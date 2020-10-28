@@ -30,7 +30,6 @@ class RoomRepo(val database: Database) {
             ?: emitter.onError(RuntimeException())
     }.subscribeOn(Schedulers.io())
 
-
     fun getImageByPath(path: String) = Single.create<Image> { emitter ->
         database.imageDao().findByPath(path)?.let { emitter.onSuccess(it) }
             ?: emitter.onError(RuntimeException())
@@ -40,9 +39,9 @@ class RoomRepo(val database: Database) {
         database.imageDao().insert(image)
     }
 
-
     fun getImageById(id: Long) = Single.create<Image> { emitter ->
         database.imageDao().findById(id)?.let { emitter.onSuccess(it) }
             ?: emitter.onError(RuntimeException())
     }.subscribeOn(Schedulers.io())
+
 }

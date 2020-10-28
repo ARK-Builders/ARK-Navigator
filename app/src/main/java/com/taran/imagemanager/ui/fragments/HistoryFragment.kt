@@ -49,8 +49,4 @@ class HistoryFragment: MvpAppCompatFragment(), HistoryView {
         rv_folders.adapter = adapter
     }
 
-
-
-
-
 }

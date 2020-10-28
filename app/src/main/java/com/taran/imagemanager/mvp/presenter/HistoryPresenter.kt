@@ -59,11 +59,10 @@ class HistoryPresenter: MvpPresenter<HistoryView>() {
                 val folders = it.toMutableList()
                 folders.add(Folder(-1L, "", ""))
                 fileGridPresenter.folders = folders
-            },{
+            }, {
                 fileGridPresenter.folders = mutableListOf(Folder(-1L, "", ""))
             }
         )
-
     }
 
 }

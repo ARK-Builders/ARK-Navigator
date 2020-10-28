@@ -11,5 +11,4 @@ class Image (
     override var path: String,
     var tags: String? = null,
     var hash: String? = null
-
 ): IFile

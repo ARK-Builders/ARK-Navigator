@@ -30,7 +30,6 @@ class ExplorerFragment: MvpAppCompatFragment(), ExplorerView {
     @InjectPresenter
     lateinit var presenter: ExplorerPresenter
 
-
     @ProvidePresenter
     fun providePresenter() = ExplorerPresenter(arguments!!.getString(DetailFragment.PATH_KEY, "/")).apply {
         App.instance.appComponent.inject(this)
@@ -44,7 +43,6 @@ class ExplorerFragment: MvpAppCompatFragment(), ExplorerView {
         savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_explorer, container, false)
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         App.instance.appComponent.inject(this)
@@ -56,6 +54,5 @@ class ExplorerFragment: MvpAppCompatFragment(), ExplorerView {
 
         rv_files.adapter = adapter
     }
-
 
 }

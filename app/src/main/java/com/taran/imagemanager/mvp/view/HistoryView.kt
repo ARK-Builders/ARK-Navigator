@@ -6,7 +6,5 @@ import moxy.viewstate.strategy.StateStrategyType
 
 @StateStrategyType(AddToEndSingleStrategy::class)
 interface HistoryView: MvpView {
-
     fun init()
-
 }

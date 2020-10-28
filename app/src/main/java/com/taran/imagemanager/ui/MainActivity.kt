@@ -22,7 +22,6 @@ class MainActivity : AppCompatActivity() {
 
     val navigator = SupportAppNavigator(this, R.id.container)
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -39,8 +38,6 @@ class MainActivity : AppCompatActivity() {
 
         router.replaceScreen(Screens.HistoryScreen())
     }
-
-
 
     override fun onResumeFragments() {
         super.onResumeFragments()

@@ -53,9 +53,6 @@ class FileGridRVAdapter(
         override fun setText(title: String) = with(containerView) {
             tv_title.text = title
         }
-
-
-
     }
 
 }

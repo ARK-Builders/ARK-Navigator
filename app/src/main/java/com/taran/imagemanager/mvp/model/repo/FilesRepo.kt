@@ -11,7 +11,7 @@ class FilesRepo() {
         val directory = File(path)
         val inputFiles = directory.listFiles()
 
-        return filterByImage(inputFiles).toMutableList()
+        return filterImages(inputFiles).toMutableList()
     }
 
     fun getFilesInFolder(path: String): MutableList<IFile> {
@@ -19,19 +19,18 @@ class FilesRepo() {
         val inputFiles = directory.listFiles()
 
 
-        val folders = filterByFolder(inputFiles)
-        val images = filterByImage(inputFiles)
+        val folders = filterFolders(inputFiles)
+        val images = filterImages(inputFiles)
 
         val files = mutableListOf<IFile>()
         files.addAll(folders)
         files.addAll(images)
 
         return files
-
     }
 
 
-    private fun filterByImage(files: Array<File>?): List<Image> {
+    private fun filterImages(files: Array<File>?): List<Image> {
         return files?.filter { file ->
             val fp = file.absolutePath
             fp.endsWith(".jpg") || fp.endsWith(".png") || fp.endsWith(".jpeg")
@@ -40,7 +39,7 @@ class FilesRepo() {
         }?: listOf()
     }
 
-    private fun filterByFolder(files: Array<File>?): List<Folder> {
+    private fun filterFolders(files: Array<File>?): List<Folder> {
         return files?.filter { file ->
             file.isDirectory
         }?.map { file ->

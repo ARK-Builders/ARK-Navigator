@@ -21,7 +21,6 @@ import javax.inject.Inject
 
 class ExplorerPresenter(val currentFolder: String) : MvpPresenter<ExplorerView>() {
 
-
     @Inject
     lateinit var filesRepo: FilesRepo
 
@@ -58,7 +57,6 @@ class ExplorerPresenter(val currentFolder: String) : MvpPresenter<ExplorerView>(
                 router.navigateTo(Screens.ExplorerScreen(file.path))
             else
                 router.navigateTo(Screens.DetailScreen(currentFolder, pos))
-
         }
     }
 
@@ -72,7 +70,6 @@ class ExplorerPresenter(val currentFolder: String) : MvpPresenter<ExplorerView>(
     }
 
     private fun calculateHash(files: MutableList<IFile>) {
-
         roomRepo.getFolderByPath(currentFolder).subscribe(
             { folder ->
                 //Папка есть в бд, мы ее обработали
@@ -95,7 +92,6 @@ class ExplorerPresenter(val currentFolder: String) : MvpPresenter<ExplorerView>(
                 )
             }
         )
-
     }
 
     private fun processImages(images: List<Image>) = Completable
@@ -106,12 +102,5 @@ class ExplorerPresenter(val currentFolder: String) : MvpPresenter<ExplorerView>(
             }
             emitter.onComplete()
         }.subscribeOn(Schedulers.io())
-
-
-
-
-
-
-
 
 }

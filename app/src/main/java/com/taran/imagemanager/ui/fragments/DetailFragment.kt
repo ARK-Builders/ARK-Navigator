@@ -20,7 +20,6 @@ import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
 
 class DetailFragment: MvpAppCompatFragment(), DetailView {
-
     companion object {
         const val PATH_KEY = "path"
         const val POS_KEY = "pos"
@@ -45,7 +44,6 @@ class DetailFragment: MvpAppCompatFragment(), DetailView {
     }
 
     var adapter: DetailVPAdapter? = null
-
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -89,5 +87,4 @@ class DetailFragment: MvpAppCompatFragment(), DetailView {
             false
         }
     }
-
 }

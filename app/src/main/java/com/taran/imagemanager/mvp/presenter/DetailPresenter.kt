@@ -37,7 +37,6 @@ class DetailPresenter(val currentFolder: String, val pos: Int) : MvpPresenter<De
         super.onFirstViewAttach()
         viewState.init()
 
-
         detailListPresenter.images = filesRepo.getImagesInFolder(currentFolder)
         viewState.setCurrentItem(pos)
         viewState.updateAdapter()
@@ -72,6 +71,4 @@ class DetailPresenter(val currentFolder: String, val pos: Int) : MvpPresenter<De
                 roomRepo.insertImage(image)
             })
     }
-
-
 }
