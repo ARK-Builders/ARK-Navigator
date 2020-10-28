@@ -12,9 +12,9 @@ interface FolderDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(folder: Folder)
 
-    @Query("SELECT * FROM Folder")
+    @Query("SELECT * FROM folder")
     fun getAll(): List<Folder>
 
-    @Query("SELECT * FROM Folder WHERE path = :path LIMIT 1")
+    @Query("SELECT * FROM folder WHERE path = :path LIMIT 1")
     fun findByPath(path: String): Folder?
 }

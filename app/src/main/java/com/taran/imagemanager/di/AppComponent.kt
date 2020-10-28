@@ -7,6 +7,7 @@ import com.taran.imagemanager.di.modules.RepoModule
 import com.taran.imagemanager.mvp.presenter.DetailPresenter
 import com.taran.imagemanager.mvp.presenter.ExplorerPresenter
 import com.taran.imagemanager.mvp.presenter.HistoryPresenter
+import com.taran.imagemanager.mvp.presenter.MainPresenter
 import com.taran.imagemanager.ui.MainActivity
 import com.taran.imagemanager.ui.fragments.DetailFragment
 import com.taran.imagemanager.ui.fragments.ExplorerFragment
@@ -26,6 +27,7 @@ import javax.inject.Singleton
 
 interface AppComponent {
     fun inject(mainActivity: MainActivity)
+    fun inject(mainPresenter: MainPresenter)
     fun inject(explorerFragment: ExplorerFragment)
     fun inject(explorerPresenter: ExplorerPresenter)
     fun inject(detailPresenter: DetailPresenter)

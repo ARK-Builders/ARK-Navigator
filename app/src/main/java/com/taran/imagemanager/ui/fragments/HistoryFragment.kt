@@ -49,4 +49,8 @@ class HistoryFragment: MvpAppCompatFragment(), HistoryView {
         rv_folders.adapter = adapter
     }
 
+    override fun updateAdapter() {
+        adapter?.notifyDataSetChanged()
+    }
+
 }

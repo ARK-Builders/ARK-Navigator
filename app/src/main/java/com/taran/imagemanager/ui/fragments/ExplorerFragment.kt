@@ -22,7 +22,7 @@ class ExplorerFragment: MvpAppCompatFragment(), ExplorerView {
 
         fun newInstance(path: String) = ExplorerFragment().apply {
             arguments = Bundle().apply {
-                putString(DetailFragment.PATH_KEY, path)
+                putString(PATH_KEY, path)
             }
         }
     }
@@ -31,7 +31,7 @@ class ExplorerFragment: MvpAppCompatFragment(), ExplorerView {
     lateinit var presenter: ExplorerPresenter
 
     @ProvidePresenter
-    fun providePresenter() = ExplorerPresenter(arguments!!.getString(DetailFragment.PATH_KEY, "/")).apply {
+    fun providePresenter() = ExplorerPresenter(arguments!!.getString(PATH_KEY, "/")).apply {
         App.instance.appComponent.inject(this)
     }
 
@@ -53,6 +53,10 @@ class ExplorerFragment: MvpAppCompatFragment(), ExplorerView {
         adapter = FileGridRVAdapter(presenter.fileGridPresenter)
 
         rv_files.adapter = adapter
+    }
+
+    override fun updateAdapter() {
+        adapter?.notifyDataSetChanged()
     }
 
 }

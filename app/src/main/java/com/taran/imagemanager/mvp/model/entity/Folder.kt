@@ -3,7 +3,7 @@ package com.taran.imagemanager.mvp.model.entity
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity
+@Entity(tableName = "folder")
 class Folder(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,

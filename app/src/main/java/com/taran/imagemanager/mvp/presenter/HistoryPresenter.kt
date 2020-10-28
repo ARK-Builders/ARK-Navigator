@@ -1,13 +1,13 @@
 package com.taran.imagemanager.mvp.presenter
 
-import android.util.Log
 import com.taran.imagemanager.mvp.model.entity.Folder
 import com.taran.imagemanager.mvp.model.entity.Icons
 import com.taran.imagemanager.mvp.model.repo.RoomRepo
 import com.taran.imagemanager.mvp.presenter.adapter.IFileGridPresenter
-import com.taran.imagemanager.mvp.view.item.FileItemView
 import com.taran.imagemanager.mvp.view.HistoryView
+import com.taran.imagemanager.mvp.view.item.FileItemView
 import com.taran.imagemanager.navigation.Screens
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import moxy.MvpPresenter
 import ru.terrakok.cicerone.Router
 import javax.inject.Inject
@@ -35,7 +35,7 @@ class HistoryPresenter: MvpPresenter<HistoryView>() {
                 view.setText(folder.name)
                 view.setIcon(Icons.FOLDER, null)
             } else {
-                view.setText("Новая папка")
+                view.setText("Add folder")
                 view.setIcon(Icons.PLUS, null)
             }
         }
@@ -54,13 +54,15 @@ class HistoryPresenter: MvpPresenter<HistoryView>() {
 
         viewState.init()
 
-        roomRepo.getAllFolders().subscribe(
+        roomRepo.getAllFolders().observeOn(AndroidSchedulers.mainThread()).subscribe(
             {
                 val folders = it.toMutableList()
                 folders.add(Folder(-1L, "", ""))
                 fileGridPresenter.folders = folders
+                viewState.updateAdapter()
             }, {
                 fileGridPresenter.folders = mutableListOf(Folder(-1L, "", ""))
+                viewState.updateAdapter()
             }
         )
     }

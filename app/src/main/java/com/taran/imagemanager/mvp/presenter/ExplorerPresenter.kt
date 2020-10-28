@@ -66,20 +66,21 @@ class ExplorerPresenter(val currentFolder: String) : MvpPresenter<ExplorerView>(
 
         val files = filesRepo.getFilesInFolder(currentFolder)
         fileGridPresenter.files = files
+        viewState.updateAdapter()
         calculateHash(files)
     }
 
     private fun calculateHash(files: MutableList<IFile>) {
         roomRepo.getFolderByPath(currentFolder).subscribe(
             { folder ->
-                //Папка есть в бд, мы ее обработали
+                //The folder is in the database, we processed it
             },
             {
-                //Папки нет в бд
-                //Последовательная обработка файлов
+                //The folder is not in the database
+                //consistent file processing
                 processImages(files.filterIsInstance<Image>()).subscribe(
                     {
-                        //В конце запись папки в бд
+                        //At the end, write the folder to the database
                         val folderFile = File(currentFolder)
                         roomRepo.insertFolder(
                             Folder(
