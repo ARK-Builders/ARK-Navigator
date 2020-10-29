@@ -2,6 +2,7 @@ package com.taran.imagemanager.mvp.presenter
 
 import com.taran.imagemanager.mvp.model.entity.Folder
 import com.taran.imagemanager.mvp.model.entity.Icons
+import com.taran.imagemanager.mvp.model.repo.FilesRepo
 import com.taran.imagemanager.mvp.model.repo.RoomRepo
 import com.taran.imagemanager.mvp.presenter.adapter.IFileGridPresenter
 import com.taran.imagemanager.mvp.view.HistoryView
@@ -19,6 +20,9 @@ class HistoryPresenter: MvpPresenter<HistoryView>() {
 
     @Inject
     lateinit var router: Router
+
+    @Inject
+    lateinit var fileRepo: FilesRepo
 
     val fileGridPresenter = FileGridPresenter()
 
@@ -44,8 +48,8 @@ class HistoryPresenter: MvpPresenter<HistoryView>() {
             val folder = folders[pos]
             if (folder.id != -1L)
                 router.navigateTo(Screens.ExplorerScreen(folder.path))
-            else
-                router.navigateTo(Screens.ExplorerScreen("/"))
+//            else
+//                router.navigateTo(Screens.ExplorerScreen(rootPath))
         }
     }
 
@@ -54,17 +58,20 @@ class HistoryPresenter: MvpPresenter<HistoryView>() {
 
         viewState.init()
 
-        roomRepo.getAllFolders().observeOn(AndroidSchedulers.mainThread()).subscribe(
-            {
-                val folders = it.toMutableList()
-                folders.add(Folder(-1L, "", ""))
-                fileGridPresenter.folders = folders
-                viewState.updateAdapter()
-            }, {
-                fileGridPresenter.folders = mutableListOf(Folder(-1L, "", ""))
-                viewState.updateAdapter()
-            }
-        )
-    }
+        fileGridPresenter.folders.addAll(fileRepo.getStorages())
+        viewState.updateAdapter()
 
+
+//        roomRepo.getAllFolders().observeOn(AndroidSchedulers.mainThread()).subscribe(
+//            {
+//                val folders = it.toMutableList()
+//                folders.add(Folder(-1L, "", ""))
+//                fileGridPresenter.folders.addAll(folders)
+//                viewState.updateAdapter()
+//            }, {
+//                fileGridPresenter.folders.add(Folder(-1L, "", ""))
+//                viewState.updateAdapter()
+//            }
+//        )
+    }
 }

@@ -3,9 +3,10 @@ package com.taran.imagemanager.mvp.model.repo
 import com.taran.imagemanager.mvp.model.entity.Folder
 import com.taran.imagemanager.mvp.model.entity.IFile
 import com.taran.imagemanager.mvp.model.entity.Image
+import com.taran.imagemanager.mvp.model.file.FileProvider
 import java.io.File
 
-class FilesRepo() {
+class FilesRepo(val fileProvider: FileProvider) {
 
     fun getImagesInFolder(path: String): MutableList<Image> {
         val directory = File(path)
@@ -27,6 +28,13 @@ class FilesRepo() {
         files.addAll(images)
 
         return files
+    }
+
+    fun getStorages(): List<Folder> {
+        return fileProvider.getStorages().map { path ->
+            val folder = File(path)
+            Folder(name = folder.name, path = folder.path)
+        }
     }
 
 
