@@ -7,8 +7,8 @@ import androidx.room.PrimaryKey
 class Image (
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-    override var name: String,
-    override var path: String,
+    var name: String,
+    var path: String,
     var tags: String? = null,
     var hash: String? = null
 ): IFile

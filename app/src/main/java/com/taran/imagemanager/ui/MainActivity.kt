@@ -1,10 +1,13 @@
 package com.taran.imagemanager.ui
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.provider.DocumentsContract
 import androidx.core.app.ActivityCompat
 import com.taran.imagemanager.R
+import com.taran.imagemanager.mvp.model.file.FileProvider
 import com.taran.imagemanager.mvp.presenter.MainPresenter
 import com.taran.imagemanager.mvp.view.MainView
 import moxy.MvpAppCompatActivity
@@ -12,6 +15,8 @@ import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
 import ru.terrakok.cicerone.NavigatorHolder
 import ru.terrakok.cicerone.android.support.SupportAppNavigator
+import java.io.File
+import java.net.URI
 import javax.inject.Inject
 
 
@@ -19,6 +24,7 @@ class MainActivity : MvpAppCompatActivity(), MainView {
 
     @Inject
     lateinit var navigatorHolder: NavigatorHolder
+
 
     @InjectPresenter
     lateinit var presenter: MainPresenter
@@ -75,5 +81,4 @@ class MainActivity : MvpAppCompatActivity(), MainView {
         super.onPause()
         navigatorHolder.removeNavigator()
     }
-
 }

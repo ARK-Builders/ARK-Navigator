@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 class Folder(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-    override var name: String,
-    override var path: String,
+    var name: String,
+    var path: String,
     var tags: String? = null
 ): IFile

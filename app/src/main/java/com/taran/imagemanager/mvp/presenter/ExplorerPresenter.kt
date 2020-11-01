@@ -55,8 +55,10 @@ class ExplorerPresenter(val currentFolder: String) : MvpPresenter<ExplorerView>(
             val file = files[pos]
             if (file is Folder)
                 router.navigateTo(Screens.ExplorerScreen(file.path))
-            else
-                router.navigateTo(Screens.DetailScreen(currentFolder, pos))
+            else {
+                val images = files.filterIsInstance<Image>().toMutableList()
+                router.navigateTo(Screens.DetailScreen(images, pos))
+            }
         }
     }
 
@@ -64,23 +66,28 @@ class ExplorerPresenter(val currentFolder: String) : MvpPresenter<ExplorerView>(
         super.onFirstViewAttach()
         viewState.init()
 
-        val files = filesRepo.getFilesInFolder(currentFolder)
-        fileGridPresenter.files = files
-        viewState.updateAdapter()
-        calculateHash(files)
+        if (currentFolder != "gallery") {
+            val files = filesRepo.getFilesInFolder(currentFolder)
+            fileGridPresenter.files = files
+            viewState.updateAdapter()
+            calculateHash()
+        } else {
+            val images = filesRepo.getImagesFromGallery()
+            fileGridPresenter.files = images.toMutableList()
+            viewState.updateAdapter()
+        }
     }
 
-    private fun calculateHash(files: MutableList<IFile>) {
+    private fun calculateHash() {
         roomRepo.getFolderByPath(currentFolder).subscribe(
             { folder ->
                 //The folder is in the database, we processed it
             },
             {
                 //The folder is not in the database
-                //consistent file processing
-                processImages(files.filterIsInstance<Image>()).subscribe(
+                val images = fileGridPresenter.files.filterIsInstance<Image>()
+                processImages(images).subscribe(
                     {
-                        //At the end, write the folder to the database
                         val folderFile = File(currentFolder)
                         roomRepo.insertFolder(
                             Folder(
@@ -88,8 +95,7 @@ class ExplorerPresenter(val currentFolder: String) : MvpPresenter<ExplorerView>(
                                 path = folderFile.absolutePath
                             )
                         ).subscribe()
-                    },
-                    {}
+                    }, {}
                 )
             }
         )
@@ -103,5 +109,4 @@ class ExplorerPresenter(val currentFolder: String) : MvpPresenter<ExplorerView>(
             }
             emitter.onComplete()
         }.subscribeOn(Schedulers.io())
-
 }

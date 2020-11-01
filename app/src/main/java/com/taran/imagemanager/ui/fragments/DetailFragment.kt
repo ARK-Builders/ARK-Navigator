@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AlertDialog
 import com.taran.imagemanager.R
+import com.taran.imagemanager.mvp.model.entity.Image
 import com.taran.imagemanager.mvp.presenter.DetailPresenter
 import com.taran.imagemanager.mvp.view.DetailView
 import com.taran.imagemanager.ui.App
@@ -19,17 +20,12 @@ import moxy.MvpAppCompatFragment
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
 
-class DetailFragment: MvpAppCompatFragment(), DetailView {
+class DetailFragment(
+    val images: MutableList<Image> = mutableListOf(),
+    val pos: Int = 0
+) : MvpAppCompatFragment(), DetailView {
     companion object {
-        const val PATH_KEY = "path"
-        const val POS_KEY = "pos"
-
-        fun newInstance(path: String, pos: Int) = DetailFragment().apply {
-            arguments = Bundle().apply {
-                putString(PATH_KEY, path)
-                putInt(POS_KEY, pos)
-            }
-        }
+        fun newInstance(images: MutableList<Image>, pos: Int) = DetailFragment(images, pos)
     }
 
     @InjectPresenter
@@ -37,8 +33,8 @@ class DetailFragment: MvpAppCompatFragment(), DetailView {
 
     @ProvidePresenter
     fun providePresenter() = DetailPresenter(
-        arguments!!.getString(PATH_KEY, "/"),
-        arguments!!.getInt(POS_KEY, 0)
+        images,
+        pos
     ).apply {
         App.instance.appComponent.inject(this)
     }

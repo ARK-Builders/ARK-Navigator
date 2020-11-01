@@ -1,14 +1,12 @@
 package com.taran.imagemanager.ui.fragments
 
-import android.os.Build
+import android.content.Intent
 import android.os.Bundle
-import android.os.Environment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.GridLayoutManager
 import com.taran.imagemanager.R
-import com.taran.imagemanager.mvp.model.entity.Folder
 import com.taran.imagemanager.mvp.presenter.HistoryPresenter
 import com.taran.imagemanager.mvp.view.HistoryView
 import com.taran.imagemanager.ui.App
@@ -17,7 +15,7 @@ import kotlinx.android.synthetic.main.fragment_history.*
 import moxy.MvpAppCompatFragment
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
-import java.io.File
+
 
 class HistoryFragment : MvpAppCompatFragment(), HistoryView {
 

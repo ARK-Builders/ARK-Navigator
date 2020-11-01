@@ -30,13 +30,13 @@ class FilesRepo(val fileProvider: FileProvider) {
         return files
     }
 
-    fun getStorages(): List<Folder> {
-        return fileProvider.getStorages().map { path ->
-            val folder = File(path)
-            Folder(name = folder.name, path = folder.path)
-        }
+    fun getExternalStorage(): String {
+        return fileProvider.getExternalStorage()
     }
 
+    fun getImagesFromGallery(): List<Image> {
+        return fileProvider.getImagesFromGallery()
+    }
 
     private fun filterImages(files: Array<File>?): List<Image> {
         return files?.filter { file ->

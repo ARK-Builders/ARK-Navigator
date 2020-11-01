@@ -39,7 +39,5 @@ class DetailVPAdapter(
         override fun setImage(path: String) = with(containerView) {
             loadImage(path, iv_image)
         }
-
     }
-
 }

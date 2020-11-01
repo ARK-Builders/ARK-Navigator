@@ -11,7 +11,7 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import moxy.MvpPresenter
 import javax.inject.Inject
 
-class DetailPresenter(val currentFolder: String, val pos: Int) : MvpPresenter<DetailView>() {
+class DetailPresenter(val images: List<Image>, val pos: Int) : MvpPresenter<DetailView>() {
 
     @Inject
     lateinit var filesRepo: FilesRepo
@@ -29,7 +29,8 @@ class DetailPresenter(val currentFolder: String, val pos: Int) : MvpPresenter<De
         override fun getCount() = images.size
 
         override fun bindView(view: DetailItemView) {
-            view.setImage(images[view.pos].path)
+            val image = images[view.pos]
+            view.setImage(image.path)
         }
     }
 
@@ -37,7 +38,7 @@ class DetailPresenter(val currentFolder: String, val pos: Int) : MvpPresenter<De
         super.onFirstViewAttach()
         viewState.init()
 
-        detailListPresenter.images = filesRepo.getImagesInFolder(currentFolder)
+        detailListPresenter.images = images.toMutableList()
         viewState.setCurrentItem(pos)
         viewState.updateAdapter()
     }
@@ -56,6 +57,7 @@ class DetailPresenter(val currentFolder: String, val pos: Int) : MvpPresenter<De
                     viewState.showTagsDialog("")
                 }
             )
+
     }
 
     fun tagsEdit(pos: Int, tags: String) {
@@ -64,11 +66,10 @@ class DetailPresenter(val currentFolder: String, val pos: Int) : MvpPresenter<De
             .subscribe({ imageRoom ->
                 imageRoom.tags = tags
                 roomRepo.insertImage(imageRoom).subscribe()
-
             }, {
                 image.hash = getHash(image.path)
                 image.tags = tags
-                roomRepo.insertImage(image)
+                roomRepo.insertImage(image).subscribe()
             })
     }
 }
