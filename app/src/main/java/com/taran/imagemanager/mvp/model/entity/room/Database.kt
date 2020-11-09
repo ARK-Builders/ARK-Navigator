@@ -11,7 +11,7 @@ import com.taran.imagemanager.mvp.model.entity.room.dao.ImageDao
         Folder::class,
         Image::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 abstract class Database : RoomDatabase() {

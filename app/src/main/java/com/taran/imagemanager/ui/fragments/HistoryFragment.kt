@@ -55,4 +55,9 @@ class HistoryFragment : MvpAppCompatFragment(), HistoryView {
     override fun updateAdapter() {
         adapter?.notifyDataSetChanged()
     }
+
+    override fun onResume() {
+        super.onResume()
+        presenter.onViewResumed()
+    }
 }

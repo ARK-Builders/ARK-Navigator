@@ -19,7 +19,7 @@ import java.io.File
 import javax.inject.Inject
 
 
-class ExplorerPresenter(val currentFolder: String) : MvpPresenter<ExplorerView>() {
+class ExplorerPresenter(val currentFolderPath: String) : MvpPresenter<ExplorerView>() {
 
     @Inject
     lateinit var filesRepo: FilesRepo
@@ -31,6 +31,8 @@ class ExplorerPresenter(val currentFolder: String) : MvpPresenter<ExplorerView>(
     lateinit var router: Router
 
     val fileGridPresenter = FileGridPresenter()
+
+    var currentFolder: Folder? = null
 
     inner class FileGridPresenter :
         IFileGridPresenter {
@@ -66,38 +68,66 @@ class ExplorerPresenter(val currentFolder: String) : MvpPresenter<ExplorerView>(
         super.onFirstViewAttach()
         viewState.init()
 
-        if (currentFolder != "gallery") {
-            val files = filesRepo.getFilesInFolder(currentFolder)
+        if (currentFolderPath != "gallery") {
+            val files = filesRepo.getFilesInFolder(currentFolderPath)
             fileGridPresenter.files = files
             viewState.updateAdapter()
-            calculateHash()
+            checkCurrentFolder()
         } else {
+            viewState.setFabVisibility(false)
             val images = filesRepo.getImagesFromGallery()
             fileGridPresenter.files = images.toMutableList()
             viewState.updateAdapter()
         }
     }
 
-    private fun calculateHash() {
-        roomRepo.getFolderByPath(currentFolder).subscribe(
-            { folder ->
-                //The folder is in the database, we processed it
+    fun fabClicked() {
+        viewState.showDialog()
+    }
+
+    fun addFolderToFavorite() {
+        currentFolder!!.favorite = true
+        roomRepo.getFolderByPath(currentFolderPath).subscribe(
+            {
+                it.favorite = true
+                roomRepo.insertFolder(it).subscribe()
             },
             {
-                //The folder is not in the database
-                val images = fileGridPresenter.files.filterIsInstance<Image>()
-                processImages(images).subscribe(
-                    {
-                        val folderFile = File(currentFolder)
-                        roomRepo.insertFolder(
-                            Folder(
-                                name = folderFile.name,
-                                path = folderFile.absolutePath
-                            )
-                        ).subscribe()
-                    }, {}
-                )
+                roomRepo.insertFolder(currentFolder!!).subscribe()
             }
+        )
+    }
+
+    private fun checkCurrentFolder() {
+        roomRepo.getFolderByPath(currentFolderPath).subscribe(
+            {
+                currentFolder = it
+                if (!currentFolder!!.processed)
+                    calculateHash()
+            },
+            {
+                val fileFolder = File(currentFolderPath)
+                currentFolder = Folder(name = fileFolder.name, path = fileFolder.path)
+                calculateHash()
+            }
+        )
+    }
+
+    private fun calculateHash() {
+        val images = fileGridPresenter.files.filterIsInstance<Image>()
+        processImages(images).subscribe(
+            {
+                currentFolder!!.processed = true
+                roomRepo.getFolderByPath(currentFolderPath).subscribe(
+                    {
+                        it.processed = true
+                        roomRepo.insertFolder(it).subscribe()
+                    },
+                    {
+                        roomRepo.insertFolder(currentFolder!!).subscribe()
+                    }
+                )
+            }, {}
         )
     }
 

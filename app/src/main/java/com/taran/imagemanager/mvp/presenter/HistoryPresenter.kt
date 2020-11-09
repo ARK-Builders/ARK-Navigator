@@ -56,15 +56,20 @@ class HistoryPresenter: MvpPresenter<HistoryView>() {
 
     override fun onFirstViewAttach() {
         super.onFirstViewAttach()
-
         viewState.init()
+    }
 
-        roomRepo.getAllFolders().observeOn(AndroidSchedulers.mainThread()).subscribe(
+    fun onViewResumed() {
+        setupAdapterList()
+    }
+
+    private fun setupAdapterList() {
+        roomRepo.getAllFavoriteFolders().observeOn(AndroidSchedulers.mainThread()).subscribe(
             {
                 val folders = it.toMutableList()
                 folders.add(Folder(-2L, "Gallery", ""))
                 folders.add(Folder(-1L, "New Folder", ""))
-                fileGridPresenter.folders.addAll(folders)
+                fileGridPresenter.folders = folders
                 viewState.updateAdapter()
             }, {}
         )

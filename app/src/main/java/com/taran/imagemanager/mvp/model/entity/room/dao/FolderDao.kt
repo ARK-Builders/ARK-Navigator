@@ -17,4 +17,7 @@ interface FolderDao {
 
     @Query("SELECT * FROM folder WHERE path = :path LIMIT 1")
     fun findByPath(path: String): Folder?
+
+    @Query("SELECT * FROM folder WHERE favorite = 1")
+    fun getAllFavorite(): List<Folder>
 }

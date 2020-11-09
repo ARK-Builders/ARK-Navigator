@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.GridLayoutManager
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.taran.imagemanager.R
 import com.taran.imagemanager.mvp.presenter.ExplorerPresenter
 import com.taran.imagemanager.mvp.view.ExplorerView
@@ -52,7 +53,27 @@ class ExplorerFragment: MvpAppCompatFragment(), ExplorerView {
         rv_files.layoutManager = GridLayoutManager(context, 3)
         adapter = FileGridRVAdapter(presenter.fileGridPresenter)
 
+        fab.setOnClickListener {
+            presenter.fabClicked()
+        }
         rv_files.adapter = adapter
+    }
+
+    override fun setFabVisibility(isVisible: Boolean) {
+        if (isVisible)
+            fab.visibility = View.VISIBLE
+        else
+            fab.visibility = View.GONE
+    }
+
+    override fun showDialog() {
+        MaterialAlertDialogBuilder(context)
+            .setTitle("Do you want to add a folder to the home screen?")
+            .setPositiveButton("OK") { dialog, which ->
+                presenter.addFolderToFavorite()
+            }
+            .setNegativeButton("Cancel") { dialog, which -> }
+            .show()
     }
 
     override fun updateAdapter() {

@@ -11,4 +11,10 @@ interface ExplorerView: MvpView {
 
     @StateStrategyType(SkipStrategy::class)
     fun updateAdapter()
+
+    @StateStrategyType(SkipStrategy::class)
+    fun setFabVisibility(isVisible: Boolean)
+
+    @StateStrategyType(SkipStrategy::class)
+    fun showDialog()
 }

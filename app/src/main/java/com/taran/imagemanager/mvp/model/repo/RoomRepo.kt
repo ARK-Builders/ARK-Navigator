@@ -25,6 +25,11 @@ class RoomRepo(val database: Database) {
         it.onSuccess(folders)
     }.subscribeOn(Schedulers.io())
 
+    fun getAllFavoriteFolders() = Single.create<List<Folder>> {
+        val folders = database.folderDao().getAllFavorite()
+        it.onSuccess(folders)
+    }.subscribeOn(Schedulers.io())
+
     fun getFolderByPath(path: String) = Single.create<Folder> { emitter ->
         database.folderDao().findByPath(path)?.let { emitter.onSuccess(it) }
             ?: emitter.onError(RuntimeException())

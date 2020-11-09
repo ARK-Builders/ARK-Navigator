@@ -9,5 +9,7 @@ class Folder(
     val id: Long = 0,
     var name: String,
     var path: String,
+    var favorite: Boolean = false,
+    var processed: Boolean = false,
     var tags: String? = null
 ): IFile
