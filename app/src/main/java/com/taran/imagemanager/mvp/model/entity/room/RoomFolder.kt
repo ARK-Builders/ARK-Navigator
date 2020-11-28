@@ -1,16 +1,15 @@
-package com.taran.imagemanager.mvp.model.entity
+package com.taran.imagemanager.mvp.model.entity.room
 
-import android.os.Parcelable
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import kotlinx.android.parcel.Parcelize
 
-@Parcelize
-data class Folder(
+@Entity(tableName = "folder")
+class RoomFolder(
+    @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-    override var name: String,
+    var name: String,
     var path: String,
     var favorite: Boolean = false,
     var processed: Boolean = false,
     var tags: String? = null
-): IFile, Parcelable
+)

@@ -8,10 +8,10 @@ import com.taran.imagemanager.mvp.model.entity.room.dao.ImageDao
 
 @androidx.room.Database(
     entities = [
-        Folder::class,
-        Image::class
+        RoomFolder::class,
+        RoomImage::class
     ],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 abstract class Database : RoomDatabase() {

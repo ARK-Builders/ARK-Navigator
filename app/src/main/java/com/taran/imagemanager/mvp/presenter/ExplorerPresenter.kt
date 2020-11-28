@@ -15,11 +15,10 @@ import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import moxy.MvpPresenter
 import ru.terrakok.cicerone.Router
-import java.io.File
 import javax.inject.Inject
 
 
-class ExplorerPresenter(val currentFolderPath: String) : MvpPresenter<ExplorerView>() {
+class ExplorerPresenter(var currentFolder: Folder) : MvpPresenter<ExplorerView>() {
 
     @Inject
     lateinit var filesRepo: FilesRepo
@@ -32,7 +31,6 @@ class ExplorerPresenter(val currentFolderPath: String) : MvpPresenter<ExplorerVi
 
     val fileGridPresenter = FileGridPresenter()
 
-    var currentFolder: Folder? = null
 
     inner class FileGridPresenter :
         IFileGridPresenter {
@@ -56,7 +54,7 @@ class ExplorerPresenter(val currentFolderPath: String) : MvpPresenter<ExplorerVi
         override fun onCardClicked(pos: Int) {
             val file = files[pos]
             if (file is Folder)
-                router.navigateTo(Screens.ExplorerScreen(file.path))
+                router.navigateTo(Screens.ExplorerScreen(file))
             else {
                 val images = files.filterIsInstance<Image>().toMutableList()
                 router.navigateTo(Screens.DetailScreen(images, pos))
@@ -68,8 +66,9 @@ class ExplorerPresenter(val currentFolderPath: String) : MvpPresenter<ExplorerVi
         super.onFirstViewAttach()
         viewState.init()
 
-        if (currentFolderPath != "gallery") {
-            val files = filesRepo.getFilesInFolder(currentFolderPath)
+        if (currentFolder.path != "gallery") {
+            val files = filesRepo.getFilesInFolder(currentFolder.path)
+            files.sortBy { it.name }
             fileGridPresenter.files = files
             viewState.updateAdapter()
             checkCurrentFolder()
@@ -86,28 +85,26 @@ class ExplorerPresenter(val currentFolderPath: String) : MvpPresenter<ExplorerVi
     }
 
     fun addFolderToFavorite() {
-        currentFolder!!.favorite = true
-        roomRepo.getFolderByPath(currentFolderPath).subscribe(
+        currentFolder.favorite = true
+        roomRepo.getFolderByPath(currentFolder.path).subscribe(
             {
                 it.favorite = true
                 roomRepo.insertFolder(it).subscribe()
             },
             {
-                roomRepo.insertFolder(currentFolder!!).subscribe()
+                roomRepo.insertFolder(currentFolder).subscribe()
             }
         )
     }
 
     private fun checkCurrentFolder() {
-        roomRepo.getFolderByPath(currentFolderPath).subscribe(
+        roomRepo.getFolderByPath(currentFolder.path).subscribe(
             {
                 currentFolder = it
-                if (!currentFolder!!.processed)
+                if (!currentFolder.processed)
                     calculateHash()
             },
             {
-                val fileFolder = File(currentFolderPath)
-                currentFolder = Folder(name = fileFolder.name, path = fileFolder.path)
                 calculateHash()
             }
         )
@@ -117,14 +114,14 @@ class ExplorerPresenter(val currentFolderPath: String) : MvpPresenter<ExplorerVi
         val images = fileGridPresenter.files.filterIsInstance<Image>()
         processImages(images).subscribe(
             {
-                currentFolder!!.processed = true
-                roomRepo.getFolderByPath(currentFolderPath).subscribe(
+                currentFolder.processed = true
+                roomRepo.getFolderByPath(currentFolder.path).subscribe(
                     {
                         it.processed = true
                         roomRepo.insertFolder(it).subscribe()
                     },
                     {
-                        roomRepo.insertFolder(currentFolder!!).subscribe()
+                        roomRepo.insertFolder(currentFolder).subscribe()
                     }
                 )
             }, {}

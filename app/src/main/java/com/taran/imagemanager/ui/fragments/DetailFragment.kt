@@ -20,12 +20,17 @@ import moxy.MvpAppCompatFragment
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
 
-class DetailFragment(
-    val images: MutableList<Image> = mutableListOf(),
-    val pos: Int = 0
-) : MvpAppCompatFragment(), DetailView {
+class DetailFragment: MvpAppCompatFragment(), DetailView {
     companion object {
-        fun newInstance(images: MutableList<Image>, pos: Int) = DetailFragment(images, pos)
+        const val IMAGES_KEY = "images"
+        const val POS_KEY = "pos"
+
+        fun newInstance(images: MutableList<Image>, pos: Int) = DetailFragment().apply {
+            arguments = Bundle().apply {
+                putInt(POS_KEY, pos)
+                putParcelableArray(IMAGES_KEY, images.toTypedArray())
+            }
+        }
     }
 
     @InjectPresenter
@@ -33,8 +38,8 @@ class DetailFragment(
 
     @ProvidePresenter
     fun providePresenter() = DetailPresenter(
-        images,
-        pos
+        arguments!!.getParcelableArray(IMAGES_KEY)!!.map { it as Image },
+        arguments!!.getInt(POS_KEY)
     ).apply {
         App.instance.appComponent.inject(this)
     }

@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.taran.imagemanager.R
+import com.taran.imagemanager.mvp.model.entity.Folder
 import com.taran.imagemanager.mvp.presenter.ExplorerPresenter
 import com.taran.imagemanager.mvp.view.ExplorerView
 import com.taran.imagemanager.ui.App
@@ -19,11 +20,11 @@ import moxy.presenter.ProvidePresenter
 class ExplorerFragment: MvpAppCompatFragment(), ExplorerView {
 
     companion object {
-        const val PATH_KEY = "path"
+        const val FOLDER_KEY = "folder"
 
-        fun newInstance(path: String) = ExplorerFragment().apply {
+        fun newInstance(folder: Folder) = ExplorerFragment().apply {
             arguments = Bundle().apply {
-                putString(PATH_KEY, path)
+                putParcelable(FOLDER_KEY, folder)
             }
         }
     }
@@ -32,7 +33,7 @@ class ExplorerFragment: MvpAppCompatFragment(), ExplorerView {
     lateinit var presenter: ExplorerPresenter
 
     @ProvidePresenter
-    fun providePresenter() = ExplorerPresenter(arguments!!.getString(PATH_KEY, "/")).apply {
+    fun providePresenter() = ExplorerPresenter(arguments!![FOLDER_KEY] as Folder).apply {
         App.instance.appComponent.inject(this)
     }
 

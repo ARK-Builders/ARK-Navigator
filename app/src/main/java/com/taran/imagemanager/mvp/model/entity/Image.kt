@@ -1,14 +1,13 @@
 package com.taran.imagemanager.mvp.model.entity
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
 
-@Entity(tableName = "image")
-class Image (
-    @PrimaryKey(autoGenerate = true)
+@Parcelize
+data class Image (
     val id: Long = 0,
-    var name: String,
+    override var name: String,
     var path: String,
     var tags: String? = null,
     var hash: String? = null
-): IFile
+): IFile, Parcelable

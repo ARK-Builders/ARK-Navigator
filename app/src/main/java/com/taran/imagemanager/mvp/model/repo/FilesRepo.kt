@@ -4,6 +4,7 @@ import com.taran.imagemanager.mvp.model.entity.Folder
 import com.taran.imagemanager.mvp.model.entity.IFile
 import com.taran.imagemanager.mvp.model.entity.Image
 import com.taran.imagemanager.mvp.model.file.FileProvider
+import com.taran.imagemanager.utils.checkInternalStorage
 import java.io.File
 
 class FilesRepo(val fileProvider: FileProvider) {
@@ -32,6 +33,10 @@ class FilesRepo(val fileProvider: FileProvider) {
 
     fun getExternalStorage(): String {
         return fileProvider.getExternalStorage()
+    }
+
+    fun getExtSdCards(): List<Folder> {
+        return fileProvider.getExtSdCards().map { checkInternalStorage(it) }
     }
 
     fun getImagesFromGallery(): List<Image> {

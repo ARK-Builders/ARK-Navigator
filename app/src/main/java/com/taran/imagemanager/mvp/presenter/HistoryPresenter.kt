@@ -36,21 +36,12 @@ class HistoryPresenter: MvpPresenter<HistoryView>() {
         override fun bindView(view: FileItemView) {
             val folder = folders[view.pos]
             view.setText(folder.name)
-            if (folder.id != -1L) {
-                view.setIcon(Icons.FOLDER, null)
-            } else {
-                view.setIcon(Icons.PLUS, null)
-            }
+            view.setIcon(Icons.FOLDER, null)
         }
 
         override fun onCardClicked(pos: Int) {
             val folder = folders[pos]
-            if (folder.id == -2L)
-                router.navigateTo(Screens.ExplorerScreen("gallery"))
-            if (folder.id == -1L)
-                router.navigateTo(Screens.ExplorerScreen(fileRepo.getExternalStorage()))
-            if (folder.id != -2L && folder.id != -1L)
-                router.navigateTo(Screens.ExplorerScreen(folder.path))
+            router.navigateTo(Screens.ExplorerScreen(folder))
         }
     }
 
@@ -65,13 +56,18 @@ class HistoryPresenter: MvpPresenter<HistoryView>() {
 
     private fun setupAdapterList() {
         roomRepo.getAllFavoriteFolders().observeOn(AndroidSchedulers.mainThread()).subscribe(
-            {
-                val folders = it.toMutableList()
-                folders.add(Folder(-2L, "Gallery", ""))
-                folders.add(Folder(-1L, "New Folder", ""))
+            { list ->
+                val folders = list.toMutableList()
+                folders.sortBy { it.name }
+                addDefaultFolders(folders)
                 fileGridPresenter.folders = folders
                 viewState.updateAdapter()
             }, {}
         )
+    }
+
+    private fun addDefaultFolders(folders: MutableList<Folder>) {
+        folders.addAll(fileRepo.getExtSdCards())
+        folders.add(Folder(-2L, "Gallery", "gallery"))
     }
 }

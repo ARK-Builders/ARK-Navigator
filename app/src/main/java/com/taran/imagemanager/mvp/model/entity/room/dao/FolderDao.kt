@@ -6,18 +6,19 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.taran.imagemanager.mvp.model.entity.Folder
 import com.taran.imagemanager.mvp.model.entity.Image
+import com.taran.imagemanager.mvp.model.entity.room.RoomFolder
 
 @Dao
 interface FolderDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(folder: Folder)
+    fun insert(folder: RoomFolder)
 
     @Query("SELECT * FROM folder")
-    fun getAll(): List<Folder>
+    fun getAll(): List<RoomFolder>
 
     @Query("SELECT * FROM folder WHERE path = :path LIMIT 1")
-    fun findByPath(path: String): Folder?
+    fun findByPath(path: String): RoomFolder?
 
     @Query("SELECT * FROM folder WHERE favorite = 1")
-    fun getAllFavorite(): List<Folder>
+    fun getAllFavorite(): List<RoomFolder>
 }
