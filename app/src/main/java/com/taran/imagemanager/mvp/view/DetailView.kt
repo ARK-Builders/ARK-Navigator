@@ -12,9 +12,6 @@ interface DetailView: MvpView {
     @StateStrategyType(SkipStrategy::class)
     fun showTagsDialog(tags: String)
 
-    @StateStrategyType(SkipStrategy::class)
     fun setCurrentItem(pos: Int)
-
-    @StateStrategyType(SkipStrategy::class)
     fun updateAdapter()
 }

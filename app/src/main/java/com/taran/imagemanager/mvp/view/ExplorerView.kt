@@ -8,11 +8,7 @@ import moxy.viewstate.strategy.StateStrategyType
 @StateStrategyType(AddToEndSingleStrategy::class)
 interface ExplorerView: MvpView {
     fun init()
-
-    @StateStrategyType(SkipStrategy::class)
     fun updateAdapter()
-
-    @StateStrategyType(SkipStrategy::class)
     fun setFabVisibility(isVisible: Boolean)
 
     @StateStrategyType(SkipStrategy::class)
