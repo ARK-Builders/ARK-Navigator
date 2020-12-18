@@ -11,7 +11,7 @@ import com.taran.imagemanager.mvp.model.entity.room.RoomFolder
 @Dao
 interface FolderDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(folder: RoomFolder)
+    fun insert(folder: RoomFolder): Long
 
     @Query("SELECT * FROM folder")
     fun getAll(): List<RoomFolder>
@@ -20,5 +20,14 @@ interface FolderDao {
     fun findByPath(path: String): RoomFolder?
 
     @Query("SELECT * FROM folder WHERE favorite = 1")
-    fun getAllFavorite(): List<RoomFolder>
+    fun getFavorite(): List<RoomFolder>
+
+    @Query("UPDATE folder SET favorite = :favorite WHERE id = :id")
+    fun updateFavorite(id: Long, favorite: Boolean)
+
+    @Query("UPDATE folder SET tags = :tags WHERE id = :id")
+    fun updateTags(id: Long, tags: String)
+
+    @Query("UPDATE folder SET processed = :processed WHERE id = :id")
+    fun updateProcessed(id: Long, processed: Boolean)
 }

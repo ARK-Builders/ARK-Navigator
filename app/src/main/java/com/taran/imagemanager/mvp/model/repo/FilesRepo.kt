@@ -3,11 +3,18 @@ package com.taran.imagemanager.mvp.model.repo
 import com.taran.imagemanager.mvp.model.entity.Folder
 import com.taran.imagemanager.mvp.model.entity.IFile
 import com.taran.imagemanager.mvp.model.entity.Image
-import com.taran.imagemanager.mvp.model.file.FileProvider
+import com.taran.imagemanager.ui.file.FileProvider
 import com.taran.imagemanager.utils.checkInternalStorage
+import com.taran.imagemanager.utils.getHash
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.schedulers.Schedulers
 import java.io.File
 
 class FilesRepo(val fileProvider: FileProvider) {
+
+    fun isUriAdded(path: String): Boolean {
+        return fileProvider.getUriByPath(path) != null
+    }
 
     fun getImagesInFolder(path: String): MutableList<Image> {
         val directory = File(path)
@@ -20,7 +27,6 @@ class FilesRepo(val fileProvider: FileProvider) {
         val directory = File(path)
         val inputFiles = directory.listFiles()
 
-
         val folders = filterFolders(inputFiles)
         val images = filterImages(inputFiles)
 
@@ -31,9 +37,41 @@ class FilesRepo(val fileProvider: FileProvider) {
         return files
     }
 
-    fun getExternalStorage(): String {
-        return fileProvider.getExternalStorage()
+    fun getHashSingle(path: String) = Single.create<String> { emitter ->
+            emitter.onSuccess(getHash(path))
+    }.subscribeOn(Schedulers.io())
+
+    fun mkFile(filePath: String) {
+        fileProvider.mkFile(filePath)
     }
+
+    fun writeToFile(path: String, images: List<Image>) = Single.create<Boolean> { emitter ->
+        val data = fileProvider.readFromFile(path)
+        val map = mapFromFile(data)
+
+        images.forEach { image ->
+                map[image.hash!!] = image.tags
+        }
+
+        val builder = StringBuilder()
+        for ((k, v) in map) {
+            builder.append("\"$k\"=\"$v\"\n")
+        }
+
+        emitter.onSuccess(fileProvider.writeToFile(path, builder.toString()))
+    }.subscribeOn(Schedulers.io())
+
+    fun writeTagsToFile(path: String, image: Image) = Single.create<Boolean> { emitter ->
+        val data = fileProvider.readFromFile(path)
+        val map = mapFromFile(data)
+        map[image.hash!!] = image.tags
+
+        val builder = StringBuilder()
+        for ((k, v) in map) {
+            builder.append("\"$k\"=\"$v\"\n")
+        }
+        emitter.onSuccess(fileProvider.writeToFile(path, builder.toString()))
+    }.subscribeOn(Schedulers.io())
 
     fun getExtSdCards(): List<Folder> {
         return fileProvider.getExtSdCards().map { checkInternalStorage(it) }
@@ -58,5 +96,21 @@ class FilesRepo(val fileProvider: FileProvider) {
         }?.map { file ->
             Folder(name = file.name, path =  file.absolutePath)
         }?: listOf()
+    }
+
+    private fun mapFromFile(data: String): HashMap<String, String> {
+        val lines = data.split("\n")
+        val map = HashMap<String, String>()
+
+        lines.forEach { line ->
+            if (line.isNotEmpty()) {
+                val values = line.split("=")
+                val hash = values[0].replace("\"", "")
+                val tags = values[1].replace("\"", "")
+                map[hash] = tags
+            }
+        }
+
+        return map
     }
 }

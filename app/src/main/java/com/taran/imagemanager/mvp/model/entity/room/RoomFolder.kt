@@ -11,5 +11,5 @@ class RoomFolder(
     var path: String,
     var favorite: Boolean = false,
     var processed: Boolean = false,
-    var tags: String? = null
+    var tags: String = ""
 )

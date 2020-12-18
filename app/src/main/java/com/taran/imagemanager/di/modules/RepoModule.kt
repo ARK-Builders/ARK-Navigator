@@ -1,11 +1,11 @@
 package com.taran.imagemanager.di.modules
 
+import com.taran.imagemanager.mvp.model.entity.ActiveIndexingStorage
 import com.taran.imagemanager.mvp.model.entity.room.Database
-import com.taran.imagemanager.mvp.model.file.FileProvider
 import com.taran.imagemanager.mvp.model.repo.FilesRepo
 import com.taran.imagemanager.mvp.model.repo.RoomRepo
 import com.taran.imagemanager.ui.App
-import com.taran.imagemanager.ui.file.AndroidFileProvider
+import com.taran.imagemanager.ui.file.FileProvider
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
@@ -27,6 +27,12 @@ class RepoModule {
     @Singleton
     @Provides
     fun fileProvider(app: App): FileProvider {
-        return AndroidFileProvider(app)
+        return FileProvider(app)
+    }
+
+    @Singleton
+    @Provides
+    fun indexingStorage(): ActiveIndexingStorage {
+        return ActiveIndexingStorage()
     }
 }

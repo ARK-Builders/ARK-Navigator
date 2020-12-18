@@ -1,5 +1,6 @@
 package com.taran.imagemanager.ui.fragments
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -71,10 +72,15 @@ class ExplorerFragment: MvpAppCompatFragment(), ExplorerView {
         MaterialAlertDialogBuilder(context)
             .setTitle("Do you want to add a folder to the home screen?")
             .setPositiveButton("OK") { dialog, which ->
-                presenter.addFolderToFavorite()
+                presenter.favoriteChanged()
             }
             .setNegativeButton("Cancel") { dialog, which -> }
             .show()
+    }
+
+    override fun requestSdCardUri() {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+        activity!!.startActivityForResult(intent, 2)
     }
 
     override fun updateAdapter() {

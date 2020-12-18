@@ -12,8 +12,8 @@ class Screens {
         override fun getFragment() = ExplorerFragment.newInstance(folder)
     }
 
-    class DetailScreen(val images: MutableList<Image>, val pos: Int): SupportAppScreen() {
-        override fun getFragment() = DetailFragment.newInstance(images, pos)
+    class DetailScreen(val images: MutableList<Image>, val pos: Int, val folder: Folder): SupportAppScreen() {
+        override fun getFragment() = DetailFragment.newInstance(images, pos, folder)
     }
 
     class HistoryScreen: SupportAppScreen() {

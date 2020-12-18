@@ -11,7 +11,7 @@ import com.taran.imagemanager.mvp.model.entity.room.RoomImage
 @Dao
 interface ImageDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(image: RoomImage)
+    fun insert(image: RoomImage): Long
 
     @Query("SELECT * FROM image")
     fun getAll(): List<RoomImage>
@@ -21,4 +21,7 @@ interface ImageDao {
 
     @Query("SELECT * FROM image WHERE path = :path LIMIT 1")
     fun findByPath(path: String): RoomImage?
+
+    @Query("UPDATE image SET tags = :tags WHERE id = :id")
+    fun updateTags(id: Long, tags: String)
 }

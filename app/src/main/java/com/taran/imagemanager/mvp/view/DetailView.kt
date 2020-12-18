@@ -10,8 +10,10 @@ interface DetailView: MvpView {
     fun init()
 
     @StateStrategyType(SkipStrategy::class)
-    fun showTagsDialog(tags: String)
+    fun showTagsDialog(imageTags: List<String>, folderTags: List<String>)
 
+    fun setImageTags(imageTags: List<String>)
+    fun setDialogTags(imageTags: List<String>, folderTags: List<String>)
     fun setCurrentItem(pos: Int)
     fun updateAdapter()
 }

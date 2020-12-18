@@ -55,7 +55,7 @@ class HistoryPresenter: MvpPresenter<HistoryView>() {
     }
 
     private fun setupAdapterList() {
-        roomRepo.getAllFavoriteFolders().observeOn(AndroidSchedulers.mainThread()).subscribe(
+        roomRepo.getFavoriteFolders().observeOn(AndroidSchedulers.mainThread()).subscribe(
             { list ->
                 val folders = list.toMutableList()
                 folders.sortBy { it.name }
@@ -68,6 +68,6 @@ class HistoryPresenter: MvpPresenter<HistoryView>() {
 
     private fun addDefaultFolders(folders: MutableList<Folder>) {
         folders.addAll(fileRepo.getExtSdCards())
-        folders.add(Folder(-2L, "Gallery", "gallery"))
+        folders.add(Folder( name = "Gallery", path =  "gallery"))
     }
 }

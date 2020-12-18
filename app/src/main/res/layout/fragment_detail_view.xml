@@ -4,10 +4,31 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/viewPager"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent">
+
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/view_pager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+        <co.lujun.androidtagview.TagContainerLayout
+            android:id="@+id/tags_image_detail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="88dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginStart="10dp"
+            app:container_background_color="@android:color/transparent"
+            app:container_border_color = "@android:color/transparent"
+            android:layout_alignParentBottom="true"
+            app:container_enable_drag="false"
+            />
+
+    </RelativeLayout>
+
+
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"

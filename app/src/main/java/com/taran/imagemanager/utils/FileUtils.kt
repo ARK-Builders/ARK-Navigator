@@ -2,8 +2,9 @@ package com.taran.imagemanager.utils
 
 import com.taran.imagemanager.mvp.model.entity.Folder
 
+private val checkPaths = listOf("/storage/emulated/legacy", "/storage/emulated/0", "/mnt/sdcard")
+
 fun checkInternalStorage(folder: Folder): Folder {
-    val checkPaths = listOf("/storage/emulated/legacy", "/storage/emulated/0", "/mnt/sdcard")
     checkPaths.find { path ->
         path == folder.path
     }?.let {
@@ -11,4 +12,12 @@ fun checkInternalStorage(folder: Folder): Folder {
     }
 
     return folder
+}
+
+fun isInternalStorage(folder: Folder): Boolean {
+    checkPaths.forEach {
+        if (folder.path.startsWith(it))
+            return true
+    }
+    return false
 }

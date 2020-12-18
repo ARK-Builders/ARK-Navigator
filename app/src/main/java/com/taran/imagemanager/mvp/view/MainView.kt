@@ -10,5 +10,5 @@ interface MainView: MvpView {
     fun init()
 
     @StateStrategyType(SkipStrategy::class)
-    fun requestPermissions()
+    fun requestReadWritePerm()
 }

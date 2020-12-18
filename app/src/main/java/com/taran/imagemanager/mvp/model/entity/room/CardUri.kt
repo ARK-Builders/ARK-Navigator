@@ -3,12 +3,10 @@ package com.taran.imagemanager.mvp.model.entity.room
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "image")
-class RoomImage (
+@Entity
+class CardUri(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-    var name: String,
-    var path: String,
-    var tags: String = "",
-    var hash: String? = null
+    val path: String,
+    var uri: String? = null
 )

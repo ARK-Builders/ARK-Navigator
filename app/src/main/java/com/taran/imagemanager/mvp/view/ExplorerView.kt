@@ -1,5 +1,6 @@
 package com.taran.imagemanager.mvp.view
 
+import com.taran.imagemanager.mvp.model.entity.Folder
 import moxy.MvpView
 import moxy.viewstate.strategy.AddToEndSingleStrategy
 import moxy.viewstate.strategy.SkipStrategy
@@ -13,4 +14,7 @@ interface ExplorerView: MvpView {
 
     @StateStrategyType(SkipStrategy::class)
     fun showDialog()
+
+    @StateStrategyType(SkipStrategy::class)
+    fun requestSdCardUri()
 }

@@ -1,33 +1,36 @@
 package com.taran.imagemanager.ui
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.provider.DocumentsContract
+import android.os.StrictMode
 import androidx.core.app.ActivityCompat
 import com.taran.imagemanager.R
-import com.taran.imagemanager.mvp.model.file.FileProvider
+import com.taran.imagemanager.mvp.model.entity.Folder
 import com.taran.imagemanager.mvp.presenter.MainPresenter
 import com.taran.imagemanager.mvp.view.MainView
+import com.taran.imagemanager.utils.*
 import moxy.MvpAppCompatActivity
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
 import ru.terrakok.cicerone.NavigatorHolder
 import ru.terrakok.cicerone.android.support.SupportAppNavigator
-import java.io.File
-import java.net.URI
 import javax.inject.Inject
 
 
 class MainActivity : MvpAppCompatActivity(), MainView {
 
+
     @Inject
     lateinit var navigatorHolder: NavigatorHolder
 
-
     @InjectPresenter
     lateinit var presenter: MainPresenter
+
+    var sharedPref: SharedPreferences? = null
 
     val navigator = SupportAppNavigator(this, R.id.container)
 
@@ -42,17 +45,27 @@ class MainActivity : MvpAppCompatActivity(), MainView {
         App.instance.appComponent.inject(this)
     }
 
-    override fun init() {}
+    override fun init() {
+        val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+        StrictMode.setThreadPolicy(policy)
+        sharedPref = this.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
+    }
 
-    override fun requestPermissions() {
-        ActivityCompat.requestPermissions(
-            this@MainActivity,
-            arrayOf(
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ),
-            1
-        )
+    override fun requestReadWritePerm() {
+        val permGranted = sharedPref!!.getBoolean(PREF_READ_WRITE_GRANTED, false)
+
+        if (!permGranted) {
+            ActivityCompat.requestPermissions(
+                this@MainActivity,
+                arrayOf(
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ),
+                1
+            )
+        } else {
+            presenter.readWritePermGranted()
+        }
     }
 
     override fun onRequestPermissionsResult(
@@ -62,14 +75,33 @@ class MainActivity : MvpAppCompatActivity(), MainView {
     ) {
         if (requestCode == 1) {
             if (grantResults.isNotEmpty()
-                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                presenter.permissionsGranted()
+                && grantResults[0] == PackageManager.PERMISSION_GRANTED
+            ) {
+                with(sharedPref!!.edit()) {
+                    putBoolean(PREF_READ_WRITE_GRANTED, true)
+                    apply()
+                }
+                presenter.readWritePermGranted()
             } else {
                 presenter.permissionsDenied()
             }
         }
 
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == 2) {
+            val treeUri = data!!.data!!
+            contentResolver
+                .takePersistableUriPermission(
+                    treeUri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                )
+
+            presenter.sdCardUriGranted(treeUri.toString())
+        }
+        super.onActivityResult(requestCode, resultCode, data)
     }
 
     override fun onResumeFragments() {

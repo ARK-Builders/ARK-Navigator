@@ -7,10 +7,10 @@ import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 data class Folder(
-    val id: Long = 0,
+    var id: Long = 0,
     override var name: String,
     var path: String,
     var favorite: Boolean = false,
     var processed: Boolean = false,
-    var tags: String? = null
+    var tags: String = ""
 ): IFile, Parcelable
