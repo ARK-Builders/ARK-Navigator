@@ -38,40 +38,37 @@ class FilesRepo(val fileProvider: FileProvider) {
     }
 
     fun getHashSingle(path: String) = Single.create<String> { emitter ->
-            emitter.onSuccess(getHash(path))
+        emitter.onSuccess(getHash(path))
     }.subscribeOn(Schedulers.io())
 
-    fun mkFile(filePath: String) {
-        fileProvider.mkFile(filePath)
-    }
+    fun writeToFile(path: String, images: List<Image>, override: Boolean) =
+        Single.create<Boolean> { emitter ->
 
-    fun writeToFile(path: String, images: List<Image>) = Single.create<Boolean> { emitter ->
-        val data = fileProvider.readFromFile(path)
-        val map = mapFromFile(data)
+            synchronized(this) {
+                fileProvider.mkFile(path)
+                val data = fileProvider.readFromFile(path)
+                val map = mapFromFile(data)
 
-        images.forEach { image ->
-                map[image.hash!!] = image.tags
-        }
+                if (override)
+                    images.forEach { image ->
+                        map[image.hash!!] = image.tags
+                    }
+                else
+                    images.forEach { image ->
+                        if (map[image.hash!!] == null)
+                            map[image.hash!!] = image.tags
+                    }
 
-        val builder = StringBuilder()
-        for ((k, v) in map) {
-            builder.append("\"$k\"=\"$v\"\n")
-        }
 
-        emitter.onSuccess(fileProvider.writeToFile(path, builder.toString()))
-    }.subscribeOn(Schedulers.io())
+                val builder = StringBuilder()
+                for ((k, v) in map) {
+                    builder.append("\"$k\"=\"$v\"\n")
+                }
 
-    fun writeTagsToFile(path: String, image: Image) = Single.create<Boolean> { emitter ->
-        val data = fileProvider.readFromFile(path)
-        val map = mapFromFile(data)
-        map[image.hash!!] = image.tags
+                emitter.onSuccess(fileProvider.writeToFile(path, builder.toString()))
+            }
 
-        val builder = StringBuilder()
-        for ((k, v) in map) {
-            builder.append("\"$k\"=\"$v\"\n")
-        }
-        emitter.onSuccess(fileProvider.writeToFile(path, builder.toString()))
-    }.subscribeOn(Schedulers.io())
+        }.subscribeOn(Schedulers.io())
 
     fun getExtSdCards(): List<Folder> {
         return fileProvider.getExtSdCards().map { checkInternalStorage(it) }
@@ -86,16 +83,16 @@ class FilesRepo(val fileProvider: FileProvider) {
             val fp = file.absolutePath
             fp.endsWith(".jpg") || fp.endsWith(".png") || fp.endsWith(".jpeg")
         }?.map { file ->
-            Image(name = file.name, path =  file.absolutePath)
-        }?: listOf()
+            Image(name = file.name, path = file.absolutePath)
+        } ?: listOf()
     }
 
     private fun filterFolders(files: Array<File>?): List<Folder> {
         return files?.filter { file ->
             file.isDirectory
         }?.map { file ->
-            Folder(name = file.name, path =  file.absolutePath)
-        }?: listOf()
+            Folder(name = file.name, path = file.absolutePath)
+        } ?: listOf()
     }
 
     private fun mapFromFile(data: String): HashMap<String, String> {

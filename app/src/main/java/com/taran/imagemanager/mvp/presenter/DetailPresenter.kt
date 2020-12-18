@@ -1,6 +1,5 @@
 package com.taran.imagemanager.mvp.presenter
 
-import com.taran.imagemanager.mvp.model.entity.ActiveIndexingStorage
 import com.taran.imagemanager.mvp.model.entity.Folder
 import com.taran.imagemanager.mvp.model.entity.Image
 import com.taran.imagemanager.mvp.model.repo.FilesRepo
@@ -10,16 +9,11 @@ import com.taran.imagemanager.mvp.view.DetailView
 import com.taran.imagemanager.mvp.view.item.DetailItemView
 import com.taran.imagemanager.utils.TEXT_STORAGE_NAME
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.core.Observer
-import io.reactivex.rxjava3.disposables.Disposable
 import moxy.MvpPresenter
 import javax.inject.Inject
 
 class DetailPresenter(val images: List<Image>, val pos: Int, val currentFolder: Folder) :
     MvpPresenter<DetailView>() {
-
-    @Inject
-    lateinit var indexingStorage: ActiveIndexingStorage
 
     @Inject
     lateinit var filesRepo: FilesRepo
@@ -28,7 +22,6 @@ class DetailPresenter(val images: List<Image>, val pos: Int, val currentFolder: 
     lateinit var roomRepo: RoomRepo
 
     var currentImage: Image? = null
-    val imagesToWrite = mutableListOf<Image>()
 
     val detailListPresenter = DetailListPresenter()
 
@@ -48,9 +41,6 @@ class DetailPresenter(val images: List<Image>, val pos: Int, val currentFolder: 
     override fun onFirstViewAttach() {
         super.onFirstViewAttach()
         viewState.init()
-
-        if (!currentFolder.processed)
-            indexingStorage.map[currentFolder.path]!!.subscribe(getIndexingObserver())
 
         detailListPresenter.images = images.toMutableList()
         viewState.setCurrentItem(pos)
@@ -105,35 +95,17 @@ class DetailPresenter(val images: List<Image>, val pos: Int, val currentFolder: 
         roomRepo.updateImageTags(currentImage!!.id, currentImage!!.tags).subscribe()
 
         if (currentFolder.path != "gallery") {
-
-            if (currentFolder.processed) {
-                filesRepo.writeTagsToFile(
-                    "${currentFolder.path}/$TEXT_STORAGE_NAME",
-                    currentImage!!
-                ).subscribe()
-            } else {
-                imagesToWrite.add(currentImage!!)
-            }
+            filesRepo.writeToFile(
+                "${currentFolder.path}/$TEXT_STORAGE_NAME",
+                listOf(currentImage!!),
+                true
+            ).subscribe()
         }
 
         val folderTags = mapToTagsList(currentFolder.tags)
         val imageTags = mapToTagsList(currentImage!!.tags)
         viewState.setImageTags(imageTags)
         viewState.setDialogTags(imageTags, folderTags)
-    }
-
-    private fun getIndexingObserver() = object : Observer<Boolean> {
-        override fun onSubscribe(d: Disposable?) {}
-
-        override fun onNext(t: Boolean?) {}
-
-        override fun onError(e: Throwable?) {}
-
-        override fun onComplete() {
-            indexingStorage.map.remove(currentFolder.path)
-            filesRepo.writeToFile("${currentFolder.path}/$TEXT_STORAGE_NAME", imagesToWrite).subscribe()
-        }
-
     }
 
     private fun mapToTagsList(str: String): List<String> {

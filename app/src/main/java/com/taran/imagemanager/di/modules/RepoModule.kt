@@ -1,6 +1,5 @@
 package com.taran.imagemanager.di.modules
 
-import com.taran.imagemanager.mvp.model.entity.ActiveIndexingStorage
 import com.taran.imagemanager.mvp.model.entity.room.Database
 import com.taran.imagemanager.mvp.model.repo.FilesRepo
 import com.taran.imagemanager.mvp.model.repo.RoomRepo
@@ -28,11 +27,5 @@ class RepoModule {
     @Provides
     fun fileProvider(app: App): FileProvider {
         return FileProvider(app)
-    }
-
-    @Singleton
-    @Provides
-    fun indexingStorage(): ActiveIndexingStorage {
-        return ActiveIndexingStorage()
     }
 }
