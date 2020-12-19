@@ -8,9 +8,8 @@ import moxy.viewstate.strategy.StateStrategyType
 @StateStrategyType(AddToEndSingleStrategy::class)
 interface DetailView: MvpView {
     fun init()
-
-    @StateStrategyType(SkipStrategy::class)
     fun showTagsDialog(imageTags: List<String>, folderTags: List<String>)
+    fun closeDialog()
 
     fun setImageTags(imageTags: List<String>)
     fun setDialogTags(imageTags: List<String>, folderTags: List<String>)

@@ -12,10 +12,6 @@ import java.io.File
 
 class FilesRepo(val fileProvider: FileProvider) {
 
-    fun isUriAdded(path: String): Boolean {
-        return fileProvider.getUriByPath(path) != null
-    }
-
     fun getImagesInFolder(path: String): MutableList<Image> {
         val directory = File(path)
         val inputFiles = directory.listFiles()
@@ -41,11 +37,20 @@ class FilesRepo(val fileProvider: FileProvider) {
         emitter.onSuccess(getHash(path))
     }.subscribeOn(Schedulers.io())
 
+    fun mkFile(path: String) = Single.create<Boolean> { emitter ->
+        if (fileProvider.isBaseFolder(path)) {
+            if (fileProvider.canWrite(path)) {
+                emitter.onSuccess(fileProvider.mkFile(path))
+            } else
+                emitter.onSuccess(false)
+        } else
+            emitter.onSuccess(true)
+    }.subscribeOn(Schedulers.io())
+
     fun writeToFile(path: String, images: List<Image>, override: Boolean) =
         Single.create<Boolean> { emitter ->
 
             synchronized(this) {
-                fileProvider.mkFile(path)
                 val data = fileProvider.readFromFile(path)
                 val map = mapFromFile(data)
 

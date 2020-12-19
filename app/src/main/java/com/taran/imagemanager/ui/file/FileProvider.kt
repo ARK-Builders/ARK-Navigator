@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
+import android.util.Log
 import androidx.documentfile.provider.DocumentFile
 import com.taran.imagemanager.mvp.model.entity.Folder
 import com.taran.imagemanager.mvp.model.entity.Image
@@ -15,6 +16,7 @@ import java.io.*
 class FileProvider(val context: Context) {
     val TEXT_MIME_TYPE = "text/plain"
     var cardUris = mutableListOf<CardUri>()
+    val DUMMY_FILE_NAME = "dummy.txt"
 
     fun getExternalStorage(): String {
         return Environment.getExternalStorageDirectory().absolutePath
@@ -38,7 +40,7 @@ class FileProvider(val context: Context) {
         )
 
         var imagePath: String
-        var imageName: String
+        var imageName: String?
         val images = mutableListOf<Image>()
 
         cursor?.let {
@@ -48,13 +50,34 @@ class FileProvider(val context: Context) {
                 while (cursor.moveToNext()) {
                     imagePath = cursor.getString(columnIndexPath)
                     imageName = cursor.getString(columnIndexName)
-                    images.add(Image(name = imageName, path = imagePath))
+                    if (imageName == null) {
+                        imageName = "Unknown"
+                        Log.i("UnknownImageName", imagePath)
+                    }
+                    images.add(Image(name = imageName!!, path = imagePath))
                 }
             }
 
             it.close()
         }
+
+
         return images
+    }
+
+    fun canWrite(filePath: String): Boolean {
+        val file = File(filePath)
+        val dummyPath = "${file.parent}/$DUMMY_FILE_NAME"
+        return if (mkFile(dummyPath)) {
+            try {
+                writeToFile(dummyPath, "test")
+                removeFile(dummyPath)
+                true
+            } catch (e: Exception) {
+                false
+            }
+        } else
+            false
     }
 
     fun mkFile(filePath: String): Boolean {
@@ -70,10 +93,31 @@ class FileProvider(val context: Context) {
         }
 
         try {
-
             val parentFolder = getDocumentFile(file.parent!!)
 
-            return parentFolder.createFile(TEXT_MIME_TYPE, TEXT_STORAGE_NAME) != null
+            return parentFolder.createFile(TEXT_MIME_TYPE, file.name) != null
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        return false
+    }
+
+    fun removeFile(filePath: String): Boolean {
+        val file = File(filePath)
+
+        if (!file.exists()) return true
+
+        try {
+            if (file.delete())
+                return true
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        try {
+            val document = getDocumentFile(filePath)
+            return document.delete()
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -132,7 +176,8 @@ class FileProvider(val context: Context) {
         try {
             inputStream = FileInputStream(path)
             return inputStream
-        } catch (e: Exception) { }
+        } catch (e: Exception) {
+        }
 
         val document = getDocumentFile(path)
         inputStream = context.contentResolver.openInputStream(document.uri)!!
@@ -144,7 +189,8 @@ class FileProvider(val context: Context) {
         try {
             outputStream = FileOutputStream(path)
             return outputStream
-        } catch (e: Exception) {}
+        } catch (e: Exception) {
+        }
 
         val document = getDocumentFile(path)
         outputStream = context.contentResolver.openOutputStream(document.uri)!!
@@ -168,6 +214,16 @@ class FileProvider(val context: Context) {
         }
 
         return null
+    }
+
+    fun isBaseFolder(path: String): Boolean {
+        val file = File(path)
+        val sdPaths = getExtSdCards().map { it.path }
+        sdPaths.forEach { sdPath ->
+            if (sdPath == file.parent)
+                return true
+        }
+        return false
     }
 
     fun getExtSdCards(): List<Folder> {

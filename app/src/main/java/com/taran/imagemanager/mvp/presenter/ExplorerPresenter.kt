@@ -15,6 +15,7 @@ import com.taran.imagemanager.navigation.Screens
 import com.taran.imagemanager.utils.TEXT_STORAGE_NAME
 import com.taran.imagemanager.utils.getHash
 import com.taran.imagemanager.utils.isInternalStorage
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
 import moxy.MvpPresenter
@@ -76,7 +77,15 @@ class ExplorerPresenter(var currentFolder: Folder) : MvpPresenter<ExplorerView>(
             files.sortBy { it.name }
             fileGridPresenter.files = files
             viewState.updateAdapter()
-            checkCurrentFolder()
+            filesRepo.mkFile("${currentFolder.path}/$TEXT_STORAGE_NAME")
+                .observeOn(AndroidSchedulers.mainThread()).subscribe(
+                    { exist ->
+                        if (exist)
+                            checkCurrentFolder()
+                        else
+                            requestSdCardUri()
+                    }, {}
+                )
         } else {
             viewState.setFabVisibility(false)
             val images = filesRepo.getImagesFromGallery()
@@ -96,32 +105,36 @@ class ExplorerPresenter(var currentFolder: Folder) : MvpPresenter<ExplorerView>(
 
     private fun checkCurrentFolder() {
         roomRepo.getFolderByPath(currentFolder.path).subscribe(
-                {
-                    currentFolder = it
-                },
-                {
-                    processFolder()
-                }
-            )
+            {
+                currentFolder = it
+            },
+            {
+                processFolder()
+            }
+        )
     }
 
     private fun processFolder() {
-        if (isInternalStorage(currentFolder) || filesRepo.isUriAdded(currentFolder.path)) {
-            roomRepo.insertFolder(currentFolder).subscribe(
-                {
-                    currentFolder.id = it
-                    calculateHash()
-                },
-                {}
-            )
-        } else {
-            roomRepo.insertCardUri(CardUri(path = currentFolder.path)).subscribe(
-                {
-                    viewState.requestSdCardUri()
-                },
-                {}
-            )
-        }
+        roomRepo.insertFolder(currentFolder).subscribe(
+            {
+                currentFolder.id = it
+                calculateHash()
+            },
+            {}
+        )
+    }
+
+    private fun requestSdCardUri() {
+        roomRepo.getCardUriByPath(currentFolder.path).observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                it.uri = null
+                roomRepo.insertCardUri(it).observeOn(AndroidSchedulers.mainThread())
+                    .subscribe({ viewState.requestSdCardUri() }, {})
+            }, {
+                roomRepo.insertCardUri(CardUri(path = currentFolder.path))
+                    .observeOn(AndroidSchedulers.mainThread()).subscribe(
+                        { viewState.requestSdCardUri() }, {})
+            })
     }
 
 
@@ -130,7 +143,8 @@ class ExplorerPresenter(var currentFolder: Folder) : MvpPresenter<ExplorerView>(
         processImages(images).subscribe(
             { processedImages ->
                 currentFolder.processed = true
-                roomRepo.updateFolderProcessed(currentFolder.id, currentFolder.processed).subscribe()
+                roomRepo.updateFolderProcessed(currentFolder.id, currentFolder.processed)
+                    .subscribe()
                 filesRepo.writeToFile(
                     "${currentFolder.path}/$TEXT_STORAGE_NAME",
                     processedImages,

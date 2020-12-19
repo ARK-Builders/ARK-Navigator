@@ -81,4 +81,10 @@ class RoomRepo(val database: Database) {
             ?: emitter.onError(RuntimeException())
     }.subscribeOn(Schedulers.io())
 
+    fun getCardUriByPath(path: String) = Single.create<CardUri> { emitter ->
+        database.cardUriDao().findByPath(path)?.let {
+            emitter.onSuccess(it)
+        } ?: emitter.onError(RuntimeException())
+    }.subscribeOn(Schedulers.io())
+
 }

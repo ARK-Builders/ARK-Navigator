@@ -76,16 +76,38 @@ class DetailPresenter(val images: List<Image>, val pos: Int, val currentFolder: 
     fun fabClicked() {
         val folderTags = mapToTagsList(currentFolder.tags)
         val imageTags = mapToTagsList(currentImage!!.tags)
-        viewState.showTagsDialog(imageTags, folderTags)
+        viewState.showTagsDialog(imageTags, deleteDuplicates(folderTags))
+    }
+
+    fun tagRemoved(tag: String) {
+        val folderTags = currentFolder.tags.split(",").toMutableList()
+        folderTags.remove(tag)
+        currentFolder.tags = folderTags.joinToString(",")
+
+        val imageTags = currentImage!!.tags.split(",").toMutableList()
+        imageTags.remove(tag)
+        currentImage!!.tags = imageTags.joinToString(",")
+        roomRepo.updateImageTags(currentImage!!.id, currentImage!!.tags).subscribe()
+
+
+        if (currentFolder.path != "gallery") {
+            roomRepo.updateFolderTags(currentFolder.id, currentFolder.tags).subscribe()
+            filesRepo.writeToFile(
+                "${currentFolder.path}/$TEXT_STORAGE_NAME",
+                listOf(currentImage!!),
+                true
+            ).subscribe()
+        }
+
+        viewState.setImageTags(imageTags)
+        viewState.setDialogTags(imageTags, deleteDuplicates(folderTags))
     }
 
     fun tagAdded(tag: String) {
         if (currentFolder.tags.isNotEmpty()) {
-            if (!currentFolder.tags.contains(tag))
-                currentFolder.tags += ",$tag"
+            currentFolder.tags += ",$tag"
         } else
             currentFolder.tags = tag
-        roomRepo.updateFolderTags(currentFolder.id, currentFolder.tags).subscribe()
 
         if (currentImage!!.tags.isNotEmpty()) {
             if (!currentImage!!.tags.contains(tag))
@@ -95,6 +117,7 @@ class DetailPresenter(val images: List<Image>, val pos: Int, val currentFolder: 
         roomRepo.updateImageTags(currentImage!!.id, currentImage!!.tags).subscribe()
 
         if (currentFolder.path != "gallery") {
+            roomRepo.updateFolderTags(currentFolder.id, currentFolder.tags).subscribe()
             filesRepo.writeToFile(
                 "${currentFolder.path}/$TEXT_STORAGE_NAME",
                 listOf(currentImage!!),
@@ -105,7 +128,8 @@ class DetailPresenter(val images: List<Image>, val pos: Int, val currentFolder: 
         val folderTags = mapToTagsList(currentFolder.tags)
         val imageTags = mapToTagsList(currentImage!!.tags)
         viewState.setImageTags(imageTags)
-        viewState.setDialogTags(imageTags, folderTags)
+        viewState.setDialogTags(imageTags, deleteDuplicates(folderTags))
+        viewState.closeDialog()
     }
 
     private fun mapToTagsList(str: String): List<String> {
@@ -114,4 +138,8 @@ class DetailPresenter(val images: List<Image>, val pos: Int, val currentFolder: 
         else
             listOf()
     }
+
+    private fun deleteDuplicates(list: List<String>): List<String> = list.toHashSet().toList()
+
+
 }

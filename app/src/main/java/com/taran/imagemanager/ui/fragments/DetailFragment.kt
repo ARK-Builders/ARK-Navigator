@@ -40,6 +40,7 @@ class DetailFragment: MvpAppCompatFragment(), DetailView {
     }
 
     var dialogView: View? = null
+    var dialog: AlertDialog? = null
 
     @InjectPresenter
     lateinit var presenter: DetailPresenter
@@ -94,7 +95,10 @@ class DetailFragment: MvpAppCompatFragment(), DetailView {
     override fun showTagsDialog(imageTags: List<String>, folderTags: List<String>) {
         dialogView = LayoutInflater.from(context!!).inflate(R.layout.dialog_tags, null)
         val alertDialogBuilder = AlertDialog.Builder(context!!).setView(dialogView)
-        alertDialogBuilder.show()
+        dialog = alertDialogBuilder.show()
+
+
+
 
         dialogView!!.tags_image.theme = ColorFactory.NONE
         dialogView!!.tags_image.tagBackgroundColor = ContextCompat.getColor(context!!, R.color.colorPrimary)
@@ -107,6 +111,19 @@ class DetailFragment: MvpAppCompatFragment(), DetailView {
 
         dialogView!!.tags_image.tags = imageTags
         dialogView!!.tags_folder.tags = folderTags
+
+        dialogView!!.tags_image.setOnTagClickListener(object : TagView.OnTagClickListener {
+            override fun onTagClick(position: Int, text: String?) {
+                presenter.tagRemoved(dialogView!!.tags_image.tags[position])
+            }
+
+            override fun onTagLongClick(position: Int, text: String?) {}
+
+            override fun onSelectedTagDrag(position: Int, text: String?) {}
+
+            override fun onTagCrossClick(position: Int) {}
+
+        })
 
         dialogView!!.tags_folder.setOnTagClickListener(object : TagView.OnTagClickListener {
             override fun onTagClick(position: Int, text: String?) {
@@ -131,12 +148,21 @@ class DetailFragment: MvpAppCompatFragment(), DetailView {
         }
     }
 
+    override fun closeDialog() {
+        dialog?.dismiss()
+    }
+
     override fun setDialogTags(imageTags: List<String>, folderTags: List<String>) {
-        dialogView!!.tags_image.tags = imageTags
-        dialogView!!.tags_folder.tags = folderTags
+        dialogView?.tags_image?.tags = imageTags
+        dialogView?.tags_folder?.tags = folderTags
     }
 
     override fun setImageTags(imageTags: List<String>) {
         tags_image_detail.tags = imageTags
+    }
+
+    override fun onPause() {
+        dialog?.dismiss()
+        super.onPause()
     }
 }
