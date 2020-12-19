@@ -41,10 +41,12 @@ class FilesRepo(val fileProvider: FileProvider) {
         if (fileProvider.isBaseFolder(path)) {
             if (fileProvider.canWrite(path)) {
                 emitter.onSuccess(fileProvider.mkFile(path))
-            } else
+            } else {
+                fileProvider.deleteDuplicateCardUris(path)
                 emitter.onSuccess(false)
+            }
         } else
-            emitter.onSuccess(true)
+            emitter.onSuccess(fileProvider.mkFile(path))
     }.subscribeOn(Schedulers.io())
 
     fun writeToFile(path: String, images: List<Image>, override: Boolean) =

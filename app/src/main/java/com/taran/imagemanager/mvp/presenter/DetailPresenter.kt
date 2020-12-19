@@ -132,6 +132,10 @@ class DetailPresenter(val images: List<Image>, val pos: Int, val currentFolder: 
         viewState.closeDialog()
     }
 
+    fun dismissDialog() {
+        viewState.closeDialog()
+    }
+
     private fun mapToTagsList(str: String): List<String> {
         return if (str.isNotEmpty())
             str.split(",")

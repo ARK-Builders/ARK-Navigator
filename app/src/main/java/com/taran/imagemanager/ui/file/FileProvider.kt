@@ -66,9 +66,12 @@ class FileProvider(val context: Context) {
     }
 
     fun canWrite(filePath: String): Boolean {
-        val file = File(filePath)
+        var file = File(filePath)
         val dummyPath = "${file.parent}/$DUMMY_FILE_NAME"
+        file = File(dummyPath)
         return if (mkFile(dummyPath)) {
+            if (!file.exists())
+                return false
             try {
                 writeToFile(dummyPath, "test")
                 removeFile(dummyPath)
@@ -224,6 +227,13 @@ class FileProvider(val context: Context) {
                 return true
         }
         return false
+    }
+
+    fun deleteDuplicateCardUris(path: String) {
+        val base = getExtSdCardsBaseFolder(path)
+        cardUris = cardUris.filter { cardUri ->
+            cardUri.path != base
+        }.toMutableList()
     }
 
     fun getExtSdCards(): List<Folder> {

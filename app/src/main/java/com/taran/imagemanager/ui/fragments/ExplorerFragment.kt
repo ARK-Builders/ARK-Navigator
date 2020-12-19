@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.taran.imagemanager.R
@@ -29,6 +30,8 @@ class ExplorerFragment: MvpAppCompatFragment(), ExplorerView {
             }
         }
     }
+
+    var dialog: AlertDialog? = null
 
     @InjectPresenter
     lateinit var presenter: ExplorerPresenter
@@ -69,14 +72,23 @@ class ExplorerFragment: MvpAppCompatFragment(), ExplorerView {
     }
 
     override fun showDialog() {
-        MaterialAlertDialogBuilder(context)
+        dialog = MaterialAlertDialogBuilder(context)
             .setTitle("Do you want to add a folder to the home screen?")
             .setPositiveButton("OK") { dialog, which ->
                 presenter.favoriteChanged()
             }
             .setNegativeButton("Cancel") { dialog, which -> }
             .show()
+
+        dialog!!.setOnCancelListener {
+            presenter.dismissDialog()
+        }
     }
+
+    override fun closeDialog() {
+        dialog?.dismiss()
+    }
+
 
     override fun requestSdCardUri() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
@@ -85,6 +97,11 @@ class ExplorerFragment: MvpAppCompatFragment(), ExplorerView {
 
     override fun updateAdapter() {
         adapter?.notifyDataSetChanged()
+    }
+
+    override fun onPause() {
+        dialog?.dismiss()
+        super.onPause()
     }
 
 }

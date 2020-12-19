@@ -97,8 +97,9 @@ class DetailFragment: MvpAppCompatFragment(), DetailView {
         val alertDialogBuilder = AlertDialog.Builder(context!!).setView(dialogView)
         dialog = alertDialogBuilder.show()
 
-
-
+        dialog!!.setOnCancelListener {
+            presenter.dismissDialog()
+        }
 
         dialogView!!.tags_image.theme = ColorFactory.NONE
         dialogView!!.tags_image.tagBackgroundColor = ContextCompat.getColor(context!!, R.color.colorPrimary)

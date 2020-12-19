@@ -11,10 +11,8 @@ interface ExplorerView: MvpView {
     fun init()
     fun updateAdapter()
     fun setFabVisibility(isVisible: Boolean)
-
-    @StateStrategyType(SkipStrategy::class)
     fun showDialog()
-
+    fun closeDialog()
     @StateStrategyType(SkipStrategy::class)
     fun requestSdCardUri()
 }

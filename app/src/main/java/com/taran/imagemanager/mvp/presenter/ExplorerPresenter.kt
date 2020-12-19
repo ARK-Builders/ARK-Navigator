@@ -94,6 +94,10 @@ class ExplorerPresenter(var currentFolder: Folder) : MvpPresenter<ExplorerView>(
         }
     }
 
+    fun dismissDialog() {
+        viewState.closeDialog()
+    }
+
     fun fabClicked() {
         viewState.showDialog()
     }
