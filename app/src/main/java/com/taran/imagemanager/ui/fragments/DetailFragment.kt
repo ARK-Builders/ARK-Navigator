@@ -17,6 +17,7 @@ import com.taran.imagemanager.mvp.model.entity.Image
 import com.taran.imagemanager.mvp.presenter.DetailPresenter
 import com.taran.imagemanager.mvp.view.DetailView
 import com.taran.imagemanager.ui.App
+import com.taran.imagemanager.ui.MainActivity
 import com.taran.imagemanager.ui.adapter.DetailVPAdapter
 import kotlinx.android.synthetic.main.dialog_tags.view.*
 import kotlinx.android.synthetic.main.fragment_detail_view.*
@@ -30,7 +31,7 @@ class DetailFragment: MvpAppCompatFragment(), DetailView {
         const val POS_KEY = "pos"
         const val FOLDER_KEY = "folder"
 
-        fun newInstance(images: MutableList<Image>, pos: Int, folder: Folder) = DetailFragment().apply {
+        fun newInstance(images: List<Image>, pos: Int, folder: Folder) = DetailFragment().apply {
             arguments = Bundle().apply {
                 putInt(POS_KEY, pos)
                 putParcelableArray(IMAGES_KEY, images.toTypedArray())
@@ -82,6 +83,10 @@ class DetailFragment: MvpAppCompatFragment(), DetailView {
         fab.setOnClickListener {
             presenter.fabClicked()
         }
+    }
+
+    override fun setTitle(title: String) {
+        (activity as MainActivity).setTitle(title, true)
     }
 
     override fun setCurrentItem(pos: Int) {

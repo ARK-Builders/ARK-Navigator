@@ -38,7 +38,7 @@ class FilesRepo(val fileProvider: FileProvider) {
     }.subscribeOn(Schedulers.io())
 
     fun mkFile(path: String) = Single.create<Boolean> { emitter ->
-        if (fileProvider.isBaseFolder(path)) {
+        if (fileProvider.isFileInBaseFolder(path)) {
             if (fileProvider.canWrite(path)) {
                 emitter.onSuccess(fileProvider.mkFile(path))
             } else {
@@ -49,33 +49,42 @@ class FilesRepo(val fileProvider: FileProvider) {
             emitter.onSuccess(fileProvider.mkFile(path))
     }.subscribeOn(Schedulers.io())
 
-    fun writeToFile(path: String, images: List<Image>, override: Boolean) =
-        Single.create<Boolean> { emitter ->
 
-            synchronized(this) {
-                val data = fileProvider.readFromFile(path)
-                val map = mapFromFile(data)
+    fun safeWriteToFile(path: String, images: List<Image>) = Single.create<Boolean> { emitter ->
+        val data = fileProvider.readFromFile(path)
+        val map = mapFromFile(data)
+        images.forEach { image ->
+            map[image.hash!!] = image.tags
+        }
 
-                if (override)
-                    images.forEach { image ->
-                        map[image.hash!!] = image.tags
-                    }
-                else
-                    images.forEach { image ->
-                        if (map[image.hash!!] == null)
-                            map[image.hash!!] = image.tags
-                    }
+        val builder = StringBuilder()
+        for ((k, v) in map) {
+            builder.append("\"$k\"=\"$v\"\n")
+        }
 
+        emitter.onSuccess(fileProvider.writeToFile(path, builder.toString()))
+    }.subscribeOn(Schedulers.io())
 
-                val builder = StringBuilder()
-                for ((k, v) in map) {
-                    builder.append("\"$k\"=\"$v\"\n")
-                }
+    fun writeToFileSingle(path: String, images: List<Image>): Single<Boolean> = Single.create<Boolean> {
+        writeToFile(path, images)
+        it.onSuccess(true)
+    }.subscribeOn(Schedulers.io())
 
-                emitter.onSuccess(fileProvider.writeToFile(path, builder.toString()))
-            }
+    fun writeToFile(path: String, images: List<Image>) {
+        val builder = StringBuilder()
 
-        }.subscribeOn(Schedulers.io())
+        images.forEach { image ->
+            builder.append("\"${image.hash}\"=\"${image.tags}\"\n")
+        }
+
+        fileProvider.writeToFile(path, builder.toString())
+    }
+
+    fun readFromFile(path: String): HashMap<String,String> {
+        val data = fileProvider.readFromFile(path)
+        return mapFromFile(data)
+    }
+
 
     fun getExtSdCards(): List<Folder> {
         return fileProvider.getExtSdCards().map { checkInternalStorage(it) }

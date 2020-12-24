@@ -10,6 +10,6 @@ class RoomFolder(
     var name: String,
     var path: String,
     var favorite: Boolean = false,
-    var processed: Boolean = false,
-    var tags: String = ""
+    var tags: String = "",
+    var lastModified: Long
 )

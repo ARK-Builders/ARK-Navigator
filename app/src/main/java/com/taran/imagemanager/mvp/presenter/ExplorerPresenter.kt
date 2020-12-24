@@ -1,10 +1,8 @@
 package com.taran.imagemanager.mvp.presenter
 
-import com.taran.imagemanager.mvp.model.entity.Folder
-import com.taran.imagemanager.mvp.model.entity.IFile
-import com.taran.imagemanager.mvp.model.entity.Icons
-import com.taran.imagemanager.mvp.model.entity.Image
+import com.taran.imagemanager.mvp.model.entity.*
 import com.taran.imagemanager.mvp.model.entity.room.CardUri
+import com.taran.imagemanager.mvp.model.entity.room.RoomFolder
 import com.taran.imagemanager.mvp.model.entity.room.RoomImage
 import com.taran.imagemanager.mvp.model.repo.FilesRepo
 import com.taran.imagemanager.mvp.model.repo.RoomRepo
@@ -12,18 +10,19 @@ import com.taran.imagemanager.mvp.presenter.adapter.IFileGridPresenter
 import com.taran.imagemanager.mvp.view.ExplorerView
 import com.taran.imagemanager.mvp.view.item.FileItemView
 import com.taran.imagemanager.navigation.Screens
-import com.taran.imagemanager.utils.TEXT_STORAGE_NAME
-import com.taran.imagemanager.utils.getHash
-import com.taran.imagemanager.utils.isInternalStorage
+import com.taran.imagemanager.utils.*
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
+import io.reactivex.rxjava3.subjects.ReplaySubject
 import moxy.MvpPresenter
 import ru.terrakok.cicerone.Router
 import javax.inject.Inject
 
 
 class ExplorerPresenter(var currentFolder: Folder) : MvpPresenter<ExplorerView>() {
+    @Inject
+    lateinit var indexingSubjects: IndexingSubjects
 
     @Inject
     lateinit var filesRepo: FilesRepo
@@ -35,6 +34,7 @@ class ExplorerPresenter(var currentFolder: Folder) : MvpPresenter<ExplorerView>(
     lateinit var router: Router
 
     val fileGridPresenter = FileGridPresenter()
+    var images = listOf<Image>()
 
     inner class FileGridPresenter :
         IFileGridPresenter {
@@ -60,7 +60,6 @@ class ExplorerPresenter(var currentFolder: Folder) : MvpPresenter<ExplorerView>(
             if (file is Folder) {
                 router.navigateTo(Screens.ExplorerScreen(file))
             } else {
-                val images = files.filterIsInstance<Image>().toMutableList()
                 val imagePos = images.indexOf(file as Image)
                 router.navigateTo(Screens.DetailScreen(images, imagePos, currentFolder))
             }
@@ -76,19 +75,16 @@ class ExplorerPresenter(var currentFolder: Folder) : MvpPresenter<ExplorerView>(
             val files = filesRepo.getFilesInFolder(currentFolder.path)
             files.sortBy { it.name }
             fileGridPresenter.files = files
+            viewState.setTitle(currentFolder.path, true)
+            if (filesRepo.fileProvider.isBaseFolder(currentFolder.path))
+                viewState.setFabVisibility(false)
+            images = files.filterIsInstance<Image>().toMutableList()
             viewState.updateAdapter()
-            filesRepo.mkFile("${currentFolder.path}/$TEXT_STORAGE_NAME")
-                .observeOn(AndroidSchedulers.mainThread()).subscribe(
-                    { exist ->
-                        if (exist)
-                            checkCurrentFolder()
-                        else
-                            requestSdCardUri()
-                    }, {}
-                )
+            processFolder()
         } else {
             viewState.setFabVisibility(false)
-            val images = filesRepo.getImagesFromGallery()
+            viewState.setTitle(currentFolder.path, false)
+            images = filesRepo.getImagesFromGallery()
             fileGridPresenter.files = images.toMutableList()
             viewState.updateAdapter()
         }
@@ -107,26 +103,95 @@ class ExplorerPresenter(var currentFolder: Folder) : MvpPresenter<ExplorerView>(
         roomRepo.updateFavorite(currentFolder.id, true).subscribe()
     }
 
-    private fun checkCurrentFolder() {
+    private fun processFolder() {
+        filesRepo.mkFile(currentFolder.storagePath)
+            .observeOn(AndroidSchedulers.mainThread()).subscribe(
+                { exist ->
+                    if (exist)
+                        checkFolder()
+                    else
+                        requestSdCardUri()
+                }, {}
+            )
+    }
+
+    private fun checkFolder() {
         roomRepo.getFolderByPath(currentFolder.path).subscribe(
             {
                 currentFolder = it
+                if (currentFolder.lastModified == filesRepo.fileProvider.getLastModified(currentFolder.storagePath))
+                    loadTags().subscribe()
+                else
+                    synchronizeWithFile().subscribe()
             },
             {
-                processFolder()
+                synchronizeWithFile().subscribe()
             }
         )
     }
 
-    private fun processFolder() {
-        roomRepo.insertFolder(currentFolder).subscribe(
-            {
-                currentFolder.id = it
-                calculateHash()
-            },
-            {}
+    private fun loadTags() = Single.create<Boolean> { emitter ->
+        val indexingSubject = ReplaySubject.create<Image>()
+        indexingSubjects.map[currentFolder.path] = indexingSubject
+        images.forEach { image ->
+            val roomImage = roomRepo.database.imageDao().findByPath(image.path)
+            if (roomImage == null) {
+                image.hash = getHash(image.path)
+            } else {
+                image.id = roomImage.id
+                image.hash = roomImage.hash
+                image.tags = roomImage.tags
+            }
+            image.synchronized = true
+        }
+
+        currentFolder.synchronized = true
+        indexingSubject.onComplete()
+        emitter.onSuccess(true)
+    }.subscribeOn(Schedulers.io())
+
+    private fun synchronizeWithFile() = Single.create<Boolean> { emitter ->
+        val indexingSubject = ReplaySubject.create<Image>()
+        indexingSubjects.map[currentFolder.path] = indexingSubject
+        val fileMap = filesRepo.readFromFile(currentFolder.storagePath)
+        currentFolder.tags = ""
+        images.forEach { image ->
+            val roomImage = roomRepo.database.imageDao().findByPath(image.path)
+            if (roomImage == null) {
+                image.hash = getHash(image.path)
+            } else {
+                image.id = roomImage.id
+                image.hash = roomImage.hash
+            }
+
+            if (!fileMap[image.hash].isNullOrEmpty()) {
+                val newTag = image.tags.findNewTags(fileMap[image.hash]!!)
+                image.tags = image.tags.addTag(newTag)
+                currentFolder.tags = currentFolder.tags.addTag(newTag)
+            }
+
+            image.synchronized = true
+            roomRepo.database.imageDao()
+                .insert(RoomImage(image.id, image.name, image.path, image.tags, image.hash))
+        }
+
+        filesRepo.writeToFile(currentFolder.storagePath, images)
+        currentFolder.lastModified =
+            filesRepo.fileProvider.getLastModified(currentFolder.storagePath)
+        roomRepo.database.folderDao().insert(
+            RoomFolder(
+                currentFolder.id,
+                currentFolder.name,
+                currentFolder.path,
+                currentFolder.favorite,
+                currentFolder.tags,
+                currentFolder.lastModified!!
+            )
         )
-    }
+        currentFolder.synchronized = true
+        indexingSubject.onComplete()
+        emitter.onSuccess(true)
+    }.subscribeOn(Schedulers.io())
 
     private fun requestSdCardUri() {
         roomRepo.getCardUriByPath(currentFolder.path).observeOn(AndroidSchedulers.mainThread())
@@ -140,36 +205,4 @@ class ExplorerPresenter(var currentFolder: Folder) : MvpPresenter<ExplorerView>(
                         { viewState.requestSdCardUri() }, {})
             })
     }
-
-
-    private fun calculateHash() {
-        val images = fileGridPresenter.files.filterIsInstance<Image>()
-        processImages(images).subscribe(
-            { processedImages ->
-                currentFolder.processed = true
-                roomRepo.updateFolderProcessed(currentFolder.id, currentFolder.processed)
-                    .subscribe()
-                filesRepo.writeToFile(
-                    "${currentFolder.path}/$TEXT_STORAGE_NAME",
-                    processedImages,
-                    false
-                ).subscribe()
-            },
-            {}
-        )
-    }
-
-    private fun processImages(images: List<Image>) = Single.create<List<Image>> { emitter ->
-        images.forEach { image ->
-            val roomImage = roomRepo.database.imageDao().findByPath(image.path)
-            if (roomImage == null) {
-                image.hash = getHash(image.path)
-                image.id = roomRepo.database.imageDao()
-                    .insert(RoomImage(image.id, image.name, image.path, image.tags, image.hash))
-            } else {
-                image.hash = roomImage.hash
-            }
-        }
-        emitter.onSuccess(images)
-    }.subscribeOn(Schedulers.io())
 }

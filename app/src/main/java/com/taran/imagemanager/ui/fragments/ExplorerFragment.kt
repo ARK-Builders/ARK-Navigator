@@ -13,6 +13,7 @@ import com.taran.imagemanager.mvp.model.entity.Folder
 import com.taran.imagemanager.mvp.presenter.ExplorerPresenter
 import com.taran.imagemanager.mvp.view.ExplorerView
 import com.taran.imagemanager.ui.App
+import com.taran.imagemanager.ui.MainActivity
 import com.taran.imagemanager.ui.adapter.FileGridRVAdapter
 import kotlinx.android.synthetic.main.fragment_explorer.*
 import moxy.MvpAppCompatFragment
@@ -83,6 +84,10 @@ class ExplorerFragment: MvpAppCompatFragment(), ExplorerView {
         dialog!!.setOnCancelListener {
             presenter.dismissDialog()
         }
+    }
+
+    override fun setTitle(title: String, isPath: Boolean) {
+        (activity as MainActivity).setTitle(title, isPath)
     }
 
     override fun closeDialog() {

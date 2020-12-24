@@ -13,6 +13,7 @@ import com.taran.imagemanager.mvp.model.entity.Folder
 import com.taran.imagemanager.mvp.presenter.MainPresenter
 import com.taran.imagemanager.mvp.view.MainView
 import com.taran.imagemanager.utils.*
+import kotlinx.android.synthetic.main.activity_main.*
 import moxy.MvpAppCompatActivity
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
@@ -88,6 +89,15 @@ class MainActivity : MvpAppCompatActivity(), MainView {
         }
 
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
+    fun setTitle(title: String, isPath: Boolean) {
+        if (isPath)
+            toolbar_text.textSize = 16f
+        else
+            toolbar_text.textSize = 20f
+        toolbar_text.text = title
+        toolbar_text.isSelected = true
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

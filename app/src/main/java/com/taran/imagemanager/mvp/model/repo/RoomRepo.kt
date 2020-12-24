@@ -14,7 +14,7 @@ import java.lang.RuntimeException
 class RoomRepo(val database: Database) {
 
     fun insertFolder(folder: Folder) = Single.create<Long> {
-        val roomFolder = RoomFolder(folder.id, folder.name, folder.path, folder.favorite, folder.processed, folder.tags)
+        val roomFolder = RoomFolder(folder.id, folder.name, folder.path, folder.favorite, folder.tags, folder.lastModified!!)
         it.onSuccess(database.folderDao().insert(roomFolder))
     }.subscribeOn(Schedulers.io())
 
@@ -30,11 +30,6 @@ class RoomRepo(val database: Database) {
 
     fun updateFavorite(id: Long, favorite: Boolean) = Completable.create {
         database.folderDao().updateFavorite(id, favorite)
-        it.onComplete()
-    }.subscribeOn(Schedulers.io())
-
-    fun updateFolderProcessed(id: Long, processed: Boolean) = Completable.create {
-        database.folderDao().updateProcessed(id, processed)
         it.onComplete()
     }.subscribeOn(Schedulers.io())
 
@@ -55,21 +50,21 @@ class RoomRepo(val database: Database) {
 
     fun getAllFolders() = Single.create<List<Folder>> {
         val folders = database.folderDao().getAll().map { roomFolder ->
-            Folder(roomFolder.id, roomFolder.name, roomFolder.path, roomFolder.favorite, roomFolder.processed, roomFolder.tags)
+            Folder(roomFolder.id, roomFolder.name, roomFolder.path, roomFolder.favorite, roomFolder.tags, lastModified = roomFolder.lastModified)
         }
         it.onSuccess(folders)
     }.subscribeOn(Schedulers.io())
 
     fun getFavoriteFolders() = Single.create<List<Folder>> {
         val folders = database.folderDao().getFavorite().map { roomFolder ->
-            Folder(roomFolder.id, roomFolder.name, roomFolder.path, roomFolder.favorite, roomFolder.processed, roomFolder.tags)
+            Folder(roomFolder.id, roomFolder.name, roomFolder.path, roomFolder.favorite, roomFolder.tags, lastModified = roomFolder.lastModified)
         }
         it.onSuccess(folders)
     }.subscribeOn(Schedulers.io())
 
     fun getFolderByPath(path: String) = Single.create<Folder> { emitter ->
         database.folderDao().findByPath(path)?.let {  roomFolder ->
-            val folder = Folder(roomFolder.id, roomFolder.name, roomFolder.path, roomFolder.favorite, roomFolder.processed, roomFolder.tags)
+            val folder = Folder(roomFolder.id, roomFolder.name, roomFolder.path, roomFolder.favorite, roomFolder.tags, lastModified = roomFolder.lastModified)
             emitter.onSuccess(folder) }
             ?: emitter.onError(RuntimeException())
     }.subscribeOn(Schedulers.io())

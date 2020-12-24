@@ -27,7 +27,4 @@ interface FolderDao {
 
     @Query("UPDATE folder SET tags = :tags WHERE id = :id")
     fun updateTags(id: Long, tags: String)
-
-    @Query("UPDATE folder SET processed = :processed WHERE id = :id")
-    fun updateProcessed(id: Long, processed: Boolean)
 }

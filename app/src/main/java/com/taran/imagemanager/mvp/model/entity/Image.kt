@@ -9,5 +9,6 @@ data class Image (
     override var name: String,
     var path: String,
     var tags: String = "",
-    var hash: String? = null
+    var hash: String? = null,
+    var synchronized: Boolean = false
 ): IFile, Parcelable

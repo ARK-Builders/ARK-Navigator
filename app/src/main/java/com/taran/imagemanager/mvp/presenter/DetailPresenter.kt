@@ -1,5 +1,6 @@
 package com.taran.imagemanager.mvp.presenter
 
+import com.taran.imagemanager.mvp.model.entity.IndexingSubjects
 import com.taran.imagemanager.mvp.model.entity.Folder
 import com.taran.imagemanager.mvp.model.entity.Image
 import com.taran.imagemanager.mvp.model.repo.FilesRepo
@@ -7,13 +8,16 @@ import com.taran.imagemanager.mvp.model.repo.RoomRepo
 import com.taran.imagemanager.mvp.presenter.adapter.IDetailListPresenter
 import com.taran.imagemanager.mvp.view.DetailView
 import com.taran.imagemanager.mvp.view.item.DetailItemView
-import com.taran.imagemanager.utils.TEXT_STORAGE_NAME
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import com.taran.imagemanager.utils.*
+import io.reactivex.rxjava3.core.Observer
+import io.reactivex.rxjava3.disposables.Disposable
 import moxy.MvpPresenter
 import javax.inject.Inject
 
 class DetailPresenter(val images: List<Image>, val pos: Int, val currentFolder: Folder) :
     MvpPresenter<DetailView>() {
+    @Inject
+    lateinit var indexingSubjects: IndexingSubjects
 
     @Inject
     lateinit var filesRepo: FilesRepo
@@ -42,41 +46,24 @@ class DetailPresenter(val images: List<Image>, val pos: Int, val currentFolder: 
         super.onFirstViewAttach()
         viewState.init()
 
+        if (!currentFolder.synchronized)
+            indexingSubjects.map[currentFolder.path]?.subscribe(getIndexingObserver())
+
         detailListPresenter.images = images.toMutableList()
         viewState.setCurrentItem(pos)
     }
 
     fun imageChanged(newPos: Int) {
         currentImage = images[newPos]
-        loadTags()
-    }
-
-    private fun loadTags() {
-        roomRepo.getImageByPath(currentImage!!.path).observeOn(AndroidSchedulers.mainThread())
-            .subscribe({ imageRoom ->
-                currentImage = imageRoom
-                val tags = mapToTagsList(currentImage!!.tags)
-                viewState.setImageTags(tags)
-            }, {
-                viewState.setImageTags(listOf())
-                filesRepo.getHashSingle(currentImage!!.path).subscribe(
-                    { hash ->
-                        currentImage!!.hash = hash
-                        roomRepo.insertImage(currentImage!!).subscribe(
-                            { id ->
-                                currentImage!!.id = id
-                            },
-                            {}
-                        )
-                    }, {}
-                )
-            })
+        viewState.setTitle(currentImage!!.name)
+        viewState.setImageTags(currentImage!!.tags.mapToTagList())
     }
 
     fun fabClicked() {
-        val folderTags = mapToTagsList(currentFolder.tags)
-        val imageTags = mapToTagsList(currentImage!!.tags)
-        viewState.showTagsDialog(imageTags, deleteDuplicates(folderTags))
+        viewState.showTagsDialog(
+            currentImage!!.tags.mapToTagList(),
+            currentFolder.tags.removeDuplicateTags().mapToTagList()
+        )
     }
 
     fun tagRemoved(tag: String) {
@@ -87,48 +74,53 @@ class DetailPresenter(val images: List<Image>, val pos: Int, val currentFolder: 
         val imageTags = currentImage!!.tags.split(",").toMutableList()
         imageTags.remove(tag)
         currentImage!!.tags = imageTags.joinToString(",")
-        roomRepo.updateImageTags(currentImage!!.id, currentImage!!.tags).subscribe()
 
+        if (currentImage!!.synchronized)
+            roomRepo.updateImageTags(currentImage!!.id, currentImage!!.tags).subscribe()
 
-        if (currentFolder.path != "gallery") {
-            roomRepo.updateFolderTags(currentFolder.id, currentFolder.tags).subscribe()
-            filesRepo.writeToFile(
-                "${currentFolder.path}/$TEXT_STORAGE_NAME",
-                listOf(currentImage!!),
-                true
-            ).subscribe()
+        if (currentFolder.synchronized) {
+            if (currentFolder.path != "gallery") {
+                filesRepo.writeToFileSingle(currentFolder.storagePath, images).subscribe(
+                    {
+                        currentFolder.lastModified = filesRepo.fileProvider.getLastModified(currentFolder.storagePath)
+                        roomRepo.insertFolder(currentFolder).subscribe()
+                    },
+                    {}
+                )
+            }
         }
-
-        viewState.setImageTags(imageTags)
-        viewState.setDialogTags(imageTags, deleteDuplicates(folderTags))
+        viewState.setImageTags(currentImage!!.tags.mapToTagList())
+        viewState.setDialogTags(
+            currentImage!!.tags.mapToTagList(),
+            currentFolder.tags.removeDuplicateTags().mapToTagList()
+        )
     }
 
     fun tagAdded(tag: String) {
-        if (currentFolder.tags.isNotEmpty()) {
-            currentFolder.tags += ",$tag"
-        } else
-            currentFolder.tags = tag
+        val newTag = currentImage!!.tags.findNewTags(tag)
+        currentImage!!.tags = currentImage!!.tags.addTag(newTag)
+        currentFolder.tags = currentFolder.tags.addTag(newTag)
 
-        if (currentImage!!.tags.isNotEmpty()) {
-            if (!currentImage!!.tags.contains(tag))
-                currentImage!!.tags += ",$tag"
-        } else
-            currentImage!!.tags = tag
-        roomRepo.updateImageTags(currentImage!!.id, currentImage!!.tags).subscribe()
+        if (currentImage!!.synchronized)
+            roomRepo.updateImageTags(currentImage!!.id, currentImage!!.tags).subscribe()
 
-        if (currentFolder.path != "gallery") {
-            roomRepo.updateFolderTags(currentFolder.id, currentFolder.tags).subscribe()
-            filesRepo.writeToFile(
-                "${currentFolder.path}/$TEXT_STORAGE_NAME",
-                listOf(currentImage!!),
-                true
-            ).subscribe()
+        if (currentFolder.synchronized) {
+
+            if (currentFolder.path != "gallery") {
+                filesRepo.writeToFileSingle(currentFolder.storagePath, images).subscribe(
+                    {
+                        currentFolder.lastModified = filesRepo.fileProvider.getLastModified(currentFolder.storagePath)
+                        roomRepo.insertFolder(currentFolder).subscribe()
+                    },
+                    {}
+                )
+            }
         }
-
-        val folderTags = mapToTagsList(currentFolder.tags)
-        val imageTags = mapToTagsList(currentImage!!.tags)
-        viewState.setImageTags(imageTags)
-        viewState.setDialogTags(imageTags, deleteDuplicates(folderTags))
+        viewState.setImageTags(currentImage!!.tags.mapToTagList())
+        viewState.setDialogTags(
+            currentImage!!.tags.mapToTagList(),
+            currentFolder.tags.removeDuplicateTags().mapToTagList()
+        )
         viewState.closeDialog()
     }
 
@@ -136,14 +128,23 @@ class DetailPresenter(val images: List<Image>, val pos: Int, val currentFolder: 
         viewState.closeDialog()
     }
 
-    private fun mapToTagsList(str: String): List<String> {
-        return if (str.isNotEmpty())
-            str.split(",")
-        else
-            listOf()
+    private fun getIndexingObserver() = object : Observer<Image> {
+        override fun onSubscribe(d: Disposable?) {}
+
+        override fun onNext(synchronizedImage: Image?) {}
+
+        override fun onError(e: Throwable?) {}
+
+        override fun onComplete() {
+            filesRepo.writeToFileSingle(currentFolder.storagePath, images).subscribe(
+                {
+                    currentFolder.lastModified = filesRepo.fileProvider.getLastModified(currentFolder.storagePath)
+                    roomRepo.insertFolder(currentFolder).subscribe()
+                },
+                {}
+            )
+        }
+
     }
-
-    private fun deleteDuplicates(list: List<String>): List<String> = list.toHashSet().toList()
-
 
 }

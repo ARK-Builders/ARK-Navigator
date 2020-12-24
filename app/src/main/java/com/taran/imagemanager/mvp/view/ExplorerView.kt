@@ -15,4 +15,5 @@ interface ExplorerView: MvpView {
     fun closeDialog()
     @StateStrategyType(SkipStrategy::class)
     fun requestSdCardUri()
+    fun setTitle(title: String, isPath: Boolean)
 }

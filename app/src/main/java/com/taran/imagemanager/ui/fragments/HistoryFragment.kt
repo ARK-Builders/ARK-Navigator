@@ -10,6 +10,7 @@ import com.taran.imagemanager.R
 import com.taran.imagemanager.mvp.presenter.HistoryPresenter
 import com.taran.imagemanager.mvp.view.HistoryView
 import com.taran.imagemanager.ui.App
+import com.taran.imagemanager.ui.MainActivity
 import com.taran.imagemanager.ui.adapter.FileGridRVAdapter
 import kotlinx.android.synthetic.main.fragment_history.*
 import moxy.MvpAppCompatFragment
@@ -48,7 +49,7 @@ class HistoryFragment : MvpAppCompatFragment(), HistoryView {
     override fun init() {
         rv_folders.layoutManager = GridLayoutManager(context, 3)
         adapter = FileGridRVAdapter(presenter.fileGridPresenter)
-
+        (activity as MainActivity).setTitle("Home", false)
         rv_folders.adapter = adapter
     }
 

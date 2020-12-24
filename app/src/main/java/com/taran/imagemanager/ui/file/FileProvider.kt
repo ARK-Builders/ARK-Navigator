@@ -128,6 +128,11 @@ class FileProvider(val context: Context) {
         return false
     }
 
+    fun getLastModified(path: String): Long {
+        val file = File(path)
+        return file.lastModified()
+    }
+
     private fun getDocumentFile(path: String): DocumentFile {
 
         val baseFolder = getExtSdCardsBaseFolder(path)
@@ -151,27 +156,31 @@ class FileProvider(val context: Context) {
     }
 
     fun writeToFile(path: String, data: String): Boolean {
-        val outputStream = getFileOutputStream(path)
-        outputStream.write(data.toByteArray())
-        outputStream.close()
-        return true
+        synchronized(this) {
+            val outputStream = getFileOutputStream(path)
+            outputStream.write(data.toByteArray())
+            outputStream.close()
+            return true
+        }
     }
 
     fun readFromFile(path: String): String {
-        val inputStream = getFileInputStream(path)
-        val bufferedReader = BufferedReader(InputStreamReader(inputStream))
-        var buffer: String?
-        val stringBuilder = StringBuilder()
-        buffer = bufferedReader.readLine()
-        while (buffer != null) {
-            stringBuilder.append(buffer).append("\n")
+        synchronized(this) {
+            val inputStream = getFileInputStream(path)
+            val bufferedReader = BufferedReader(InputStreamReader(inputStream))
+            var buffer: String?
+            val stringBuilder = StringBuilder()
             buffer = bufferedReader.readLine()
+            while (buffer != null) {
+                stringBuilder.append(buffer).append("\n")
+                buffer = bufferedReader.readLine()
+            }
+
+            inputStream.close()
+            bufferedReader.close()
+
+            return stringBuilder.toString()
         }
-
-        inputStream.close()
-        bufferedReader.close()
-
-        return stringBuilder.toString()
     }
 
     fun getFileInputStream(path: String): InputStream {
@@ -219,11 +228,15 @@ class FileProvider(val context: Context) {
         return null
     }
 
-    fun isBaseFolder(path: String): Boolean {
+    fun isFileInBaseFolder(path: String): Boolean {
         val file = File(path)
+        return isBaseFolder(file.parent!!)
+    }
+
+    fun isBaseFolder(folder: String): Boolean {
         val sdPaths = getExtSdCards().map { it.path }
         sdPaths.forEach { sdPath ->
-            if (sdPath == file.parent)
+            if (sdPath == folder)
                 return true
         }
         return false
