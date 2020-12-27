@@ -1,11 +1,11 @@
-package com.taran.imagemanager.di.modules
+package space.taran.arkbrowser.di.modules
 
-import com.taran.imagemanager.mvp.model.entity.IndexingSubjects
-import com.taran.imagemanager.mvp.model.entity.room.Database
-import com.taran.imagemanager.mvp.model.repo.FilesRepo
-import com.taran.imagemanager.mvp.model.repo.RoomRepo
-import com.taran.imagemanager.ui.App
-import com.taran.imagemanager.ui.file.FileProvider
+import space.taran.arkbrowser.mvp.model.entity.IndexingSubjects
+import space.taran.arkbrowser.mvp.model.entity.room.Database
+import space.taran.arkbrowser.mvp.model.repo.FilesRepo
+import space.taran.arkbrowser.mvp.model.repo.RoomRepo
+import space.taran.arkbrowser.ui.App
+import space.taran.arkbrowser.ui.file.FileProvider
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton

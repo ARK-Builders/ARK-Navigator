@@ -1,4 +1,4 @@
-package com.taran.imagemanager.ui.fragments
+package space.taran.arkbrowser.ui.fragments
 
 import android.graphics.Color
 import android.os.Bundle
@@ -11,14 +11,14 @@ import androidx.core.content.ContextCompat
 import androidx.viewpager2.widget.ViewPager2
 import co.lujun.androidtagview.ColorFactory
 import co.lujun.androidtagview.TagView
-import com.taran.imagemanager.R
-import com.taran.imagemanager.mvp.model.entity.Folder
-import com.taran.imagemanager.mvp.model.entity.Image
-import com.taran.imagemanager.mvp.presenter.DetailPresenter
-import com.taran.imagemanager.mvp.view.DetailView
-import com.taran.imagemanager.ui.App
-import com.taran.imagemanager.ui.MainActivity
-import com.taran.imagemanager.ui.adapter.DetailVPAdapter
+import space.taran.arkbrowser.R
+import space.taran.arkbrowser.mvp.model.entity.Folder
+import space.taran.arkbrowser.mvp.model.entity.Image
+import space.taran.arkbrowser.mvp.presenter.DetailPresenter
+import space.taran.arkbrowser.mvp.view.DetailView
+import space.taran.arkbrowser.ui.App
+import space.taran.arkbrowser.ui.MainActivity
+import space.taran.arkbrowser.ui.adapter.DetailVPAdapter
 import kotlinx.android.synthetic.main.dialog_tags.view.*
 import kotlinx.android.synthetic.main.fragment_detail_view.*
 import moxy.MvpAppCompatFragment

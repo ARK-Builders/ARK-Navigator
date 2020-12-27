@@ -1,4 +1,4 @@
-package com.taran.imagemanager.ui.fragments
+package space.taran.arkbrowser.ui.fragments
 
 import android.content.Intent
 import android.os.Bundle
@@ -6,12 +6,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.GridLayoutManager
-import com.taran.imagemanager.R
-import com.taran.imagemanager.mvp.presenter.HistoryPresenter
-import com.taran.imagemanager.mvp.view.HistoryView
-import com.taran.imagemanager.ui.App
-import com.taran.imagemanager.ui.MainActivity
-import com.taran.imagemanager.ui.adapter.FileGridRVAdapter
+import space.taran.arkbrowser.R
+import space.taran.arkbrowser.mvp.presenter.HistoryPresenter
+import space.taran.arkbrowser.mvp.view.HistoryView
+import space.taran.arkbrowser.ui.App
+import space.taran.arkbrowser.ui.MainActivity
+import space.taran.arkbrowser.ui.adapter.FileGridRVAdapter
 import kotlinx.android.synthetic.main.fragment_history.*
 import moxy.MvpAppCompatFragment
 import moxy.presenter.InjectPresenter

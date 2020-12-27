@@ -1,9 +1,9 @@
-package com.taran.imagemanager.mvp.model.entity
+package space.taran.arkbrowser.mvp.model.entity
 
 import android.os.Parcelable
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.taran.imagemanager.utils.TEXT_STORAGE_NAME
+import space.taran.arkbrowser.utils.TEXT_STORAGE_NAME
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize

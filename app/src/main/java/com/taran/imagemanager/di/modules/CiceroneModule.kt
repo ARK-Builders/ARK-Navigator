@@ -1,4 +1,4 @@
-package com.taran.imagemanager.di.modules
+package space.taran.arkbrowser.di.modules
 
 import dagger.Module
 import dagger.Provides

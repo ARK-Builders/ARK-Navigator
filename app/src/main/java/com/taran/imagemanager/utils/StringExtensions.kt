@@ -1,4 +1,4 @@
-package com.taran.imagemanager.utils
+package space.taran.arkbrowser.utils
 
 fun String.removeDuplicateTags(): String {
     val list = this.split(",")

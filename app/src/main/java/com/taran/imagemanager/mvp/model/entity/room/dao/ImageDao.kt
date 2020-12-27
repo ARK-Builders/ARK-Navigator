@@ -1,12 +1,12 @@
-package com.taran.imagemanager.mvp.model.entity.room.dao
+package space.taran.arkbrowser.mvp.model.entity.room.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.taran.imagemanager.mvp.model.entity.Folder
-import com.taran.imagemanager.mvp.model.entity.Image
-import com.taran.imagemanager.mvp.model.entity.room.RoomImage
+import space.taran.arkbrowser.mvp.model.entity.Folder
+import space.taran.arkbrowser.mvp.model.entity.Image
+import space.taran.arkbrowser.mvp.model.entity.room.RoomImage
 
 @Dao
 interface ImageDao {

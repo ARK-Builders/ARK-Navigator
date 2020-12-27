@@ -1,4 +1,4 @@
-package com.taran.imagemanager.mvp.model.entity
+package space.taran.arkbrowser.mvp.model.entity
 
 interface IFile {
     var name: String

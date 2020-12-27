@@ -1,14 +1,14 @@
-package com.taran.imagemanager.ui.adapter
+package space.taran.arkbrowser.ui.adapter
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.taran.imagemanager.R
-import com.taran.imagemanager.mvp.model.entity.Icons
-import com.taran.imagemanager.mvp.presenter.adapter.IFileGridPresenter
-import com.taran.imagemanager.mvp.view.item.FileItemView
-import com.taran.imagemanager.utils.loadImage
+import space.taran.arkbrowser.R
+import space.taran.arkbrowser.mvp.model.entity.Icons
+import space.taran.arkbrowser.mvp.presenter.adapter.IFileGridPresenter
+import space.taran.arkbrowser.mvp.view.item.FileItemView
+import space.taran.arkbrowser.utils.loadImage
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.item_file_grid.view.*
 

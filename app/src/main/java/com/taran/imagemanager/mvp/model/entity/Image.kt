@@ -1,4 +1,4 @@
-package com.taran.imagemanager.mvp.model.entity
+package space.taran.arkbrowser.mvp.model.entity
 
 import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize

@@ -1,11 +1,11 @@
-package com.taran.imagemanager.mvp.model.repo
+package space.taran.arkbrowser.mvp.model.repo
 
-import com.taran.imagemanager.mvp.model.entity.Folder
-import com.taran.imagemanager.mvp.model.entity.IFile
-import com.taran.imagemanager.mvp.model.entity.Image
-import com.taran.imagemanager.ui.file.FileProvider
-import com.taran.imagemanager.utils.checkInternalStorage
-import com.taran.imagemanager.utils.getHash
+import space.taran.arkbrowser.mvp.model.entity.Folder
+import space.taran.arkbrowser.mvp.model.entity.IFile
+import space.taran.arkbrowser.mvp.model.entity.Image
+import space.taran.arkbrowser.ui.file.FileProvider
+import space.taran.arkbrowser.utils.checkInternalStorage
+import space.taran.arkbrowser.utils.getHash
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
 import java.io.File

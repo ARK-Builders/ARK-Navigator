@@ -1,4 +1,4 @@
-package com.taran.imagemanager
+package space.taran.arkbrowser
 
 import org.junit.Test
 

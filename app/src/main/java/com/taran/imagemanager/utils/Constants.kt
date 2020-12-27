@@ -1,4 +1,4 @@
-package com.taran.imagemanager.utils
+package space.taran.arkbrowser.utils
 
 const val DB_NAME = "ArkBrowser.db"
 const val TEXT_STORAGE_NAME = "ArkBrowser.txt"

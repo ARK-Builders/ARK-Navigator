@@ -1,9 +1,9 @@
-package com.taran.imagemanager.ui
+package space.taran.arkbrowser.ui
 
 import android.app.Application
-import com.taran.imagemanager.di.AppComponent
-import com.taran.imagemanager.di.DaggerAppComponent
-import com.taran.imagemanager.di.modules.AppModule
+import space.taran.arkbrowser.di.AppComponent
+import space.taran.arkbrowser.di.DaggerAppComponent
+import space.taran.arkbrowser.di.modules.AppModule
 
 class App: Application() {
 

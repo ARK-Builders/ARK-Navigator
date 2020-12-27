@@ -1,17 +1,17 @@
-package com.taran.imagemanager.di
+package space.taran.arkbrowser.di
 
-import com.taran.imagemanager.di.modules.AppModule
-import com.taran.imagemanager.di.modules.CiceroneModule
-import com.taran.imagemanager.di.modules.DatabaseModule
-import com.taran.imagemanager.di.modules.RepoModule
-import com.taran.imagemanager.mvp.presenter.DetailPresenter
-import com.taran.imagemanager.mvp.presenter.ExplorerPresenter
-import com.taran.imagemanager.mvp.presenter.HistoryPresenter
-import com.taran.imagemanager.mvp.presenter.MainPresenter
-import com.taran.imagemanager.ui.MainActivity
-import com.taran.imagemanager.ui.fragments.DetailFragment
-import com.taran.imagemanager.ui.fragments.ExplorerFragment
-import com.taran.imagemanager.ui.fragments.HistoryFragment
+import space.taran.arkbrowser.di.modules.AppModule
+import space.taran.arkbrowser.di.modules.CiceroneModule
+import space.taran.arkbrowser.di.modules.DatabaseModule
+import space.taran.arkbrowser.di.modules.RepoModule
+import space.taran.arkbrowser.mvp.presenter.DetailPresenter
+import space.taran.arkbrowser.mvp.presenter.ExplorerPresenter
+import space.taran.arkbrowser.mvp.presenter.HistoryPresenter
+import space.taran.arkbrowser.mvp.presenter.MainPresenter
+import space.taran.arkbrowser.ui.MainActivity
+import space.taran.arkbrowser.ui.fragments.DetailFragment
+import space.taran.arkbrowser.ui.fragments.ExplorerFragment
+import space.taran.arkbrowser.ui.fragments.HistoryFragment
 import dagger.Component
 import javax.inject.Singleton
 

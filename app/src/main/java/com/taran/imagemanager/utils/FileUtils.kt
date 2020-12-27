@@ -1,6 +1,6 @@
-package com.taran.imagemanager.utils
+package space.taran.arkbrowser.utils
 
-import com.taran.imagemanager.mvp.model.entity.Folder
+import space.taran.arkbrowser.mvp.model.entity.Folder
 
 private val checkPaths = listOf("/storage/emulated/legacy", "/storage/emulated/0", "/mnt/sdcard")
 

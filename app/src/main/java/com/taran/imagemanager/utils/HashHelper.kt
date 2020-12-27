@@ -1,4 +1,4 @@
-package com.taran.imagemanager.utils
+package space.taran.arkbrowser.utils
 
 import java.io.File
 import java.util.zip.CRC32

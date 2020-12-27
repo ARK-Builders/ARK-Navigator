@@ -1,6 +1,6 @@
-package com.taran.imagemanager.mvp.view.item
+package space.taran.arkbrowser.mvp.view.item
 
-import com.taran.imagemanager.mvp.model.entity.Icons
+import space.taran.arkbrowser.mvp.model.entity.Icons
 
 interface FileItemView {
     var pos: Int

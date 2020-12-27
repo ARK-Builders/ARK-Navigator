@@ -1,14 +1,14 @@
-package com.taran.imagemanager.mvp.presenter
+package space.taran.arkbrowser.mvp.presenter
 
-import com.taran.imagemanager.mvp.model.entity.IndexingSubjects
-import com.taran.imagemanager.mvp.model.entity.Folder
-import com.taran.imagemanager.mvp.model.entity.Image
-import com.taran.imagemanager.mvp.model.repo.FilesRepo
-import com.taran.imagemanager.mvp.model.repo.RoomRepo
-import com.taran.imagemanager.mvp.presenter.adapter.IDetailListPresenter
-import com.taran.imagemanager.mvp.view.DetailView
-import com.taran.imagemanager.mvp.view.item.DetailItemView
-import com.taran.imagemanager.utils.*
+import space.taran.arkbrowser.mvp.model.entity.IndexingSubjects
+import space.taran.arkbrowser.mvp.model.entity.Folder
+import space.taran.arkbrowser.mvp.model.entity.Image
+import space.taran.arkbrowser.mvp.model.repo.FilesRepo
+import space.taran.arkbrowser.mvp.model.repo.RoomRepo
+import space.taran.arkbrowser.mvp.presenter.adapter.IDetailListPresenter
+import space.taran.arkbrowser.mvp.view.DetailView
+import space.taran.arkbrowser.mvp.view.item.DetailItemView
+import space.taran.arkbrowser.utils.*
 import io.reactivex.rxjava3.core.Observer
 import io.reactivex.rxjava3.disposables.Disposable
 import moxy.MvpPresenter

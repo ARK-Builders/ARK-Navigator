@@ -1,9 +1,9 @@
-package com.taran.imagemanager.mvp.model.entity.room
+package space.taran.arkbrowser.mvp.model.entity.room
 
 import androidx.room.RoomDatabase
-import com.taran.imagemanager.mvp.model.entity.room.dao.CardUriDao
-import com.taran.imagemanager.mvp.model.entity.room.dao.FolderDao
-import com.taran.imagemanager.mvp.model.entity.room.dao.ImageDao
+import space.taran.arkbrowser.mvp.model.entity.room.dao.CardUriDao
+import space.taran.arkbrowser.mvp.model.entity.room.dao.FolderDao
+import space.taran.arkbrowser.mvp.model.entity.room.dao.ImageDao
 
 @androidx.room.Database(
     entities = [

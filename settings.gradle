@@ -1,2 +1,2 @@
 include ':app'
-rootProject.name = "Image Manager"
+rootProject.name = "ARK Browser"

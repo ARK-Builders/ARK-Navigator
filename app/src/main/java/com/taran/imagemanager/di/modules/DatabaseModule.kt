@@ -1,9 +1,9 @@
-package com.taran.imagemanager.di.modules
+package space.taran.arkbrowser.di.modules
 
 import androidx.room.Room
-import com.taran.imagemanager.mvp.model.entity.room.Database
-import com.taran.imagemanager.ui.App
-import com.taran.imagemanager.utils.DB_NAME
+import space.taran.arkbrowser.mvp.model.entity.room.Database
+import space.taran.arkbrowser.ui.App
+import space.taran.arkbrowser.utils.DB_NAME
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton

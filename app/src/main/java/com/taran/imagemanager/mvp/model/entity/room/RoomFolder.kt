@@ -1,4 +1,4 @@
-package com.taran.imagemanager.mvp.model.entity.room
+package space.taran.arkbrowser.mvp.model.entity.room
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

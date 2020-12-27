@@ -1,6 +1,6 @@
-package com.taran.imagemanager.mvp.view
+package space.taran.arkbrowser.mvp.view
 
-import com.taran.imagemanager.mvp.model.entity.Folder
+import space.taran.arkbrowser.mvp.model.entity.Folder
 import moxy.MvpView
 import moxy.viewstate.strategy.AddToEndSingleStrategy
 import moxy.viewstate.strategy.SkipStrategy

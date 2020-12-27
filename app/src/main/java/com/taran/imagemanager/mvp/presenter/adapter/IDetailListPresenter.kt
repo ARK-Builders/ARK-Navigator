@@ -1,6 +1,6 @@
-package com.taran.imagemanager.mvp.presenter.adapter
+package space.taran.arkbrowser.mvp.presenter.adapter
 
-import com.taran.imagemanager.mvp.view.item.DetailItemView
+import space.taran.arkbrowser.mvp.view.item.DetailItemView
 
 interface IDetailListPresenter {
     fun getCount(): Int

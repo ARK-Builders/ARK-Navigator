@@ -1,10 +1,10 @@
-package com.taran.imagemanager.navigation
+package space.taran.arkbrowser.navigation
 
-import com.taran.imagemanager.mvp.model.entity.Folder
-import com.taran.imagemanager.mvp.model.entity.Image
-import com.taran.imagemanager.ui.fragments.DetailFragment
-import com.taran.imagemanager.ui.fragments.ExplorerFragment
-import com.taran.imagemanager.ui.fragments.HistoryFragment
+import space.taran.arkbrowser.mvp.model.entity.Folder
+import space.taran.arkbrowser.mvp.model.entity.Image
+import space.taran.arkbrowser.ui.fragments.DetailFragment
+import space.taran.arkbrowser.ui.fragments.ExplorerFragment
+import space.taran.arkbrowser.ui.fragments.HistoryFragment
 import ru.terrakok.cicerone.android.support.SupportAppScreen
 
 class Screens {

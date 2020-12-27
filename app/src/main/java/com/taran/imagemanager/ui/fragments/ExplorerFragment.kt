@@ -1,4 +1,4 @@
-package com.taran.imagemanager.ui.fragments
+package space.taran.arkbrowser.ui.fragments
 
 import android.content.Intent
 import android.os.Bundle
@@ -8,13 +8,13 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.taran.imagemanager.R
-import com.taran.imagemanager.mvp.model.entity.Folder
-import com.taran.imagemanager.mvp.presenter.ExplorerPresenter
-import com.taran.imagemanager.mvp.view.ExplorerView
-import com.taran.imagemanager.ui.App
-import com.taran.imagemanager.ui.MainActivity
-import com.taran.imagemanager.ui.adapter.FileGridRVAdapter
+import space.taran.arkbrowser.R
+import space.taran.arkbrowser.mvp.model.entity.Folder
+import space.taran.arkbrowser.mvp.presenter.ExplorerPresenter
+import space.taran.arkbrowser.mvp.view.ExplorerView
+import space.taran.arkbrowser.ui.App
+import space.taran.arkbrowser.ui.MainActivity
+import space.taran.arkbrowser.ui.adapter.FileGridRVAdapter
 import kotlinx.android.synthetic.main.fragment_explorer.*
 import moxy.MvpAppCompatFragment
 import moxy.presenter.InjectPresenter

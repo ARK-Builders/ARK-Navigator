@@ -1,11 +1,11 @@
-package com.taran.imagemanager.mvp.model.entity.room.dao
+package space.taran.arkbrowser.mvp.model.entity.room.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.taran.imagemanager.mvp.model.entity.room.CardUri
-import com.taran.imagemanager.mvp.model.entity.room.RoomImage
+import space.taran.arkbrowser.mvp.model.entity.room.CardUri
+import space.taran.arkbrowser.mvp.model.entity.room.RoomImage
 
 @Dao
 interface CardUriDao {

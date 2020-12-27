@@ -1,4 +1,4 @@
-package com.taran.imagemanager.mvp.view.item
+package space.taran.arkbrowser.mvp.view.item
 
 interface DetailItemView {
     var pos: Int

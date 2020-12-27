@@ -1,6 +1,6 @@
-package com.taran.imagemanager.di.modules
+package space.taran.arkbrowser.di.modules
 
-import com.taran.imagemanager.ui.App
+import space.taran.arkbrowser.ui.App
 import dagger.Module
 import dagger.Provides
 

@@ -1,4 +1,4 @@
-package com.taran.imagemanager.ui
+package space.taran.arkbrowser.ui
 
 import android.Manifest
 import android.content.Context
@@ -8,11 +8,11 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.StrictMode
 import androidx.core.app.ActivityCompat
-import com.taran.imagemanager.R
-import com.taran.imagemanager.mvp.model.entity.Folder
-import com.taran.imagemanager.mvp.presenter.MainPresenter
-import com.taran.imagemanager.mvp.view.MainView
-import com.taran.imagemanager.utils.*
+import space.taran.arkbrowser.R
+import space.taran.arkbrowser.mvp.model.entity.Folder
+import space.taran.arkbrowser.mvp.presenter.MainPresenter
+import space.taran.arkbrowser.mvp.view.MainView
+import space.taran.arkbrowser.utils.*
 import kotlinx.android.synthetic.main.activity_main.*
 import moxy.MvpAppCompatActivity
 import moxy.presenter.InjectPresenter

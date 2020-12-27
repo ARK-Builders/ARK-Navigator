@@ -1,4 +1,4 @@
-package com.taran.imagemanager.ui.file
+package space.taran.arkbrowser.ui.file
 
 import android.content.Context
 import android.net.Uri
@@ -6,10 +6,10 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import androidx.documentfile.provider.DocumentFile
-import com.taran.imagemanager.mvp.model.entity.Folder
-import com.taran.imagemanager.mvp.model.entity.Image
-import com.taran.imagemanager.mvp.model.entity.room.CardUri
-import com.taran.imagemanager.utils.TEXT_STORAGE_NAME
+import space.taran.arkbrowser.mvp.model.entity.Folder
+import space.taran.arkbrowser.mvp.model.entity.Image
+import space.taran.arkbrowser.mvp.model.entity.room.CardUri
+import space.taran.arkbrowser.utils.TEXT_STORAGE_NAME
 import java.io.*
 
 

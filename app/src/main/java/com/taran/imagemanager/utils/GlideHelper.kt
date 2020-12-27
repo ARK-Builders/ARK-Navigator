@@ -1,4 +1,4 @@
-package com.taran.imagemanager.utils
+package space.taran.arkbrowser.utils
 
 import android.widget.ImageView
 import com.bumptech.glide.Glide

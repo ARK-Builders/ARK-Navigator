@@ -1,13 +1,13 @@
-package com.taran.imagemanager.mvp.presenter
+package space.taran.arkbrowser.mvp.presenter
 
-import com.taran.imagemanager.mvp.model.entity.Folder
-import com.taran.imagemanager.mvp.model.entity.Icons
-import com.taran.imagemanager.mvp.model.repo.FilesRepo
-import com.taran.imagemanager.mvp.model.repo.RoomRepo
-import com.taran.imagemanager.mvp.presenter.adapter.IFileGridPresenter
-import com.taran.imagemanager.mvp.view.HistoryView
-import com.taran.imagemanager.mvp.view.item.FileItemView
-import com.taran.imagemanager.navigation.Screens
+import space.taran.arkbrowser.mvp.model.entity.Folder
+import space.taran.arkbrowser.mvp.model.entity.Icons
+import space.taran.arkbrowser.mvp.model.repo.FilesRepo
+import space.taran.arkbrowser.mvp.model.repo.RoomRepo
+import space.taran.arkbrowser.mvp.presenter.adapter.IFileGridPresenter
+import space.taran.arkbrowser.mvp.view.HistoryView
+import space.taran.arkbrowser.mvp.view.item.FileItemView
+import space.taran.arkbrowser.navigation.Screens
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import moxy.MvpPresenter
 import ru.terrakok.cicerone.Router

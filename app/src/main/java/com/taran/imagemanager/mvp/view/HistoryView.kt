@@ -1,4 +1,4 @@
-package com.taran.imagemanager.mvp.view
+package space.taran.arkbrowser.mvp.view
 
 import moxy.MvpView
 import moxy.viewstate.strategy.AddToEndSingleStrategy

@@ -1,11 +1,11 @@
-package com.taran.imagemanager.mvp.model.repo
+package space.taran.arkbrowser.mvp.model.repo
 
-import com.taran.imagemanager.mvp.model.entity.Folder
-import com.taran.imagemanager.mvp.model.entity.Image
-import com.taran.imagemanager.mvp.model.entity.room.CardUri
-import com.taran.imagemanager.mvp.model.entity.room.Database
-import com.taran.imagemanager.mvp.model.entity.room.RoomFolder
-import com.taran.imagemanager.mvp.model.entity.room.RoomImage
+import space.taran.arkbrowser.mvp.model.entity.Folder
+import space.taran.arkbrowser.mvp.model.entity.Image
+import space.taran.arkbrowser.mvp.model.entity.room.CardUri
+import space.taran.arkbrowser.mvp.model.entity.room.Database
+import space.taran.arkbrowser.mvp.model.entity.room.RoomFolder
+import space.taran.arkbrowser.mvp.model.entity.room.RoomImage
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
