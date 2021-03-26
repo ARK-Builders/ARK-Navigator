@@ -14,15 +14,11 @@
         android:layout_margin="10dp"
         android:gravity="center"/>
 
-    <co.lujun.androidtagview.TagContainerLayout
-        android:id="@+id/tags_image"
-        android:layout_width="wrap_content"
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chipg_dialog_detail"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        app:container_background_color="@color/white"
-        app:container_border_color = "@color/white"
-        app:container_enable_drag="false"
-        app:tag_clickable="true"
+        android:padding="10dp"
         />
 
 
@@ -40,24 +36,5 @@
             android:imeOptions="actionDone"
             android:inputType="text" />
     </com.google.android.material.textfield.TextInputLayout>
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Directory tags"
-        android:textSize="20sp"
-        android:layout_margin="10dp"
-        android:gravity="center"/>
-
-    <co.lujun.androidtagview.TagContainerLayout
-        android:id="@+id/tags_folder"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        app:container_background_color="@color/white"
-        app:container_border_color = "@color/white"
-        app:container_enable_drag="false"
-        app:tag_clickable="true"
-        />
 
 </LinearLayout>
