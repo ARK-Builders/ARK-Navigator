@@ -2,6 +2,8 @@ package space.taran.arkbrowser.mvp.model.entity
 
 import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
+import space.taran.arkbrowser.utils.Constants.Companion.NO_TAGS
+import space.taran.arkbrowser.utils.Tags
 
 @Parcelize
 data class File (
@@ -10,7 +12,7 @@ data class File (
     var path: String,
     var type: String,
     var rootId: Long? = null,
-    var tags: String = "",
+    var tags: Tags = NO_TAGS,
     var hash: String? = null,
     var isFolder: Boolean,
     var fav: Boolean = false,

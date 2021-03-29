@@ -9,7 +9,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Image tags"
+        android:text="Input comma-separated tags"
         android:textSize="20sp"
         android:layout_margin="10dp"
         android:gravity="center"/>
@@ -18,7 +18,6 @@
         android:id="@+id/chipg_dialog_detail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="10dp"
         />
 
 

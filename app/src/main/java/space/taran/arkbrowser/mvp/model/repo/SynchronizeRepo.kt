@@ -3,8 +3,7 @@ package space.taran.arkbrowser.mvp.model.repo
 import space.taran.arkbrowser.mvp.model.entity.File
 import space.taran.arkbrowser.mvp.model.entity.Root
 import space.taran.arkbrowser.mvp.model.entity.room.RoomRoot
-import space.taran.arkbrowser.utils.addTag
-import space.taran.arkbrowser.utils.findNewTags
+
 import space.taran.arkbrowser.utils.getHash
 import space.taran.arkbrowser.utils.mapFileToRoom
 import io.reactivex.rxjava3.core.Completable
@@ -65,9 +64,9 @@ class SynchronizeRepo(val roomRepo: RoomRepo, val filesRepo: FilesRepo) {
                     image.hash = roomImage.hash
                 }
 
-                if (!fileMap[image.hash].isNullOrEmpty()) {
-                    val newTag = image.tags.findNewTags(fileMap[image.hash]!!)
-                    image.tags = image.tags.addTag(newTag)
+                val stored = fileMap.get(image.hash)
+                if (!stored.isNullOrEmpty()) {
+                    image.tags = image.tags.union(stored)
                 }
 
                 image.rootId = root.id

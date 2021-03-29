@@ -7,9 +7,10 @@ import space.taran.arkbrowser.mvp.model.repo.RoomRepo
 import space.taran.arkbrowser.mvp.presenter.adapter.IDetailListPresenter
 import space.taran.arkbrowser.mvp.view.DetailView
 import space.taran.arkbrowser.mvp.view.item.DetailItemView
-import space.taran.arkbrowser.utils.*
 import moxy.MvpPresenter
 import ru.terrakok.cicerone.Router
+import space.taran.arkbrowser.utils.Constants.Companion.EMPTY_TAG
+import space.taran.arkbrowser.utils.Converters.Companion.tagsFromString
 import javax.inject.Inject
 
 class DetailPresenter(val root: Root, val files: List<File>, val pos: Int) :
@@ -52,21 +53,20 @@ class DetailPresenter(val root: Root, val files: List<File>, val pos: Int) :
 
     fun imageChanged(newPos: Int) {
         currentFile = files[newPos]
-        viewState.setImageTags(currentFile!!.tags.mapToTagList())
+        viewState.setImageTags(currentFile!!.tags)
         viewState.setTitle(currentFile!!.name)
     }
 
     fun fabClicked() {
-        viewState.showTagsDialog(currentFile!!.tags.mapToTagList())
+        viewState.showTagsDialog(currentFile!!.tags)
     }
 
     fun chipGroupClicked() {
-        viewState.showTagsDialog(currentFile!!.tags.mapToTagList())
+        viewState.showTagsDialog(currentFile!!.tags)
     }
 
     fun tagRemoved(tag: String) {
-
-        currentFile!!.tags = currentFile!!.tags.removeTag(tag)
+        currentFile!!.tags = currentFile!!.tags.minus(tag)
         if (currentFile!!.synchronized)
             roomRepo.insertFile(currentFile!!).subscribe()
 
@@ -80,17 +80,18 @@ class DetailPresenter(val root: Root, val files: List<File>, val pos: Int) :
             )
         }
 
-        viewState.setImageTags(currentFile!!.tags.mapToTagList())
-        viewState.setDialogTags(currentFile!!.tags.mapToTagList())
+        viewState.setImageTags(currentFile!!.tags)
+        viewState.setDialogTags(currentFile!!.tags)
     }
 
-    fun tagAdded(tag: String) {
-        if (tag == "") {
-            error("Input of empty tags is forbidden")
+    // returns true if tags were actually added
+    fun tagsAdded(input: String): Boolean {
+        val tags = tagsFromString(input)
+        if (tags.isEmpty() || tags.contains(EMPTY_TAG)) {
+            return false
         }
 
-        val newTag = currentFile!!.tags.findNewTags(tag)
-        currentFile!!.tags = currentFile!!.tags.addTag(newTag)
+        currentFile!!.tags = currentFile!!.tags.plus(tags)
 
         if (currentFile!!.synchronized)
             roomRepo.insertFile(currentFile!!).subscribe()
@@ -104,9 +105,12 @@ class DetailPresenter(val root: Root, val files: List<File>, val pos: Int) :
                 {}
             )
         }
-        viewState.setImageTags(currentFile!!.tags.mapToTagList())
-        viewState.setDialogTags(currentFile!!.tags.mapToTagList())
+
+        viewState.setImageTags(currentFile!!.tags)
+        viewState.setDialogTags(currentFile!!.tags)
         viewState.closeDialog()
+
+        return true
     }
 
     fun dismissDialog() {

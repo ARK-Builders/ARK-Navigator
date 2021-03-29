@@ -90,7 +90,7 @@ class RootFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
 
         dialog = alertDialogBuilder.show()
 
-        dialog!!.setOnKeyListener { dialog, keyCode, event ->
+        dialog!!.setOnKeyListener { _, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_BACK &&
                 event.action == KeyEvent.ACTION_UP &&
                 !event.isCanceled
