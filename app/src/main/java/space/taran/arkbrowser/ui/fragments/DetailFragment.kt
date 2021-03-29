@@ -107,13 +107,18 @@ class DetailFragment: MvpAppCompatFragment(), DetailView, BackButtonListener {
         }
 
         dialogView!!.et_tags.setOnEditorActionListener { v, actionId, event ->
-
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 val tag = dialogView!!.et_tags.text.toString()
-                presenter.tagAdded(tag)
-            }
 
-            false
+                if (tag != "") {
+                    presenter.tagAdded(tag)
+                    false
+                } else {
+                    true
+                }
+            } else {
+                false
+            }
         }
 
         dialog = alertDialogBuilder.show()

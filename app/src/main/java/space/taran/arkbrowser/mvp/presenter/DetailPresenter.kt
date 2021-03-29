@@ -85,8 +85,9 @@ class DetailPresenter(val root: Root, val files: List<File>, val pos: Int) :
     }
 
     fun tagAdded(tag: String) {
-        if (tag == "")
-            return
+        if (tag == "") {
+            error("Input of empty tags is forbidden")
+        }
 
         val newTag = currentFile!!.tags.findNewTags(tag)
         currentFile!!.tags = currentFile!!.tags.addTag(newTag)
@@ -116,6 +117,4 @@ class DetailPresenter(val root: Root, val files: List<File>, val pos: Int) :
         router.exit()
         return true
     }
-
-
 }
