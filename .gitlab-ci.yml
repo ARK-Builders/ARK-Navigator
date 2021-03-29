@@ -15,7 +15,7 @@ build:
     - app/build/outputs/apk/debug/app-debug.apk
   script:
   - ./gradlew assembleDebug
-  - cp `find -iname '*.apk'` $WEBSITE_ROOT/ark-browser/
+  - cp `find -iname '*.apk'` $WEBSITE_ROOT/ark-browser/app-debug-$CI_COMMIT_BRANCH.apk
 
 lint:
   stage: lint
