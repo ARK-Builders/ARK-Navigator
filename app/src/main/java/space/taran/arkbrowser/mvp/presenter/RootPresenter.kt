@@ -2,7 +2,7 @@ package space.taran.arkbrowser.mvp.presenter
 
 import space.taran.arkbrowser.mvp.model.entity.*
 import space.taran.arkbrowser.mvp.model.entity.common.Icons
-import space.taran.arkbrowser.mvp.model.entity.room.CardUri
+import space.taran.arkbrowser.mvp.model.entity.room.SDCardUri
 import space.taran.arkbrowser.mvp.model.repo.FilesRepo
 import space.taran.arkbrowser.mvp.model.repo.RoomRepo
 import space.taran.arkbrowser.mvp.model.repo.SynchronizeRepo
@@ -142,13 +142,13 @@ class RootPresenter: MvpPresenter<RootView>() {
 
     private fun requestSdCardUri() {
         val basePath = filesRepo.fileProvider.getExtSdCardBaseFolder(pickedDir!!.path)
-        roomRepo.getCardUriByPath(basePath!!).observeOn(AndroidSchedulers.mainThread())
+        roomRepo.getSdCardUriByPath(basePath!!).observeOn(AndroidSchedulers.mainThread())
             .subscribe({
                 it.uri = null
-                roomRepo.insertCardUri(it).observeOn(AndroidSchedulers.mainThread())
+                roomRepo.insertSdCardUri(it).observeOn(AndroidSchedulers.mainThread())
                     .subscribe({ viewState.requestSdCardUri() }, {})
             }, {
-                roomRepo.insertCardUri(CardUri(path = basePath))
+                roomRepo.insertSdCardUri(SDCardUri(path = basePath))
                     .observeOn(AndroidSchedulers.mainThread()).subscribe(
                         { viewState.requestSdCardUri() }, {})
             })

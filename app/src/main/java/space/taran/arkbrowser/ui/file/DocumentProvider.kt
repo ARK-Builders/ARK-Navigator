@@ -3,14 +3,14 @@ package space.taran.arkbrowser.ui.file
 import android.content.Context
 import android.net.Uri
 import androidx.documentfile.provider.DocumentFile
-import space.taran.arkbrowser.mvp.model.entity.room.CardUri
+import space.taran.arkbrowser.mvp.model.entity.room.SDCardUri
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
 
 class DocumentProvider(val context: Context, val fileProvider: FileProvider) {
 
-    var cardUris = mutableListOf<CardUri>()
+    var sdCardUris = mutableListOf<SDCardUri>()
 
     fun getFileUri(path: String): String {
         val document = DocumentFile.fromFile(File(path))
@@ -95,7 +95,7 @@ class DocumentProvider(val context: Context, val fileProvider: FileProvider) {
 
     private fun getUriByPath(path: String): Uri? {
         val base = fileProvider.getExtSdCardBaseFolder(path)
-        cardUris.forEach {
+        sdCardUris.forEach {
             if (it.path == base)
                 return Uri.parse(it.uri)
         }

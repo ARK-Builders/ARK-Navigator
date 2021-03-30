@@ -30,17 +30,17 @@ class MainPresenter: MvpPresenter<MainView>() {
     }
 
     fun permsGranted() {
-        loadCardUris()
+        loadSdCardUris()
     }
 
     fun permissionsDenied() {
 
     }
 
-    private fun loadCardUris() {
-        roomRepo.getCardUris().subscribe(
+    private fun loadSdCardUris() {
+        roomRepo.getSdCardUris().subscribe(
             { list ->
-                filesRepo.documentProvider.cardUris = list.toMutableList()
+                filesRepo.documentProvider.sdCardUris = list.toMutableList()
                 loadAndSyncRoots()
             },
             {}
@@ -60,13 +60,13 @@ class MainPresenter: MvpPresenter<MainView>() {
     }
 
     fun sdCardUriGranted(uri: String) {
-        roomRepo.getCardUris().observeOn(AndroidSchedulers.mainThread()).subscribe(
+        roomRepo.getSdCardUris().observeOn(AndroidSchedulers.mainThread()).subscribe(
             { list ->
                list.forEach {
                    if (it.uri == null) {
                        it.uri = uri
-                       filesRepo.documentProvider.cardUris.add(it)
-                       roomRepo.insertCardUri(it).subscribe()
+                       filesRepo.documentProvider.sdCardUris.add(it)
+                       roomRepo.insertSdCardUri(it).subscribe()
                    }
                }
             }, {}

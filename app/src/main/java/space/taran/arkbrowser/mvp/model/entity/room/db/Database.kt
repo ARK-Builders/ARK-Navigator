@@ -1,14 +1,14 @@
 package space.taran.arkbrowser.mvp.model.entity.room.db
 
 import androidx.room.RoomDatabase
-import space.taran.arkbrowser.mvp.model.entity.room.CardUri
+import space.taran.arkbrowser.mvp.model.entity.room.SDCardUri
 import space.taran.arkbrowser.mvp.model.entity.room.RoomFile
 import space.taran.arkbrowser.mvp.model.entity.room.RoomRoot
 import space.taran.arkbrowser.mvp.model.entity.room.dao.*
 
 @androidx.room.Database(
     entities = [
-        CardUri::class,
+        SDCardUri::class,
         RoomRoot::class,
         RoomFile::class
     ],
@@ -16,7 +16,7 @@ import space.taran.arkbrowser.mvp.model.entity.room.dao.*
     exportSchema = false
 )
 abstract class Database : RoomDatabase() {
-    abstract fun cardUriDao(): CardUriDao
+    abstract fun sdCardUriDao(): SDCardUriDao
     abstract fun rootDao(): RootDao
     abstract fun fileDao(): FileDao
 
