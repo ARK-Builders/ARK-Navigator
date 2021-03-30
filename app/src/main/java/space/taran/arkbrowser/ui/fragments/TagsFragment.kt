@@ -100,7 +100,7 @@ class TagsFragment(val root: Root? = null, val files: List<File>? = null, val st
             chip.textStartPadding = 0f
             chip.textEndPadding = 0f
             chip.setOnClickListener {
-                presenter.clearTagsClicked()
+                presenter.clearTagsChecked()
             }
             chipg_tags.addView(chip)
         }

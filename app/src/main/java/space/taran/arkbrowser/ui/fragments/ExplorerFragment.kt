@@ -92,10 +92,10 @@ class ExplorerFragment: MvpAppCompatFragment(), ExplorerView, BackButtonListener
     override fun showDialog() {
         dialog = MaterialAlertDialogBuilder(context!!)
             .setTitle("Do you want to add a folder to the home screen?")
-            .setPositiveButton("OK") { dialog, which ->
+            .setPositiveButton("OK") { _, _ ->
                 presenter.favoriteChanged()
             }
-            .setNegativeButton("Cancel") { dialog, which ->
+            .setNegativeButton("Cancel") { _, _ ->
                 presenter.dismissDialog()
             }
             .show()

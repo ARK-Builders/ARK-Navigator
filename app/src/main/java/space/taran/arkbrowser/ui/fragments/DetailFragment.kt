@@ -21,6 +21,7 @@ import kotlinx.android.synthetic.main.fragment_detail_view.*
 import moxy.MvpAppCompatFragment
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
+import space.taran.arkbrowser.utils.Tags
 
 class DetailFragment: MvpAppCompatFragment(), DetailView, BackButtonListener {
     companion object {
@@ -91,7 +92,7 @@ class DetailFragment: MvpAppCompatFragment(), DetailView, BackButtonListener {
         view_pager.adapter?.notifyDataSetChanged()
     }
 
-    override fun showTagsDialog(imageTags: List<String>) {
+    override fun showTagsDialog(imageTags: Tags) {
         dialogView = LayoutInflater.from(context!!).inflate(R.layout.dialog_tags, null)
         val alertDialogBuilder = AlertDialog.Builder(context!!).setView(dialogView)
 
@@ -106,14 +107,14 @@ class DetailFragment: MvpAppCompatFragment(), DetailView, BackButtonListener {
             dialogView?.chipg_dialog_detail?.addView(chip)
         }
 
-        dialogView!!.et_tags.setOnEditorActionListener { v, actionId, event ->
-
+        dialogView!!.et_tags.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
-                val tag = dialogView!!.et_tags.text.toString()
-                presenter.tagAdded(tag)
-            }
+                val tags = dialogView!!.et_tags.text.toString()
 
-            false
+                !presenter.tagsAdded(tags)
+            } else {
+                false
+            }
         }
 
         dialog = alertDialogBuilder.show()
@@ -126,7 +127,7 @@ class DetailFragment: MvpAppCompatFragment(), DetailView, BackButtonListener {
         dialog?.dismiss()
     }
 
-    override fun setDialogTags(imageTags: List<String>) {
+    override fun setDialogTags(imageTags: Tags) {
         dialogView?.chipg_dialog_detail?.removeAllViews()
         imageTags.forEach { tag ->
             val chip = Chip(context)
@@ -140,7 +141,7 @@ class DetailFragment: MvpAppCompatFragment(), DetailView, BackButtonListener {
 
     }
 
-    override fun setImageTags(imageTags: List<String>) {
+    override fun setImageTags(imageTags: Tags) {
         if (imageTags.isEmpty())
             fab_explorer_fav.visibility = View.VISIBLE
         else

@@ -11,7 +11,6 @@ import space.taran.arkbrowser.mvp.presenter.adapter.IFileGridPresenter
 import space.taran.arkbrowser.mvp.view.TagsView
 import space.taran.arkbrowser.mvp.view.item.FileItemView
 import space.taran.arkbrowser.navigation.Screens
-import space.taran.arkbrowser.utils.mapToTagList
 import space.taran.arkbrowser.utils.tagsComparator
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observer
@@ -41,7 +40,7 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
 
     val fileGridPresenter = FileGridPresenter()
     var syncDisposable: Disposable? = null
-    var tags = mutableListOf<TagState>()
+    var tagStates = mutableListOf<TagState>()
     var allFiles = mutableListOf<File>()
 
     inner class FileGridPresenter :
@@ -83,13 +82,13 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
     }
 
     fun tagChecked(tag: String, isChecked: Boolean) {
-        val tagState = tags.find { tagState -> tagState.tag == tag }
+        val tagState = tagStates.find { tagState -> tagState.tag == tag }
         tagState!!.isChecked = isChecked
         applyTagsToFiles()
     }
 
-    fun clearTagsClicked() {
-        tags.forEach { tagState ->
+    fun clearTagsChecked() {
+        tagStates.forEach { tagState ->
             tagState.isChecked = false
         }
         applyTagsToFiles()
@@ -153,23 +152,23 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
     }
 
     private fun applyTagsToFiles() {
-        tags.forEach { tagState ->
+        tagStates.forEach { tagState ->
             tagState.isActual = false
         }
 
-        if (tags.none{ tagState -> tagState.isChecked}) {
+        if (tagStates.none{ tagState -> tagState.isChecked}) {
             fileGridPresenter.files.clear()
             fileGridPresenter.files.addAll(allFiles)
             viewState.updateAdapter()
             viewState.clearTags()
-            viewState.setTags(tags)
+            viewState.setTags(tagStates)
             return
         }
 
         val filteredFiles = mutableListOf<File>()
         allFiles.forEach allFiles@{ file ->
             var isFileFit = true
-            tags.forEach { tagState ->
+            tagStates.forEach { tagState ->
                 if (tagState.isChecked) {
                     if (!file.tags.contains(tagState.tag))
                         isFileFit = false
@@ -179,7 +178,7 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
         }
 
         filteredFiles.forEach { file ->
-            tags.forEach { tagState ->
+            tagStates.forEach { tagState ->
                 if (file.tags.contains(tagState.tag))
                     tagState.isActual = true
             }
@@ -187,9 +186,9 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
         fileGridPresenter.files.clear()
         fileGridPresenter.files.addAll(filteredFiles)
         viewState.updateAdapter()
-        tags.sortWith(tagsComparator())
+        tagStates.sortWith(tagsComparator())
         viewState.clearTags()
-        viewState.setTags(tags)
+        viewState.setTags(tagStates)
     }
 
     private fun getSyncObserver(root: Root) = object : Observer<File> {
@@ -209,14 +208,14 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
     private fun setupTags() {
         viewState.clearTags()
         allFiles.forEach { file ->
-            file.tags.mapToTagList().forEach { tag ->
-                val state = tags.find { state -> state.tag == tag }
+            file.tags.forEach { tag ->
+                val state = tagStates.find { state -> state.tag == tag }
                 if (state == null) {
-                    tags.add(TagState(tag, false, false))
+                    tagStates.add(TagState(tag, false, false))
                 }
             }
         }
-        viewState.setTags(tags)
+        viewState.setTags(tagStates)
     }
 
 }
