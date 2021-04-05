@@ -3,25 +3,36 @@ stages:
 - release
 - lint
 
+.template: &env-info
+  before_script:
+  - hostname && hostname -I
+  - env | grep -e CI_COMMIT -e CI_PIPELINE
+  - echo "$CI_COMMIT_BRANCH" | sed 's,^.*\/,,g' > /tmp/build-name
+
 test:
+  <<: *env-info
   stage: test
   script:
   - ./gradlew testDebugUnitTest
 
 build:
+  <<: *env-info
   stage: release
   artifacts:
     paths:
     - app/build/outputs/apk/debug/app-debug.apk
   script:
   - ./gradlew assembleDebug
-  - cp `find -iname '*.apk'` $WEBSITE_ROOT/ark-browser/app-debug-$CI_COMMIT_BRANCH.apk
+  - cp `find -iname '*.apk'`
+      $WEBSITE_ROOT/ark-browser/app-debug-$(cat /tmp/build-name).apk
 
 lint:
+  <<: *env-info
   stage: lint
   artifacts:
     paths:
     - app/build/reports/lint-results.html
   script:
   - ./gradlew lint
-  - cp `find -name lint-results.html` $WEBSITE_ROOT/ark-browser/
+  - cp `find -name lint-results.html`
+      $WEBSITE_ROOT/ark-browser/lint-results-$(cat /tmp/build-name).html
