@@ -127,6 +127,13 @@ class FileProvider(val context: Context) {
     }
 
     private fun mapToFile(file: java.io.File): File {
-        return File(name = file.name, type = file.extension, path = file.absolutePath, isFolder = file.isDirectory)
+        return File(
+            name = file.name,
+            type = file.extension,
+            path = file.absolutePath,
+            size = file.length(),
+            lastModified = file.lastModified(),
+            isFolder = file.isDirectory
+        )
     }
 }

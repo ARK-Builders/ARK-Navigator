@@ -16,6 +16,8 @@ class RoomFile (
     var name: String,
     var path: String,
     var type: String,
+    var size: Long,
+    var lastModified: Long,
     var rootId: Long? = null,
     var tags: Tags = NO_TAGS,
     var hash: String? = null,

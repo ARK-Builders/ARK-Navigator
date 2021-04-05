@@ -17,7 +17,7 @@ import space.taran.arkbrowser.ui.App
 import space.taran.arkbrowser.ui.MainActivity
 import space.taran.arkbrowser.ui.adapter.DetailVPAdapter
 import kotlinx.android.synthetic.main.dialog_tags.view.*
-import kotlinx.android.synthetic.main.fragment_detail_view.*
+import kotlinx.android.synthetic.main.fragment_detail.*
 import moxy.MvpAppCompatFragment
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
@@ -59,7 +59,7 @@ class DetailFragment: MvpAppCompatFragment(), DetailView, BackButtonListener {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_detail_view, container, false)
+    ): View? = inflater.inflate(R.layout.fragment_detail, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -96,6 +96,11 @@ class DetailFragment: MvpAppCompatFragment(), DetailView, BackButtonListener {
         dialogView = LayoutInflater.from(context!!).inflate(R.layout.dialog_tags, null)
         val alertDialogBuilder = AlertDialog.Builder(context!!).setView(dialogView)
 
+        if (imageTags.isNotEmpty())
+            dialogView!!.chipg_dialog_detail.visibility = View.VISIBLE
+        else
+            dialogView!!.chipg_dialog_detail.visibility = View.GONE
+
         dialogView?.chipg_dialog_detail?.removeAllViews()
         imageTags.forEach { tag ->
             val chip = Chip(context)
@@ -128,6 +133,10 @@ class DetailFragment: MvpAppCompatFragment(), DetailView, BackButtonListener {
     }
 
     override fun setDialogTags(imageTags: Tags) {
+        if (imageTags.isNotEmpty())
+            dialogView!!.chipg_dialog_detail.visibility = View.VISIBLE
+        else
+            dialogView!!.chipg_dialog_detail.visibility = View.GONE
         dialogView?.chipg_dialog_detail?.removeAllViews()
         imageTags.forEach { tag ->
             val chip = Chip(context)

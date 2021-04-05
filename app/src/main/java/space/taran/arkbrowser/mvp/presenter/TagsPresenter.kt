@@ -17,6 +17,8 @@ import io.reactivex.rxjava3.core.Observer
 import io.reactivex.rxjava3.disposables.Disposable
 import moxy.MvpPresenter
 import ru.terrakok.cicerone.Router
+import space.taran.arkbrowser.utils.SortBy
+import space.taran.arkbrowser.utils.filesComparator
 import javax.inject.Inject
 
 class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
@@ -42,6 +44,9 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
     var syncDisposable: Disposable? = null
     var tagStates = mutableListOf<TagState>()
     var allFiles = mutableListOf<File>()
+    var sortBy = SortBy.NAME
+    var isReversedSort = false
+    var displayFiles = mutableListOf<File>()
 
     inner class FileGridPresenter :
         IFileGridPresenter {
@@ -84,14 +89,14 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
     fun tagChecked(tag: String, isChecked: Boolean) {
         val tagState = tagStates.find { tagState -> tagState.tag == tag }
         tagState!!.isChecked = isChecked
-        applyTagsToFiles()
+        applySortAndTagsToFiles()
     }
 
     fun clearTagsChecked() {
         tagStates.forEach { tagState ->
             tagState.isChecked = false
         }
-        applyTagsToFiles()
+        applySortAndTagsToFiles()
     }
 
     override fun onFirstViewAttach() {
@@ -107,9 +112,9 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
     private fun initFromRoot() {
         allFiles.clear()
         allFiles.addAll(root!!.files)
-        fileGridPresenter.files.clear()
-        fileGridPresenter.files.addAll(allFiles)
-        viewState.updateAdapter()
+        displayFiles.clear()
+        displayFiles.addAll(allFiles)
+        applySortAndTagsToFiles()
         viewState.setToolbarTitle(root.name)
         syncRepo.getSyncObservable(root)?.observeOn(AndroidSchedulers.mainThread())
             ?.subscribe(getSyncObserver(root))
@@ -124,9 +129,9 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
                     allFiles.add(rootFile)
             }
         }
-        fileGridPresenter.files.clear()
-        fileGridPresenter.files.addAll(allFiles)
-        viewState.updateAdapter()
+        displayFiles.clear()
+        displayFiles.addAll(allFiles)
+        applySortAndTagsToFiles()
     }
 
     private fun initFromAllRoots() {
@@ -137,9 +142,9 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
             syncRepo.getSyncObservable(root)?.observeOn(AndroidSchedulers.mainThread())
                 ?.subscribe(getSyncObserver(root))
         }
-        fileGridPresenter.files.clear()
-        fileGridPresenter.files.addAll(allFiles)
-        viewState.updateAdapter()
+        displayFiles.clear()
+        displayFiles.addAll(allFiles)
+        applySortAndTagsToFiles()
     }
 
     override fun onDestroy() {
@@ -151,15 +156,43 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
         setupTags()
     }
 
-    private fun applyTagsToFiles() {
+    fun sortByChanged(sortBy: SortBy) {
+        this.sortBy = sortBy
+        applySortAndTagsToFiles()
+        dismissDialog()
+    }
+
+    fun reversedSortChanged(isReversedSort: Boolean) {
+        this.isReversedSort = isReversedSort
+        applySortAndTagsToFiles()
+        dismissDialog()
+    }
+
+    fun sortByMenuClicked() {
+        viewState.showSortByDialog(sortBy, isReversedSort)
+    }
+
+    fun dismissDialog() {
+        viewState.closeSortByDialog()
+    }
+
+    private fun applySortAndTagsToFiles() {
         tagStates.forEach { tagState ->
             tagState.isActual = false
         }
 
         if (tagStates.none{ tagState -> tagState.isChecked}) {
+            displayFiles.clear()
+            displayFiles.addAll(allFiles)
+
+            displayFiles.sortWith(filesComparator(sortBy))
             fileGridPresenter.files.clear()
-            fileGridPresenter.files.addAll(allFiles)
+            if (isReversedSort)
+                fileGridPresenter.files.addAll(displayFiles.reversed())
+            else
+                fileGridPresenter.files.addAll(displayFiles)
             viewState.updateAdapter()
+
             viewState.clearTags()
             viewState.setTags(tagStates)
             return
@@ -183,9 +216,18 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
                     tagState.isActual = true
             }
         }
+
+        displayFiles.clear()
+        displayFiles.addAll(filteredFiles)
+
+        displayFiles.sortWith(filesComparator(sortBy))
         fileGridPresenter.files.clear()
-        fileGridPresenter.files.addAll(filteredFiles)
+        if (isReversedSort)
+            fileGridPresenter.files.addAll(displayFiles.reversed())
+        else
+            fileGridPresenter.files.addAll(displayFiles)
         viewState.updateAdapter()
+
         tagStates.sortWith(tagsComparator())
         viewState.clearTags()
         viewState.setTags(tagStates)
@@ -215,6 +257,7 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
                 }
             }
         }
+        tagStates.sortWith(tagsComparator())
         viewState.setTags(tagStates)
     }
 

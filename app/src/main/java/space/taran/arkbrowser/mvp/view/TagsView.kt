@@ -5,6 +5,7 @@ import moxy.MvpView
 import moxy.viewstate.strategy.AddToEndSingleStrategy
 import moxy.viewstate.strategy.SkipStrategy
 import moxy.viewstate.strategy.StateStrategyType
+import space.taran.arkbrowser.utils.SortBy
 
 @StateStrategyType(AddToEndSingleStrategy::class)
 interface TagsView: MvpView {
@@ -17,4 +18,6 @@ interface TagsView: MvpView {
     @StateStrategyType(SkipStrategy::class)
     fun clearTags()
     fun setToolbarTitle(title: String)
+    fun showSortByDialog(sortBy: SortBy, isReversedSort: Boolean)
+    fun closeSortByDialog()
 }

@@ -1,8 +1,10 @@
 package space.taran.arkbrowser.ui.adapter
 
+import android.content.res.ColorStateList
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import space.taran.arkbrowser.R
 import space.taran.arkbrowser.mvp.model.entity.common.Icons
@@ -44,12 +46,26 @@ class FileGridRVAdapter(
 
         override fun setIcon(resourceType: Icons, path: String?) = with(containerView) {
             when(resourceType) {
-                Icons.FOLDER -> iv.setImageResource(R.drawable.ic_baseline_folder)
-                Icons.PLUS -> iv.setImageResource(R.drawable.ic_baseline_add)
-                Icons.FILE -> iv.setImageResource(R.drawable.ic_file)
+                Icons.FOLDER -> {
+                    iv.setImageResource(R.drawable.ic_baseline_folder)
+                    iv.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.gray))
+                }
+                Icons.PLUS -> {
+                    iv.setImageResource(R.drawable.ic_baseline_add)
+                    iv.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.gray))
+                }
+                Icons.FILE -> {
+                    iv.setImageResource(R.drawable.ic_file)
+                    iv.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.gray))
+                }
+                Icons.ROOT -> {
+                    iv.setImageResource(R.drawable.ic_root)
+                    iv.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.gray))
+                }
                 Icons.IMAGE -> loadImage(path!!, iv)
-                Icons.ROOT -> iv.setImageResource(R.drawable.ic_root)
             }
+
+
         }
 
         override fun setText(title: String) = with(containerView) {
