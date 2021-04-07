@@ -66,8 +66,11 @@ class FileGridRVAdapter(
             }
         }
 
-        override fun setFav() = with(containerView) {
-            iv_fav.visibility = View.VISIBLE
+        override fun setFav(isFav: Boolean) = with(containerView) {
+            if (isFav)
+                iv_fav.visibility = View.VISIBLE
+            else
+                iv_fav.visibility = View.GONE
         }
 
         override fun setText(title: String) = with(containerView) {

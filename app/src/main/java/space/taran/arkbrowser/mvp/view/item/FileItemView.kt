@@ -7,5 +7,5 @@ interface FileItemView {
 
     fun setIcon(resourceType: Icons, path: String?)
     fun setText(title: String)
-    fun setFav()
+    fun setFav(isFav: Boolean)
 }

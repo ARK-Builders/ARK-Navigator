@@ -57,6 +57,11 @@ class ExplorerFragment: MvpAppCompatFragment(), ExplorerView, BackButtonListener
         App.instance.appComponent.inject(this)
     }
 
+    override fun onResume() {
+        super.onResume()
+        presenter.onViewResumed()
+    }
+
     override fun init() {
         rv_files.layoutManager = GridLayoutManager(context, 3)
         adapter = FileGridRVAdapter(presenter.fileGridPresenter)

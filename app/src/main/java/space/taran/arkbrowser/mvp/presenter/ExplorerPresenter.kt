@@ -50,8 +50,7 @@ class ExplorerPresenter(var currentFolder: File? = null) : MvpPresenter<Explorer
                 else
                     view.setIcon(Icons.FILE, null)
             }
-            if (file.fav)
-                view.setFav()
+            view.setFav(file.fav)
         }
 
         override fun onCardClicked(pos: Int) {
@@ -65,7 +64,13 @@ class ExplorerPresenter(var currentFolder: File? = null) : MvpPresenter<Explorer
     override fun onFirstViewAttach() {
         super.onFirstViewAttach()
         viewState.init()
+    }
 
+    fun onViewResumed() {
+        loadFiles()
+    }
+
+    private fun loadFiles() {
         if (currentFolder == null) {
             viewState.setFabsVisibility(false)
             roomRepo.getFavFiles().observeOn(AndroidSchedulers.mainThread()).subscribe(
@@ -91,11 +96,25 @@ class ExplorerPresenter(var currentFolder: File? = null) : MvpPresenter<Explorer
                 viewState.setFabsVisibility(false)
             } ?: viewState.setFabsVisibility(true)
 
-            val files = filesRepo.fileProvider.list(currentFolder!!.path)
-            fileGridPresenter.files.clear()
-            fileGridPresenter.files.addAll(files.sortedWith(filesComparator()))
-            viewState.updateAdapter()
             viewState.setTitle(currentFolder!!.path)
+
+            roomRepo.getFavFiles().observeOn(AndroidSchedulers.mainThread()).subscribe(
+                { roomFiles ->
+                    val files = filesRepo.fileProvider.list(currentFolder!!.path)
+                    roomFiles.forEach { roomFile ->
+                        files.forEach { file ->
+                            if (roomFile.path == file.path)
+                                file.fav = roomFile.fav
+                        }
+                    }
+                    fileGridPresenter.files.clear()
+                    fileGridPresenter.files.addAll(files.sortedWith(filesComparator()))
+                    viewState.updateAdapter()
+                },
+                {
+                    it.printStackTrace()
+                }
+            )
         }
     }
 
