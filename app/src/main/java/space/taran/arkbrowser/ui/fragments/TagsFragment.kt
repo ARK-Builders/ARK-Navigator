@@ -5,6 +5,7 @@ import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Bundle
 import android.view.*
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
@@ -66,10 +67,14 @@ class TagsFragment(val root: Root? = null, val files: List<File>? = null, val st
     }
 
     override fun openFile(uri: String, mimeType: String) {
-        val intent = Intent(Intent.ACTION_EDIT)
-        val fileUri: Uri = Uri.parse(uri)
-        intent.setDataAndType(fileUri, mimeType)
-        startActivity(intent)
+        try {
+            val intent = Intent(Intent.ACTION_VIEW)
+            val fileUri: Uri = Uri.parse(uri)
+            intent.setDataAndType(fileUri, mimeType)
+            startActivity(intent)
+        } catch (e: Exception) {
+            Toast.makeText(context, "No app can handle this file", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun updateAdapter() {

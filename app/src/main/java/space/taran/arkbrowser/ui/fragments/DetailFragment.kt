@@ -67,6 +67,7 @@ class DetailFragment: MvpAppCompatFragment(), DetailView, BackButtonListener {
     }
 
     override fun init() {
+        (activity as MainActivity).setToolbarVisibility(true)
         adapter = DetailVPAdapter(presenter.detailListPresenter)
         view_pager.adapter = adapter
         view_pager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
@@ -134,9 +135,9 @@ class DetailFragment: MvpAppCompatFragment(), DetailView, BackButtonListener {
 
     override fun setDialogTags(imageTags: Tags) {
         if (imageTags.isNotEmpty())
-            dialogView!!.chipg_dialog_detail.visibility = View.VISIBLE
+            dialogView?.chipg_dialog_detail?.visibility = View.VISIBLE
         else
-            dialogView!!.chipg_dialog_detail.visibility = View.GONE
+            dialogView?.chipg_dialog_detail?.visibility = View.GONE
         dialogView?.chipg_dialog_detail?.removeAllViews()
         imageTags.forEach { tag ->
             val chip = Chip(context)

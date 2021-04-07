@@ -64,8 +64,10 @@ class FileGridRVAdapter(
                 }
                 Icons.IMAGE -> loadImage(path!!, iv)
             }
+        }
 
-
+        override fun setFav() = with(containerView) {
+            iv_fav.visibility = View.VISIBLE
         }
 
         override fun setText(title: String) = with(containerView) {

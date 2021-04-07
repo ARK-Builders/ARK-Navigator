@@ -85,7 +85,13 @@ class FileProvider(val context: Context) {
 
     fun list(path: String): List<File> {
         val parent = java.io.File(path)
-        return parent.listFiles()?.let { files -> files.map { mapToFile(it) } } ?: listOf()
+        return parent.listFiles()?.let { files ->
+            files.map {
+                mapToFile(it)
+            }.filter {
+                !it.name.startsWith(".")
+            }
+        } ?: listOf()
     }
 
     fun getBytes(path: String): ByteArray {

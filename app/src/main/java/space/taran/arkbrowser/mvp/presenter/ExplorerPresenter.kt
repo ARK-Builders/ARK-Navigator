@@ -50,6 +50,8 @@ class ExplorerPresenter(var currentFolder: File? = null) : MvpPresenter<Explorer
                 else
                     view.setIcon(Icons.FILE, null)
             }
+            if (file.fav)
+                view.setFav()
         }
 
         override fun onCardClicked(pos: Int) {

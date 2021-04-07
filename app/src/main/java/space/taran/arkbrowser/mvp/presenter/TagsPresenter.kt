@@ -66,23 +66,21 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
 
         override fun onCardClicked(pos: Int) {
             val file = files[pos]
-            if (!file.isFolder) {
-                if (file.isImage()) {
-                    val images = allFiles.filter { it.isImage() }
-                    val newPos = images.indexOf(file)
-                    router.navigateTo(
-                        Screens.DetailScreen(
-                            syncRepo.getRootForId(file.rootId!!)!!,
-                            images,
-                            newPos
-                        )
+            if (file.isImage()) {
+                val images = allFiles.filter { it.isImage() }
+                val newPos = images.indexOf(file)
+                router.navigateTo(
+                    Screens.DetailScreen(
+                        syncRepo.getRootForId(file.rootId!!)!!,
+                        images,
+                        newPos
                     )
-                } else
-                    viewState.openFile(
-                        filesRepo.documentProvider.getFileUri(file.path),
-                        filesRepo.documentProvider.getMimeType(file.path)
-                    )
-            }
+                )
+            } else
+                viewState.openFile(
+                    filesRepo.documentProvider.getFileUri(file.path),
+                    filesRepo.documentProvider.getMimeType(file.path)
+                )
         }
     }
 
@@ -181,7 +179,7 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
             tagState.isActual = false
         }
 
-        if (tagStates.none{ tagState -> tagState.isChecked}) {
+        if (tagStates.none { tagState -> tagState.isChecked }) {
             displayFiles.clear()
             displayFiles.addAll(allFiles)
 

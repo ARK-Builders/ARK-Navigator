@@ -11,3 +11,4 @@ fun isInternalStorage(file: File): Boolean {
     }
     return false
 }
+
