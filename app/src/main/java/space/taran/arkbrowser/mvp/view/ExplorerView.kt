@@ -9,7 +9,8 @@ import moxy.viewstate.strategy.StateStrategyType
 interface ExplorerView: MvpView {
     fun init()
     fun updateAdapter()
-    fun setFabsVisibility(isVisible: Boolean)
+    fun setFavoriteFabVisibility(isVisible: Boolean)
+    fun setTagsFabVisibility(isVisible: Boolean)
     fun showDialog()
     fun closeDialog()
     fun setTitle(title: String)

@@ -31,6 +31,7 @@ class ExplorerPresenter(var currentFolder: File? = null) : MvpPresenter<Explorer
     lateinit var router: Router
 
     val fileGridPresenter = FileGridPresenter()
+    var currentRoot: Root? = null
 
     inner class FileGridPresenter :
         IFileGridPresenter {
@@ -67,55 +68,71 @@ class ExplorerPresenter(var currentFolder: File? = null) : MvpPresenter<Explorer
     }
 
     fun onViewResumed() {
-        loadFiles()
+        init()
     }
 
-    private fun loadFiles() {
+    private fun init() {
         if (currentFolder == null) {
-            viewState.setFabsVisibility(false)
-            roomRepo.getFavFiles().observeOn(AndroidSchedulers.mainThread()).subscribe(
-                { favFiles ->
-                    val extFolders = filesRepo.fileProvider.getExtSdCards()
-                    fileGridPresenter.files.clear()
-                    fileGridPresenter.files.addAll(extFolders)
-                    fileGridPresenter.files.addAll(favFiles)
-                    fileGridPresenter.files =
-                        fileGridPresenter.files.sortedWith(filesComparator()).toMutableList()
-                    viewState.updateAdapter()
-                    viewState.setTitle("/")
-                },
-                {
-                    it.printStackTrace()
-                }
-            )
+            initHomeFiles()
         } else {
-            val ext = filesRepo.fileProvider.getExtSdCards().find { extSd ->
-                extSd.path == currentFolder!!.path
-            }
-            ext?.let {
-                viewState.setFabsVisibility(false)
-            } ?: viewState.setFabsVisibility(true)
-
-            viewState.setTitle(currentFolder!!.path)
-
-            roomRepo.getFavFiles().observeOn(AndroidSchedulers.mainThread()).subscribe(
-                { roomFiles ->
-                    val files = filesRepo.fileProvider.list(currentFolder!!.path)
-                    roomFiles.forEach { roomFile ->
-                        files.forEach { file ->
-                            if (roomFile.path == file.path)
-                                file.fav = roomFile.fav
-                        }
-                    }
-                    fileGridPresenter.files.clear()
-                    fileGridPresenter.files.addAll(files.sortedWith(filesComparator()))
-                    viewState.updateAdapter()
-                },
-                {
-                    it.printStackTrace()
-                }
-            )
+            initExplorerFiles()
         }
+    }
+
+    private fun initHomeFiles() {
+        viewState.setFavoriteFabVisibility(false)
+        viewState.setTagsFabVisibility(false)
+        roomRepo.getFavFiles().observeOn(AndroidSchedulers.mainThread()).subscribe(
+            { favFiles ->
+                val extFolders = filesRepo.fileProvider.getExtSdCards()
+                fileGridPresenter.files.clear()
+                fileGridPresenter.files.addAll(extFolders)
+                fileGridPresenter.files.addAll(favFiles)
+                fileGridPresenter.files =
+                    fileGridPresenter.files.sortedWith(filesComparator()).toMutableList()
+                viewState.updateAdapter()
+                viewState.setTitle("/")
+            },
+            {
+                it.printStackTrace()
+            }
+        )
+    }
+
+    private fun initExplorerFiles() {
+        val extSdCard = filesRepo.fileProvider.getExtSdCards().find { extSd ->
+            extSd.path == currentFolder!!.path
+        }
+        extSdCard?.let {
+            viewState.setFavoriteFabVisibility(false)
+            viewState.setTagsFabVisibility(false)
+        } ?: let {
+            viewState.setFavoriteFabVisibility(true)
+            currentRoot = syncRepo.getRootByPath(currentFolder!!.path)
+            currentRoot?.let {
+                viewState.setTagsFabVisibility(true)
+            } ?: viewState.setTagsFabVisibility(false)
+        }
+
+        viewState.setTitle(currentFolder!!.path)
+
+        roomRepo.getFavFiles().observeOn(AndroidSchedulers.mainThread()).subscribe(
+            { roomFiles ->
+                val files = filesRepo.fileProvider.list(currentFolder!!.path)
+                roomFiles.forEach { roomFile ->
+                    files.forEach { file ->
+                        if (roomFile.path == file.path)
+                            file.fav = roomFile.fav
+                    }
+                }
+                fileGridPresenter.files.clear()
+                fileGridPresenter.files.addAll(files.sortedWith(filesComparator()))
+                viewState.updateAdapter()
+            },
+            {
+                it.printStackTrace()
+            }
+        )
     }
 
     fun dismissDialog() {
@@ -127,9 +144,7 @@ class ExplorerPresenter(var currentFolder: File? = null) : MvpPresenter<Explorer
     }
 
     fun tagsFabClicked() {
-        val root = syncRepo.getRootByPath(currentFolder!!.path)
-        root?.let {
-            viewState.setSelectedTab(1)
+        currentRoot?.let {
             router.newRootScreen(
                 Screens.TagsScreen(
                     it,
@@ -137,8 +152,7 @@ class ExplorerPresenter(var currentFolder: File? = null) : MvpPresenter<Explorer
                     TagsPresenter.State.FILES
                 )
             )
-        } ?: viewState.showToast("Root not found")
-
+        }
     }
 
     fun favoriteChanged() {

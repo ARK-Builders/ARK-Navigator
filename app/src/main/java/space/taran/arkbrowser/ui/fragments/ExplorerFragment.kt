@@ -22,7 +22,7 @@ import moxy.MvpAppCompatFragment
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
 
-class ExplorerFragment: MvpAppCompatFragment(), ExplorerView, BackButtonListener {
+class ExplorerFragment : MvpAppCompatFragment(), ExplorerView, BackButtonListener {
 
     companion object {
         const val FOLDER_KEY = "file"
@@ -76,15 +76,18 @@ class ExplorerFragment: MvpAppCompatFragment(), ExplorerView, BackButtonListener
         rv_files.adapter = adapter
     }
 
-    override fun setFabsVisibility(isVisible: Boolean) {
-        if (isVisible) {
+    override fun setFavoriteFabVisibility(isVisible: Boolean) {
+        if (isVisible)
             fab_explorer_fav.visibility = View.VISIBLE
-            fab_explorer_tags.visibility = View.VISIBLE
-        }
-        else {
+        else
             fab_explorer_fav.visibility = View.GONE
+    }
+
+    override fun setTagsFabVisibility(isVisible: Boolean) {
+        if (isVisible)
+            fab_explorer_tags.visibility = View.VISIBLE
+        else
             fab_explorer_tags.visibility = View.GONE
-        }
     }
 
     override fun openFile(uri: String, mimeType: String) {
