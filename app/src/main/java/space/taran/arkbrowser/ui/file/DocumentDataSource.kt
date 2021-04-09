@@ -8,14 +8,9 @@ import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
 
-class DocumentProvider(val context: Context, val fileProvider: FileProvider) {
+class DocumentDataSource(val context: Context, val fileDataSource: FileDataSource) {
 
     var sdCardUris = mutableListOf<SDCardUri>()
-
-    fun getFileUri(path: String): String {
-        val document = DocumentFile.fromFile(File(path))
-        return document.uri.toString()
-    }
 
     fun getMimeType(path: String): String {
         val document = DocumentFile.fromFile(File(path))
@@ -73,7 +68,7 @@ class DocumentProvider(val context: Context, val fileProvider: FileProvider) {
     }
 
     private fun getDocumentFile(path: String): DocumentFile {
-        val baseFolder = fileProvider.getExtSdCardBaseFolder(path)
+        val baseFolder = fileDataSource.getExtSdCardBaseFolder(path)
         var sameFolder = false
         var relativePath: String? = null
 
@@ -94,7 +89,7 @@ class DocumentProvider(val context: Context, val fileProvider: FileProvider) {
     }
 
     private fun getUriByPath(path: String): Uri? {
-        val base = fileProvider.getExtSdCardBaseFolder(path)
+        val base = fileDataSource.getExtSdCardBaseFolder(path)
         sdCardUris.forEach {
             if (it.path == base)
                 return Uri.parse(it.uri)

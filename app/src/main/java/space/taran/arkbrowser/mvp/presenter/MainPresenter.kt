@@ -40,7 +40,7 @@ class MainPresenter: MvpPresenter<MainView>() {
     private fun loadSdCardUris() {
         roomRepo.getSdCardUris().subscribe(
             { list ->
-                filesRepo.documentProvider.sdCardUris = list.toMutableList()
+                filesRepo.documentDataSource.sdCardUris = list.toMutableList()
                 loadAndSyncRoots()
             },
             {}
@@ -65,7 +65,7 @@ class MainPresenter: MvpPresenter<MainView>() {
                list.forEach {
                    if (it.uri == null) {
                        it.uri = uri
-                       filesRepo.documentProvider.sdCardUris.add(it)
+                       filesRepo.documentDataSource.sdCardUris.add(it)
                        roomRepo.insertSdCardUri(it).subscribe()
                    }
                }

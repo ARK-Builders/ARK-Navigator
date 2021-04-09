@@ -69,8 +69,9 @@ class TagsFragment(val root: Root? = null, val files: List<File>? = null, val st
     override fun openFile(uri: String, mimeType: String) {
         try {
             val intent = Intent(Intent.ACTION_VIEW)
-            val fileUri: Uri = Uri.parse(uri)
+            val fileUri = Uri.parse(uri)
             intent.setDataAndType(fileUri, mimeType)
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             startActivity(intent)
         } catch (e: Exception) {
             Toast.makeText(context, "No app can handle this file", Toast.LENGTH_SHORT).show()

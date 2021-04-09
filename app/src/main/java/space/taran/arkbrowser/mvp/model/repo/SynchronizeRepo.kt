@@ -33,7 +33,7 @@ class SynchronizeRepo(val roomRepo: RoomRepo, val filesRepo: FilesRepo) {
             root.files.filter { file -> file.isImage() }.forEach { image ->
                 val roomImage = roomRepo.database.fileDao().findByPath(image.path)
                 if (roomImage == null) {
-                    image.hash = getHash(filesRepo.fileProvider.getBytes(image.path))
+                    image.hash = getHash(filesRepo.fileDataSource.getBytes(image.path))
                     roomRepo.database.fileDao().insert(mapFileToRoom(image))
                 } else {
                     image.id = roomImage.id
@@ -58,7 +58,7 @@ class SynchronizeRepo(val roomRepo: RoomRepo, val filesRepo: FilesRepo) {
             root.files.filter { file -> file.isImage() }.forEach { image ->
                 val roomImage = roomRepo.database.fileDao().findByPath(image.path)
                 if (roomImage == null) {
-                    image.hash = getHash(filesRepo.fileProvider.getBytes(image.path))
+                    image.hash = getHash(filesRepo.fileDataSource.getBytes(image.path))
                 } else {
                     image.id = roomImage.id
                     image.hash = roomImage.hash

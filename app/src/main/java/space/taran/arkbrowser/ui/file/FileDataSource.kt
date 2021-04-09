@@ -1,14 +1,20 @@
 package space.taran.arkbrowser.ui.file
 
 import android.content.Context
+import androidx.core.content.FileProvider
 import space.taran.arkbrowser.mvp.model.entity.File
 import java.io.*
 
-class FileProvider(val context: Context) {
+class FileDataSource(val context: Context) {
 
     fun getFile(path: String): File {
         val file = java.io.File(path)
         return mapToFile(file)
+    }
+
+    fun getUriForFileByProvider(path: String): String {
+        val file = java.io.File(path)
+        return FileProvider.getUriForFile(context, "space.taran.arkbrowser.provider", file).toString()
     }
 
     fun getParent(path: String): File? {

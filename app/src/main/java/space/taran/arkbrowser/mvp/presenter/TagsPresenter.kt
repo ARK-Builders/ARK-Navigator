@@ -78,8 +78,8 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
                 )
             } else
                 viewState.openFile(
-                    filesRepo.documentProvider.getFileUri(file.path),
-                    filesRepo.documentProvider.getMimeType(file.path)
+                    filesRepo.fileDataSource.getUriForFileByProvider(file.path),
+                    filesRepo.documentDataSource.getMimeType(file.path)
                 )
         }
     }

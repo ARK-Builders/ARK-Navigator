@@ -2,15 +2,15 @@ package space.taran.arkbrowser.mvp.model.repo
 
 import space.taran.arkbrowser.mvp.model.entity.File
 import space.taran.arkbrowser.mvp.model.entity.Root
-import space.taran.arkbrowser.ui.file.DocumentProvider
-import space.taran.arkbrowser.ui.file.FileProvider
+import space.taran.arkbrowser.ui.file.DocumentDataSource
+import space.taran.arkbrowser.ui.file.FileDataSource
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import space.taran.arkbrowser.utils.Converters.Companion.stringFromTags
 import space.taran.arkbrowser.utils.Converters.Companion.tagsFromString
 import space.taran.arkbrowser.utils.Tags
 
-class FilesRepo(val fileProvider: FileProvider, val documentProvider: DocumentProvider) {
+class FilesRepo(val fileDataSource: FileDataSource, val documentDataSource: DocumentDataSource) {
 
     companion object {
         const val TEXT_STORAGE_NAME = ".ark-tags.txt"
@@ -22,7 +22,7 @@ class FilesRepo(val fileProvider: FileProvider, val documentProvider: DocumentPr
 
     fun getAllFiles(path: String): List<File> {
         val files = mutableListOf<File>()
-        fileProvider.list(path).forEach { file ->
+        fileDataSource.list(path).forEach { file ->
             if (file.isFolder)
                 files.addAll(getAllFiles(file.path))
             else
@@ -39,8 +39,8 @@ class FilesRepo(val fileProvider: FileProvider, val documentProvider: DocumentPr
             builder.append("${file.hash}${KEY_VALUE_SEPARATOR}${string}\n")
         }
 
-        if (!fileProvider.write(path, builder.toString())) {
-            documentProvider.write(path, builder.toString())
+        if (!fileDataSource.write(path, builder.toString())) {
+            documentDataSource.write(path, builder.toString())
         }
     }
 
@@ -50,7 +50,7 @@ class FilesRepo(val fileProvider: FileProvider, val documentProvider: DocumentPr
     }.subscribeOn(Schedulers.io())
 
     fun readFromStorage(path: String): Map<String, Tags> =
-        fileProvider.read(path)
+        fileDataSource.read(path)
             .split("\n")
             .filter { line ->
                 line.isNotEmpty() && line.contains(KEY_VALUE_SEPARATOR)
@@ -65,22 +65,22 @@ class FilesRepo(val fileProvider: FileProvider, val documentProvider: DocumentPr
             .toMap()
 
     fun getRootLastModified(root: Root): Long {
-        return fileProvider.getLastModified(root.storagePath)
+        return fileDataSource.getLastModified(root.storagePath)
     }
 
     fun createStorage(parentPath: String): String? {
-        if (!fileProvider.mk("$parentPath/$DUMMY_FILE_NAME")) {
-            if (!documentProvider.mk(parentPath, DUMMY_FILE_NAME, TEXT_MIME_TYPE))
+        if (!fileDataSource.mk("$parentPath/$DUMMY_FILE_NAME")) {
+            if (!documentDataSource.mk(parentPath, DUMMY_FILE_NAME, TEXT_MIME_TYPE))
                 return null
             else
-                documentProvider.remove("$parentPath/$DUMMY_FILE_NAME")
+                documentDataSource.remove("$parentPath/$DUMMY_FILE_NAME")
         } else
-            fileProvider.remove("$parentPath/$DUMMY_FILE_NAME")
+            fileDataSource.remove("$parentPath/$DUMMY_FILE_NAME")
 
-        return if (fileProvider.mk("$parentPath/$TEXT_STORAGE_NAME"))
+        return if (fileDataSource.mk("$parentPath/$TEXT_STORAGE_NAME"))
             "$parentPath/$TEXT_STORAGE_NAME"
         else {
-            if (documentProvider.mk(parentPath, TEXT_STORAGE_NAME, TEXT_MIME_TYPE))
+            if (documentDataSource.mk(parentPath, TEXT_STORAGE_NAME, TEXT_MIME_TYPE))
                 "$parentPath/$TEXT_STORAGE_NAME"
             else
                 null

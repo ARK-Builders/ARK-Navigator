@@ -80,7 +80,7 @@ class RootPresenter: MvpPresenter<RootView>() {
                 pickedDir = file
                 viewState.setDialogPath(pickedDir!!.path)
                 files.clear()
-                files.addAll(filesRepo.fileProvider.list(file.path).sortedWith(filesComparator()))
+                files.addAll(filesRepo.fileDataSource.list(file.path).sortedWith(filesComparator()))
                 viewState.updateDialogAdapter()
             }
         }
@@ -136,12 +136,12 @@ class RootPresenter: MvpPresenter<RootView>() {
         dialogIsOpen = true
         pickedDir = null
         dialogGridPresenter.files.clear()
-        dialogGridPresenter.files.addAll(filesRepo.fileProvider.getExtSdCards())
+        dialogGridPresenter.files.addAll(filesRepo.fileDataSource.getExtSdCards())
         viewState.updateDialogAdapter()
     }
 
     private fun requestSdCardUri() {
-        val basePath = filesRepo.fileProvider.getExtSdCardBaseFolder(pickedDir!!.path)
+        val basePath = filesRepo.fileDataSource.getExtSdCardBaseFolder(pickedDir!!.path)
         roomRepo.getSdCardUriByPath(basePath!!).observeOn(AndroidSchedulers.mainThread())
             .subscribe({
                 it.uri = null
@@ -157,7 +157,7 @@ class RootPresenter: MvpPresenter<RootView>() {
     fun backClicked(): Boolean {
         if (dialogIsOpen) {
             if (pickedDir != null) {
-                val extPaths = filesRepo.fileProvider.getExtSdCards()
+                val extPaths = filesRepo.fileDataSource.getExtSdCards()
                 extPaths.forEach {
                     if (pickedDir!!.path ==  it.path) {
                         pickedDir = null
@@ -169,9 +169,9 @@ class RootPresenter: MvpPresenter<RootView>() {
                     }
                 }
 
-                val parent = filesRepo.fileProvider.getParent(pickedDir!!.path)
+                val parent = filesRepo.fileDataSource.getParent(pickedDir!!.path)
                 pickedDir = parent
-                val files = filesRepo.fileProvider.list(pickedDir!!.path)
+                val files = filesRepo.fileDataSource.list(pickedDir!!.path)
                 viewState.setDialogPath(pickedDir!!.path)
                 dialogGridPresenter.files.clear()
                 dialogGridPresenter.files.addAll(files.sortedWith(filesComparator()))

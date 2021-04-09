@@ -84,7 +84,7 @@ class ExplorerPresenter(var currentFolder: File? = null) : MvpPresenter<Explorer
         viewState.setTagsFabVisibility(false)
         roomRepo.getFavFiles().observeOn(AndroidSchedulers.mainThread()).subscribe(
             { favFiles ->
-                val extFolders = filesRepo.fileProvider.getExtSdCards()
+                val extFolders = filesRepo.fileDataSource.getExtSdCards()
                 fileGridPresenter.files.clear()
                 fileGridPresenter.files.addAll(extFolders)
                 fileGridPresenter.files.addAll(favFiles)
@@ -100,7 +100,7 @@ class ExplorerPresenter(var currentFolder: File? = null) : MvpPresenter<Explorer
     }
 
     private fun initExplorerFiles() {
-        val extSdCard = filesRepo.fileProvider.getExtSdCards().find { extSd ->
+        val extSdCard = filesRepo.fileDataSource.getExtSdCards().find { extSd ->
             extSd.path == currentFolder!!.path
         }
         extSdCard?.let {
@@ -118,7 +118,7 @@ class ExplorerPresenter(var currentFolder: File? = null) : MvpPresenter<Explorer
 
         roomRepo.getFavFiles().observeOn(AndroidSchedulers.mainThread()).subscribe(
             { roomFiles ->
-                val files = filesRepo.fileProvider.list(currentFolder!!.path)
+                val files = filesRepo.fileDataSource.list(currentFolder!!.path)
                 roomFiles.forEach { roomFile ->
                     files.forEach { file ->
                         if (roomFile.path == file.path)
