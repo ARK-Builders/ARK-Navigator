@@ -14,11 +14,16 @@
         android:clipToPadding="false"
         android:padding="10dp"/>
 
-
-    <com.google.android.material.chip.ChipGroup
-        android:id="@+id/chipg_tags"
+    <space.taran.arkbrowser.ui.customview.ScrollViewAutoHeight
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="10dp"/>
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chipg_tags"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"/>
+
+    </space.taran.arkbrowser.ui.customview.ScrollViewAutoHeight>
 
 </LinearLayout>
