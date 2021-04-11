@@ -54,6 +54,7 @@ class TagsFragment(val root: Root? = null, val files: List<File>? = null, val st
     }
 
     override fun init() {
+        (activity as MainActivity).setSelectedTab(1)
         (activity as MainActivity).setToolbarVisibility(true)
         rv_tags.layoutManager = GridLayoutManager(context, 3)
         adapter = FileGridRVAdapter(presenter.fileGridPresenter)

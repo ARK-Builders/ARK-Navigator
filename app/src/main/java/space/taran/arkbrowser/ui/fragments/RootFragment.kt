@@ -57,6 +57,7 @@ class RootFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
     }
 
     override fun init() {
+        (activity as MainActivity).setSelectedTab(0)
         rv_roots.layoutManager = GridLayoutManager(context, 3)
         adapter = FileGridRVAdapter(presenter.rootGridPresenter)
         (activity as MainActivity).setToolbarVisibility(false)
@@ -106,10 +107,6 @@ class RootFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
 
     override fun setDialogPath(path: String) {
         dialogView?.tv_roots_dialog_path!!.text = path
-    }
-
-    override fun setSelectedTab(pos: Int) {
-        (activity as MainActivity).setSelectedTab(pos)
     }
 
     override fun requestSdCardUri() {

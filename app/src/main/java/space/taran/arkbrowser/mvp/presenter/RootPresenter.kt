@@ -51,7 +51,6 @@ class RootPresenter: MvpPresenter<RootView>() {
 
         override fun onCardClicked(pos: Int) {
             val root = roots[pos]
-            viewState.setSelectedTab(1)
             router.replaceScreen(Screens.TagsScreen(root = root, state = TagsPresenter.State.SINGLE_ROOT))
         }
     }

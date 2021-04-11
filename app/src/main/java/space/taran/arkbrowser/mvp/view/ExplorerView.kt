@@ -20,6 +20,4 @@ interface ExplorerView: MvpView {
     fun showToast(msg: String)
     @StateStrategyType(SkipStrategy::class)
     fun openFile(uri: String, mimeType: String)
-    @StateStrategyType(SkipStrategy::class)
-    fun setSelectedTab(pos: Int)
 }

@@ -15,6 +15,4 @@ interface RootView: MvpView {
     @StateStrategyType(SkipStrategy::class)
     fun requestSdCardUri()
     fun setDialogPath(path: String)
-    @StateStrategyType(SkipStrategy::class)
-    fun setSelectedTab(pos: Int)
 }

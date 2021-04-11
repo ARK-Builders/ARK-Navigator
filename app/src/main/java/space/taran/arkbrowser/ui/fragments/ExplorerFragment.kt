@@ -63,6 +63,7 @@ class ExplorerFragment : MvpAppCompatFragment(), ExplorerView, BackButtonListene
     }
 
     override fun init() {
+        (activity as MainActivity).setSelectedTab(2)
         rv_files.layoutManager = GridLayoutManager(context, 3)
         adapter = FileGridRVAdapter(presenter.fileGridPresenter)
         (activity as MainActivity).setToolbarVisibility(true)
@@ -123,10 +124,6 @@ class ExplorerFragment : MvpAppCompatFragment(), ExplorerView, BackButtonListene
 
     override fun closeDialog() {
         dialog?.dismiss()
-    }
-
-    override fun setSelectedTab(pos: Int) {
-        (activity as MainActivity).setSelectedTab(pos)
     }
 
     override fun requestSdCardUri() {
