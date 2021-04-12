@@ -14,7 +14,7 @@ import space.taran.arkbrowser.mvp.model.entity.Root
 import space.taran.arkbrowser.mvp.presenter.DetailPresenter
 import space.taran.arkbrowser.mvp.view.DetailView
 import space.taran.arkbrowser.ui.App
-import space.taran.arkbrowser.ui.MainActivity
+import space.taran.arkbrowser.ui.activity.MainActivity
 import space.taran.arkbrowser.ui.adapter.DetailVPAdapter
 import kotlinx.android.synthetic.main.dialog_tags.view.*
 import kotlinx.android.synthetic.main.fragment_detail.*

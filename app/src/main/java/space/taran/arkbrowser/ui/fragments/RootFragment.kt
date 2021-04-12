@@ -12,7 +12,7 @@ import space.taran.arkbrowser.R
 import space.taran.arkbrowser.mvp.presenter.RootPresenter
 import space.taran.arkbrowser.mvp.view.RootView
 import space.taran.arkbrowser.ui.App
-import space.taran.arkbrowser.ui.MainActivity
+import space.taran.arkbrowser.ui.activity.MainActivity
 import space.taran.arkbrowser.ui.adapter.FileGridRVAdapter
 import kotlinx.android.synthetic.main.dialog_roots_new.view.*
 import kotlinx.android.synthetic.main.fragment_roots.*

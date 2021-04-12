@@ -18,7 +18,7 @@ import space.taran.arkbrowser.mvp.model.entity.common.TagState
 import space.taran.arkbrowser.mvp.presenter.TagsPresenter
 import space.taran.arkbrowser.mvp.view.TagsView
 import space.taran.arkbrowser.ui.App
-import space.taran.arkbrowser.ui.MainActivity
+import space.taran.arkbrowser.ui.activity.MainActivity
 import space.taran.arkbrowser.ui.adapter.FileGridRVAdapter
 import kotlinx.android.synthetic.main.fragment_tags.*
 import moxy.MvpAppCompatFragment

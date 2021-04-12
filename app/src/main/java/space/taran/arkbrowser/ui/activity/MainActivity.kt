@@ -1,10 +1,11 @@
-package space.taran.arkbrowser.ui
+package space.taran.arkbrowser.ui.activity
 
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import space.taran.arkbrowser.R
@@ -17,6 +18,7 @@ import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
 import ru.terrakok.cicerone.NavigatorHolder
 import ru.terrakok.cicerone.android.support.SupportAppNavigator
+import space.taran.arkbrowser.ui.App
 import javax.inject.Inject
 
 
@@ -114,6 +116,10 @@ class MainActivity : MvpAppCompatActivity(), MainView {
 
     fun setSelectedTab(pos: Int) {
         bottom_navigation.menu.getItem(pos).isChecked = true
+    }
+
+    override fun showToast(toast: String) {
+        Toast.makeText(this, toast, Toast.LENGTH_LONG).show()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

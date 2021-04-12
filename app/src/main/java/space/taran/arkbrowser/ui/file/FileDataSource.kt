@@ -89,6 +89,19 @@ class FileDataSource(val context: Context) {
         }
     }
 
+    fun readFirstLine(path: String): String {
+        synchronized(this) {
+            val inputStream = FileInputStream(path)
+            val bufferedReader = BufferedReader(InputStreamReader(inputStream))
+            val line = bufferedReader.readLine()
+
+            inputStream.close()
+            bufferedReader.close()
+
+            return line
+        }
+    }
+
     fun list(path: String): List<File> {
         val parent = java.io.File(path)
         return parent.listFiles()?.let { files ->

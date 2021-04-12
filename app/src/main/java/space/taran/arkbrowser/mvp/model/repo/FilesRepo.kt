@@ -15,9 +15,11 @@ class FilesRepo(val fileDataSource: FileDataSource, val documentDataSource: Docu
     companion object {
         const val TEXT_STORAGE_NAME = ".ark-tags.txt"
         const val KEY_VALUE_SEPARATOR = ':'
+        const val STORAGE_VERSION = 1
 
         private const val TEXT_MIME_TYPE = "text/plain"
         private const val DUMMY_FILE_NAME = "dummy.txt"
+        private const val KEY_VALUE_STORAGE_VERSION = "version"
     }
 
     fun getAllFiles(path: String): List<File> {
@@ -33,6 +35,7 @@ class FilesRepo(val fileDataSource: FileDataSource, val documentDataSource: Docu
 
     fun writeToStorage(path: String, files: List<File>) {
         val builder = StringBuilder()
+        builder.append("$KEY_VALUE_STORAGE_VERSION$KEY_VALUE_SEPARATOR$STORAGE_VERSION\n")
 
         files.forEach { file ->
             val string = stringFromTags(file.tags)
@@ -48,6 +51,12 @@ class FilesRepo(val fileDataSource: FileDataSource, val documentDataSource: Docu
         writeToStorage(path, files)
         emitter.onComplete()
     }.subscribeOn(Schedulers.io())
+
+    fun readStorageVersion(path: String): Int {
+        val line = fileDataSource.readFirstLine(path)
+        val fields = line.split(KEY_VALUE_SEPARATOR)
+        return fields[1].toInt()
+    }
 
     fun readFromStorage(path: String): Map<String, Tags> =
         fileDataSource.read(path)

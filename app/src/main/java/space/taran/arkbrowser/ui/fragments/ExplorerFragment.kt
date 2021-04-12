@@ -15,7 +15,7 @@ import space.taran.arkbrowser.mvp.model.entity.File
 import space.taran.arkbrowser.mvp.presenter.ExplorerPresenter
 import space.taran.arkbrowser.mvp.view.ExplorerView
 import space.taran.arkbrowser.ui.App
-import space.taran.arkbrowser.ui.MainActivity
+import space.taran.arkbrowser.ui.activity.MainActivity
 import space.taran.arkbrowser.ui.adapter.FileGridRVAdapter
 import kotlinx.android.synthetic.main.fragment_explorer.*
 import moxy.MvpAppCompatFragment

@@ -108,5 +108,4 @@ class SynchronizeRepo(val roomRepo: RoomRepo, val filesRepo: FilesRepo) {
 
         return null
     }
-
 }

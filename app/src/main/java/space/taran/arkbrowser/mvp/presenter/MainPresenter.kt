@@ -8,6 +8,7 @@ import space.taran.arkbrowser.navigation.Screens
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import moxy.MvpPresenter
 import ru.terrakok.cicerone.Router
+import space.taran.arkbrowser.mvp.model.entity.Root
 import javax.inject.Inject
 
 class MainPresenter: MvpPresenter<MainView>() {
@@ -51,6 +52,9 @@ class MainPresenter: MvpPresenter<MainView>() {
         roomRepo.getAllRoots().observeOn(AndroidSchedulers.mainThread()).subscribe(
             { list ->
                 list.forEach { root ->
+                    val storageVersion = filesRepo.readStorageVersion(root.storagePath)
+                    if (storageVersion != FilesRepo.STORAGE_VERSION)
+                        storageVersionDifferent(storageVersion, root)
                     syncRepo.synchronizeRoot(root)
                 }
                 router.replaceScreen(Screens.RootScreen())
@@ -87,6 +91,10 @@ class MainPresenter: MvpPresenter<MainView>() {
 
     fun backClicked() {
         router.exit()
+    }
+
+    private fun storageVersionDifferent(fileStorageVersion: Int, root: Root) {
+        viewState.showToast("${root.storagePath} has a different version")
     }
 
 }

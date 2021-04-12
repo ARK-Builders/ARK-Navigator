@@ -5,9 +5,10 @@ import space.taran.arkbrowser.di.modules.CiceroneModule
 import space.taran.arkbrowser.di.modules.DatabaseModule
 import space.taran.arkbrowser.di.modules.RepoModule
 import space.taran.arkbrowser.mvp.presenter.*
-import space.taran.arkbrowser.ui.MainActivity
+import space.taran.arkbrowser.ui.activity.MainActivity
 import space.taran.arkbrowser.ui.fragments.*
 import dagger.Component
+import space.taran.arkbrowser.ui.App
 import javax.inject.Singleton
 
 @Singleton
