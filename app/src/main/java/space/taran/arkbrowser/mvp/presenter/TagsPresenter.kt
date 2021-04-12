@@ -67,7 +67,7 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
         override fun onCardClicked(pos: Int) {
             val file = files[pos]
             if (file.isImage()) {
-                val images = allFiles.filter { it.isImage() }
+                val images = displayFiles.filter { it.isImage() }
                 val newPos = images.indexOf(file)
                 router.navigateTo(
                     Screens.DetailScreen(
@@ -161,8 +161,12 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
     }
 
     fun reversedSortChanged(isReversedSort: Boolean) {
+        if (this.isReversedSort != isReversedSort)
+            displayFiles.reverse()
         this.isReversedSort = isReversedSort
-        applySortAndTagsToFiles()
+        fileGridPresenter.files.clear()
+        fileGridPresenter.files.addAll(displayFiles)
+        viewState.updateAdapter()
         dismissDialog()
     }
 
@@ -220,10 +224,7 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
 
         displayFiles.sortWith(filesComparator(sortBy))
         fileGridPresenter.files.clear()
-        if (isReversedSort)
-            fileGridPresenter.files.addAll(displayFiles.reversed())
-        else
-            fileGridPresenter.files.addAll(displayFiles)
+        fileGridPresenter.files.addAll(displayFiles)
         viewState.updateAdapter()
 
         tagStates.sortWith(tagsComparator())
