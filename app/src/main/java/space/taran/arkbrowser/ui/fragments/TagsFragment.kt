@@ -87,6 +87,10 @@ class TagsFragment(val root: Root? = null, val files: List<File>? = null, val st
         (activity as MainActivity).setTitle(title)
     }
 
+    override fun setTagsLayoutVisibility(isVisible: Boolean) {
+        chipg_tags.visibility = if (isVisible) View.VISIBLE else View.GONE
+    }
+
     override fun showSortByDialog(sortBy: SortBy, isReversedSort: Boolean) {
         sortByDialogView = LayoutInflater.from(context!!).inflate(R.layout.dialog_sort, null)
         val alertDialogBuilder = AlertDialog.Builder(context!!).setView(sortByDialogView)
@@ -162,6 +166,7 @@ class TagsFragment(val root: Root? = null, val files: List<File>? = null, val st
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when(item.itemId) {
             R.id.menu_tags_sort_by -> presenter.sortByMenuClicked()
+            R.id.menu_tags_tags_off -> presenter.tagsOffChanged()
         }
         return true
     }

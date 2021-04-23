@@ -11,14 +11,12 @@ import space.taran.arkbrowser.mvp.presenter.adapter.IFileGridPresenter
 import space.taran.arkbrowser.mvp.view.TagsView
 import space.taran.arkbrowser.mvp.view.item.FileItemView
 import space.taran.arkbrowser.navigation.Screens
-import space.taran.arkbrowser.utils.tagsComparator
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observer
 import io.reactivex.rxjava3.disposables.Disposable
 import moxy.MvpPresenter
 import ru.terrakok.cicerone.Router
-import space.taran.arkbrowser.utils.SortBy
-import space.taran.arkbrowser.utils.filesComparator
+import space.taran.arkbrowser.utils.*
 import javax.inject.Inject
 
 class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
@@ -48,6 +46,8 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
     var isReversedSort = false
     var displayFiles = mutableListOf<File>()
 
+    var isTagsOff = false
+
     inner class FileGridPresenter :
         IFileGridPresenter {
 
@@ -67,7 +67,8 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
         override fun onCardClicked(pos: Int) {
             val file = files[pos]
             if (file.isImage()) {
-                val images = displayFiles.filter { it.isImage() }
+                val sortedFiles = if (isReversedSort) displayFiles.reversed() else displayFiles
+                val images = sortedFiles.filter { it.isImage() }
                 val newPos = images.indexOf(file)
                 router.navigateTo(
                     Screens.DetailScreen(
@@ -87,14 +88,14 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
     fun tagChecked(tag: String, isChecked: Boolean) {
         val tagState = tagStates.find { tagState -> tagState.tag == tag }
         tagState!!.isChecked = isChecked
-        applySortAndTagsToFiles()
+        applyTagsToFiles()
     }
 
     fun clearTagsChecked() {
         tagStates.forEach { tagState ->
             tagState.isChecked = false
         }
-        applySortAndTagsToFiles()
+        applyTagsToFiles()
     }
 
     override fun onFirstViewAttach() {
@@ -112,7 +113,7 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
         allFiles.addAll(root!!.files)
         displayFiles.clear()
         displayFiles.addAll(allFiles)
-        applySortAndTagsToFiles()
+        applyTagsToFiles()
         viewState.setToolbarTitle(root.name)
         syncRepo.getSyncObservable(root)?.observeOn(AndroidSchedulers.mainThread())
             ?.subscribe(getSyncObserver(root))
@@ -129,7 +130,7 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
         }
         displayFiles.clear()
         displayFiles.addAll(allFiles)
-        applySortAndTagsToFiles()
+        applyTagsToFiles()
     }
 
     private fun initFromAllRoots() {
@@ -142,7 +143,7 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
         }
         displayFiles.clear()
         displayFiles.addAll(allFiles)
-        applySortAndTagsToFiles()
+        applyTagsToFiles()
     }
 
     override fun onDestroy() {
@@ -151,23 +152,35 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
     }
 
     fun onViewResumed() {
-        setupTags()
+        if (isTagsOff) {
+            findUntaggedFiles()
+        } else {
+            setupTags()
+        }
     }
 
     fun sortByChanged(sortBy: SortBy) {
         this.sortBy = sortBy
-        applySortAndTagsToFiles()
+        sortAndUpdateFiles()
         dismissDialog()
     }
 
     fun reversedSortChanged(isReversedSort: Boolean) {
-        if (this.isReversedSort != isReversedSort)
-            displayFiles.reverse()
         this.isReversedSort = isReversedSort
-        fileGridPresenter.files.clear()
-        fileGridPresenter.files.addAll(displayFiles)
-        viewState.updateAdapter()
+        sortAndUpdateFiles()
         dismissDialog()
+    }
+
+    fun tagsOffChanged() {
+        isTagsOff = !isTagsOff
+        if (isTagsOff) {
+            findUntaggedFiles()
+            viewState.setTagsLayoutVisibility(false)
+        } else {
+            setupTags()
+            applyTagsToFiles()
+            viewState.setTagsLayoutVisibility(true)
+        }
     }
 
     fun sortByMenuClicked() {
@@ -178,7 +191,7 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
         viewState.closeSortByDialog()
     }
 
-    private fun applySortAndTagsToFiles() {
+    private fun applyTagsToFiles() {
         tagStates.forEach { tagState ->
             tagState.isActual = false
         }
@@ -187,16 +200,8 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
             displayFiles.clear()
             displayFiles.addAll(allFiles)
 
-            displayFiles.sortWith(filesComparator(sortBy))
-            fileGridPresenter.files.clear()
-            if (isReversedSort)
-                fileGridPresenter.files.addAll(displayFiles.reversed())
-            else
-                fileGridPresenter.files.addAll(displayFiles)
-            viewState.updateAdapter()
-
-            viewState.clearTags()
-            viewState.setTags(tagStates)
+            sortAndUpdateFiles()
+            sortAndUpdateTags()
             return
         }
 
@@ -221,15 +226,22 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
 
         displayFiles.clear()
         displayFiles.addAll(filteredFiles)
+        sortAndUpdateFiles()
+        sortAndUpdateTags()
+    }
 
-        displayFiles.sortWith(filesComparator(sortBy))
-        fileGridPresenter.files.clear()
-        fileGridPresenter.files.addAll(displayFiles)
-        viewState.updateAdapter()
+    private fun findUntaggedFiles() {
+        val filteredFiles = mutableListOf<File>()
+        allFiles.forEach { file ->
+            if (file.tags.isEmpty())
+                filteredFiles.add(file)
+        }
 
-        tagStates.sortWith(tagsComparator())
-        viewState.clearTags()
-        viewState.setTags(tagStates)
+        displayFiles.clear()
+        displayFiles.addAll(filteredFiles)
+        sortAndUpdateFiles()
+        tagStates.clear()
+        sortAndUpdateTags()
     }
 
     private fun getSyncObserver(root: Root) = object : Observer<File> {
@@ -246,18 +258,49 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
         override fun onComplete() {}
     }
 
-    private fun setupTags() {
+    private fun sortAndUpdateFiles() {
+        displayFiles.sortWith(filesComparator(sortBy))
+        fileGridPresenter.files.clear()
+        if (isReversedSort)
+            fileGridPresenter.files.addAll(displayFiles.reversed())
+        else
+            fileGridPresenter.files.addAll(displayFiles)
+        viewState.updateAdapter()
+    }
+
+    private fun sortAndUpdateTags() {
+        tagStates.sortWith(tagsComparator())
         viewState.clearTags()
+        viewState.setTags(tagStates)
+    }
+
+    private fun setupTags() {
+        val filesTags = HashSet<Tag>()
         allFiles.forEach { file ->
             file.tags.forEach { tag ->
-                val state = tagStates.find { state -> state.tag == tag }
-                if (state == null) {
-                    tagStates.add(TagState(tag, false, false))
-                }
+                filesTags.add(tag)
             }
         }
-        tagStates.sortWith(tagsComparator())
-        viewState.setTags(tagStates)
+        val currentTags = tagStates.map { it.tag }.toSet()
+        val newTags = filesTags.subtract(currentTags)
+        val deletedTags = currentTags.subtract(filesTags)
+
+        newTags.forEach { tag ->
+            tagStates.add(TagState(tag, false, false))
+        }
+
+        deletedTags.forEach { tag ->
+            var index: Int? = null
+            tagStates.forEachIndexed { i, tagState ->
+                if (tagState.tag == tag) {
+                    index = i
+                    return@forEachIndexed
+                }
+            }
+            index?.let { tagStates.removeAt(it) }
+        }
+
+        sortAndUpdateTags()
     }
 
 }

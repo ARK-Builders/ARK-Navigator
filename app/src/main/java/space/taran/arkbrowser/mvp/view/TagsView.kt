@@ -20,4 +20,5 @@ interface TagsView: MvpView {
     fun setToolbarTitle(title: String)
     fun showSortByDialog(sortBy: SortBy, isReversedSort: Boolean)
     fun closeSortByDialog()
+    fun setTagsLayoutVisibility(isVisible: Boolean)
 }

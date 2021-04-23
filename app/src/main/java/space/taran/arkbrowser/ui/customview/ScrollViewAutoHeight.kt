@@ -16,13 +16,9 @@ class ScrollViewAutoHeight @JvmOverloads constructor(
         private const val PART_OF_SCREEN = 4
     }
 
-    private val defaultDisplay by lazy {
-        (context.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay
-    }
+    private val defaultDisplay = (context.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay
 
-    private val size by lazy {
-        Point()
-    }
+    private val size = Point()
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         defaultDisplay.getSize(size)

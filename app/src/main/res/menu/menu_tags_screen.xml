@@ -1,8 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/menu_tags_tags_off"
+        android:icon="@drawable/ic_cloud_off"
+        android:title="Tags off"
+        app:showAsAction="always"/>
+
     <item
         android:id="@+id/menu_tags_sort_by"
-        android:enabled="true"
-        android:title="Sort by"/>
+        android:icon="@drawable/ic_sort"
+        android:title="Sort by"
+        app:showAsAction="always" />
+
 
 </menu>
