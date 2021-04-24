@@ -14,6 +14,6 @@ interface RootDao {
     @Query("SELECT * FROM RoomRoot")
     fun getAll(): List<RoomRoot>
 
-    @Query("DELETE FROM RoomRoot WHERE id = :id")
-    fun deleteById(id: Long)
+    @Query("SELECT * FROM RoomRoot WHERE id = :id")
+    fun getById(id: Long): RoomRoot?
 }

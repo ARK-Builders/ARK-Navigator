@@ -1,20 +1,28 @@
 package space.taran.arkbrowser.utils
 
-import space.taran.arkbrowser.mvp.model.entity.File
+import space.taran.arkbrowser.mvp.model.entity.Resource
 import space.taran.arkbrowser.mvp.model.entity.common.TagState
+import java.io.File
 
 enum class SortBy{
     NAME, SIZE, LAST_MODIFIED, TYPE
 }
 
-fun filesComparator(sortBy: SortBy = SortBy.NAME) = Comparator<File> { f1, f2 ->
-    when {
-        f1.isFolder && f2.isFolder -> fileCompare(sortBy, f1, f2)
-        f1.isFolder && !f2.isFolder -> -1
-        !f1.isFolder && f2.isFolder -> 1
-        !f1.isFolder && !f2.isFolder -> fileCompare(sortBy, f1, f2)
-        else -> 0
+val fileComparator = Comparator<File> { f1, f2 -> compareFiles(f1, f2) }
+
+val markableFileComparator = Comparator<MarkableFile> { (_, f1), (_, f2) ->
+    compareFiles(f1, f2)
+}
+
+fun resourceComparator(sortBy: SortBy, inverse: Boolean = false) = Comparator<Resource> { r1, r2 ->
+    val result = when (sortBy) {
+        SortBy.NAME -> r1.name.compareTo(r2.name)
+        SortBy.TYPE -> r1.type.compareTo(r2.type)
+        SortBy.LAST_MODIFIED -> r1.lastModified.compareTo(r2.lastModified)
+        SortBy.SIZE -> r1.size.compareTo(r2.size)
     }
+
+    if (inverse) { result * -1 } else { result }
 }
 
 fun tagsComparator() = Comparator<TagState> { o1, o2 ->
@@ -35,11 +43,10 @@ fun tagsComparator() = Comparator<TagState> { o1, o2 ->
     }
 }
 
-private fun fileCompare(sortBy: SortBy, f1: File, f2: File): Int {
-    return when (sortBy) {
-        SortBy.NAME -> f1.name.compareTo(f2.name)
-        SortBy.TYPE -> f1.type.compareTo(f2.type)
-        SortBy.LAST_MODIFIED -> f1.lastModified.compareTo(f2.lastModified)
-        SortBy.SIZE -> f1.size.compareTo(f2.size)
-    }
+private fun compareFiles(f1: File, f2: File) = when {
+    f1.isDirectory && f2.isDirectory   -> f1.name.compareTo(f2.name)
+    !f1.isDirectory && !f2.isDirectory -> f1.name.compareTo(f2.name)
+    f1.isDirectory && !f2.isDirectory  -> -1
+    !f1.isDirectory && f2.isDirectory  -> 1
+    else -> 0
 }

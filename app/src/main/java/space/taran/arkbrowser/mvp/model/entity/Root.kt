@@ -2,14 +2,19 @@ package space.taran.arkbrowser.mvp.model.entity
 
 import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
+import space.taran.arkbrowser.mvp.model.entity.room.RoomRoot
+import java.io.File
+
+typealias RootId = Long
 
 @Parcelize
 data class Root (
-    var id: Long = 0,
-    var name: String,
-    var parentPath: String,
-    val storagePath: String,
-    var synchronized: Boolean = false,
-    val files: MutableList<File> = mutableListOf(),
-    var storageLastModified: Long? = null
-): Parcelable
+    val id: RootId = 0,
+    val folder: File //todo: maybe Uri is necessary
+): Parcelable {
+    companion object {
+        fun fromRoom(root: RoomRoot): Root =
+            Root(root.id,
+                File(root.path))    //todo or Uri.parse()
+    }
+}

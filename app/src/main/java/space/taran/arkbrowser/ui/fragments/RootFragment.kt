@@ -13,7 +13,7 @@ import space.taran.arkbrowser.mvp.presenter.RootPresenter
 import space.taran.arkbrowser.mvp.view.RootView
 import space.taran.arkbrowser.ui.App
 import space.taran.arkbrowser.ui.activity.MainActivity
-import space.taran.arkbrowser.ui.adapter.FileGridRVAdapter
+import space.taran.arkbrowser.ui.adapter.ItemGridRVAdapter
 import kotlinx.android.synthetic.main.dialog_roots_new.view.*
 import kotlinx.android.synthetic.main.fragment_roots.*
 import moxy.MvpAppCompatFragment
@@ -35,8 +35,8 @@ class RootFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
             App.instance.appComponent.inject(this)
         }
 
-    var adapter: FileGridRVAdapter? = null
-    var dialogAdapter: FileGridRVAdapter? = null
+    var adapter: ItemGridRVAdapter? = null
+    var dialogAdapter: ItemGridRVAdapter? = null
     var dialogView: View? = null
     var dialog: AlertDialog? = null
 
@@ -59,7 +59,7 @@ class RootFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
     override fun init() {
         (activity as MainActivity).setSelectedTab(0)
         rv_roots.layoutManager = GridLayoutManager(context, 3)
-        adapter = FileGridRVAdapter(presenter.rootGridPresenter)
+        adapter = ItemGridRVAdapter(presenter.rootGridPresenter)
         (activity as MainActivity).setToolbarVisibility(false)
         rv_roots.adapter = adapter
         fab_roots.setOnClickListener {
@@ -79,7 +79,7 @@ class RootFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
         dialogView = LayoutInflater.from(context!!).inflate(R.layout.dialog_roots_new, null)
         val alertDialogBuilder = AlertDialog.Builder(context!!).setView(dialogView)
         dialogView!!.rv_roots_dialog.layoutManager = GridLayoutManager(context, 2)
-        dialogAdapter = FileGridRVAdapter(presenter.dialogGridPresenter)
+        dialogAdapter = ItemGridRVAdapter(presenter.dialogGridPresenter)
         dialogView!!.rv_roots_dialog.adapter = dialogAdapter
         dialogView!!.btn_roots_dialog_cancel.setOnClickListener {
             presenter.dismissDialog()

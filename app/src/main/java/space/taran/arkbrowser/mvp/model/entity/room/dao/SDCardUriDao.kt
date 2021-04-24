@@ -8,7 +8,6 @@ import space.taran.arkbrowser.mvp.model.entity.room.SDCardUri
 
 @Dao
 interface SDCardUriDao {
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(sdCardUri: SDCardUri): Long
 
@@ -17,6 +16,4 @@ interface SDCardUriDao {
 
     @Query("SELECT * FROM SDCardUri")
     fun getAll(): List<SDCardUri>
-
-
 }

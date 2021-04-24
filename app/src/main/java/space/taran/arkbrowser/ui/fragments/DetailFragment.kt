@@ -9,7 +9,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.chip.Chip
 import space.taran.arkbrowser.R
-import space.taran.arkbrowser.mvp.model.entity.File
+import space.taran.arkbrowser.mvp.model.entity.Resource
 import space.taran.arkbrowser.mvp.model.entity.Root
 import space.taran.arkbrowser.mvp.presenter.DetailPresenter
 import space.taran.arkbrowser.mvp.view.DetailView
@@ -26,20 +26,20 @@ import space.taran.arkbrowser.utils.Tags
 class DetailFragment: MvpAppCompatFragment(), DetailView, BackButtonListener {
     companion object {
         const val ROOT_KEY = "root"
-        const val IMAGES_KEY = "files"
-        const val POS_KEY = "pos"
+        const val RESOURCES_KEY = "resources"
+        const val POSITION_KEY = "pos"
 
-        fun newInstance(root: Root, files: List<File>, pos: Int) = DetailFragment().apply {
+        fun newInstance(root: Root, resources: List<Resource>, pos: Int) = DetailFragment().apply {
             arguments = Bundle().apply {
                 putParcelable(ROOT_KEY, root)
-                putInt(POS_KEY, pos)
-                putParcelableArray(IMAGES_KEY, files.toTypedArray())
+                putInt(POSITION_KEY, pos)
+                putParcelableArray(RESOURCES_KEY, resources.toTypedArray())
             }
         }
     }
 
-    var dialogView: View? = null
-    var dialog: AlertDialog? = null
+    private var dialogView: View? = null
+    private var dialog: AlertDialog? = null
 
     @InjectPresenter
     lateinit var presenter: DetailPresenter
@@ -47,8 +47,8 @@ class DetailFragment: MvpAppCompatFragment(), DetailView, BackButtonListener {
     @ProvidePresenter
     fun providePresenter() = DetailPresenter(
         arguments!!.getParcelable(ROOT_KEY)!!,
-        arguments!!.getParcelableArray(IMAGES_KEY)!!.map { it as File },
-        arguments!!.getInt(POS_KEY)
+        arguments!!.getParcelableArray(RESOURCES_KEY)!!.map { it as Resource },
+        arguments!!.getInt(POSITION_KEY)
     ).apply {
         App.instance.appComponent.inject(this)
     }

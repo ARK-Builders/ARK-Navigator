@@ -1,5 +1,6 @@
 package space.taran.arkbrowser.mvp.view
 
+import android.net.Uri
 import space.taran.arkbrowser.mvp.model.entity.common.TagState
 import moxy.MvpView
 import moxy.viewstate.strategy.AddToEndSingleStrategy
@@ -14,7 +15,7 @@ interface TagsView: MvpView {
     @StateStrategyType(SkipStrategy::class)
     fun setTags(tags: List<TagState>)
     @StateStrategyType(SkipStrategy::class)
-    fun openFile(uri: String, mimeType: String)
+    fun openFile(uri: Uri, mimeType: String)
     @StateStrategyType(SkipStrategy::class)
     fun clearTags()
     fun setToolbarTitle(title: String)

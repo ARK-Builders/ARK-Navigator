@@ -4,8 +4,8 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity
-class RoomRoot (
+class RoomFavorite (
     @PrimaryKey(autoGenerate = true)
-    var id: Long = 0,
+    var id: Long,
     var path: String
 )

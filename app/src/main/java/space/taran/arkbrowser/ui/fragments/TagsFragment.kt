@@ -12,35 +12,33 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.chip.Chip
 import kotlinx.android.synthetic.main.dialog_sort.view.*
 import space.taran.arkbrowser.R
-import space.taran.arkbrowser.mvp.model.entity.File
-import space.taran.arkbrowser.mvp.model.entity.Root
 import space.taran.arkbrowser.mvp.model.entity.common.TagState
 import space.taran.arkbrowser.mvp.presenter.TagsPresenter
 import space.taran.arkbrowser.mvp.view.TagsView
 import space.taran.arkbrowser.ui.App
 import space.taran.arkbrowser.ui.activity.MainActivity
-import space.taran.arkbrowser.ui.adapter.FileGridRVAdapter
+import space.taran.arkbrowser.ui.adapter.ItemGridRVAdapter
 import kotlinx.android.synthetic.main.fragment_tags.*
 import moxy.MvpAppCompatFragment
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
+import space.taran.arkbrowser.mvp.model.entity.Resource
 import space.taran.arkbrowser.utils.SortBy
 
-
-class TagsFragment(val root: Root? = null, val files: List<File>? = null, val state: TagsPresenter.State? = null) : MvpAppCompatFragment(), TagsView {
+class TagsFragment(val rootName: String?, val resources: Set<Resource>) : MvpAppCompatFragment(), TagsView {
 
     @InjectPresenter
     lateinit var presenter: TagsPresenter
 
     @ProvidePresenter
     fun providePresenter() =
-        TagsPresenter(root, files, state!!).apply {
+        TagsPresenter(rootName, resources).apply {
             App.instance.appComponent.inject(this)
         }
 
-    var adapter: FileGridRVAdapter? = null
-    var sortByDialogView: View? = null
-    var sortByDialog: AlertDialog? = null
+    private var adapter: ItemGridRVAdapter? = null
+    private var sortByDialogView: View? = null
+    private var sortByDialog: AlertDialog? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -57,7 +55,7 @@ class TagsFragment(val root: Root? = null, val files: List<File>? = null, val st
         (activity as MainActivity).setSelectedTab(1)
         (activity as MainActivity).setToolbarVisibility(true)
         rv_tags.layoutManager = GridLayoutManager(context, 3)
-        adapter = FileGridRVAdapter(presenter.fileGridPresenter)
+        adapter = ItemGridRVAdapter(presenter.fileGridPresenter)
         rv_tags.adapter = adapter
         setHasOptionsMenu(true)
     }
@@ -67,11 +65,10 @@ class TagsFragment(val root: Root? = null, val files: List<File>? = null, val st
         presenter.onViewResumed()
     }
 
-    override fun openFile(uri: String, mimeType: String) {
+    override fun openFile(uri: Uri, mimeType: String) {
         try {
             val intent = Intent(Intent.ACTION_VIEW)
-            val fileUri = Uri.parse(uri)
-            intent.setDataAndType(fileUri, mimeType)
+            intent.setDataAndType(uri, mimeType)
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             startActivity(intent)
         } catch (e: Exception) {

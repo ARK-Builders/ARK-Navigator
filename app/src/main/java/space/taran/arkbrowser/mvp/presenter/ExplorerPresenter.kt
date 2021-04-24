@@ -1,63 +1,68 @@
 package space.taran.arkbrowser.mvp.presenter
 
+import androidx.core.net.toUri
 import space.taran.arkbrowser.mvp.model.entity.*
-import space.taran.arkbrowser.mvp.model.entity.common.Icons
-import space.taran.arkbrowser.mvp.model.repo.FilesRepo
+import space.taran.arkbrowser.mvp.model.entity.common.Icon
+import space.taran.arkbrowser.mvp.model.repo.ResourcesRepo
 import space.taran.arkbrowser.mvp.model.repo.RoomRepo
-import space.taran.arkbrowser.mvp.model.repo.SynchronizeRepo
-import space.taran.arkbrowser.mvp.presenter.adapter.IFileGridPresenter
+import space.taran.arkbrowser.mvp.model.repo.RootsRepo
+import space.taran.arkbrowser.mvp.presenter.adapter.IItemGridPresenter
 import space.taran.arkbrowser.mvp.view.ExplorerView
 import space.taran.arkbrowser.mvp.view.item.FileItemView
 import space.taran.arkbrowser.navigation.Screens
 import space.taran.arkbrowser.utils.*
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import moxy.MvpPresenter
 import ru.terrakok.cicerone.Router
+import space.taran.arkbrowser.mvp.model.entity.common.IconOrImage
+import space.taran.arkbrowser.mvp.model.repo.FavoritesRepo
+import java.io.File
 import javax.inject.Inject
 
-
 class ExplorerPresenter(var currentFolder: File? = null) : MvpPresenter<ExplorerView>() {
-
-    @Inject
-    lateinit var syncRepo: SynchronizeRepo
-
-    @Inject
-    lateinit var filesRepo: FilesRepo
-
-    @Inject
-    lateinit var roomRepo: RoomRepo
-
     @Inject
     lateinit var router: Router
 
-    val fileGridPresenter = FileGridPresenter()
+    @Inject
+    lateinit var rootsRepo: RootsRepo
+
+    @Inject
+    lateinit var resourcesRepo: ResourcesRepo
+
+    @Inject
+    lateinit var favoritesRepo: FavoritesRepo
+
+    var fileGridPresenter: ItemGridPresenter? = null
     var currentRoot: Root? = null
 
-    inner class FileGridPresenter :
-        IFileGridPresenter {
+    inner class ItemGridPresenter(var files: List<MarkableFile>) :
+        IItemGridPresenter {
 
-        var files = mutableListOf<File>()
+        init {
+            this.files = files.sortedWith(markableFileComparator)
+        }
 
         override fun getCount() = files.size
 
         override fun bindView(view: FileItemView) {
-            val file = files[view.pos]
+            val (favorite, file) = files[view.pos]
             view.setText(file.name)
-            if (file.isFolder)
-                view.setIcon(Icons.FOLDER, null)
-            else {
-                if (file.isImage())
-                    view.setIcon(Icons.IMAGE, file.path)
-                else
-                    view.setIcon(Icons.FILE, null)
+            if (file.isDirectory) {
+                view.setIcon(IconOrImage(icon = Icon.FOLDER))
+            } else {
+                //todo: improve image type recognition and remove copy-paste
+                if (file.path.endsWith(".png") || file.path.endsWith(".jpg") || file.path.endsWith(".jpeg")) {
+                    view.setIcon(IconOrImage(image = file))
+                } else {
+                    view.setIcon(IconOrImage(icon = Icon.FILE))
+                }
             }
-            view.setFav(file.fav)
+            view.setFav(favorite)
         }
 
-        override fun onCardClicked(pos: Int) {
-            val file = files[pos]
-            if (file.isFolder) {
-                router.navigateTo(Screens.ExplorerScreen(file))
+        override fun itemClicked(pos: Int) {
+            val (_, file) = files[pos]
+            if (file.isDirectory) {
+                router.navigateTo(Screens.ExplorerScreen(file.toUri()))
             }
         }
     }
@@ -82,25 +87,19 @@ class ExplorerPresenter(var currentFolder: File? = null) : MvpPresenter<Explorer
     private fun initHomeFiles() {
         viewState.setFavoriteFabVisibility(false)
         viewState.setTagsFabVisibility(false)
-        roomRepo.getFavFiles().observeOn(AndroidSchedulers.mainThread()).subscribe(
-            { favFiles ->
-                val extFolders = filesRepo.fileDataSource.getExtSdCards()
-                fileGridPresenter.files.clear()
-                fileGridPresenter.files.addAll(extFolders)
-                fileGridPresenter.files.addAll(favFiles)
-                fileGridPresenter.files =
-                    fileGridPresenter.files.sortedWith(filesComparator()).toMutableList()
-                viewState.updateAdapter()
-                viewState.setTitle("/")
-            },
-            {
-                it.printStackTrace()
-            }
-        )
+        val favorites = favoritesRepo.getAll()
+        val extFolders = resourcesRepo.fileDataSource.getExtSdCards()
+
+        fileGridPresenter = ItemGridPresenter(
+            extFolders.map {_ -> false}.zip(extFolders) +
+                favorites.map {_ -> true}.zip(favorites.map { it.file }))
+
+        viewState.updateAdapter()
+        viewState.setTitle("/")
     }
 
     private fun initExplorerFiles() {
-        val extSdCard = filesRepo.fileDataSource.getExtSdCards().find { extSd ->
+        val extSdCard = resourcesRepo.fileDataSource.getExtSdCards().find { extSd ->
             extSd.path == currentFolder!!.path
         }
         extSdCard?.let {
@@ -108,7 +107,7 @@ class ExplorerPresenter(var currentFolder: File? = null) : MvpPresenter<Explorer
             viewState.setTagsFabVisibility(false)
         } ?: let {
             viewState.setFavoriteFabVisibility(true)
-            currentRoot = syncRepo.getRootByPath(currentFolder!!.path)
+            currentRoot = rootsRepo.getRootByFile(currentFolder!!)
             currentRoot?.let {
                 viewState.setTagsFabVisibility(true)
             } ?: viewState.setTagsFabVisibility(false)
@@ -116,23 +115,16 @@ class ExplorerPresenter(var currentFolder: File? = null) : MvpPresenter<Explorer
 
         viewState.setTitle(currentFolder!!.path)
 
-        roomRepo.getFavFiles().observeOn(AndroidSchedulers.mainThread()).subscribe(
-            { roomFiles ->
-                val files = filesRepo.fileDataSource.list(currentFolder!!.path)
-                roomFiles.forEach { roomFile ->
-                    files.forEach { file ->
-                        if (roomFile.path == file.path)
-                            file.fav = roomFile.fav
-                    }
-                }
-                fileGridPresenter.files.clear()
-                fileGridPresenter.files.addAll(files.sortedWith(filesComparator()))
-                viewState.updateAdapter()
-            },
-            {
-                it.printStackTrace()
-            }
-        )
+        val favorites = roomRepo.getFavorites()
+            .map { it.file }
+            .toSet()
+
+        val filesHere = listChildren(currentFolder!!)
+            .map { Pair(favorites.contains(it), it) }
+            .sortedWith(markableFileComparator)
+
+        fileGridPresenter = ItemGridPresenter(filesHere)
+        viewState.updateAdapter()
     }
 
     fun dismissDialog() {
@@ -147,23 +139,20 @@ class ExplorerPresenter(var currentFolder: File? = null) : MvpPresenter<Explorer
         currentRoot?.let {
             router.newRootScreen(
                 Screens.TagsScreen(
-                    it,
-                    fileGridPresenter.files,
-                    TagsPresenter.State.FILES
-                )
-            )
+                    currentFolder!!.name,
+                    resourcesRepo.retrieveResources(currentFolder!!)))
         }
     }
 
     fun favoriteChanged() {
-        currentFolder!!.fav = true
-        roomRepo.insertFile(currentFolder!!).subscribe()
+        val folder = currentFolder!!
+        val favorite = Favorite(name = folder.name, file = folder)
+
+        roomRepo.insertFavorite(favorite)
     }
 
     fun backClicked(): Boolean {
         router.exit()
         return true
     }
-
-
 }

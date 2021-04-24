@@ -10,6 +10,7 @@ import space.taran.arkbrowser.mvp.view.item.DetailItemView
 import space.taran.arkbrowser.utils.loadImage
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.item_image.view.*
+import java.io.File
 
 class DetailVPAdapter(
     val presenter: IDetailListPresenter
@@ -36,8 +37,8 @@ class DetailVPAdapter(
 
         override var pos = -1
 
-        override fun setImage(path: String) = with(containerView) {
-            loadImage(path, iv_image)
+        override fun setImage(file: File): Unit = with(containerView) {
+            loadImage(file, iv_image)
         }
     }
 }

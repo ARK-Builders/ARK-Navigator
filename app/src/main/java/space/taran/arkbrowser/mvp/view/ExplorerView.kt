@@ -1,5 +1,6 @@
 package space.taran.arkbrowser.mvp.view
 
+import android.net.Uri
 import moxy.MvpView
 import moxy.viewstate.strategy.AddToEndSingleStrategy
 import moxy.viewstate.strategy.SkipStrategy
@@ -19,5 +20,5 @@ interface ExplorerView: MvpView {
     @StateStrategyType(SkipStrategy::class)
     fun showToast(msg: String)
     @StateStrategyType(SkipStrategy::class)
-    fun openFile(uri: String, mimeType: String)
+    fun openFile(uri: Uri, mimeType: String)
 }

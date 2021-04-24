@@ -7,16 +7,17 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import space.taran.arkbrowser.R
-import space.taran.arkbrowser.mvp.model.entity.common.Icons
-import space.taran.arkbrowser.mvp.presenter.adapter.IFileGridPresenter
+import space.taran.arkbrowser.mvp.presenter.adapter.IItemGridPresenter
 import space.taran.arkbrowser.mvp.view.item.FileItemView
 import space.taran.arkbrowser.utils.loadImage
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.item_file_grid.view.*
+import space.taran.arkbrowser.mvp.model.entity.common.IconOrImage
+import space.taran.arkbrowser.utils.iconToImageResource
 
-class FileGridRVAdapter(
-    val presenter: IFileGridPresenter
-): RecyclerView.Adapter<FileGridRVAdapter.ViewHolder>() {
+class ItemGridRVAdapter(
+    val presenter: IItemGridPresenter
+): RecyclerView.Adapter<ItemGridRVAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         ViewHolder(
@@ -34,7 +35,7 @@ class FileGridRVAdapter(
         presenter.bindView(holder)
 
         holder.itemView.setOnClickListener {
-            presenter.onCardClicked(position)
+            presenter.itemClicked(position)
         }
     }
 
@@ -44,25 +45,12 @@ class FileGridRVAdapter(
 
         override var pos = -1
 
-        override fun setIcon(resourceType: Icons, path: String?) = with(containerView) {
-            when(resourceType) {
-                Icons.FOLDER -> {
-                    iv.setImageResource(R.drawable.ic_baseline_folder)
-                    iv.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.gray))
-                }
-                Icons.PLUS -> {
-                    iv.setImageResource(R.drawable.ic_baseline_add)
-                    iv.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.gray))
-                }
-                Icons.FILE -> {
-                    iv.setImageResource(R.drawable.ic_file)
-                    iv.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.gray))
-                }
-                Icons.ROOT -> {
-                    iv.setImageResource(R.drawable.ic_root)
-                    iv.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.gray))
-                }
-                Icons.IMAGE -> loadImage(path!!, iv)
+        override fun setIcon(icon: IconOrImage): Unit = with(containerView) {
+            if (icon.icon != null) {
+                iv.setImageResource(iconToImageResource(icon.icon))
+                iv.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.gray))
+            } else {
+                loadImage(icon.image!!, iv)
             }
         }
 
@@ -77,5 +65,4 @@ class FileGridRVAdapter(
             tv_title.text = title
         }
     }
-
 }

@@ -1,11 +1,10 @@
 package space.taran.arkbrowser.mvp.presenter
 
-import space.taran.arkbrowser.mvp.model.repo.SynchronizeRepo
-import space.taran.arkbrowser.mvp.model.repo.FilesRepo
+import space.taran.arkbrowser.mvp.model.repo.RootsRepo
+import space.taran.arkbrowser.mvp.model.repo.ResourcesRepo
 import space.taran.arkbrowser.mvp.model.repo.RoomRepo
 import space.taran.arkbrowser.mvp.view.MainView
 import space.taran.arkbrowser.navigation.Screens
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import moxy.MvpPresenter
 import ru.terrakok.cicerone.Router
 import space.taran.arkbrowser.mvp.model.entity.Root
@@ -13,16 +12,16 @@ import javax.inject.Inject
 
 class MainPresenter: MvpPresenter<MainView>() {
     @Inject
-    lateinit var filesRepo: FilesRepo
-
-    @Inject
     lateinit var router: Router
 
     @Inject
-    lateinit var syncRepo: SynchronizeRepo
+    lateinit var roomRepo: RoomRepo
 
     @Inject
-    lateinit var roomRepo: RoomRepo
+    lateinit var rootsRepo: RootsRepo
+
+    @Inject
+    lateinit var resourcesRepo: ResourcesRepo
 
     override fun onFirstViewAttach() {
         super.onFirstViewAttach()
@@ -41,7 +40,7 @@ class MainPresenter: MvpPresenter<MainView>() {
     private fun loadSdCardUris() {
         roomRepo.getSdCardUris().subscribe(
             { list ->
-                filesRepo.documentDataSource.sdCardUris = list.toMutableList()
+                resourcesRepo.documentDataSource.sdCardUris = list.toMutableList()
                 loadAndSyncRoots()
             },
             {}
@@ -52,10 +51,10 @@ class MainPresenter: MvpPresenter<MainView>() {
         roomRepo.getAllRoots().observeOn(AndroidSchedulers.mainThread()).subscribe(
             { list ->
                 list.forEach { root ->
-                    val storageVersion = filesRepo.readStorageVersion(root.storagePath)
-                    if (storageVersion != FilesRepo.STORAGE_VERSION)
+                    val storageVersion = resourcesRepo.readStorageVersion(root.storage)
+                    if (storageVersion != ResourcesRepo.STORAGE_VERSION)
                         storageVersionDifferent(storageVersion, root)
-                    syncRepo.synchronizeRoot(root)
+                    rootsRepo.synchronizeRoot(root)
                 }
                 router.replaceScreen(Screens.RootScreen())
             },
@@ -69,7 +68,7 @@ class MainPresenter: MvpPresenter<MainView>() {
                list.forEach {
                    if (it.uri == null) {
                        it.uri = uri
-                       filesRepo.documentDataSource.sdCardUris.add(it)
+                       resourcesRepo.documentDataSource.sdCardUris.add(it)
                        roomRepo.insertSdCardUri(it).subscribe()
                    }
                }
@@ -82,7 +81,9 @@ class MainPresenter: MvpPresenter<MainView>() {
     }
 
     fun goToTagsScreen() {
-        router.newRootScreen(Screens.TagsScreen(state = TagsPresenter.State.ALL_ROOTS))
+        router.newRootScreen(Screens.TagsScreen(
+            rootName = null,
+            resources = rootsRepo.roots.values.flatMap { it.resources }))
     }
 
     fun goToExplorerScreen() {
@@ -94,7 +95,7 @@ class MainPresenter: MvpPresenter<MainView>() {
     }
 
     private fun storageVersionDifferent(fileStorageVersion: Int, root: Root) {
-        viewState.showToast("${root.storagePath} has a different version")
+        viewState.showToast("${root.storage.path} has a different version")
     }
 
 }

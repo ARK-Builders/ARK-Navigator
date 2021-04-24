@@ -1,8 +1,8 @@
 package space.taran.arkbrowser.mvp.presenter
 
-import space.taran.arkbrowser.mvp.model.entity.File
+import space.taran.arkbrowser.mvp.model.entity.Resource
 import space.taran.arkbrowser.mvp.model.entity.Root
-import space.taran.arkbrowser.mvp.model.repo.FilesRepo
+import space.taran.arkbrowser.mvp.model.repo.ResourcesRepo
 import space.taran.arkbrowser.mvp.model.repo.RoomRepo
 import space.taran.arkbrowser.mvp.presenter.adapter.IDetailListPresenter
 import space.taran.arkbrowser.mvp.view.DetailView
@@ -13,11 +13,11 @@ import space.taran.arkbrowser.utils.Constants.Companion.EMPTY_TAG
 import space.taran.arkbrowser.utils.Converters.Companion.tagsFromString
 import javax.inject.Inject
 
-class DetailPresenter(val root: Root, val files: List<File>, val pos: Int) :
+class DetailPresenter(val root: Root, val resources: List<Resource>, val pos: Int) :
     MvpPresenter<DetailView>() {
 
     @Inject
-    lateinit var filesRepo: FilesRepo
+    lateinit var resourcesRepo: ResourcesRepo
 
     @Inject
     lateinit var router: Router
@@ -25,20 +25,20 @@ class DetailPresenter(val root: Root, val files: List<File>, val pos: Int) :
     @Inject
     lateinit var roomRepo: RoomRepo
 
-    var currentFile: File? = null
+    private var currentResource: Resource = resources[0]
 
     val detailListPresenter = DetailListPresenter()
 
     inner class DetailListPresenter :
         IDetailListPresenter {
 
-        var files = mutableListOf<File>()
+        var files = mutableListOf<Resource>()
 
         override fun getCount() = files.size
 
         override fun bindView(view: DetailItemView) {
             val image = files[view.pos]
-            view.setImage(image.path)
+            view.setImage(image.file)
         }
     }
 
@@ -46,42 +46,31 @@ class DetailPresenter(val root: Root, val files: List<File>, val pos: Int) :
         super.onFirstViewAttach()
         viewState.init()
 
-        detailListPresenter.files = files.toMutableList()
+        detailListPresenter.files = resources.toMutableList()
         viewState.updateAdapter()
         viewState.setCurrentItem(pos)
     }
 
     fun imageChanged(newPos: Int) {
-        currentFile = files[newPos]
-        viewState.setImageTags(currentFile!!.tags)
-        viewState.setTitle(currentFile!!.name)
+        currentResource = resources[newPos]
+        viewState.setImageTags(currentResource.tags)
+        viewState.setTitle(currentResource.name)
     }
 
     fun fabClicked() {
-        viewState.showTagsDialog(currentFile!!.tags)
+        viewState.showTagsDialog(currentResource.tags)
     }
 
     fun chipGroupClicked() {
-        viewState.showTagsDialog(currentFile!!.tags)
+        viewState.showTagsDialog(currentResource.tags)
     }
 
     fun tagRemoved(tag: String) {
-        currentFile!!.tags = currentFile!!.tags.minus(tag)
-        if (currentFile!!.synchronized)
-            roomRepo.insertFile(currentFile!!).subscribe()
+        currentResource.tags = currentResource.tags - tag
+        roomRepo.insertResource(currentResource)
 
-        if (root.synchronized) {
-            filesRepo.writeToStorageAsync(root.storagePath, root.files).subscribe(
-                {
-                    root.storageLastModified = filesRepo.getRootLastModified(root)
-                    roomRepo.insertRoot(root).subscribe()
-                },
-                {}
-            )
-        }
-
-        viewState.setImageTags(currentFile!!.tags)
-        viewState.setDialogTags(currentFile!!.tags)
+        viewState.setImageTags(currentResource.tags)
+        viewState.setDialogTags(currentResource.tags)
     }
 
     // returns true if tags were actually added
@@ -91,23 +80,18 @@ class DetailPresenter(val root: Root, val files: List<File>, val pos: Int) :
             return false
         }
 
-        currentFile!!.tags = currentFile!!.tags.plus(tags)
+        currentResource.tags = currentResource.tags.plus(tags)
 
-        if (currentFile!!.synchronized)
-            roomRepo.insertFile(currentFile!!).subscribe()
+        if (currentResource.synchronized)
+            roomRepo.insertResource(currentResource)
 
         if (root.synchronized) {
-            filesRepo.writeToStorageAsync(root.storagePath, root.files).subscribe(
-                {
-                    root.storageLastModified = filesRepo.getRootLastModified(root)
-                    roomRepo.insertRoot(root).subscribe()
-                },
-                {}
-            )
+            resourcesRepo.writeToStorageAsync(root.storage, root.resources)
+            roomRepo.insertRoot(root)
         }
 
-        viewState.setImageTags(currentFile!!.tags)
-        viewState.setDialogTags(currentFile!!.tags)
+        viewState.setImageTags(currentResource.tags)
+        viewState.setDialogTags(currentResource.tags)
         viewState.closeDialog()
 
         return true

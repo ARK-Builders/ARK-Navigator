@@ -1,27 +1,28 @@
 package space.taran.arkbrowser.mvp.presenter
 
 import space.taran.arkbrowser.mvp.model.entity.*
-import space.taran.arkbrowser.mvp.model.entity.common.Icons
+import space.taran.arkbrowser.mvp.model.entity.common.Icon
 import space.taran.arkbrowser.mvp.model.entity.room.SDCardUri
-import space.taran.arkbrowser.mvp.model.repo.FilesRepo
+import space.taran.arkbrowser.mvp.model.repo.ResourcesRepo
 import space.taran.arkbrowser.mvp.model.repo.RoomRepo
-import space.taran.arkbrowser.mvp.model.repo.SynchronizeRepo
-import space.taran.arkbrowser.mvp.presenter.adapter.IFileGridPresenter
+import space.taran.arkbrowser.mvp.model.repo.RootsRepo
+import space.taran.arkbrowser.mvp.model.entity.common.IconOrImage
+import space.taran.arkbrowser.mvp.presenter.adapter.IItemGridPresenter
 import space.taran.arkbrowser.mvp.view.RootView
 import space.taran.arkbrowser.mvp.view.item.FileItemView
 import space.taran.arkbrowser.navigation.Screens
-import space.taran.arkbrowser.utils.filesComparator
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import space.taran.arkbrowser.utils.resourceComparator
+import space.taran.arkbrowser.utils.SortBy
+import space.taran.arkbrowser.utils.listChildren
 import moxy.InjectViewState
 import moxy.MvpPresenter
 import ru.terrakok.cicerone.Router
+import java.io.File
+import java.lang.IllegalStateException
 import javax.inject.Inject
 
 @InjectViewState
 class RootPresenter: MvpPresenter<RootView>() {
-    @Inject
-    lateinit var syncRepo: SynchronizeRepo
-
     @Inject
     lateinit var router: Router
 
@@ -29,34 +30,43 @@ class RootPresenter: MvpPresenter<RootView>() {
     lateinit var roomRepo: RoomRepo
 
     @Inject
-    lateinit var filesRepo: FilesRepo
+    lateinit var rootsRepo: RootsRepo
 
-    val rootGridPresenter = FileGridPresenter()
-    val dialogGridPresenter = DialogFileGridPresenter()
+    @Inject
+    lateinit var resourcesRepo: ResourcesRepo
+
+    val rootGridPresenter = ItemGridPresenter()
+    val dialogGridPresenter = DialogItemGridPresenter()
     var pickedDir: File? = null
     var dialogIsOpen: Boolean = false
 
-    inner class FileGridPresenter :
-        IFileGridPresenter {
+    inner class ItemGridPresenter :
+        IItemGridPresenter {
 
-        var roots = mutableListOf<Root>()
+        private var roots: List<Root> = listOf()
+
+        fun load(roots: List<Root>) {
+            this.roots = roots
+        }
 
         override fun getCount() = roots.size
 
         override fun bindView(view: FileItemView) {
             val root = roots[view.pos]
             view.setText(root.name)
-            view.setIcon(Icons.ROOT, null)
+            view.setIcon(IconOrImage(icon = Icon.ROOT))
         }
 
-        override fun onCardClicked(pos: Int) {
+        override fun itemClicked(pos: Int) {
             val root = roots[pos]
-            router.replaceScreen(Screens.TagsScreen(root = root, state = TagsPresenter.State.SINGLE_ROOT))
+            router.replaceScreen(Screens.TagsScreen(
+                rootName = root.name,
+                resources = resourcesRepo.retrieveResources(root.folder)))
         }
     }
 
-    inner class DialogFileGridPresenter: IFileGridPresenter {
-        var files = mutableListOf<File>()
+    inner class DialogItemGridPresenter: IItemGridPresenter {
+        var files = mutableListOf<Resource>()
 
         override fun getCount() = files.size
 
@@ -64,22 +74,23 @@ class RootPresenter: MvpPresenter<RootView>() {
             val file = files[view.pos]
             view.setText(file.name)
             if (file.isFolder)
-                view.setIcon(Icons.FOLDER, null)
+                view.setIcon(Icon.FOLDER, null)
             else {
                 if (file.isImage())
-                    view.setIcon(Icons.IMAGE, file.path)
+                    view.setIcon(Icon.IMAGE, file.file)
                 else
-                    view.setIcon(Icons.FILE, file.path)
+                    view.setIcon(Icon.FILE, file.file)
             }
         }
 
-        override fun onCardClicked(pos: Int) {
+        override fun itemClicked(pos: Int) {
             val file = files[pos]
             if (file.isFolder) {
-                pickedDir = file
-                viewState.setDialogPath(pickedDir!!.path)
+                pickedDir = file.file
+                viewState.setDialogPath(pickedDir!!)
                 files.clear()
-                files.addAll(filesRepo.fileDataSource.list(file.path).sortedWith(filesComparator()))
+                files.addAll(resourcesRepo.fileDataSource.list(file.file)
+                    .sortedWith(resourceComparator(SortBy.NAME)))
                 viewState.updateDialogAdapter()
             }
         }
@@ -91,38 +102,31 @@ class RootPresenter: MvpPresenter<RootView>() {
     }
 
     fun onViewResumed() {
-        rootGridPresenter.roots.clear()
-        val sortedRoots = syncRepo.roots.toMutableList()
-        sortedRoots.sortBy { it.name }
-        rootGridPresenter.roots.addAll(sortedRoots)
+        rootGridPresenter.load(rootsRepo.getRoots().sortedBy { it.name })
         viewState.updateRootAdapter()
     }
 
     fun rootPicked() {
-        if (pickedDir == null)
-            return
-        val storagePath = filesRepo.createStorage(pickedDir!!.path)
-        if (storagePath == null) {
+        if (pickedDir == null) {
+            throw IllegalStateException("Nothing is really picked")
+        }
+
+        val root = Root(name = pickedDir!!.name, folder = pickedDir!!)
+        rootsRepo.insertRoot(root)
+
+        val storage = resourcesRepo.createStorage(pickedDir!!)
+        if (storage == null) {
             requestSdCardUri()
             return
         }
 
-        val root = Root(name = pickedDir!!.name, parentPath = pickedDir!!.path, storagePath = storagePath)
-        roomRepo.insertRoot(root).observeOn(AndroidSchedulers.mainThread()).subscribe(
-            { id ->
-                root.id = id
-                syncRepo.synchronizeRoot(root)
-                rootGridPresenter.roots.clear()
-                val sortedRoots = syncRepo.roots.toMutableList()
-                sortedRoots.sortBy { it.name }
-                rootGridPresenter.roots.addAll(sortedRoots)
-                viewState.updateRootAdapter()
-                dismissDialog()
-            },
-            {
-               it.printStackTrace()
-            }
-        )
+        rootsRepo.synchronizeRoot(root)
+        rootGridPresenter.roots.clear()
+        val sortedRoots = rootsRepo.roots.toMutableList()
+        sortedRoots.sortBy { it.name }
+        rootGridPresenter.roots.addAll(sortedRoots)
+        viewState.updateRootAdapter()
+        dismissDialog()
     }
 
     fun dismissDialog() {
@@ -135,12 +139,12 @@ class RootPresenter: MvpPresenter<RootView>() {
         dialogIsOpen = true
         pickedDir = null
         dialogGridPresenter.files.clear()
-        dialogGridPresenter.files.addAll(filesRepo.fileDataSource.getExtSdCards())
+        dialogGridPresenter.files.addAll(resourcesRepo.fileDataSource.getExtSdCards())
         viewState.updateDialogAdapter()
     }
 
     private fun requestSdCardUri() {
-        val basePath = filesRepo.fileDataSource.getExtSdCardBaseFolder(pickedDir!!.path)
+        val basePath = resourcesRepo.fileDataSource.getExtSdCardBaseFolder(pickedDir!!.path)
         roomRepo.getSdCardUriByPath(basePath!!).observeOn(AndroidSchedulers.mainThread())
             .subscribe({
                 it.uri = null
@@ -156,9 +160,9 @@ class RootPresenter: MvpPresenter<RootView>() {
     fun backClicked(): Boolean {
         if (dialogIsOpen) {
             if (pickedDir != null) {
-                val extPaths = filesRepo.fileDataSource.getExtSdCards()
+                val extPaths = resourcesRepo.fileDataSource.getExtSdCards()
                 extPaths.forEach {
-                    if (pickedDir!!.path ==  it.path) {
+                    if (pickedDir == it.path) {
                         pickedDir = null
                         dialogGridPresenter.files.clear()
                         dialogGridPresenter.files.addAll(extPaths)
@@ -168,17 +172,19 @@ class RootPresenter: MvpPresenter<RootView>() {
                     }
                 }
 
-                val parent = filesRepo.fileDataSource.getParent(pickedDir!!.path)
-                pickedDir = parent
-                val files = filesRepo.fileDataSource.list(pickedDir!!.path)
-                viewState.setDialogPath(pickedDir!!.path)
+                pickedDir = pickedDir.parentFile
+                val files = listChildren(pickedDir!!)
+                viewState.setDialogPath(pickedDir!!)
                 dialogGridPresenter.files.clear()
-                dialogGridPresenter.files.addAll(files.sortedWith(filesComparator()))
+                dialogGridPresenter.files.addAll(
+                    files.sortedWith(resourceComparator(SortBy.NAME)))
                 viewState.updateDialogAdapter()
-            } else
+            } else {
                 viewState.closeChooserDialog()
-        } else
+            }
+        } else {
             router.exit()
+        }
 
         return true
     }

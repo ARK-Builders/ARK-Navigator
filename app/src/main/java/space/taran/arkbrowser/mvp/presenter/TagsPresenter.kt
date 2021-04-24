@@ -1,25 +1,24 @@
 package space.taran.arkbrowser.mvp.presenter
 
-import space.taran.arkbrowser.mvp.model.entity.File
-import space.taran.arkbrowser.mvp.model.entity.common.Icons
+import androidx.documentfile.provider.DocumentFile
+import space.taran.arkbrowser.mvp.model.entity.Resource
+import space.taran.arkbrowser.mvp.model.entity.common.Icon
 import space.taran.arkbrowser.mvp.model.entity.Root
 import space.taran.arkbrowser.mvp.model.entity.common.TagState
-import space.taran.arkbrowser.mvp.model.repo.SynchronizeRepo
-import space.taran.arkbrowser.mvp.model.repo.FilesRepo
+import space.taran.arkbrowser.mvp.model.repo.RootsRepo
+import space.taran.arkbrowser.mvp.model.repo.ResourcesRepo
 import space.taran.arkbrowser.mvp.model.repo.RoomRepo
-import space.taran.arkbrowser.mvp.presenter.adapter.IFileGridPresenter
+import space.taran.arkbrowser.mvp.presenter.adapter.IItemGridPresenter
 import space.taran.arkbrowser.mvp.view.TagsView
 import space.taran.arkbrowser.mvp.view.item.FileItemView
 import space.taran.arkbrowser.navigation.Screens
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.core.Observer
-import io.reactivex.rxjava3.disposables.Disposable
 import moxy.MvpPresenter
 import ru.terrakok.cicerone.Router
+import space.taran.arkbrowser.mvp.model.entity.common.IconOrImage
 import space.taran.arkbrowser.utils.*
 import javax.inject.Inject
 
-class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
+class TagsPresenter(val rootName: String?, val allResources: Set<Resource>) :
     MvpPresenter<TagsView>() {
 
     enum class State {
@@ -27,7 +26,7 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
     }
 
     @Inject
-    lateinit var syncRepo: SynchronizeRepo
+    lateinit var syncRepo: RootsRepo
 
     @Inject
     lateinit var router: Router
@@ -36,52 +35,53 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
     lateinit var roomRepo: RoomRepo
 
     @Inject
-    lateinit var filesRepo: FilesRepo
+    lateinit var filesRepo: ResourcesRepo
 
-    val fileGridPresenter = FileGridPresenter()
+    val fileGridPresenter = ItemGridPresenter()
     var syncDisposable: Disposable? = null
     var tagStates = mutableListOf<TagState>()
-    var allFiles = mutableListOf<File>()
     var sortBy = SortBy.NAME
     var isReversedSort = false
-    var displayFiles = mutableListOf<File>()
+
+    var selectedResources = setOf<Resource>()
 
     var isTagsOff = false
 
-    inner class FileGridPresenter :
-        IFileGridPresenter {
+    inner class ItemGridPresenter :
+        IItemGridPresenter {
 
-        var files = mutableListOf<File>()
+        var resources = mutableListOf<Resource>()
 
-        override fun getCount() = files.size
+        override fun getCount() = resources.size
 
         override fun bindView(view: FileItemView) {
-            val file = files[view.pos]
-            view.setText(file.name)
-            if (file.isImage())
-                view.setIcon(Icons.IMAGE, file.path)
-            else
-                view.setIcon(Icons.FILE, file.path)
+            val resource = resources[view.pos]
+            view.setText(resource.name)
+            if (resource.isImage()) {
+                view.setIcon(IconOrImage(image = resource.file))
+            } else {
+                view.setIcon(IconOrImage(icon = Icon.FILE))
+            }
         }
 
-        override fun onCardClicked(pos: Int) {
-            val file = files[pos]
-            if (file.isImage()) {
-                val sortedFiles = if (isReversedSort) displayFiles.reversed() else displayFiles
-                val images = sortedFiles.filter { it.isImage() }
-                val newPos = images.indexOf(file)
+        override fun itemClicked(pos: Int) {
+            val resource = resources[pos]
+            if (resource.isImage()) {
+                val images = selectedResources.filter { it.isImage() }
+                val newPos = images.indexOf(resource)
                 router.navigateTo(
                     Screens.DetailScreen(
-                        syncRepo.getRootForId(file.rootId!!)!!,
+                        syncRepo.getRootById(resource.rootId!!)!!,
                         images,
                         newPos
                     )
                 )
-            } else
+            } else {
                 viewState.openFile(
-                    filesRepo.fileDataSource.getUriForFileByProvider(file.path),
-                    filesRepo.documentDataSource.getMimeType(file.path)
+                    filesRepo.fileDataSource.getUriForFileByProvider(resource.file),
+                    DocumentFile.fromFile(resource.file).type!!
                 )
+            }
         }
     }
 
@@ -101,48 +101,48 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
     override fun onFirstViewAttach() {
         super.onFirstViewAttach()
         viewState.init()
-        when (state) {
-            State.SINGLE_ROOT -> initFromRoot()
-            State.FILES -> initFromFiles()
-            State.ALL_ROOTS -> initFromAllRoots()
-        }
+        selectedResources = allResources
+        applyTagsToFiles()
+
+        viewState.setToolbarTitle(rootName ?: "All resources")
     }
 
     private fun initFromRoot() {
-        allFiles.clear()
-        allFiles.addAll(root!!.files)
-        displayFiles.clear()
-        displayFiles.addAll(allFiles)
-        applyTagsToFiles()
-        viewState.setToolbarTitle(root.name)
+
+
+        viewState.setToolbarTitle(rootName)
         syncRepo.getSyncObservable(root)?.observeOn(AndroidSchedulers.mainThread())
             ?.subscribe(getSyncObserver(root))
     }
 
     private fun initFromFiles() {
         viewState.setToolbarTitle(root!!.name)
-        allFiles.clear()
-        files!!.forEach { file ->
-            root.files.forEach { rootFile ->
+
+        val buffer = mutableListOf<Resource>()
+        resources!!.forEach { file ->
+            root.resources.forEach { rootFile ->
                 if (file.path == rootFile.path)
-                    allFiles.add(rootFile)
+                    buffer.add(rootFile)
             }
         }
-        displayFiles.clear()
-        displayFiles.addAll(allFiles)
+        allResources = buffer.toSet()
+
+        selectedResources = allResources
         applyTagsToFiles()
     }
 
     private fun initFromAllRoots() {
         viewState.setToolbarTitle("All roots")
-        allFiles.clear()
+
+        val buffer = mutableListOf<Resource>()
         syncRepo.roots.forEach { root ->
-            allFiles.addAll(root.files)
+            buffer.addAll(root.resources)
             syncRepo.getSyncObservable(root)?.observeOn(AndroidSchedulers.mainThread())
                 ?.subscribe(getSyncObserver(root))
         }
-        displayFiles.clear()
-        displayFiles.addAll(allFiles)
+        allResources = buffer.toSet()
+
+        selectedResources = allResources
         applyTagsToFiles()
     }
 
@@ -197,16 +197,16 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
         }
 
         if (tagStates.none { tagState -> tagState.isChecked }) {
-            displayFiles.clear()
-            displayFiles.addAll(allFiles)
+            selectedResources.clear()
+            selectedResources.addAll(allResources)
 
             sortAndUpdateFiles()
             sortAndUpdateTags()
             return
         }
 
-        val filteredFiles = mutableListOf<File>()
-        allFiles.forEach allFiles@{ file ->
+        val filteredFiles = mutableListOf<Resource>()
+        allResources.forEach allFiles@{ file ->
             var isFileFit = true
             tagStates.forEach { tagState ->
                 if (tagState.isChecked) {
@@ -224,32 +224,30 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
             }
         }
 
-        displayFiles.clear()
-        displayFiles.addAll(filteredFiles)
+        selectedResources.clear()
+        selectedResources.addAll(filteredFiles)
         sortAndUpdateFiles()
         sortAndUpdateTags()
     }
 
     private fun findUntaggedFiles() {
-        val filteredFiles = mutableListOf<File>()
-        allFiles.forEach { file ->
-            if (file.tags.isEmpty())
-                filteredFiles.add(file)
+        val filteredFiles = allResources.filter { file ->
+            file.tags.isEmpty()
         }
 
-        displayFiles.clear()
-        displayFiles.addAll(filteredFiles)
+        selectedResources.clear()
+        selectedResources.addAll(filteredFiles)
         sortAndUpdateFiles()
         tagStates.clear()
         sortAndUpdateTags()
     }
 
-    private fun getSyncObserver(root: Root) = object : Observer<File> {
+    private fun getSyncObserver(root: Root) = object : Observer<Resource> {
         override fun onSubscribe(d: Disposable?) {
             syncDisposable = d
         }
 
-        override fun onNext(syncFile: File) {
+        override fun onNext(syncResource: Resource) {
 
         }
 
@@ -259,12 +257,9 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
     }
 
     private fun sortAndUpdateFiles() {
-        displayFiles.sortWith(filesComparator(sortBy))
-        fileGridPresenter.files.clear()
-        if (isReversedSort)
-            fileGridPresenter.files.addAll(displayFiles.reversed())
-        else
-            fileGridPresenter.files.addAll(displayFiles)
+        selectedResources.sortWith(resourceComparator(sortBy, isReversedSort))
+        fileGridPresenter.resources.clear()
+        fileGridPresenter.resources.addAll(selectedResources)
         viewState.updateAdapter()
     }
 
@@ -276,7 +271,7 @@ class TagsPresenter(val root: Root?, val files: List<File>?, val state: State) :
 
     private fun setupTags() {
         val filesTags = HashSet<Tag>()
-        allFiles.forEach { file ->
+        allResources.forEach { file ->
             file.tags.forEach { tag ->
                 filesTags.add(tag)
             }

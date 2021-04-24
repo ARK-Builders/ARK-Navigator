@@ -11,23 +11,23 @@ import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import space.taran.arkbrowser.R
-import space.taran.arkbrowser.mvp.model.entity.File
 import space.taran.arkbrowser.mvp.presenter.ExplorerPresenter
 import space.taran.arkbrowser.mvp.view.ExplorerView
 import space.taran.arkbrowser.ui.App
 import space.taran.arkbrowser.ui.activity.MainActivity
-import space.taran.arkbrowser.ui.adapter.FileGridRVAdapter
+import space.taran.arkbrowser.ui.adapter.ItemGridRVAdapter
 import kotlinx.android.synthetic.main.fragment_explorer.*
 import moxy.MvpAppCompatFragment
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
+import java.io.File
 
 class ExplorerFragment : MvpAppCompatFragment(), ExplorerView, BackButtonListener {
 
     companion object {
         const val FOLDER_KEY = "file"
 
-        fun newInstance(folder: File?) = ExplorerFragment().apply {
+        fun newInstance(folder: Uri?) = ExplorerFragment().apply {
             arguments = Bundle().apply {
                 putParcelable(FOLDER_KEY, folder)
             }
@@ -44,7 +44,7 @@ class ExplorerFragment : MvpAppCompatFragment(), ExplorerView, BackButtonListene
         App.instance.appComponent.inject(this)
     }
 
-    var adapter: FileGridRVAdapter? = null
+    var adapter: ItemGridRVAdapter? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -65,7 +65,7 @@ class ExplorerFragment : MvpAppCompatFragment(), ExplorerView, BackButtonListene
     override fun init() {
         (activity as MainActivity).setSelectedTab(2)
         rv_files.layoutManager = GridLayoutManager(context, 3)
-        adapter = FileGridRVAdapter(presenter.fileGridPresenter)
+        adapter = ItemGridRVAdapter(presenter.fileGridPresenter!!)
         (activity as MainActivity).setToolbarVisibility(true)
         fab_explorer_fav.setOnClickListener {
             presenter.favFabClicked()
@@ -91,10 +91,9 @@ class ExplorerFragment : MvpAppCompatFragment(), ExplorerView, BackButtonListene
             fab_explorer_tags.visibility = View.GONE
     }
 
-    override fun openFile(uri: String, mimeType: String) {
+    override fun openFile(uri: Uri, mimeType: String) {
         val intent = Intent(Intent.ACTION_EDIT)
-        val fileUri: Uri = Uri.parse(uri)
-        intent.setDataAndType(fileUri, mimeType)
+        intent.setDataAndType(uri, mimeType)
         startActivity(intent)
     }
 
