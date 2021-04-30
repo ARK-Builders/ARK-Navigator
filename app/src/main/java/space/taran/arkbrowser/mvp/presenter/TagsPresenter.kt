@@ -3,7 +3,7 @@ package space.taran.arkbrowser.mvp.presenter
 import androidx.documentfile.provider.DocumentFile
 import space.taran.arkbrowser.mvp.model.entity.Resource
 import space.taran.arkbrowser.mvp.model.entity.common.Icon
-import space.taran.arkbrowser.mvp.model.entity.Root
+import space.taran.arkbrowser.mvp.model.entity.remove_Root
 import space.taran.arkbrowser.mvp.model.entity.common.TagState
 import space.taran.arkbrowser.mvp.model.repo.RootsRepo
 import space.taran.arkbrowser.mvp.model.repo.ResourcesRepo
@@ -242,7 +242,7 @@ class TagsPresenter(val rootName: String?, val allResources: Set<Resource>) :
         sortAndUpdateTags()
     }
 
-    private fun getSyncObserver(root: Root) = object : Observer<Resource> {
+    private fun getSyncObserver(root: remove_Root) = object : Observer<Resource> {
         override fun onSubscribe(d: Disposable?) {
             syncDisposable = d
         }

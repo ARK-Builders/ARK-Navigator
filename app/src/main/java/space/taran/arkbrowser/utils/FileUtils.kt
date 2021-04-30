@@ -1,12 +1,20 @@
 package space.taran.arkbrowser.utils
 
-import android.util.Log
+import android.content.Context
+import android.net.Uri
+import androidx.core.content.FileProvider
 import java.io.*
 
 typealias Timestamp = Long
 typealias StringPath = String
 
 typealias MarkableFile = Pair<Boolean, File>
+
+//todo: java.io.File -> java.nio.Path
+
+// todo: https://www.toptal.com/android/android-threading-all-you-need-to-know
+//https://developer.android.com/reference/androidx/work/WorkManager.html
+//https://developer.android.com/reference/androidx/core/app/JobIntentService.html
 
 fun isImage(file: File): Boolean =
     when(file.extension) {
@@ -59,15 +67,10 @@ fun remove(file: File): Boolean {
 }
 
 //todo: synchronize all usages
-fun write(file: File, data: String): Boolean {
-    return try {
+fun write(file: File, data: String) {
         val outputStream = FileOutputStream(file)
         outputStream.write(data.toByteArray())
         outputStream.close()
-        true
-    } catch (e: Exception) {
-        false
-    }
 }
 
 //todo: synchronize all usages
@@ -104,3 +107,29 @@ fun readFirstLine(file: File): String {
 fun readBytes(file: File): ByteArray {
     return FileInputStream(file).readBytes()
 }
+
+
+fun getUriForFileByProvider(context: Context, file: File): Uri {
+    return FileProvider.getUriForFile(context,
+        "space.taran.arkbrowser.provider",
+        file)
+}
+
+fun getExtSdCards(context: Context): List<File> =
+    context.getExternalFilesDirs("external")
+        .toList()
+        .filterNotNull()
+        .mapNotNull {
+            val path = it.absolutePath
+            //todo: improve
+            val index = path.lastIndexOf("/Android/data")
+            if (index >= 0) {
+                File(path.substring(0, index))
+            } else {
+                null
+            }
+        }
+
+fun getExtSdCardBaseFolder(context: Context, file: File): File? =
+    getExtSdCards(context).find { file.startsWith(it) }
+//todo fs.normalize `path` before check

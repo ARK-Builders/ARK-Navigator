@@ -65,6 +65,7 @@ class MainActivity : MvpAppCompatActivity(), MainView {
     }
 
     override fun requestPerms() {
+        //todo: are *_EXTERNAL_STORAGE permissions really necessary?
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
             == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(
                 this,

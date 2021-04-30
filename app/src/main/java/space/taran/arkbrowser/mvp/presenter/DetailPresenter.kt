@@ -1,7 +1,7 @@
 package space.taran.arkbrowser.mvp.presenter
 
 import space.taran.arkbrowser.mvp.model.entity.Resource
-import space.taran.arkbrowser.mvp.model.entity.Root
+import space.taran.arkbrowser.mvp.model.entity.remove_Root
 import space.taran.arkbrowser.mvp.model.repo.ResourcesRepo
 import space.taran.arkbrowser.mvp.model.repo.RoomRepo
 import space.taran.arkbrowser.mvp.presenter.adapter.IDetailListPresenter
@@ -13,7 +13,7 @@ import space.taran.arkbrowser.utils.Constants.Companion.EMPTY_TAG
 import space.taran.arkbrowser.utils.Converters.Companion.tagsFromString
 import javax.inject.Inject
 
-class DetailPresenter(val root: Root, val resources: List<Resource>, val pos: Int) :
+class DetailPresenter(val root: remove_Root, val resources: List<Resource>, val pos: Int) :
     MvpPresenter<DetailView>() {
 
     @Inject

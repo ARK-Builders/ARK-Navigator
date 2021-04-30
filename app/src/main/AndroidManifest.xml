@@ -2,9 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="space.taran.arkbrowser">
 
+    <!-- todo: are these permissions really necessary? -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
+    <!-- todo: see "requestLegacyExternalStorage"-->
     <application
         android:name="space.taran.arkbrowser.ui.App"
         android:allowBackup="true"

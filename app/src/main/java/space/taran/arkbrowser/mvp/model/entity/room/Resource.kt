@@ -23,7 +23,6 @@ data class Resource (
 
 typealias ResourceId = Long
 
-//todo: when re-scan is necessary?
 fun computeId(file: File): ResourceId {
     val crc32 = CRC32()
     crc32.update(readBytes(file))

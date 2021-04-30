@@ -4,7 +4,6 @@ import androidx.core.net.toUri
 import space.taran.arkbrowser.mvp.model.entity.*
 import space.taran.arkbrowser.mvp.model.entity.common.Icon
 import space.taran.arkbrowser.mvp.model.repo.ResourcesRepo
-import space.taran.arkbrowser.mvp.model.repo.RoomRepo
 import space.taran.arkbrowser.mvp.model.repo.RootsRepo
 import space.taran.arkbrowser.mvp.presenter.adapter.IItemGridPresenter
 import space.taran.arkbrowser.mvp.view.ExplorerView
@@ -32,7 +31,7 @@ class ExplorerPresenter(var currentFolder: File? = null) : MvpPresenter<Explorer
     lateinit var favoritesRepo: FavoritesRepo
 
     var fileGridPresenter: ItemGridPresenter? = null
-    var currentRoot: Root? = null
+    var currentRoot: remove_Root? = null
 
     inner class ItemGridPresenter(var files: List<MarkableFile>) :
         IItemGridPresenter {
@@ -146,7 +145,7 @@ class ExplorerPresenter(var currentFolder: File? = null) : MvpPresenter<Explorer
 
     fun favoriteChanged() {
         val folder = currentFolder!!
-        val favorite = Favorite(name = folder.name, file = folder)
+        val favorite = remove_Favorite(name = folder.name, file = folder)
 
         roomRepo.insertFavorite(favorite)
     }

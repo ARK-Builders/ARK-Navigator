@@ -8,7 +8,7 @@ typealias Tags = Set<Tag>
 
 class Constants {
     companion object {
-        val EMPTY_TAG: Tag = ""
+        const val EMPTY_TAG: Tag = ""
         val NO_TAGS: Tags = HashSet()
     }
 }

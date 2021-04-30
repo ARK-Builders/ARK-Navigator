@@ -1,8 +1,6 @@
-package space.taran.arkbrowser.mvp.model.entity.room.dao
+package space.taran.arkbrowser.mvp.model.entity.room
 
 import androidx.room.*
-import space.taran.arkbrowser.mvp.model.entity.room.Resource
-import space.taran.arkbrowser.mvp.model.entity.room.ResourceId
 import space.taran.arkbrowser.utils.StringPath
 
 @Dao
@@ -12,9 +10,6 @@ interface ResourceDao {
 
     @Delete
     fun deleteByPath(path: StringPath)
-
-    @Insert
-    fun update(resource: Resource)
 
     @Query("SELECT * FROM Resource")
     fun getAll(): List<Resource>

@@ -10,7 +10,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.chip.Chip
 import space.taran.arkbrowser.R
 import space.taran.arkbrowser.mvp.model.entity.Resource
-import space.taran.arkbrowser.mvp.model.entity.Root
+import space.taran.arkbrowser.mvp.model.entity.remove_Root
 import space.taran.arkbrowser.mvp.presenter.DetailPresenter
 import space.taran.arkbrowser.mvp.view.DetailView
 import space.taran.arkbrowser.ui.App
@@ -29,7 +29,7 @@ class DetailFragment: MvpAppCompatFragment(), DetailView, BackButtonListener {
         const val RESOURCES_KEY = "resources"
         const val POSITION_KEY = "pos"
 
-        fun newInstance(root: Root, resources: List<Resource>, pos: Int) = DetailFragment().apply {
+        fun newInstance(root: remove_Root, resources: List<Resource>, pos: Int) = DetailFragment().apply {
             arguments = Bundle().apply {
                 putParcelable(ROOT_KEY, root)
                 putInt(POSITION_KEY, pos)

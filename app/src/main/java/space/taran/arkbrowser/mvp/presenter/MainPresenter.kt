@@ -7,7 +7,7 @@ import space.taran.arkbrowser.mvp.view.MainView
 import space.taran.arkbrowser.navigation.Screens
 import moxy.MvpPresenter
 import ru.terrakok.cicerone.Router
-import space.taran.arkbrowser.mvp.model.entity.Root
+import space.taran.arkbrowser.mvp.model.entity.remove_Root
 import javax.inject.Inject
 
 class MainPresenter: MvpPresenter<MainView>() {
@@ -94,7 +94,7 @@ class MainPresenter: MvpPresenter<MainView>() {
         router.exit()
     }
 
-    private fun storageVersionDifferent(fileStorageVersion: Int, root: Root) {
+    private fun storageVersionDifferent(fileStorageVersion: Int, root: remove_Root) {
         viewState.showToast("${root.storage.path} has a different version")
     }
 

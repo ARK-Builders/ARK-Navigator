@@ -4,66 +4,89 @@ import space.taran.arkbrowser.mvp.model.entity.room.Resource
 import java.io.File
 import space.taran.arkbrowser.mvp.model.entity.room.ResourceId
 import space.taran.arkbrowser.mvp.model.entity.room.computeId
-import space.taran.arkbrowser.mvp.model.entity.room.dao.ResourceDao
+import space.taran.arkbrowser.mvp.model.entity.room.ResourceDao
 import space.taran.arkbrowser.utils.Timestamp
 import space.taran.arkbrowser.utils.listAllFiles
-import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
 
-private typealias MutableResources = MutableMap<File, ResourceMeta>
-
-private data class ResourceMeta(val id: ResourceId, val modified: Timestamp)
+data class ResourceMeta(val id: ResourceId, val modified: Timestamp)
 
 private data class Difference(
     val deleted: List<File>,
     val updated: List<File>,
     val added: List<File>)
 
-class ResourcesIndex(private val resourceDao: ResourceDao) {
+// The index must read from the DAO only during application startup,
+// since DB doesn't change from outside. But we must persist all changes
+// during application lifecycle into the DAO for the case of any unexpected exit.
+class ResourcesIndex private constructor (
+    private val root: File,
+    private val dao: ResourceDao,
+    resources: Map<File, ResourceMeta>) {
 
-    // Initializing the index from application database
-    private val rootToResources: MutableMap<File, MutableResources> =
-        resourceDao.getAll()
-            .groupBy { it.root }
-            .mapValues { it.value
+    private val pathToMeta: MutableMap<File, ResourceMeta> =
+        resources.toMutableMap()
+
+    //todo query functions
+
+    //todo modification functions with immediate persisting
+
+    companion object {
+        // Constructor for loading from the database
+        fun loadFromDatabase(
+                root: File,
+                dao: ResourceDao
+        ): ResourcesIndex {
+            //todo https://www.toptal.com/android/android-threading-all-you-need-to-know
+            // Use Case #7: Querying local SQLite database
+
+            val index = ResourcesIndex(root, dao,
+                groupResources(dao.getAll()))
+
+            index.reindexRoot(index.calculateDifference())
+            return index
+        }
+
+        // Constructor for building from the filesystem
+        fun buildFromFilesystem(
+                root: File,
+                dao: ResourceDao
+        ): ResourcesIndex {
+            val index = ResourcesIndex(root, dao,
+                scanResources(listAllFiles(root)))
+
+            index.persistResources(index.pathToMeta)
+            return index
+        }
+
+        //todo: parallel and asynchronous
+        private fun scanResources(files: List<File>): Map<File, ResourceMeta> =
+            files.map {
+                it to ResourceMeta(
+                    id = computeId(it),
+                    modified = it.lastModified())
+            }.toMap()
+
+        private fun groupResources(resources: List<Resource>): Map<File, ResourceMeta> =
+            resources
                 .groupBy { resource -> resource.path }
                 .mapValues { (_, resources) ->
                     if (resources.size > 1) {
-                        throw IllegalStateException("Database must not have" +
-                            "several resources for the same path")
+                        throw IllegalStateException("Index must not have" +
+                                "several resources for the same path")
                     }
                     val resource = resources[0]
                     ResourceMeta(resource.id, resource.modified)
                 }
                 .mapKeys { (path, _) -> File(path) }
-                .toMutableMap()
-            }
-            .mapKeys { (root, _) -> File(root) }
-            .toMutableMap()
-
-    init {
-        // The index is initialized, scanning for modifications since last run
-        rootToResources.keys.forEach { reindexRoot(it, calculateDifference(it)) }
     }
 
-    fun indexRoot(root: File) {
-        if (rootToResources.containsKey(root)) {
-            reindexRoot(root, calculateDifference(root))
-            return
-        }
-
-        val resources = indexFiles(root, listAllFiles(root))
-        rootToResources[root] = resources.toMutableMap()
-    }
-
-    private fun reindexRoot(root: File, diff: Difference) {
-        val pathToMeta = rootToResources[root]!!
-
+    private fun reindexRoot(diff: Difference) {
         diff.deleted.forEach {
             pathToMeta.remove(it)
         }
         (diff.deleted + diff.updated).forEach {
-            resourceDao.deleteByPath(it.path)
+            dao.deleteByPath(it.path)
         }
 
         val toInsert = diff.updated + diff.added
@@ -73,32 +96,11 @@ class ResourcesIndex(private val resourceDao: ResourceDao) {
                 modified = it.lastModified())
         }
 
-        indexFiles(root, toInsert)
+        val newResources = scanResources(toInsert)
+        persistResources(newResources)
     }
 
-    private fun indexFiles(root: File, files: List<File>): Map<File, ResourceMeta> {
-        val resources = files.map {
-            it to ResourceMeta(
-                id = computeId(it),
-                modified = it.lastModified())
-        }.toMap()
-
-        resourceDao.insertAll(
-            resources.entries.toList()
-                .map { Resource(
-                    id = it.value.id,
-                    root = root.path,
-                    path = it.key.path,
-                    modified = it.value.modified)
-                })
-
-        return resources
-    }
-
-    private fun calculateDifference(root: File): Difference {
-        val pathToMeta = rootToResources[root]
-            ?: throw IllegalArgumentException("Root $root isn't indexed yet")
-
+    private fun calculateDifference(): Difference {
         val (present, absent) = pathToMeta.keys.partition { it.exists() }
 
         val updated = present
@@ -113,5 +115,16 @@ class ResourcesIndex(private val resourceDao: ResourceDao) {
         }
 
         return Difference(absent, updated, added)
+    }
+
+    private fun persistResources(resources: Map<File, ResourceMeta>) {
+        dao.insertAll(
+            resources.entries.toList()
+                .map { Resource(
+                    id = it.value.id,
+                    root = root.path,
+                    path = it.key.path,
+                    modified = it.value.modified)
+                })
     }
 }

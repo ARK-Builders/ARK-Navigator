@@ -1,6 +1,6 @@
 package space.taran.arkbrowser.di.modules
 
-import space.taran.arkbrowser.mvp.model.entity.room.db.Database
+import space.taran.arkbrowser.mvp.model.entity.room.Database
 import space.taran.arkbrowser.mvp.model.repo.ResourcesRepo
 import space.taran.arkbrowser.mvp.model.repo.RoomRepo
 import space.taran.arkbrowser.mvp.model.repo.RootsRepo

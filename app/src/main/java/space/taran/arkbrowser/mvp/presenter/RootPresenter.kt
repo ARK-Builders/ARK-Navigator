@@ -43,9 +43,9 @@ class RootPresenter: MvpPresenter<RootView>() {
     inner class ItemGridPresenter :
         IItemGridPresenter {
 
-        private var roots: List<Root> = listOf()
+        private var roots: List<remove_Root> = listOf()
 
-        fun load(roots: List<Root>) {
+        fun load(roots: List<remove_Root>) {
             this.roots = roots
         }
 
@@ -111,7 +111,7 @@ class RootPresenter: MvpPresenter<RootView>() {
             throw IllegalStateException("Nothing is really picked")
         }
 
-        val root = Root(name = pickedDir!!.name, folder = pickedDir!!)
+        val root = remove_Root(name = pickedDir!!.name, folder = pickedDir!!)
         rootsRepo.insertRoot(root)
 
         val storage = resourcesRepo.createStorage(pickedDir!!)
