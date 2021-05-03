@@ -1,5 +1,6 @@
 package space.taran.arkbrowser.ui.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,7 +11,7 @@ import space.taran.arkbrowser.mvp.view.item.DetailItemView
 import space.taran.arkbrowser.utils.loadImage
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.item_image.view.*
-import java.io.File
+import java.nio.file.Path
 
 class DetailVPAdapter(
     val presenter: IDetailListPresenter
@@ -27,6 +28,7 @@ class DetailVPAdapter(
     override fun getItemCount() = presenter.getCount()
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        Log.d("flow", "onBindViewHolder in DetailVPAdapter")
         holder.pos = position
         presenter.bindView(holder)
     }
@@ -37,7 +39,7 @@ class DetailVPAdapter(
 
         override var pos = -1
 
-        override fun setImage(file: File): Unit = with(containerView) {
+        override fun setImage(file: Path): Unit = with(containerView) {
             loadImage(file, iv_image)
         }
     }

@@ -1,6 +1,7 @@
 package space.taran.arkbrowser.ui.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,8 +10,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.chip.Chip
 import space.taran.arkbrowser.R
-import space.taran.arkbrowser.mvp.model.entity.Resource
-import space.taran.arkbrowser.mvp.model.entity.remove_Root
 import space.taran.arkbrowser.mvp.presenter.DetailPresenter
 import space.taran.arkbrowser.mvp.view.DetailView
 import space.taran.arkbrowser.ui.App
@@ -21,19 +20,19 @@ import kotlinx.android.synthetic.main.fragment_detail.*
 import moxy.MvpAppCompatFragment
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
+import space.taran.arkbrowser.mvp.model.entity.room.ResourceId
 import space.taran.arkbrowser.utils.Tags
 
 class DetailFragment: MvpAppCompatFragment(), DetailView, BackButtonListener {
     companion object {
-        const val ROOT_KEY = "root"
         const val RESOURCES_KEY = "resources"
         const val POSITION_KEY = "pos"
 
-        fun newInstance(root: remove_Root, resources: List<Resource>, pos: Int) = DetailFragment().apply {
+        fun newInstance(resources: List<ResourceId>, pos: Int) = DetailFragment().apply {
+            Log.d("flow", "creating DetailFragment")
             arguments = Bundle().apply {
-                putParcelable(ROOT_KEY, root)
                 putInt(POSITION_KEY, pos)
-                putParcelableArray(RESOURCES_KEY, resources.toTypedArray())
+                putLongArray(RESOURCES_KEY, resources.toLongArray())
             }
         }
     }
@@ -45,12 +44,15 @@ class DetailFragment: MvpAppCompatFragment(), DetailView, BackButtonListener {
     lateinit var presenter: DetailPresenter
 
     @ProvidePresenter
-    fun providePresenter() = DetailPresenter(
-        arguments!!.getParcelable(ROOT_KEY)!!,
-        arguments!!.getParcelableArray(RESOURCES_KEY)!!.map { it as Resource },
-        arguments!!.getInt(POSITION_KEY)
-    ).apply {
-        App.instance.appComponent.inject(this)
+    fun providePresenter(): DetailPresenter {
+        Log.d("flow", "creating DetailPresenter")
+
+        return DetailPresenter(
+            arguments!!.getParcelableArray(RESOURCES_KEY)!!.map { it as ResourceId },
+            arguments!!.getInt(POSITION_KEY)
+        ).apply {
+            App.instance.appComponent.inject(this)
+        }
     }
 
     var adapter: DetailVPAdapter? = null
@@ -59,14 +61,20 @@ class DetailFragment: MvpAppCompatFragment(), DetailView, BackButtonListener {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_detail, container, false)
+    ): View? {
+        Log.d("flow", "creating view in DetailFragment")
+        return inflater.inflate(R.layout.fragment_detail, container, false)
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        Log.d("flow", "view created in DetailFragment")
         super.onViewCreated(view, savedInstanceState)
         App.instance.appComponent.inject(this)
     }
 
     override fun init() {
+        Log.d("flow", "initializing DetailFragment")
+
         (activity as MainActivity).setToolbarVisibility(true)
         adapter = DetailVPAdapter(presenter.detailListPresenter)
         view_pager.adapter = adapter
@@ -86,14 +94,18 @@ class DetailFragment: MvpAppCompatFragment(), DetailView, BackButtonListener {
     }
 
     override fun setCurrentItem(pos: Int) {
+        Log.d("flow", "setting current item to $pos in DetailFragment")
         view_pager.setCurrentItem(pos, false)
     }
 
     override fun updateAdapter() {
+        Log.d("flow", "updating adapter in DetailFragment")
         view_pager.adapter?.notifyDataSetChanged()
     }
 
     override fun showTagsDialog(imageTags: Tags) {
+        Log.d("flow", "showing tags dialog in DetailFragment")
+
         dialogView = LayoutInflater.from(context!!).inflate(R.layout.dialog_tags, null)
         val alertDialogBuilder = AlertDialog.Builder(context!!).setView(dialogView)
 
@@ -130,10 +142,13 @@ class DetailFragment: MvpAppCompatFragment(), DetailView, BackButtonListener {
     }
 
     override fun closeDialog() {
+        Log.d("flow", "closing dialog in DetailFragment")
         dialog?.dismiss()
     }
 
     override fun setDialogTags(imageTags: Tags) {
+        Log.d("flow", "setting dialog tags in DetailFragment")
+
         if (imageTags.isNotEmpty())
             dialogView?.chipg_dialog_detail?.visibility = View.VISIBLE
         else
@@ -152,6 +167,8 @@ class DetailFragment: MvpAppCompatFragment(), DetailView, BackButtonListener {
     }
 
     override fun setImageTags(imageTags: Tags) {
+        Log.d("flow", "setting image tags in DetailFragment")
+
         if (imageTags.isEmpty())
             fab_explorer_fav.visibility = View.VISIBLE
         else
@@ -168,10 +185,14 @@ class DetailFragment: MvpAppCompatFragment(), DetailView, BackButtonListener {
     }
 
     override fun onPause() {
+        Log.d("flow", "pausing DetailFragment")
         dialog?.dismiss()
         super.onPause()
     }
 
-    override fun backClicked() = presenter.backClicked()
+    override fun backClicked(): Boolean {
+        Log.d("flow", "back clicked in DetailFragment")
+        return presenter.backClicked()
+    }
 
 }

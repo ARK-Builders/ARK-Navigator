@@ -3,6 +3,7 @@ package space.taran.arkbrowser.ui.fragments
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,16 +21,21 @@ import kotlinx.android.synthetic.main.fragment_explorer.*
 import moxy.MvpAppCompatFragment
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
+import space.taran.arkbrowser.mvp.presenter.adapter.IItemGridPresenter
+import space.taran.arkbrowser.ui.activity.MainActivity.Companion.REQUEST_CODE_SD_CARD_URI
 import java.io.File
+import java.nio.file.Path
+import java.nio.file.Paths
 
 class ExplorerFragment : MvpAppCompatFragment(), ExplorerView, BackButtonListener {
 
     companion object {
         const val FOLDER_KEY = "file"
 
-        fun newInstance(folder: Uri?) = ExplorerFragment().apply {
+        fun newInstance(folder: Path?) = ExplorerFragment().apply {
+            Log.d("flow", "[mock] creating ExplorerFragment")
             arguments = Bundle().apply {
-                putParcelable(FOLDER_KEY, folder)
+                putString(FOLDER_KEY, folder.toString())
             }
         }
     }
@@ -40,8 +46,18 @@ class ExplorerFragment : MvpAppCompatFragment(), ExplorerView, BackButtonListene
     lateinit var presenter: ExplorerPresenter
 
     @ProvidePresenter
-    fun providePresenter() = ExplorerPresenter(arguments!![FOLDER_KEY] as File?).apply {
-        App.instance.appComponent.inject(this)
+    fun providePresenter(): ExplorerPresenter {
+        val arg = arguments!![FOLDER_KEY] as String?
+        val path = if (arg != null) {
+            Paths.get(arg)
+        } else {
+            null
+        }
+
+        return ExplorerPresenter(path).apply {
+            Log.d("flow", "creating ExplorerPresenter in ExplorerFragment")
+            App.instance.appComponent.inject(this)
+        }
     }
 
     var adapter: ItemGridRVAdapter? = null
@@ -50,22 +66,28 @@ class ExplorerFragment : MvpAppCompatFragment(), ExplorerView, BackButtonListene
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_explorer, container, false)
+    ): View? {
+        Log.d("flow", "creating view in ExplorerFragment")
+        return inflater.inflate(R.layout.fragment_explorer, container, false)
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        Log.d("flow", "view created in ExplorerFragment")
         super.onViewCreated(view, savedInstanceState)
         App.instance.appComponent.inject(this)
     }
 
     override fun onResume() {
+        Log.d("flow", "resuming in ExplorerFragment")
         super.onResume()
         presenter.onViewResumed()
     }
 
     override fun init() {
+        Log.d("flow", "initializing ExplorerFragment")
         (activity as MainActivity).setSelectedTab(2)
         rv_files.layoutManager = GridLayoutManager(context, 3)
-        adapter = ItemGridRVAdapter(presenter.fileGridPresenter!!)
+        adapter = ItemGridRVAdapter(presenter.fileGridPresenter!! as IItemGridPresenter<Any>) //todo
         (activity as MainActivity).setToolbarVisibility(true)
         fab_explorer_fav.setOnClickListener {
             presenter.favFabClicked()
@@ -78,6 +100,8 @@ class ExplorerFragment : MvpAppCompatFragment(), ExplorerView, BackButtonListene
     }
 
     override fun setFavoriteFabVisibility(isVisible: Boolean) {
+        Log.d("flow", "setting favorites fab vsibility in ExplorerFragment")
+
         if (isVisible)
             fab_explorer_fav.visibility = View.VISIBLE
         else
@@ -85,6 +109,8 @@ class ExplorerFragment : MvpAppCompatFragment(), ExplorerView, BackButtonListene
     }
 
     override fun setTagsFabVisibility(isVisible: Boolean) {
+        Log.d("flow", "setting tags fab vsibility in ExplorerFragment")
+
         if (isVisible)
             fab_explorer_tags.visibility = View.VISIBLE
         else
@@ -92,6 +118,7 @@ class ExplorerFragment : MvpAppCompatFragment(), ExplorerView, BackButtonListene
     }
 
     override fun openFile(uri: Uri, mimeType: String) {
+        Log.d("flow", "opening file $uri in ExplorerFragment")
         val intent = Intent(Intent.ACTION_EDIT)
         intent.setDataAndType(uri, mimeType)
         startActivity(intent)
@@ -122,23 +149,30 @@ class ExplorerFragment : MvpAppCompatFragment(), ExplorerView, BackButtonListene
     }
 
     override fun closeDialog() {
+        Log.d("flow", "closing dialog in ExplorerFragment")
         dialog?.dismiss()
     }
 
     override fun requestSdCardUri() {
+        Log.d("flow", "requesting sdcarf uri in ExplorerFragment")
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
-        activity!!.startActivityForResult(intent, 2)
+        activity!!.startActivityForResult(intent, REQUEST_CODE_SD_CARD_URI)
     }
 
     override fun updateAdapter() {
+        Log.d("flow", "updating adapter in ExplorerFragment")
         adapter?.notifyDataSetChanged()
     }
 
     override fun onPause() {
+        Log.d("flow", "pausing ExplorerFragment")
         dialog?.dismiss()
         super.onPause()
     }
 
-    override fun backClicked() = presenter.backClicked()
+    override fun backClicked(): Boolean {
+        Log.d("flow", "back clicked in ExplorerFragment")
+        return presenter.backClicked()
+    }
 
 }

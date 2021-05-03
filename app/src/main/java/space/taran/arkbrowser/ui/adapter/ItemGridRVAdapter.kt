@@ -1,6 +1,7 @@
 package space.taran.arkbrowser.ui.adapter
 
 import android.content.res.ColorStateList
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,7 +17,7 @@ import space.taran.arkbrowser.mvp.model.entity.common.IconOrImage
 import space.taran.arkbrowser.utils.iconToImageResource
 
 class ItemGridRVAdapter(
-    val presenter: IItemGridPresenter
+    val presenter: IItemGridPresenter<Any> //todo
 ): RecyclerView.Adapter<ItemGridRVAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
@@ -31,12 +32,17 @@ class ItemGridRVAdapter(
     override fun getItemCount() = presenter.getCount()
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        Log.d("flow", "onBindViewHolder in ItemGridRVAdapter")
         holder.pos = position
         presenter.bindView(holder)
 
         holder.itemView.setOnClickListener {
             presenter.itemClicked(position)
         }
+    }
+
+    fun backClicked() {
+        presenter.backClicked()
     }
 
     inner class ViewHolder(override val containerView: View) :

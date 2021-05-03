@@ -1,7 +1,5 @@
 package space.taran.arkbrowser.utils
 
-import androidx.room.TypeConverter
-
 typealias Tag = String
 
 typealias Tags = Set<Tag>
@@ -15,16 +13,14 @@ class Constants {
 
 class Converters {
     companion object {
-        @JvmStatic
-        @TypeConverter
         fun stringFromTags(tags: Tags): String = tags
             .joinToString(",")
 
-        @JvmStatic
-        @TypeConverter
         fun tagsFromString(string: String): Tags = string
             .split(',')
             .filter { tag -> tag.isNotEmpty() }
             .toSet()
     }
 }
+
+//todo

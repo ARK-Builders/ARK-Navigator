@@ -1,29 +1,18 @@
 package space.taran.arkbrowser.mvp.presenter
 
-import space.taran.arkbrowser.mvp.model.repo.RootsRepo
-import space.taran.arkbrowser.mvp.model.repo.ResourcesRepo
-import space.taran.arkbrowser.mvp.model.repo.RoomRepo
+import android.util.Log
 import space.taran.arkbrowser.mvp.view.MainView
 import space.taran.arkbrowser.navigation.Screens
 import moxy.MvpPresenter
 import ru.terrakok.cicerone.Router
-import space.taran.arkbrowser.mvp.model.entity.remove_Root
 import javax.inject.Inject
 
 class MainPresenter: MvpPresenter<MainView>() {
     @Inject
     lateinit var router: Router
 
-    @Inject
-    lateinit var roomRepo: RoomRepo
-
-    @Inject
-    lateinit var rootsRepo: RootsRepo
-
-    @Inject
-    lateinit var resourcesRepo: ResourcesRepo
-
     override fun onFirstViewAttach() {
+        Log.d("flow", "first view attached in MainPresenter")
         super.onFirstViewAttach()
         viewState.init()
         viewState.requestPerms()
@@ -33,69 +22,35 @@ class MainPresenter: MvpPresenter<MainView>() {
         loadSdCardUris()
     }
 
-    fun permissionsDenied() {
-
-    }
-
     private fun loadSdCardUris() {
-        roomRepo.getSdCardUris().subscribe(
-            { list ->
-                resourcesRepo.documentDataSource.sdCardUris = list.toMutableList()
-                loadAndSyncRoots()
-            },
-            {}
-        )
-    }
-
-    private fun loadAndSyncRoots() {
-        roomRepo.getAllRoots().observeOn(AndroidSchedulers.mainThread()).subscribe(
-            { list ->
-                list.forEach { root ->
-                    val storageVersion = resourcesRepo.readStorageVersion(root.storage)
-                    if (storageVersion != ResourcesRepo.STORAGE_VERSION)
-                        storageVersionDifferent(storageVersion, root)
-                    rootsRepo.synchronizeRoot(root)
-                }
-                router.replaceScreen(Screens.RootScreen())
-            },
-            {}
-        )
+        Log.d("flow", "[mock] loading sdcard URIs")
+        Log.d("flow", "creating Roots screen")
+        router.replaceScreen(Screens.RootsScreen())
     }
 
     fun sdCardUriGranted(uri: String) {
-        roomRepo.getSdCardUris().observeOn(AndroidSchedulers.mainThread()).subscribe(
-            { list ->
-               list.forEach {
-                   if (it.uri == null) {
-                       it.uri = uri
-                       resourcesRepo.documentDataSource.sdCardUris.add(it)
-                       roomRepo.insertSdCardUri(it).subscribe()
-                   }
-               }
-            }, {}
-        )
+        Log.d("activity", "[mock] sdcard uri granted for $uri")
+        //todo
     }
 
     fun goToRootsScreen() {
-        router.newRootScreen(Screens.RootScreen())
+        Log.d("flow", "creating Roots screen")
+        router.newRootScreen(Screens.RootsScreen())
     }
 
     fun goToTagsScreen() {
-        router.newRootScreen(Screens.TagsScreen(
-            rootName = null,
-            resources = rootsRepo.roots.values.flatMap { it.resources }))
+        Log.d("flow", "[mock] creating Tags screen")
+//        router.newRootScreen(Screens.TagsScreen(
+//            resources = rootsRepo.roots.values.flatMap { it.resources }))
     }
 
     fun goToExplorerScreen() {
+        Log.d("flow", "creating Explorer screen")
         router.newRootScreen(Screens.ExplorerScreen())
     }
 
     fun backClicked() {
+        Log.d("flow", "back clicked in MainPresenter")
         router.exit()
     }
-
-    private fun storageVersionDifferent(fileStorageVersion: Int, root: remove_Root) {
-        viewState.showToast("${root.storage.path} has a different version")
-    }
-
 }

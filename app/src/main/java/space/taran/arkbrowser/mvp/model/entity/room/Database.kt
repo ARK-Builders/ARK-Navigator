@@ -4,7 +4,8 @@ import androidx.room.RoomDatabase
 
 @androidx.room.Database(
     entities = [
-        Folder::class,
+        Root::class,
+        Favorite::class,
         Resource::class
     ],
     version = 12,

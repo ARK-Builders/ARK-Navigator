@@ -27,8 +27,8 @@ interface AppComponent {
     fun inject(explorerPresenter: ExplorerPresenter)
     fun inject(detailPresenter: DetailPresenter)
     fun inject(detailImageFragment: DetailFragment)
-    fun inject(rootFragment: RootFragment)
-    fun inject(rootPresenter: RootPresenter)
+    fun inject(rootsFragment: RootsFragment)
+    fun inject(rootsPresenter: RootsPresenter)
     fun inject(tagsPresenter: TagsPresenter)
     fun inject(tagsFragment: TagsFragment)
 }

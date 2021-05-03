@@ -4,7 +4,7 @@ import android.widget.ImageView
 import com.bumptech.glide.Glide
 import space.taran.arkbrowser.R
 import space.taran.arkbrowser.mvp.model.entity.common.Icon
-import java.io.File
+import java.nio.file.Path
 
 fun iconToImageResource(icon: Icon): Int =
     when(icon) {
@@ -22,7 +22,7 @@ fun iconToImageResource(icon: Icon): Int =
         }
     }
 
-fun loadImage(file: File, container: ImageView) =
+fun loadImage(file: Path, container: ImageView) =
     Glide.with(container.context)
         .load(file)
         .into(container)

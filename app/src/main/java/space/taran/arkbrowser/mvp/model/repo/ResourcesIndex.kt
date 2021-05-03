@@ -41,7 +41,7 @@ class ResourcesIndex private constructor (
             // Use Case #7: Querying local SQLite database
 
             val index = ResourcesIndex(root, dao,
-                groupResources(dao.getAll()))
+                groupResources(dao.query()))
 
             index.reindexRoot(index.calculateDifference())
             return index

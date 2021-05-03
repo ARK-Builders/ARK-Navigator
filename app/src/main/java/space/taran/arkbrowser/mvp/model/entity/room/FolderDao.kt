@@ -2,14 +2,26 @@ package space.taran.arkbrowser.mvp.model.entity.room
 
 import androidx.room.*
 
+data class RootWithFavorites(
+    @Embedded
+    val root: Root,
+    @Relation(
+        parentColumn = "path",
+        entityColumn = "root")
+    val favorites: List<Favorite>)
+
 @Dao
 interface FolderDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(folder: Folder)
+    @Insert
+    fun insert(root: Root)
 
-    @Delete
-    fun delete(folder: Folder)
+    @Insert
+    fun insert(vararg favorite: Favorite)
 
-    @Query("SELECT * FROM Folder")
-    fun getAll(): List<Folder>
+    @Transaction
+    @Query("SELECT * FROM Root")
+    fun query(): List<RootWithFavorites>
+    //todo: looks like it will not yield roots without favorites
+
+    //todo adopt "suspend" functions
 }

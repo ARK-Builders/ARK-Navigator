@@ -1,9 +1,9 @@
 package space.taran.arkbrowser.mvp.view.item
 
-import java.io.File
+import java.nio.file.Path
 
 interface DetailItemView {
     var pos: Int
 
-    fun setImage(file: File)
+    fun setImage(file: Path)
 }

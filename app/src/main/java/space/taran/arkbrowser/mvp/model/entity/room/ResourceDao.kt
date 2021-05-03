@@ -8,9 +8,9 @@ interface ResourceDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(resources: List<Resource>)
 
-    @Delete
+    @Query("DELETE FROM Resource where path = :path")
     fun deleteByPath(path: StringPath)
 
     @Query("SELECT * FROM Resource")
-    fun getAll(): List<Resource>
+    fun query(): List<Resource>
 }
