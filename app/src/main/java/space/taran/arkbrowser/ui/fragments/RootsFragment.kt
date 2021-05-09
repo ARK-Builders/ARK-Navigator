@@ -20,21 +20,21 @@ import kotlinx.android.synthetic.main.fragment_roots.*
 import moxy.MvpAppCompatFragment
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
-import space.taran.arkbrowser.mvp.model.entity.common.Icon
-import space.taran.arkbrowser.mvp.model.entity.common.IconOrImage
-import space.taran.arkbrowser.mvp.presenter.adapter.IItemGridPresenter
-import space.taran.arkbrowser.mvp.presenter.adapter.ReversibleItemGridPresenter
-import space.taran.arkbrowser.mvp.view.item.FileItemView
+import space.taran.arkbrowser.mvp.presenter.utils.RootPicker
 import space.taran.arkbrowser.ui.activity.MainActivity.Companion.REQUEST_CODE_SD_CARD_URI
-import space.taran.arkbrowser.utils.getExtSdCards
+import space.taran.arkbrowser.utils.ROOTS_FRAGMENT
+import space.taran.arkbrowser.utils.listDevices
 import java.lang.IllegalStateException
 import java.nio.file.Files
 import java.nio.file.Path
+import kotlin.streams.toList
 
 class RootsFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
 
     companion object {
-        fun newInstance() = RootsFragment()
+        fun newInstance() = RootsFragment() //todo ?
+
+        const val PATH_PICKER_MESSAGE = "Add new root to the index"
     }
 
     @InjectPresenter
@@ -42,39 +42,39 @@ class RootsFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
 
     @ProvidePresenter
     fun providePresenter() =
-        RootsPresenter(getExtSdCards(context!!)).apply {
-            Log.d("flow", "creating RootsPresenter in RootsFragment")
+        RootsPresenter(listDevices(context!!)).apply {
+            Log.d(ROOTS_FRAGMENT, "creating RootsPresenter in RootsFragment")
             App.instance.appComponent.inject(this)
         }
 
-    var adapter: ItemGridRVAdapter? = null
-    var dialogAdapter: ItemGridRVAdapter? = null
-    var dialogView: View? = null
-    var alertDialog: AlertDialog? = null
+    private var adapter: ItemGridRVAdapter<Path>? = null
+    private var dialogAdapter: ItemGridRVAdapter<Path>? = null
+    private var dialogView: View? = null
+    private var alertDialog: AlertDialog? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        Log.d("flow", "creating view in RootsFragment")
+        Log.d(ROOTS_FRAGMENT, "creating view in RootsFragment")
         return inflater.inflate(R.layout.fragment_roots, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        Log.d("flow", "view created in RootsFragment")
+        Log.d(ROOTS_FRAGMENT, "view created in RootsFragment")
         super.onViewCreated(view, savedInstanceState)
         App.instance.appComponent.inject(this)
     }
 
     override fun onResume() {
-        Log.d("flow", "resuming in RootsFragment")
+        Log.d(ROOTS_FRAGMENT, "resuming in RootsFragment")
         super.onResume()
         presenter.onViewResumed()
     }
 
     override fun init() {
-        Log.d("flow", "[mock] loading roots in RootsFragment")
+        Log.d(ROOTS_FRAGMENT, "[mock] loading roots in RootsFragment")
 
 //        roomRepo.getAllRoots().observeOn(AndroidSchedulers.mainThread()).subscribe(
 //            { list ->
@@ -90,7 +90,7 @@ class RootsFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
 
         (activity as MainActivity).setSelectedTab(0)
         rv_roots.layoutManager = GridLayoutManager(context, 3)
-        adapter = ItemGridRVAdapter(presenter.rootGridPresenter as IItemGridPresenter<Any>) //todo
+        adapter = ItemGridRVAdapter(presenter.rootGridPresenter) //todo
         (activity as MainActivity).setToolbarVisibility(false)
         rv_roots.adapter = adapter
         fab_roots.setOnClickListener {
@@ -99,25 +99,44 @@ class RootsFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
     }
 
     override fun updateRootAdapter() {
-        Log.d("flow", "updating root adapter in RootsFragment")
+        Log.d(ROOTS_FRAGMENT, "updating root adapter in RootsFragment")
         adapter?.notifyDataSetChanged()
     }
 
     override fun updateDialogAdapter() {
-        Log.d("flow", "updating dialog adapter in RootsFragment")
+        Log.d(ROOTS_FRAGMENT, "updating dialog adapter in RootsFragment")
         dialogAdapter?.notifyDataSetChanged()
     }
 
-    override fun openChooserDialog(files: List<Path>, handler: (Path) -> Unit) {
-        Log.d("flow", "opening chooser dialog in RootsFragment")
+    fun onClickHandler(): (Path) -> Unit = { path: Path ->
+        Log.d("picker","Path $path was clicked")
+
+        if (Files.isDirectory(path)) {
+            val children = Files.list(path).toList()
+            dialogAdapter!!.updateItems(children)
+        } else {
+            Log.d("picker","but it is not a directory")
+        }
+    }
+
+    override fun openChooserDialog(paths: List<Path>, onFinish: (Path) -> Unit) {
+        Log.d(ROOTS_FRAGMENT, "opening chooser dialog in RootsFragment")
         dialogView = LayoutInflater.from(context!!)
             .inflate(R.layout.dialog_roots_new, null)
 
         if (dialogView != null) {
             val dialogView = dialogView!!
 
+            dialogView.tv_roots_dialog_path.text = PATH_PICKER_MESSAGE
+
             dialogView.rv_roots_dialog.layoutManager = GridLayoutManager(context, 2)
-            dialogAdapter = ItemGridRVAdapter(DialogItemGridPresenter(files, handler) as IItemGridPresenter<Any>) //todo
+
+            dialogAdapter = ItemGridRVAdapter(
+                RootPicker(
+                    paths,
+                    onClickHandler()
+                )
+            )
             dialogView.rv_roots_dialog.adapter = dialogAdapter
 
             dialogView.btn_roots_dialog_cancel.setOnClickListener {
@@ -136,47 +155,46 @@ class RootsFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
             .setView(dialogView)
 
         alertDialog = alertDialogBuilder.show()
-        if (alertDialog != null) {
-            val alertDialog = alertDialog!!
-
-            alertDialog.setOnKeyListener { _, keyCode, event ->
-                if (keyCode == KeyEvent.KEYCODE_BACK &&
-                    event.action == KeyEvent.ACTION_UP &&
-                    !event.isCanceled
-                ) {
-                    //todo
-                    dialogAdapter!!.backClicked()
-                    //presenter.backClicked()
-                    return@setOnKeyListener true
-                }
-                false
-            }
-
-            alertDialog.setCanceledOnTouchOutside(false)
-        } else {
+        if (alertDialog == null) {
             throw IllegalStateException("Failed to build AlertDialog")
         }
+        val alertDialog = alertDialog!!
+
+        alertDialog.setOnKeyListener { _, keyCode, event ->
+            if (keyCode == KeyEvent.KEYCODE_BACK &&
+                event.action == KeyEvent.ACTION_UP &&
+                !event.isCanceled
+            ) {
+                //todo
+                dialogAdapter!!.backClicked()
+                //presenter.backClicked()
+                return@setOnKeyListener true
+            }
+            false
+        }
+
+        alertDialog.setCanceledOnTouchOutside(false)
     }
 
     override fun setDialogPath(path: String) {
-        Log.d("flow", "setting dialog path to $path in RootsFragment")
+        Log.d(ROOTS_FRAGMENT, "setting dialog path to $path in RootsFragment")
 
         dialogView?.tv_roots_dialog_path!!.text = path
     }
 
     override fun requestSdCardUri() {
-        Log.d("flow", "requesting sd card URI in RootsFragment")
+        Log.d(ROOTS_FRAGMENT, "requesting sd card URI in RootsFragment")
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
         activity!!.startActivityForResult(intent, REQUEST_CODE_SD_CARD_URI)
     }
 
     override fun closeChooserDialog() {
-        Log.d("flow", "closing chooser dialog in RootsFragment")
+        Log.d(ROOTS_FRAGMENT, "closing chooser dialog in RootsFragment")
         alertDialog?.dismiss()
     }
 
     override fun backClicked(): Boolean {
-        Log.d("flow", "back clicked in RootsFragment")
+        Log.d(ROOTS_FRAGMENT, "back clicked in RootsFragment")
         return presenter.backClicked()
     }
 
@@ -184,34 +202,4 @@ class RootsFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
 //    private fun storageVersionDifferent(fileStorageVersion: Int, root: remove_Root) {
 //        viewState.showToast("${root.storage.path} has a different version")
 //    }
-
-    inner class DialogItemGridPresenter(initialFiles: List<Path>, handler: (Path) -> Unit):
-        ReversibleItemGridPresenter<Path>(initialFiles, {
-            Log.d("flow", "item $it clicked in RootsPresenter/DialogItemGridPresenter")
-
-            if (Files.isDirectory(it)) {
-                handler(it)
-            } else {
-                //todo: unclicable item
-            }
-        }) {
-
-        override fun bindView(view: FileItemView) {
-            Log.d("flow", "binding view in RootsPresenter/DialogItemGridPresenter")
-
-            val paths = items()
-            val path = paths[view.pos]
-            view.setText(path.fileName.toString())
-            if (Files.isDirectory(path)) {
-                view.setIcon(IconOrImage(icon = Icon.FOLDER))
-            } else {
-                view.setIcon(IconOrImage(icon = Icon.FILE))
-                //todo
-//                if (path.isImage())
-//                    view.setIcon(Icon.IMAGE, path.file)
-//                else
-//                    view.setIcon(Icon.FILE, path.file)
-            }
-        }
-    }
 }

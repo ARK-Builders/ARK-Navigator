@@ -3,13 +3,13 @@ package space.taran.arkbrowser.mvp.presenter
 import android.util.Log
 import space.taran.arkbrowser.mvp.model.entity.common.Icon
 import space.taran.arkbrowser.mvp.model.entity.common.IconOrImage
-import space.taran.arkbrowser.mvp.presenter.adapter.IItemGridPresenter
 import space.taran.arkbrowser.mvp.view.RootView
 import space.taran.arkbrowser.mvp.view.item.FileItemView
 import moxy.InjectViewState
 import moxy.MvpPresenter
 import ru.terrakok.cicerone.Router
 import space.taran.arkbrowser.mvp.model.repo.FoldersRepo
+import space.taran.arkbrowser.mvp.presenter.adapter.ItemGridPresenter
 import java.io.File
 import java.lang.IllegalStateException
 import java.nio.file.Path
@@ -23,7 +23,7 @@ class RootsPresenter(private val devices: List<Path>): MvpPresenter<RootView>() 
     @Inject
     lateinit var foldersRepo: FoldersRepo
 
-    val rootGridPresenter = ItemGridPresenter()
+    val rootGridPresenter = XItemGridPresenter()
 
     private val roots = mutableListOf<Path>()
 
@@ -31,8 +31,8 @@ class RootsPresenter(private val devices: List<Path>): MvpPresenter<RootView>() 
     var pickedDir: File? = null
     var dialogIsOpen: Boolean = false
 
-    inner class ItemGridPresenter :
-        IItemGridPresenter<Path>({
+    inner class XItemGridPresenter :
+        ItemGridPresenter<Path>({
             Log.d("flow", "[mock] creating Tags screen with $it")
 //            router.replaceScreen(Screens.TagsScreen(
 //                resources = resourcesRepo.retrieveResources(root.folder)))
@@ -43,6 +43,10 @@ class RootsPresenter(private val devices: List<Path>): MvpPresenter<RootView>() 
 
         override fun items() = roots
 
+        override fun updateItems(items: List<Path>) {
+            roots = items
+        }
+
         override fun bindView(view: FileItemView) {
             Log.d("flow", "binding view in RootsPresenter/ItemGridPresenter")
             val root = roots[view.pos]
@@ -50,7 +54,7 @@ class RootsPresenter(private val devices: List<Path>): MvpPresenter<RootView>() 
             view.setIcon(IconOrImage(icon = Icon.ROOT))
         }
 
-        override fun backClicked() {
+        override fun backClicked(): Boolean {
             TODO("Not yet implemented")
         }
     }
@@ -158,5 +162,4 @@ class RootsPresenter(private val devices: List<Path>): MvpPresenter<RootView>() 
 
         return true
     }
-
 }

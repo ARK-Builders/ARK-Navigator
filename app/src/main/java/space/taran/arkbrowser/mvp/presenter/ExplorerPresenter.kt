@@ -2,7 +2,6 @@ package space.taran.arkbrowser.mvp.presenter
 
 import android.util.Log
 import space.taran.arkbrowser.mvp.model.entity.common.Icon
-import space.taran.arkbrowser.mvp.presenter.adapter.IItemGridPresenter
 import space.taran.arkbrowser.mvp.view.ExplorerView
 import space.taran.arkbrowser.mvp.view.item.FileItemView
 import space.taran.arkbrowser.navigation.Screens
@@ -11,6 +10,7 @@ import moxy.MvpPresenter
 import ru.terrakok.cicerone.Router
 import space.taran.arkbrowser.mvp.model.entity.common.IconOrImage
 import space.taran.arkbrowser.mvp.model.repo.FoldersRepo
+import space.taran.arkbrowser.mvp.presenter.adapter.ItemGridPresenter
 import java.nio.file.Files
 import java.nio.file.Path
 import javax.inject.Inject
@@ -22,11 +22,11 @@ class ExplorerPresenter(var currentFolder: Path? = null) : MvpPresenter<Explorer
     @Inject
     lateinit var foldersRepo: FoldersRepo
 
-    var fileGridPresenter: ItemGridPresenter? = null
+    var fileGridPresenter: XItemGridPresenter? = null
     var currentRoot: Path? = null
 
-    inner class ItemGridPresenter(var files: List<MarkableFile>) :
-        IItemGridPresenter<MarkableFile>({
+    inner class XItemGridPresenter(var files: List<MarkableFile>) :
+        ItemGridPresenter<MarkableFile>({
             val (_, file) = it
             if (Files.isDirectory(file)) {
                 router.navigateTo(Screens.ExplorerScreen(file))
@@ -38,6 +38,10 @@ class ExplorerPresenter(var currentFolder: Path? = null) : MvpPresenter<Explorer
         }
 
         override fun items() = files //todo
+
+        override fun updateItems(items: List<MarkableFile>) {
+            this.files = items.sortedWith(markableFileComparator)
+        }
 
         override fun bindView(view: FileItemView) {
             val (favorite, path) = files[view.pos]
@@ -55,7 +59,7 @@ class ExplorerPresenter(var currentFolder: Path? = null) : MvpPresenter<Explorer
             view.setFav(favorite)
         }
 
-        override fun backClicked() {
+        override fun backClicked(): Boolean {
             TODO("Not yet implemented")
         }
     }

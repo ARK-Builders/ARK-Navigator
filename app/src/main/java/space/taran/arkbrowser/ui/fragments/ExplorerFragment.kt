@@ -21,9 +21,8 @@ import kotlinx.android.synthetic.main.fragment_explorer.*
 import moxy.MvpAppCompatFragment
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
-import space.taran.arkbrowser.mvp.presenter.adapter.IItemGridPresenter
 import space.taran.arkbrowser.ui.activity.MainActivity.Companion.REQUEST_CODE_SD_CARD_URI
-import java.io.File
+import space.taran.arkbrowser.utils.MarkableFile
 import java.nio.file.Path
 import java.nio.file.Paths
 
@@ -60,7 +59,7 @@ class ExplorerFragment : MvpAppCompatFragment(), ExplorerView, BackButtonListene
         }
     }
 
-    var adapter: ItemGridRVAdapter? = null
+    var adapter: ItemGridRVAdapter<MarkableFile>? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -87,7 +86,7 @@ class ExplorerFragment : MvpAppCompatFragment(), ExplorerView, BackButtonListene
         Log.d("flow", "initializing ExplorerFragment")
         (activity as MainActivity).setSelectedTab(2)
         rv_files.layoutManager = GridLayoutManager(context, 3)
-        adapter = ItemGridRVAdapter(presenter.fileGridPresenter!! as IItemGridPresenter<Any>) //todo
+        adapter = ItemGridRVAdapter(presenter.fileGridPresenter!!)
         (activity as MainActivity).setToolbarVisibility(true)
         fab_explorer_fav.setOnClickListener {
             presenter.favFabClicked()

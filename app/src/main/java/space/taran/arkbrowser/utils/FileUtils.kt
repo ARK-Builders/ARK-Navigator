@@ -2,10 +2,12 @@ package space.taran.arkbrowser.utils
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.core.content.FileProvider
 import java.io.*
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 
 typealias Timestamp = Long
 typealias StringPath = String
@@ -120,26 +122,26 @@ fun getUriForFileByProvider(context: Context, file: File): Uri {
         file)
 }
 
-fun getExtSdCards(context: Context): List<Path> =
-    context.getExternalFilesDirs("external")
+fun listDevices(context: Context): List<Path> =
+    context.getExternalFilesDirs(null)
         .toList()
         .filterNotNull()
         .map {
             it.toPath().toRealPath()
+                .takeWhile { part ->
+                    part != ANDROID_DIRECTORY
+                }
+                .fold(ROOT_PATH) { parent, child ->
+                    parent.resolve(child)
+                }
         }
-//        .mapNotNull {
-//            val path = it.absolutePath
-//            todo: improve
-//            val index = path.lastIndexOf("/Android/data")
-//            if (index >= 0) {
-//                File(path.substring(0, index))
-//            } else {
-//                null
-//            }
-//        }
 
-fun getExtSdCardBaseFolder(context: Context, file: Path): Path? =
-    getExtSdCards(context).find { file.startsWith(it) }
+val ANDROID_DIRECTORY = Paths.get("Android")
+
+val ROOT_PATH = Paths.get("/")
+
+//fun getExtSdCardBaseFolder(context: Context, file: Path): Path? =
+//    getExtSdCards(context).find { file.startsWith(it) }
 //todo fs.normalize `path` before check
 
 fun extension(path: Path): String =

@@ -24,7 +24,6 @@ import moxy.MvpAppCompatFragment
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
 import space.taran.arkbrowser.mvp.model.entity.room.ResourceId
-import space.taran.arkbrowser.mvp.presenter.adapter.IItemGridPresenter
 import space.taran.arkbrowser.utils.SortBy
 
 class TagsFragment(val resources: Set<ResourceId>) : MvpAppCompatFragment(), TagsView {
@@ -39,7 +38,7 @@ class TagsFragment(val resources: Set<ResourceId>) : MvpAppCompatFragment(), Tag
             App.instance.appComponent.inject(this)
         }
 
-    private var adapter: ItemGridRVAdapter? = null
+    private var adapter: ItemGridRVAdapter<ResourceId>? = null
     private var sortByDialogView: View? = null
     private var sortByDialog: AlertDialog? = null
 
@@ -63,7 +62,7 @@ class TagsFragment(val resources: Set<ResourceId>) : MvpAppCompatFragment(), Tag
         (activity as MainActivity).setSelectedTab(1)
         (activity as MainActivity).setToolbarVisibility(true)
         rv_tags.layoutManager = GridLayoutManager(context, 3)
-        adapter = ItemGridRVAdapter(presenter.fileGridPresenter as IItemGridPresenter<Any>) //todo
+        adapter = ItemGridRVAdapter(presenter.fileGridPresenter) //todo
         rv_tags.adapter = adapter
         setHasOptionsMenu(true)
     }

@@ -10,10 +10,13 @@ import java.nio.file.Path
 interface RootView: MvpView {
     fun init()
     fun updateRootAdapter()
-    fun updateDialogAdapter()
+
     fun openChooserDialog(files: List<Path>, handler: (Path) -> Unit)
     fun closeChooserDialog()
+
     @StateStrategyType(SkipStrategy::class)
     fun requestSdCardUri()
+
+    fun updateDialogAdapter()
     fun setDialogPath(path: String)
 }

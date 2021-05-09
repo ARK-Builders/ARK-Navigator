@@ -8,31 +8,28 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import space.taran.arkbrowser.R
-import space.taran.arkbrowser.mvp.presenter.adapter.IItemGridPresenter
+import space.taran.arkbrowser.mvp.presenter.adapter.ItemGridPresenter
 import space.taran.arkbrowser.mvp.view.item.FileItemView
 import space.taran.arkbrowser.utils.loadImage
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.item_file_grid.view.*
 import space.taran.arkbrowser.mvp.model.entity.common.IconOrImage
+import space.taran.arkbrowser.utils.ITEM_GRID
 import space.taran.arkbrowser.utils.iconToImageResource
 
-class ItemGridRVAdapter(
-    val presenter: IItemGridPresenter<Any> //todo
-): RecyclerView.Adapter<ItemGridRVAdapter.ViewHolder>() {
+class ItemGridRVAdapter<T>(val presenter: ItemGridPresenter<T>)
+    : RecyclerView.Adapter<ItemGridRVAdapter<T>.ViewHolder>() {
+
+    override fun getItemCount() = presenter.getCount()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         ViewHolder(
             LayoutInflater.from(parent.context).inflate(
                 R.layout.item_file_grid,
                 parent,
-                false
-            )
-        )
-
-    override fun getItemCount() = presenter.getCount()
+                false))
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        Log.d("flow", "onBindViewHolder in ItemGridRVAdapter")
         holder.pos = position
         presenter.bindView(holder)
 
@@ -41,8 +38,18 @@ class ItemGridRVAdapter(
         }
     }
 
+    fun updateItems(items: List<T>) {
+        Log.d(ITEM_GRID, "update requested")
+        presenter.updateItems(items)
+        this.notifyDataSetChanged()
+    }
+
     fun backClicked() {
-        presenter.backClicked()
+        Log.d(ITEM_GRID, "back clicked")
+        if (!presenter.backClicked()) {
+            Log.d(ITEM_GRID, "[mock] can't go back, destructing")
+        }
+        this.notifyDataSetChanged()
     }
 
     inner class ViewHolder(override val containerView: View) :

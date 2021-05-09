@@ -2,12 +2,12 @@ package space.taran.arkbrowser.mvp.presenter
 
 import android.util.Log
 import space.taran.arkbrowser.mvp.model.entity.common.TagState
-import space.taran.arkbrowser.mvp.presenter.adapter.IItemGridPresenter
 import space.taran.arkbrowser.mvp.view.TagsView
 import space.taran.arkbrowser.mvp.view.item.FileItemView
 import moxy.MvpPresenter
 import ru.terrakok.cicerone.Router
 import space.taran.arkbrowser.mvp.model.entity.room.ResourceId
+import space.taran.arkbrowser.mvp.presenter.adapter.ItemGridPresenter
 import space.taran.arkbrowser.utils.*
 import javax.inject.Inject
 
@@ -21,7 +21,7 @@ class TagsPresenter(val allResources: Set<ResourceId>) :
     @Inject
     lateinit var router: Router
 
-    val fileGridPresenter = ItemGridPresenter()
+    val fileGridPresenter = XItemGridPresenter()
 //    var syncDisposable: Disposable? = null
     var tagStates = mutableListOf<TagState>()
     var sortBy = SortBy.NAME
@@ -31,8 +31,8 @@ class TagsPresenter(val allResources: Set<ResourceId>) :
 
     var isTagsOff = false
 
-    inner class ItemGridPresenter :
-        IItemGridPresenter<ResourceId>({
+    inner class XItemGridPresenter :
+        ItemGridPresenter<ResourceId>({
             Log.d("flow", "[mock] item $it clicked in TagsPresenter/ItemGridPresenter")
 //            if (resource.isImage()) {
 //                val images = selectedResources.filter { it.isImage() }
@@ -56,6 +56,10 @@ class TagsPresenter(val allResources: Set<ResourceId>) :
 
         override fun items() = resources //todo
 
+        override fun updateItems(items: List<ResourceId>) {
+            //TODO
+        }
+
         override fun bindView(view: FileItemView) {
             val resource = resources[view.pos]
             Log.d("flow", "[mock] binding view with $resource in TagsPresenter/ItemGridPresenter")
@@ -67,7 +71,7 @@ class TagsPresenter(val allResources: Set<ResourceId>) :
 //            }
         }
 
-        override fun backClicked() {
+        override fun backClicked(): Boolean {
             TODO("Not yet implemented")
         }
     }
