@@ -4,20 +4,21 @@ import android.util.Log
 import kotlinx.collections.immutable.persistentListOf
 import space.taran.arkbrowser.utils.ITEM_GRID
 import java.lang.AssertionError
-import java.lang.IllegalStateException
 
-abstract class ReversibleItemGridPresenter<T>(
-    init: List<T>, handler: (T) -> Unit)
-        : ItemGridPresenter<T>(handler) {
+abstract class ReversibleItemGridPresenter<Label,Item>(
+    label: Label, items: List<Item>, handler: (Item) -> Unit)
+        : ItemGridPresenter<Label, Item>(handler) {
 
-    private var frames = persistentListOf(init)
+    private inner class Frame(val label: Label, val items: List<Item>)
+
+    private var frames = persistentListOf(Frame(label, items))
     private var depth = 1
 
-    override fun items(): List<T> = frames.last()
+    override fun items(): List<Item> = frames.last().items
 
-    override fun updateItems(items: List<T>) {
+    override fun updateItems(label: Label, items: List<Item>) {
         Log.d(ITEM_GRID, "adding a frame of items")
-        frames = frames.add(items)
+        frames = frames.add(Frame(label, items))
         depth++
 
         if (depth != frames.size) {
@@ -26,9 +27,9 @@ abstract class ReversibleItemGridPresenter<T>(
         Log.d(ITEM_GRID, "new stack depth: $depth")
     }
 
-    override fun backClicked(): Boolean {
+    override fun backClicked(): Label? {
         if (depth == 1) {
-            return false
+            return null
         }
 
         Log.d(ITEM_GRID, "reverting last frame of items")
@@ -39,6 +40,6 @@ abstract class ReversibleItemGridPresenter<T>(
             throw AssertionError()
         }
         Log.d(ITEM_GRID, "new stack depth: $depth")
-        return true
+        return frames.last().label
     }
 }

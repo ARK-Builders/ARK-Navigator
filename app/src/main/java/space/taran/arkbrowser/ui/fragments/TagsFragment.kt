@@ -38,7 +38,7 @@ class TagsFragment(val resources: Set<ResourceId>) : MvpAppCompatFragment(), Tag
             App.instance.appComponent.inject(this)
         }
 
-    private var adapter: ItemGridRVAdapter<ResourceId>? = null
+    private var adapter: ItemGridRVAdapter<Unit, ResourceId>? = null
     private var sortByDialogView: View? = null
     private var sortByDialog: AlertDialog? = null
 

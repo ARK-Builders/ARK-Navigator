@@ -32,7 +32,7 @@ class TagsPresenter(val allResources: Set<ResourceId>) :
     var isTagsOff = false
 
     inner class XItemGridPresenter :
-        ItemGridPresenter<ResourceId>({
+        ItemGridPresenter<Unit, ResourceId>({
             Log.d("flow", "[mock] item $it clicked in TagsPresenter/ItemGridPresenter")
 //            if (resource.isImage()) {
 //                val images = selectedResources.filter { it.isImage() }
@@ -56,7 +56,7 @@ class TagsPresenter(val allResources: Set<ResourceId>) :
 
         override fun items() = resources //todo
 
-        override fun updateItems(items: List<ResourceId>) {
+        override fun updateItems(label: Unit, items: List<ResourceId>) {
             //TODO
         }
 
@@ -71,7 +71,7 @@ class TagsPresenter(val allResources: Set<ResourceId>) :
 //            }
         }
 
-        override fun backClicked(): Boolean {
+        override fun backClicked(): Unit {
             TODO("Not yet implemented")
         }
     }

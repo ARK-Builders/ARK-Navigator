@@ -4,15 +4,15 @@ import android.util.Log
 import space.taran.arkbrowser.mvp.view.item.FileItemView
 import space.taran.arkbrowser.utils.ITEM_GRID
 
-abstract class ItemGridPresenter<T>(
-    private val handler: (T) -> Unit) {
+abstract class ItemGridPresenter<Label, Item>(
+    private val handler: (Item) -> Unit) {
 
-    abstract fun items(): List<T>
-    abstract fun updateItems(items: List<T>)
+    abstract fun items(): List<Item>
+    abstract fun updateItems(label: Label, items: List<Item>)
     abstract fun bindView(view: FileItemView)
 
-    // returns true if the event was processed
-    abstract fun backClicked(): Boolean
+    // returns null if the event wasn't processed
+    abstract fun backClicked(): Label?
 
     fun getCount() = items().size
 

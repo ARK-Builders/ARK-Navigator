@@ -20,6 +20,8 @@ import moxy.presenter.ProvidePresenter
 import ru.terrakok.cicerone.NavigatorHolder
 import ru.terrakok.cicerone.android.support.SupportAppNavigator
 import space.taran.arkbrowser.ui.App
+import space.taran.arkbrowser.utils.MAIN_ACTIVITY
+import space.taran.arkbrowser.utils.PERMISSIONS
 import java.lang.AssertionError
 import javax.inject.Inject
 
@@ -34,7 +36,7 @@ class MainActivity : MvpAppCompatActivity(), MainView {
     private val navigator = SupportAppNavigator(this, R.id.container)
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        Log.d("flow", "creating MainActivity")
+        Log.d(MAIN_ACTIVITY, "creating")
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         App.instance.appComponent.inject(this)
@@ -42,32 +44,32 @@ class MainActivity : MvpAppCompatActivity(), MainView {
 
     @ProvidePresenter
     fun providePresenter() = MainPresenter().apply {
-        Log.d("flow", "creating MainPresenter")
+        Log.d(MAIN_ACTIVITY, "creating MainPresenter")
         App.instance.appComponent.inject(this)
     }
 
     override fun init() {
-        Log.d("flow", "initializing MainActivity")
+        Log.d(MAIN_ACTIVITY, "initializing")
         setSupportActionBar(toolbar)
         bottom_navigation.setOnNavigationItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.page_roots -> {
-                    Log.d("flow", "switching to Roots screen")
+                    Log.d(MAIN_ACTIVITY, "switching to Roots screen")
                     presenter.goToRootsScreen()
                     true
                 }
                 R.id.page_tags -> {
-                    Log.d("flow", "switching to Tags screen")
+                    Log.d(MAIN_ACTIVITY, "switching to Tags screen")
                     presenter.goToTagsScreen()
                     true
                 }
                 R.id.page_explorer -> {
-                    Log.d("flow", "switching to Explorer screen")
+                    Log.d(MAIN_ACTIVITY, "switching to Explorer screen")
                     presenter.goToExplorerScreen()
                     true
                 }
                 else -> {
-                    Log.w("flow", "no handler found")
+                    Log.w(MAIN_ACTIVITY, "no handler found")
                     true
                 }
             }
@@ -83,14 +85,14 @@ class MainActivity : MvpAppCompatActivity(), MainView {
 
         if (writePermission == PackageManager.PERMISSION_GRANTED &&
                 readPermission == PackageManager.PERMISSION_GRANTED) {
-            Log.d("permissions", "already granted")
+            Log.d(PERMISSIONS, "already granted")
             presenter.permsGranted()
         } else {
             val permissions = arrayOf(
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.READ_EXTERNAL_STORAGE)
 
-            Log.d("permissions", "requesting $permissions")
+            Log.d(PERMISSIONS, "requesting $permissions")
             ActivityCompat.requestPermissions(this, permissions, REQUEST_CODE_PERMISSIONS)
         }
     }
@@ -101,7 +103,7 @@ class MainActivity : MvpAppCompatActivity(), MainView {
         granted: IntArray) {
 
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
-            Log.d("permissions", "granted $granted")
+            Log.d(PERMISSIONS, "granted $granted")
 
             if (granted.size == permissions.size) {
                 val denied = permissions
@@ -110,18 +112,18 @@ class MainActivity : MvpAppCompatActivity(), MainView {
                     .map { (permission, _) -> permission }
 
                 if (denied.isEmpty()) {
-                    Log.d("permissions", "all necessary permissions granted")
+                    Log.d(PERMISSIONS, "all necessary permissions granted")
                     presenter.permsGranted()
                 } else {
-                    Log.e("permissions", "denied $denied")
+                    Log.e(PERMISSIONS, "denied $denied")
                     showToast("Permissions $denied denied")
                 }
             } else {
-                Log.e("permissions", "less permissions granted than expected")
+                Log.e(PERMISSIONS, "less permissions granted than expected")
                 throw AssertionError("Failed to request permissions")
             }
         } else {
-            Log.d("permissions", "unknown permissions result received")
+            Log.d(PERMISSIONS, "unknown permissions result received")
         }
 
         super.onRequestPermissionsResult(requestCode, permissions, granted)
@@ -140,7 +142,7 @@ class MainActivity : MvpAppCompatActivity(), MainView {
     }
 
     fun setSelectedTab(pos: Int) {
-        Log.d("flow", "tab $pos selected")
+        Log.d(MAIN_ACTIVITY, "tab $pos selected")
         bottom_navigation.menu.getItem(pos).isChecked = true
     }
 
@@ -150,7 +152,7 @@ class MainActivity : MvpAppCompatActivity(), MainView {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
         if (requestCode == REQUEST_CODE_SD_CARD_URI) {
-            Log.d("activity", "sdcard uri request resulted," +
+            Log.d(MAIN_ACTIVITY, "sdcard uri request resulted," +
                     "code $resultCode, intent: $intent")
 
             val treeUri = intent!!.data!!
@@ -160,26 +162,26 @@ class MainActivity : MvpAppCompatActivity(), MainView {
             //todo: is it really needed?
             presenter.sdCardUriGranted(treeUri.toString())
         } else {
-            Log.d("activity", "unknown activity result received")
+            Log.d(MAIN_ACTIVITY, "unknown activity result received")
         }
 
         super.onActivityResult(requestCode, resultCode, intent)
     }
 
     override fun onResumeFragments() {
-        Log.d("flow", "resuming fragments in MainActivity")
+        Log.d(MAIN_ACTIVITY, "resuming fragments in MainActivity")
         super.onResumeFragments()
         navigatorHolder.setNavigator(navigator)
     }
 
     override fun onPause() {
-        Log.d("flow", "pausing MainActivity")
+        Log.d(MAIN_ACTIVITY, "pausing MainActivity")
         super.onPause()
         navigatorHolder.removeNavigator()
     }
 
     override fun onBackPressed() {
-        Log.d("flow", "back pressed in MainActivity")
+        Log.d(MAIN_ACTIVITY, "back pressed in MainActivity")
         supportFragmentManager.fragments.forEach {
             if (it is BackButtonListener && it.backClicked()) {
                 return

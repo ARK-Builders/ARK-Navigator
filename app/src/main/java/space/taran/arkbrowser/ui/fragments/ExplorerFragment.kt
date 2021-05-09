@@ -59,7 +59,7 @@ class ExplorerFragment : MvpAppCompatFragment(), ExplorerView, BackButtonListene
         }
     }
 
-    var adapter: ItemGridRVAdapter<MarkableFile>? = null
+    var adapter: ItemGridRVAdapter<Unit, MarkableFile>? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,

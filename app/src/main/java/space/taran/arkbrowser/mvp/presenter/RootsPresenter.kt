@@ -10,6 +10,7 @@ import moxy.MvpPresenter
 import ru.terrakok.cicerone.Router
 import space.taran.arkbrowser.mvp.model.repo.FoldersRepo
 import space.taran.arkbrowser.mvp.presenter.adapter.ItemGridPresenter
+import space.taran.arkbrowser.utils.ROOTS_SCREEN
 import java.io.File
 import java.lang.IllegalStateException
 import java.nio.file.Path
@@ -29,11 +30,10 @@ class RootsPresenter(private val devices: List<Path>): MvpPresenter<RootView>() 
 
     //todo
     var pickedDir: File? = null
-    var dialogIsOpen: Boolean = false
 
     inner class XItemGridPresenter :
-        ItemGridPresenter<Path>({
-            Log.d("flow", "[mock] creating Tags screen with $it")
+        ItemGridPresenter<Unit, Path>({
+            Log.d(ROOTS_SCREEN, "[mock] creating Tags screen with $it")
 //            router.replaceScreen(Screens.TagsScreen(
 //                resources = resourcesRepo.retrieveResources(root.folder)))
 
@@ -43,32 +43,32 @@ class RootsPresenter(private val devices: List<Path>): MvpPresenter<RootView>() 
 
         override fun items() = roots
 
-        override fun updateItems(items: List<Path>) {
+        override fun updateItems(label: Unit, items: List<Path>) {
             roots = items
         }
 
         override fun bindView(view: FileItemView) {
-            Log.d("flow", "binding view in RootsPresenter/ItemGridPresenter")
+            Log.d(ROOTS_SCREEN, "binding view in RootsPresenter/ItemGridPresenter")
             val root = roots[view.pos]
             //view.setText(root.name)
             view.setIcon(IconOrImage(icon = Icon.ROOT))
         }
 
-        override fun backClicked(): Boolean {
+        override fun backClicked(): Unit {
             TODO("Not yet implemented")
         }
     }
 
     override fun onFirstViewAttach() {
-        Log.d("flow", "first view attached in RootsPresenter")
+        Log.d(ROOTS_SCREEN, "first view attached in RootsPresenter")
         super.onFirstViewAttach()
         viewState.init()
     }
 
     fun onViewResumed() {
-        Log.d("flow", "[mock] view resumed in RootsPresenter")
+        Log.d(ROOTS_SCREEN, "[mock] view resumed in RootsPresenter")
 //        rootGridPresenter.load(rootsRepo.getRoots().sortedBy { it.name })
-        viewState.updateRootAdapter()
+        viewState.updateAdapter()
     }
 
     fun rootPicked() {
@@ -76,7 +76,7 @@ class RootsPresenter(private val devices: List<Path>): MvpPresenter<RootView>() 
             throw IllegalStateException("Nothing is really picked")
         }
 
-        Log.d("flow", "[mock] root $pickedDir picked in RootsPresenter")
+        Log.d(ROOTS_SCREEN, "[mock] root $pickedDir picked in RootsPresenter")
 
 //        val root = remove_Root(name = pickedDir!!.name, folder = pickedDir!!)
 //        rootsRepo.insertRoot(root)
@@ -93,46 +93,14 @@ class RootsPresenter(private val devices: List<Path>): MvpPresenter<RootView>() 
 //        sortedRoots.sortBy { it.name }
 //        rootGridPresenter.roots.addAll(sortedRoots)
 //        viewState.updateRootAdapter()
-        dismissDialog()
-    }
-
-    fun dismissDialog() {
-        Log.d("flow", "dialog dismissed in RootsPresenter")
-        viewState.closeChooserDialog()
-        dialogIsOpen = false
     }
 
     fun fabClicked() {
-        Log.d("flow", "fab clicked in RootsPresenter")
-        viewState.openChooserDialog(devices) {
-            Log.d("flow", "Path $it was added as root")
+        Log.d(ROOTS_SCREEN, "[add root] clicked")
+        viewState.openRootPicker(devices) {
+            Log.d(ROOTS_SCREEN, "path $it was added as root")
             roots.add(it)
-        }
-        dialogIsOpen = true
-        pickedDir = null
-        viewState.updateDialogAdapter()
-    }
 
-    private fun requestSdCardUri() {
-        //todo
-//        val basePath = resourcesRepo.fileDataSource.getExtSdCardBaseFolder(pickedDir!!.path)
-//        roomRepo.getSdCardUriByPath(basePath!!).observeOn(AndroidSchedulers.mainThread())
-//            .subscribe({
-//                it.uri = null
-//                roomRepo.insertSdCardUri(it).observeOn(AndroidSchedulers.mainThread())
-//                    .subscribe({ viewState.requestSdCardUri() }, {})
-//            }, {
-//                roomRepo.insertSdCardUri(SDCardUri(path = basePath))
-//                    .observeOn(AndroidSchedulers.mainThread()).subscribe(
-//                        { viewState.requestSdCardUri() }, {})
-//            })
-    }
-
-    fun backClicked(): Boolean {
-        Log.d("flow", "back clicked in RootsPresenter")
-        if (dialogIsOpen) {
-            Log.d("flow", "dialog is open in RootsPresenter")
-//            if (pickedDir != null) {
 //                val extPaths = resourcesRepo.fileDataSource.getExtSdCards()
 //                extPaths.forEach {
 //                    if (pickedDir == it.path) {
@@ -152,14 +120,30 @@ class RootsPresenter(private val devices: List<Path>): MvpPresenter<RootView>() 
 //                dialogGridPresenter.files.addAll(
 //                    files.sortedWith(resourceComparator(SortBy.NAME)))
 //                viewState.updateDialogAdapter()
-//            } else {
-//                viewState.closeChooserDialog()
-//            }
-        } else {
-            Log.d("flow", "dialog isn't open in RootsPresenter, quitting")
-            router.exit()
+
         }
 
+        pickedDir = null
+    }
+
+    private fun requestSdCardUri() {
+        //todo
+//        val basePath = resourcesRepo.fileDataSource.getExtSdCardBaseFolder(pickedDir!!.path)
+//        roomRepo.getSdCardUriByPath(basePath!!).observeOn(AndroidSchedulers.mainThread())
+//            .subscribe({
+//                it.uri = null
+//                roomRepo.insertSdCardUri(it).observeOn(AndroidSchedulers.mainThread())
+//                    .subscribe({ viewState.requestSdCardUri() }, {})
+//            }, {
+//                roomRepo.insertSdCardUri(SDCardUri(path = basePath))
+//                    .observeOn(AndroidSchedulers.mainThread()).subscribe(
+//                        { viewState.requestSdCardUri() }, {})
+//            })
+    }
+
+    fun backClicked(): Boolean {
+        Log.d(ROOTS_SCREEN, "back clicked")
+        router.exit()
         return true
     }
 }

@@ -17,8 +17,8 @@ import space.taran.arkbrowser.mvp.model.entity.common.IconOrImage
 import space.taran.arkbrowser.utils.ITEM_GRID
 import space.taran.arkbrowser.utils.iconToImageResource
 
-class ItemGridRVAdapter<T>(val presenter: ItemGridPresenter<T>)
-    : RecyclerView.Adapter<ItemGridRVAdapter<T>.ViewHolder>() {
+open class ItemGridRVAdapter<L, I>(val presenter: ItemGridPresenter<L, I>)
+    : RecyclerView.Adapter<ItemGridRVAdapter<L, I>.ViewHolder>() {
 
     override fun getItemCount() = presenter.getCount()
 
@@ -38,18 +38,19 @@ class ItemGridRVAdapter<T>(val presenter: ItemGridPresenter<T>)
         }
     }
 
-    fun updateItems(items: List<T>) {
+    fun updateItems(label: L, items: List<I>) {
         Log.d(ITEM_GRID, "update requested")
-        presenter.updateItems(items)
+        presenter.updateItems(label, items)
         this.notifyDataSetChanged()
     }
 
-    fun backClicked() {
+    open fun backClicked(): L? {
         Log.d(ITEM_GRID, "back clicked")
-        if (!presenter.backClicked()) {
-            Log.d(ITEM_GRID, "[mock] can't go back, destructing")
+        val label = presenter.backClicked()
+        if (label != null) {
+            this.notifyDataSetChanged()
         }
-        this.notifyDataSetChanged()
+        return label
     }
 
     inner class ViewHolder(override val containerView: View) :

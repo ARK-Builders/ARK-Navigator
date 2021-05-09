@@ -26,7 +26,7 @@ class ExplorerPresenter(var currentFolder: Path? = null) : MvpPresenter<Explorer
     var currentRoot: Path? = null
 
     inner class XItemGridPresenter(var files: List<MarkableFile>) :
-        ItemGridPresenter<MarkableFile>({
+        ItemGridPresenter<Unit, MarkableFile>({
             val (_, file) = it
             if (Files.isDirectory(file)) {
                 router.navigateTo(Screens.ExplorerScreen(file))
@@ -39,7 +39,7 @@ class ExplorerPresenter(var currentFolder: Path? = null) : MvpPresenter<Explorer
 
         override fun items() = files //todo
 
-        override fun updateItems(items: List<MarkableFile>) {
+        override fun updateItems(label: Unit, items: List<MarkableFile>) {
             this.files = items.sortedWith(markableFileComparator)
         }
 
@@ -59,7 +59,7 @@ class ExplorerPresenter(var currentFolder: Path? = null) : MvpPresenter<Explorer
             view.setFav(favorite)
         }
 
-        override fun backClicked(): Boolean {
+        override fun backClicked(): Unit {
             TODO("Not yet implemented")
         }
     }

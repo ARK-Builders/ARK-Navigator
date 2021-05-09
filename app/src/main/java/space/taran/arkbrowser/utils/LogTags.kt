@@ -1,6 +1,10 @@
 package space.taran.arkbrowser.utils
 
-const val ROOTS_FRAGMENT: String = "roots-fragment"
+const val PERMISSIONS: String = "permissions"
+
+const val MAIN_ACTIVITY: String = "main"
+
+const val ROOTS_SCREEN: String = "roots-screen"
 
 const val ROOT_PICKER: String = "root-picker"
 
