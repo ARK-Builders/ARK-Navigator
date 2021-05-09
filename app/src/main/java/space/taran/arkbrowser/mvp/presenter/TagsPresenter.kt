@@ -54,6 +54,8 @@ class TagsPresenter(val allResources: Set<ResourceId>) :
 
         var resources = mutableListOf<ResourceId>()
 
+        override fun label() = Unit
+
         override fun items() = resources //todo
 
         override fun updateItems(label: Unit, items: List<ResourceId>) {

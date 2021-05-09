@@ -7,6 +7,7 @@ import space.taran.arkbrowser.utils.ITEM_GRID
 abstract class ItemGridPresenter<Label, Item>(
     private val handler: (Item) -> Unit) {
 
+    abstract fun label(): Label
     abstract fun items(): List<Item>
     abstract fun updateItems(label: Label, items: List<Item>)
     abstract fun bindView(view: FileItemView)

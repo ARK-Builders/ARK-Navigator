@@ -1,52 +1,62 @@
 package space.taran.arkbrowser.ui.fragments
 
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.GridLayoutManager
-import space.taran.arkbrowser.R
-import space.taran.arkbrowser.mvp.presenter.RootsPresenter
-import space.taran.arkbrowser.mvp.view.RootView
-import space.taran.arkbrowser.ui.App
-import space.taran.arkbrowser.ui.activity.MainActivity
-import space.taran.arkbrowser.ui.adapter.ItemGridRVAdapter
 import kotlinx.android.synthetic.main.dialog_roots_new.view.*
 import kotlinx.android.synthetic.main.fragment_roots.*
 import moxy.MvpAppCompatFragment
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
+import space.taran.arkbrowser.R
+import space.taran.arkbrowser.mvp.model.repo.Folders
+import space.taran.arkbrowser.mvp.presenter.RootsPresenter
+import space.taran.arkbrowser.mvp.presenter.utils.FoldersTree
 import space.taran.arkbrowser.mvp.presenter.utils.RootPicker
-import space.taran.arkbrowser.ui.activity.MainActivity.Companion.REQUEST_CODE_SD_CARD_URI
+import space.taran.arkbrowser.mvp.view.RootView
+import space.taran.arkbrowser.ui.App
+import space.taran.arkbrowser.ui.activity.MainActivity
 import space.taran.arkbrowser.utils.ROOTS_SCREEN
 import space.taran.arkbrowser.utils.ROOT_PICKER
 import space.taran.arkbrowser.utils.listDevices
-import java.lang.IllegalStateException
 import java.nio.file.Files
 import java.nio.file.Path
 
 class RootsFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
+    private lateinit var devices: List<Path>
 
-    companion object {
-        fun newInstance() = RootsFragment() //todo ?
-    }
+    private lateinit var foldersTree: FoldersTree
+    private lateinit var rootPicker: RootPicker
 
     @InjectPresenter
     lateinit var presenter: RootsPresenter
 
     @ProvidePresenter
     fun providePresenter() =
-        RootsPresenter(listDevices(context!!)).apply {
-            Log.d(ROOTS_SCREEN, "creating RootsPresenter in RootsFragment")
+        RootsPresenter().apply {
+            Log.d(ROOTS_SCREEN, "RootsPresenter created")
             App.instance.appComponent.inject(this)
         }
 
-    private var adapter: ItemGridRVAdapter<Unit, Path>? = null
-    private var rootPicker: RootPicker? = null
+
+    override fun loadFolders(folders: Folders) {
+        Log.d(ROOTS_SCREEN, "[mock] loading roots in RootsFragment")
+        if (this::foldersTree.isInitialized) {
+            //todo update foldersTree's items without destructing it
+            foldersTree.notifyDataSetChanged()
+        } else {
+            foldersTree = FoldersTree(Folders)
+            rv_roots.adapter = foldersTree
+            TODO()
+        }
+    }
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -61,121 +71,113 @@ class RootsFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
         Log.d(ROOTS_SCREEN, "view created in RootsFragment")
         super.onViewCreated(view, savedInstanceState)
         App.instance.appComponent.inject(this)
+        initialize()
     }
 
     override fun onResume() {
         Log.d(ROOTS_SCREEN, "resuming in RootsFragment")
         super.onResume()
-        presenter.onViewResumed()
+        presenter.resume()
     }
 
-    override fun init() {
-        Log.d(ROOTS_SCREEN, "[mock] loading roots in RootsFragment")
+    override fun backClicked(): Boolean {
+        Log.d(ROOTS_SCREEN, "back clicked in RootsFragment")
+        return presenter.quit()
+    }
 
-//        roomRepo.getAllRoots().observeOn(AndroidSchedulers.mainThread()).subscribe(
-//            { list ->
-//                list.forEach { root ->
-//                    val storageVersion = resourcesRepo.readStorageVersion(root.storage)
-//                    if (storageVersion != ResourcesRepo.STORAGE_VERSION)
-//                        storageVersionDifferent(storageVersion, root)
-//                    rootsRepo.synchronizeRoot(root)
-//                }
-//            },
-//            {}
-//        )
+
+    private fun initialize() {
+        Log.d(ROOTS_SCREEN, "initializing RootsFragment")
+
+        devices = listDevices(context!!)
 
         (activity as MainActivity).setSelectedTab(0)
         rv_roots.layoutManager = GridLayoutManager(context, 3)
-        adapter = ItemGridRVAdapter(presenter.rootGridPresenter) //todo
+
         (activity as MainActivity).setToolbarVisibility(false)
-        rv_roots.adapter = adapter
-        fab_roots.setOnClickListener {
-            presenter.fabClicked()
+
+        fab_add_roots.setOnClickListener {
+            openRootPicker(devices)
         }
     }
 
-    override fun updateAdapter() {
-        Log.d(ROOTS_SCREEN, "updating root adapter in RootsFragment")
-        adapter?.notifyDataSetChanged()
-    }
+    private fun openRootPicker(paths: List<Path>) {
+        Log.d(ROOTS_SCREEN, "initializing root picker")
 
-    fun onClickHandler(): (Path) -> Unit = { path: Path ->
-        Log.d(ROOT_PICKER,"path $path was clicked")
-
-        if (Files.isDirectory(path)) {
-            rootPicker!!.updatePath(path)
-        } else {
-            Log.d(ROOT_PICKER,"but it is not a directory")
-        }
-    }
-
-    override fun openRootPicker(paths: List<Path>, onFinish: (Path) -> Unit) {
-        Log.d(ROOTS_SCREEN, "opening chooser dialog in RootsFragment")
-        val dialogView_ = LayoutInflater.from(context!!)
+        val dialogView = LayoutInflater.from(context!!)
             .inflate(R.layout.dialog_roots_new, null)
+            ?: throw IllegalStateException("Failed to inflate dialog View for roots picker")
 
-        var alertDialog_: AlertDialog? = null
+        dialogView.rv_roots_dialog.layoutManager = GridLayoutManager(context, 2)
+        rootPicker = RootPicker(paths, rootPickerClickHandler(), dialogView)
 
-        if (dialogView_ != null) {
-            val dialogView = dialogView_!!
+        var alertDialog: AlertDialog? = null
 
-            dialogView.rv_roots_dialog.layoutManager = GridLayoutManager(context, 2)
+        dialogView.btn_roots_dialog_cancel.setOnClickListener {
+            Log.d(ROOT_PICKER, "[cancel] pressed, closing root picker")
+            alertDialog?.dismiss()
+        }
+        dialogView.btn_roots_dialog_pick.setOnClickListener {
+            Log.d(ROOT_PICKER, "[pick] pressed")
 
-            rootPicker = RootPicker(paths, onClickHandler(), dialogView)
-
-            dialogView.btn_roots_dialog_cancel.setOnClickListener {
-                Log.d(ROOT_PICKER, "[cancel] pressed, closing root picker")
-                alertDialog_?.dismiss()
+            val path = rootPicker!!.getLabel()
+            if (path.nameCount > 2) {
+                presenter.addRoot(path)
+                alertDialog?.dismiss()
+            } else {
+                Log.d(ROOT_PICKER,"potentially huge directory")
+                briefMessage(BIG_DIR_CHOSEN_AS_ROOT)
             }
-            dialogView.btn_roots_dialog_pick.setOnClickListener {
-                Log.d("ui", "[pick] clicked")
-                presenter.rootPicked()
-            }
-        } else {
-            throw IllegalStateException("Failed to inflate roots dialog View")
         }
 
-        val alertDialogBuilder = AlertDialog.Builder(context!!)
-            .setView(dialogView_)
+        alertDialog = rootPickerAlertDialog(dialogView)
+        Log.d(ROOTS_SCREEN, "root picker initialized")
+    }
 
-        alertDialog_ = alertDialogBuilder.show()
-        if (alertDialog_ == null) {
-            throw IllegalStateException("Failed to build AlertDialog")
-        }
+    private fun rootPickerAlertDialog(view: View): AlertDialog {
+        val builder = AlertDialog.Builder(context!!).setView(view)
 
-        val alertDialog = alertDialog_!!
+        val result = builder.show()
+            ?: throw IllegalStateException("Failed to create AlertDialog")
 
-        alertDialog.setOnKeyListener { _, keyCode, event ->
+        result.setOnKeyListener { _, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_BACK &&
                 event.action == KeyEvent.ACTION_UP &&
-                !event.isCanceled
-            ) {
+                !event.isCanceled) {
+
                 Log.d(ROOT_PICKER, "[back] pressed")
                 if (rootPicker!!.backClicked() == null) {
                     Log.d(ROOT_PICKER, "can't go back, closing root picker")
-                    alertDialog.dismiss()
+                    result.dismiss()
                 }
                 return@setOnKeyListener true
             }
             false
         }
 
-        alertDialog.setCanceledOnTouchOutside(false)
+        result.setCanceledOnTouchOutside(false)
+        return result
     }
 
-    override fun requestSdCardUri() {
-        Log.d(ROOTS_SCREEN, "requesting sd card URI in RootsFragment")
-        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
-        activity!!.startActivityForResult(intent, REQUEST_CODE_SD_CARD_URI)
+    private fun rootPickerClickHandler(): (Path) -> Unit = { path: Path ->
+        Log.d(ROOT_PICKER,"path $path was clicked")
+
+        if (Files.isDirectory(path)) {
+            rootPicker!!.updatePath(path)
+        } else {
+            Log.d(ROOT_PICKER,"but it is not a directory")
+            briefMessage(FILE_CHOSEN_AS_ROOT)
+        }
     }
 
-    override fun backClicked(): Boolean {
-        Log.d(ROOTS_SCREEN, "back clicked in RootsFragment")
-        return presenter.backClicked()
+    private fun briefMessage(text: String) {
+        Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
     }
 
-    //todo
-//    private fun storageVersionDifferent(fileStorageVersion: Int, root: remove_Root) {
-//        viewState.showToast("${root.storage.path} has a different version")
-//    }
+    companion object {
+        private const val BIG_DIR_CHOSEN_AS_ROOT =
+            "Huge directories can cause long waiting times"
+        private const val FILE_CHOSEN_AS_ROOT =
+            "Can't go inside a file"
+    }
 }

@@ -1,6 +1,5 @@
 package space.taran.arkbrowser.mvp.presenter.utils
 
-import android.util.Log
 import android.view.View
 import kotlinx.android.synthetic.main.dialog_roots_new.view.*
 import space.taran.arkbrowser.mvp.model.entity.common.Icon
@@ -8,56 +7,45 @@ import space.taran.arkbrowser.mvp.model.entity.common.IconOrImage
 import space.taran.arkbrowser.mvp.presenter.adapter.ReversibleItemGridPresenter
 import space.taran.arkbrowser.mvp.view.item.FileItemView
 import space.taran.arkbrowser.ui.adapter.ItemGridRVAdapter
-import space.taran.arkbrowser.utils.ROOT_PICKER
+import space.taran.arkbrowser.utils.ROOT_PATH
 import java.nio.file.Files
 import java.nio.file.Path
-import kotlin.streams.toList
+
+import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.listDirectoryEntries
 
 typealias PathHandler = (Path) -> Unit
 
+@OptIn(ExperimentalPathApi::class)
 class RootPicker(
     paths: List<Path>,
     handler: PathHandler,
     private val view: View)
-        : ItemGridRVAdapter<String, Path>(InnerRootPicker(paths, handler)) {
+        : ItemGridRVAdapter<Path, Path>(InnerRootPicker(paths, handler)) {
 
     init {
         view.rv_roots_dialog.adapter = this
         view.tv_roots_dialog_path.text = "/"
     }
 
-    override fun backClicked(): String? {
+    override fun backClicked(): Path? {
         val label = super.backClicked()
         if (label != null) {
-            view.tv_roots_dialog_path.text = label
+            view.tv_roots_dialog_path.text = label.toString()
         }
         return label
     }
 
     fun updatePath(path: Path) {
-        val children = Files.list(path).toList()
-        val label = path.toString()
+        val children = path.listDirectoryEntries()
+        this.updateItems(path, children)
 
-        this.updateItems(label, children)
-        view.tv_roots_dialog_path.text = label
+        view.tv_roots_dialog_path.text = path.toString()
     }
 }
 
-class InnerRootPicker(paths: List<Path>, pickRoot: (Path) -> Unit):
-    ReversibleItemGridPresenter<String, Path>("/", paths, onClick(pickRoot)) {
-
-    companion object {
-        fun onClick(pickRoot: PathHandler): PathHandler = {
-            Log.d(ROOT_PICKER, "path $it clicked")
-
-            if (Files.isDirectory(it)) {
-                Log.d(ROOT_PICKER, "and it is a folder, passing up")
-                pickRoot(it)
-            } else {
-                Log.d(ROOT_PICKER, "but it is not a folder, ignoring")
-            }
-        }
-    }
+class InnerRootPicker(paths: List<Path>, onClick: (Path) -> Unit):
+    ReversibleItemGridPresenter<Path, Path>(ROOT_PATH, paths, onClick) {
 
     override fun bindView(view: FileItemView) {
         val path = items()[view.pos]

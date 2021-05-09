@@ -53,6 +53,8 @@ open class ItemGridRVAdapter<L, I>(val presenter: ItemGridPresenter<L, I>)
         return label
     }
 
+    fun getLabel() = presenter.label()
+
     inner class ViewHolder(override val containerView: View) :
         RecyclerView.ViewHolder(containerView),
         LayoutContainer, FileItemView {

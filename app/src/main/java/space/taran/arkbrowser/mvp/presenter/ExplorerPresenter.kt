@@ -37,6 +37,8 @@ class ExplorerPresenter(var currentFolder: Path? = null) : MvpPresenter<Explorer
             this.files = files.sortedWith(markableFileComparator)
         }
 
+        override fun label() = Unit
+
         override fun items() = files //todo
 
         override fun updateItems(label: Unit, items: List<MarkableFile>) {

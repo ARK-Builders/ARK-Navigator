@@ -1,6 +1,5 @@
 package space.taran.arkbrowser.navigation
 
-import android.net.Uri
 import space.taran.arkbrowser.ui.fragments.*
 import ru.terrakok.cicerone.android.support.SupportAppScreen
 import space.taran.arkbrowser.mvp.model.entity.room.ResourceId
@@ -16,7 +15,7 @@ class Screens {
     }
 
     class RootsScreen: SupportAppScreen() {
-        override fun getFragment() = RootsFragment.newInstance()
+        override fun getFragment() = RootsFragment()
     }
 
     class TagsScreen(val resources: Set<ResourceId>): SupportAppScreen() {

@@ -1,13 +1,11 @@
 package space.taran.arkbrowser.mvp.model.repo
 
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
 import space.taran.arkbrowser.mvp.model.entity.room.FolderDao
+import space.taran.arkbrowser.utils.PartialResult
 import space.taran.arkbrowser.utils.folderExists
 import java.nio.file.Path
 import java.nio.file.Paths
 
-import com.github.michaelbull.result.Result
 import space.taran.arkbrowser.utils.fail
 import space.taran.arkbrowser.utils.ok
 import java.lang.AssertionError
@@ -18,7 +16,7 @@ class FoldersRepo(private val dao: FolderDao) {
 
     //todo: upon writing, canonicalize paths and maybe check as well?
 
-    fun query(): Result<Folders, List<Path>> {
+    suspend fun query(): PartialResult<Folders, List<Path>> {
         val missingPaths = mutableListOf<Path>()
 
         val validPaths = dao.query()
@@ -48,10 +46,8 @@ class FoldersRepo(private val dao: FolderDao) {
                 }
             }
 
-        return if (missingPaths.isEmpty()) {
-            Ok(validPaths.toMap())
-        } else {
-            Err(missingPaths.toList())
-        }
+        return PartialResult(
+            validPaths.toMap(),
+            missingPaths.toList())
     }
 }

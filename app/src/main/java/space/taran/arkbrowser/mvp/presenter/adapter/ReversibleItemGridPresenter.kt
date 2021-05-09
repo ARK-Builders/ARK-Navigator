@@ -14,6 +14,8 @@ abstract class ReversibleItemGridPresenter<Label,Item>(
     private var frames = persistentListOf(Frame(label, items))
     private var depth = 1
 
+    override fun label(): Label = frames.last().label
+
     override fun items(): List<Item> = frames.last().items
 
     override fun updateItems(label: Label, items: List<Item>) {
