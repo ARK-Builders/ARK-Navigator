@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.dialog_roots_new.view.*
 import kotlinx.android.synthetic.main.fragment_roots.*
 import moxy.MvpAppCompatFragment
@@ -51,9 +52,8 @@ class RootsFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
             //todo update foldersTree's items without destructing it
             foldersTree.notifyDataSetChanged()
         } else {
-            foldersTree = FoldersTree(Folders)
+            foldersTree = FoldersTree(devices, folders)
             rv_roots.adapter = foldersTree
-            TODO()
         }
     }
 
@@ -89,10 +89,10 @@ class RootsFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
     private fun initialize() {
         Log.d(ROOTS_SCREEN, "initializing RootsFragment")
 
-        devices = listDevices(context!!)
+        devices = listDevices(requireContext())
 
         (activity as MainActivity).setSelectedTab(0)
-        rv_roots.layoutManager = GridLayoutManager(context, 3)
+        rv_roots.layoutManager = LinearLayoutManager(context)
 
         (activity as MainActivity).setToolbarVisibility(false)
 
@@ -104,7 +104,7 @@ class RootsFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
     private fun openRootPicker(paths: List<Path>) {
         Log.d(ROOTS_SCREEN, "initializing root picker")
 
-        val dialogView = LayoutInflater.from(context!!)
+        val dialogView = LayoutInflater.from(requireContext())
             .inflate(R.layout.dialog_roots_new, null)
             ?: throw IllegalStateException("Failed to inflate dialog View for roots picker")
 
@@ -120,7 +120,7 @@ class RootsFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
         dialogView.btn_roots_dialog_pick.setOnClickListener {
             Log.d(ROOT_PICKER, "[pick] pressed")
 
-            val path = rootPicker!!.getLabel()
+            val path = rootPicker.getLabel()
             if (path.nameCount > 2) {
                 presenter.addRoot(path)
                 alertDialog?.dismiss()
@@ -135,7 +135,7 @@ class RootsFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
     }
 
     private fun rootPickerAlertDialog(view: View): AlertDialog {
-        val builder = AlertDialog.Builder(context!!).setView(view)
+        val builder = AlertDialog.Builder(requireContext()).setView(view)
 
         val result = builder.show()
             ?: throw IllegalStateException("Failed to create AlertDialog")
@@ -146,7 +146,7 @@ class RootsFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
                 !event.isCanceled) {
 
                 Log.d(ROOT_PICKER, "[back] pressed")
-                if (rootPicker!!.backClicked() == null) {
+                if (rootPicker.backClicked() == null) {
                     Log.d(ROOT_PICKER, "can't go back, closing root picker")
                     result.dismiss()
                 }
@@ -163,7 +163,7 @@ class RootsFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
         Log.d(ROOT_PICKER,"path $path was clicked")
 
         if (Files.isDirectory(path)) {
-            rootPicker!!.updatePath(path)
+            rootPicker.updatePath(path)
         } else {
             Log.d(ROOT_PICKER,"but it is not a directory")
             briefMessage(FILE_CHOSEN_AS_ROOT)
