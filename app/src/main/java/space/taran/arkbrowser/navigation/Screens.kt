@@ -6,10 +6,6 @@ import space.taran.arkbrowser.mvp.model.entity.room.ResourceId
 import java.nio.file.Path
 
 class Screens {
-    class ExplorerScreen(val folder: Path? = null): SupportAppScreen() {
-        override fun getFragment() = ExplorerFragment.newInstance(folder)
-    }
-
     class DetailScreen(val resources: List<ResourceId>, val pos: Int): SupportAppScreen() {
         override fun getFragment() = DetailFragment.newInstance(resources, pos)
     }

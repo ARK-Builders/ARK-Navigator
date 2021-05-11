@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.dialog_roots_new.view.*
 import kotlinx.android.synthetic.main.fragment_roots.*
 import moxy.MvpAppCompatFragment
@@ -29,6 +28,21 @@ import space.taran.arkbrowser.utils.listDevices
 import java.nio.file.Files
 import java.nio.file.Path
 
+//todo: alternative handler for clicks on paths
+//{
+//    val (_, file) = it
+//    if (Files.isDirectory(file)) {
+//        router.navigateTo(Screens.ExplorerScreen(file))
+//    }
+//}
+
+//todo also useful
+//if (path.endsWith(".png") || path.endsWith(".jpg") || path.endsWith(".jpeg")) {
+//    view.setIcon(IconOrImage(image = path))
+//} else {
+//    view.setIcon(IconOrImage(icon = Icon.FILE))
+//}
+
 class RootsFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
     private lateinit var devices: List<Path>
 
@@ -36,10 +50,7 @@ class RootsFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
     private lateinit var rootPicker: RootPicker
 
     private lateinit var roots: Set<Path>
-
-    //private lateinit var favorites: Set<Path>
-    //todo: use it for hybrid picker (when we descend into already chosen root,
-    // we start choosing favorite folder since we can't have nested roots)
+    private lateinit var favorites: Set<Path>
 
     @InjectPresenter
     lateinit var presenter: RootsPresenter
@@ -59,8 +70,7 @@ class RootsFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
         rv_roots.adapter = foldersTree
 
         roots = folders.keys
-        //favorites = folders.values.flatten().toSet()
-        //todo
+        favorites = folders.values.flatten().toSet()
     }
 
     override fun notifyUser(message: String, moreTime: Boolean) {
@@ -118,7 +128,7 @@ class RootsFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
             ?: throw IllegalStateException("Failed to inflate dialog View for roots picker")
 
         dialogView.rv_roots_dialog.layoutManager = GridLayoutManager(context, 2)
-        rootPicker = RootPicker(paths, rootPickerClickHandler(), dialogView)
+        rootPicker = RootPicker(paths, rootPickerClickHandler(dialogView), dialogView)
 
         var alertDialog: AlertDialog? = null
 
@@ -131,11 +141,22 @@ class RootsFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
 
             val path = rootPicker.getLabel()
             if (!devices.contains(path)) {
-                if (roots.contains(path)) {
-                    notifyUser(ROOT_IS_ALREADY_PICKED)
+                if (rootNotFavorite) {
+                    // adding path as root
+                    if (roots.contains(path)) {
+                        notifyUser(ROOT_IS_ALREADY_PICKED)
+                    } else {
+                        presenter.addRoot(path)
+                        alertDialog?.dismiss()
+                    }
                 } else {
-                    presenter.addRoot(path)
-                    alertDialog?.dismiss()
+                    // adding path as favorite
+                    if (favorites.contains(path)) {
+                        notifyUser(FAVORITE_IS_ALREADY_PICKED)
+                    } else {
+                        presenter.addFavorite(path)
+                        alertDialog?.dismiss()
+                    }
                 }
             } else {
                 Log.d(ROOT_PICKER,"potentially huge directory")
@@ -172,23 +193,54 @@ class RootsFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
         return result
     }
 
-    private fun rootPickerClickHandler(): (Path) -> Unit = { path: Path ->
+    //todo don't pass dialogView here, draw it from new "model"
+    private fun rootPickerClickHandler(dialogView: View): (Path) -> Unit = { path: Path ->
         Log.d(ROOT_PICKER,"path $path was clicked")
 
         if (Files.isDirectory(path)) {
             rootPicker.updatePath(path)
+
+            val rootPrefix = roots.find { path.startsWith(it) }
+            if (rootPrefix != null) {
+                if (rootPrefix == path) {
+                    //todo fake disabling (still show messages when pressing on disabled button)
+                    //todo consistent rules for onPick messages and gray-out
+                    //todo revert button state when backClicked
+                    dialogView.btn_roots_dialog_pick.isEnabled = false
+                    dialogView.btn_roots_dialog_pick.text = PICK_ROOT
+                    rootNotFavorite = true
+                } else {
+                    dialogView.btn_roots_dialog_pick.isEnabled = true
+                    dialogView.btn_roots_dialog_pick.text = PICK_FAVORITE
+                    rootNotFavorite = false
+                }
+            } else {
+                dialogView.btn_roots_dialog_pick.isEnabled = true
+                dialogView.btn_roots_dialog_pick.text = PICK_ROOT
+                rootNotFavorite = true
+            }
         } else {
             Log.d(ROOT_PICKER,"but it is not a directory")
             notifyUser(FILE_CHOSEN_AS_ROOT)
         }
     }
 
+    //todo move it somewhere
+    private var rootNotFavorite: Boolean = true
+
     companion object {
         private const val DEVICE_CHOSEN_AS_ROOT =
             "Huge directories can cause long waiting times"
+        private const val FAVORITE_IS_ALREADY_PICKED =
+            "This folder is already among your favorites"
         private const val ROOT_IS_ALREADY_PICKED =
             "This folder is already picked as root"
         private const val FILE_CHOSEN_AS_ROOT =
             "Can't go inside a file"
+
+        private const val PICK_FAVORITE =
+            "FAVORITE"
+        private const val PICK_ROOT =
+            "ADD ROOT"
     }
 }

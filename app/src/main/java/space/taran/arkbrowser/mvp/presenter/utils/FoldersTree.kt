@@ -99,10 +99,6 @@ class FoldersTree(devices: List<Path>, folders: Folders)
 
 private class Factory: TreeViewAdapter.ViewHolderFactory {
     override fun createViewHolder(context: Context, viewType: Int): ViewHolder<AnyTreeItemView> {
-        Log.d("DEBUG", "device hash: ${DeviceNode::class.hashCode()}")
-        Log.d("DEBUG", "root hash: ${RootNode::class.hashCode()}")
-        Log.d("DEBUG", "favorite hash: ${FavoriteNode::class.hashCode()}")
-        Log.d("DEBUG", "node hash: ${Node::class.hashCode()}")
         val itemView: View = when (viewType) {
             DeviceNode::class.hashCode()   -> DeviceFolderView(context)
             RootNode::class.hashCode()     -> RootFolderView(context)
@@ -162,7 +158,7 @@ private abstract class FolderView<C, N: Node<C>>(context: Context)
     abstract fun label(): String
 
     override fun bind(item: TreeItem<N>, position: Int) {
-        //todo: use `position`
+        Log.d(FOLDERS_TREE, "binding ${item.data}")
 
         val data = item.data
         nameText.text = data.path.toString()
@@ -179,6 +175,9 @@ private abstract class FolderView<C, N: Node<C>>(context: Context)
         position: Int,
         adapter: ITreeViewAdapter) {
 
+        Log.d(FOLDERS_TREE, "expanding ${item.data}")
+        Log.d(FOLDERS_TREE, "children are ${item.data.children()}")
+
         adapter.insertChildren( position, item.data.children())
 
         animator.setFloatValues(0F, 90F)
@@ -189,6 +188,8 @@ private abstract class FolderView<C, N: Node<C>>(context: Context)
         item: TreeItem<N>,
         position: Int,
         adapter: ITreeViewAdapter) {
+
+        Log.d(FOLDERS_TREE, "collapsing ${item.data}")
 
         super.onCollapseChildren(item, position, adapter)
         animator.setFloatValues(90F, 00F)

@@ -7,11 +7,11 @@ import space.taran.arkbrowser.mvp.view.RootView
 import moxy.InjectViewState
 import moxy.MvpPresenter
 import ru.terrakok.cicerone.Router
-import space.taran.arkbrowser.mvp.model.repo.Folders
 import space.taran.arkbrowser.mvp.model.repo.FoldersRepo
 import space.taran.arkbrowser.utils.CONCURRENT
 import space.taran.arkbrowser.utils.ROOTS_SCREEN
 import java.lang.AssertionError
+import java.lang.IllegalStateException
 import java.nio.file.Path
 import javax.inject.Inject
 
@@ -23,7 +23,7 @@ class RootsPresenter: MvpPresenter<RootView>() {
     @Inject
     lateinit var foldersRepo: FoldersRepo
 
-    private lateinit var folders: Folders
+    private lateinit var rootToFavorites: MutableMap<Path, MutableList<Path>>
 
     override fun onFirstViewAttach() {
         Log.d(ROOTS_SCREEN, "first view attached in RootsPresenter")
@@ -44,15 +44,17 @@ class RootsPresenter: MvpPresenter<RootView>() {
                         result.failed.joinToString("\n"))
                 }
 
-                folders = result.succeeded
+                rootToFavorites = result.succeeded
+                    .mapValues { (_, favorites) -> favorites.toMutableList() }
+                    .toMutableMap()
                 Log.d(CONCURRENT, "launch[1]")
             }
             Log.d(CONCURRENT, "runBlocking[1]")
         }
         Log.d(CONCURRENT, "runBlocking[2]")
 
-        Log.d(ROOTS_SCREEN, "folders loaded: $folders")
-        viewState.loadFolders(folders)
+        Log.d(ROOTS_SCREEN, "folders loaded: $rootToFavorites")
+        viewState.loadFolders(rootToFavorites)
 
 //        viewState.init() //todo load
 
@@ -74,11 +76,11 @@ class RootsPresenter: MvpPresenter<RootView>() {
     fun addRoot(path: Path) {
         Log.d(ROOTS_SCREEN, "root $path added in RootsPresenter")
 
-        if (folders.containsKey(path)) {
+        if (rootToFavorites.containsKey(path)) {
             throw AssertionError("Path must be checked in RootPicker")
         }
 
-        folders = folders.plus(path to listOf())
+        rootToFavorites[path] = mutableListOf()
         //todo persist
 
 //        val root = remove_Root(name = pickedDir!!.name, folder = pickedDir!!)
@@ -97,12 +99,28 @@ class RootsPresenter: MvpPresenter<RootView>() {
 //        rootGridPresenter.roots.addAll(sortedRoots)
 //        viewState.updateRootAdapter()
 
-        viewState.loadFolders(folders)
+        viewState.loadFolders(rootToFavorites)
+    }
+
+    fun addFavorite(path: Path) {
+        Log.d(ROOTS_SCREEN, "favorite $path added in RootsPresenter")
+
+        val root = rootToFavorites.keys.find { path.startsWith(it) }
+            ?: throw IllegalStateException("Can't add favorite if it's root is not added")
+
+        if (rootToFavorites[root]!!.contains(path)) {
+            throw AssertionError("Path must be checked in RootPicker")
+        }
+
+        rootToFavorites[root]!!.add(path)
+        //todo persist
+
+        viewState.loadFolders(rootToFavorites)
     }
 
     fun resume() {
         Log.d(ROOTS_SCREEN, "view resumed in RootsPresenter")
-        viewState.loadFolders(folders)
+        viewState.loadFolders(rootToFavorites)
     }
 
     fun quit(): Boolean {

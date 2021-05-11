@@ -44,11 +44,6 @@ class MainPresenter: MvpPresenter<MainView>() {
 //            resources = rootsRepo.roots.values.flatMap { it.resources }))
     }
 
-    fun goToExplorerScreen() {
-        Log.d("flow", "creating Explorer screen")
-        router.newRootScreen(Screens.ExplorerScreen())
-    }
-
     fun backClicked() {
         Log.d("flow", "back clicked in MainPresenter")
         router.exit()

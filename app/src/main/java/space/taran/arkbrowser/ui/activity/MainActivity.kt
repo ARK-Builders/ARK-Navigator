@@ -63,11 +63,6 @@ class MainActivity : MvpAppCompatActivity(), MainView {
                     presenter.goToTagsScreen()
                     true
                 }
-                R.id.page_explorer -> {
-                    Log.d(MAIN_ACTIVITY, "switching to Explorer screen")
-                    presenter.goToExplorerScreen()
-                    true
-                }
                 else -> {
                     Log.w(MAIN_ACTIVITY, "no handler found")
                     true
