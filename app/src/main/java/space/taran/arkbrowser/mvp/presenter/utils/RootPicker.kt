@@ -8,6 +8,7 @@ import space.taran.arkbrowser.mvp.presenter.adapter.ReversibleItemGridPresenter
 import space.taran.arkbrowser.mvp.view.item.FileItemView
 import space.taran.arkbrowser.ui.adapter.ItemGridRVAdapter
 import space.taran.arkbrowser.utils.ROOT_PATH
+import space.taran.arkbrowser.utils.findLongestCommonPrefix
 import java.nio.file.Files
 import java.nio.file.Path
 
@@ -25,7 +26,7 @@ class RootPicker(
 
     init {
         view.rv_roots_dialog.adapter = this
-        view.tv_roots_dialog_path.text = "/"
+        view.tv_roots_dialog_path.text = super.getLabel().toString()
     }
 
     override fun backClicked(): Path? {
@@ -45,7 +46,9 @@ class RootPicker(
 }
 
 class InnerRootPicker(paths: List<Path>, onClick: (Path) -> Unit):
-    ReversibleItemGridPresenter<Path, Path>(ROOT_PATH, paths, onClick) {
+    ReversibleItemGridPresenter<Path, Path>(
+        findLongestCommonPrefix(paths).first,
+        paths, onClick) {
 
     override fun bindView(view: FileItemView) {
         val path = items()[view.pos]

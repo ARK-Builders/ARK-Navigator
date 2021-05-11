@@ -5,6 +5,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.core.content.FileProvider
 import java.io.*
+import java.lang.IllegalArgumentException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -143,6 +144,27 @@ val ROOT_PATH = Paths.get("/")
 //fun getExtSdCardBaseFolder(context: Context, file: Path): Path? =
 //    getExtSdCards(context).find { file.startsWith(it) }
 //todo fs.normalize `path` before check
+
+fun findLongestCommonPrefix(paths: List<Path>): Pair<Path, List<Path>> {
+    if (paths.isEmpty()) {
+        throw IllegalArgumentException("Can't search for common prefix among empty collection")
+    }
+
+    fun tailrec(_prefix: Path, paths: List<Path>): Pair<Path, List<Path>> {
+        val grouped = paths.groupBy { it.getName(0) }
+        if (grouped.size > 1) {
+            return _prefix to paths
+        }
+
+        val prefix = _prefix.resolve(grouped.keys.first())
+        val shortened = grouped.values.first()
+            .map { prefix.relativize(it) }
+
+        return tailrec(prefix, shortened)
+    }
+
+    return tailrec(ROOT_PATH, paths)
+}
 
 fun extension(path: Path): String =
     path.fileName.toString()

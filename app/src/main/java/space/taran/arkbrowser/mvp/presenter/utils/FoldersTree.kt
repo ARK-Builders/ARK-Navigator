@@ -3,28 +3,51 @@ package space.taran.arkbrowser.mvp.presenter.utils
 import android.animation.ValueAnimator
 import android.content.Context
 import android.util.Log
+import android.view.View
 import android.widget.FrameLayout
 import com.ekezet.treeview.*
 import com.ekezet.treeview.TreeViewAdapter.ViewHolder
 import com.ekezet.treeview.TreeViewAdapter.TreeItemView
-import kotlinx.android.synthetic.main.item_view_folder.view.*
+import kotlinx.android.synthetic.main.item_view_folder_tree_root.view.*
 import space.taran.arkbrowser.R
 import space.taran.arkbrowser.utils.FOLDERS_TREE
 import space.taran.arkbrowser.mvp.model.repo.Folders
 import java.lang.IllegalStateException
 import java.nio.file.Path
 
-enum class FolderType {
-    DEVICE, ROOT, FAVORITE
+//todo simplify
+private interface Node<N> {
+    val path: Path
+    fun children(): List<TreeItem<N>>
 }
 
-private data class Node(
-    val path: Path,
-    val type: FolderType,
-    val children: List<Node>)
+private data class DeviceNode(
+    override val path: Path,
+    val children: List<RootNode>): Node<RootNode> {
 
-class FoldersTree(devices: List<Path>, folders: Folders):
-    TreeViewAdapter(Factory(), extractFolderDetails(devices, folders)) {
+    override fun children(): List<TreeItem<RootNode>> {
+        return children.map { TreeItem from it }
+    }
+}
+
+private data class RootNode(
+    override val path: Path,
+    val children: List<FavoriteNode>): Node<FavoriteNode> {
+
+    override fun children(): List<TreeItem<FavoriteNode>> {
+        return children.map { TreeItem from it }
+    }
+}
+
+private data class FavoriteNode(
+    override val path: Path): Node<Unit> {
+    override fun children(): List<TreeItem<Unit>> {
+        return emptyList()
+    }
+}
+
+class FoldersTree(devices: List<Path>, folders: Folders)
+    : TreeViewAdapter(Factory(), extractFolderDetails(devices, folders)) {
 
     companion object {
         fun extractFolderDetails(_devices: List<Path>, folders: Folders)
@@ -55,23 +78,18 @@ class FoldersTree(devices: List<Path>, folders: Folders):
                         val (_, root) = deviceAndRoot
 
                         val favorites = _favorites.map {
-                            Node(
-                                path = root.relativize(it),
-                                type = FolderType.FAVORITE,
-                                children = listOf())
+                            FavoriteNode(path = root.relativize(it))
                         }
 
                         Log.d(FOLDERS_TREE, "root $root contains favorites ${favorites.map { it.path }}")
-                        Node(
+                        RootNode(
                             path = device.relativize(root),
-                            type = FolderType.ROOT,
                             children = favorites)
                     }
 
                     Log.d(FOLDERS_TREE, "device $device contains roots ${roots.map { it.path }}")
-                    TreeItem from Node(
+                    TreeItem from DeviceNode(
                         path = device,
-                        type = FolderType.DEVICE,
                         children = roots)
                 }
                 .toMutableList()
@@ -80,19 +98,59 @@ class FoldersTree(devices: List<Path>, folders: Folders):
 }
 
 private class Factory: TreeViewAdapter.ViewHolderFactory {
-
-    private val typesAmount = FolderType.values().size
-
     override fun createViewHolder(context: Context, viewType: Int): ViewHolder<AnyTreeItemView> {
-        if (viewType < typesAmount) {
-            throw IllegalArgumentException("Unknown viewType: $viewType")
+        Log.d("DEBUG", "device hash: ${DeviceNode::class.hashCode()}")
+        Log.d("DEBUG", "root hash: ${RootNode::class.hashCode()}")
+        Log.d("DEBUG", "favorite hash: ${FavoriteNode::class.hashCode()}")
+        Log.d("DEBUG", "node hash: ${Node::class.hashCode()}")
+        val itemView: View = when (viewType) {
+            DeviceNode::class.hashCode()   -> DeviceFolderView(context)
+            RootNode::class.hashCode()     -> RootFolderView(context)
+            FavoriteNode::class.hashCode() -> FavoriteFolderView(context)
+            else -> throw IllegalArgumentException("Illegal viewType: $viewType")
         }
-        return ViewHolder(FolderView(context))
+        return ViewHolder(itemView)
     }
 }
 
-private class FolderView(context: Context)
-    : FrameLayout(context), TreeItemView<Node> {
+private class DeviceFolderView(context: Context) : FolderView<RootNode, DeviceNode>(context) {
+    init {
+        inflate(context, R.layout.item_view_folder_tree_device, this)
+        layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
+    }
+
+    override fun label(): String {
+        return "[device]"
+    }
+}
+
+private class RootFolderView(context: Context) : FolderView<FavoriteNode, RootNode>(context) {
+    init {
+        inflate(context, R.layout.item_view_folder_tree_root, this)
+        layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
+    }
+
+    override fun label(): String {
+        return "[root]"
+    }
+}
+
+//todo simplify
+private class FavoriteFolderView(context: Context) : FolderView<Unit, FavoriteNode>(context) {
+    init {
+        inflate(context, R.layout.item_view_folder_tree_favorite, this)
+        layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
+    }
+
+    override fun label(): String {
+        return "[favorite]"
+    }
+}
+
+
+//todo smart folding
+private abstract class FolderView<C, N: Node<C>>(context: Context)
+    : FrameLayout(context), TreeItemView<N> {
 
     private val animator = ValueAnimator().apply {
         duration = 500L
@@ -101,21 +159,14 @@ private class FolderView(context: Context)
         }
     }
 
-    init {
-        inflate(context, R.layout.item_view_folder, this)
-        layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
-    }
+    abstract fun label(): String
 
-    override fun bind(item: TreeItem<Node>, position: Int) {
+    override fun bind(item: TreeItem<N>, position: Int) {
         //todo: use `position`
 
         val data = item.data
         nameText.text = data.path.toString()
-        typeText.text = when (data.type) {
-            FolderType.DEVICE   -> "[device]"
-            FolderType.ROOT     -> "[root]"
-            FolderType.FAVORITE -> "[favorite]"
-        }
+        typeText.text = label()
 
         chevronImage.rotation = if (item.isExpanded)
             90F
@@ -124,17 +175,18 @@ private class FolderView(context: Context)
     }
 
     override fun onExpandChildren(
-        item: TreeItem<Node>,
+        item: TreeItem<N>,
         position: Int,
         adapter: ITreeViewAdapter) {
 
-        //todo: adapter.insertChildren(position, Repo.getAlbums(item.data.id).map { TreeItem from it })
+        adapter.insertChildren( position, item.data.children())
+
         animator.setFloatValues(0F, 90F)
         animator.start()
     }
 
     override fun onCollapseChildren(
-        item: TreeItem<Node>,
+        item: TreeItem<N>,
         position: Int,
         adapter: ITreeViewAdapter) {
 

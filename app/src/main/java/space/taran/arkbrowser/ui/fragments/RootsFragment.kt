@@ -35,6 +35,12 @@ class RootsFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
     private lateinit var foldersTree: FoldersTree
     private lateinit var rootPicker: RootPicker
 
+    private lateinit var roots: Set<Path>
+
+    //private lateinit var favorites: Set<Path>
+    //todo: use it for hybrid picker (when we descend into already chosen root,
+    // we start choosing favorite folder since we can't have nested roots)
+
     @InjectPresenter
     lateinit var presenter: RootsPresenter
 
@@ -47,14 +53,19 @@ class RootsFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
 
 
     override fun loadFolders(folders: Folders) {
-        Log.d(ROOTS_SCREEN, "[mock] loading roots in RootsFragment")
-        if (this::foldersTree.isInitialized) {
-            //todo update foldersTree's items without destructing it
-            foldersTree.notifyDataSetChanged()
-        } else {
-            foldersTree = FoldersTree(devices, folders)
-            rv_roots.adapter = foldersTree
-        }
+        Log.d(ROOTS_SCREEN, "loading roots in RootsFragment")
+
+        foldersTree = FoldersTree(devices, folders)
+        rv_roots.adapter = foldersTree
+
+        roots = folders.keys
+        //favorites = folders.values.flatten().toSet()
+        //todo
+    }
+
+    override fun notifyUser(message: String, moreTime: Boolean) {
+        val duration = if (moreTime) Toast.LENGTH_LONG else Toast.LENGTH_SHORT
+        Toast.makeText(context, message, duration).show()
     }
 
 
@@ -92,8 +103,6 @@ class RootsFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
         devices = listDevices(requireContext())
 
         (activity as MainActivity).setSelectedTab(0)
-        rv_roots.layoutManager = LinearLayoutManager(context)
-
         (activity as MainActivity).setToolbarVisibility(false)
 
         fab_add_roots.setOnClickListener {
@@ -121,12 +130,16 @@ class RootsFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
             Log.d(ROOT_PICKER, "[pick] pressed")
 
             val path = rootPicker.getLabel()
-            if (path.nameCount > 2) {
-                presenter.addRoot(path)
-                alertDialog?.dismiss()
+            if (!devices.contains(path)) {
+                if (roots.contains(path)) {
+                    notifyUser(ROOT_IS_ALREADY_PICKED)
+                } else {
+                    presenter.addRoot(path)
+                    alertDialog?.dismiss()
+                }
             } else {
                 Log.d(ROOT_PICKER,"potentially huge directory")
-                briefMessage(BIG_DIR_CHOSEN_AS_ROOT)
+                notifyUser(DEVICE_CHOSEN_AS_ROOT)
             }
         }
 
@@ -166,17 +179,15 @@ class RootsFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
             rootPicker.updatePath(path)
         } else {
             Log.d(ROOT_PICKER,"but it is not a directory")
-            briefMessage(FILE_CHOSEN_AS_ROOT)
+            notifyUser(FILE_CHOSEN_AS_ROOT)
         }
     }
 
-    private fun briefMessage(text: String) {
-        Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
-    }
-
     companion object {
-        private const val BIG_DIR_CHOSEN_AS_ROOT =
+        private const val DEVICE_CHOSEN_AS_ROOT =
             "Huge directories can cause long waiting times"
+        private const val ROOT_IS_ALREADY_PICKED =
+            "This folder is already picked as root"
         private const val FILE_CHOSEN_AS_ROOT =
             "Can't go inside a file"
     }

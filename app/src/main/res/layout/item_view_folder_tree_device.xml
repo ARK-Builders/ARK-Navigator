@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginVertical="8dp"
     android:background="#c0c0c0ff"
     android:padding="8dp">
 
@@ -22,7 +23,6 @@
         android:id="@+id/nameText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
         android:gravity="start"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"

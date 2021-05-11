@@ -8,6 +8,7 @@ import space.taran.arkbrowser.mvp.model.repo.Folders
 @StateStrategyType(AddToEndSingleStrategy::class)
 interface RootView: MvpView {
     fun loadFolders(folders: Folders)
+    fun notifyUser(message: String, moreTime: Boolean = false)
 //
 //    @StateStrategyType(SkipStrategy::class)
 //    fun requestSdCardUri()
