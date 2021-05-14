@@ -1,29 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginStart="64dp"
     android:background="#EDDF69"
     android:padding="8dp">
 
-    <ImageView
-        android:id="@+id/chevronImage"
+    <Space
         android:layout_width="16dp"
-        android:layout_height="16dp"
-        android:scaleType="centerInside"
-        android:src="@drawable/ic_chevron_right_black_24dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="ContentDescription" />
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
     <TextView
         android:id="@+id/nameText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
+        android:layout_gravity="center_vertical"
         android:gravity="start"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -37,10 +30,38 @@
         android:id="@+id/typeText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="end"
+        android:layout_gravity="center_vertical"
+        android:layout_marginStart="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/linearLayout"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="CD" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <Space
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="end"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="parent">
+
+        <ImageButton
+            android:id="@+id/navigateButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:background="@android:color/transparent"
+            android:clickable="true"
+            android:contentDescription="navigate"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_folder_tree_node_navigate" />
+    </LinearLayout>
+
+</LinearLayout>

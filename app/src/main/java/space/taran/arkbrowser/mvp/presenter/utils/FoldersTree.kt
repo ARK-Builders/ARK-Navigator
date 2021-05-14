@@ -116,7 +116,7 @@ private class DeviceFolderView(context: Context) : FolderView<RootNode, DeviceNo
     }
 
     override fun label(): String {
-        return "[device]"
+        return DEVICE_LABEL
     }
 }
 
@@ -127,19 +127,28 @@ private class RootFolderView(context: Context) : FolderView<FavoriteNode, RootNo
     }
 
     override fun label(): String {
-        return "[root]"
+        return ROOT_LABEL
     }
 }
 
-//todo simplify
-private class FavoriteFolderView(context: Context) : FolderView<Unit, FavoriteNode>(context) {
+//todo move somewhere
+private class FavoriteFolderView(context: Context) : FrameLayout(context), TreeItemView<FavoriteNode> {
     init {
         inflate(context, R.layout.item_view_folder_tree_favorite, this)
         layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
     }
 
-    override fun label(): String {
-        return "[favorite]"
+    override fun bind(item: TreeItem<FavoriteNode>, position: Int) {
+        Log.d(FOLDERS_TREE, "binding ${item.data}")
+
+        val data = item.data
+        nameText.text = data.path.toString()
+        typeText.text = FAVORITE_LABEL
+    }
+
+    override fun onExpandChildren(item: TreeItem<FavoriteNode>, position: Int,
+                                  adapter: ITreeViewAdapter) {
+        //non-expandable
     }
 }
 
@@ -196,3 +205,7 @@ private abstract class FolderView<C, N: Node<C>>(context: Context)
         animator.start()
     }
 }
+
+private const val DEVICE_LABEL = "[device]"
+private const val ROOT_LABEL = "[root]"
+private const val FAVORITE_LABEL = "[root]"

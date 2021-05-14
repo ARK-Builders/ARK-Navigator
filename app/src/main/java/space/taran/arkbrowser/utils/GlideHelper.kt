@@ -17,9 +17,6 @@ fun iconToImageResource(icon: Icon): Int =
         Icon.FILE -> {
             R.drawable.ic_file
         }
-        Icon.ROOT -> {
-            R.drawable.ic_root
-        }
     }
 
 fun loadImage(file: Path, container: ImageView) =
