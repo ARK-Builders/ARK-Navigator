@@ -1,19 +1,19 @@
 package space.taran.arkbrowser.mvp.presenter
 
 import android.util.Log
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import space.taran.arkbrowser.mvp.view.RootView
 import moxy.InjectViewState
 import moxy.MvpPresenter
 import ru.terrakok.cicerone.Router
+import space.taran.arkbrowser.utils.CoroutineRunner.runAndBlock
 import space.taran.arkbrowser.mvp.model.repo.FoldersRepo
-import space.taran.arkbrowser.utils.CONCURRENT
 import space.taran.arkbrowser.utils.ROOTS_SCREEN
 import java.lang.AssertionError
 import java.lang.IllegalStateException
 import java.nio.file.Path
 import javax.inject.Inject
+
+//todo: protect foldersRepo when enabling real concurrency
 
 @InjectViewState
 class RootsPresenter: MvpPresenter<RootView>() {
@@ -29,91 +29,58 @@ class RootsPresenter: MvpPresenter<RootView>() {
         Log.d(ROOTS_SCREEN, "first view attached in RootsPresenter")
         super.onFirstViewAttach()
 
-        Log.d(CONCURRENT, "runBlocking[-1]")
-        runBlocking {
-            Log.d(CONCURRENT, "runBlocking[0]")
-            //            GlobalScope.launch {
-            launch {
-                Log.d(CONCURRENT, "launch[0]")
-                val result = foldersRepo.query()
-                //todo protect `folders`?
+        runAndBlock {
+            val result = foldersRepo.query()
 
-                if (result.failed.isNotEmpty()) {
-                    viewState.notifyUser(
-                "Failed to load the following roots:\n" +
-                        result.failed.joinToString("\n"))
-                }
-
-                rootToFavorites = result.succeeded
-                    .mapValues { (_, favorites) -> favorites.toMutableList() }
-                    .toMutableMap()
-                Log.d(CONCURRENT, "launch[1]")
+            if (result.failed.isNotEmpty()) {
+                viewState.notifyUser(
+                    "Failed to load the following roots:\n" +
+                            result.failed.joinToString("\n"))
             }
-            Log.d(CONCURRENT, "runBlocking[1]")
+
+            rootToFavorites = result.succeeded
+                .mapValues { (_, favorites) -> favorites.toMutableList() }
+                .toMutableMap()
         }
-        Log.d(CONCURRENT, "runBlocking[2]")
 
         Log.d(ROOTS_SCREEN, "folders loaded: $rootToFavorites")
         viewState.loadFolders(rootToFavorites)
-
-//        viewState.init() //todo load
-
-
-        //        roomRepo.getAllRoots().observeOn(AndroidSchedulers.mainThread()).subscribe(
-//            { list ->
-//                list.forEach { root ->
-//                    val storageVersion = resourcesRepo.readStorageVersion(root.storage)
-//                    if (storageVersion != ResourcesRepo.STORAGE_VERSION)
-//                        storageVersionDifferent(storageVersion, root)
-//                    rootsRepo.synchronizeRoot(root)
-//                }
-//            },
-//            {}
-//        )
-
     }
 
-    fun addRoot(path: Path) {
-        Log.d(ROOTS_SCREEN, "root $path added in RootsPresenter")
+    fun addRoot(root: Path) {
+        Log.d(ROOTS_SCREEN, "root $root added in RootsPresenter")
+        val path = root.toRealPath()
 
         if (rootToFavorites.containsKey(path)) {
             throw AssertionError("Path must be checked in RootPicker")
         }
 
         rootToFavorites[path] = mutableListOf()
-        //todo persist
 
-//        val root = remove_Root(name = pickedDir!!.name, folder = pickedDir!!)
-//        rootsRepo.insertRoot(root)
-//
-//        val storage = resourcesRepo.createStorage(pickedDir!!)
-//        if (storage == null) {
-//            requestSdCardUri()
-//            return
-//        }
-//
-//        rootsRepo.synchronizeRoot(root)
-//        rootGridPresenter.roots.clear()
-//        val sortedRoots = rootsRepo.roots.toMutableList()
-//        sortedRoots.sortBy { it.name }
-//        rootGridPresenter.roots.addAll(sortedRoots)
-//        viewState.updateRootAdapter()
+        runAndBlock {
+            foldersRepo.insertRoot(path)
+        }
 
         viewState.loadFolders(rootToFavorites)
     }
 
-    fun addFavorite(path: Path) {
-        Log.d(ROOTS_SCREEN, "favorite $path added in RootsPresenter")
+    fun addFavorite(favorite: Path) {
+        Log.d(ROOTS_SCREEN, "favorite $favorite added in RootsPresenter")
+        val path = favorite.toRealPath()
 
         val root = rootToFavorites.keys.find { path.startsWith(it) }
             ?: throw IllegalStateException("Can't add favorite if it's root is not added")
 
-        if (rootToFavorites[root]!!.contains(path)) {
+        val relative = root.relativize(path)
+        if (rootToFavorites[root]!!.contains(relative)) {
             throw AssertionError("Path must be checked in RootPicker")
         }
 
-        rootToFavorites[root]!!.add(path)
-        //todo persist
+        rootToFavorites[root]!!.add(relative)
+
+        runAndBlock {
+            foldersRepo.insertFavorite(root, relative)
+        }
 
         viewState.loadFolders(rootToFavorites)
     }

@@ -1,26 +1,26 @@
 package space.taran.arkbrowser.mvp.model.repo
 
+import android.util.Log
+import space.taran.arkbrowser.mvp.model.entity.room.Favorite
 import space.taran.arkbrowser.mvp.model.entity.room.FolderDao
-import space.taran.arkbrowser.utils.PartialResult
-import space.taran.arkbrowser.utils.folderExists
+import space.taran.arkbrowser.mvp.model.entity.room.Root
+import space.taran.arkbrowser.utils.*
 import java.nio.file.Path
 import java.nio.file.Paths
 
-import space.taran.arkbrowser.utils.fail
-import space.taran.arkbrowser.utils.ok
 import java.lang.AssertionError
 
 typealias Folders = Map<Path, List<Path>>
 
 class FoldersRepo(private val dao: FolderDao) {
 
-    //todo: upon writing, canonicalize paths and maybe check as well?
-
     suspend fun query(): PartialResult<Folders, List<Path>> {
         val missingPaths = mutableListOf<Path>()
 
         val validPaths = dao.query()
             .flatMap {
+                Log.d(DATABASE, "retrieved $it")
+
                 val root = Paths.get(it.root.path)
 
                 if (!folderExists(root)) {
@@ -49,5 +49,19 @@ class FoldersRepo(private val dao: FolderDao) {
         return PartialResult(
             validPaths.toMap(),
             missingPaths.toList())
+    }
+
+    suspend fun insertRoot(path: Path) {
+        val entity = Root(path.toString())
+
+        Log.d(DATABASE, "storing $entity")
+        dao.insert(entity)
+    }
+
+    suspend fun insertFavorite(root: Path, favorite: Path) {
+        val entity = Favorite(root.toString(), favorite.toString())
+
+        Log.d(DATABASE, "storing $entity")
+        dao.insert(entity)
     }
 }

@@ -78,7 +78,7 @@ class FoldersTree(devices: List<Path>, folders: Folders)
                         val (_, root) = deviceAndRoot
 
                         val favorites = _favorites.map {
-                            FavoriteNode(path = root.relativize(it))
+                            FavoriteNode(path = it)
                         }
 
                         Log.d(FOLDERS_TREE, "root $root contains favorites ${favorites.map { it.path }}")

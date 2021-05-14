@@ -13,3 +13,5 @@ const val FOLDERS_TREE: String = "folders-tree"
 const val ITEM_GRID: String = "item-grid"
 
 const val CONCURRENT: String = "concurrent"
+
+const val DATABASE: String = "database"

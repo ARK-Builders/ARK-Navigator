@@ -9,6 +9,21 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.attribute.FileTime
 
+//todo
+//                list.forEach { root ->
+//                    val storageVersion = resourcesRepo.readStorageVersion(root.storage)
+//                    if (storageVersion != ResourcesRepo.STORAGE_VERSION)
+//                        storageVersionDifferent(storageVersion, root)
+//                    rootsRepo.synchronizeRoot(root)
+//                }
+
+//todo
+//        val storage = resourcesRepo.createStorage(pickedDir!!)
+//        if (storage == null) {
+//            requestSdCardUri()
+//            return
+//        }
+
 // The storage is being read from the FS both during application startup
 // and during application lifecycle since it can be changed from outside.
 // We also must persist all changes during application lifecycle into FS.
