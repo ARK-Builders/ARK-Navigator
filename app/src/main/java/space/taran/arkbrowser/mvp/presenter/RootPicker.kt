@@ -1,4 +1,4 @@
-package space.taran.arkbrowser.mvp.presenter.utils
+package space.taran.arkbrowser.mvp.presenter
 
 import android.view.View
 import kotlinx.android.synthetic.main.dialog_roots_new.view.*
@@ -7,7 +7,6 @@ import space.taran.arkbrowser.mvp.model.entity.common.IconOrImage
 import space.taran.arkbrowser.mvp.presenter.adapter.ReversibleItemGridPresenter
 import space.taran.arkbrowser.mvp.view.item.FileItemView
 import space.taran.arkbrowser.ui.adapter.ItemGridRVAdapter
-import space.taran.arkbrowser.utils.ROOT_PATH
 import space.taran.arkbrowser.utils.findLongestCommonPrefix
 import java.nio.file.Files
 import java.nio.file.Path

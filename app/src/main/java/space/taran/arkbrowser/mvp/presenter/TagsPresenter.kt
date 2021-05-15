@@ -1,17 +1,18 @@
 package space.taran.arkbrowser.mvp.presenter
 
-import android.util.Log
 import space.taran.arkbrowser.mvp.model.entity.common.TagState
 import space.taran.arkbrowser.mvp.view.TagsView
 import space.taran.arkbrowser.mvp.view.item.FileItemView
-import moxy.MvpPresenter
-import ru.terrakok.cicerone.Router
 import space.taran.arkbrowser.mvp.model.entity.room.ResourceId
 import space.taran.arkbrowser.mvp.presenter.adapter.ItemGridPresenter
 import space.taran.arkbrowser.utils.*
+import moxy.MvpPresenter
+import ru.terrakok.cicerone.Router
+import android.util.Log
+import java.nio.file.Path
 import javax.inject.Inject
 
-class TagsPresenter(val allResources: Set<ResourceId>) :
+class TagsPresenter(val path: Path, val root: Path?) :
     MvpPresenter<TagsView>() {
 
     enum class State {
@@ -97,7 +98,7 @@ class TagsPresenter(val allResources: Set<ResourceId>) :
         Log.d("flow", "first view attached in TagsPresenter")
         super.onFirstViewAttach()
         viewState.init()
-        selectedResources = allResources
+//        selectedResources = allResources
         applyTagsToFiles()
 
 //        viewState.setToolbarTitle(rootName ?: "All resources")

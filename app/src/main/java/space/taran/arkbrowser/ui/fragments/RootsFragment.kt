@@ -14,11 +14,12 @@ import kotlinx.android.synthetic.main.fragment_roots.*
 import moxy.MvpAppCompatFragment
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
+import ru.terrakok.cicerone.Router
 import space.taran.arkbrowser.R
 import space.taran.arkbrowser.mvp.model.repo.Folders
 import space.taran.arkbrowser.mvp.presenter.RootsPresenter
-import space.taran.arkbrowser.mvp.presenter.utils.FoldersTree
-import space.taran.arkbrowser.mvp.presenter.utils.RootPicker
+import space.taran.arkbrowser.mvp.presenter.FoldersTree
+import space.taran.arkbrowser.mvp.presenter.RootPicker
 import space.taran.arkbrowser.mvp.view.RootView
 import space.taran.arkbrowser.ui.App
 import space.taran.arkbrowser.ui.activity.MainActivity
@@ -27,21 +28,7 @@ import space.taran.arkbrowser.utils.ROOT_PICKER
 import space.taran.arkbrowser.utils.listDevices
 import java.nio.file.Files
 import java.nio.file.Path
-
-//todo: alternative handler for clicks on paths
-//{
-//    val (_, file) = it
-//    if (Files.isDirectory(file)) {
-//        router.navigateTo(Screens.ExplorerScreen(file))
-//    }
-//}
-
-//todo also useful
-//if (path.endsWith(".png") || path.endsWith(".jpg") || path.endsWith(".jpeg")) {
-//    view.setIcon(IconOrImage(image = path))
-//} else {
-//    view.setIcon(IconOrImage(icon = Icon.FILE))
-//}
+import javax.inject.Inject
 
 class RootsFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
     private lateinit var devices: List<Path>
@@ -51,6 +38,9 @@ class RootsFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
 
     private lateinit var roots: Set<Path>
     private lateinit var favorites: Set<Path>
+
+    @Inject
+    lateinit var router: Router
 
     @InjectPresenter
     lateinit var presenter: RootsPresenter
@@ -66,7 +56,7 @@ class RootsFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
     override fun loadFolders(folders: Folders) {
         Log.d(ROOTS_SCREEN, "loading roots in RootsFragment")
 
-        foldersTree = FoldersTree(devices, folders)
+        foldersTree = FoldersTree(devices, folders, router)
         rv_roots.adapter = foldersTree
 
         roots = folders.keys

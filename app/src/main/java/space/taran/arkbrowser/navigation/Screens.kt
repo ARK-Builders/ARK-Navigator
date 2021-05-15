@@ -14,7 +14,7 @@ class Screens {
         override fun getFragment() = RootsFragment()
     }
 
-    class TagsScreen(val resources: Set<ResourceId>): SupportAppScreen() {
-        override fun getFragment() = TagsFragment(resources)
+    class TagsScreen(val path: Path, val root: Path?): SupportAppScreen() {
+        override fun getFragment() = TagsFragment(path, root)
     }
 }

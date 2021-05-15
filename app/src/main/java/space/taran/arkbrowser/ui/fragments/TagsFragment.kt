@@ -25,15 +25,18 @@ import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
 import space.taran.arkbrowser.mvp.model.entity.room.ResourceId
 import space.taran.arkbrowser.utils.SortBy
+import java.nio.file.Path
 
-class TagsFragment(val resources: Set<ResourceId>) : MvpAppCompatFragment(), TagsView {
+//`path` is used for filtering resources' paths
+//`root` is used for querying tags storage
+class TagsFragment(val path: Path, val root: Path?) : MvpAppCompatFragment(), TagsView {
 
     @InjectPresenter
     lateinit var presenter: TagsPresenter
 
     @ProvidePresenter
     fun providePresenter() =
-        TagsPresenter(resources).apply {
+        TagsPresenter(path, root).apply {
             Log.d("flow", "creating TagsPresenter")
             App.instance.appComponent.inject(this)
         }
@@ -194,3 +197,9 @@ class TagsFragment(val resources: Set<ResourceId>) : MvpAppCompatFragment(), Tag
         chipg_tags.removeAllViews()
     }
 }
+
+//if (path.endsWith(".png") || path.endsWith(".jpg") || path.endsWith(".jpeg")) {
+//    view.setIcon(IconOrImage(image = path))
+//} else {
+//    view.setIcon(IconOrImage(icon = Icon.FILE))
+//}
