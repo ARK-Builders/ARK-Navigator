@@ -5,7 +5,6 @@ import space.taran.arkbrowser.mvp.view.ResourcesView
 import space.taran.arkbrowser.mvp.view.item.FileItemView
 import space.taran.arkbrowser.mvp.model.entity.room.ResourceId
 import space.taran.arkbrowser.mvp.presenter.adapter.ItemGridPresenter
-import space.taran.arkbrowser.utils.CoroutineRunner.runAndBlock
 import moxy.MvpPresenter
 import ru.terrakok.cicerone.Router
 import android.util.Log
@@ -51,15 +50,13 @@ class ResourcesPresenter(val root: Path?, val path: Path?) :
         Log.d(RESOURCES_SCREEN, "first view attached in ResourcesPresenter")
         super.onFirstViewAttach()
 
-        val roots = runAndBlock {
-            val result = foldersRepo.query()
 
-            Notifications.notifyIfFailedPaths(viewState, result.failed)
-            return@runAndBlock result.succeeded.keys
-        }
-        Log.d(RESOURCES_SCREEN, "roots loaded: $roots")
+        val folders = foldersRepo.query()
+        Log.d(RESOURCES_SCREEN, "folders retrieved: $folders")
 
-        rootToStorage = roots
+        Notifications.notifyIfFailedPaths(viewState, folders.failed)
+
+        rootToStorage = folders.succeeded.keys
             .map { it to TagsStorage.provide(it) }
             .toMap()
             .toMutableMap()

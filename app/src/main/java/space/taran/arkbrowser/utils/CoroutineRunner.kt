@@ -12,15 +12,13 @@ object CoroutineRunner {
 
         var result: R? = null
         runBlocking {
-            Log.d(CONCURRENT, "\t[1]")
             launch {
-                Log.d(CONCURRENT, "\t[2]")
+                Log.d(CONCURRENT, "\tperforming the job")
                 result = f()
-                Log.d(CONCURRENT, "\t[3]")
+                Log.d(CONCURRENT, "\tthe job performed")
             }
-            Log.d(CONCURRENT, "\t[4]")
         }
-        Log.d(CONCURRENT, "\t[5]")
+        Log.d(CONCURRENT, "\tcontinuing main routine")
 
         return result!!
     }
@@ -30,15 +28,13 @@ object CoroutineRunner {
 
         var result: R? = null
         runBlocking {
-            Log.d(CONCURRENT, "\t[1]")
             GlobalScope.launch {
-                Log.d(CONCURRENT, "\t[2]")
+                Log.d(CONCURRENT, "\tperforming the job")
                 result = f()
-                Log.d(CONCURRENT, "\t[3]")
+                Log.d(CONCURRENT, "\tthe job performed")
             }
-            Log.d(CONCURRENT, "\t[4]")
         }
-        Log.d(CONCURRENT, "\t[5]")
+        Log.d(CONCURRENT, "\tcontinuing main routine")
 
         return result!!
     }

@@ -6,11 +6,11 @@ import space.taran.arkbrowser.utils.StringPath
 @Dao
 interface ResourceDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertAll(resources: List<Resource>)
+    suspend fun insertAll(resources: List<Resource>)
 
-    @Query("DELETE FROM Resource where path = :path")
-    fun deleteByPath(path: StringPath)
+    @Query("DELETE FROM Resource where path in (:paths)")
+    suspend fun deletePaths(paths: List<StringPath>)
 
     @Query("SELECT * FROM Resource")
-    fun query(): List<Resource>
+    suspend fun query(): List<Resource>
 }

@@ -14,10 +14,14 @@ typealias Folders = Map<Path, List<Path>>
 
 class FoldersRepo(private val dao: FolderDao) {
 
-    suspend fun query(): PartialResult<Folders, List<Path>> {
+    fun query(): PartialResult<Folders, List<Path>> {
         val missingPaths = mutableListOf<Path>()
 
-        val validPaths = dao.query()
+        val rootsWithFavorites = CoroutineRunner.runAndBlock {
+            dao.query()
+        }
+
+        val validPaths = rootsWithFavorites
             .flatMap {
                 Log.d(DATABASE, "retrieved $it")
 
@@ -51,17 +55,21 @@ class FoldersRepo(private val dao: FolderDao) {
             missingPaths.toList())
     }
 
-    suspend fun insertRoot(path: Path) {
+    fun insertRoot(path: Path) {
         val entity = Root(path.toString())
-
         Log.d(DATABASE, "storing $entity")
-        dao.insert(entity)
+
+        CoroutineRunner.runAndBlock {
+            dao.insert(entity)
+        }
     }
 
-    suspend fun insertFavorite(root: Path, favorite: Path) {
+    fun insertFavorite(root: Path, favorite: Path) {
         val entity = Favorite(root.toString(), favorite.toString())
 
         Log.d(DATABASE, "storing $entity")
-        dao.insert(entity)
+        CoroutineRunner.runAndBlock {
+            dao.insert(entity)
+        }
     }
 }

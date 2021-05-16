@@ -62,18 +62,18 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        Log.d(RESOURCES_SCREEN, "creating view in TagsFragment")
+        Log.d(RESOURCES_SCREEN, "creating view in ResourcesFragment")
         return inflater.inflate(R.layout.fragment_tags, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        Log.d(RESOURCES_SCREEN, "view created in TagsFragment")
+        Log.d(RESOURCES_SCREEN, "view created in ResourcesFragment")
         super.onViewCreated(view, savedInstanceState)
         App.instance.appComponent.inject(this)
     }
 
     override fun init() {
-        Log.d(RESOURCES_SCREEN, "initializing TagsFragment")
+        Log.d(RESOURCES_SCREEN, "initializing ResourcesFragment")
         (activity as MainActivity).setSelectedTab(1)
         (activity as MainActivity).setToolbarVisibility(true)
         rv_tags.layoutManager = GridLayoutManager(context, 3)
@@ -83,13 +83,13 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
     }
 
     override fun onResume() {
-        Log.d(RESOURCES_SCREEN, "resuming in TagsFragment")
+        Log.d(RESOURCES_SCREEN, "resuming in ResourcesFragment")
         super.onResume()
         presenter.onViewResumed()
     }
 
     override fun openFile(uri: Uri, mimeType: String) {
-        Log.d(RESOURCES_SCREEN, "opening file $uri in TagsFragment")
+        Log.d(RESOURCES_SCREEN, "opening file $uri in ResourcesFragment")
         try {
             val intent = Intent(Intent.ACTION_VIEW)
             intent.setDataAndType(uri, mimeType)
@@ -101,7 +101,7 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
     }
 
     override fun updateAdapter() {
-        Log.d(RESOURCES_SCREEN, "updating adapter in TagsFragment")
+        Log.d(RESOURCES_SCREEN, "updating adapter in ResourcesFragment")
         adapter?.notifyDataSetChanged()
     }
 
@@ -115,7 +115,7 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
     }
 
     override fun showSortByDialog(sortBy: SortBy, isReversedSort: Boolean) {
-        Log.d(RESOURCES_SCREEN, "showing sort-by dialog ($sortBy, $isReversedSort) in TagsFragment")
+        Log.d(RESOURCES_SCREEN, "showing sort-by dialog ($sortBy, $isReversedSort) in ResourcesFragment")
         sortByDialogView = LayoutInflater.from(context!!).inflate(R.layout.dialog_sort, null)
         val alertDialogBuilder = AlertDialog.Builder(context!!).setView(sortByDialogView)
         when (sortBy) {
@@ -153,7 +153,7 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
     }
 
     override fun closeSortByDialog() {
-        Log.d(RESOURCES_SCREEN, "closing sort-by dialog in TagsFragment")
+        Log.d(RESOURCES_SCREEN, "closing sort-by dialog in ResourcesFragment")
         sortByDialog?.dismiss()
     }
 
@@ -190,7 +190,7 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        Log.d(RESOURCES_SCREEN, "options item selected in TagsFragment")
+        Log.d(RESOURCES_SCREEN, "options item selected in ResourcesFragment")
         when(item.itemId) {
             R.id.menu_tags_sort_by -> presenter.sortByMenuClicked()
             R.id.menu_tags_tags_off -> presenter.tagsOffChanged()
@@ -199,13 +199,13 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        Log.d(RESOURCES_SCREEN, "creating options menu in TagsFragment")
+        Log.d(RESOURCES_SCREEN, "creating options menu in ResourcesFragment")
         inflater.inflate(R.menu.menu_tags_screen, menu)
         super.onCreateOptionsMenu(menu, inflater)
     }
 
     override fun clearTags() {
-        Log.d(RESOURCES_SCREEN, "clearing tags in TagsFragment")
+        Log.d(RESOURCES_SCREEN, "clearing tags in ResourcesFragment")
         chipg_tags.removeAllViews()
     }
 

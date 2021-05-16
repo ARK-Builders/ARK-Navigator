@@ -5,8 +5,6 @@ import space.taran.arkbrowser.mvp.view.FoldersView
 import moxy.InjectViewState
 import moxy.MvpPresenter
 import ru.terrakok.cicerone.Router
-import space.taran.arkbrowser.mvp.model.repo.Folders
-import space.taran.arkbrowser.utils.CoroutineRunner.runAndBlock
 import space.taran.arkbrowser.mvp.model.repo.FoldersRepo
 import space.taran.arkbrowser.mvp.model.repo.ResourcesIndexFactory
 import space.taran.arkbrowser.ui.fragments.utils.Notifications
@@ -35,15 +33,12 @@ class FoldersPresenter: MvpPresenter<FoldersView>() {
         Log.d(FOLDERS_SCREEN, "first view attached in RootsPresenter")
         super.onFirstViewAttach()
 
-        val result: Folders = runAndBlock {
-            val result = foldersRepo.query()
+        val folders = foldersRepo.query()
+        Log.d(FOLDERS_SCREEN, "folders retrieved: $folders")
 
-            Notifications.notifyIfFailedPaths(viewState, result.failed)
-            return@runAndBlock result.succeeded
-        }
-        Log.d(FOLDERS_SCREEN, "folders loaded: $result")
+        Notifications.notifyIfFailedPaths(viewState, folders.failed)
 
-        rootToFavorites = result
+        rootToFavorites = folders.succeeded
             .mapValues { (_, favorites) -> favorites.toMutableList() }
             .toMutableMap()
 
@@ -60,9 +55,7 @@ class FoldersPresenter: MvpPresenter<FoldersView>() {
 
         rootToFavorites[path] = mutableListOf()
 
-        runAndBlock {
-            foldersRepo.insertRoot(path)
-        }
+        foldersRepo.insertRoot(path)
 
         viewState.notifyUser(
             message = "indexing of huge folders can take minutes",
@@ -87,9 +80,7 @@ class FoldersPresenter: MvpPresenter<FoldersView>() {
 
         rootToFavorites[root]!!.add(relative)
 
-        runAndBlock {
-            foldersRepo.insertFavorite(root, relative)
-        }
+        foldersRepo.insertFavorite(root, relative)
 
         viewState.loadFolders(rootToFavorites)
     }

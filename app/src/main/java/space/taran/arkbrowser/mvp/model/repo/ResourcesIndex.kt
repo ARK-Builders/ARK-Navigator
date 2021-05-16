@@ -5,6 +5,7 @@ import space.taran.arkbrowser.mvp.model.entity.room.Resource
 import space.taran.arkbrowser.mvp.model.entity.room.ResourceId
 import space.taran.arkbrowser.mvp.model.entity.room.computeId
 import space.taran.arkbrowser.mvp.model.entity.room.ResourceDao
+import space.taran.arkbrowser.utils.CoroutineRunner
 import space.taran.arkbrowser.utils.RESOURCES_INDEX
 import space.taran.arkbrowser.utils.isHidden
 import java.lang.IllegalStateException
@@ -45,8 +46,10 @@ class ResourcesIndex internal constructor (
         diff.deleted.forEach {
             pathToMeta.remove(it)
         }
-        (diff.deleted + diff.updated).forEach {
-            dao.deleteByPath(it.toString())
+
+        val pathsToDelete = diff.deleted + diff.updated
+        CoroutineRunner.runAndBlock {
+            dao.deletePaths(pathsToDelete.map { it.toString() })
         }
 
         val toInsert = diff.updated + diff.added
@@ -81,14 +84,18 @@ class ResourcesIndex internal constructor (
         Log.d(RESOURCES_INDEX, "persisting "
             + "${resources.size} resources from root $root")
 
-        dao.insertAll(
-            resources.entries.toList()
-                .map { Resource(
-                    id = it.value.id,
-                    root = root.toString(),
-                    path = it.key.toString(),
-                    modified = it.value.modified.toMillis())
-                })
+        val entities = resources.entries.toList()
+            .map { Resource(
+                id = it.value.id,
+                root = root.toString(),
+                path = it.key.toString(),
+                modified = it.value.modified.toMillis())
+            }
+
+        CoroutineRunner.runAndBlock {
+            dao.insertAll(entities)
+        }
+        Log.d(RESOURCES_INDEX, "${entities.size} resources persisted")
     }
 
     companion object {
