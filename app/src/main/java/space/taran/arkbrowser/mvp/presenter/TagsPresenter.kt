@@ -12,12 +12,8 @@ import android.util.Log
 import java.nio.file.Path
 import javax.inject.Inject
 
-class TagsPresenter(val path: Path, val root: Path?) :
+class TagsPresenter(val root: Path?, val path: Path?) :
     MvpPresenter<TagsView>() {
-
-    enum class State {
-        SINGLE_ROOT, FILES, ALL_ROOTS
-    }
 
     @Inject
     lateinit var router: Router
@@ -34,7 +30,7 @@ class TagsPresenter(val path: Path, val root: Path?) :
 
     inner class XItemGridPresenter :
         ItemGridPresenter<Unit, ResourceId>({
-            Log.d("flow", "[mock] item $it clicked in TagsPresenter/ItemGridPresenter")
+            Log.d(TAGS_SCREEN, "[mock] item $it clicked in TagsPresenter/ItemGridPresenter")
 //            if (resource.isImage()) {
 //                val images = selectedResources.filter { it.isImage() }
 //                val newPos = images.indexOf(resource)
@@ -65,7 +61,7 @@ class TagsPresenter(val path: Path, val root: Path?) :
 
         override fun bindView(view: FileItemView) {
             val resource = resources[view.pos]
-            Log.d("flow", "[mock] binding view with $resource in TagsPresenter/ItemGridPresenter")
+            Log.d(TAGS_SCREEN, "[mock] binding view with $resource in TagsPresenter/ItemGridPresenter")
 //            view.setText(resource.name)
 //            if (resource.isImage()) {
 //                view.setIcon(IconOrImage(image = resource.file))
@@ -80,14 +76,14 @@ class TagsPresenter(val path: Path, val root: Path?) :
     }
 
     fun tagChecked(tag: String, isChecked: Boolean) {
-        Log.d("flow", "tag checked clicked in TagsPresenter")
+        Log.d(TAGS_SCREEN, "tag checked clicked in TagsPresenter")
         val tagState = tagStates.find { tagState -> tagState.tag == tag }
         tagState!!.isChecked = isChecked
         applyTagsToFiles()
     }
 
     fun clearTagsChecked() {
-        Log.d("flow", "clearing checked tags in TagsPresenter")
+        Log.d(TAGS_SCREEN, "clearing checked tags in TagsPresenter")
         tagStates.forEach { tagState ->
             tagState.isChecked = false
         }
@@ -95,7 +91,7 @@ class TagsPresenter(val path: Path, val root: Path?) :
     }
 
     override fun onFirstViewAttach() {
-        Log.d("flow", "first view attached in TagsPresenter")
+        Log.d(TAGS_SCREEN, "first view attached in TagsPresenter")
         super.onFirstViewAttach()
         viewState.init()
 //        selectedResources = allResources
@@ -143,13 +139,13 @@ class TagsPresenter(val path: Path, val root: Path?) :
 //    }
 
     override fun onDestroy() {
-        Log.d("flow", "destroying TagsPresenter")
+        Log.d(TAGS_SCREEN, "destroying TagsPresenter")
         super.onDestroy()
         //syncDisposable?.dispose()
     }
 
     fun onViewResumed() {
-        Log.d("flow", "view resumed in TagsPresenter")
+        Log.d(TAGS_SCREEN, "view resumed in TagsPresenter")
         if (isTagsOff) {
             findUntaggedFiles()
         } else {
@@ -158,21 +154,21 @@ class TagsPresenter(val path: Path, val root: Path?) :
     }
 
     fun sortByChanged(sortBy: SortBy) {
-        Log.d("flow", "sorting by changed date in TagsPresenter")
+        Log.d(TAGS_SCREEN, "sorting by changed date in TagsPresenter")
         this.sortBy = sortBy
         sortAndUpdateFiles()
         dismissDialog()
     }
 
     fun reversedSortChanged(isReversedSort: Boolean) {
-        Log.d("flow", "reversed sort changed in TagsPresenter")
+        Log.d(TAGS_SCREEN, "reversed sort changed in TagsPresenter")
         this.isReversedSort = isReversedSort
         sortAndUpdateFiles()
         dismissDialog()
     }
 
     fun tagsOffChanged() {
-        Log.d("flow", "tags on/off changed in TagsPresenter")
+        Log.d(TAGS_SCREEN, "tags on/off changed in TagsPresenter")
         isTagsOff = !isTagsOff
         if (isTagsOff) {
             findUntaggedFiles()
@@ -185,17 +181,17 @@ class TagsPresenter(val path: Path, val root: Path?) :
     }
 
     fun sortByMenuClicked() {
-        Log.d("flow", "sort-by menu clicked in TagsPresenter")
+        Log.d(TAGS_SCREEN, "sort-by menu clicked in TagsPresenter")
         viewState.showSortByDialog(sortBy, isReversedSort)
     }
 
     fun dismissDialog() {
-        Log.d("flow", "dialog dismissed in TagsPresenter")
+        Log.d(TAGS_SCREEN, "dialog dismissed in TagsPresenter")
         viewState.closeSortByDialog()
     }
 
     private fun applyTagsToFiles() {
-        Log.d("flow", "[mock] applying tags to resources in TagsPresenter")
+        Log.d(TAGS_SCREEN, "[mock] applying tags to resources in TagsPresenter")
 
         tagStates.forEach { tagState ->
             tagState.isActual = false
@@ -236,7 +232,7 @@ class TagsPresenter(val path: Path, val root: Path?) :
     }
 
     private fun findUntaggedFiles() {
-        Log.d("flow", "[mock] looking for untagged resources in TagsPresenter")
+        Log.d(TAGS_SCREEN, "[mock] looking for untagged resources in TagsPresenter")
 
 //        val filteredFiles = allResources.filter { file ->
 //            file.tags.isEmpty()
@@ -264,7 +260,7 @@ class TagsPresenter(val path: Path, val root: Path?) :
 //    }
 
     private fun sortAndUpdateFiles() {
-        Log.d("flow", "[mock] sorting and updating resources in TagsPresenter")
+        Log.d(TAGS_SCREEN, "[mock] sorting and updating resources in TagsPresenter")
 //        selectedResources.sortWith(resourceComparator(sortBy, isReversedSort))
 //        fileGridPresenter.resources.clear()
 //        fileGridPresenter.resources.addAll(selectedResources)
@@ -272,14 +268,14 @@ class TagsPresenter(val path: Path, val root: Path?) :
     }
 
     private fun sortAndUpdateTags() {
-        Log.d("flow", "[mock] sorting and updating tags in TagsPresenter")
+        Log.d(TAGS_SCREEN, "[mock] sorting and updating tags in TagsPresenter")
         tagStates.sortWith(tagsComparator())
         viewState.clearTags()
         viewState.setTags(tagStates)
     }
 
     private fun setupTags() {
-        Log.d("flow", "[mock] setting up tags in TagsPresenter")
+        Log.d(TAGS_SCREEN, "[mock] setting up tags in TagsPresenter")
 
 //        val filesTags = HashSet<Tag>()
 //        allResources.forEach { file ->
@@ -308,5 +304,4 @@ class TagsPresenter(val path: Path, val root: Path?) :
 //
 //        sortAndUpdateTags()
     }
-
 }

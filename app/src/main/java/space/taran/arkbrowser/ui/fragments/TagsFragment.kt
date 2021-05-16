@@ -25,19 +25,26 @@ import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
 import space.taran.arkbrowser.mvp.model.entity.room.ResourceId
 import space.taran.arkbrowser.utils.SortBy
+import space.taran.arkbrowser.utils.TAGS_SCREEN
 import java.nio.file.Path
 
+//`root` is used for querying tags storage and resources index,
+//       if it is `null`, then resources from all roots are taken
+//                        and tags storage for every particular resource
+//                        is determined dynamically
+//
 //`path` is used for filtering resources' paths
-//`root` is used for querying tags storage
-class TagsFragment(val path: Path, val root: Path?) : MvpAppCompatFragment(), TagsView {
+//       if it is `null`, then no filtering is performed
+//       (recommended instead of passing same value for `path` and `root)
+class TagsFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment(), TagsView {
 
     @InjectPresenter
     lateinit var presenter: TagsPresenter
 
     @ProvidePresenter
     fun providePresenter() =
-        TagsPresenter(path, root).apply {
-            Log.d("flow", "creating TagsPresenter")
+        TagsPresenter(root, path).apply {
+            Log.d(TAGS_SCREEN, "creating TagsPresenter")
             App.instance.appComponent.inject(this)
         }
 
@@ -50,18 +57,18 @@ class TagsFragment(val path: Path, val root: Path?) : MvpAppCompatFragment(), Ta
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        Log.d("flow", "creating view in TagsFragment")
+        Log.d(TAGS_SCREEN, "creating view in TagsFragment")
         return inflater.inflate(R.layout.fragment_tags, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        Log.d("flow", "view created in TagsFragment")
+        Log.d(TAGS_SCREEN, "view created in TagsFragment")
         super.onViewCreated(view, savedInstanceState)
         App.instance.appComponent.inject(this)
     }
 
     override fun init() {
-        Log.d("flow", "initializing TagsFragment")
+        Log.d(TAGS_SCREEN, "initializing TagsFragment")
         (activity as MainActivity).setSelectedTab(1)
         (activity as MainActivity).setToolbarVisibility(true)
         rv_tags.layoutManager = GridLayoutManager(context, 3)
@@ -71,13 +78,13 @@ class TagsFragment(val path: Path, val root: Path?) : MvpAppCompatFragment(), Ta
     }
 
     override fun onResume() {
-        Log.d("flow", "resuming in TagsFragment")
+        Log.d(TAGS_SCREEN, "resuming in TagsFragment")
         super.onResume()
         presenter.onViewResumed()
     }
 
     override fun openFile(uri: Uri, mimeType: String) {
-        Log.d("flow", "opening file $uri in TagsFragment")
+        Log.d(TAGS_SCREEN, "opening file $uri in TagsFragment")
         try {
             val intent = Intent(Intent.ACTION_VIEW)
             intent.setDataAndType(uri, mimeType)
@@ -89,7 +96,7 @@ class TagsFragment(val path: Path, val root: Path?) : MvpAppCompatFragment(), Ta
     }
 
     override fun updateAdapter() {
-        Log.d("flow", "updating adapter in TagsFragment")
+        Log.d(TAGS_SCREEN, "updating adapter in TagsFragment")
         adapter?.notifyDataSetChanged()
     }
 
@@ -98,12 +105,12 @@ class TagsFragment(val path: Path, val root: Path?) : MvpAppCompatFragment(), Ta
     }
 
     override fun setTagsLayoutVisibility(isVisible: Boolean) {
-        Log.d("flow", "setting tags layout visibility to $isVisible")
+        Log.d(TAGS_SCREEN, "setting tags layout visibility to $isVisible")
         chipg_tags.visibility = if (isVisible) View.VISIBLE else View.GONE
     }
 
     override fun showSortByDialog(sortBy: SortBy, isReversedSort: Boolean) {
-        Log.d("flow", "showing sort-by dialog ($sortBy, $isReversedSort) in TagsFragment")
+        Log.d(TAGS_SCREEN, "showing sort-by dialog ($sortBy, $isReversedSort) in TagsFragment")
         sortByDialogView = LayoutInflater.from(context!!).inflate(R.layout.dialog_sort, null)
         val alertDialogBuilder = AlertDialog.Builder(context!!).setView(sortByDialogView)
         when (sortBy) {
@@ -141,13 +148,13 @@ class TagsFragment(val path: Path, val root: Path?) : MvpAppCompatFragment(), Ta
     }
 
     override fun closeSortByDialog() {
-        Log.d("flow", "closing sort-by dialog in TagsFragment")
+        Log.d(TAGS_SCREEN, "closing sort-by dialog in TagsFragment")
         sortByDialog?.dismiss()
     }
 
 
     override fun setTags(tags: List<TagState>) {
-        Log.d("flow", "setting tags states to $tags")
+        Log.d(TAGS_SCREEN, "setting tags states to $tags")
         tags.forEach { tagState ->
             val chip = Chip(context)
             chip.isCheckable = true
@@ -178,7 +185,7 @@ class TagsFragment(val path: Path, val root: Path?) : MvpAppCompatFragment(), Ta
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        Log.d("flow", "options item selected in TagsFragment")
+        Log.d(TAGS_SCREEN, "options item selected in TagsFragment")
         when(item.itemId) {
             R.id.menu_tags_sort_by -> presenter.sortByMenuClicked()
             R.id.menu_tags_tags_off -> presenter.tagsOffChanged()
@@ -187,13 +194,13 @@ class TagsFragment(val path: Path, val root: Path?) : MvpAppCompatFragment(), Ta
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        Log.d("flow", "creating options menu in TagsFragment")
+        Log.d(TAGS_SCREEN, "creating options menu in TagsFragment")
         inflater.inflate(R.menu.menu_tags_screen, menu)
         super.onCreateOptionsMenu(menu, inflater)
     }
 
     override fun clearTags() {
-        Log.d("flow", "clearing tags in TagsFragment")
+        Log.d(TAGS_SCREEN, "clearing tags in TagsFragment")
         chipg_tags.removeAllViews()
     }
 }

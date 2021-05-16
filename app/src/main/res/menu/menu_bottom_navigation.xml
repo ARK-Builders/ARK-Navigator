@@ -2,15 +2,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/page_roots"
-        android:title="Explorer"
         android:enabled="true"
         android:icon="@drawable/ic_menu_explore"
-        android:tint="?attr/colorControlNormal"/>
+        android:tint="?attr/colorControlNormal"
+        android:title="Manage folders" />
 
     <item
         android:id="@+id/page_tags"
-        android:title="Navigator"
         android:enabled="true"
         android:icon="@drawable/ic_menu_navigate"
-        android:tint="?attr/colorControlNormal"/>
+        android:tint="?attr/colorControlNormal"
+        android:title="Navigate data" />
 </menu>

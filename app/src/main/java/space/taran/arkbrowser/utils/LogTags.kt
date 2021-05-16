@@ -1,8 +1,10 @@
 package space.taran.arkbrowser.utils
 
+const val MAIN: String = "main"
+
 const val PERMISSIONS: String = "permissions"
 
-const val MAIN_ACTIVITY: String = "main"
+const val TAGS_SCREEN: String = "tags-screen"
 
 const val ROOTS_SCREEN: String = "roots-screen"
 

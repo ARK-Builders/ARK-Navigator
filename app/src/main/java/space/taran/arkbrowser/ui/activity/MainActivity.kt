@@ -20,7 +20,7 @@ import moxy.presenter.ProvidePresenter
 import ru.terrakok.cicerone.NavigatorHolder
 import ru.terrakok.cicerone.android.support.SupportAppNavigator
 import space.taran.arkbrowser.ui.App
-import space.taran.arkbrowser.utils.MAIN_ACTIVITY
+import space.taran.arkbrowser.utils.MAIN
 import space.taran.arkbrowser.utils.PERMISSIONS
 import java.lang.AssertionError
 import javax.inject.Inject
@@ -36,7 +36,7 @@ class MainActivity : MvpAppCompatActivity(), MainView {
     private val navigator = SupportAppNavigator(this, R.id.container)
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        Log.d(MAIN_ACTIVITY, "creating")
+        Log.d(MAIN, "creating")
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         App.instance.appComponent.inject(this)
@@ -44,27 +44,27 @@ class MainActivity : MvpAppCompatActivity(), MainView {
 
     @ProvidePresenter
     fun providePresenter() = MainPresenter().apply {
-        Log.d(MAIN_ACTIVITY, "creating MainPresenter")
+        Log.d(MAIN, "creating MainPresenter")
         App.instance.appComponent.inject(this)
     }
 
     override fun init() {
-        Log.d(MAIN_ACTIVITY, "initializing")
+        Log.d(MAIN, "initializing")
         setSupportActionBar(toolbar)
         bottom_navigation.setOnNavigationItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.page_roots -> {
-                    Log.d(MAIN_ACTIVITY, "switching to Roots screen")
+                    Log.d(MAIN, "switching to Roots screen")
                     presenter.goToRootsScreen()
                     true
                 }
                 R.id.page_tags -> {
-                    Log.d(MAIN_ACTIVITY, "switching to Tags screen")
+                    Log.d(MAIN, "switching to Tags screen")
                     presenter.goToTagsScreen()
                     true
                 }
                 else -> {
-                    Log.w(MAIN_ACTIVITY, "no handler found")
+                    Log.w(MAIN, "no handler found")
                     true
                 }
             }
@@ -137,7 +137,7 @@ class MainActivity : MvpAppCompatActivity(), MainView {
     }
 
     fun setSelectedTab(pos: Int) {
-        Log.d(MAIN_ACTIVITY, "tab $pos selected")
+        Log.d(MAIN, "tab $pos selected")
         bottom_navigation.menu.getItem(pos).isChecked = true
     }
 
@@ -147,7 +147,7 @@ class MainActivity : MvpAppCompatActivity(), MainView {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
         if (requestCode == REQUEST_CODE_SD_CARD_URI) {
-            Log.d(MAIN_ACTIVITY, "sdcard uri request resulted," +
+            Log.d(MAIN, "sdcard uri request resulted," +
                     "code $resultCode, intent: $intent")
 
             val treeUri = intent!!.data!!
@@ -157,26 +157,26 @@ class MainActivity : MvpAppCompatActivity(), MainView {
             //todo: is it really needed?
             presenter.sdCardUriGranted(treeUri.toString())
         } else {
-            Log.d(MAIN_ACTIVITY, "unknown activity result received")
+            Log.d(MAIN, "unknown activity result received")
         }
 
         super.onActivityResult(requestCode, resultCode, intent)
     }
 
     override fun onResumeFragments() {
-        Log.d(MAIN_ACTIVITY, "resuming fragments in MainActivity")
+        Log.d(MAIN, "resuming fragments in MainActivity")
         super.onResumeFragments()
         navigatorHolder.setNavigator(navigator)
     }
 
     override fun onPause() {
-        Log.d(MAIN_ACTIVITY, "pausing MainActivity")
+        Log.d(MAIN, "pausing MainActivity")
         super.onPause()
         navigatorHolder.removeNavigator()
     }
 
     override fun onBackPressed() {
-        Log.d(MAIN_ACTIVITY, "back pressed in MainActivity")
+        Log.d(MAIN, "back pressed in MainActivity")
         supportFragmentManager.fragments.forEach {
             if (it is BackButtonListener && it.backClicked()) {
                 return

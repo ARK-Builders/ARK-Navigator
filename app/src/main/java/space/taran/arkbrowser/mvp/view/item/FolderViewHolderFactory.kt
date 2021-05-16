@@ -52,7 +52,7 @@ private class FavoriteFolderView(context: Context, private val router: Router)
 
         this.navigateButton.setOnClickListener {
             Log.d(FOLDERS_TREE, "navigating to path ${item.data.path} under root ${item.data.root}")
-            router.navigateTo(Screens.TagsScreen(item.data.path, item.data.root))
+            router.navigateTo(Screens.TagsScreen(item.data.root, item.data.path))
         }
     }
 
@@ -75,7 +75,7 @@ private class RootFolderView(context: Context, private val router: Router)
 
         this.navigateButton.setOnClickListener {
             Log.d(FOLDERS_TREE, "navigating to root ${item.data.path}")
-            router.navigateTo(Screens.TagsScreen(item.data.path, item.data.path))
+            router.navigateTo(Screens.TagsScreen(item.data.path, null))
         }
     }
 

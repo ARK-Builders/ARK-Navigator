@@ -1,1 +1,1 @@
-ARK Browser
+ARK Navigator
