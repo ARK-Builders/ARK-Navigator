@@ -27,7 +27,7 @@ class FoldersPresenter: MvpPresenter<FoldersView>() {
     @Inject
     lateinit var resourcesIndexexRepo: ResourcesIndexFactory
 
-    private lateinit var rootToFavorites: MutableMap<Path, MutableList<Path>>
+    private lateinit var favoritesByRoot: MutableMap<Path, MutableList<Path>>
 
     override fun onFirstViewAttach() {
         Log.d(FOLDERS_SCREEN, "first view attached in RootsPresenter")
@@ -38,22 +38,22 @@ class FoldersPresenter: MvpPresenter<FoldersView>() {
 
         Notifications.notifyIfFailedPaths(viewState, folders.failed)
 
-        rootToFavorites = folders.succeeded
+        favoritesByRoot = folders.succeeded
             .mapValues { (_, favorites) -> favorites.toMutableList() }
             .toMutableMap()
 
-        viewState.loadFolders(rootToFavorites)
+        viewState.loadFolders(favoritesByRoot)
     }
 
     fun addRoot(root: Path) {
         Log.d(FOLDERS_SCREEN, "root $root added in RootsPresenter")
         val path = root.toRealPath()
 
-        if (rootToFavorites.containsKey(path)) {
+        if (favoritesByRoot.containsKey(path)) {
             throw AssertionError("Path must be checked in RootPicker")
         }
 
-        rootToFavorites[path] = mutableListOf()
+        favoritesByRoot[path] = mutableListOf()
 
         foldersRepo.insertRoot(path)
 
@@ -63,31 +63,31 @@ class FoldersPresenter: MvpPresenter<FoldersView>() {
         //todo: non-blocking indexing
         resourcesIndexexRepo.buildFromFilesystem(root)
 
-        viewState.loadFolders(rootToFavorites)
+        viewState.loadFolders(favoritesByRoot)
     }
 
     fun addFavorite(favorite: Path) {
         Log.d(FOLDERS_SCREEN, "favorite $favorite added in RootsPresenter")
         val path = favorite.toRealPath()
 
-        val root = rootToFavorites.keys.find { path.startsWith(it) }
+        val root = favoritesByRoot.keys.find { path.startsWith(it) }
             ?: throw IllegalStateException("Can't add favorite if it's root is not added")
 
         val relative = root.relativize(path)
-        if (rootToFavorites[root]!!.contains(relative)) {
+        if (favoritesByRoot[root]!!.contains(relative)) {
             throw AssertionError("Path must be checked in RootPicker")
         }
 
-        rootToFavorites[root]!!.add(relative)
+        favoritesByRoot[root]!!.add(relative)
 
         foldersRepo.insertFavorite(root, relative)
 
-        viewState.loadFolders(rootToFavorites)
+        viewState.loadFolders(favoritesByRoot)
     }
 
     fun resume() {
         Log.d(FOLDERS_SCREEN, "view resumed in RootsPresenter")
-        viewState.loadFolders(rootToFavorites)
+        viewState.loadFolders(favoritesByRoot)
     }
 
     fun quit(): Boolean {

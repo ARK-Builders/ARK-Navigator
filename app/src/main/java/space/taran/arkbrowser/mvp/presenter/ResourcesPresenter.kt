@@ -8,9 +8,7 @@ import space.taran.arkbrowser.mvp.presenter.adapter.ItemGridPresenter
 import moxy.MvpPresenter
 import ru.terrakok.cicerone.Router
 import android.util.Log
-import space.taran.arkbrowser.mvp.model.repo.FoldersRepo
-import space.taran.arkbrowser.mvp.model.repo.ResourcesIndex
-import space.taran.arkbrowser.mvp.model.repo.TagsStorage
+import space.taran.arkbrowser.mvp.model.repo.*
 import space.taran.arkbrowser.ui.fragments.utils.Notifications
 import space.taran.arkbrowser.utils.RESOURCES_SCREEN
 import space.taran.arkbrowser.utils.SortBy
@@ -19,7 +17,7 @@ import java.nio.file.Path
 import javax.inject.Inject
 
 //todo: @InjectViewState
-class ResourcesPresenter(val root: Path?, val path: Path?) :
+class ResourcesPresenter(val root: Path?, val prefix: Path?) :
     MvpPresenter<ResourcesView>() {
 
     @Inject
@@ -28,21 +26,20 @@ class ResourcesPresenter(val root: Path?, val path: Path?) :
     @Inject
     lateinit var foldersRepo: FoldersRepo
 
-    //todo: check that this is re-created when we switch from Folders screen with different parameters
-    private lateinit var rootToStorage: Map<Path, TagsStorage>
+    @Inject
+    lateinit var resourcesIndexFactory: ResourcesIndexFactory
 
-    private lateinit var rootToIndex: Map<Path, ResourcesIndex>
+    private lateinit var index: ResourcesIndex
+    private lateinit var storage: TagsStorage
 
-//    val storage = TagsStorage.provide(root!!)
-//    Log.d(RESOURCES_SCREEN, "storage $storage has been read successfully")
+    private lateinit var allResources: Set<ResourceId>
 
     val fileGridPresenter = XItemGridPresenter()
-//    var syncDisposable: Disposable? = null
     var tagStates = mutableListOf<TagState>()
     var sortBy = SortBy.NAME
     var isReversedSort = false
 
-    var selectedResources = setOf<ResourceId>()
+    var displayedResources = setOf<ResourceId>()
 
     var isTagsOff = false
 
@@ -50,31 +47,66 @@ class ResourcesPresenter(val root: Path?, val path: Path?) :
         Log.d(RESOURCES_SCREEN, "first view attached in ResourcesPresenter")
         super.onFirstViewAttach()
 
-
         val folders = foldersRepo.query()
         Log.d(RESOURCES_SCREEN, "folders retrieved: $folders")
 
         Notifications.notifyIfFailedPaths(viewState, folders.failed)
 
-        rootToStorage = folders.succeeded.keys
-            .map { it to TagsStorage.provide(it) }
+        val roots: List<Path> = {
+            val all = folders.succeeded.keys
+            if (root != null) {
+                if (!all.contains(root)) {
+                    throw AssertionError("Requested root wasn't found in DB")
+                }
+
+                listOf(root)
+            } else {
+                all.toList()
+            }
+        }()
+
+        val rootToIndex = roots
+            .map { it to resourcesIndexFactory.loadFromDatabase(it) }
             .toMap()
-            .toMutableMap()
 
+        val rootToStorage = roots
+            .map { it to PlainTagsStorage.provide(it) }
+            .toMap()
 
-            viewState.init()
-//        selectedResources = allResources
-            applyTagsToFiles()
+        roots.forEach { root ->
+            val storage = rootToStorage[root]!!
 
-//        viewState.setToolbarTitle(rootName ?: "All resources")
+            val indexed = rootToIndex[root]!!.listIds(null)
+            val tagged = storage.listIds()
+
+            //todo: when async indexing will be ready, tagged ids must be boosted
+            //in the indexing queue and be removed only if they fail to be indexed
+            storage.removeIds(tagged - indexed.toSet())
         }
 
+        index = AggregatedResourcesIndex(rootToIndex.values)
+        storage = AggregatedTagsStorage(rootToStorage.values)
+
+        //todo: with async indexing we must display non-indexed-yet resources too
+        allResources = index.listIds(prefix)
+        displayedResources = allResources
+
+        viewState.init()
+        applyTagsToFiles()
+
+        val title = {
+            val path = (prefix ?: root)
+            if (path != null) "$path, " else ""
+        }()
+
+        viewState.setToolbarTitle("$title${roots.size} of roots chosen")
+    }
 
     inner class XItemGridPresenter :
         ItemGridPresenter<Unit, ResourceId>({
             Log.d(RESOURCES_SCREEN, "[mock] item $it clicked in ResourcesPresenter/ItemGridPresenter")
 //            if (resource.isImage()) {
-//                val images = selectedResources.filter { it.isImage() }
+//                val images = displayedResources.filter { it.isImage() }
 //                val newPos = images.indexOf(resource)
 //                router.navigateTo(
 //                    Screens.DetailScreen(
@@ -151,7 +183,7 @@ class ResourcesPresenter(val root: Path?, val path: Path?) :
 //        }
 //        allResources = buffer.toSet()
 //
-//        selectedResources = allResources
+//        displayedResources = allResources
 //        applyTagsToFiles()
 //    }
 //
@@ -166,14 +198,13 @@ class ResourcesPresenter(val root: Path?, val path: Path?) :
 //        }
 //        allResources = buffer.toSet()
 //
-//        selectedResources = allResources
+//        displayedResources = allResources
 //        applyTagsToFiles()
 //    }
 
     override fun onDestroy() {
         Log.d(RESOURCES_SCREEN, "destroying ResourcesPresenter")
         super.onDestroy()
-        //syncDisposable?.dispose()
     }
 
     fun onViewResumed() {
@@ -230,8 +261,8 @@ class ResourcesPresenter(val root: Path?, val path: Path?) :
         }
 
         if (tagStates.none { tagState -> tagState.isChecked }) {
-//            selectedResources.clear()
-//            selectedResources.addAll(allResources)
+//            displayedResources.clear()
+//            displayedResources.addAll(allResources)
 
             sortAndUpdateFiles()
             sortAndUpdateTags()
@@ -257,8 +288,8 @@ class ResourcesPresenter(val root: Path?, val path: Path?) :
 //            }
 //        }
 //
-//        selectedResources.clear()
-//        selectedResources.addAll(filteredFiles)
+//        displayedResources.clear()
+//        displayedResources.addAll(filteredFiles)
 //        sortAndUpdateFiles()
 //        sortAndUpdateTags()
     }
@@ -270,32 +301,18 @@ class ResourcesPresenter(val root: Path?, val path: Path?) :
 //            file.tags.isEmpty()
 //        }
 //
-//        selectedResources.clear()
-//        selectedResources.addAll(filteredFiles)
+//        displayedResources.clear()
+//        displayedResources.addAll(filteredFiles)
 //        sortAndUpdateFiles()
 //        tagStates.clear()
 //        sortAndUpdateTags()
     }
 
-//    private fun getSyncObserver(root: remove_Root) = object : Observer<Resource> {
-//        override fun onSubscribe(d: Disposable?) {
-//            syncDisposable = d
-//        }
-//
-//        override fun onNext(syncResource: Resource) {
-//
-//        }
-//
-//        override fun onError(e: Throwable?) {}
-//
-//        override fun onComplete() {}
-//    }
-
     private fun sortAndUpdateFiles() {
         Log.d(RESOURCES_SCREEN, "[mock] sorting and updating resources in ResourcesPresenter")
-//        selectedResources.sortWith(resourceComparator(sortBy, isReversedSort))
+//        displayedResources.sortWith(resourceComparator(sortBy, isReversedSort))
 //        fileGridPresenter.resources.clear()
-//        fileGridPresenter.resources.addAll(selectedResources)
+//        fileGridPresenter.resources.addAll(displayedResources)
 //        viewState.updateAdapter()
     }
 

@@ -20,18 +20,14 @@ import space.taran.arkbrowser.ui.App
 import space.taran.arkbrowser.ui.activity.MainActivity
 import space.taran.arkbrowser.ui.adapter.ItemGridRVAdapter
 import kotlinx.android.synthetic.main.fragment_tags.*
-import moxy.InjectViewState
 import moxy.MvpAppCompatFragment
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
 import space.taran.arkbrowser.mvp.model.entity.room.ResourceId
-import space.taran.arkbrowser.mvp.model.repo.FoldersRepo
-import space.taran.arkbrowser.mvp.model.repo.TagsStorage
 import space.taran.arkbrowser.ui.fragments.utils.Notifications
 import space.taran.arkbrowser.utils.SortBy
 import space.taran.arkbrowser.utils.RESOURCES_SCREEN
 import java.nio.file.Path
-import javax.inject.Inject
 
 //`root` is used for querying tags storage and resources index,
 //       if it is `null`, then resources from all roots are taken

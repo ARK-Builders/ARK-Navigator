@@ -2,16 +2,16 @@ package space.taran.arkbrowser.mvp.model.repo
 
 import android.util.Log
 import space.taran.arkbrowser.mvp.model.entity.room.ResourceDao
-import space.taran.arkbrowser.mvp.model.repo.ResourcesIndex.Companion.groupResources
-import space.taran.arkbrowser.mvp.model.repo.ResourcesIndex.Companion.listAllFiles
-import space.taran.arkbrowser.mvp.model.repo.ResourcesIndex.Companion.scanResources
+import space.taran.arkbrowser.mvp.model.repo.PlainResourcesIndex.Companion.groupResources
+import space.taran.arkbrowser.mvp.model.repo.PlainResourcesIndex.Companion.listAllFiles
+import space.taran.arkbrowser.mvp.model.repo.PlainResourcesIndex.Companion.scanResources
 import space.taran.arkbrowser.utils.CoroutineRunner
 import space.taran.arkbrowser.utils.RESOURCES_INDEX
 import java.nio.file.Path
 import kotlin.system.measureTimeMillis
 
 class ResourcesIndexFactory(private val dao: ResourceDao) {
-    fun loadFromDatabase(root: Path): ResourcesIndex {
+    fun loadFromDatabase(root: Path): PlainResourcesIndex {
         //todo https://www.toptal.com/android/android-threading-all-you-need-to-know
         // Use Case #7: Querying local SQLite database
 
@@ -20,13 +20,13 @@ class ResourcesIndexFactory(private val dao: ResourceDao) {
         }
         Log.d(RESOURCES_INDEX, "${resources.size} resources retrieved from DB")
 
-        val index = ResourcesIndex(root, dao, groupResources(resources))
+        val index = PlainResourcesIndex(root, dao, groupResources(resources))
 
         index.reindexRoot(index.calculateDifference())
         return index
     }
 
-    fun buildFromFilesystem(root: Path): ResourcesIndex {
+    fun buildFromFilesystem(root: Path): PlainResourcesIndex {
         Log.d(RESOURCES_INDEX, "building index from root $root")
 
 
@@ -44,9 +44,9 @@ class ResourcesIndexFactory(private val dao: ResourceDao) {
         }
         Log.d(RESOURCES_INDEX, "hashes calculation took $time2 milliseconds")
 
-        val index = ResourcesIndex(root, dao, metadata)
+        val index = PlainResourcesIndex(root, dao, metadata)
 
-        index.persistResources(index.pathToMeta())
+        index.persistResources(index.metaByPath)
         return index
     }
 }

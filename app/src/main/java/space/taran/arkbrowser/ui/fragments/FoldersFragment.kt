@@ -32,6 +32,7 @@ import javax.inject.Inject
 
 class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
     private lateinit var devices: List<Path>
+    //todo treat syncthing folder as special storage device
 
     private lateinit var foldersTree: FoldersTree
     private lateinit var folderPicker: FolderPicker
