@@ -1,7 +1,9 @@
 package space.taran.arkbrowser.mvp.model.repo
 
+import android.util.Log
 import space.taran.arkbrowser.mvp.model.entity.room.ResourceId
 import space.taran.arkbrowser.utils.Converters.Companion.tagsFromString
+import space.taran.arkbrowser.utils.TAGS_STORAGE
 import space.taran.arkbrowser.utils.Tags
 import java.lang.IllegalStateException
 import java.nio.charset.StandardCharsets
@@ -27,7 +29,7 @@ import java.nio.file.attribute.FileTime
 // The storage is being read from the FS both during application startup
 // and during application lifecycle since it can be changed from outside.
 // We also must persist all changes during application lifecycle into FS.
-class TagsStorage private constructor(private val root: Path) {
+class TagsStorage private constructor(root: Path) {
     private val storageFile = root.resolve(STORAGE_FILENAME)
 
     private var lastModified: FileTime = FileTime.fromMillis(0L)
@@ -36,16 +38,33 @@ class TagsStorage private constructor(private val root: Path) {
         if (Files.exists(storageFile)) {
             lastModified = Files.getLastModifiedTime(storageFile)
 
+            Log.d(TAGS_STORAGE, "file $storageFile exists" +
+                ", last modified at $lastModified")
+
             val lines = Files.readAllLines(storageFile, StandardCharsets.UTF_8)
             verifyVersion(lines.removeAt(0))
 
-            lines.map {
+            val result = lines
+                .map {
                     val parts = it.split(KEY_VALUE_SEPARATOR)
-                    parts[0].toLong() to tagsFromString(parts[1])
+                    val id = parts[0].toLong()
+                    val tags = tagsFromString(parts[1])
+
+                    if (tags.isEmpty()) throw AssertionError(
+                        "Tags storage must not contain empty sets of tags")
+
+                    id to tags
                 }
                 .toMap()
                 .toMutableMap()
+
+            if (result.isEmpty()) throw AssertionError(
+                "Tags storage must not be empty")
+
+            Log.d(TAGS_STORAGE, result.toString())
+            result
         } else {
+            Log.d(TAGS_STORAGE, "file $storageFile doesn't exist")
             mutableMapOf()
         }
 
@@ -55,11 +74,14 @@ class TagsStorage private constructor(private val root: Path) {
 
     //todo background listening to changes in FileSystem
 
+    //todo: clean up storage when items are removed
+    // (OR their ids are present but files not found)
+
     companion object {
         const val STORAGE_FILENAME = ".ark-tags"
 
-        const val STORAGE_VERSION = 2
-        const val STORAGE_VERSION_PREFIX = "version "
+        private const val STORAGE_VERSION = 2
+        private const val STORAGE_VERSION_PREFIX = "version "
 
         const val KEY_VALUE_SEPARATOR = ':'
 

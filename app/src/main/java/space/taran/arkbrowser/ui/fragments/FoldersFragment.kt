@@ -23,8 +23,8 @@ import space.taran.arkbrowser.mvp.presenter.RootPicker
 import space.taran.arkbrowser.mvp.view.FoldersView
 import space.taran.arkbrowser.ui.App
 import space.taran.arkbrowser.ui.activity.MainActivity
-import space.taran.arkbrowser.utils.ROOTS_SCREEN
-import space.taran.arkbrowser.utils.ROOT_PICKER
+import space.taran.arkbrowser.utils.FOLDERS_SCREEN
+import space.taran.arkbrowser.utils.FOLDER_PICKER
 import space.taran.arkbrowser.utils.listDevices
 import java.nio.file.Files
 import java.nio.file.Path
@@ -48,13 +48,13 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
     @ProvidePresenter
     fun providePresenter() =
         FoldersPresenter().apply {
-            Log.d(ROOTS_SCREEN, "RootsPresenter created")
+            Log.d(FOLDERS_SCREEN, "RootsPresenter created")
             App.instance.appComponent.inject(this)
         }
 
 
     override fun loadFolders(folders: Folders) {
-        Log.d(ROOTS_SCREEN, "loading roots in RootsFragment")
+        Log.d(FOLDERS_SCREEN, "loading roots in RootsFragment")
 
         foldersTree = FoldersTree(devices, folders, router)
         rv_roots.adapter = foldersTree
@@ -74,31 +74,31 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        Log.d(ROOTS_SCREEN, "creating view in RootsFragment")
+        Log.d(FOLDERS_SCREEN, "creating view in RootsFragment")
         return inflater.inflate(R.layout.fragment_roots, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        Log.d(ROOTS_SCREEN, "view created in RootsFragment")
+        Log.d(FOLDERS_SCREEN, "view created in RootsFragment")
         super.onViewCreated(view, savedInstanceState)
         App.instance.appComponent.inject(this)
         initialize()
     }
 
     override fun onResume() {
-        Log.d(ROOTS_SCREEN, "resuming in RootsFragment")
+        Log.d(FOLDERS_SCREEN, "resuming in RootsFragment")
         super.onResume()
         presenter.resume()
     }
 
     override fun backClicked(): Boolean {
-        Log.d(ROOTS_SCREEN, "back clicked in RootsFragment")
+        Log.d(FOLDERS_SCREEN, "back clicked in RootsFragment")
         return presenter.quit()
     }
 
 
     private fun initialize() {
-        Log.d(ROOTS_SCREEN, "initializing RootsFragment")
+        Log.d(FOLDERS_SCREEN, "initializing RootsFragment")
 
         devices = listDevices(requireContext())
 
@@ -111,7 +111,7 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
     }
 
     private fun openRootPicker(paths: List<Path>) {
-        Log.d(ROOTS_SCREEN, "initializing root picker")
+        Log.d(FOLDERS_SCREEN, "initializing root picker")
 
         val dialogView = LayoutInflater.from(requireContext())
             .inflate(R.layout.dialog_roots_new, null)
@@ -123,11 +123,11 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
         var alertDialog: AlertDialog? = null
 
         dialogView.btn_roots_dialog_cancel.setOnClickListener {
-            Log.d(ROOT_PICKER, "[cancel] pressed, closing root picker")
+            Log.d(FOLDER_PICKER, "[cancel] pressed, closing root picker")
             alertDialog?.dismiss()
         }
         dialogView.btn_roots_dialog_pick.setOnClickListener {
-            Log.d(ROOT_PICKER, "[pick] pressed")
+            Log.d(FOLDER_PICKER, "[pick] pressed")
 
             val path = rootPicker.getLabel()
             if (!devices.contains(path)) {
@@ -149,13 +149,13 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
                     }
                 }
             } else {
-                Log.d(ROOT_PICKER,"potentially huge directory")
+                Log.d(FOLDER_PICKER,"potentially huge directory")
                 notifyUser(DEVICE_CHOSEN_AS_ROOT)
             }
         }
 
         alertDialog = rootPickerAlertDialog(dialogView)
-        Log.d(ROOTS_SCREEN, "root picker initialized")
+        Log.d(FOLDERS_SCREEN, "root picker initialized")
     }
 
     private fun rootPickerAlertDialog(view: View): AlertDialog {
@@ -169,9 +169,9 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
                 event.action == KeyEvent.ACTION_UP &&
                 !event.isCanceled) {
 
-                Log.d(ROOT_PICKER, "[back] pressed")
+                Log.d(FOLDER_PICKER, "[back] pressed")
                 if (rootPicker.backClicked() == null) {
-                    Log.d(ROOT_PICKER, "can't go back, closing root picker")
+                    Log.d(FOLDER_PICKER, "can't go back, closing root picker")
                     result.dismiss()
                 }
                 return@setOnKeyListener true
@@ -185,7 +185,7 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
 
     //todo don't pass dialogView here, draw it from new "model"
     private fun rootPickerClickHandler(dialogView: View): (Path) -> Unit = { path: Path ->
-        Log.d(ROOT_PICKER,"path $path was clicked")
+        Log.d(FOLDER_PICKER,"path $path was clicked")
 
         if (Files.isDirectory(path)) {
             rootPicker.updatePath(path)
@@ -210,7 +210,7 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
                 rootNotFavorite = true
             }
         } else {
-            Log.d(ROOT_PICKER,"but it is not a directory")
+            Log.d(FOLDER_PICKER,"but it is not a directory")
             notifyUser(FILE_CHOSEN_AS_ROOT)
         }
     }

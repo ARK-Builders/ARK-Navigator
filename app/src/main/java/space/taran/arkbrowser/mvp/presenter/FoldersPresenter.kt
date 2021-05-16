@@ -7,7 +7,7 @@ import moxy.MvpPresenter
 import ru.terrakok.cicerone.Router
 import space.taran.arkbrowser.utils.CoroutineRunner.runAndBlock
 import space.taran.arkbrowser.mvp.model.repo.FoldersRepo
-import space.taran.arkbrowser.utils.ROOTS_SCREEN
+import space.taran.arkbrowser.utils.FOLDERS_SCREEN
 import java.lang.AssertionError
 import java.lang.IllegalStateException
 import java.nio.file.Path
@@ -26,7 +26,7 @@ class FoldersPresenter: MvpPresenter<FoldersView>() {
     private lateinit var rootToFavorites: MutableMap<Path, MutableList<Path>>
 
     override fun onFirstViewAttach() {
-        Log.d(ROOTS_SCREEN, "first view attached in RootsPresenter")
+        Log.d(FOLDERS_SCREEN, "first view attached in RootsPresenter")
         super.onFirstViewAttach()
 
         runAndBlock {
@@ -34,8 +34,9 @@ class FoldersPresenter: MvpPresenter<FoldersView>() {
 
             if (result.failed.isNotEmpty()) {
                 viewState.notifyUser(
-                    "Failed to load the following roots:\n" +
-                            result.failed.joinToString("\n"))
+                    message = "Failed to load the following roots:\n" +
+                        result.failed.joinToString("\n"),
+                    moreTime = true)
             }
 
             rootToFavorites = result.succeeded
@@ -43,12 +44,12 @@ class FoldersPresenter: MvpPresenter<FoldersView>() {
                 .toMutableMap()
         }
 
-        Log.d(ROOTS_SCREEN, "folders loaded: $rootToFavorites")
+        Log.d(FOLDERS_SCREEN, "folders loaded: $rootToFavorites")
         viewState.loadFolders(rootToFavorites)
     }
 
     fun addRoot(root: Path) {
-        Log.d(ROOTS_SCREEN, "root $root added in RootsPresenter")
+        Log.d(FOLDERS_SCREEN, "root $root added in RootsPresenter")
         val path = root.toRealPath()
 
         if (rootToFavorites.containsKey(path)) {
@@ -65,7 +66,7 @@ class FoldersPresenter: MvpPresenter<FoldersView>() {
     }
 
     fun addFavorite(favorite: Path) {
-        Log.d(ROOTS_SCREEN, "favorite $favorite added in RootsPresenter")
+        Log.d(FOLDERS_SCREEN, "favorite $favorite added in RootsPresenter")
         val path = favorite.toRealPath()
 
         val root = rootToFavorites.keys.find { path.startsWith(it) }
@@ -86,12 +87,12 @@ class FoldersPresenter: MvpPresenter<FoldersView>() {
     }
 
     fun resume() {
-        Log.d(ROOTS_SCREEN, "view resumed in RootsPresenter")
+        Log.d(FOLDERS_SCREEN, "view resumed in RootsPresenter")
         viewState.loadFolders(rootToFavorites)
     }
 
     fun quit(): Boolean {
-        Log.d(ROOTS_SCREEN, "back clicked")
+        Log.d(FOLDERS_SCREEN, "back clicked")
         router.exit()
         return true
     }

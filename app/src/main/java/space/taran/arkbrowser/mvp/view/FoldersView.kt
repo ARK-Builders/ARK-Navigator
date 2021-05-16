@@ -9,14 +9,14 @@ import space.taran.arkbrowser.mvp.model.repo.Folders
 interface FoldersView: MvpView {
     fun loadFolders(folders: Folders)
     fun notifyUser(message: String, moreTime: Boolean = false)
-//
+
 //    @StateStrategyType(SkipStrategy::class)
 //    fun requestSdCardUri()
 
 
 //todo
 //    private fun storageVersionDifferent(fileStorageVersion: Int, root: remove_Root) {
-//        viewState.showToast("${root.storage.path} has a different version")
+//        viewState.notifyUser("${root.storage.path} has a different version")
 //    }
 
 //    override fun requestSdCardUri() {

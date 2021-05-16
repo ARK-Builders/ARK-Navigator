@@ -24,8 +24,9 @@ import moxy.MvpAppCompatFragment
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
 import space.taran.arkbrowser.mvp.model.entity.room.ResourceId
+import space.taran.arkbrowser.mvp.model.repo.TagsStorage
 import space.taran.arkbrowser.utils.SortBy
-import space.taran.arkbrowser.utils.TAGS_SCREEN
+import space.taran.arkbrowser.utils.RESOURCES_SCREEN
 import java.nio.file.Path
 
 //`root` is used for querying tags storage and resources index,
@@ -42,11 +43,17 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
     lateinit var presenter: ResourcesPresenter
 
     @ProvidePresenter
-    fun providePresenter() =
+    fun providePresenter() = {
+        val storage = TagsStorage.provide(root!!)
+        Log.d(RESOURCES_SCREEN, "storage $storage has been read successfully")
+
         ResourcesPresenter(root, path).apply {
-            Log.d(TAGS_SCREEN, "creating TagsPresenter")
+            Log.d(RESOURCES_SCREEN, "creating ResourcesPresenter")
             App.instance.appComponent.inject(this)
         }
+    }()
+
+
 
     private var adapter: ItemGridRVAdapter<Unit, ResourceId>? = null
     private var sortByDialogView: View? = null
@@ -57,18 +64,18 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        Log.d(TAGS_SCREEN, "creating view in TagsFragment")
+        Log.d(RESOURCES_SCREEN, "creating view in TagsFragment")
         return inflater.inflate(R.layout.fragment_tags, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        Log.d(TAGS_SCREEN, "view created in TagsFragment")
+        Log.d(RESOURCES_SCREEN, "view created in TagsFragment")
         super.onViewCreated(view, savedInstanceState)
         App.instance.appComponent.inject(this)
     }
 
     override fun init() {
-        Log.d(TAGS_SCREEN, "initializing TagsFragment")
+        Log.d(RESOURCES_SCREEN, "initializing TagsFragment")
         (activity as MainActivity).setSelectedTab(1)
         (activity as MainActivity).setToolbarVisibility(true)
         rv_tags.layoutManager = GridLayoutManager(context, 3)
@@ -78,13 +85,13 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
     }
 
     override fun onResume() {
-        Log.d(TAGS_SCREEN, "resuming in TagsFragment")
+        Log.d(RESOURCES_SCREEN, "resuming in TagsFragment")
         super.onResume()
         presenter.onViewResumed()
     }
 
     override fun openFile(uri: Uri, mimeType: String) {
-        Log.d(TAGS_SCREEN, "opening file $uri in TagsFragment")
+        Log.d(RESOURCES_SCREEN, "opening file $uri in TagsFragment")
         try {
             val intent = Intent(Intent.ACTION_VIEW)
             intent.setDataAndType(uri, mimeType)
@@ -96,7 +103,7 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
     }
 
     override fun updateAdapter() {
-        Log.d(TAGS_SCREEN, "updating adapter in TagsFragment")
+        Log.d(RESOURCES_SCREEN, "updating adapter in TagsFragment")
         adapter?.notifyDataSetChanged()
     }
 
@@ -105,12 +112,12 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
     }
 
     override fun setTagsLayoutVisibility(isVisible: Boolean) {
-        Log.d(TAGS_SCREEN, "setting tags layout visibility to $isVisible")
+        Log.d(RESOURCES_SCREEN, "setting tags layout visibility to $isVisible")
         chipg_tags.visibility = if (isVisible) View.VISIBLE else View.GONE
     }
 
     override fun showSortByDialog(sortBy: SortBy, isReversedSort: Boolean) {
-        Log.d(TAGS_SCREEN, "showing sort-by dialog ($sortBy, $isReversedSort) in TagsFragment")
+        Log.d(RESOURCES_SCREEN, "showing sort-by dialog ($sortBy, $isReversedSort) in TagsFragment")
         sortByDialogView = LayoutInflater.from(context!!).inflate(R.layout.dialog_sort, null)
         val alertDialogBuilder = AlertDialog.Builder(context!!).setView(sortByDialogView)
         when (sortBy) {
@@ -148,13 +155,13 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
     }
 
     override fun closeSortByDialog() {
-        Log.d(TAGS_SCREEN, "closing sort-by dialog in TagsFragment")
+        Log.d(RESOURCES_SCREEN, "closing sort-by dialog in TagsFragment")
         sortByDialog?.dismiss()
     }
 
 
     override fun setTags(tags: List<TagState>) {
-        Log.d(TAGS_SCREEN, "setting tags states to $tags")
+        Log.d(RESOURCES_SCREEN, "setting tags states to $tags")
         tags.forEach { tagState ->
             val chip = Chip(context)
             chip.isCheckable = true
@@ -185,7 +192,7 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        Log.d(TAGS_SCREEN, "options item selected in TagsFragment")
+        Log.d(RESOURCES_SCREEN, "options item selected in TagsFragment")
         when(item.itemId) {
             R.id.menu_tags_sort_by -> presenter.sortByMenuClicked()
             R.id.menu_tags_tags_off -> presenter.tagsOffChanged()
@@ -194,13 +201,13 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        Log.d(TAGS_SCREEN, "creating options menu in TagsFragment")
+        Log.d(RESOURCES_SCREEN, "creating options menu in TagsFragment")
         inflater.inflate(R.menu.menu_tags_screen, menu)
         super.onCreateOptionsMenu(menu, inflater)
     }
 
     override fun clearTags() {
-        Log.d(TAGS_SCREEN, "clearing tags in TagsFragment")
+        Log.d(RESOURCES_SCREEN, "clearing tags in TagsFragment")
         chipg_tags.removeAllViews()
     }
 }

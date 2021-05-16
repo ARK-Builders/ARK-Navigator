@@ -4,13 +4,15 @@ const val MAIN: String = "main"
 
 const val PERMISSIONS: String = "permissions"
 
-const val TAGS_SCREEN: String = "tags-screen"
+const val RESOURCES_SCREEN: String = "resources-screen"
 
-const val ROOTS_SCREEN: String = "roots-screen"
+const val FOLDERS_SCREEN: String = "folders-screen"
 
-const val ROOT_PICKER: String = "root-picker"
+const val FOLDER_PICKER: String = "folder-picker"
 
 const val FOLDERS_TREE: String = "folders-tree"
+
+const val TAGS_STORAGE: String = "tags-storage"
 
 const val ITEM_GRID: String = "item-grid"
 

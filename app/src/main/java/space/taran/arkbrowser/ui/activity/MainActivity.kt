@@ -111,7 +111,7 @@ class MainActivity : MvpAppCompatActivity(), MainView {
                     presenter.permsGranted()
                 } else {
                     Log.e(PERMISSIONS, "denied $denied")
-                    showToast("Permissions $denied denied")
+                    notifyUser("Permissions $denied denied")
                 }
             } else {
                 Log.e(PERMISSIONS, "less permissions granted than expected")
@@ -141,8 +141,8 @@ class MainActivity : MvpAppCompatActivity(), MainView {
         bottom_navigation.menu.getItem(pos).isChecked = true
     }
 
-    override fun showToast(toast: String) {
-        Toast.makeText(this, toast, Toast.LENGTH_LONG).show()
+    override fun notifyUser(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {

@@ -8,8 +8,10 @@ import moxy.viewstate.strategy.StateStrategyType
 @StateStrategyType(AddToEndSingleStrategy::class)
 interface MainView: MvpView {
     fun init()
+
     @StateStrategyType(SkipStrategy::class)
     fun requestPerms()
+
     @StateStrategyType(SkipStrategy::class)
-    fun showToast(toast: String)
+    fun notifyUser(message: String)
 }

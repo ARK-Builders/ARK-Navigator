@@ -11,15 +11,24 @@ import space.taran.arkbrowser.utils.SortBy
 @StateStrategyType(AddToEndSingleStrategy::class)
 interface ResourcesView: MvpView {
     fun init()
+
     fun updateAdapter()
+
     @StateStrategyType(SkipStrategy::class)
     fun setTags(tags: List<TagState>)
-    @StateStrategyType(SkipStrategy::class)
-    fun openFile(uri: Uri, mimeType: String)
+
     @StateStrategyType(SkipStrategy::class)
     fun clearTags()
+
+    @StateStrategyType(SkipStrategy::class)
+    fun openFile(uri: Uri, mimeType: String)
+
     fun setToolbarTitle(title: String)
+
     fun showSortByDialog(sortBy: SortBy, isReversedSort: Boolean)
     fun closeSortByDialog()
+
     fun setTagsLayoutVisibility(isVisible: Boolean)
 }
+
+//todo: what are these StateStrategyType and SkipStrategy and why are they necessary?
