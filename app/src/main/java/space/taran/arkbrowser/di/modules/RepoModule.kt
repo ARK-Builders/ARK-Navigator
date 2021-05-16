@@ -5,6 +5,7 @@ import space.taran.arkbrowser.mvp.model.entity.room.Database
 import dagger.Module
 import dagger.Provides
 import space.taran.arkbrowser.mvp.model.repo.FoldersRepo
+import space.taran.arkbrowser.mvp.model.repo.ResourcesIndexFactory
 import javax.inject.Singleton
 
 @Module
@@ -16,5 +17,10 @@ class RepoModule {
         return FoldersRepo(database.folderDao())
     }
 
-    //todo join with DatabaseModule
+    @Singleton
+    @Provides
+    fun resourcesIndexesRepo(database: Database): ResourcesIndexFactory {
+        Log.d("modules", "creating ResourcesIndexesRepo")
+        return ResourcesIndexFactory(database.resourceDao())
+    }
 }

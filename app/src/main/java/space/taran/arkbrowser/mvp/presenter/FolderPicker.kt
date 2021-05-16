@@ -17,7 +17,7 @@ import kotlin.io.path.listDirectoryEntries
 typealias PathHandler = (Path) -> Unit
 
 @OptIn(ExperimentalPathApi::class)
-class RootPicker(
+class FolderPicker(
     paths: List<Path>,
     handler: PathHandler,
     private val view: View)
@@ -37,7 +37,7 @@ class RootPicker(
     }
 
     fun updatePath(path: Path) {
-        val children = path.listDirectoryEntries()
+        val children = path.listDirectoryEntries().sorted()
         this.updateItems(path, children)
 
         view.tv_roots_dialog_path.text = path.toString()

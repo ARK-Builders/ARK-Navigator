@@ -6,6 +6,8 @@ const val PERMISSIONS: String = "permissions"
 
 const val RESOURCES_SCREEN: String = "resources-screen"
 
+const val RESOURCES_INDEX: String = "resources-index"
+
 const val FOLDERS_SCREEN: String = "folders-screen"
 
 const val FOLDER_PICKER: String = "folder-picker"

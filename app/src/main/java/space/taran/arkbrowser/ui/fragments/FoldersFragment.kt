@@ -6,7 +6,6 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.GridLayoutManager
 import kotlinx.android.synthetic.main.dialog_roots_new.view.*
@@ -19,10 +18,11 @@ import space.taran.arkbrowser.R
 import space.taran.arkbrowser.mvp.model.repo.Folders
 import space.taran.arkbrowser.mvp.presenter.FoldersPresenter
 import space.taran.arkbrowser.mvp.presenter.FoldersTree
-import space.taran.arkbrowser.mvp.presenter.RootPicker
+import space.taran.arkbrowser.mvp.presenter.FolderPicker
 import space.taran.arkbrowser.mvp.view.FoldersView
 import space.taran.arkbrowser.ui.App
 import space.taran.arkbrowser.ui.activity.MainActivity
+import space.taran.arkbrowser.ui.fragments.utils.Notifications
 import space.taran.arkbrowser.utils.FOLDERS_SCREEN
 import space.taran.arkbrowser.utils.FOLDER_PICKER
 import space.taran.arkbrowser.utils.listDevices
@@ -34,7 +34,7 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
     private lateinit var devices: List<Path>
 
     private lateinit var foldersTree: FoldersTree
-    private lateinit var rootPicker: RootPicker
+    private lateinit var folderPicker: FolderPicker
 
     private lateinit var roots: Set<Path>
     private lateinit var favorites: Set<Path>
@@ -63,12 +63,6 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
         favorites = folders.values.flatten().toSet()
     }
 
-    override fun notifyUser(message: String, moreTime: Boolean) {
-        val duration = if (moreTime) Toast.LENGTH_LONG else Toast.LENGTH_SHORT
-        Toast.makeText(context, message, duration).show()
-    }
-
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -96,6 +90,10 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
         return presenter.quit()
     }
 
+    override fun notifyUser(message: String, moreTime: Boolean) {
+        Notifications.notifyUser(context, message, moreTime)
+    }
+
 
     private fun initialize() {
         Log.d(FOLDERS_SCREEN, "initializing RootsFragment")
@@ -118,7 +116,7 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
             ?: throw IllegalStateException("Failed to inflate dialog View for roots picker")
 
         dialogView.rv_roots_dialog.layoutManager = GridLayoutManager(context, 2)
-        rootPicker = RootPicker(paths, rootPickerClickHandler(dialogView), dialogView)
+        folderPicker = FolderPicker(paths, rootPickerClickHandler(dialogView), dialogView)
 
         var alertDialog: AlertDialog? = null
 
@@ -129,7 +127,7 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
         dialogView.btn_roots_dialog_pick.setOnClickListener {
             Log.d(FOLDER_PICKER, "[pick] pressed")
 
-            val path = rootPicker.getLabel()
+            val path = folderPicker.getLabel()
             if (!devices.contains(path)) {
                 if (rootNotFavorite) {
                     // adding path as root
@@ -170,7 +168,7 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
                 !event.isCanceled) {
 
                 Log.d(FOLDER_PICKER, "[back] pressed")
-                if (rootPicker.backClicked() == null) {
+                if (folderPicker.backClicked() == null) {
                     Log.d(FOLDER_PICKER, "can't go back, closing root picker")
                     result.dismiss()
                 }
@@ -188,7 +186,7 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
         Log.d(FOLDER_PICKER,"path $path was clicked")
 
         if (Files.isDirectory(path)) {
-            rootPicker.updatePath(path)
+            folderPicker.updatePath(path)
 
             val rootPrefix = roots.find { path.startsWith(it) }
             if (rootPrefix != null) {

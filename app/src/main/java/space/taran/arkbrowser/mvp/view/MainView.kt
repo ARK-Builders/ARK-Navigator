@@ -6,12 +6,9 @@ import moxy.viewstate.strategy.SkipStrategy
 import moxy.viewstate.strategy.StateStrategyType
 
 @StateStrategyType(AddToEndSingleStrategy::class)
-interface MainView: MvpView {
+interface MainView: MvpView, NotifiableView {
     fun init()
 
     @StateStrategyType(SkipStrategy::class)
     fun requestPerms()
-
-    @StateStrategyType(SkipStrategy::class)
-    fun notifyUser(message: String)
 }

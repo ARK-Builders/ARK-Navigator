@@ -9,8 +9,9 @@ import java.lang.IllegalArgumentException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import kotlin.io.path.listDirectoryEntries
 
-typealias Timestamp = Long
+typealias Milliseconds = Long
 typealias StringPath = String
 
 typealias MarkableFile = Pair<Boolean, Path>
@@ -27,21 +28,8 @@ fun isImage(file: File): Boolean =
         else -> false
     }
 
-fun listChildren(folder: File): List<File> =
-    folder.listFiles()?.let { files ->
-        files.filter {
-            !it.name.startsWith(".")
-        }
-    } ?: listOf()
-
-fun listAllFiles(folder: File): List<File> {
-    val (directories, files) = listChildren(folder)
-        .partition { it.isDirectory }
-
-    return files + directories.flatMap {
-        listAllFiles(it)
-    }
-}
+fun isHidden(path: Path): Boolean =
+    path.fileName.toString().startsWith('.')
 
 fun folderExists(path: Path): Boolean =
     Files.exists(path) || Files.isDirectory(path)
@@ -110,12 +98,6 @@ fun readFirstLine(file: File): String {
 
     return line
 }
-
-//todo: synchronize all usages
-fun readBytes(file: File): ByteArray {
-    return FileInputStream(file).readBytes()
-}
-
 
 fun getUriForFileByProvider(context: Context, file: File): Uri {
     return FileProvider.getUriForFile(context,

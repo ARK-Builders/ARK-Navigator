@@ -9,7 +9,7 @@ import moxy.viewstate.strategy.StateStrategyType
 import space.taran.arkbrowser.utils.SortBy
 
 @StateStrategyType(AddToEndSingleStrategy::class)
-interface ResourcesView: MvpView {
+interface ResourcesView: MvpView, NotifiableView {
     fun init()
 
     fun updateAdapter()

@@ -7,33 +7,39 @@ import kotlinx.coroutines.runBlocking
 
 object CoroutineRunner {
 
-    fun runAndBlock(f: suspend () -> Unit) {
+    fun <R>runAndBlock(f: suspend () -> R): R {
         Log.w(CONCURRENT, "running coroutine, blocking main thread")
-        Log.d(CONCURRENT, "\t[0]")
+
+        var result: R? = null
         runBlocking {
             Log.d(CONCURRENT, "\t[1]")
             launch {
                 Log.d(CONCURRENT, "\t[2]")
-                f()
+                result = f()
                 Log.d(CONCURRENT, "\t[3]")
             }
             Log.d(CONCURRENT, "\t[4]")
         }
         Log.d(CONCURRENT, "\t[5]")
+
+        return result!!
     }
 
-    fun runInBackground(f: suspend () -> Unit) {
+    fun <R>runInBackground(f: suspend () -> R): R {
         Log.i(CONCURRENT, "running coroutine, without blocking main thread")
-        Log.d(CONCURRENT, "\t[0]")
+
+        var result: R? = null
         runBlocking {
             Log.d(CONCURRENT, "\t[1]")
             GlobalScope.launch {
                 Log.d(CONCURRENT, "\t[2]")
-                f()
+                result = f()
                 Log.d(CONCURRENT, "\t[3]")
             }
             Log.d(CONCURRENT, "\t[4]")
         }
         Log.d(CONCURRENT, "\t[5]")
+
+        return result!!
     }
 }

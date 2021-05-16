@@ -20,6 +20,7 @@ import moxy.presenter.ProvidePresenter
 import ru.terrakok.cicerone.NavigatorHolder
 import ru.terrakok.cicerone.android.support.SupportAppNavigator
 import space.taran.arkbrowser.ui.App
+import space.taran.arkbrowser.ui.fragments.utils.Notifications
 import space.taran.arkbrowser.utils.MAIN
 import space.taran.arkbrowser.utils.PERMISSIONS
 import java.lang.AssertionError
@@ -141,8 +142,8 @@ class MainActivity : MvpAppCompatActivity(), MainView {
         bottom_navigation.menu.getItem(pos).isChecked = true
     }
 
-    override fun notifyUser(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+    override fun notifyUser(message: String, moreTime: Boolean) {
+        Notifications.notifyUser(this, message, moreTime)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {

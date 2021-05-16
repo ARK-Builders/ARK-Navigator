@@ -5,8 +5,11 @@ import space.taran.arkbrowser.mvp.view.FoldersView
 import moxy.InjectViewState
 import moxy.MvpPresenter
 import ru.terrakok.cicerone.Router
+import space.taran.arkbrowser.mvp.model.repo.Folders
 import space.taran.arkbrowser.utils.CoroutineRunner.runAndBlock
 import space.taran.arkbrowser.mvp.model.repo.FoldersRepo
+import space.taran.arkbrowser.mvp.model.repo.ResourcesIndexFactory
+import space.taran.arkbrowser.ui.fragments.utils.Notifications
 import space.taran.arkbrowser.utils.FOLDERS_SCREEN
 import java.lang.AssertionError
 import java.lang.IllegalStateException
@@ -23,28 +26,27 @@ class FoldersPresenter: MvpPresenter<FoldersView>() {
     @Inject
     lateinit var foldersRepo: FoldersRepo
 
+    @Inject
+    lateinit var resourcesIndexexRepo: ResourcesIndexFactory
+
     private lateinit var rootToFavorites: MutableMap<Path, MutableList<Path>>
 
     override fun onFirstViewAttach() {
         Log.d(FOLDERS_SCREEN, "first view attached in RootsPresenter")
         super.onFirstViewAttach()
 
-        runAndBlock {
+        val result: Folders = runAndBlock {
             val result = foldersRepo.query()
 
-            if (result.failed.isNotEmpty()) {
-                viewState.notifyUser(
-                    message = "Failed to load the following roots:\n" +
-                        result.failed.joinToString("\n"),
-                    moreTime = true)
-            }
-
-            rootToFavorites = result.succeeded
-                .mapValues { (_, favorites) -> favorites.toMutableList() }
-                .toMutableMap()
+            Notifications.notifyIfFailedPaths(viewState, result.failed)
+            return@runAndBlock result.succeeded
         }
+        Log.d(FOLDERS_SCREEN, "folders loaded: $result")
 
-        Log.d(FOLDERS_SCREEN, "folders loaded: $rootToFavorites")
+        rootToFavorites = result
+            .mapValues { (_, favorites) -> favorites.toMutableList() }
+            .toMutableMap()
+
         viewState.loadFolders(rootToFavorites)
     }
 
@@ -61,6 +63,12 @@ class FoldersPresenter: MvpPresenter<FoldersView>() {
         runAndBlock {
             foldersRepo.insertRoot(path)
         }
+
+        viewState.notifyUser(
+            message = "indexing of huge folders can take minutes",
+            moreTime = true)
+        //todo: non-blocking indexing
+        resourcesIndexexRepo.buildFromFilesystem(root)
 
         viewState.loadFolders(rootToFavorites)
     }

@@ -20,14 +20,18 @@ import space.taran.arkbrowser.ui.App
 import space.taran.arkbrowser.ui.activity.MainActivity
 import space.taran.arkbrowser.ui.adapter.ItemGridRVAdapter
 import kotlinx.android.synthetic.main.fragment_tags.*
+import moxy.InjectViewState
 import moxy.MvpAppCompatFragment
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
 import space.taran.arkbrowser.mvp.model.entity.room.ResourceId
+import space.taran.arkbrowser.mvp.model.repo.FoldersRepo
 import space.taran.arkbrowser.mvp.model.repo.TagsStorage
+import space.taran.arkbrowser.ui.fragments.utils.Notifications
 import space.taran.arkbrowser.utils.SortBy
 import space.taran.arkbrowser.utils.RESOURCES_SCREEN
 import java.nio.file.Path
+import javax.inject.Inject
 
 //`root` is used for querying tags storage and resources index,
 //       if it is `null`, then resources from all roots are taken
@@ -43,17 +47,11 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
     lateinit var presenter: ResourcesPresenter
 
     @ProvidePresenter
-    fun providePresenter() = {
-        val storage = TagsStorage.provide(root!!)
-        Log.d(RESOURCES_SCREEN, "storage $storage has been read successfully")
-
+    fun providePresenter() =
         ResourcesPresenter(root, path).apply {
             Log.d(RESOURCES_SCREEN, "creating ResourcesPresenter")
             App.instance.appComponent.inject(this)
         }
-    }()
-
-
 
     private var adapter: ItemGridRVAdapter<Unit, ResourceId>? = null
     private var sortByDialogView: View? = null
@@ -209,6 +207,10 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
     override fun clearTags() {
         Log.d(RESOURCES_SCREEN, "clearing tags in TagsFragment")
         chipg_tags.removeAllViews()
+    }
+
+    override fun notifyUser(message: String, moreTime: Boolean) {
+        Notifications.notifyUser(context, message, moreTime)
     }
 }
 
