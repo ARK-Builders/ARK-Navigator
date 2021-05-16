@@ -17,10 +17,10 @@ import moxy.presenter.ProvidePresenter
 import ru.terrakok.cicerone.Router
 import space.taran.arkbrowser.R
 import space.taran.arkbrowser.mvp.model.repo.Folders
-import space.taran.arkbrowser.mvp.presenter.RootsPresenter
+import space.taran.arkbrowser.mvp.presenter.FoldersPresenter
 import space.taran.arkbrowser.mvp.presenter.FoldersTree
 import space.taran.arkbrowser.mvp.presenter.RootPicker
-import space.taran.arkbrowser.mvp.view.RootView
+import space.taran.arkbrowser.mvp.view.FoldersView
 import space.taran.arkbrowser.ui.App
 import space.taran.arkbrowser.ui.activity.MainActivity
 import space.taran.arkbrowser.utils.ROOTS_SCREEN
@@ -30,7 +30,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import javax.inject.Inject
 
-class RootsFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
+class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
     private lateinit var devices: List<Path>
 
     private lateinit var foldersTree: FoldersTree
@@ -43,11 +43,11 @@ class RootsFragment: MvpAppCompatFragment(), RootView, BackButtonListener {
     lateinit var router: Router
 
     @InjectPresenter
-    lateinit var presenter: RootsPresenter
+    lateinit var presenter: FoldersPresenter
 
     @ProvidePresenter
     fun providePresenter() =
-        RootsPresenter().apply {
+        FoldersPresenter().apply {
             Log.d(ROOTS_SCREEN, "RootsPresenter created")
             App.instance.appComponent.inject(this)
         }

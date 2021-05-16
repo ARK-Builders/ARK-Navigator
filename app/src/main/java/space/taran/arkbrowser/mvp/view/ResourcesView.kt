@@ -9,7 +9,7 @@ import moxy.viewstate.strategy.StateStrategyType
 import space.taran.arkbrowser.utils.SortBy
 
 @StateStrategyType(AddToEndSingleStrategy::class)
-interface TagsView: MvpView {
+interface ResourcesView: MvpView {
     fun init()
     fun updateAdapter()
     @StateStrategyType(SkipStrategy::class)

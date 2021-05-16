@@ -14,8 +14,8 @@ import com.google.android.material.chip.Chip
 import kotlinx.android.synthetic.main.dialog_sort.view.*
 import space.taran.arkbrowser.R
 import space.taran.arkbrowser.mvp.model.entity.common.TagState
-import space.taran.arkbrowser.mvp.presenter.TagsPresenter
-import space.taran.arkbrowser.mvp.view.TagsView
+import space.taran.arkbrowser.mvp.presenter.ResourcesPresenter
+import space.taran.arkbrowser.mvp.view.ResourcesView
 import space.taran.arkbrowser.ui.App
 import space.taran.arkbrowser.ui.activity.MainActivity
 import space.taran.arkbrowser.ui.adapter.ItemGridRVAdapter
@@ -36,14 +36,14 @@ import java.nio.file.Path
 //`path` is used for filtering resources' paths
 //       if it is `null`, then no filtering is performed
 //       (recommended instead of passing same value for `path` and `root)
-class TagsFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment(), TagsView {
+class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment(), ResourcesView {
 
     @InjectPresenter
-    lateinit var presenter: TagsPresenter
+    lateinit var presenter: ResourcesPresenter
 
     @ProvidePresenter
     fun providePresenter() =
-        TagsPresenter(root, path).apply {
+        ResourcesPresenter(root, path).apply {
             Log.d(TAGS_SCREEN, "creating TagsPresenter")
             App.instance.appComponent.inject(this)
         }

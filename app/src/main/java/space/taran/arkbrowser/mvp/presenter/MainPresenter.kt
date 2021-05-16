@@ -7,7 +7,6 @@ import moxy.MvpPresenter
 import ru.terrakok.cicerone.Router
 import space.taran.arkbrowser.utils.MAIN
 import space.taran.arkbrowser.utils.PERMISSIONS
-import space.taran.arkbrowser.utils.ROOT_PATH
 import javax.inject.Inject
 
 class MainPresenter: MvpPresenter<MainView>() {
@@ -24,7 +23,7 @@ class MainPresenter: MvpPresenter<MainView>() {
     fun permsGranted() {
         Log.d(MAIN, "creating Roots screen")
         //todo: default to TagsScreen if there are any roots added
-        router.replaceScreen(Screens.RootsScreen())
+        router.replaceScreen(Screens.FoldersScreen())
     }
 
     fun sdCardUriGranted(uri: String) {
@@ -34,12 +33,12 @@ class MainPresenter: MvpPresenter<MainView>() {
 
     fun goToRootsScreen() {
         Log.d(MAIN, "creating Roots screen")
-        router.newRootScreen(Screens.RootsScreen())
+        router.newRootScreen(Screens.FoldersScreen())
     }
 
     fun goToTagsScreen() {
         Log.d(MAIN, "[mock] creating Tags screen")
-        router.newRootScreen(Screens.TagsScreen(null, null))
+        router.newRootScreen(Screens.ResourcesScreen(null, null))
     }
 
     fun backClicked() {

@@ -1,7 +1,7 @@
 package space.taran.arkbrowser.mvp.presenter
 
 import android.util.Log
-import space.taran.arkbrowser.mvp.view.RootView
+import space.taran.arkbrowser.mvp.view.FoldersView
 import moxy.InjectViewState
 import moxy.MvpPresenter
 import ru.terrakok.cicerone.Router
@@ -16,7 +16,7 @@ import javax.inject.Inject
 //todo: protect foldersRepo when enabling real concurrency
 
 @InjectViewState
-class RootsPresenter: MvpPresenter<RootView>() {
+class FoldersPresenter: MvpPresenter<FoldersView>() {
     @Inject
     lateinit var router: Router
 

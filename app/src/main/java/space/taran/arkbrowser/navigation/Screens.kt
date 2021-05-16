@@ -10,11 +10,11 @@ class Screens {
         override fun getFragment() = DetailFragment.newInstance(resources, pos)
     }
 
-    class RootsScreen: SupportAppScreen() {
-        override fun getFragment() = RootsFragment()
+    class FoldersScreen: SupportAppScreen() {
+        override fun getFragment() = FoldersFragment()
     }
 
-    class TagsScreen(val root: Path?, val path: Path?): SupportAppScreen() {
-        override fun getFragment() = TagsFragment(root, path)
+    class ResourcesScreen(val root: Path?, val path: Path?): SupportAppScreen() {
+        override fun getFragment() = ResourcesFragment(root, path)
     }
 }

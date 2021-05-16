@@ -1,7 +1,7 @@
 package space.taran.arkbrowser.mvp.presenter
 
 import space.taran.arkbrowser.mvp.model.entity.common.TagState
-import space.taran.arkbrowser.mvp.view.TagsView
+import space.taran.arkbrowser.mvp.view.ResourcesView
 import space.taran.arkbrowser.mvp.view.item.FileItemView
 import space.taran.arkbrowser.mvp.model.entity.room.ResourceId
 import space.taran.arkbrowser.mvp.presenter.adapter.ItemGridPresenter
@@ -12,8 +12,8 @@ import android.util.Log
 import java.nio.file.Path
 import javax.inject.Inject
 
-class TagsPresenter(val root: Path?, val path: Path?) :
-    MvpPresenter<TagsView>() {
+class ResourcesPresenter(val root: Path?, val path: Path?) :
+    MvpPresenter<ResourcesView>() {
 
     @Inject
     lateinit var router: Router

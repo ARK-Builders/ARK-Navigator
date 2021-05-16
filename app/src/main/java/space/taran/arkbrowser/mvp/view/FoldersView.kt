@@ -6,7 +6,7 @@ import moxy.viewstate.strategy.StateStrategyType
 import space.taran.arkbrowser.mvp.model.repo.Folders
 
 @StateStrategyType(AddToEndSingleStrategy::class)
-interface RootView: MvpView {
+interface FoldersView: MvpView {
     fun loadFolders(folders: Folders)
     fun notifyUser(message: String, moreTime: Boolean = false)
 //
