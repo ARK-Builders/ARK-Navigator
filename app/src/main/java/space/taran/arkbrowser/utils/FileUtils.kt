@@ -9,7 +9,6 @@ import java.lang.IllegalArgumentException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
-import kotlin.io.path.listDirectoryEntries
 
 typealias Milliseconds = Long
 typealias StringPath = String
@@ -22,11 +21,30 @@ typealias MarkableFile = Pair<Boolean, Path>
 //https://developer.android.com/reference/androidx/work/WorkManager.html
 //https://developer.android.com/reference/androidx/core/app/JobIntentService.html
 
-fun isImage(file: File): Boolean =
-    when(file.extension) {
-        "jpg", "jpeg", "png" -> true
-        else -> false
+fun provideIconImage(file: Path): Path? =
+    providePreview(file) //todo downscale to, say, 128x128
+
+//might be a temporary file
+fun providePreview(file: Path): Path? =
+    if (isImage(file)) {
+        file
+    } else {
+        if (false) { //todo: create previews from videos, pdfs, etc.
+            TODO()
+        } else {
+            null
+        }
     }
+
+fun isImage(file: Path): Boolean {
+    val name = file.fileName.toString()
+    val result = name.endsWith(".jpg")
+            || name.endsWith(".jpeg")
+            || name.endsWith(".png")
+
+    Log.d(ITEM_GRID, "is file $file an image? $result")
+    return result
+}
 
 fun isHidden(path: Path): Boolean =
     path.fileName.toString().startsWith('.')

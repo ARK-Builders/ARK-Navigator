@@ -12,11 +12,13 @@ import kotlin.system.measureTimeMillis
 
 class ResourcesIndexFactory(private val dao: ResourceDao) {
     fun loadFromDatabase(root: Path): PlainResourcesIndex {
+        Log.d(RESOURCES_INDEX, "loading index for $root from the database")
+
         //todo https://www.toptal.com/android/android-threading-all-you-need-to-know
         // Use Case #7: Querying local SQLite database
 
         val resources = CoroutineRunner.runAndBlock {
-            dao.query()
+            dao.query(root.toString())
         }
         Log.d(RESOURCES_INDEX, "${resources.size} resources retrieved from DB")
 
@@ -28,7 +30,6 @@ class ResourcesIndexFactory(private val dao: ResourceDao) {
 
     fun buildFromFilesystem(root: Path): PlainResourcesIndex {
         Log.d(RESOURCES_INDEX, "building index from root $root")
-
 
         var files: List<Path>
 

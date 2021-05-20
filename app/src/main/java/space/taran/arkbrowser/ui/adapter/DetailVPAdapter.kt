@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import space.taran.arkbrowser.R
 import space.taran.arkbrowser.mvp.presenter.adapter.IDetailListPresenter
-import space.taran.arkbrowser.mvp.view.item.DetailItemView
+import space.taran.arkbrowser.mvp.view.item.PreviewItemView
 import space.taran.arkbrowser.utils.loadImage
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.item_image.view.*
@@ -35,7 +35,7 @@ class DetailVPAdapter(
 
     inner class ViewHolder(override val containerView: View) :
         RecyclerView.ViewHolder(containerView),
-        LayoutContainer, DetailItemView {
+        LayoutContainer, PreviewItemView {
 
         override var pos = -1
 

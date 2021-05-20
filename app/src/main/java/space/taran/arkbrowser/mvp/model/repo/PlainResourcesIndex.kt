@@ -36,17 +36,28 @@ class PlainResourcesIndex internal constructor (
     internal val metaByPath: MutableMap<Path, ResourceMeta> =
         resources.toMutableMap()
 
-    override fun listIds(prefix: Path?): Set<ResourceId> {
-        val filtered = if (prefix != null) {
+    private val pathById: MutableMap<ResourceId, Path> =
+        resources.map { (path, meta) ->
+            meta.id to path
+        }
+        .toMap()
+        .toMutableMap()
+
+    override fun listIds(prefix: Path?): List<ResourceId> {
+        val ids = if (prefix != null) {
             metaByPath.filterKeys { it.startsWith(prefix) }
         } else {
             metaByPath
         }
+        .values
+        .map { it.id }
 
-        return filtered
-            .values.map { it.id }
-            .toSet()
+        Log.d(RESOURCES_INDEX, "${ids.size} of ids returned, " +
+            "checksum is ${ids.foldRight(0L, { id, acc -> acc + id })}")
+        return ids
     }
+
+    override fun getPath(id: ResourceId): Path? = pathById[id]
 
     //todo query functions
 
@@ -54,6 +65,7 @@ class PlainResourcesIndex internal constructor (
 
     internal fun reindexRoot(diff: Difference) {
         diff.deleted.forEach {
+            pathById[metaByPath[it]!!.id]
             metaByPath.remove(it)
         }
 
@@ -64,11 +76,17 @@ class PlainResourcesIndex internal constructor (
 
         val toInsert = diff.updated + diff.added
         toInsert.forEach {
+            val id = computeId(it)
+
             metaByPath[it] = ResourceMeta(
-                id = computeId(it),
+                id = id,
                 modified = Files.getLastModifiedTime(it))
+            pathById[id] = it
         }
 
+        Log.d(RESOURCES_INDEX, "re-scanning ${toInsert.size} resources")
+
+        //todo: streaming/iterating
         val newResources = scanResources(toInsert)
         persistResources(newResources)
     }
@@ -86,6 +104,9 @@ class PlainResourcesIndex internal constructor (
         val added = listAllFiles(root).filter { file ->
             !metaByPath.containsKey(file)
         }
+
+        Log.d(RESOURCES_INDEX, "${absent.size} absent, " +
+                "${updated.size} updated, ${added.size} added")
 
         return Difference(absent, updated, added)
     }
@@ -116,7 +137,7 @@ class PlainResourcesIndex internal constructor (
                     id = computeId(it),
                     modified = Files.getLastModifiedTime(it))
             }
-                .toMap()
+            .toMap()
 
         internal fun groupResources(resources: List<Resource>): Map<Path, ResourceMeta> =
             resources

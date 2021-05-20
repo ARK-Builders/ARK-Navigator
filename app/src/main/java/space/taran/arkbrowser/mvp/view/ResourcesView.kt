@@ -6,11 +6,12 @@ import moxy.MvpView
 import moxy.viewstate.strategy.AddToEndSingleStrategy
 import moxy.viewstate.strategy.SkipStrategy
 import moxy.viewstate.strategy.StateStrategyType
+import space.taran.arkbrowser.mvp.presenter.ResourcesGrid
 import space.taran.arkbrowser.utils.SortBy
 
 @StateStrategyType(AddToEndSingleStrategy::class)
 interface ResourcesView: MvpView, NotifiableView {
-    fun init()
+    fun init(grid: ResourcesGrid)
 
     fun updateAdapter()
 

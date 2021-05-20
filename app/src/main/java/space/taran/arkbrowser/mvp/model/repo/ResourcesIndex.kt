@@ -5,6 +5,8 @@ import java.nio.file.Path
 
 interface ResourcesIndex {
 
-    fun listIds(prefix: Path?): Set<ResourceId>
+    fun listIds(prefix: Path?): List<ResourceId>
+
+    fun getPath(id: ResourceId): Path?
 
 }

@@ -13,9 +13,10 @@ import space.taran.arkbrowser.mvp.view.item.FileItemView
 import space.taran.arkbrowser.utils.loadImage
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.item_file_grid.view.*
-import space.taran.arkbrowser.mvp.model.entity.common.IconOrImage
+import space.taran.arkbrowser.mvp.model.entity.common.Icon
 import space.taran.arkbrowser.utils.ITEM_GRID
-import space.taran.arkbrowser.utils.iconToImageResource
+import space.taran.arkbrowser.utils.RESOURCES_SCREEN
+import space.taran.arkbrowser.utils.imageForPredefinedIcon
 
 open class ItemGridRVAdapter<L, I>(val presenter: ItemGridPresenter<L, I>)
     : RecyclerView.Adapter<ItemGridRVAdapter<L, I>.ViewHolder>() {
@@ -30,7 +31,6 @@ open class ItemGridRVAdapter<L, I>(val presenter: ItemGridPresenter<L, I>)
                 false))
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.pos = position
         presenter.bindView(holder)
 
         holder.itemView.setOnClickListener {
@@ -59,22 +59,16 @@ open class ItemGridRVAdapter<L, I>(val presenter: ItemGridPresenter<L, I>)
         RecyclerView.ViewHolder(containerView),
         LayoutContainer, FileItemView {
 
-        override var pos = -1
+        override fun position(): Int = this.layoutPosition
 
-        override fun setIcon(icon: IconOrImage): Unit = with(containerView) {
-            if (icon.icon != null) {
-                iv.setImageResource(iconToImageResource(icon.icon))
+        override fun setIcon(icon: Icon): Unit = with(containerView) {
+            Log.d(ITEM_GRID, "setting icon $icon")
+            if (icon.predefined != null) {
+                iv.setImageResource(imageForPredefinedIcon(icon.predefined))
                 iv.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.gray))
             } else {
                 loadImage(icon.image!!, iv)
             }
-        }
-
-        override fun setFav(isFav: Boolean) = with(containerView) {
-            if (isFav)
-                iv_fav.visibility = View.VISIBLE
-            else
-                iv_fav.visibility = View.GONE
         }
 
         override fun setText(title: String) = with(containerView) {

@@ -7,9 +7,11 @@ class AggregatedResourcesIndex(
     private val shards: Collection<PlainResourcesIndex>)
     : ResourcesIndex {
 
-    override fun listIds(prefix: Path?): Set<ResourceId> {
-        return shards
-            .flatMap { it.listIds(prefix) }
-            .toSet()
-    }
+    override fun listIds(prefix: Path?): List<ResourceId> =
+        shards.flatMap { it.listIds(prefix) }
+
+    override fun getPath(id: ResourceId): Path? =
+        //todo: iterators or streams would optimize out redundant maps
+        shards.mapNotNull { it.getPath(id) }
+            .firstOrNull()
 }

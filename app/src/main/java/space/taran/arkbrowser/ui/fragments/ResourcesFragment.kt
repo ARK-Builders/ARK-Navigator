@@ -24,6 +24,7 @@ import moxy.MvpAppCompatFragment
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
 import space.taran.arkbrowser.mvp.model.entity.room.ResourceId
+import space.taran.arkbrowser.mvp.presenter.ResourcesGrid
 import space.taran.arkbrowser.ui.fragments.utils.Notifications
 import space.taran.arkbrowser.utils.SortBy
 import space.taran.arkbrowser.utils.RESOURCES_SCREEN
@@ -68,14 +69,16 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
         App.instance.appComponent.inject(this)
     }
 
-    override fun init() {
+    override fun init(grid: ResourcesGrid) {
         Log.d(RESOURCES_SCREEN, "initializing ResourcesFragment")
         (activity as MainActivity).setSelectedTab(1)
         (activity as MainActivity).setToolbarVisibility(true)
-        rv_tags.layoutManager = GridLayoutManager(context, 3)
-        adapter = ItemGridRVAdapter(presenter.fileGridPresenter) //todo
-        rv_tags.adapter = adapter
         setHasOptionsMenu(true)
+
+        adapter = ItemGridRVAdapter(grid)
+
+        rv_tags.adapter = adapter
+        rv_tags.layoutManager = GridLayoutManager(context, 3)
     }
 
     override fun onResume() {

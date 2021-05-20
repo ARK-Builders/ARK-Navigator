@@ -3,7 +3,7 @@ package space.taran.arkbrowser.mvp.presenter
 import android.util.Log
 import space.taran.arkbrowser.mvp.presenter.adapter.IDetailListPresenter
 import space.taran.arkbrowser.mvp.view.DetailView
-import space.taran.arkbrowser.mvp.view.item.DetailItemView
+import space.taran.arkbrowser.mvp.view.item.PreviewItemView
 import space.taran.arkbrowser.utils.Constants.Companion.EMPTY_TAG
 import space.taran.arkbrowser.utils.Converters.Companion.tagsFromString
 import space.taran.arkbrowser.mvp.model.entity.room.ResourceId
@@ -30,7 +30,7 @@ class DetailPresenter(val resources: List<ResourceId>, val pos: Int) :
 
         override fun getCount() = resource.size
 
-        override fun bindView(view: DetailItemView) {
+        override fun bindView(view: PreviewItemView) {
             val resource = resource[view.pos]
             Log.d("flow", "[mock] binding view for resource $resource")
             //view.setImage(resource.file)

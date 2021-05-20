@@ -11,6 +11,7 @@ interface ResourceDao {
     @Query("DELETE FROM Resource where path in (:paths)")
     suspend fun deletePaths(paths: List<StringPath>)
 
-    @Query("SELECT * FROM Resource")
-    suspend fun query(): List<Resource>
+    @Query("SELECT * FROM Resource where root = :root")
+    suspend fun query(root: StringPath): List<Resource>
+    //todo: can be optimized with `root in (:roots)`
 }

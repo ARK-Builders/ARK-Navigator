@@ -2,9 +2,7 @@ package space.taran.arkbrowser.mvp.presenter
 
 import space.taran.arkbrowser.mvp.model.entity.common.TagState
 import space.taran.arkbrowser.mvp.view.ResourcesView
-import space.taran.arkbrowser.mvp.view.item.FileItemView
 import space.taran.arkbrowser.mvp.model.entity.room.ResourceId
-import space.taran.arkbrowser.mvp.presenter.adapter.ItemGridPresenter
 import moxy.MvpPresenter
 import ru.terrakok.cicerone.Router
 import android.util.Log
@@ -34,14 +32,13 @@ class ResourcesPresenter(val root: Path?, val prefix: Path?) :
 
     private lateinit var allResources: Set<ResourceId>
 
-    val fileGridPresenter = XItemGridPresenter()
-    var tagStates = mutableListOf<TagState>()
-    var sortBy = SortBy.NAME
-    var isReversedSort = false
+    private var tagStates = mutableListOf<TagState>()
+    private var sortBy = SortBy.NAME
+    private var isReversedSort = false
 
-    var displayedResources = setOf<ResourceId>()
+    private var displayedResources = setOf<ResourceId>()
 
-    var isTagsOff = false
+    private var isTagsOff = false
 
     override fun onFirstViewAttach() {
         Log.d(RESOURCES_SCREEN, "first view attached in ResourcesPresenter")
@@ -64,6 +61,7 @@ class ResourcesPresenter(val root: Path?, val prefix: Path?) :
                 all.toList()
             }
         }()
+        Log.d(RESOURCES_SCREEN, "using roots $roots")
 
         val rootToIndex = roots
             .map { it to resourcesIndexFactory.loadFromDatabase(it) }
@@ -88,10 +86,8 @@ class ResourcesPresenter(val root: Path?, val prefix: Path?) :
         storage = AggregatedTagsStorage(rootToStorage.values)
 
         //todo: with async indexing we must display non-indexed-yet resources too
-        allResources = index.listIds(prefix)
-        displayedResources = allResources
+        viewState.init(ResourcesGrid(index, index.listIds(prefix)))
 
-        viewState.init()
         applyTagsToFiles()
 
         val title = {
@@ -100,53 +96,6 @@ class ResourcesPresenter(val root: Path?, val prefix: Path?) :
         }()
 
         viewState.setToolbarTitle("$title${roots.size} of roots chosen")
-    }
-
-    inner class XItemGridPresenter :
-        ItemGridPresenter<Unit, ResourceId>({
-            Log.d(RESOURCES_SCREEN, "[mock] item $it clicked in ResourcesPresenter/ItemGridPresenter")
-//            if (resource.isImage()) {
-//                val images = displayedResources.filter { it.isImage() }
-//                val newPos = images.indexOf(resource)
-//                router.navigateTo(
-//                    Screens.DetailScreen(
-//                        syncRepo.getRootById(resource.rootId!!)!!,
-//                        images,
-//                        newPos
-//                    )
-//                )
-//            } else {
-//                viewState.openFile(
-//                    filesRepo.fileDataSource.getUriForFileByProvider(resource.file),
-//                    DocumentFile.fromFile(resource.file).type!!
-//                )
-//            }
-        }) {
-
-        var resources = mutableListOf<ResourceId>()
-
-        override fun label() = Unit
-
-        override fun items() = resources //todo
-
-        override fun updateItems(label: Unit, items: List<ResourceId>) {
-            //TODO
-        }
-
-        override fun bindView(view: FileItemView) {
-            val resource = resources[view.pos]
-            Log.d(RESOURCES_SCREEN, "[mock] binding view with $resource in ResourcesPresenter/ItemGridPresenter")
-//            view.setText(resource.name)
-//            if (resource.isImage()) {
-//                view.setIcon(IconOrImage(image = resource.file))
-//            } else {
-//                view.setIcon(IconOrImage(icon = Icon.FILE))
-//            }
-        }
-
-        override fun backClicked(): Unit {
-            TODO("Not yet implemented")
-        }
     }
 
     fun tagChecked(tag: String, isChecked: Boolean) {
