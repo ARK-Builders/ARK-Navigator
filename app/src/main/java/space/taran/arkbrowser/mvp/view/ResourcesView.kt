@@ -7,7 +7,6 @@ import moxy.viewstate.strategy.AddToEndSingleStrategy
 import moxy.viewstate.strategy.SkipStrategy
 import moxy.viewstate.strategy.StateStrategyType
 import space.taran.arkbrowser.mvp.presenter.ResourcesGrid
-import space.taran.arkbrowser.utils.SortBy
 
 @StateStrategyType(AddToEndSingleStrategy::class)
 interface ResourcesView: MvpView, NotifiableView {
@@ -25,9 +24,6 @@ interface ResourcesView: MvpView, NotifiableView {
     fun openFile(uri: Uri, mimeType: String)
 
     fun setToolbarTitle(title: String)
-
-    fun showSortByDialog(sortBy: SortBy, isReversedSort: Boolean)
-    fun closeSortByDialog()
 
     fun setTagsLayoutVisibility(isVisible: Boolean)
 }

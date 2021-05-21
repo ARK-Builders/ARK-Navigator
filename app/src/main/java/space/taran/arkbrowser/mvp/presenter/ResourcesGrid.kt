@@ -11,11 +11,12 @@ import space.taran.arkbrowser.utils.*
 import java.lang.AssertionError
 import java.lang.IllegalStateException
 import java.nio.file.Files
+import java.nio.file.Path
 
 //todo: inherit ReversibleItemGridPresenter to get "undo"
 class ResourcesGrid(
     private val index: ResourcesIndex,
-    private val resources: List<ResourceId>)
+    private var resources: List<ResourceId>)
     : ItemGridPresenter<Unit, ResourceId>({
         Log.d(RESOURCES_SCREEN, "[mock] item $it clicked in ResourcesPresenter/ItemGridPresenter")
 
@@ -46,12 +47,15 @@ class ResourcesGrid(
 //        }
     }) {
 
+    fun <T: Comparable<T>>sortedBy(selector: (Path) -> T) =
+        resources.sortedBy { selector(index.getPath(it)!!) }
+
     override fun label() = Unit
 
     override fun items() = resources
 
     override fun updateItems(label: Unit, items: List<ResourceId>) {
-        throw IllegalStateException("Not updatable") //todo
+        resources = items
     }
 
     override fun bindView(view: FileItemView) {

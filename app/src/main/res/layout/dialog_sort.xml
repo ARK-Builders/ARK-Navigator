@@ -17,7 +17,7 @@
             android:textSize="18sp" />
 
         <RadioGroup
-            android:id="@+id/rg_sort_by"
+            android:id="@+id/rg_sorting"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp">
@@ -41,10 +41,18 @@
                 android:text="Last modified" />
 
             <com.google.android.material.radiobutton.MaterialRadioButton
-                android:id="@+id/rb_extension"
+                android:id="@+id/rb_type"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Extension" />
+
+            <com.google.android.material.radiobutton.MaterialRadioButton
+                android:id="@+id/rb_default"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clickable="false"
+                android:enabled="false"
+                android:text="As-is" />
 
         </RadioGroup>
 
@@ -55,7 +63,7 @@
             android:background="?android:attr/listDivider" />
 
         <RadioGroup
-            android:id="@+id/rg_sort_reversed"
+            android:id="@+id/rg_sorting_direction"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp">

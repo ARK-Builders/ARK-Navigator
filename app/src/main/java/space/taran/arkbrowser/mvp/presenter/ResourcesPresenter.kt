@@ -2,14 +2,12 @@ package space.taran.arkbrowser.mvp.presenter
 
 import space.taran.arkbrowser.mvp.model.entity.common.TagState
 import space.taran.arkbrowser.mvp.view.ResourcesView
-import space.taran.arkbrowser.mvp.model.entity.room.ResourceId
 import moxy.MvpPresenter
 import ru.terrakok.cicerone.Router
 import android.util.Log
 import space.taran.arkbrowser.mvp.model.repo.*
 import space.taran.arkbrowser.ui.fragments.utils.Notifications
 import space.taran.arkbrowser.utils.RESOURCES_SCREEN
-import space.taran.arkbrowser.utils.SortBy
 import space.taran.arkbrowser.utils.tagsComparator
 import java.nio.file.Path
 import javax.inject.Inject
@@ -30,13 +28,9 @@ class ResourcesPresenter(val root: Path?, val prefix: Path?) :
     private lateinit var index: ResourcesIndex
     private lateinit var storage: TagsStorage
 
-    private lateinit var allResources: Set<ResourceId>
+    private lateinit var grid: ResourcesGrid
 
     private var tagStates = mutableListOf<TagState>()
-    private var sortBy = SortBy.NAME
-    private var isReversedSort = false
-
-    private var displayedResources = setOf<ResourceId>()
 
     private var isTagsOff = false
 
@@ -86,7 +80,8 @@ class ResourcesPresenter(val root: Path?, val prefix: Path?) :
         storage = AggregatedTagsStorage(rootToStorage.values)
 
         //todo: with async indexing we must display non-indexed-yet resources too
-        viewState.init(ResourcesGrid(index, index.listIds(prefix)))
+        grid = ResourcesGrid(index, index.listIds(prefix))
+        viewState.init(grid)
 
         applyTagsToFiles()
 
@@ -97,6 +92,21 @@ class ResourcesPresenter(val root: Path?, val prefix: Path?) :
 
         viewState.setToolbarTitle("$title${roots.size} of roots chosen")
     }
+
+    override fun onDestroy() {
+        Log.d(RESOURCES_SCREEN, "destroying ResourcesPresenter")
+        super.onDestroy()
+    }
+
+    fun onViewResumed() {
+        Log.d(RESOURCES_SCREEN, "view resumed in ResourcesPresenter")
+        if (isTagsOff) {
+            findUntaggedFiles()
+        } else {
+            setupTags()
+        }
+    }
+
 
     fun tagChecked(tag: String, isChecked: Boolean) {
         Log.d(RESOURCES_SCREEN, "tag checked clicked in ResourcesPresenter")
@@ -113,72 +123,6 @@ class ResourcesPresenter(val root: Path?, val prefix: Path?) :
         applyTagsToFiles()
     }
 
-//    private fun initFromRoot() {
-//
-//        viewState.setToolbarTitle(rootName)
-//        syncRepo.getSyncObservable(root)?.observeOn(AndroidSchedulers.mainThread())
-//            ?.subscribe(getSyncObserver(root))
-//    }
-//
-//    private fun initFromFiles() {
-//        viewState.setToolbarTitle(root!!.name)
-//
-//        val buffer = mutableListOf<Resource>()
-//        resources!!.forEach { file ->
-//            root.resources.forEach { rootFile ->
-//                if (file.path == rootFile.path)
-//                    buffer.add(rootFile)
-//            }
-//        }
-//        allResources = buffer.toSet()
-//
-//        displayedResources = allResources
-//        applyTagsToFiles()
-//    }
-//
-//    private fun initFromAllRoots() {
-//        viewState.setToolbarTitle("All roots")
-//
-//        val buffer = mutableListOf<Resource>()
-//        syncRepo.roots.forEach { root ->
-//            buffer.addAll(root.resources)
-//            syncRepo.getSyncObservable(root)?.observeOn(AndroidSchedulers.mainThread())
-//                ?.subscribe(getSyncObserver(root))
-//        }
-//        allResources = buffer.toSet()
-//
-//        displayedResources = allResources
-//        applyTagsToFiles()
-//    }
-
-    override fun onDestroy() {
-        Log.d(RESOURCES_SCREEN, "destroying ResourcesPresenter")
-        super.onDestroy()
-    }
-
-    fun onViewResumed() {
-        Log.d(RESOURCES_SCREEN, "view resumed in ResourcesPresenter")
-        if (isTagsOff) {
-            findUntaggedFiles()
-        } else {
-            setupTags()
-        }
-    }
-
-    fun sortByChanged(sortBy: SortBy) {
-        Log.d(RESOURCES_SCREEN, "sorting by changed date in ResourcesPresenter")
-        this.sortBy = sortBy
-        sortAndUpdateFiles()
-        dismissDialog()
-    }
-
-    fun reversedSortChanged(isReversedSort: Boolean) {
-        Log.d(RESOURCES_SCREEN, "reversed sort changed in ResourcesPresenter")
-        this.isReversedSort = isReversedSort
-        sortAndUpdateFiles()
-        dismissDialog()
-    }
-
     fun tagsOffChanged() {
         Log.d(RESOURCES_SCREEN, "tags on/off changed in ResourcesPresenter")
         isTagsOff = !isTagsOff
@@ -192,16 +136,6 @@ class ResourcesPresenter(val root: Path?, val prefix: Path?) :
         }
     }
 
-    fun sortByMenuClicked() {
-        Log.d(RESOURCES_SCREEN, "sort-by menu clicked in ResourcesPresenter")
-        viewState.showSortByDialog(sortBy, isReversedSort)
-    }
-
-    fun dismissDialog() {
-        Log.d(RESOURCES_SCREEN, "dialog dismissed in ResourcesPresenter")
-        viewState.closeSortByDialog()
-    }
-
     private fun applyTagsToFiles() {
         Log.d(RESOURCES_SCREEN, "[mock] applying tags to resources in ResourcesPresenter")
 
@@ -213,7 +147,7 @@ class ResourcesPresenter(val root: Path?, val prefix: Path?) :
 //            displayedResources.clear()
 //            displayedResources.addAll(allResources)
 
-            sortAndUpdateFiles()
+//            sortAndUpdateFiles()
             sortAndUpdateTags()
             return
         }
@@ -255,14 +189,6 @@ class ResourcesPresenter(val root: Path?, val prefix: Path?) :
 //        sortAndUpdateFiles()
 //        tagStates.clear()
 //        sortAndUpdateTags()
-    }
-
-    private fun sortAndUpdateFiles() {
-        Log.d(RESOURCES_SCREEN, "[mock] sorting and updating resources in ResourcesPresenter")
-//        displayedResources.sortWith(resourceComparator(sortBy, isReversedSort))
-//        fileGridPresenter.resources.clear()
-//        fileGridPresenter.resources.addAll(displayedResources)
-//        viewState.updateAdapter()
     }
 
     private fun sortAndUpdateTags() {

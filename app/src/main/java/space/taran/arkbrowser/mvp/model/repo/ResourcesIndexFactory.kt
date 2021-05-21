@@ -14,9 +14,6 @@ class ResourcesIndexFactory(private val dao: ResourceDao) {
     fun loadFromDatabase(root: Path): PlainResourcesIndex {
         Log.d(RESOURCES_INDEX, "loading index for $root from the database")
 
-        //todo https://www.toptal.com/android/android-threading-all-you-need-to-know
-        // Use Case #7: Querying local SQLite database
-
         val resources = CoroutineRunner.runAndBlock {
             dao.query(root.toString())
         }

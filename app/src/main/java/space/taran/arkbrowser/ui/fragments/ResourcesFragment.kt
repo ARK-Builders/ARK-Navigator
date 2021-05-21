@@ -18,16 +18,16 @@ import space.taran.arkbrowser.mvp.presenter.ResourcesPresenter
 import space.taran.arkbrowser.mvp.view.ResourcesView
 import space.taran.arkbrowser.ui.App
 import space.taran.arkbrowser.ui.activity.MainActivity
-import space.taran.arkbrowser.ui.adapter.ItemGridRVAdapter
 import kotlinx.android.synthetic.main.fragment_tags.*
 import moxy.MvpAppCompatFragment
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
-import space.taran.arkbrowser.mvp.model.entity.room.ResourceId
 import space.taran.arkbrowser.mvp.presenter.ResourcesGrid
+import space.taran.arkbrowser.ui.adapter.ResourcesGridAdapter
 import space.taran.arkbrowser.ui.fragments.utils.Notifications
-import space.taran.arkbrowser.utils.SortBy
 import space.taran.arkbrowser.utils.RESOURCES_SCREEN
+import space.taran.arkbrowser.utils.extension
+import java.nio.file.Files
 import java.nio.file.Path
 
 //`root` is used for querying tags storage and resources index,
@@ -50,15 +50,16 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
             App.instance.appComponent.inject(this)
         }
 
-    private var adapter: ItemGridRVAdapter<Unit, ResourceId>? = null
-    private var sortByDialogView: View? = null
-    private var sortByDialog: AlertDialog? = null
+    private lateinit var gridAdapter: ResourcesGridAdapter
+
+    private var sorting: Sorting = Sorting.DEFAULT
+    private var ascending: Boolean = true
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+        savedInstanceState: Bundle?): View? {
+
         Log.d(RESOURCES_SCREEN, "creating view in ResourcesFragment")
         return inflater.inflate(R.layout.fragment_tags, container, false)
     }
@@ -75,9 +76,9 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
         (activity as MainActivity).setToolbarVisibility(true)
         setHasOptionsMenu(true)
 
-        adapter = ItemGridRVAdapter(grid)
+        gridAdapter = ResourcesGridAdapter(grid)
 
-        rv_tags.adapter = adapter
+        rv_tags.adapter = gridAdapter
         rv_tags.layoutManager = GridLayoutManager(context, 3)
     }
 
@@ -101,7 +102,7 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
 
     override fun updateAdapter() {
         Log.d(RESOURCES_SCREEN, "updating adapter in ResourcesFragment")
-        adapter?.notifyDataSetChanged()
+        gridAdapter?.notifyDataSetChanged()
     }
 
     override fun setToolbarTitle(title: String) {
@@ -113,49 +114,70 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
         chipg_tags.visibility = if (isVisible) View.VISIBLE else View.GONE
     }
 
-    override fun showSortByDialog(sortBy: SortBy, isReversedSort: Boolean) {
-        Log.d(RESOURCES_SCREEN, "showing sort-by dialog ($sortBy, $isReversedSort) in ResourcesFragment")
-        sortByDialogView = LayoutInflater.from(context!!).inflate(R.layout.dialog_sort, null)
-        val alertDialogBuilder = AlertDialog.Builder(context!!).setView(sortByDialogView)
-        when (sortBy) {
-            SortBy.NAME -> sortByDialogView!!.rb_name.isChecked = true
-            SortBy.SIZE -> sortByDialogView!!.rb_size.isChecked = true
-            SortBy.LAST_MODIFIED -> sortByDialogView!!.rb_last_modified.isChecked = true
-            SortBy.TYPE -> sortByDialogView!!.rb_extension.isChecked = true
-        }
-        if (isReversedSort)
-            sortByDialogView!!.rb_descending.isChecked = true
-        else
-            sortByDialogView!!.rb_ascending.isChecked = true
+    private fun showSortByDialog() {
+        Log.d(RESOURCES_SCREEN, "showing sort-by dialog in ResourcesFragment")
+        val view = LayoutInflater.from(context!!).inflate(R.layout.dialog_sort, null)!!
+        val alertBuilder = AlertDialog.Builder(context!!).setView(view)
 
-        sortByDialogView!!.rg_sort_by.setOnCheckedChangeListener { _, checkedId ->
-            when(checkedId) {
-                R.id.rb_name -> presenter.sortByChanged(SortBy.NAME)
-                R.id.rb_size -> presenter.sortByChanged(SortBy.SIZE)
-                R.id.rb_last_modified -> presenter.sortByChanged(SortBy.LAST_MODIFIED)
-                R.id.rb_extension -> presenter.sortByChanged(SortBy.TYPE)
+        when(sorting) {
+            Sorting.DEFAULT -> view.rb_default.isChecked = true
+            Sorting.NAME -> view.rb_name.isChecked = true
+            Sorting.SIZE -> view.rb_size.isChecked = true
+            Sorting.LAST_MODIFIED -> view.rb_last_modified.isChecked = true
+            Sorting.TYPE -> view.rb_type.isChecked = true
+        }
+
+        if (sorting == Sorting.DEFAULT) {
+            view.rb_ascending.isEnabled = false
+            view.rb_descending.isEnabled = false
+            view.rg_sorting_direction.isEnabled = false
+        } else {
+            if (ascending) {
+                view.rb_ascending.isChecked = true
+            } else {
+                view.rb_descending.isChecked = true
             }
         }
 
-        sortByDialogView!!.rg_sort_reversed.setOnCheckedChangeListener { _, checkedId ->
+        var dialog: AlertDialog? = null
+
+        view.rg_sorting.setOnCheckedChangeListener { _, checkedId ->
             when(checkedId) {
-                R.id.rb_ascending -> presenter.reversedSortChanged(false)
-                R.id.rb_descending -> presenter.reversedSortChanged(true)
+                R.id.rb_default -> throw AssertionError("As-is sorting is initial, unsorted order")
+
+                R.id.rb_name -> sorting = Sorting.NAME
+                R.id.rb_size -> sorting = Sorting.SIZE
+                R.id.rb_last_modified -> sorting = Sorting.LAST_MODIFIED
+                R.id.rb_type -> sorting = Sorting.TYPE
+            }
+            Log.d(RESOURCES_SCREEN, "sorting criteria changed, sorting = $sorting")
+
+            when(sorting) {
+                Sorting.NAME -> gridAdapter.sortBy { it.fileName }
+                Sorting.SIZE -> gridAdapter.sortBy { Files.size(it) }
+                Sorting.TYPE -> gridAdapter.sortBy { extension(it) }
+                Sorting.LAST_MODIFIED -> gridAdapter.sortBy { Files.getLastModifiedTime(it) }
+                Sorting.DEFAULT -> throw AssertionError("Not possible")
             }
 
+            ascending = true
+            dialog!!.dismiss()
         }
 
-        sortByDialog = alertDialogBuilder.show()
-        sortByDialog!!.setOnDismissListener {
-            presenter.dismissDialog()
+        view.rg_sorting_direction.setOnCheckedChangeListener { _, checkedId ->
+            when(checkedId) {
+                R.id.rb_ascending -> ascending = true
+                R.id.rb_descending -> ascending = false
+            }
+            Log.d(RESOURCES_SCREEN, "sorting direction changed, ascending = $ascending")
+
+            gridAdapter.reverse()
+
+            dialog!!.dismiss()
         }
-    }
 
-    override fun closeSortByDialog() {
-        Log.d(RESOURCES_SCREEN, "closing sort-by dialog in ResourcesFragment")
-        sortByDialog?.dismiss()
+        dialog = alertBuilder.show()
     }
-
 
     override fun setTags(tags: List<TagState>) {
         Log.d(RESOURCES_SCREEN, "setting tags states to $tags")
@@ -191,7 +213,7 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         Log.d(RESOURCES_SCREEN, "options item selected in ResourcesFragment")
         when(item.itemId) {
-            R.id.menu_tags_sort_by -> presenter.sortByMenuClicked()
+            R.id.menu_tags_sort_by -> showSortByDialog()
             R.id.menu_tags_tags_off -> presenter.tagsOffChanged()
         }
         return true
@@ -213,8 +235,6 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
     }
 }
 
-//if (path.endsWith(".png") || path.endsWith(".jpg") || path.endsWith(".jpeg")) {
-//    view.setIcon(IconOrImage(image = path))
-//} else {
-//    view.setIcon(IconOrImage(icon = Icon.FILE))
-//}
+enum class Sorting {
+    DEFAULT, NAME, SIZE, LAST_MODIFIED, TYPE
+}
