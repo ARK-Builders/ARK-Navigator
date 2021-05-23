@@ -40,10 +40,14 @@ class PlainTagsStorage private constructor(root: Path): TagsStorage {
             mutableMapOf()
         }
 
-    override fun listIds(): Set<ResourceId> = tagsById.keys
+    //todo `listAllTags`
 
-    override fun removeIds(ids: Collection<ResourceId>) {
-        Log.d(TAGS_STORAGE, "removing ${ids.size} resources")
+    override fun listTags(id: ResourceId): Tags = tagsById[id] ?: setOf()
+
+    override fun listResources(): Set<ResourceId> = tagsById.keys
+
+    override fun forgetResources(ids: Collection<ResourceId>) {
+        Log.d(TAGS_STORAGE, "forgetting ${ids.size} resources")
         ids.forEach { tagsById.remove(it) }
         persist()
     }

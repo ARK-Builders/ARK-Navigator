@@ -1,19 +1,15 @@
 package space.taran.arkbrowser.ui.fragments
 
-import android.content.Intent
 import android.content.res.ColorStateList
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.*
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.chip.Chip
 import kotlinx.android.synthetic.main.dialog_sort.view.*
 import space.taran.arkbrowser.R
-import space.taran.arkbrowser.mvp.model.entity.common.TagState
 import space.taran.arkbrowser.mvp.presenter.ResourcesPresenter
 import space.taran.arkbrowser.mvp.view.ResourcesView
 import space.taran.arkbrowser.ui.App
@@ -26,6 +22,7 @@ import space.taran.arkbrowser.mvp.presenter.ResourcesGrid
 import space.taran.arkbrowser.ui.adapter.ResourcesGridAdapter
 import space.taran.arkbrowser.ui.fragments.utils.Notifications
 import space.taran.arkbrowser.utils.RESOURCES_SCREEN
+import space.taran.arkbrowser.utils.Tags
 import space.taran.arkbrowser.utils.extension
 import java.nio.file.Files
 import java.nio.file.Path
@@ -52,6 +49,10 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
 
     private lateinit var gridAdapter: ResourcesGridAdapter
 
+    private lateinit var menuTagsOn: MenuItem
+    private lateinit var menuTagsOff: MenuItem
+    private var tagsEnabled = true
+
     private var sorting: Sorting = Sorting.DEFAULT
     private var ascending: Boolean = true
 
@@ -70,6 +71,42 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
         App.instance.appComponent.inject(this)
     }
 
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        Log.d(RESOURCES_SCREEN, "options item selected in ResourcesFragment")
+        when(item.itemId) {
+            R.id.menu_tags_sort_by -> showSortByDialog()
+            R.id.menu_tags_off -> disableTags()
+
+            R.id.menu_tags_on -> {
+                val tags = presenter.listTagsForAllResources()
+                if (tags.isNotEmpty()) {
+                    enableTags(tags)
+                } else {
+                    notifyUser("Tag something first")
+                }
+            }
+        }
+        return true
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        Log.d(RESOURCES_SCREEN, "creating options menu in ResourcesFragment")
+        inflater.inflate(R.menu.menu_tags_screen, menu)
+
+        menuTagsOn = menu.findItem(R.id.menu_tags_on)
+        menuTagsOff = menu.findItem(R.id.menu_tags_off)
+
+        showTagsOnOffButtons()
+
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onResume() {
+        Log.d(RESOURCES_SCREEN, "resuming in ResourcesFragment")
+        super.onResume()
+    }
+
+
     override fun init(grid: ResourcesGrid) {
         Log.d(RESOURCES_SCREEN, "initializing ResourcesFragment")
         (activity as MainActivity).setSelectedTab(1)
@@ -80,38 +117,109 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
 
         rv_tags.adapter = gridAdapter
         rv_tags.layoutManager = GridLayoutManager(context, 3)
-    }
 
-    override fun onResume() {
-        Log.d(RESOURCES_SCREEN, "resuming in ResourcesFragment")
-        super.onResume()
-        presenter.onViewResumed()
-    }
-
-    override fun openFile(uri: Uri, mimeType: String) {
-        Log.d(RESOURCES_SCREEN, "opening file $uri in ResourcesFragment")
-        try {
-            val intent = Intent(Intent.ACTION_VIEW)
-            intent.setDataAndType(uri, mimeType)
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            startActivity(intent)
-        } catch (e: Exception) {
-            Toast.makeText(context, "No app can handle this file", Toast.LENGTH_SHORT).show()
+        val tags = presenter.listTagsForAllResources()
+        if (tags.isNotEmpty()) {
+            enableTags(tags)
+        } else {
+            notifyUser("You don't have any tags here yet", moreTime = true)
+            disableTags()
         }
     }
 
-    override fun updateAdapter() {
-        Log.d(RESOURCES_SCREEN, "updating adapter in ResourcesFragment")
-        gridAdapter?.notifyDataSetChanged()
-    }
+//    fun openFile(uri: Uri, mimeType: String) {
+//        Log.d(RESOURCES_SCREEN, "opening file $uri in ResourcesFragment")
+//        try {
+//            val intent = Intent(Intent.ACTION_VIEW)
+//            intent.setDataAndType(uri, mimeType)
+//            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+//            startActivity(intent)
+//        } catch (e: Exception) {
+//            Toast.makeText(context, "No app can handle this file", Toast.LENGTH_SHORT).show()
+//        }
+//    }
 
     override fun setToolbarTitle(title: String) {
         (activity as MainActivity).setTitle(title)
     }
 
-    override fun setTagsLayoutVisibility(isVisible: Boolean) {
-        Log.d(RESOURCES_SCREEN, "setting tags layout visibility to $isVisible")
-        chipg_tags.visibility = if (isVisible) View.VISIBLE else View.GONE
+    override fun notifyUser(message: String, moreTime: Boolean) {
+        Notifications.notifyUser(context, message, moreTime)
+    }
+
+    private fun enableTags(tags: Tags) {
+        Log.d(RESOURCES_SCREEN, "enabling tags mode")
+
+        tagsEnabled = true
+        showTagsOnOffButtons()
+
+        //todo filter-out untagged resources }
+
+        chipg_tags.visibility = View.VISIBLE
+
+        Log.d(RESOURCES_SCREEN, "tags loaded: $tags")
+
+        //todo: tags must be displayed in the following order:
+        // checked tags go first
+        // then available tags
+        // not available tags go last, grayed-out
+
+        //todo: hide selector if there are no tags yet
+
+        tags.forEach { tag ->
+            val chip = Chip(context)
+            chip.isCheckable = true
+            chip.text = tag
+            chip.isChecked = false
+//            if (tagState.isActual) {
+//                chip.chipBackgroundColor =
+//                    ColorStateList.valueOf(ContextCompat.getColor(context!!, R.color.colorPrimary))
+//                chip.setTextColor(ContextCompat.getColor(context!!, R.color.white))
+//            }
+            chip.setOnClickListener {
+//                Log.d(RESOURCES_SCREEN, "tag checked clicked in ResourcesPresenter")
+//                val tagState = tagStates.find { tagState -> tagState.tag == tag }
+//                tagState!!.isChecked = isChecked
+//                applyTagsToFiles()
+                //todo filter resources by clicked tag
+            }
+            chipg_tags.addView(chip)
+        }
+
+        if (tags.size > 1) {
+            val chip = Chip(context)
+            chip.chipIcon = ContextCompat.getDrawable(context!!, R.drawable.ic_close)
+            chip.chipIconTint = ColorStateList.valueOf(ContextCompat.getColor(context!!, R.color.black))
+            chip.textStartPadding = 0f
+            chip.textEndPadding = 0f
+            chip.setOnClickListener {
+                //todo: call `onBack`
+                //chipg_tags.removeAllViews()
+            }
+            chipg_tags.addView(chip)
+        }
+    }
+
+    private fun disableTags() {
+        Log.d(RESOURCES_SCREEN, "disabling tags mode")
+
+        tagsEnabled = false
+        showTagsOnOffButtons()
+
+        //todo display only tagged resources
+
+        chipg_tags.visibility = View.GONE
+
+        gridAdapter.updateItems(Unit,
+            presenter.listUntaggedResources().toList())
+    }
+
+    private fun showTagsOnOffButtons() {
+        if (this::menuTagsOn.isInitialized && this::menuTagsOff.isInitialized) {
+            Log.d(RESOURCES_SCREEN, "showing tags selector? $tagsEnabled")
+            menuTagsOn.isVisible = !tagsEnabled
+            menuTagsOff.isVisible = tagsEnabled
+        }
     }
 
     private fun showSortByDialog() {
@@ -177,61 +285,6 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
         }
 
         dialog = alertBuilder.show()
-    }
-
-    override fun setTags(tags: List<TagState>) {
-        Log.d(RESOURCES_SCREEN, "setting tags states to $tags")
-        tags.forEach { tagState ->
-            val chip = Chip(context)
-            chip.isCheckable = true
-            chip.text = tagState.tag
-            chip.isChecked = tagState.isChecked
-            if (tagState.isActual) {
-                chip.chipBackgroundColor =
-                    ColorStateList.valueOf(ContextCompat.getColor(context!!, R.color.colorPrimary))
-                chip.setTextColor(ContextCompat.getColor(context!!, R.color.white))
-            }
-            chip.setOnClickListener {
-                presenter.tagChecked(tagState.tag, chip.isChecked)
-            }
-            chipg_tags.addView(chip)
-        }
-
-        if (tags.size > 1) {
-            val chip = Chip(context)
-            chip.chipIcon = ContextCompat.getDrawable(context!!, R.drawable.ic_close)
-            chip.chipIconTint = ColorStateList.valueOf(ContextCompat.getColor(context!!, R.color.black))
-            chip.textStartPadding = 0f
-            chip.textEndPadding = 0f
-            chip.setOnClickListener {
-                presenter.clearTagsChecked()
-            }
-            chipg_tags.addView(chip)
-        }
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        Log.d(RESOURCES_SCREEN, "options item selected in ResourcesFragment")
-        when(item.itemId) {
-            R.id.menu_tags_sort_by -> showSortByDialog()
-            R.id.menu_tags_tags_off -> presenter.tagsOffChanged()
-        }
-        return true
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        Log.d(RESOURCES_SCREEN, "creating options menu in ResourcesFragment")
-        inflater.inflate(R.menu.menu_tags_screen, menu)
-        super.onCreateOptionsMenu(menu, inflater)
-    }
-
-    override fun clearTags() {
-        Log.d(RESOURCES_SCREEN, "clearing tags in ResourcesFragment")
-        chipg_tags.removeAllViews()
-    }
-
-    override fun notifyUser(message: String, moreTime: Boolean) {
-        Notifications.notifyUser(context, message, moreTime)
     }
 }
 

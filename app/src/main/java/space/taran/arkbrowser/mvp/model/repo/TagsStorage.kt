@@ -1,11 +1,14 @@
 package space.taran.arkbrowser.mvp.model.repo
 
 import space.taran.arkbrowser.mvp.model.entity.room.ResourceId
+import space.taran.arkbrowser.utils.Tags
 
 interface TagsStorage {
 
-    fun listIds(): Set<ResourceId>
+    fun listTags(id: ResourceId): Tags
 
-    fun removeIds(ids: Collection<ResourceId>)
+    fun listResources(): Set<ResourceId>
+
+    fun forgetResources(ids: Collection<ResourceId>)
 
 }

@@ -1,7 +1,6 @@
 package space.taran.arkbrowser.mvp.presenter
 
 import android.util.Log
-import space.taran.arkbrowser.mvp.model.entity.common.PredefinedIcon
 import space.taran.arkbrowser.mvp.model.entity.common.Icon
 import space.taran.arkbrowser.mvp.model.entity.room.ResourceId
 import space.taran.arkbrowser.mvp.model.repo.ResourcesIndex
@@ -9,7 +8,6 @@ import space.taran.arkbrowser.mvp.presenter.adapter.ItemGridPresenter
 import space.taran.arkbrowser.mvp.view.item.FileItemView
 import space.taran.arkbrowser.utils.*
 import java.lang.AssertionError
-import java.lang.IllegalStateException
 import java.nio.file.Files
 import java.nio.file.Path
 

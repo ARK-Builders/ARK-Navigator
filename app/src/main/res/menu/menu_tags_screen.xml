@@ -3,7 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/menu_tags_tags_off"
+        android:id="@+id/menu_tags_on"
+        android:icon="@drawable/ic_cloud_on"
+        android:title="Tags on"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/menu_tags_off"
         android:icon="@drawable/ic_cloud_off"
         android:title="Tags off"
         app:showAsAction="always"/>
@@ -13,6 +19,4 @@
         android:icon="@drawable/ic_sort"
         android:title="Sort by"
         app:showAsAction="always" />
-
-
 </menu>
