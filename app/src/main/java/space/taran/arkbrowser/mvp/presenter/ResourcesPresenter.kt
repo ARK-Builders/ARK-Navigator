@@ -4,15 +4,17 @@ import space.taran.arkbrowser.mvp.view.ResourcesView
 import moxy.MvpPresenter
 import ru.terrakok.cicerone.Router
 import android.util.Log
-import space.taran.arkbrowser.mvp.model.entity.room.ResourceId
+import space.taran.arkbrowser.mvp.model.dao.ResourceId
 import space.taran.arkbrowser.mvp.model.repo.*
+import space.taran.arkbrowser.mvp.presenter.adapter.ResourcesList
+import space.taran.arkbrowser.navigation.Screens
 import space.taran.arkbrowser.ui.fragments.utils.Notifications
 import space.taran.arkbrowser.utils.RESOURCES_SCREEN
 import space.taran.arkbrowser.utils.Tags
 import java.nio.file.Path
 import javax.inject.Inject
 
-//todo: @InjectViewState
+//todo: @InjectViewState ?
 class ResourcesPresenter(
     val root: Path?,
     private val prefix: Path?)
@@ -30,7 +32,7 @@ class ResourcesPresenter(
     private lateinit var index: ResourcesIndex
     private lateinit var storage: TagsStorage
 
-    private lateinit var grid: ResourcesGrid
+    private lateinit var grid: ResourcesList
 
 
     fun listTagsForAllResources(): Tags = grid.items()
@@ -88,7 +90,21 @@ class ResourcesPresenter(
         storage = AggregatedTagsStorage(rootToStorage.values)
 
         //todo: with async indexing we must display non-indexed-yet resources too
-        grid = ResourcesGrid(index, index.listIds(prefix))
+        val resources = index.listIds(prefix)
+        grid = ResourcesList(index, resources) { position, resource ->
+            Log.d(RESOURCES_SCREEN, "resource $resource at $position clicked " +
+                "in ResourcesPresenter/ItemGridPresenter")
+
+            router.navigateTo(Screens.GalleryScreen(index, storage, resources, position))
+
+            //todo: long-press handler
+            //        viewState.openFile(
+            //            filesRepo.fileDataSource.getUriForFileByProvider(resource.file),
+            //            DocumentFile.fromFile(resource.file).type!!)
+        }
+
+
+
         viewState.init(grid)
 
         val title = {

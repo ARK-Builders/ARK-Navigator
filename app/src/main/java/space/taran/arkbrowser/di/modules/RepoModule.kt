@@ -1,7 +1,7 @@
 package space.taran.arkbrowser.di.modules
 
 import android.util.Log
-import space.taran.arkbrowser.mvp.model.entity.room.Database
+import space.taran.arkbrowser.mvp.model.dao.Database
 import dagger.Module
 import dagger.Provides
 import space.taran.arkbrowser.mvp.model.repo.FoldersRepo

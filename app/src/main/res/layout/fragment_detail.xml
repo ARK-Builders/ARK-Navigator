@@ -14,7 +14,7 @@
             android:layout_height="match_parent"/>
 
         <com.google.android.material.chip.ChipGroup
-            android:id="@+id/chipg_detail"
+            android:id="@+id/tags_cg"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="10dp"
@@ -22,10 +22,8 @@
             />
     </RelativeLayout>
 
-
-
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_explorer_fav"
+        android:id="@+id/edit_tags_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"

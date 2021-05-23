@@ -1,7 +1,7 @@
 package space.taran.arkbrowser.mvp.model.repo
 
 import android.util.Log
-import space.taran.arkbrowser.mvp.model.entity.room.ResourceId
+import space.taran.arkbrowser.mvp.model.dao.ResourceId
 import space.taran.arkbrowser.utils.Converters.Companion.stringFromTags
 import space.taran.arkbrowser.utils.Converters.Companion.tagsFromString
 import space.taran.arkbrowser.utils.TAGS_STORAGE

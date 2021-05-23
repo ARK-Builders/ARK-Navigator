@@ -23,10 +23,10 @@ import javax.inject.Singleton
 interface AppComponent {
     fun inject(mainActivity: MainActivity)
     fun inject(mainPresenter: MainPresenter)
-    fun inject(detailPresenter: DetailPresenter)
-    fun inject(detailImageFragment: DetailFragment)
-    fun inject(foldersFragment: FoldersFragment)
     fun inject(foldersPresenter: FoldersPresenter)
+    fun inject(foldersFragment: FoldersFragment)
     fun inject(resourcesPresenter: ResourcesPresenter)
     fun inject(resourcesFragment: ResourcesFragment)
+    fun inject(galleryPresenter: GalleryPresenter)
+    fun inject(galleryFragment: GalleryFragment)
 }

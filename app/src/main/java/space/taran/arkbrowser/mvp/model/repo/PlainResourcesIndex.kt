@@ -1,10 +1,10 @@
 package space.taran.arkbrowser.mvp.model.repo
 
 import android.util.Log
-import space.taran.arkbrowser.mvp.model.entity.room.Resource
-import space.taran.arkbrowser.mvp.model.entity.room.ResourceId
-import space.taran.arkbrowser.mvp.model.entity.room.computeId
-import space.taran.arkbrowser.mvp.model.entity.room.ResourceDao
+import space.taran.arkbrowser.mvp.model.dao.Resource
+import space.taran.arkbrowser.mvp.model.dao.ResourceId
+import space.taran.arkbrowser.mvp.model.dao.computeId
+import space.taran.arkbrowser.mvp.model.dao.ResourceDao
 import space.taran.arkbrowser.utils.CoroutineRunner
 import space.taran.arkbrowser.utils.RESOURCES_INDEX
 import space.taran.arkbrowser.utils.isHidden
@@ -92,7 +92,9 @@ class PlainResourcesIndex internal constructor (
     }
 
     internal fun calculateDifference(): Difference {
-        val (present, absent) = metaByPath.keys.partition { Files.exists(it) }
+        val (present, absent) = metaByPath.keys.partition {
+            Files.exists(it)
+        }
 
         val updated = present
             .map { it to metaByPath[it]!! }

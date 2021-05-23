@@ -1,9 +1,9 @@
 package space.taran.arkbrowser.mvp.model.repo
 
 import android.util.Log
-import space.taran.arkbrowser.mvp.model.entity.room.Favorite
-import space.taran.arkbrowser.mvp.model.entity.room.FolderDao
-import space.taran.arkbrowser.mvp.model.entity.room.Root
+import space.taran.arkbrowser.mvp.model.dao.Favorite
+import space.taran.arkbrowser.mvp.model.dao.FolderDao
+import space.taran.arkbrowser.mvp.model.dao.Root
 import space.taran.arkbrowser.utils.*
 import java.nio.file.Path
 import java.nio.file.Paths

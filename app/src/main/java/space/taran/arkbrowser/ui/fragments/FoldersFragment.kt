@@ -19,6 +19,7 @@ import space.taran.arkbrowser.mvp.model.repo.Folders
 import space.taran.arkbrowser.mvp.presenter.FoldersPresenter
 import space.taran.arkbrowser.mvp.presenter.FoldersTree
 import space.taran.arkbrowser.mvp.presenter.FolderPicker
+import space.taran.arkbrowser.mvp.presenter.adapter.ItemClickHandler
 import space.taran.arkbrowser.mvp.view.FoldersView
 import space.taran.arkbrowser.ui.App
 import space.taran.arkbrowser.ui.activity.MainActivity
@@ -55,7 +56,7 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
 
 
     override fun loadFolders(folders: Folders) {
-        Log.d(FOLDERS_SCREEN, "loading roots in RootsFragment")
+        Log.d(FOLDERS_SCREEN, "loading roots in FoldersFragment")
 
         foldersTree = FoldersTree(devices, folders, router)
         rv_roots.adapter = foldersTree
@@ -67,27 +68,27 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        Log.d(FOLDERS_SCREEN, "creating view in RootsFragment")
+        savedInstanceState: Bundle?): View? {
+
+        Log.d(FOLDERS_SCREEN, "inflating layout for FoldersFragment")
         return inflater.inflate(R.layout.fragment_roots, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        Log.d(FOLDERS_SCREEN, "view created in RootsFragment")
+        Log.d(FOLDERS_SCREEN, "view created in FoldersFragment")
         super.onViewCreated(view, savedInstanceState)
         App.instance.appComponent.inject(this)
         initialize()
     }
 
     override fun onResume() {
-        Log.d(FOLDERS_SCREEN, "resuming in RootsFragment")
+        Log.d(FOLDERS_SCREEN, "resuming in FoldersFragment")
         super.onResume()
         presenter.resume()
     }
 
     override fun backClicked(): Boolean {
-        Log.d(FOLDERS_SCREEN, "back clicked in RootsFragment")
+        Log.d(FOLDERS_SCREEN, "[back] clicked in FoldersFragment")
         return presenter.quit()
     }
 
@@ -97,7 +98,7 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
 
 
     private fun initialize() {
-        Log.d(FOLDERS_SCREEN, "initializing RootsFragment")
+        Log.d(FOLDERS_SCREEN, "initializing FoldersFragment")
 
         devices = listDevices(requireContext())
 
@@ -183,7 +184,7 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
     }
 
     //todo don't pass dialogView here, draw it from new "model"
-    private fun rootPickerClickHandler(dialogView: View): (Path) -> Unit = { path: Path ->
+    private fun rootPickerClickHandler(dialogView: View): ItemClickHandler<Path> = { _, path: Path ->
         Log.d(FOLDER_PICKER,"path $path was clicked")
 
         if (Files.isDirectory(path)) {

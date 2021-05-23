@@ -1,6 +1,6 @@
 package space.taran.arkbrowser.mvp.model.repo
 
-import space.taran.arkbrowser.mvp.model.entity.room.ResourceId
+import space.taran.arkbrowser.mvp.model.dao.ResourceId
 import space.taran.arkbrowser.utils.Tags
 
 interface TagsStorage {

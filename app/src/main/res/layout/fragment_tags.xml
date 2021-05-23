@@ -6,7 +6,7 @@
     android:orientation="vertical">
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_tags"
+        android:id="@+id/rv_resources"
         android:layout_gravity="center"
         android:layout_width="match_parent"
         android:layout_height="0dp"

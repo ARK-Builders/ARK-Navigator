@@ -42,7 +42,7 @@ class MainPresenter: MvpPresenter<MainView>() {
     }
 
     fun backClicked() {
-        Log.d(MAIN, "back clicked in MainPresenter")
+        Log.d(MAIN, "[back] clicked in MainPresenter")
         router.exit()
     }
 }

@@ -1,4 +1,4 @@
-package space.taran.arkbrowser.mvp.model.entity.room
+package space.taran.arkbrowser.mvp.model.dao
 
 import androidx.room.*
 import space.taran.arkbrowser.utils.StringPath

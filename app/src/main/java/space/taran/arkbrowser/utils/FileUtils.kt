@@ -15,6 +15,10 @@ typealias StringPath = String
 
 typealias MarkableFile = Pair<Boolean, Path>
 
+enum class Sorting {
+    DEFAULT, NAME, SIZE, LAST_MODIFIED, TYPE
+}
+
 //todo: java.io.File -> java.nio.Path
 
 // todo: https://www.toptal.com/android/android-threading-all-you-need-to-know
@@ -42,7 +46,6 @@ fun isImage(file: Path): Boolean {
             || name.endsWith(".jpeg")
             || name.endsWith(".png")
 
-    Log.d(ITEM_GRID, "is file $file an image? $result")
     return result
 }
 

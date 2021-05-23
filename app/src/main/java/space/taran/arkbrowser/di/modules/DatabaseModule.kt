@@ -2,8 +2,8 @@ package space.taran.arkbrowser.di.modules
 
 import android.util.Log
 import androidx.room.Room
-import space.taran.arkbrowser.mvp.model.entity.room.Database
-import space.taran.arkbrowser.mvp.model.entity.room.Database.Companion.DB_NAME
+import space.taran.arkbrowser.mvp.model.dao.Database
+import space.taran.arkbrowser.mvp.model.dao.Database.Companion.DB_NAME
 import space.taran.arkbrowser.ui.App
 import dagger.Module
 import dagger.Provides

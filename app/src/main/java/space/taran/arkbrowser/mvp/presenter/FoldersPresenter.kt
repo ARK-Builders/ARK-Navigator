@@ -16,7 +16,7 @@ import javax.inject.Inject
 
 //todo: protect foldersRepo when enabling real concurrency
 
-@InjectViewState
+//todo @InjectViewState ?
 class FoldersPresenter: MvpPresenter<FoldersView>() {
     @Inject
     lateinit var router: Router
@@ -25,7 +25,7 @@ class FoldersPresenter: MvpPresenter<FoldersView>() {
     lateinit var foldersRepo: FoldersRepo
 
     @Inject
-    lateinit var resourcesIndexexRepo: ResourcesIndexFactory
+    lateinit var resourcesIndexFactory: ResourcesIndexFactory
 
     private lateinit var favoritesByRoot: MutableMap<Path, MutableList<Path>>
 
@@ -61,7 +61,7 @@ class FoldersPresenter: MvpPresenter<FoldersView>() {
             message = "indexing of huge folders can take minutes",
             moreTime = true)
         //todo: non-blocking indexing
-        resourcesIndexexRepo.buildFromFilesystem(root)
+        resourcesIndexFactory.buildFromFilesystem(root)
 
         viewState.loadFolders(favoritesByRoot)
     }
@@ -91,7 +91,7 @@ class FoldersPresenter: MvpPresenter<FoldersView>() {
     }
 
     fun quit(): Boolean {
-        Log.d(FOLDERS_SCREEN, "back clicked")
+        Log.d(FOLDERS_SCREEN, "[back] clicked")
         router.exit()
         return true
     }

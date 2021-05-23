@@ -1,4 +1,4 @@
-package space.taran.arkbrowser.mvp.model.entity.common
+package space.taran.arkbrowser.mvp.model.dao.common
 
 import space.taran.arkbrowser.utils.provideIconImage
 import java.nio.file.Files
@@ -10,17 +10,17 @@ enum class PredefinedIcon {
 }
 
 //todo: is it possible to use java.nio.Path here?
-data class Icon(val predefined: PredefinedIcon? = null, val image: Path? = null) {
+data class Preview(val predefined: PredefinedIcon? = null, val image: Path? = null) {
     companion object {
-        fun provide(path: Path): Icon {
+        fun provide(path: Path): Preview {
             if (Files.isDirectory(path)) {
-                return Icon(predefined = PredefinedIcon.FOLDER)
+                return Preview(predefined = PredefinedIcon.FOLDER)
             }
 
             val image = provideIconImage(path)
-                ?: return Icon(predefined = PredefinedIcon.FILE)
+                ?: return Preview(predefined = PredefinedIcon.FILE)
 
-            return Icon(image = image)
+            return Preview(image = image)
         }
     }
 }

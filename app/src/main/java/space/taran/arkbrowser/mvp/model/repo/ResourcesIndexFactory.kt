@@ -1,7 +1,7 @@
 package space.taran.arkbrowser.mvp.model.repo
 
 import android.util.Log
-import space.taran.arkbrowser.mvp.model.entity.room.ResourceDao
+import space.taran.arkbrowser.mvp.model.dao.ResourceDao
 import space.taran.arkbrowser.mvp.model.repo.PlainResourcesIndex.Companion.groupResources
 import space.taran.arkbrowser.mvp.model.repo.PlainResourcesIndex.Companion.listAllFiles
 import space.taran.arkbrowser.mvp.model.repo.PlainResourcesIndex.Companion.scanResources
@@ -20,6 +20,7 @@ class ResourcesIndexFactory(private val dao: ResourceDao) {
         Log.d(RESOURCES_INDEX, "${resources.size} resources retrieved from DB")
 
         val index = PlainResourcesIndex(root, dao, groupResources(resources))
+        Log.d(RESOURCES_INDEX, "index created")
 
         index.reindexRoot(index.calculateDifference())
         return index

@@ -18,10 +18,11 @@ import kotlinx.android.synthetic.main.fragment_tags.*
 import moxy.MvpAppCompatFragment
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
-import space.taran.arkbrowser.mvp.presenter.ResourcesGrid
-import space.taran.arkbrowser.ui.adapter.ResourcesGridAdapter
+import space.taran.arkbrowser.mvp.presenter.adapter.ResourcesList
+import space.taran.arkbrowser.ui.adapter.ResourcesGrid
 import space.taran.arkbrowser.ui.fragments.utils.Notifications
 import space.taran.arkbrowser.utils.RESOURCES_SCREEN
+import space.taran.arkbrowser.utils.Sorting
 import space.taran.arkbrowser.utils.Tags
 import space.taran.arkbrowser.utils.extension
 import java.nio.file.Files
@@ -47,7 +48,7 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
             App.instance.appComponent.inject(this)
         }
 
-    private lateinit var gridAdapter: ResourcesGridAdapter
+    private lateinit var gridAdapter: ResourcesGrid
 
     private lateinit var menuTagsOn: MenuItem
     private lateinit var menuTagsOff: MenuItem
@@ -61,7 +62,7 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
         container: ViewGroup?,
         savedInstanceState: Bundle?): View? {
 
-        Log.d(RESOURCES_SCREEN, "creating view in ResourcesFragment")
+        Log.d(RESOURCES_SCREEN, "inflating layout for ResourcesFragment")
         return inflater.inflate(R.layout.fragment_tags, container, false)
     }
 
@@ -90,7 +91,7 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        Log.d(RESOURCES_SCREEN, "creating options menu in ResourcesFragment")
+        Log.d(RESOURCES_SCREEN, "inflating options menu in ResourcesFragment")
         inflater.inflate(R.menu.menu_tags_screen, menu)
 
         menuTagsOn = menu.findItem(R.id.menu_tags_on)
@@ -107,16 +108,16 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
     }
 
 
-    override fun init(grid: ResourcesGrid) {
+    override fun init(grid: ResourcesList) {
         Log.d(RESOURCES_SCREEN, "initializing ResourcesFragment")
         (activity as MainActivity).setSelectedTab(1)
         (activity as MainActivity).setToolbarVisibility(true)
         setHasOptionsMenu(true)
 
-        gridAdapter = ResourcesGridAdapter(grid)
+        gridAdapter = ResourcesGrid(grid)
 
-        rv_tags.adapter = gridAdapter
-        rv_tags.layoutManager = GridLayoutManager(context, 3)
+        rv_resources.adapter = gridAdapter
+        rv_resources.layoutManager = GridLayoutManager(context, 3)
 
         val tags = presenter.listTagsForAllResources()
         if (tags.isNotEmpty()) {
@@ -155,6 +156,9 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
 
         //todo filter-out untagged resources }
 
+        //todo: selector produces `Query` which is just set of tags right now
+        //(so it can represent only conjunction of tags), but will change in future
+        //in the way it will also support negation and disjunction
         chipg_tags.visibility = View.VISIBLE
 
         Log.d(RESOURCES_SCREEN, "tags loaded: $tags")
@@ -210,8 +214,8 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
 
         chipg_tags.visibility = View.GONE
 
-        gridAdapter.updateItems(Unit,
-            presenter.listUntaggedResources().toList())
+        gridAdapter.updateItems(presenter.listUntaggedResources().toList())
+        //todo hmm
     }
 
     private fun showTagsOnOffButtons() {
@@ -286,8 +290,4 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
 
         dialog = alertBuilder.show()
     }
-}
-
-enum class Sorting {
-    DEFAULT, NAME, SIZE, LAST_MODIFIED, TYPE
 }
