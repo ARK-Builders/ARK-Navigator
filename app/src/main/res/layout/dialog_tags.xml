@@ -30,7 +30,7 @@
         android:hint="Add">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/et_tags"
+            android:id="@+id/new_tags"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:imeOptions="actionDone"

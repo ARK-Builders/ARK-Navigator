@@ -2,6 +2,7 @@ package space.taran.arkbrowser.mvp.model.repo
 
 import android.util.Log
 import space.taran.arkbrowser.mvp.model.dao.ResourceId
+import space.taran.arkbrowser.utils.Constants.Companion.NO_TAGS
 import space.taran.arkbrowser.utils.Converters.Companion.stringFromTags
 import space.taran.arkbrowser.utils.Converters.Companion.tagsFromString
 import space.taran.arkbrowser.utils.TAGS_STORAGE
@@ -22,33 +23,62 @@ import java.nio.file.attribute.FileTime
 // The storage is being read from the FS both during application startup
 // and during application lifecycle since it can be changed from outside.
 // We also must persist all changes during application lifecycle into FS.
-class PlainTagsStorage private constructor(root: Path): TagsStorage {
+class PlainTagsStorage
+    private constructor(
+        root: Path,
+        resources: Collection<ResourceId>): TagsStorage {
+
     private val storageFile: Path = root.resolve(STORAGE_FILENAME)
 
     private var lastModified: FileTime = FileTime.fromMillis(0L)
 
-    private val tagsById: MutableMap<ResourceId, Tags> =
+    private val tagsById: MutableMap<ResourceId, Tags> = {
+        val result = resources.map { it to NO_TAGS }
+            .toMap()
+            .toMutableMap()
+
         if (Files.exists(storageFile)) {
             lastModified = Files.getLastModifiedTime(storageFile)
 
-            Log.d(TAGS_STORAGE, "file $storageFile exists" +
-                ", last modified at $lastModified")
+            Log.d(
+                TAGS_STORAGE, "file $storageFile exists" +
+                        ", last modified at $lastModified"
+            )
 
-            readStorage().toMutableMap()
+            result.putAll(readStorage())
         } else {
             Log.d(TAGS_STORAGE, "file $storageFile doesn't exist")
-            mutableMapOf()
         }
+
+        result
+    }()
 
     //todo `listAllTags`
 
-    override fun listTags(id: ResourceId): Tags = tagsById[id] ?: setOf()
+    // if this id isn't present in storage, then the call is wrong
+    override fun getTags(id: ResourceId): Tags = tagsById[id]!!
 
-    override fun listResources(): Set<ResourceId> = tagsById.keys
+    override fun setTags(id: ResourceId, tags: Tags) {
+        if (!tagsById.containsKey(id)) {
+            throw AssertionError("Storage isn't aware about this resource id")
+        }
 
-    override fun forgetResources(ids: Collection<ResourceId>) {
-        Log.d(TAGS_STORAGE, "forgetting ${ids.size} resources")
-        ids.forEach { tagsById.remove(it) }
+        Log.d(TAGS_STORAGE, "new tags for resource $id: $tags")
+        tagsById[id] = tags
+
+        persist()
+    }
+
+    override fun listTaggedResources(): Set<ResourceId> =
+        tagsById
+            .filter { (_, tags) -> tags.isNotEmpty() }
+            .keys
+
+    override fun cleanup(existing: Collection<ResourceId>) {
+        val disappeared = tagsById.keys.minus(existing)
+
+        Log.d(TAGS_STORAGE, "forgetting ${disappeared.size} resources")
+        disappeared.forEach { tagsById.remove(it) }
         persist()
     }
 
@@ -90,7 +120,7 @@ class PlainTagsStorage private constructor(root: Path): TagsStorage {
             }
         }
 
-        if (tagsById.isEmpty()) {
+        if (tagsById.isEmpty() || tagsById.all { it.value.isEmpty() }) {
             if (exists) {
                 Log.d(TAGS_STORAGE, "no tagged resources, deleting storage file")
                 Files.delete(storageFile)
@@ -111,15 +141,17 @@ class PlainTagsStorage private constructor(root: Path): TagsStorage {
                 val id = parts[0].toLong()
                 val tags = tagsFromString(parts[1])
 
-                if (tags.isEmpty()) throw AssertionError(
-                    "Tags storage must not contain empty sets of tags")
+                if (tags.isEmpty()) {
+                    throw AssertionError("Tags storage must not contain empty sets of tags")
+                }
 
                 id to tags
             }
             .toMap()
 
-        if (result.isEmpty()) throw AssertionError(
-            "Tags storage must not be empty")
+        if (result.isEmpty()) {
+            throw AssertionError("Tags storage must not be empty")
+        }
 
         Log.d(TAGS_STORAGE, "${result.size} entries has been read")
         return result
@@ -127,9 +159,10 @@ class PlainTagsStorage private constructor(root: Path): TagsStorage {
 
     private fun writeStorage() {
         val lines = mutableListOf<String>()
-
         lines.add("$STORAGE_VERSION_PREFIX$STORAGE_VERSION")
-        lines.addAll(tagsById.map { (id, tags) ->
+
+        val entries = tagsById.filterValues { it.isNotEmpty() }
+        lines.addAll(entries.map { (id, tags) ->
             "$id$KEY_VALUE_SEPARATOR ${stringFromTags(tags)}"
         })
 
@@ -158,13 +191,16 @@ class PlainTagsStorage private constructor(root: Path): TagsStorage {
 
         private val storageByRoot = mutableMapOf<Path, PlainTagsStorage>()
 
-        fun provide(root: Path): PlainTagsStorage {
+        fun provide(root: Path, resources: Collection<ResourceId>): PlainTagsStorage {
             val storage = storageByRoot[root]
             if (storage != null) {
+                if (storage.tagsById.keys != resources) {
+                    throw AssertionError("Index and storage diverged")
+                }
                 return storage
             }
 
-            val fresh = PlainTagsStorage(root)
+            val fresh = PlainTagsStorage(root, resources)
             storageByRoot[root] = fresh
             return fresh
         }

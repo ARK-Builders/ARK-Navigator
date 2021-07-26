@@ -17,9 +17,9 @@
             android:id="@+id/tags_cg"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="10dp"
             android:layout_alignParentBottom="true"
-            />
+            android:padding="10dp"
+            android:visibility="visible" />
     </RelativeLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

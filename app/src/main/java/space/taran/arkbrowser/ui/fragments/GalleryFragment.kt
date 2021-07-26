@@ -7,24 +7,29 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AlertDialog
+import androidx.core.view.ViewCompat
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.chip.Chip
-import space.taran.arkbrowser.R
-import space.taran.arkbrowser.mvp.presenter.GalleryPresenter
-import space.taran.arkbrowser.mvp.view.GalleryView
-import space.taran.arkbrowser.ui.App
-import space.taran.arkbrowser.ui.activity.MainActivity
-import space.taran.arkbrowser.ui.adapter.PreviewsPager
 import kotlinx.android.synthetic.main.dialog_tags.view.*
-import kotlinx.android.synthetic.main.fragment_detail.*
+import kotlinx.android.synthetic.main.fragment_gallery.*
 import moxy.MvpAppCompatFragment
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
+import space.taran.arkbrowser.R
 import space.taran.arkbrowser.mvp.model.dao.ResourceId
 import space.taran.arkbrowser.mvp.model.repo.ResourcesIndex
 import space.taran.arkbrowser.mvp.model.repo.TagsStorage
+import space.taran.arkbrowser.mvp.presenter.GalleryPresenter
 import space.taran.arkbrowser.mvp.presenter.adapter.PreviewsList
+import space.taran.arkbrowser.mvp.view.GalleryView
+import space.taran.arkbrowser.mvp.view.NotifiableView
+import space.taran.arkbrowser.ui.App
+import space.taran.arkbrowser.ui.activity.MainActivity
+import space.taran.arkbrowser.ui.adapter.PreviewsPager
+import space.taran.arkbrowser.ui.fragments.utils.Notifications
 import space.taran.arkbrowser.utils.*
+import java.lang.AssertionError
+
 
 //todo: use Bundle if resume doesn't work
 
@@ -32,8 +37,9 @@ class GalleryFragment(
     private val index: ResourcesIndex,
     private val storage: TagsStorage,
     private val resources: List<ResourceId>,
-    private val startAt: Int)
-    : MvpAppCompatFragment(), GalleryView, BackButtonListener {
+    private val startAt: Int
+)
+    : MvpAppCompatFragment(), GalleryView, BackButtonListener, NotifiableView {
 
     private var dialogView: View? = null
     private var dialog: AlertDialog? = null
@@ -43,7 +49,7 @@ class GalleryFragment(
 
     @ProvidePresenter
     fun providePresenter() =
-        GalleryPresenter(index, storage, resources, startAt).apply {
+        GalleryPresenter(index, storage, resources).apply {
             Log.d(GALLERY_SCREEN, "creating GalleryPresenter")
             App.instance.appComponent.inject(this)
         }
@@ -53,10 +59,11 @@ class GalleryFragment(
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?): View? {
+        savedInstanceState: Bundle?
+    ): View? {
 
         Log.d(GALLERY_SCREEN, "inflating layout for GalleryFragment")
-        return inflater.inflate(R.layout.fragment_detail, container, false)
+        return inflater.inflate(R.layout.fragment_gallery, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -65,11 +72,12 @@ class GalleryFragment(
         App.instance.appComponent.inject(this)
     }
 
+    //todo
     //        view_pager.adapter?.notifyDataSetChanged()
 
     override fun init(previews: PreviewsList) {
-        Log.d(GALLERY_SCREEN, "initializing GalleryFragment, " +
-            "position = $startAt")
+        Log.d(GALLERY_SCREEN, "initializing GalleryFragment, position = $startAt")
+        Log.d(GALLERY_SCREEN, "currentItem = ${view_pager.currentItem}")
 
         (activity as MainActivity).setToolbarVisibility(true)
 
@@ -78,26 +86,32 @@ class GalleryFragment(
         view_pager.adapter = adapter
         view_pager.offscreenPageLimit = 2
 
-        view_pager.setCurrentItem(previews.position(), false)
+        view_pager.setCurrentItem(startAt, false)
 
-        view_pager.registerOnPageChangeCallback(object: ViewPager2.OnPageChangeCallback() {
+        view_pager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            private var workaround = true
+
             override fun onPageSelected(position: Int) {
-                Log.d(GALLERY_SCREEN, "[mock] changing to preview at position $position")
-                val resource = resources[position]
-                presenter
-                setImageTags(storage.listTags(resource))
-                setTitle(index.getPath(resource)!!.fileName.toString())
+                if (!workaround) {
+                    //weird bug causes this callback be called redundantly if startAt == 0
+                    Log.d(GALLERY_SCREEN, "changing to preview at position $position")
+                    displayPreview(position)
+                }
+                workaround = false
             }
         })
 
+        displayPreview(startAt)
+
         edit_tags_fab.setOnClickListener {
-            Log.d(GALLERY_SCREEN, "[mock] [edit_tags] clicked")
-            showTagsDialog(storage.listTags(resources[previews.position()]))
+            val position = view_pager.currentItem
+            Log.d(GALLERY_SCREEN, "[edit_tags] clicked at position $position")
+            showEditTagsDialog(position)
         }
     }
 
     override fun setTitle(title: String) {
-        (activity as MainActivity).setTitle(title)
+        activity?.title = title
     }
 
     override fun onPause() {
@@ -111,8 +125,20 @@ class GalleryFragment(
         return presenter.backClicked()
     }
 
-    private fun showTagsDialog(tags: Tags) {
-        Log.d(GALLERY_SCREEN, "showing tags dialog in GalleryFragment")
+    override fun notifyUser(message: String, moreTime: Boolean) {
+        Notifications.notifyUser(context, message, moreTime)
+    }
+
+    private fun showEditTagsDialog(position: Int) {
+        val resource = resources[position]
+        Log.d(GALLERY_SCREEN, "showing [edit-tags] dialog for position $position")
+        showEditTagsDialog(resource)
+    }
+
+    private fun showEditTagsDialog(resource: ResourceId) {
+        Log.d(GALLERY_SCREEN, "showing [edit-tags] dialog for resource $resource")
+
+        val tags = presenter.listTags(resource)
 
         dialogView = LayoutInflater.from(context!!).inflate(R.layout.dialog_tags, null)
         val alertDialogBuilder = AlertDialog.Builder(context!!).setView(dialogView)
@@ -123,27 +149,18 @@ class GalleryFragment(
             dialogView!!.chipg_dialog_detail.visibility = View.GONE
         }
 
-        //dialogView?.chipg_dialog_detail?.removeAllViews()
+        dialogView?.chipg_dialog_detail?.removeAllViews()
 
-        tags.forEach { tag ->
-            val chip = Chip(context)
-            chip.text = tag
-            chip.isCloseIconVisible = true
-            chip.setOnCloseIconClickListener {
-                removeTag(tag)
-            }
-            dialogView?.chipg_dialog_detail?.addView(chip)
-        }
+        displayDialogTags(resource, tags)
 
-        dialogView!!.et_tags.setOnEditorActionListener { _, actionId, _ ->
+        dialogView!!.new_tags.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
-                val newTags = Converters.tagsFromString(dialogView!!.et_tags.text.toString())
+                val newTags = Converters.tagsFromString(dialogView!!.new_tags.text.toString())
                 if (newTags.isEmpty() || newTags.contains(Constants.EMPTY_TAG)) {
                     return@setOnEditorActionListener false
                 }
 
-                replaceTags(newTags)
-                closeDialog()
+                replaceTags(resource, tags + newTags)
                 true
             } else {
                 false
@@ -152,68 +169,83 @@ class GalleryFragment(
 
         dialog = alertDialogBuilder.show()
         dialog!!.setOnCancelListener {
-            closeDialog()
+            closeEditTagsDialog()
         }
     }
 
-    private fun closeDialog() {
-        Log.d(GALLERY_SCREEN, "closing dialog in GalleryFragment")
-        dialog?.dismiss()
+    private fun displayPreview(position: Int) {
+        val resource = resources[position]
+        val tags = presenter.listTags(resource)
+        displayPreviewTags(resource, tags)
+        setTitle(index.getPath(resource)!!.fileName.toString())
     }
 
-    private fun setDialogTags(imageTags: Tags) {
-        Log.d(GALLERY_SCREEN, "setting dialog tags in GalleryFragment")
+    private fun displayDialogTags(resource: ResourceId, tags: Tags) {
+        Log.d(GALLERY_SCREEN, "displaying tags resource $resource for edit")
 
-        if (imageTags.isNotEmpty())
+        if (tags.isNotEmpty()) {
             dialogView?.chipg_dialog_detail?.visibility = View.VISIBLE
-        else
+        } else {
             dialogView?.chipg_dialog_detail?.visibility = View.GONE
+        }
         dialogView?.chipg_dialog_detail?.removeAllViews()
-        imageTags.forEach { tag ->
+
+        tags.forEach { tag ->
             val chip = Chip(context)
             chip.text = tag
             chip.isCloseIconVisible = true
             chip.setOnCloseIconClickListener {
-                removeTag(tag)
+                Log.d(GALLERY_SCREEN, "tag $tag on resource $resource close-icon-clicked")
+                removeTag(resource, tags, tag)
             }
             dialogView?.chipg_dialog_detail?.addView(chip)
         }
-
     }
 
-    private fun setImageTags(imageTags: Tags) {
-        Log.d(GALLERY_SCREEN, "setting image tags in GalleryFragment")
+    private fun displayPreviewTags(resource: ResourceId, tags: Tags) {
+        Log.d(GALLERY_SCREEN, "displaying tags of resource $resource for preview")
 
-        if (imageTags.isEmpty())
+        if (tags.isEmpty()) {
             edit_tags_fab.visibility = View.VISIBLE
-        else
+        } else {
             edit_tags_fab.visibility = View.GONE
+        }
 
         tags_cg.removeAllViews()
 
-        imageTags.forEach { tag ->
+        tags.forEach { tag ->
             val chip = Chip(context)
             chip.text = tag
+
             chip.setOnClickListener {
-                Log.d(GALLERY_SCREEN, "[mock] chip group clicked")
-                //viewState.showTagsDialog(currentResource.tags)
+                Log.d(GALLERY_SCREEN, "tag $tag on resource $resource clicked")
+                showEditTagsDialog(resource)
             }
+
+            chip.setOnLongClickListener {
+                Log.d(GALLERY_SCREEN, "tag $tag on resource $resource long-clicked")
+                removeTag(resource, tags, tag)
+                true
+            }
+
             tags_cg.addView(chip)
         }
     }
 
-    private fun replaceTags(tags: Tags) {
-        presenter.replaceTags(tags)
-        setImageTags(tags)
-        setDialogTags(tags)
+    private fun removeTag(resource: ResourceId, tags: Tags, tag: Tag) {
+        notifyUser("Tag \"$tag\" removed")
+        replaceTags(resource, tags - tag)
     }
 
-    private fun removeTag(tag: Tag) {
-        Log.d(GALLERY_SCREEN, "[mock] tag $tag removed")
-//        currentResource.tags = currentResource.tags - tag
-//
-//        setImageTags(currentResource.tags)
-//        setDialogTags(currentResource.tags)
-        presenter.removeTag(tag)
+    private fun replaceTags(resource: ResourceId, tags: Tags) {
+        closeEditTagsDialog()
+        presenter.replaceTags(resource, tags)
+        displayPreviewTags(resource, tags)
+        displayDialogTags(resource, tags)
+    }
+
+    private fun closeEditTagsDialog() {
+        Log.d(GALLERY_SCREEN, "closing dialog in GalleryFragment")
+        dialog?.dismiss()
     }
 }

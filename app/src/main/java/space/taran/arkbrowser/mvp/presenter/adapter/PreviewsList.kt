@@ -4,8 +4,7 @@ import space.taran.arkbrowser.mvp.model.dao.common.Preview
 import space.taran.arkbrowser.mvp.view.item.PreviewItemView
 
 class PreviewsList(
-    private val previews: List<Preview>,
-    private val position: Int)
+    private val previews: List<Preview>)
     : ItemsPresenter<Preview, PreviewItemView>() {
 
     override fun items() = previews
@@ -24,6 +23,4 @@ class PreviewsList(
             view.setImage(preview.image!!)
         }
     }
-
-    fun position() = position
 }

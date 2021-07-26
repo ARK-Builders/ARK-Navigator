@@ -9,7 +9,7 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.GridLayoutManager
 import kotlinx.android.synthetic.main.dialog_roots_new.view.*
-import kotlinx.android.synthetic.main.fragment_roots.*
+import kotlinx.android.synthetic.main.fragment_folders.*
 import moxy.MvpAppCompatFragment
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
@@ -71,7 +71,7 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
         savedInstanceState: Bundle?): View? {
 
         Log.d(FOLDERS_SCREEN, "inflating layout for FoldersFragment")
-        return inflater.inflate(R.layout.fragment_roots, container, false)
+        return inflater.inflate(R.layout.fragment_folders, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

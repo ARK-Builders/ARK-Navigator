@@ -18,18 +18,15 @@ import javax.inject.Inject
 class GalleryPresenter(
     private val index: ResourcesIndex,
     private val storage: TagsStorage,
-    private val resources: List<ResourceId>,
-    private val initialPosition: Int)
+    private val resources: List<ResourceId>)
     : MvpPresenter<GalleryView>() {
 
     @Inject
     lateinit var router: Router
 
-    private var currentResource: ResourceId = resources[0]
-
     private val previews = PreviewsList(resources.map {
         Preview.provide(index.getPath(it)!!)
-    }, initialPosition)
+    })
 
     override fun onFirstViewAttach() {
         Log.d(GALLERY_SCREEN, "first view attached in GalleryPresenter")
@@ -37,23 +34,15 @@ class GalleryPresenter(
         viewState.init(previews)
     }
 
-    fun removeTag(tag: String) {
-        Log.d(GALLERY_SCREEN, "[mock] tag $tag removed from $currentResource")
-        //roomRepo.insertResource(currentResource)
+    fun listTags(resource: ResourceId): Tags {
+        val tags = storage.getTags(resource)
+        Log.d(GALLERY_SCREEN, "resource $resource has tags $tags")
+        return tags
     }
 
-    // returns true if tags were actually added
-    fun replaceTags(tags: Tags) {
-        Log.d(GALLERY_SCREEN, "[mock] tags $tags added to $currentResource")
-        //        currentResource.tags = currentResource.tags.plus(tags)
-        //
-        //        if (currentResource.synchronized)
-        //            roomRepo.insertResource(currentResource)
-        //
-        //        if (root.synchronized) {
-        //            resourcesRepo.writeToStorageAsync(root.storage, root.resources)
-        //            roomRepo.insertRoot(root)
-        //        }
+    fun replaceTags(resource: ResourceId, tags: Tags) {
+        Log.d(GALLERY_SCREEN, "tags $tags added to $resource")
+        storage.setTags(resource, tags)
     }
 
     fun backClicked(): Boolean {

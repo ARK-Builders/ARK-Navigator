@@ -14,7 +14,7 @@ import space.taran.arkbrowser.mvp.presenter.ResourcesPresenter
 import space.taran.arkbrowser.mvp.view.ResourcesView
 import space.taran.arkbrowser.ui.App
 import space.taran.arkbrowser.ui.activity.MainActivity
-import kotlinx.android.synthetic.main.fragment_tags.*
+import kotlinx.android.synthetic.main.fragment_resources.*
 import moxy.MvpAppCompatFragment
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
@@ -63,7 +63,7 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
         savedInstanceState: Bundle?): View? {
 
         Log.d(RESOURCES_SCREEN, "inflating layout for ResourcesFragment")
-        return inflater.inflate(R.layout.fragment_tags, container, false)
+        return inflater.inflate(R.layout.fragment_resources, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -180,6 +180,7 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
 //                    ColorStateList.valueOf(ContextCompat.getColor(context!!, R.color.colorPrimary))
 //                chip.setTextColor(ContextCompat.getColor(context!!, R.color.white))
 //            }
+
             chip.setOnClickListener {
 //                Log.d(RESOURCES_SCREEN, "tag checked clicked in ResourcesPresenter")
 //                val tagState = tagStates.find { tagState -> tagState.tag == tag }
@@ -190,6 +191,7 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
             chipg_tags.addView(chip)
         }
 
+        //todo if selected only
         if (tags.size > 1) {
             val chip = Chip(context)
             chip.chipIcon = ContextCompat.getDrawable(context!!, R.drawable.ic_close)

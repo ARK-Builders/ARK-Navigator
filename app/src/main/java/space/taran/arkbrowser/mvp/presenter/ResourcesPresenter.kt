@@ -9,6 +9,7 @@ import space.taran.arkbrowser.mvp.model.repo.*
 import space.taran.arkbrowser.mvp.presenter.adapter.ResourcesList
 import space.taran.arkbrowser.navigation.Screens
 import space.taran.arkbrowser.ui.fragments.utils.Notifications
+import space.taran.arkbrowser.utils.Constants.Companion.NO_TAGS
 import space.taran.arkbrowser.utils.RESOURCES_SCREEN
 import space.taran.arkbrowser.utils.Tags
 import java.nio.file.Path
@@ -32,16 +33,16 @@ class ResourcesPresenter(
     private lateinit var index: ResourcesIndex
     private lateinit var storage: TagsStorage
 
-    private lateinit var grid: ResourcesList
+    private lateinit var resources: ResourcesList
 
 
-    fun listTagsForAllResources(): Tags = grid.items()
-        .flatMap { storage.listTags(it) }
+    fun listTagsForAllResources(): Tags = resources.items()
+        .flatMap { storage.getTags(it) }
         .toSet()
 
     fun listUntaggedResources(): Set<ResourceId> =
         index.listIds(prefix).toSet()
-            .minus(storage.listResources())
+            .minus(storage.listTaggedResources())
 
 
     override fun onFirstViewAttach() {
@@ -72,30 +73,29 @@ class ResourcesPresenter(
             .toMap()
 
         val rootToStorage = roots
-            .map { it to PlainTagsStorage.provide(it) }
+            .map { it to PlainTagsStorage.provide(it, rootToIndex[it]!!.listAllIds()) }
             .toMap()
+
+        //todo: when async indexing will be ready, tagged ids must be boosted
+        //in the indexing queue and be removed if they fail to be indexed
 
         roots.forEach { root ->
             val storage = rootToStorage[root]!!
+            val indexed = rootToIndex[root]!!.listAllIds()
 
-            val indexed = rootToIndex[root]!!.listIds(null)
-            val tagged = storage.listResources()
-
-            //todo: when async indexing will be ready, tagged ids must be boosted
-            //in the indexing queue and be removed only if they fail to be indexed
-            storage.forgetResources(tagged - indexed.toSet())
+            storage.cleanup(indexed)
         }
 
         index = AggregatedResourcesIndex(rootToIndex.values)
         storage = AggregatedTagsStorage(rootToStorage.values)
 
         //todo: with async indexing we must display non-indexed-yet resources too
-        val resources = index.listIds(prefix)
-        grid = ResourcesList(index, resources) { position, resource ->
+        val resourceIds = index.listIds(prefix)
+        resources = ResourcesList(index, resourceIds) { position, resource ->
             Log.d(RESOURCES_SCREEN, "resource $resource at $position clicked " +
                 "in ResourcesPresenter/ItemGridPresenter")
 
-            router.navigateTo(Screens.GalleryScreen(index, storage, resources, position))
+            router.navigateTo(Screens.GalleryScreen(index, storage, resourceIds, position))
 
             //todo: long-press handler
             //        viewState.openFile(
@@ -103,9 +103,7 @@ class ResourcesPresenter(
             //            DocumentFile.fromFile(resource.file).type!!)
         }
 
-
-
-        viewState.init(grid)
+        viewState.init(this.resources)
 
         val title = {
             val path = (prefix ?: root)

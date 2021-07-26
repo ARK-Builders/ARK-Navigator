@@ -1,6 +1,7 @@
 package space.taran.arkbrowser.mvp.model.repo
 
 import space.taran.arkbrowser.mvp.model.dao.ResourceId
+import space.taran.arkbrowser.utils.Tag
 import space.taran.arkbrowser.utils.Tags
 
 class AggregatedTagsStorage(
@@ -9,19 +10,24 @@ class AggregatedTagsStorage(
 
     // if we have several copies of a resource across shards,
     // then we receive all tags for the resource
-    override fun listTags(id: ResourceId): Tags =
+    override fun getTags(id: ResourceId): Tags =
         shards
-            .flatMap { it.listTags(id) }
+            .flatMap { it.getTags(id) }
             .toSet()
 
-    override fun listResources(): Set<ResourceId> =
-        shards
-            .flatMap { it.listResources() }
-            .toSet()
-
-    override fun forgetResources(ids: Collection<ResourceId>) =
+    override fun setTags(id: ResourceId, tags: Tags) =
         shards.forEach {
-            it.forgetResources(ids)
+            it.setTags(id, tags)
+        }
+
+    override fun listTaggedResources(): Set<ResourceId> =
+        shards
+            .flatMap { it.listTaggedResources() }
+            .toSet()
+
+    override fun cleanup(existing: Collection<ResourceId>) =
+        shards.forEach {
+            it.cleanup(existing)
         }
 
 }
