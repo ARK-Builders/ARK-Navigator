@@ -92,7 +92,7 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
             R.id.menu_tags_on -> {
                 val tags = presenter.listTagsForAllResources()
                 if (tags.isNotEmpty()) {
-                    initResources(presenter.provideResources())
+                    initResources(presenter.provideResourcesList())
                 } else {
                     notifyUser("Tag something first")
                 }

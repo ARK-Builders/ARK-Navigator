@@ -18,7 +18,7 @@ import javax.inject.Inject
 class GalleryPresenter(
     private val index: ResourcesIndex,
     private val storage: TagsStorage,
-    private val resources: List<ResourceId>)
+    resources: List<ResourceId>)
     : MvpPresenter<GalleryView>() {
 
     @Inject

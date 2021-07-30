@@ -98,7 +98,7 @@ class ResourcesPresenter(
         //todo: with async indexing we must display non-indexed-yet resources too
         resources = index.listIds(prefix)
 
-        viewState.init(provideResources())
+        viewState.init(provideResourcesList())
 
         val title = {
             val path = (prefix ?: root)
@@ -113,12 +113,12 @@ class ResourcesPresenter(
         super.onDestroy()
     }
 
-    fun provideResources(): ResourcesList =
-        ResourcesList(index, resources) { position, resource ->
+    fun provideResourcesList(): ResourcesList {
+        var resourcesList: ResourcesList? = null
+        resourcesList = ResourcesList(index, resources) { position, resource ->
             Log.d(RESOURCES_SCREEN, "resource $resource at $position clicked ItemGridPresenter")
 
-            //todo not `this.resources` but `somewhere.resourcesSelection`
-            router.navigateTo(Screens.GalleryScreen(index, storage, resources, position))
+            router.navigateTo(Screens.GalleryScreen(index, storage, resourcesList!!.items(), position))
 
             //todo: long-press handler
             //        viewState.openFile(
@@ -138,4 +138,7 @@ class ResourcesPresenter(
             //        }
             //    }
         }
+
+        return resourcesList
+    }
 }

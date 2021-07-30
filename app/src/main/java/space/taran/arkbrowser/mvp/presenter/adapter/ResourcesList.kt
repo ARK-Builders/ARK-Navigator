@@ -25,7 +25,7 @@ import java.nio.file.Path
 class ResourcesList(
     private val index: ResourcesIndex,
     private var resources: List<ResourceId>,
-    private var handler: ItemClickHandler<ResourceId>)
+    handler: ItemClickHandler<ResourceId>)
     : ItemsClickablePresenter<ResourceId, FileItemView>(handler) {
 
     fun <T: Comparable<T>>sortedBy(selector: (Path) -> T) =
