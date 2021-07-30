@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AlertDialog
-import androidx.core.view.ViewCompat
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.chip.Chip
 import kotlinx.android.synthetic.main.dialog_tags.view.*
@@ -28,8 +27,6 @@ import space.taran.arkbrowser.ui.activity.MainActivity
 import space.taran.arkbrowser.ui.adapter.PreviewsPager
 import space.taran.arkbrowser.ui.fragments.utils.Notifications
 import space.taran.arkbrowser.utils.*
-import java.lang.AssertionError
-
 
 //todo: use Bundle if resume doesn't work
 
@@ -72,9 +69,6 @@ class GalleryFragment(
         App.instance.appComponent.inject(this)
     }
 
-    //todo
-    //        view_pager.adapter?.notifyDataSetChanged()
-
     override fun init(previews: PreviewsList) {
         Log.d(GALLERY_SCREEN, "initializing GalleryFragment, position = $startAt")
         Log.d(GALLERY_SCREEN, "currentItem = ${view_pager.currentItem}")
@@ -92,7 +86,7 @@ class GalleryFragment(
             private var workaround = true
 
             override fun onPageSelected(position: Int) {
-                if (!workaround) {
+                if (startAt > 0 || !workaround) {
                     //weird bug causes this callback be called redundantly if startAt == 0
                     Log.d(GALLERY_SCREEN, "changing to preview at position $position")
                     displayPreview(position)

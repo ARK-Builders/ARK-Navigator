@@ -16,6 +16,8 @@ const val FOLDER_PICKER: String = "folder-picker"
 
 const val FOLDERS_TREE: String = "folders-tree"
 
+const val TAGS_SELECTOR: String = "tags-selector"
+
 const val TAGS_STORAGE: String = "tags-storage"
 
 const val ITEMS_CONTAINER: String = "item-container"

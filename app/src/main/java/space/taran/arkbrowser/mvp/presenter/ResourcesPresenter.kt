@@ -9,7 +9,6 @@ import space.taran.arkbrowser.mvp.model.repo.*
 import space.taran.arkbrowser.mvp.presenter.adapter.ResourcesList
 import space.taran.arkbrowser.navigation.Screens
 import space.taran.arkbrowser.ui.fragments.utils.Notifications
-import space.taran.arkbrowser.utils.Constants.Companion.NO_TAGS
 import space.taran.arkbrowser.utils.RESOURCES_SCREEN
 import space.taran.arkbrowser.utils.Tags
 import java.nio.file.Path
@@ -33,16 +32,23 @@ class ResourcesPresenter(
     private lateinit var index: ResourcesIndex
     private lateinit var storage: TagsStorage
 
-    private lateinit var resources: ResourcesList
+    private lateinit var resources: List<ResourceId>
 
 
-    fun listTagsForAllResources(): Tags = resources.items()
+    fun listTagsForAllResources(): Tags = resources
         .flatMap { storage.getTags(it) }
         .toSet()
 
-    fun listUntaggedResources(): Set<ResourceId> =
-        index.listIds(prefix).toSet()
-            .minus(storage.listTaggedResources())
+    fun listUntaggedResources(): Set<ResourceId> = resources
+        .toSet()
+        .minus(storage.listTaggedResources())
+
+    fun createTagsSelector(): TagsSelector? {
+        val tags = listTagsForAllResources()
+        Log.d(RESOURCES_SCREEN, "tags loaded: $tags")
+
+        return TagsSelector(tags, resources.toSet(), storage)
+    }
 
 
     override fun onFirstViewAttach() {
@@ -90,20 +96,9 @@ class ResourcesPresenter(
         storage = AggregatedTagsStorage(rootToStorage.values)
 
         //todo: with async indexing we must display non-indexed-yet resources too
-        val resourceIds = index.listIds(prefix)
-        resources = ResourcesList(index, resourceIds) { position, resource ->
-            Log.d(RESOURCES_SCREEN, "resource $resource at $position clicked " +
-                "in ResourcesPresenter/ItemGridPresenter")
+        resources = index.listIds(prefix)
 
-            router.navigateTo(Screens.GalleryScreen(index, storage, resourceIds, position))
-
-            //todo: long-press handler
-            //        viewState.openFile(
-            //            filesRepo.fileDataSource.getUriForFileByProvider(resource.file),
-            //            DocumentFile.fromFile(resource.file).type!!)
-        }
-
-        viewState.init(this.resources)
+        viewState.init(provideResources())
 
         val title = {
             val path = (prefix ?: root)
@@ -117,4 +112,30 @@ class ResourcesPresenter(
         Log.d(RESOURCES_SCREEN, "destroying ResourcesPresenter")
         super.onDestroy()
     }
+
+    fun provideResources(): ResourcesList =
+        ResourcesList(index, resources) { position, resource ->
+            Log.d(RESOURCES_SCREEN, "resource $resource at $position clicked ItemGridPresenter")
+
+            //todo not `this.resources` but `somewhere.resourcesSelection`
+            router.navigateTo(Screens.GalleryScreen(index, storage, resources, position))
+
+            //todo: long-press handler
+            //        viewState.openFile(
+            //            filesRepo.fileDataSource.getUriForFileByProvider(resource.file),
+            //            DocumentFile.fromFile(resource.file).type!!)
+
+            //in view:
+            //    fun openFile(uri: Uri, mimeType: String) {
+            //        Log.d(RESOURCES_SCREEN, "opening file $uri in ResourcesFragment")
+            //        try {
+            //            val intent = Intent(Intent.ACTION_VIEW)
+            //            intent.setDataAndType(uri, mimeType)
+            //            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            //            startActivity(intent)
+            //        } catch (e: Exception) {
+            //            Toast.makeText(context, "No app can handle this file", Toast.LENGTH_SHORT).show()
+            //        }
+            //    }
+        }
 }

@@ -1,13 +1,10 @@
 package space.taran.arkbrowser.ui.fragments
 
-import android.content.res.ColorStateList
 import android.os.Bundle
 import android.util.Log
 import android.view.*
 import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
-import com.google.android.material.chip.Chip
 import kotlinx.android.synthetic.main.dialog_sort.view.*
 import space.taran.arkbrowser.R
 import space.taran.arkbrowser.mvp.presenter.ResourcesPresenter
@@ -21,10 +18,8 @@ import moxy.presenter.ProvidePresenter
 import space.taran.arkbrowser.mvp.presenter.adapter.ResourcesList
 import space.taran.arkbrowser.ui.adapter.ResourcesGrid
 import space.taran.arkbrowser.ui.fragments.utils.Notifications
-import space.taran.arkbrowser.utils.RESOURCES_SCREEN
-import space.taran.arkbrowser.utils.Sorting
-import space.taran.arkbrowser.utils.Tags
-import space.taran.arkbrowser.utils.extension
+import space.taran.arkbrowser.mvp.presenter.TagsSelector
+import space.taran.arkbrowser.utils.*
 import java.nio.file.Files
 import java.nio.file.Path
 
@@ -69,7 +64,23 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         Log.d(RESOURCES_SCREEN, "view created in ResourcesFragment")
         super.onViewCreated(view, savedInstanceState)
+
         App.instance.appComponent.inject(this)
+    }
+
+    //todo:
+    //      case: open folder, click [tags off], then [tags on], open resource, go [back]
+    //      expected: all resources displayed
+    //      actual: only untagged resources displayed
+    //      (apparently, wrong state restored)
+
+    override fun init(grid: ResourcesList) {
+        Log.d(RESOURCES_SCREEN, "initializing ResourcesFragment")
+        (activity as MainActivity).setSelectedTab(1)
+        (activity as MainActivity).setToolbarVisibility(true)
+        setHasOptionsMenu(true)
+
+        initResources(grid)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -81,7 +92,7 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
             R.id.menu_tags_on -> {
                 val tags = presenter.listTagsForAllResources()
                 if (tags.isNotEmpty()) {
-                    enableTags(tags)
+                    initResources(presenter.provideResources())
                 } else {
                     notifyUser("Tag something first")
                 }
@@ -107,39 +118,6 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
         super.onResume()
     }
 
-
-    override fun init(grid: ResourcesList) {
-        Log.d(RESOURCES_SCREEN, "initializing ResourcesFragment")
-        (activity as MainActivity).setSelectedTab(1)
-        (activity as MainActivity).setToolbarVisibility(true)
-        setHasOptionsMenu(true)
-
-        gridAdapter = ResourcesGrid(grid)
-
-        rv_resources.adapter = gridAdapter
-        rv_resources.layoutManager = GridLayoutManager(context, 3)
-
-        val tags = presenter.listTagsForAllResources()
-        if (tags.isNotEmpty()) {
-            enableTags(tags)
-        } else {
-            notifyUser("You don't have any tags here yet", moreTime = true)
-            disableTags()
-        }
-    }
-
-//    fun openFile(uri: Uri, mimeType: String) {
-//        Log.d(RESOURCES_SCREEN, "opening file $uri in ResourcesFragment")
-//        try {
-//            val intent = Intent(Intent.ACTION_VIEW)
-//            intent.setDataAndType(uri, mimeType)
-//            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-//            startActivity(intent)
-//        } catch (e: Exception) {
-//            Toast.makeText(context, "No app can handle this file", Toast.LENGTH_SHORT).show()
-//        }
-//    }
-
     override fun setToolbarTitle(title: String) {
         (activity as MainActivity).setTitle(title)
     }
@@ -148,76 +126,49 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
         Notifications.notifyUser(context, message, moreTime)
     }
 
-    private fun enableTags(tags: Tags) {
+    private fun initResources(resources: ResourcesList) {
+        gridAdapter = ResourcesGrid(resources)
+
+        rv_resources.adapter = gridAdapter
+        rv_resources.layoutManager = GridLayoutManager(context, 3)
+
+        val selector = presenter.createTagsSelector()
+        if (selector != null) {
+            enableTags(selector)
+        } else {
+            notifyUser("You don't have any tags here yet", moreTime = true)
+            disableTags()
+        }
+    }
+
+    //showing all resources, displaying tags selector
+    private fun enableTags(selector: TagsSelector) {
         Log.d(RESOURCES_SCREEN, "enabling tags mode")
 
         tagsEnabled = true
         showTagsOnOffButtons()
 
-        //todo filter-out untagged resources }
-
-        //todo: selector produces `Query` which is just set of tags right now
+        //todo: selector produces `Query` which is only a set of tags right now
         //(so it can represent only conjunction of tags), but will change in future
         //in the way it will also support negation and disjunction
-        chipg_tags.visibility = View.VISIBLE
+        tags_cg.visibility = View.VISIBLE
 
-        Log.d(RESOURCES_SCREEN, "tags loaded: $tags")
-
-        //todo: tags must be displayed in the following order:
-        // checked tags go first
-        // then available tags
-        // not available tags go last, grayed-out
-
-        //todo: hide selector if there are no tags yet
-
-        tags.forEach { tag ->
-            val chip = Chip(context)
-            chip.isCheckable = true
-            chip.text = tag
-            chip.isChecked = false
-//            if (tagState.isActual) {
-//                chip.chipBackgroundColor =
-//                    ColorStateList.valueOf(ContextCompat.getColor(context!!, R.color.colorPrimary))
-//                chip.setTextColor(ContextCompat.getColor(context!!, R.color.white))
-//            }
-
-            chip.setOnClickListener {
-//                Log.d(RESOURCES_SCREEN, "tag checked clicked in ResourcesPresenter")
-//                val tagState = tagStates.find { tagState -> tagState.tag == tag }
-//                tagState!!.isChecked = isChecked
-//                applyTagsToFiles()
-                //todo filter resources by clicked tag
-            }
-            chipg_tags.addView(chip)
-        }
-
-        //todo if selected only
-        if (tags.size > 1) {
-            val chip = Chip(context)
-            chip.chipIcon = ContextCompat.getDrawable(context!!, R.drawable.ic_close)
-            chip.chipIconTint = ColorStateList.valueOf(ContextCompat.getColor(context!!, R.color.black))
-            chip.textStartPadding = 0f
-            chip.textEndPadding = 0f
-            chip.setOnClickListener {
-                //todo: call `onBack`
-                //chipg_tags.removeAllViews()
-            }
-            chipg_tags.addView(chip)
+        selector.draw(tags_cg, context!!) { selection ->
+            gridAdapter.updateItems(selection.toList())
         }
     }
 
+    //showing only untagged resources, hiding tags selector
     private fun disableTags() {
         Log.d(RESOURCES_SCREEN, "disabling tags mode")
 
         tagsEnabled = false
         showTagsOnOffButtons()
 
-        //todo display only tagged resources
+        tags_cg.visibility = View.GONE
 
-        chipg_tags.visibility = View.GONE
-
-        gridAdapter.updateItems(presenter.listUntaggedResources().toList())
-        //todo hmm
+        val untagged = presenter.listUntaggedResources()
+        gridAdapter.updateItems(untagged.toList())
     }
 
     private fun showTagsOnOffButtons() {

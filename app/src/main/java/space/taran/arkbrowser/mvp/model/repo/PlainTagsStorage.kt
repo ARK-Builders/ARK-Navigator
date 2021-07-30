@@ -194,7 +194,9 @@ class PlainTagsStorage
         fun provide(root: Path, resources: Collection<ResourceId>): PlainTagsStorage {
             val storage = storageByRoot[root]
             if (storage != null) {
-                if (storage.tagsById.keys != resources) {
+                if (storage.tagsById.keys.toSet() != resources.toSet()) {
+                    Log.d(TAGS_STORAGE, "resources in the storage: ${storage.tagsById.keys}")
+                    Log.d(TAGS_STORAGE, "resources in the index: $resources")
                     throw AssertionError("Index and storage diverged")
                 }
                 return storage
