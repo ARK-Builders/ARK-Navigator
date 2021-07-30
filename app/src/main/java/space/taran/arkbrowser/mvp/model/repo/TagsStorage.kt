@@ -14,4 +14,6 @@ interface TagsStorage {
 
     fun cleanup(existing: Collection<ResourceId>)
 
+    fun remove(id: ResourceId)
+
 }

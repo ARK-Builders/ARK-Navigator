@@ -31,6 +31,14 @@ class ResourcesList(
     fun <T: Comparable<T>>sortedBy(selector: (Path) -> T) =
         resources.sortedBy { selector(index.getPath(it)!!) }
 
+    fun removeAt(position: Int): ResourceId {
+        val items = resources.toMutableList()
+        val resource = items.removeAt(position)
+        updateItems(items.toList())
+
+        return resource
+    }
+
     override fun items() = resources
 
     override fun updateItems(items: List<ResourceId>) {

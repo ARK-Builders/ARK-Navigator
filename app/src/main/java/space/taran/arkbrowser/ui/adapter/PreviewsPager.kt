@@ -22,5 +22,15 @@ class PreviewsPager(val presenter: PreviewsList)
     override fun onBindViewHolder(holder: PreviewItemViewHolder, position: Int) {
         holder.pos = position
         presenter.bindView(holder)
+        holder.setOnClickHandler {
+            presenter.itemClicked(position)
+        }
+    }
+
+    fun removeItem(position: Int) {
+        val items = presenter.items().toMutableList()
+        items.removeAt(position)
+        presenter.updateItems(items.toList())
+        super.notifyItemRemoved(position)
     }
 }

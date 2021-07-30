@@ -14,4 +14,8 @@ class AggregatedResourcesIndex(
         //todo: iterators or streams would optimize out redundant maps
         shards.mapNotNull { it.getPath(id) }
             .firstOrNull()
+
+    override fun remove(id: ResourceId): Path? =
+        shards.mapNotNull { it.remove(id) }
+            .firstOrNull()
 }

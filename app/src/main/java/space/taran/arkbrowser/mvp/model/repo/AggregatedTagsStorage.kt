@@ -30,4 +30,9 @@ class AggregatedTagsStorage(
             it.cleanup(existing)
         }
 
+    override fun remove(id: ResourceId) =
+        shards.forEach {
+            it.remove(id)
+        }
+
 }

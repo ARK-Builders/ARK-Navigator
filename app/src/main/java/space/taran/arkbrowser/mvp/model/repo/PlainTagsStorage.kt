@@ -82,6 +82,12 @@ class PlainTagsStorage
         persist()
     }
 
+    override fun remove(id: ResourceId) {
+        Log.d(TAGS_STORAGE, "forgetting resource $id")
+        tagsById.remove(id)
+        persist()
+    }
+
     private fun persist() {
         val exists = Files.exists(storageFile)
         val modified = if (exists) {

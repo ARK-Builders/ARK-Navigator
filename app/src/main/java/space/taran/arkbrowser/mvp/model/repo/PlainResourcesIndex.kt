@@ -8,6 +8,7 @@ import space.taran.arkbrowser.mvp.model.dao.ResourceDao
 import space.taran.arkbrowser.utils.CoroutineRunner
 import space.taran.arkbrowser.utils.RESOURCES_INDEX
 import space.taran.arkbrowser.utils.isHidden
+import java.lang.AssertionError
 import java.lang.IllegalStateException
 import java.nio.file.Files
 import java.nio.file.Path
@@ -58,6 +59,18 @@ class PlainResourcesIndex internal constructor (
     }
 
     override fun getPath(id: ResourceId): Path? = pathById[id]
+
+    override fun remove(id: ResourceId): Path? {
+        Log.d(RESOURCES_INDEX, "forgetting resource $id")
+        val path = pathById.remove(id)
+        val idRemoved = metaByPath.remove(path)!!.id
+
+        if (id != idRemoved) {
+            throw AssertionError("internal mappings are diverged")
+        }
+
+        return path
+    }
 
     //todo query functions
 

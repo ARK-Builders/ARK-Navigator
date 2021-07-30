@@ -32,22 +32,19 @@ class ResourcesPresenter(
     private lateinit var index: ResourcesIndex
     private lateinit var storage: TagsStorage
 
-    private lateinit var resources: List<ResourceId>
-
-
-    fun listTagsForAllResources(): Tags = resources
+    fun listTagsForAllResources(): Tags = resources()
         .flatMap { storage.getTags(it) }
         .toSet()
 
-    fun listUntaggedResources(): Set<ResourceId> = resources
+    fun listUntaggedResources(): Set<ResourceId> = resources()
         .toSet()
         .minus(storage.listTaggedResources())
 
-    fun createTagsSelector(): TagsSelector? {
+    fun createTagsSelector(): TagsSelector {
         val tags = listTagsForAllResources()
         Log.d(RESOURCES_SCREEN, "tags loaded: $tags")
 
-        return TagsSelector(tags, resources.toSet(), storage)
+        return TagsSelector(tags, resources().toSet(), storage)
     }
 
 
@@ -95,9 +92,6 @@ class ResourcesPresenter(
         index = AggregatedResourcesIndex(rootToIndex.values)
         storage = AggregatedTagsStorage(rootToStorage.values)
 
-        //todo: with async indexing we must display non-indexed-yet resources too
-        resources = index.listIds(prefix)
-
         viewState.init(provideResourcesList())
 
         val title = {
@@ -115,10 +109,10 @@ class ResourcesPresenter(
 
     fun provideResourcesList(): ResourcesList {
         var resourcesList: ResourcesList? = null
-        resourcesList = ResourcesList(index, resources) { position, resource ->
+        resourcesList = ResourcesList(index, resources()) { position, resource ->
             Log.d(RESOURCES_SCREEN, "resource $resource at $position clicked ItemGridPresenter")
 
-            router.navigateTo(Screens.GalleryScreen(index, storage, resourcesList!!.items(), position))
+            router.navigateTo(Screens.GalleryScreen(index, storage, resourcesList!!, position))
 
             //todo: long-press handler
             //        viewState.openFile(
@@ -141,4 +135,6 @@ class ResourcesPresenter(
 
         return resourcesList
     }
+
+    private fun resources() = index.listIds(prefix)
 }

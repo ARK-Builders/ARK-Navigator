@@ -5,6 +5,8 @@ import java.nio.file.Path
 
 interface ResourcesIndex {
 
+    //todo: with async indexing we must emit ids of not-indexed-yet resources too
+
     fun listIds(prefix: Path?): List<ResourceId>
 
     // we pass all known resource ids to a storage because
@@ -14,5 +16,7 @@ interface ResourcesIndex {
     fun listAllIds(): List<ResourceId> = listIds(null)
 
     fun getPath(id: ResourceId): Path?
+
+    fun remove(id: ResourceId): Path?
 
 }

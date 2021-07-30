@@ -3,15 +3,17 @@ package space.taran.arkbrowser.mvp.presenter.adapter
 import space.taran.arkbrowser.mvp.model.dao.common.Preview
 import space.taran.arkbrowser.mvp.view.item.PreviewItemView
 
+typealias PreviewClickHandler = ItemClickHandler<Preview>
+
 class PreviewsList(
-    private val previews: List<Preview>)
-    : ItemsPresenter<Preview, PreviewItemView>() {
+    private var previews: List<Preview>,
+    handler: PreviewClickHandler)
+    : ItemsClickablePresenter<Preview, PreviewItemView>(handler) {
 
     override fun items() = previews
 
     override fun updateItems(items: List<Preview>) {
-        //we might delete some previews, but doubtfully add more
-        TODO("Not yet implemented")
+        previews = items
     }
 
     override fun bindView(view: PreviewItemView) {
