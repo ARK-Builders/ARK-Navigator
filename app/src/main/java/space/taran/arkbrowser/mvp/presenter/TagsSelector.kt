@@ -16,9 +16,9 @@ import java.lang.AssertionError
 typealias Handler = (Set<ResourceId>) -> Unit
 
 class TagsSelector(
-    val tags: Tags,
-    val resources: Set<ResourceId>,
-    val storage: TagsStorage) {
+    private val tags: Tags,
+    private var resources: Collection<ResourceId>,
+    private val storage: TagsStorage) {
 
     private lateinit var chips: Map<Tag, Chip>
 
@@ -30,7 +30,7 @@ class TagsSelector(
     // this structure is calculated by included/excluded:
     private lateinit var selection: Set<ResourceId>
 
-    fun draw(chipGroup: ChipGroup, context: Context, update: Handler) {
+    fun drawChips(chipGroup: ChipGroup, context: Context, update: Handler) {
         this.chipGroup = chipGroup
         chipGroup.removeAllViews()
 
@@ -78,6 +78,12 @@ class TagsSelector(
         }
 
         this.chips = chips.toMap()
+        update()
+    }
+
+    fun updateResources(resources: Collection<ResourceId>) {
+        this.resources = resources
+
         update()
     }
 

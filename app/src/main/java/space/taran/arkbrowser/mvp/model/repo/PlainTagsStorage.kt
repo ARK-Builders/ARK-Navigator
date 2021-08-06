@@ -69,9 +69,9 @@ class PlainTagsStorage
         persist()
     }
 
-    override fun listTaggedResources(): Set<ResourceId> =
+    override fun listUntaggedResources(): Set<ResourceId> =
         tagsById
-            .filter { (_, tags) -> tags.isNotEmpty() }
+            .filter { (_, tags) -> tags.isEmpty() }
             .keys
 
     override fun cleanup(existing: Collection<ResourceId>) {

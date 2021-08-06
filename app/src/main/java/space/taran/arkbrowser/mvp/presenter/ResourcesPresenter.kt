@@ -36,10 +36,6 @@ class ResourcesPresenter(
         .flatMap { storage.getTags(it) }
         .toSet()
 
-    fun listUntaggedResources(): Set<ResourceId> = resources()
-        .toSet()
-        .minus(storage.listTaggedResources())
-
     fun createTagsSelector(): TagsSelector? {
         val tags = listTagsForAllResources()
         Log.d(RESOURCES_SCREEN, "tags loaded: $tags")
@@ -111,9 +107,9 @@ class ResourcesPresenter(
         super.onDestroy()
     }
 
-    fun provideResourcesList(): ResourcesList {
+    fun provideResourcesList(untagged: Boolean = false): ResourcesList {
         var resourcesList: ResourcesList? = null
-        resourcesList = ResourcesList(index, resources()) { position, resource ->
+        resourcesList = ResourcesList(index, resources(untagged)) { position, resource ->
             Log.d(RESOURCES_SCREEN, "resource $resource at $position clicked ItemGridPresenter")
 
             router.navigateTo(Screens.GalleryScreen(index, storage, resourcesList!!, position))
@@ -140,5 +136,19 @@ class ResourcesPresenter(
         return resourcesList
     }
 
-    private fun resources() = index.listIds(prefix)
+    fun resources(untagged: Boolean = false): List<ResourceId> {
+        val underPrefix = index.listIds(prefix)
+
+        val result = if (untagged) {
+            storage
+                .listUntaggedResources()
+                .intersect(underPrefix)
+                .toList()
+        } else {
+            underPrefix
+        }
+
+        viewState.notifyUser("${result.size} resources selected")
+        return result
+    }
 }

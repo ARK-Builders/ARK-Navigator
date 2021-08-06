@@ -31,7 +31,7 @@ import java.nio.file.Path
 //`path` is used for filtering resources' paths
 //       if it is `null`, then no filtering is performed
 //       (recommended instead of passing same value for `path` and `root)
-class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment(), ResourcesView {
+class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(), ResourcesView {
 
     @InjectPresenter
     lateinit var presenter: ResourcesPresenter
@@ -44,6 +44,7 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
         }
 
     private lateinit var gridAdapter: ResourcesGrid
+    private var tagsSelector: TagsSelector? = null
 
     private lateinit var menuTagsOn: MenuItem
     private lateinit var menuTagsOff: MenuItem
@@ -132,9 +133,9 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
         rv_resources.adapter = gridAdapter
         rv_resources.layoutManager = GridLayoutManager(context, 3)
 
-        val selector = presenter.createTagsSelector()
-        if (selector != null) {
-            enableTags(selector)
+        tagsSelector = presenter.createTagsSelector()
+        if (tagsSelector != null) {
+            enableTags()
         } else {
             notifyUser("You don't have any tags here yet", moreTime = true)
             disableTags()
@@ -142,7 +143,7 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
     }
 
     //showing all resources, displaying tags selector
-    private fun enableTags(selector: TagsSelector) {
+    private fun enableTags() {
         Log.d(RESOURCES_SCREEN, "enabling tags mode")
 
         tagsEnabled = true
@@ -153,7 +154,7 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
         //in the way it will also support negation and disjunction
         tags_cg.visibility = View.VISIBLE
 
-        selector.draw(tags_cg, context!!) { selection ->
+        tagsSelector!!.drawChips(tags_cg, context!!) { selection ->
             gridAdapter.updateItems(selection.toList())
         }
     }
@@ -167,8 +168,9 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
 
         tags_cg.visibility = View.GONE
 
-        val untagged = presenter.listUntaggedResources()
-        gridAdapter.updateItems(untagged.toList())
+        val untagged = presenter.resources(untagged = true)
+        gridAdapter.updateItems(untagged)
+        tagsSelector!!.updateResources(untagged)
     }
 
     private fun showTagsOnOffButtons() {

@@ -9,7 +9,9 @@ class AggregatedTagsStorage(
     : TagsStorage {
 
     // if we have several copies of a resource across shards,
-    // then we receive all tags for the resource
+    // then we would receive all tags for the resource. but
+    // copies of the same resource under different roots
+    // are forbidden now
     override fun getTags(id: ResourceId): Tags =
         shards
             .flatMap { it.getTags(id) }
@@ -20,9 +22,10 @@ class AggregatedTagsStorage(
             it.setTags(id, tags)
         }
 
-    override fun listTaggedResources(): Set<ResourceId> =
+    // assuming that resources in the shards do not overlap
+    override fun listUntaggedResources(): Set<ResourceId> =
         shards
-            .flatMap { it.listTaggedResources() }
+            .flatMap { it.listUntaggedResources() }
             .toSet()
 
     override fun cleanup(existing: Collection<ResourceId>) =

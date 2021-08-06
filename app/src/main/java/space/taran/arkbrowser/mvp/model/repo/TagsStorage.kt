@@ -10,7 +10,7 @@ interface TagsStorage {
 
     fun setTags(id: ResourceId, tags: Tags)
 
-    fun listTaggedResources(): Set<ResourceId>
+    fun listUntaggedResources(): Set<ResourceId>
 
     fun cleanup(existing: Collection<ResourceId>)
 
