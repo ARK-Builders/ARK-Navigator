@@ -40,9 +40,13 @@ class ResourcesPresenter(
         .toSet()
         .minus(storage.listTaggedResources())
 
-    fun createTagsSelector(): TagsSelector {
+    fun createTagsSelector(): TagsSelector? {
         val tags = listTagsForAllResources()
         Log.d(RESOURCES_SCREEN, "tags loaded: $tags")
+
+        if (tags.isEmpty()) {
+            return null
+        }
 
         return TagsSelector(tags, resources().toSet(), storage)
     }
