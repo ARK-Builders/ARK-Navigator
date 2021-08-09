@@ -155,6 +155,7 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         tags_cg.visibility = View.VISIBLE
 
         tagsSelector!!.drawChips(tags_cg, context!!) { selection ->
+            notifyUser("${selection.size} resources selected")
             gridAdapter.updateItems(selection.toList())
         }
     }
