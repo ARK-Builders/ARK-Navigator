@@ -1,13 +1,16 @@
 package space.taran.arkbrowser.mvp.presenter
 
 import android.content.Context
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.util.Log
+import androidx.core.content.ContextCompat
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
+import space.taran.arkbrowser.R
 import space.taran.arkbrowser.mvp.model.dao.ResourceId
 import space.taran.arkbrowser.mvp.model.repo.TagsStorage
-import space.taran.arkbrowser.utils.GALLERY_SCREEN
+import space.taran.arkbrowser.utils.Popularity
 import space.taran.arkbrowser.utils.TAGS_SELECTOR
 import space.taran.arkbrowser.utils.Tag
 import space.taran.arkbrowser.utils.Tags
@@ -17,7 +20,7 @@ typealias Handler = (Set<ResourceId>) -> Unit
 
 class TagsSelector(
     private val tags: Tags,
-    private var resources: Collection<ResourceId>,
+    private val resources: Collection<ResourceId>,
     private val storage: TagsStorage) {
 
     private lateinit var chips: Map<Tag, Chip>
@@ -30,9 +33,10 @@ class TagsSelector(
     // this structure is calculated by included/excluded:
     private lateinit var selection: Set<ResourceId>
 
+    private lateinit var clear: Chip
+
     fun drawChips(chipGroup: ChipGroup, context: Context, update: Handler) {
         this.chipGroup = chipGroup
-        chipGroup.removeAllViews()
 
         val chips = mutableMapOf<Tag, Chip>()
 
@@ -73,16 +77,21 @@ class TagsSelector(
                 true
             }
 
-            chipGroup.addView(chip)
             chips[tag] = chip
         }
 
         this.chips = chips.toMap()
-        update()
-    }
 
-    fun updateResources(resources: Collection<ResourceId>) {
-        this.resources = resources
+        clear = Chip(context)
+        clear.chipIcon = ContextCompat.getDrawable(context!!, R.drawable.ic_close)
+        clear.chipIconTint = ColorStateList.valueOf(ContextCompat.getColor(context!!, R.color.black))
+        clear.textStartPadding = 0f
+        clear.textEndPadding = 0f
+        clear.setOnClickListener {
+            //todo optimize multiple calls to update()
+            (included + excluded).forEach { uncheckTag(it) }
+            update(selection)
+        }
 
         update()
     }
@@ -121,25 +130,30 @@ class TagsSelector(
             excluded.remove(tag)
         }
 
+        chips[tag]!!.isChecked = false
+
         update()
     }
 
     private fun update() {
-        //todo: consider incremental calculation if performance will be not good enough
-        val selectionWithTags = resources
+        val selectionAndComplementWithTags = resources
             .map { resource ->
                 val tags = storage.getTags(resource)
                 resource to tags
             }
-            .filter { (_, tags) ->
+            .groupBy { (_, tags) ->
                 tags.containsAll(included) && !excluded.any { tags.contains(it) }
             }
-            .toMap()
+
+        val selectionWithTags = (selectionAndComplementWithTags[true] ?: emptyList()).toMap()
+        val complementWithTags = (selectionAndComplementWithTags[false] ?: emptyList()).toMap()
 
         selection = selectionWithTags.keys
+        val tagsOfSelectedResources = selectionWithTags.values.flatten()
+        val tagsOfUnselectedResources = complementWithTags.values.flatten()
 
         val checked = included + excluded
-        val available = selectionWithTags.values.flatten().toSet() - checked
+        val available = tagsOfSelectedResources.toSet() - checked
         val unavailable = tags - available - checked
 
         Log.d(TAGS_SELECTOR, "tags checked: $checked")
@@ -162,23 +176,27 @@ class TagsSelector(
             chip.isCheckable = false
         }
 
-        //todo: tags must be displayed in the following order:
-        // checked tags go first
-        // then available tags
-        // not available tags go last, grayed-out
+        chipGroup.removeAllViews()
 
-        //todo: update reset button
-        if (tags.size > 1 && (included.isNotEmpty() || excluded.isNotEmpty())) {
-//            val chip = Chip(context)
-//            chip.chipIcon = ContextCompat.getDrawable(context!!, R.drawable.ic_close)
-//            chip.chipIconTint = ColorStateList.valueOf(ContextCompat.getColor(context!!, R.color.black))
-//            chip.textStartPadding = 0f
-//            chip.textEndPadding = 0f
-//            chip.setOnClickListener {
-//                //todo: call `onBack`
-//                //tags_cg.removeAllViews()
-//            }
-//            chipGroup.addView(chip)
+        //todo: this ordering algorithm makes more sense, but with current selector style
+        // visually it feels too annoying. original algorithm should be used when alternative
+        // "tag cloud" style selector will be adopted
+        //pushChips(checked, Popularity.calculate(tagsOfSelectedResources))
+        //pushChips(available, Popularity.calculate(tagsOfSelectedResources))
+        //pushChips(unavailable, Popularity.calculate(tagsOfUnselectedResources))
+
+        val allTags = tagsOfSelectedResources + tagsOfUnselectedResources
+        val popularity = Popularity.calculate(allTags)
+
+        pushChips(checked + available, popularity)
+        if ((included + excluded).size > 1) {
+            chipGroup.addView(clear)
         }
+        pushChips(unavailable, popularity)
+    }
+
+    private fun pushChips(tags: Tags, popularity: Map<Tag, Int>) {
+        tags.sortedByDescending { popularity[it] }
+            .forEach { chipGroup.addView(chips[it]) }
     }
 }

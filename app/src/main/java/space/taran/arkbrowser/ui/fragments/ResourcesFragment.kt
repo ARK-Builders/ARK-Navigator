@@ -171,7 +171,6 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
 
         val untagged = presenter.resources(untagged = true)
         gridAdapter.updateItems(untagged)
-        tagsSelector!!.updateResources(untagged)
     }
 
     private fun showTagsOnOffButtons() {
