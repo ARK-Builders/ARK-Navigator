@@ -43,10 +43,6 @@ class GalleryPresenter(
         viewState.init(previews)
     }
 
-    fun onViewResumed() {
-        viewState.setFullscreenMode(isFullscreenMode)
-    }
-
     fun deleteResource(resource: ResourceId) {
         Log.d(GALLERY_SCREEN, "deleting resource $resource")
 
@@ -81,6 +77,7 @@ class GalleryPresenter(
     fun quit(): Boolean {
         Log.d(GALLERY_SCREEN, "quitting from GalleryPresenter")
         router.exit()
+        viewState.setFullscreenMode(false)
         return true
     }
 }
