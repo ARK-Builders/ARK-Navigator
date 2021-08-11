@@ -125,12 +125,12 @@ class GalleryFragment(
         }
     }
 
-    override fun setFullscreenMode(isFullscreenMode: Boolean) {
-        val isControlsVisible = !isFullscreenMode
+    override fun setFullscreen(fullscreen: Boolean) {
+        val isControlsVisible = !fullscreen
         (activity as MainActivity).setBottomNavigationVisibility(isControlsVisible)
         (activity as MainActivity).setToolbarVisibility(isControlsVisible)
         preview_controls.isVisible = isControlsVisible
-        FullscreenModeHelper.setSystemUIVisibility(isControlsVisible, requireActivity().window)
+        FullscreenHelper.setSystemUIVisibility(isControlsVisible, requireActivity().window)
     }
 
     override fun setTitle(title: String) {

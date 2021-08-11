@@ -3,7 +3,7 @@ package space.taran.arkbrowser.utils
 import android.view.View
 import android.view.Window
 
-object FullscreenModeHelper {
+object FullscreenHelper {
     fun setSystemUIVisibility(isVisible: Boolean, window: Window) {
         if (isVisible) showSystemUI(window) else hideSystemUI(window)
     }
