@@ -9,6 +9,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import space.taran.arkbrowser.R
 import space.taran.arkbrowser.mvp.presenter.MainPresenter
 import space.taran.arkbrowser.mvp.view.MainView
@@ -123,6 +124,10 @@ class MainActivity : MvpAppCompatActivity(), MainView {
         }
 
         super.onRequestPermissionsResult(requestCode, permissions, granted)
+    }
+
+    fun setBottomNavigationVisibility(isVisible: Boolean) {
+        bottom_navigation.isVisible = isVisible
     }
 
     fun setTitle(title: String) {
