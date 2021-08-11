@@ -22,21 +22,29 @@ typealias PreviewClickHandler = () -> Unit
 class GalleryPresenter(
     private val index: ResourcesIndex,
     private val storage: TagsStorage,
-    resources: ResourcesList,
-    handler: PreviewClickHandler)
+    resources: ResourcesList)
     : MvpPresenter<GalleryView>() {
+
+    private var isFullscreenMode = false
 
     @Inject
     lateinit var router: Router
 
     private val previews = PreviewsList(resources.items().map {
         Preview.provide(index.getPath(it)!!)
-    }) { _, _ -> handler() }
+    }) { _, _ ->
+        Log.d(GALLERY_SCREEN, "preview clicked, switching controls on/off")
+        toggleFullscreenMode()
+    }
 
     override fun onFirstViewAttach() {
         Log.d(GALLERY_SCREEN, "first view attached in GalleryPresenter")
         super.onFirstViewAttach()
         viewState.init(previews)
+    }
+
+    fun onViewResumed() {
+        viewState.setFullscreenMode(isFullscreenMode)
     }
 
     fun deleteResource(resource: ResourceId) {
@@ -58,6 +66,16 @@ class GalleryPresenter(
     fun replaceTags(resource: ResourceId, tags: Tags) {
         Log.d(GALLERY_SCREEN, "tags $tags added to $resource")
         storage.setTags(resource, tags)
+    }
+
+    fun toggleFullscreenMode(override: Boolean? = null) {
+        override?.let {
+            if (isFullscreenMode == override) return
+            isFullscreenMode = override
+        } ?: let {
+            isFullscreenMode = !isFullscreenMode
+        }
+        viewState.setFullscreenMode(isFullscreenMode)
     }
 
     fun quit(): Boolean {

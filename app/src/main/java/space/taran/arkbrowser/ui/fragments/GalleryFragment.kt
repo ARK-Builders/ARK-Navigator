@@ -2,9 +2,7 @@ package space.taran.arkbrowser.ui.fragments
 
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
@@ -50,11 +48,7 @@ class GalleryFragment(
 
     @ProvidePresenter
     fun providePresenter() =
-        GalleryPresenter(index, storage, resources) {
-            //todo maximize picture
-            Log.d(GALLERY_SCREEN, "preview clicked, switching controls on/off")
-            preview_controls.isVisible = !preview_controls.isVisible
-        }.apply {
+        GalleryPresenter(index, storage, resources).apply {
             Log.d(GALLERY_SCREEN, "creating GalleryPresenter")
             App.instance.appComponent.inject(this)
         }
@@ -77,11 +71,24 @@ class GalleryFragment(
         App.instance.appComponent.inject(this)
     }
 
+    override fun onResume() {
+        super.onResume()
+        presenter.onViewResumed()
+    }
+
     override fun init(previews: PreviewsList) {
         Log.d(GALLERY_SCREEN, "initializing GalleryFragment, position = $startAt")
         Log.d(GALLERY_SCREEN, "currentItem = ${view_pager.currentItem}")
 
         (activity as MainActivity).setToolbarVisibility(true)
+
+        requireActivity().window.decorView.setOnSystemUiVisibilityChangeListener { visibility ->
+            if (visibility and View.SYSTEM_UI_FLAG_FULLSCREEN == 0) {
+                presenter.toggleFullscreenMode(false)
+            } else {
+                presenter.toggleFullscreenMode(true)
+            }
+        }
 
         pagerAdapter = PreviewsPager(previews)
 
@@ -121,6 +128,14 @@ class GalleryFragment(
             Log.d(GALLERY_SCREEN, "[edit_tags] clicked at position $position")
             showEditTagsDialog(position)
         }
+    }
+
+    override fun setFullscreenMode(isFullscreenMode: Boolean) {
+        val isControlsVisible = !isFullscreenMode
+        (activity as MainActivity).setBottomNavigationVisibility(isControlsVisible)
+        (activity as MainActivity).setToolbarVisibility(isControlsVisible)
+        preview_controls.isVisible = isControlsVisible
+        FullscreenModeHelper.setSystemUIVisibility(isControlsVisible, requireActivity().window)
     }
 
     override fun setTitle(title: String) {

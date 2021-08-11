@@ -10,4 +10,5 @@ import space.taran.arkbrowser.mvp.presenter.adapter.ResourcesList
 interface GalleryView: MvpView {
     fun init(previews: PreviewsList)
     fun setTitle(title: String)
+    fun setFullscreenMode(isFullscreenMode: Boolean)
 }
