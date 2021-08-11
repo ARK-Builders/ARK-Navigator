@@ -25,7 +25,7 @@ class GalleryPresenter(
     resources: ResourcesList)
     : MvpPresenter<GalleryView>() {
 
-    private var isFullscreenMode = false
+    private var isFullscreen = false
 
     @Inject
     lateinit var router: Router
@@ -66,18 +66,18 @@ class GalleryPresenter(
 
     fun toggleFullscreenMode(override: Boolean? = null) {
         override?.let {
-            if (isFullscreenMode == override) return
-            isFullscreenMode = override
+            if (isFullscreen == override) return
+            isFullscreen = override
         } ?: let {
-            isFullscreenMode = !isFullscreenMode
+            isFullscreen = !isFullscreen
         }
-        viewState.setFullscreenMode(isFullscreenMode)
+        viewState.setFullscreen(isFullscreen)
     }
 
     fun quit(): Boolean {
         Log.d(GALLERY_SCREEN, "quitting from GalleryPresenter")
         router.exit()
-        viewState.setFullscreenMode(false)
+        viewState.setFullscreen(false)
         return true
     }
 }
