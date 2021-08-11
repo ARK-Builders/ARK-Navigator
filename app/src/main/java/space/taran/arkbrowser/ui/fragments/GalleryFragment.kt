@@ -71,11 +71,6 @@ class GalleryFragment(
         App.instance.appComponent.inject(this)
     }
 
-    override fun onResume() {
-        super.onResume()
-        presenter.onViewResumed()
-    }
-
     override fun init(previews: PreviewsList) {
         Log.d(GALLERY_SCREEN, "initializing GalleryFragment, position = $startAt")
         Log.d(GALLERY_SCREEN, "currentItem = ${view_pager.currentItem}")
