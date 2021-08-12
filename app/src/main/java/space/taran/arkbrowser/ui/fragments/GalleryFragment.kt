@@ -79,9 +79,9 @@ class GalleryFragment(
 
         requireActivity().window.decorView.setOnSystemUiVisibilityChangeListener { visibility ->
             if (visibility and View.SYSTEM_UI_FLAG_FULLSCREEN == 0) {
-                presenter.toggleFullscreenMode(false)
+                presenter.onSystemUIVisibilityChange(true)
             } else {
-                presenter.toggleFullscreenMode(true)
+                presenter.onSystemUIVisibilityChange(false)
             }
         }
 

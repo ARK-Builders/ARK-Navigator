@@ -32,10 +32,7 @@ class GalleryPresenter(
 
     private val previews = PreviewsList(resources.items().map {
         Preview.provide(index.getPath(it)!!)
-    }) { _, _ ->
-        Log.d(GALLERY_SCREEN, "preview clicked, switching controls on/off")
-        toggleFullscreenMode()
-    }
+    }, ::onPreviewsItemClick)
 
     override fun onFirstViewAttach() {
         Log.d(GALLERY_SCREEN, "first view attached in GalleryPresenter")
@@ -64,13 +61,18 @@ class GalleryPresenter(
         storage.setTags(resource, tags)
     }
 
-    fun toggleFullscreenMode(override: Boolean? = null) {
-        override?.let {
-            if (isFullscreen == override) return
-            isFullscreen = override
-        } ?: let {
-            isFullscreen = !isFullscreen
-        }
+    fun onSystemUIVisibilityChange(isVisible: Boolean) {
+        val newFullscreen = !isVisible
+        // prevent loop
+        if (isFullscreen == newFullscreen)
+            return
+        isFullscreen = newFullscreen
+        viewState.setFullscreen(isFullscreen)
+    }
+
+     fun onPreviewsItemClick(pos: Int, preview: Preview) {
+        Log.d(GALLERY_SCREEN, "preview clicked, switching controls on/off")
+        isFullscreen = !isFullscreen
         viewState.setFullscreen(isFullscreen)
     }
 
