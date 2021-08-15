@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="space.taran.arkbrowser">
+    package="space.taran.arknavigator">
 
     <!-- todo: are these permissions really necessary? -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -8,7 +8,7 @@
 
     <!-- todo: see "requestLegacyExternalStorage"-->
     <application
-        android:name="space.taran.arkbrowser.ui.App"
+        android:name="space.taran.arknavigator.ui.App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:requestLegacyExternalStorage="true"
@@ -17,7 +17,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name="space.taran.arkbrowser.ui.activity.MainActivity"
+            android:name="space.taran.arknavigator.ui.activity.MainActivity"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -26,7 +26,7 @@
         </activity>
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="space.taran.arkbrowser.provider"
+            android:authorities="space.taran.arknavigator.provider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
