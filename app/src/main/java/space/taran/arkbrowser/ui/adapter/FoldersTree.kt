@@ -5,6 +5,7 @@ import com.ekezet.treeview.*
 import ru.terrakok.cicerone.Router
 import space.taran.arkbrowser.utils.FOLDERS_TREE
 import space.taran.arkbrowser.mvp.model.repo.Folders
+import space.taran.arkbrowser.mvp.view.item.AddFavoriteHandler
 import space.taran.arkbrowser.mvp.view.item.FolderViewHolderFactory
 import java.lang.IllegalStateException
 import java.nio.file.Path
@@ -47,8 +48,13 @@ data class FavoriteNode(
     }
 }
 
-class FoldersTree(devices: List<Path>, folders: Folders, router: Router)
-    : TreeViewAdapter(FolderViewHolderFactory(router), extractFolderDetails(devices, folders)) {
+class FoldersTree(devices: List<Path>,
+                  folders: Folders,
+                  handler: AddFavoriteHandler,
+                  router: Router)
+    : TreeViewAdapter(
+        FolderViewHolderFactory(handler, router),
+        extractFolderDetails(devices, folders)) {
 
     companion object {
         fun extractFolderDetails(_devices: List<Path>, folders: Folders)

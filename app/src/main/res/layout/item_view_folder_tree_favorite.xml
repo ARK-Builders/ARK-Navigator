@@ -13,7 +13,7 @@
         android:layout_weight="1" />
 
     <TextView
-        android:id="@+id/nameText"
+        android:id="@+id/name_txt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
@@ -22,12 +22,12 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/typeText"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@id/chevronImage"
+        app:layout_constraintStart_toEndOf="@id/chevron"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Caribou" />
 
     <TextView
-        android:id="@+id/typeText"
+        android:id="@+id/type_txt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
@@ -53,7 +53,7 @@
         app:layout_constraintTop_toBottomOf="parent">
 
         <ImageButton
-            android:id="@+id/navigateButton"
+            android:id="@+id/navigate_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"

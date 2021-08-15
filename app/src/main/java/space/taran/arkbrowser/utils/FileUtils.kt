@@ -148,9 +148,13 @@ val ROOT_PATH = Paths.get("/")
 //    getExtSdCards(context).find { file.startsWith(it) }
 //todo fs.normalize `path` before check
 
-fun findLongestCommonPrefix(paths: List<Path>): Pair<Path, List<Path>> {
+fun findLongestCommonPrefix(paths: List<Path>): Path {
     if (paths.isEmpty()) {
         throw IllegalArgumentException("Can't search for common prefix among empty collection")
+    }
+
+    if (paths.size == 1) {
+        return paths.first()
     }
 
     fun tailrec(_prefix: Path, paths: List<Path>): Pair<Path, List<Path>> {
@@ -166,7 +170,7 @@ fun findLongestCommonPrefix(paths: List<Path>): Pair<Path, List<Path>> {
         return tailrec(prefix, shortened)
     }
 
-    return tailrec(ROOT_PATH, paths)
+    return tailrec(ROOT_PATH, paths).first
 }
 
 fun extension(path: Path): String =

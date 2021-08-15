@@ -58,7 +58,11 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
     override fun loadFolders(folders: Folders) {
         Log.d(FOLDERS_SCREEN, "loading roots in FoldersFragment")
 
-        foldersTree = FoldersTree(devices, folders, router)
+        val handler = { path: Path ->
+            openFolderPicker(listOf(path))
+        }
+
+        foldersTree = FoldersTree(devices, folders, handler, router)
         rv_roots.adapter = foldersTree
 
         roots = folders.keys
@@ -106,11 +110,11 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
         (activity as MainActivity).setToolbarVisibility(false)
 
         fab_add_roots.setOnClickListener {
-            openRootPicker(devices)
+            openFolderPicker(devices)
         }
     }
 
-    private fun openRootPicker(paths: List<Path>) {
+    private fun openFolderPicker(paths: List<Path>) {
         Log.d(FOLDERS_SCREEN, "initializing root picker")
 
         val dialogView = LayoutInflater.from(requireContext())
