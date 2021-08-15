@@ -174,8 +174,8 @@ class GalleryFragment(
 
         val tags = presenter.listTags(resource)
 
-        dialogView = LayoutInflater.from(context!!).inflate(R.layout.dialog_tags, null)
-        val alertDialogBuilder = AlertDialog.Builder(context!!).setView(dialogView)
+        dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_tags, null)
+        val alertDialogBuilder = AlertDialog.Builder(requireContext()).setView(dialogView)
 
         if (tags.isNotEmpty()) {
             dialogView!!.chipg_dialog_detail.visibility = View.VISIBLE

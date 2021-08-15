@@ -154,7 +154,7 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         //in the way it will also support negation and disjunction
         tags_cg.visibility = View.VISIBLE
 
-        tagsSelector!!.drawChips(tags_cg, context!!) { selection ->
+        tagsSelector!!.drawChips(tags_cg, requireContext()) { selection ->
             notifyUser("${selection.size} resources selected")
             gridAdapter.updateItems(selection.toList())
         }
@@ -183,8 +183,8 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
 
     private fun showSortByDialog() {
         Log.d(RESOURCES_SCREEN, "showing sort-by dialog in ResourcesFragment")
-        val view = LayoutInflater.from(context!!).inflate(R.layout.dialog_sort, null)!!
-        val alertBuilder = AlertDialog.Builder(context!!).setView(view)
+        val view = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_sort, null)!!
+        val alertBuilder = AlertDialog.Builder(requireContext()).setView(view)
 
         when(sorting) {
             Sorting.DEFAULT -> view.rb_default.isChecked = true
