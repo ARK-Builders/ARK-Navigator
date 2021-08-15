@@ -16,6 +16,7 @@ import space.taran.arknavigator.mvp.view.MainView
 import space.taran.arknavigator.ui.fragments.BackButtonListener
 import kotlinx.android.synthetic.main.activity_main.*
 import moxy.MvpAppCompatActivity
+import moxy.ktx.moxyPresenter
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
 import ru.terrakok.cicerone.NavigatorHolder
@@ -32,8 +33,12 @@ class MainActivity : MvpAppCompatActivity(), MainView {
     @Inject
     lateinit var navigatorHolder: NavigatorHolder
 
-    @InjectPresenter
-    lateinit var presenter: MainPresenter
+    private val presenter by moxyPresenter {
+        MainPresenter().apply {
+            Log.d(MAIN, "creating MainPresenter")
+            App.instance.appComponent.inject(this)
+        }
+    }
 
     private val navigator = SupportAppNavigator(this, R.id.container)
 
@@ -41,12 +46,6 @@ class MainActivity : MvpAppCompatActivity(), MainView {
         Log.d(MAIN, "creating")
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        App.instance.appComponent.inject(this)
-    }
-
-    @ProvidePresenter
-    fun providePresenter() = MainPresenter().apply {
-        Log.d(MAIN, "creating MainPresenter")
         App.instance.appComponent.inject(this)
     }
 

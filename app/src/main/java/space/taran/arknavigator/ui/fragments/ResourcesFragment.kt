@@ -13,6 +13,7 @@ import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.activity.MainActivity
 import kotlinx.android.synthetic.main.fragment_resources.*
 import moxy.MvpAppCompatFragment
+import moxy.ktx.moxyPresenter
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
 import space.taran.arknavigator.mvp.presenter.adapter.ResourcesList
@@ -33,15 +34,12 @@ import java.nio.file.Path
 //       (recommended instead of passing same value for `path` and `root)
 class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(), ResourcesView {
 
-    @InjectPresenter
-    lateinit var presenter: ResourcesPresenter
-
-    @ProvidePresenter
-    fun providePresenter() =
+    private val presenter by moxyPresenter {
         ResourcesPresenter(root, path).apply {
             Log.d(RESOURCES_SCREEN, "creating ResourcesPresenter")
             App.instance.appComponent.inject(this)
         }
+    }
 
     private lateinit var gridAdapter: ResourcesGrid
     private var tagsSelector: TagsSelector? = null
