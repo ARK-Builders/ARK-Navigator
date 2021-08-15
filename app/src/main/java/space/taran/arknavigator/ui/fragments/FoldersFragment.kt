@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import kotlinx.android.synthetic.main.dialog_roots_new.view.*
 import kotlinx.android.synthetic.main.fragment_folders.*
 import moxy.MvpAppCompatFragment
+import moxy.ktx.moxyPresenter
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
 import ru.terrakok.cicerone.Router
@@ -43,16 +44,12 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
     @Inject
     lateinit var router: Router
 
-    @InjectPresenter
-    lateinit var presenter: FoldersPresenter
-
-    @ProvidePresenter
-    fun providePresenter() =
+    private val presenter by moxyPresenter {
         FoldersPresenter().apply {
             Log.d(FOLDERS_SCREEN, "RootsPresenter created")
             App.instance.appComponent.inject(this)
         }
-
+    }
 
     override fun loadFolders(folders: Folders) {
         Log.d(FOLDERS_SCREEN, "loading roots in FoldersFragment")

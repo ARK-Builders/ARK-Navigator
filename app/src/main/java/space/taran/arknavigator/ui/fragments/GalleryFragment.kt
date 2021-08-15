@@ -14,6 +14,7 @@ import com.google.android.material.chip.Chip
 import kotlinx.android.synthetic.main.dialog_tags.view.*
 import kotlinx.android.synthetic.main.fragment_gallery.*
 import moxy.MvpAppCompatFragment
+import moxy.ktx.moxyPresenter
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
 import space.taran.arknavigator.R
@@ -46,15 +47,12 @@ class GalleryFragment(
     private var dialogView: View? = null
     private var dialog: AlertDialog? = null
 
-    @InjectPresenter
-    lateinit var presenter: GalleryPresenter
-
-    @ProvidePresenter
-    fun providePresenter() =
+    private val presenter by moxyPresenter {
         GalleryPresenter(index, storage, resources).apply {
             Log.d(GALLERY_SCREEN, "creating GalleryPresenter")
             App.instance.appComponent.inject(this)
         }
+    }
 
     private lateinit var pagerAdapter: PreviewsPager
 
