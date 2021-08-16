@@ -69,12 +69,6 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         App.instance.appComponent.inject(this)
     }
 
-    //todo:
-    //      case: open folder, click [tags off], then [tags on], open resource, go [back]
-    //      expected: all resources displayed
-    //      actual: only untagged resources displayed
-    //      (apparently, wrong state restored)
-
     override fun init(grid: ResourcesList) {
         Log.d(RESOURCES_SCREEN, "initializing ResourcesFragment")
         (activity as MainActivity).setSelectedTab(1)

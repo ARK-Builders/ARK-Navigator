@@ -64,7 +64,7 @@ class TagsSelector(
 
             chip.setOnLongClickListener {
                 if (!chip.isLongClickable) {
-                    Log.d(TAGS_SELECTOR, "the chip isn't clickable")
+                    Log.d(TAGS_SELECTOR, "the chip isn't long-clickable")
                     return@setOnLongClickListener false
                 }
 

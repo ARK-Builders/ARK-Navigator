@@ -113,24 +113,6 @@ class ResourcesPresenter(
             Log.d(RESOURCES_SCREEN, "resource $resource at $position clicked ItemGridPresenter")
 
             router.navigateTo(Screens.GalleryScreen(index, storage, resourcesList!!, position))
-
-            //todo: long-press handler
-            //        viewState.openFile(
-            //            filesRepo.fileDataSource.getUriForFileByProvider(resource.file),
-            //            DocumentFile.fromFile(resource.file).type!!)
-
-            //in view:
-            //    fun openFile(uri: Uri, mimeType: String) {
-            //        Log.d(RESOURCES_SCREEN, "opening file $uri in ResourcesFragment")
-            //        try {
-            //            val intent = Intent(Intent.ACTION_VIEW)
-            //            intent.setDataAndType(uri, mimeType)
-            //            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            //            startActivity(intent)
-            //        } catch (e: Exception) {
-            //            Toast.makeText(context, "No app can handle this file", Toast.LENGTH_SHORT).show()
-            //        }
-            //    }
         }
 
         return resourcesList

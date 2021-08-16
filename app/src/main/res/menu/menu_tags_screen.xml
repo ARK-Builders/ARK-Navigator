@@ -6,7 +6,7 @@
         android:id="@+id/menu_tags_on"
         android:icon="@drawable/ic_cloud_on"
         android:title="Tags on"
-        app:showAsAction="always" />
+        app:showAsAction="always"/>
 
     <item
         android:id="@+id/menu_tags_off"
@@ -18,5 +18,5 @@
         android:id="@+id/menu_tags_sort_by"
         android:icon="@drawable/ic_sort"
         android:title="Sort by"
-        app:showAsAction="always" />
+        app:showAsAction="always"/>
 </menu>

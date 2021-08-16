@@ -23,10 +23,4 @@ class PreviewItemViewHolder(override val containerView: View) :
     override fun setImage(file: Path): Unit = with(containerView) {
         loadImage(file, iv_image)
     }
-
-    fun setOnClickHandler(handler: () -> Unit) = with(containerView) {
-        iv_image.setOnClickListener {
-            handler()
-        }
-    }
 }

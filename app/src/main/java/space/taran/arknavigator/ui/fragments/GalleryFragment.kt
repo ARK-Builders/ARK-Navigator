@@ -1,10 +1,13 @@
 package space.taran.arknavigator.ui.fragments
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.chip.Chip
@@ -118,6 +121,12 @@ class GalleryFragment(
             true
         }
 
+        share_resource_fab.setOnClickListener {
+            val position = view_pager.currentItem
+            Log.d(GALLERY_SCREEN, "[share_resource] clicked at position $position")
+            shareResource(position)
+        }
+
         edit_tags_fab.setOnClickListener {
             val position = view_pager.currentItem
             Log.d(GALLERY_SCREEN, "[edit_tags] clicked at position $position")
@@ -161,6 +170,23 @@ class GalleryFragment(
         if (resources.items().isEmpty()) {
             presenter.quit()
         }
+    }
+
+    private fun shareResource(position: Int) {
+        val resource = resources.items()[position]
+        val path = index.getPath(resource)!!
+
+        val context = requireContext()
+        val uri = FileProvider.getUriForFile(
+            context, "space.taran.arknavigator.provider",
+            path.toFile())
+        val mime = context.contentResolver.getType(uri)
+        Log.d(GALLERY_SCREEN, "sharing $uri of type $mime")
+
+        val intent = Intent(Intent.ACTION_SEND)
+        intent.type = mime
+        intent.putExtra(Intent.EXTRA_STREAM, uri)
+        startActivity(Intent.createChooser(intent, "Share using"))
     }
 
     private fun showEditTagsDialog(position: Int) {
