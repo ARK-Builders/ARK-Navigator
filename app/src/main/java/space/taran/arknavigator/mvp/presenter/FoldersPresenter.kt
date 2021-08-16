@@ -18,7 +18,6 @@ import javax.inject.Inject
 
 //todo: protect foldersRepo when enabling real concurrency
 
-//todo @InjectViewState ?
 class FoldersPresenter: MvpPresenter<FoldersView>() {
     @Inject
     lateinit var router: Router
