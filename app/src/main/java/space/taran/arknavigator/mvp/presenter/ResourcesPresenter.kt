@@ -16,7 +16,6 @@ import space.taran.arknavigator.utils.Tags
 import java.nio.file.Path
 import javax.inject.Inject
 
-//todo: @InjectViewState ?
 class ResourcesPresenter(
     val root: Path?,
     private val prefix: Path?)
