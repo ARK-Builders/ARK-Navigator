@@ -1,9 +1,11 @@
 package space.taran.arknavigator.mvp.presenter
 
 import android.util.Log
+import kotlinx.coroutines.launch
 import space.taran.arknavigator.mvp.view.FoldersView
 import moxy.InjectViewState
 import moxy.MvpPresenter
+import moxy.presenterScope
 import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.mvp.model.repo.FoldersRepo
 import space.taran.arknavigator.mvp.model.repo.ResourcesIndexFactory
@@ -33,19 +35,21 @@ class FoldersPresenter: MvpPresenter<FoldersView>() {
         Log.d(FOLDERS_SCREEN, "first view attached in RootsPresenter")
         super.onFirstViewAttach()
 
-        val folders = foldersRepo.query()
-        Log.d(FOLDERS_SCREEN, "folders retrieved: $folders")
+        presenterScope.launch {
+            val folders = foldersRepo.query()
+            Log.d(FOLDERS_SCREEN, "folders retrieved: $folders")
 
-        Notifications.notifyIfFailedPaths(viewState, folders.failed)
+            Notifications.notifyIfFailedPaths(viewState, folders.failed)
 
-        favoritesByRoot = folders.succeeded
-            .mapValues { (_, favorites) -> favorites.toMutableList() }
-            .toMutableMap()
+            favoritesByRoot = folders.succeeded
+                .mapValues { (_, favorites) -> favorites.toMutableList() }
+                .toMutableMap()
 
-        viewState.loadFolders(favoritesByRoot)
+            viewState.loadFolders(favoritesByRoot)
+        }
     }
 
-    fun addRoot(root: Path) {
+    fun addRoot(root: Path) = presenterScope.launch {
         Log.d(FOLDERS_SCREEN, "root $root added in RootsPresenter")
         val path = root.toRealPath()
 
@@ -66,7 +70,7 @@ class FoldersPresenter: MvpPresenter<FoldersView>() {
         viewState.loadFolders(favoritesByRoot)
     }
 
-    fun addFavorite(favorite: Path) {
+    fun addFavorite(favorite: Path) = presenterScope.launch {
         Log.d(FOLDERS_SCREEN, "favorite $favorite added in RootsPresenter")
         val path = favorite.toRealPath()
 
@@ -87,7 +91,6 @@ class FoldersPresenter: MvpPresenter<FoldersView>() {
 
     fun resume() {
         Log.d(FOLDERS_SCREEN, "view resumed in RootsPresenter")
-        viewState.loadFolders(favoritesByRoot)
     }
 
     fun quit(): Boolean {

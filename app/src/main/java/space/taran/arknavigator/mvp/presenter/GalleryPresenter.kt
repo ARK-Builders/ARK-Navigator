@@ -1,20 +1,20 @@
 package space.taran.arknavigator.mvp.presenter
 
 import android.util.Log
-import space.taran.arknavigator.mvp.view.GalleryView
-import space.taran.arknavigator.mvp.model.dao.ResourceId
-
-import ru.terrakok.cicerone.Router
+import kotlinx.coroutines.launch
 import moxy.MvpPresenter
+import moxy.presenterScope
+import ru.terrakok.cicerone.Router
+import space.taran.arknavigator.mvp.model.dao.ResourceId
 import space.taran.arknavigator.mvp.model.dao.common.Preview
 import space.taran.arknavigator.mvp.model.repo.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.TagsStorage
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
 import space.taran.arknavigator.mvp.presenter.adapter.ResourcesList
+import space.taran.arknavigator.mvp.view.GalleryView
 import space.taran.arknavigator.utils.GALLERY_SCREEN
 import space.taran.arknavigator.utils.Tags
 import java.nio.file.Files
-
 import javax.inject.Inject
 
 typealias PreviewClickHandler = () -> Unit
@@ -40,7 +40,7 @@ class GalleryPresenter(
         viewState.init(previews)
     }
 
-    fun deleteResource(resource: ResourceId) {
+    fun deleteResource(resource: ResourceId) = presenterScope.launch {
         Log.d(GALLERY_SCREEN, "deleting resource $resource")
 
         storage.remove(resource)
@@ -56,7 +56,7 @@ class GalleryPresenter(
         return tags
     }
 
-    fun replaceTags(resource: ResourceId, tags: Tags) {
+    fun replaceTags(resource: ResourceId, tags: Tags) = presenterScope.launch {
         Log.d(GALLERY_SCREEN, "tags $tags added to $resource")
         storage.setTags(resource, tags)
     }
