@@ -178,21 +178,14 @@ class TagsSelector(
 
         chipGroup.removeAllViews()
 
-        //todo: this ordering algorithm makes more sense, but with current selector style
-        // visually it feels too annoying. original algorithm should be used when alternative
-        // "tag cloud" style selector will be adopted
-        //pushChips(checked, Popularity.calculate(tagsOfSelectedResources))
-        //pushChips(available, Popularity.calculate(tagsOfSelectedResources))
-        //pushChips(unavailable, Popularity.calculate(tagsOfUnselectedResources))
+        pushChips(checked, Popularity.calculate(tagsOfSelectedResources))
+        pushChips(available, Popularity.calculate(tagsOfSelectedResources))
 
-        val allTags = tagsOfSelectedResources + tagsOfUnselectedResources
-        val popularity = Popularity.calculate(allTags)
-
-        pushChips(checked + available, popularity)
         if ((included + excluded).size > 1) {
             chipGroup.addView(clear)
         }
-        pushChips(unavailable, popularity)
+
+        pushChips(unavailable, Popularity.calculate(tagsOfUnselectedResources))
     }
 
     private fun pushChips(tags: Tags, popularity: Map<Tag, Int>) {
