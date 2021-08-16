@@ -1,12 +1,14 @@
 package space.taran.arknavigator.mvp.presenter
 
-import space.taran.arknavigator.mvp.view.ResourcesView
-import moxy.MvpPresenter
-import ru.terrakok.cicerone.Router
 import android.util.Log
+import kotlinx.coroutines.launch
+import moxy.MvpPresenter
+import moxy.presenterScope
+import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.mvp.model.dao.ResourceId
 import space.taran.arknavigator.mvp.model.repo.*
 import space.taran.arknavigator.mvp.presenter.adapter.ResourcesList
+import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.navigation.Screens
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.utils.RESOURCES_SCREEN
@@ -52,54 +54,56 @@ class ResourcesPresenter(
         Log.d(RESOURCES_SCREEN, "first view attached in ResourcesPresenter")
         super.onFirstViewAttach()
 
-        val folders = foldersRepo.query()
-        Log.d(RESOURCES_SCREEN, "folders retrieved: $folders")
+        presenterScope.launch {
+            val folders = foldersRepo.query()
+            Log.d(RESOURCES_SCREEN, "folders retrieved: $folders")
 
-        Notifications.notifyIfFailedPaths(viewState, folders.failed)
+            Notifications.notifyIfFailedPaths(viewState, folders.failed)
 
-        val roots: List<Path> = {
-            val all = folders.succeeded.keys
-            if (root != null) {
-                if (!all.contains(root)) {
-                    throw AssertionError("Requested root wasn't found in DB")
+            val roots: List<Path> = {
+                val all = folders.succeeded.keys
+                if (root != null) {
+                    if (!all.contains(root)) {
+                        throw AssertionError("Requested root wasn't found in DB")
+                    }
+
+                    listOf(root)
+                } else {
+                    all.toList()
                 }
+            }()
+            Log.d(RESOURCES_SCREEN, "using roots $roots")
 
-                listOf(root)
-            } else {
-                all.toList()
+            val rootToIndex = roots
+                .map { it to resourcesIndexFactory.loadFromDatabase(it) }
+                .toMap()
+
+            val rootToStorage = roots
+                .map { it to PlainTagsStorage.provide(it, rootToIndex[it]!!.listAllIds()) }
+                .toMap()
+
+            //todo: when async indexing will be ready, tagged ids must be boosted
+            //in the indexing queue and be removed if they fail to be indexed
+
+            roots.forEach { root ->
+                val storage = rootToStorage[root]!!
+                val indexed = rootToIndex[root]!!.listAllIds()
+
+                storage.cleanup(indexed)
             }
-        }()
-        Log.d(RESOURCES_SCREEN, "using roots $roots")
 
-        val rootToIndex = roots
-            .map { it to resourcesIndexFactory.loadFromDatabase(it) }
-            .toMap()
+            index = AggregatedResourcesIndex(rootToIndex.values)
+            storage = AggregatedTagsStorage(rootToStorage.values)
 
-        val rootToStorage = roots
-            .map { it to PlainTagsStorage.provide(it, rootToIndex[it]!!.listAllIds()) }
-            .toMap()
+            viewState.init(provideResourcesList())
 
-        //todo: when async indexing will be ready, tagged ids must be boosted
-        //in the indexing queue and be removed if they fail to be indexed
+            val title = {
+                val path = (prefix ?: root)
+                if (path != null) "$path, " else ""
+            }()
 
-        roots.forEach { root ->
-            val storage = rootToStorage[root]!!
-            val indexed = rootToIndex[root]!!.listAllIds()
-
-            storage.cleanup(indexed)
+            viewState.setToolbarTitle("$title${roots.size} of roots chosen")
         }
-
-        index = AggregatedResourcesIndex(rootToIndex.values)
-        storage = AggregatedTagsStorage(rootToStorage.values)
-
-        viewState.init(provideResourcesList())
-
-        val title = {
-            val path = (prefix ?: root)
-            if (path != null) "$path, " else ""
-        }()
-
-        viewState.setToolbarTitle("$title${roots.size} of roots chosen")
     }
 
     override fun onDestroy() {
