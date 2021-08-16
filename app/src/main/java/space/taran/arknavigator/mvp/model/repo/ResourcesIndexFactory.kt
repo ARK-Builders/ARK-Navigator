@@ -7,7 +7,6 @@ import space.taran.arknavigator.mvp.model.dao.ResourceDao
 import space.taran.arknavigator.mvp.model.repo.PlainResourcesIndex.Companion.groupResources
 import space.taran.arknavigator.mvp.model.repo.PlainResourcesIndex.Companion.listAllFiles
 import space.taran.arknavigator.mvp.model.repo.PlainResourcesIndex.Companion.scanResources
-import space.taran.arknavigator.utils.CoroutineRunner
 import space.taran.arknavigator.utils.RESOURCES_INDEX
 import java.nio.file.Path
 import kotlin.system.measureTimeMillis
