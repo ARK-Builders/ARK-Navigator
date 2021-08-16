@@ -1,6 +1,9 @@
 package space.taran.arknavigator.mvp.model.repo
 
 import android.util.Log
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import space.taran.arknavigator.mvp.model.dao.ResourceId
 import space.taran.arknavigator.utils.Constants.Companion.NO_TAGS
 import space.taran.arknavigator.utils.Converters.Companion.stringFromTags
@@ -32,11 +35,10 @@ class PlainTagsStorage
 
     private var lastModified: FileTime = FileTime.fromMillis(0L)
 
-    private val tagsById: MutableMap<ResourceId, Tags> = {
+    private val tagsById: MutableMap<ResourceId, Tags> = runBlocking(Dispatchers.IO) {
         val result = resources.map { it to NO_TAGS }
             .toMap()
             .toMutableMap()
-
         if (Files.exists(storageFile)) {
             lastModified = Files.getLastModifiedTime(storageFile)
 
@@ -49,16 +51,15 @@ class PlainTagsStorage
         } else {
             Log.d(TAGS_STORAGE, "file $storageFile doesn't exist")
         }
-
         result
-    }()
+    }
 
     //todo `listAllTags`
 
     // if this id isn't present in storage, then the call is wrong
     override fun getTags(id: ResourceId): Tags = tagsById[id]!!
 
-    override fun setTags(id: ResourceId, tags: Tags) {
+    override suspend fun setTags(id: ResourceId, tags: Tags) = withContext(Dispatchers.IO) {
         if (!tagsById.containsKey(id)) {
             throw AssertionError("Storage isn't aware about this resource id")
         }
@@ -74,7 +75,7 @@ class PlainTagsStorage
             .filter { (_, tags) -> tags.isEmpty() }
             .keys
 
-    override fun cleanup(existing: Collection<ResourceId>) {
+    override suspend fun cleanup(existing: Collection<ResourceId>) = withContext(Dispatchers.IO) {
         val disappeared = tagsById.keys.minus(existing)
 
         Log.d(TAGS_STORAGE, "forgetting ${disappeared.size} resources")
@@ -82,13 +83,13 @@ class PlainTagsStorage
         persist()
     }
 
-    override fun remove(id: ResourceId) {
+    override suspend fun remove(id: ResourceId) = withContext(Dispatchers.IO) {
         Log.d(TAGS_STORAGE, "forgetting resource $id")
         tagsById.remove(id)
         persist()
     }
 
-    private fun persist() {
+    private suspend fun persist() = withContext(Dispatchers.IO) {
         val exists = Files.exists(storageFile)
         val modified = if (exists) {
             Files.getLastModifiedTime(storageFile)
@@ -131,13 +132,13 @@ class PlainTagsStorage
                 Log.d(TAGS_STORAGE, "no tagged resources, deleting storage file")
                 Files.delete(storageFile)
             }
-            return
+            return@withContext
         }
 
         writeStorage()
     }
 
-    private fun readStorage(): Map<ResourceId, Tags> {
+    private suspend fun readStorage(): Map<ResourceId, Tags> = withContext(Dispatchers.IO) {
         val lines = Files.readAllLines(storageFile, StandardCharsets.UTF_8)
         verifyVersion(lines.removeAt(0))
 
@@ -160,10 +161,10 @@ class PlainTagsStorage
         }
 
         Log.d(TAGS_STORAGE, "${result.size} entries has been read")
-        return result
+        return@withContext result
     }
 
-    private fun writeStorage() {
+    private suspend fun writeStorage() = withContext(Dispatchers.IO) {
         val lines = mutableListOf<String>()
         lines.add("$STORAGE_VERSION_PREFIX$STORAGE_VERSION")
 
