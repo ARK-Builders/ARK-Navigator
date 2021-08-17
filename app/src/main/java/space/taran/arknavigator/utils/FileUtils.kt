@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import androidx.core.content.FileProvider
+import space.taran.arknavigator.ui.App
 import java.io.*
 import java.lang.IllegalArgumentException
 import java.nio.file.Files
@@ -126,8 +127,8 @@ fun getUriForFileByProvider(context: Context, file: File): Uri {
         file)
 }
 
-fun listDevices(context: Context): List<Path> =
-    context.getExternalFilesDirs(null)
+fun listDevices(): List<Path> =
+    App.instance.getExternalFilesDirs(null)
         .toList()
         .filterNotNull()
         .map {
