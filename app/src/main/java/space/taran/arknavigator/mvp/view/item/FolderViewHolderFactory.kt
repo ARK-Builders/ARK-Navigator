@@ -12,10 +12,10 @@ import com.ekezet.treeview.TreeViewAdapter
 import kotlinx.android.synthetic.main.item_view_folder_tree_root.view.*
 import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.R
-import space.taran.arknavigator.mvp.presenter.DeviceNode
-import space.taran.arknavigator.mvp.presenter.FavoriteNode
-import space.taran.arknavigator.mvp.presenter.FolderTreeNode
-import space.taran.arknavigator.mvp.presenter.RootNode
+import space.taran.arknavigator.ui.adapter.DeviceNode
+import space.taran.arknavigator.ui.adapter.FavoriteNode
+import space.taran.arknavigator.ui.adapter.FolderTreeNode
+import space.taran.arknavigator.ui.adapter.RootNode
 import space.taran.arknavigator.navigation.Screens
 import space.taran.arknavigator.utils.FOLDERS_TREE
 import java.nio.file.Path

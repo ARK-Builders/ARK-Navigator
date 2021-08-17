@@ -17,8 +17,8 @@ import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.R
 import space.taran.arknavigator.mvp.model.repo.Folders
 import space.taran.arknavigator.mvp.presenter.FoldersPresenter
-import space.taran.arknavigator.mvp.presenter.FoldersTree
-import space.taran.arknavigator.mvp.presenter.FolderPicker
+import space.taran.arknavigator.ui.adapter.FoldersTree
+import space.taran.arknavigator.ui.adapter.FolderPicker
 import space.taran.arknavigator.mvp.presenter.adapter.ItemClickHandler
 import space.taran.arknavigator.mvp.view.FoldersView
 import space.taran.arknavigator.ui.App
@@ -33,7 +33,6 @@ import javax.inject.Inject
 
 class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
     private lateinit var devices: List<Path>
-    //todo treat syncthing folder as special storage device
 
     private lateinit var foldersTree: FoldersTree
     private lateinit var folderPicker: FolderPicker

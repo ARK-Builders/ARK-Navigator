@@ -5,19 +5,9 @@ import space.taran.arknavigator.mvp.model.dao.common.Preview
 import space.taran.arknavigator.mvp.model.dao.ResourceId
 import space.taran.arknavigator.mvp.model.repo.ResourcesIndex
 import space.taran.arknavigator.mvp.view.item.FileItemView
-import space.taran.arknavigator.utils.*
-import ru.terrakok.cicerone.Router
-import android.util.Log
-import space.taran.arknavigator.navigation.Screens
 import java.lang.AssertionError
 import java.nio.file.Files
 import java.nio.file.Path
-
-//todo: pass Query from tags selector. every resource
-// must be verified against the Query when its tags are changed.
-// if the Query doesn't match the changed resource anymore,
-// then it needs to be removed both from Gallery.
-// when Gallery is closed, all removed resources must be removed from Grid too
 
 //todo: move handler to presenter maybe ?
 

@@ -55,13 +55,13 @@ class MainActivity : MvpAppCompatActivity(), MainView {
         bottom_navigation.setOnNavigationItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.page_roots -> {
-                    Log.d(MAIN, "switching to Roots screen")
-                    presenter.goToRootsScreen()
+                    Log.d(MAIN, "switching to Folders screen")
+                    presenter.goToFoldersScreen()
                     true
                 }
                 R.id.page_tags -> {
-                    Log.d(MAIN, "switching to Tags screen")
-                    presenter.goToTagsScreen()
+                    Log.d(MAIN, "switching to Resources screen")
+                    presenter.goToResourcesScreen()
                     true
                 }
                 else -> {
@@ -158,9 +158,6 @@ class MainActivity : MvpAppCompatActivity(), MainView {
             val treeUri = intent!!.data!!
             contentResolver.takePersistableUriPermission(treeUri,
                 Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-
-            //todo: is it really needed?
-            presenter.sdCardUriGranted(treeUri.toString())
         } else {
             Log.d(MAIN, "unknown activity result received")
         }

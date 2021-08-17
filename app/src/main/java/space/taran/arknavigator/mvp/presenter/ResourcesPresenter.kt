@@ -79,9 +79,6 @@ class ResourcesPresenter(
             .map { it to PlainTagsStorage.provide(it, rootToIndex[it]!!.listAllIds()) }
             .toMap()
 
-        //todo: when async indexing will be ready, tagged ids must be boosted
-        //in the indexing queue and be removed if they fail to be indexed
-
         roots.forEach { root ->
             val storage = rootToStorage[root]!!
             val indexed = rootToIndex[root]!!.listAllIds()

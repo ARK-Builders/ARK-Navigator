@@ -1,10 +1,9 @@
-package space.taran.arknavigator.mvp.presenter
+package space.taran.arknavigator.ui.adapter
 
 import android.view.View
 import kotlinx.android.synthetic.main.dialog_roots_new.view.*
 import space.taran.arknavigator.mvp.presenter.adapter.FoldersWalker
 import space.taran.arknavigator.mvp.presenter.adapter.ItemClickHandler
-import space.taran.arknavigator.ui.adapter.FilesReversibleRVAdapter
 import java.nio.file.Path
 
 import kotlin.io.path.ExperimentalPathApi

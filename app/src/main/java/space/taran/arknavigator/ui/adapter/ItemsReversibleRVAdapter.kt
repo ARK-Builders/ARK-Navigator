@@ -5,8 +5,6 @@ import androidx.recyclerview.widget.RecyclerView
 import space.taran.arknavigator.mvp.presenter.adapter.ItemsReversiblePresenter
 import space.taran.arknavigator.utils.ITEMS_CONTAINER
 
-//todo: I guess, tags cloud will be reversible too
-
 abstract class ItemsReversibleRVAdapter<Label,Item,View, Holder: RecyclerView.ViewHolder>(
     private val presenter: ItemsReversiblePresenter<Label,Item,View>)
     : RecyclerView.Adapter<Holder>() {

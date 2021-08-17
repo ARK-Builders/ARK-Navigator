@@ -1,4 +1,4 @@
-package space.taran.arknavigator.mvp.presenter
+package space.taran.arknavigator.ui.adapter
 
 import android.util.Log
 import com.ekezet.treeview.*
@@ -54,7 +54,8 @@ class FoldersTree(devices: List<Path>,
                   router: Router)
     : TreeViewAdapter(
         FolderViewHolderFactory(handler, router),
-        extractFolderDetails(devices, folders)) {
+        extractFolderDetails(devices, folders)
+) {
 
     companion object {
         fun extractFolderDetails(_devices: List<Path>, folders: Folders)

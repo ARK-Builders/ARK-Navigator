@@ -13,13 +13,6 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.attribute.FileTime
 
-//todo
-//        val storage = resourcesRepo.createStorage(pickedDir!!)
-//        if (storage == null) {
-//            requestSdCardUri()
-//            return
-//        }
-
 // The storage is being read from the FS both during application startup
 // and during application lifecycle since it can be changed from outside.
 // We also must persist all changes during application lifecycle into FS.
@@ -52,8 +45,6 @@ class PlainTagsStorage
 
         result
     }()
-
-    //todo `listAllTags`
 
     // if this id isn't present in storage, then the call is wrong
     override fun getTags(id: ResourceId): Tags = tagsById[id]!!
@@ -181,8 +172,6 @@ class PlainTagsStorage
     //todo tags query functions, with checking lastModified
 
     //todo tags modification, with immediate writing to the storageFile, with checking lastModified
-
-    //todo background listening to changes in FileSystem
 
     //todo: clean up storage when items are removed
     // (OR their ids are present but files not found)

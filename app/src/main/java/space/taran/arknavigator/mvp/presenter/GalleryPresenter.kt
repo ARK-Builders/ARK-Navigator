@@ -71,7 +71,7 @@ class GalleryPresenter(
     }
 
      private fun onPreviewsItemClick(pos: Int, preview: Preview) {
-        Log.d(GALLERY_SCREEN, "preview clicked, switching controls on/off")
+        Log.d(GALLERY_SCREEN, "preview at $pos clicked, switching controls on/off")
         isFullscreen = !isFullscreen
         viewState.setFullscreen(isFullscreen)
     }

@@ -83,8 +83,8 @@ class TagsSelector(
         this.chips = chips.toMap()
 
         clear = Chip(context)
-        clear.chipIcon = ContextCompat.getDrawable(context!!, R.drawable.ic_close)
-        clear.chipIconTint = ColorStateList.valueOf(ContextCompat.getColor(context!!, R.color.black))
+        clear.chipIcon = ContextCompat.getDrawable(context, R.drawable.ic_close)
+        clear.chipIconTint = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.black))
         clear.textStartPadding = 0f
         clear.textEndPadding = 0f
         clear.setOnClickListener {

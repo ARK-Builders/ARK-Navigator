@@ -60,7 +60,7 @@ class FoldersPresenter: MvpPresenter<FoldersView>() {
         viewState.notifyUser(
             message = "indexing of huge folders can take minutes",
             moreTime = true)
-        //todo: non-blocking indexing
+
         resourcesIndexFactory.buildFromFilesystem(root)
 
         viewState.loadFolders(favoritesByRoot)

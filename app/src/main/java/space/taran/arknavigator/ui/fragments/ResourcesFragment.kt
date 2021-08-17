@@ -143,9 +143,6 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         tagsEnabled = true
         showTagsOnOffButtons()
 
-        //todo: selector produces `Query` which is only a set of tags right now
-        //(so it can represent only conjunction of tags), but will change in future
-        //in the way it will also support negation and disjunction
         tags_cg.visibility = View.VISIBLE
 
         tagsSelector!!.drawChips(tags_cg, requireContext()) { selection ->

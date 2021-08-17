@@ -21,23 +21,17 @@ class MainPresenter: MvpPresenter<MainView>() {
     }
 
     fun permsGranted() {
-        Log.d(MAIN, "creating Roots screen")
-        //todo: default to TagsScreen if there are any roots added
+        Log.d(MAIN, "creating Folders screen")
         router.replaceScreen(Screens.FoldersScreen())
     }
 
-    fun sdCardUriGranted(uri: String) {
-        Log.d(PERMISSIONS, "[mock] sdcard uri granted for $uri")
-        //todo
-    }
-
-    fun goToRootsScreen() {
-        Log.d(MAIN, "creating Roots screen")
+    fun goToFoldersScreen() {
+        Log.d(MAIN, "creating Folders screen")
         router.newRootScreen(Screens.FoldersScreen())
     }
 
-    fun goToTagsScreen() {
-        Log.d(MAIN, "[mock] creating Tags screen")
+    fun goToResourcesScreen() {
+        Log.d(MAIN, "creating Resources screen")
         router.newRootScreen(Screens.ResourcesScreen(null, null))
     }
 
