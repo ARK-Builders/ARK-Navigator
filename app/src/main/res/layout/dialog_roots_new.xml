@@ -11,7 +11,7 @@
             android:id="@+id/tv_message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Add new root to the index"
+            android:text="@string/dialog_roots_new_title"
             android:textAlignment="center" />
 
         <TextView
@@ -19,7 +19,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
-            android:text="/"
             android:textAlignment="viewStart"
             android:textSize="20sp" />
 
@@ -41,7 +40,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
                 android:layout_weight="1"
-                android:text="Cancel" />
+                android:text="@string/all_cancel" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_roots_dialog_pick"
@@ -49,7 +48,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
                 android:layout_weight="1"
-                android:text="Pick" />
+                android:text="@string/all_pick" />
 
         </LinearLayout>
 
