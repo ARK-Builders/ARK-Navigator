@@ -84,9 +84,9 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
     override fun updateRootPickerDialogPickBtnState(isEnabled: Boolean, isRoot: Boolean) {
         rootPickerDialogView?.btn_roots_dialog_pick?.isEnabled = isEnabled
         if (isRoot)
-            rootPickerDialogView?.btn_roots_dialog_pick?.text = PICK_ROOT
+            rootPickerDialogView?.btn_roots_dialog_pick?.text = requireContext().getString(R.string.folders_pick_root)
         else
-            rootPickerDialogView?.btn_roots_dialog_pick?.text = PICK_FAVORITE
+            rootPickerDialogView?.btn_roots_dialog_pick?.text = requireContext().getString(R.string.folders_pick_favorite)
     }
 
     //provide null to close the dialog
@@ -150,21 +150,5 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
 
         result.setCanceledOnTouchOutside(false)
         return result
-    }
-
-    companion object {
-        private const val DEVICE_CHOSEN_AS_ROOT =
-            "Huge directories can cause long waiting times"
-        private const val FAVORITE_IS_ALREADY_PICKED =
-            "This folder is already among your favorites"
-        private const val ROOT_IS_ALREADY_PICKED =
-            "This folder is already picked as root"
-        private const val FILE_CHOSEN_AS_ROOT =
-            "Can't go inside a file"
-
-        private const val PICK_FAVORITE =
-            "FAVORITE"
-        private const val PICK_ROOT =
-            "ADD ROOT"
     }
 }

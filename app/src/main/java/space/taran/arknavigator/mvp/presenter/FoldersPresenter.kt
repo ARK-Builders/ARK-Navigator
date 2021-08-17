@@ -6,10 +6,12 @@ import space.taran.arknavigator.mvp.view.FoldersView
 import moxy.MvpPresenter
 import moxy.presenterScope
 import ru.terrakok.cicerone.Router
+import space.taran.arknavigator.R
 import space.taran.arknavigator.mvp.model.repo.FoldersRepo
 import space.taran.arknavigator.mvp.model.repo.ResourcesIndexFactory
 import space.taran.arknavigator.mvp.presenter.adapter.ItemClickHandler
 import space.taran.arknavigator.ui.fragments.utils.Notifications
+import space.taran.arknavigator.ui.resource.StringProvider
 import space.taran.arknavigator.utils.FOLDERS_SCREEN
 import space.taran.arknavigator.utils.FOLDER_PICKER
 import space.taran.arknavigator.utils.listDevices
@@ -30,6 +32,9 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
 
     @Inject
     lateinit var resourcesIndexFactory: ResourcesIndexFactory
+
+    @Inject
+    lateinit var stringProvider: StringProvider
 
     private lateinit var devices: List<Path>
     //todo treat syncthing folder as special storage device
@@ -94,7 +99,7 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
             }
         } else {
             Log.d(FOLDER_PICKER, "but it is not a directory")
-            //           notifyUser(FoldersFragment.FILE_CHOSEN_AS_ROOT)
+            viewState.notifyUser(stringProvider.getString(R.string.folders_file_chosen_as_root))
         }
     }
 
@@ -114,7 +119,7 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
             if (rootNotFavorite) {
                 // adding path as root
                 if (roots.contains(path)) {
-                    //notifyUser(FoldersFragment.ROOT_IS_ALREADY_PICKED)
+                    viewState.notifyUser(stringProvider.getString(R.string.folders_root_is_already_picked))
                 } else {
                     addRoot(path)
                     viewState.setRootPickerDialogVisibility(null)
@@ -122,7 +127,7 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
             } else {
                 // adding path as favorite
                 if (favorites.contains(path)) {
-                    //notifyUser(FoldersFragment.FAVORITE_IS_ALREADY_PICKED)
+                    viewState.notifyUser(stringProvider.getString(R.string.folders_favorite_is_alreay_picked))
                 } else {
                     addFavorite(path)
                     viewState.setRootPickerDialogVisibility(null)
@@ -130,7 +135,7 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
             }
         } else {
             Log.d(FOLDER_PICKER, "potentially huge directory")
-            //notifyUser(FoldersFragment.DEVICE_CHOSEN_AS_ROOT)
+            viewState.notifyUser(stringProvider.getString(R.string.folders_device_chosen_as_root))
         }
     }
 
@@ -149,7 +154,7 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
         viewState.notifyUser(
             message = "indexing of huge folders can take minutes",
             moreTime = true)
-        //todo: non-blocking indexing
+
         resourcesIndexFactory.buildFromFilesystem(root)
 
         viewState.updateFoldersTree(devices, favoritesByRoot)
