@@ -2,4 +2,13 @@
     <string name="app_name">ARK Navigator</string>
     <string name="as_is_sorting_selected">This option will be applied during next resources selection</string>
     <string name="resources_tags_selector_hint">Label some resources with tags to enable tags selector</string>
+    <string name="folders_device_chosen_as_root">Huge directories can cause long waiting times</string>
+    <string name="folders_favorite_is_alreay_picked">This folder is already among your favorites</string>
+    <string name="folders_root_is_already_picked">This folder is already picked as root</string>
+    <string name="folders_file_chosen_as_root">Can\'t go inside a file</string>
+    <string name="folders_pick_favorite">FAVORITE</string>
+    <string name="folders_pick_root">ADD ROOT</string>
+    <string name="dialog_roots_new_title">Add new root to the index</string>
+    <string name="all_cancel">Cancel</string>
+    <string name="all_pick">Pick</string>
 </resources>
