@@ -57,12 +57,13 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
     private var sorting: Sorting = Sorting.DEFAULT
     private var ascending: Boolean = true
 
-    private val rootLayoutY by lazy {
+    private val rootLayoutTopY by lazy {
         val loc = IntArray(2)
         layout_root.getLocationOnScreen(loc)
         loc[1]
     }
     private val rootLayoutHeight by lazy { layout_root.height }
+    private var dragHandlerVerticalBias: Float? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -87,7 +88,7 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         setHasOptionsMenu(true)
 
         initResources(grid)
-        iv_drag_handler.setOnTouchListener(::onDragViewTouchListener)
+        iv_drag_handler.setOnTouchListener(::dragHandlerTouchListener)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -123,6 +124,7 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
     override fun onResume() {
         Log.d(RESOURCES_SCREEN, "resuming in ResourcesFragment")
         super.onResume()
+        restoreDragHandlerBias()
     }
 
     override fun setToolbarTitle(title: String) {
@@ -249,13 +251,13 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         dialog = alertBuilder.show()
     }
 
-    private fun onDragViewTouchListener(view: View, event: MotionEvent): Boolean {
+    private fun dragHandlerTouchListener(view: View, event: MotionEvent): Boolean {
         when (event.action and MotionEvent.ACTION_MASK) {
             MotionEvent.ACTION_UP -> {
                 view.performClick()
             }
             MotionEvent.ACTION_MOVE -> {
-                val relativeEventY = event.rawY - rootLayoutY
+                val relativeEventY = event.rawY - rootLayoutTopY
                 var newBias = relativeEventY / rootLayoutHeight
                 // check out of bounds
                 if (newBias < 0f)
@@ -264,10 +266,19 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
                     newBias = 1f
                 val layoutParams = view.layoutParams as ConstraintLayout.LayoutParams
                 layoutParams.verticalBias = newBias
+                dragHandlerVerticalBias = newBias
                 view.layoutParams = layoutParams
             }
         }
         layout_root.invalidate()
         return true
+    }
+
+    private fun restoreDragHandlerBias() {
+        dragHandlerVerticalBias?.let {
+            val layoutParams = iv_drag_handler.layoutParams as ConstraintLayout.LayoutParams
+            layoutParams.verticalBias = it
+            iv_drag_handler.layoutParams = layoutParams
+        }
     }
 }
