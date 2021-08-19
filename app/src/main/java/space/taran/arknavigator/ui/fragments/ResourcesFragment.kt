@@ -4,24 +4,28 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import androidx.appcompat.app.AlertDialog
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.GridLayoutManager
 import kotlinx.android.synthetic.main.dialog_sort.view.*
-import space.taran.arknavigator.R
-import space.taran.arknavigator.mvp.presenter.ResourcesPresenter
-import space.taran.arknavigator.mvp.view.ResourcesView
-import space.taran.arknavigator.ui.App
-import space.taran.arknavigator.ui.activity.MainActivity
 import kotlinx.android.synthetic.main.fragment_resources.*
 import moxy.MvpAppCompatFragment
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
+import space.taran.arknavigator.R
+import space.taran.arknavigator.mvp.presenter.ResourcesPresenter
+import space.taran.arknavigator.mvp.presenter.TagsSelector
 import space.taran.arknavigator.mvp.presenter.adapter.ResourcesList
+import space.taran.arknavigator.mvp.view.ResourcesView
+import space.taran.arknavigator.ui.App
+import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.adapter.ResourcesGrid
 import space.taran.arknavigator.ui.fragments.utils.Notifications
-import space.taran.arknavigator.mvp.presenter.TagsSelector
-import space.taran.arknavigator.utils.*
+import space.taran.arknavigator.utils.RESOURCES_SCREEN
+import space.taran.arknavigator.utils.Sorting
+import space.taran.arknavigator.utils.extension
 import java.nio.file.Files
 import java.nio.file.Path
+
 
 //`root` is used for querying tags storage and resources index,
 //       if it is `null`, then resources from all roots are taken
@@ -53,6 +57,13 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
     private var sorting: Sorting = Sorting.DEFAULT
     private var ascending: Boolean = true
 
+    private val rootLayoutY by lazy {
+        val loc = IntArray(2)
+        layout_root.getLocationOnScreen(loc)
+        loc[1]
+    }
+    private val rootLayoutHeight by lazy { layout_root.height }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -76,6 +87,7 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         setHasOptionsMenu(true)
 
         initResources(grid)
+        iv_drag_handler.setOnTouchListener(::onDragViewTouchListener)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -235,5 +247,27 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         }
 
         dialog = alertBuilder.show()
+    }
+
+    private fun onDragViewTouchListener(view: View, event: MotionEvent): Boolean {
+        when (event.action and MotionEvent.ACTION_MASK) {
+            MotionEvent.ACTION_UP -> {
+                view.performClick()
+            }
+            MotionEvent.ACTION_MOVE -> {
+                val relativeEventY = event.rawY - rootLayoutY
+                var newBias = relativeEventY / rootLayoutHeight
+                // check out of bounds
+                if (newBias < 0f)
+                    newBias = 0f
+                if (newBias > 1f)
+                    newBias = 1f
+                val layoutParams = view.layoutParams as ConstraintLayout.LayoutParams
+                layoutParams.verticalBias = newBias
+                view.layoutParams = layoutParams
+            }
+        }
+        layout_root.invalidate()
+        return true
     }
 }
