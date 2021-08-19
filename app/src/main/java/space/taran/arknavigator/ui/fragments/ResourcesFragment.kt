@@ -269,8 +269,7 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
                     if (System.currentTimeMillis() - dragHandlerStartDraggingTime!! < DRAG_MILLIS_MAX_DELTA_TRIGGER &&
                         abs(biasDelta) > DRAG_BIAS_DELTA_TOLERANCE
                     ) {
-                        val sign = sign(biasDelta)
-                        dragHandlerBias = if (sign > 0f) 0f else 1f
+                        dragHandlerBias = if (biasDelta > 0f) 0f else 1f
                         updateDragHandlerBias()
                     }
                 }
@@ -289,7 +288,6 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
                 view.layoutParams = layoutParams
             }
         }
-        layout_root.invalidate()
         return true
     }
 
