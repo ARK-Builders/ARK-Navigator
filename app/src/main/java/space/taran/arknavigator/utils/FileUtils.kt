@@ -1,6 +1,6 @@
 package space.taran.arknavigator.utils
 
-import android.content.Context
+import space.taran.arknavigator.ui.App
 import java.lang.IllegalArgumentException
 import java.nio.file.Files
 import java.nio.file.Path
@@ -48,8 +48,8 @@ fun isHidden(path: Path): Boolean =
 fun folderExists(path: Path): Boolean =
     Files.exists(path) || Files.isDirectory(path)
 
-fun listDevices(context: Context): List<Path> =
-    context.getExternalFilesDirs(null)
+fun listDevices(): List<Path> =
+    App.instance.getExternalFilesDirs(null)
         .toList()
         .filterNotNull()
         .map {
