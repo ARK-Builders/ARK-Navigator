@@ -1,22 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_resources"
-        android:layout_gravity="center"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
         android:clipToPadding="false"
-        android:padding="10dp"/>
+        android:padding="10dp"
+        app:layout_constraintBottom_toTopOf="@+id/iv_drag_handler"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
 
-    <space.taran.arknavigator.ui.customview.ScrollViewAutoHeight
+    <ImageView
+        android:id="@+id/iv_drag_handler"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="20dp"
+        android:background="@color/platinumGray"
+        android:src="@drawable/ic_drag_handle"
+        android:tint="@color/black"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.8" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_below="@id/iv_drag_handler"
+        android:background="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/iv_drag_handler"
+        app:layout_constraintVertical_bias="0.0">
 
         <com.google.android.material.chip.ChipGroup
             android:id="@+id/tags_cg"
@@ -24,7 +42,6 @@
             android:layout_height="wrap_content"
             android:padding="10dp"
             android:visibility="visible" />
+    </ScrollView>
 
-    </space.taran.arknavigator.ui.customview.ScrollViewAutoHeight>
-
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
