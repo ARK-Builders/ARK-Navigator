@@ -25,6 +25,8 @@ import space.taran.arknavigator.utils.Sorting
 import space.taran.arknavigator.utils.extension
 import java.nio.file.Files
 import java.nio.file.Path
+import kotlin.math.abs
+import kotlin.math.sign
 
 
 //`root` is used for querying tags storage and resources index,
@@ -63,7 +65,9 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         loc[1]
     }
     private val rootLayoutHeight by lazy { layout_root.height }
-    private var dragHandlerVerticalBias: Float? = null
+    private var dragHandlerBias: Float? = null
+    private var dragHandlerStartDraggingBias: Float? = null
+    private var dragHandlerStartDraggingTime: Long? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -124,7 +128,7 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
     override fun onResume() {
         Log.d(RESOURCES_SCREEN, "resuming in ResourcesFragment")
         super.onResume()
-        restoreDragHandlerBias()
+        updateDragHandlerBias()
     }
 
     override fun setToolbarTitle(title: String) {
@@ -253,8 +257,25 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
 
     private fun dragHandlerTouchListener(view: View, event: MotionEvent): Boolean {
         when (event.action and MotionEvent.ACTION_MASK) {
+            MotionEvent.ACTION_DOWN -> {
+                val layoutParams = iv_drag_handler.layoutParams as ConstraintLayout.LayoutParams
+                dragHandlerStartDraggingBias = layoutParams.verticalBias
+                dragHandlerStartDraggingTime = System.currentTimeMillis()
+            }
             MotionEvent.ACTION_UP -> {
                 view.performClick()
+                dragHandlerBias?.let { actualBias ->
+                    val biasDelta = dragHandlerStartDraggingBias!! - actualBias
+                    if (System.currentTimeMillis() - dragHandlerStartDraggingTime!! < DRAG_MILLIS_MAX_DELTA_TRIGGER &&
+                        abs(biasDelta) > DRAG_BIAS_DELTA_TOLERANCE
+                    ) {
+                        val sign = sign(biasDelta)
+                        if (sign != 0f) {
+                            dragHandlerBias = if (sign > 0f) 0f else 1f
+                            updateDragHandlerBias()
+                        }
+                    }
+                }
             }
             MotionEvent.ACTION_MOVE -> {
                 val relativeEventY = event.rawY - rootLayoutTopY
@@ -266,7 +287,7 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
                     newBias = 1f
                 val layoutParams = view.layoutParams as ConstraintLayout.LayoutParams
                 layoutParams.verticalBias = newBias
-                dragHandlerVerticalBias = newBias
+                dragHandlerBias = newBias
                 view.layoutParams = layoutParams
             }
         }
@@ -274,11 +295,16 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         return true
     }
 
-    private fun restoreDragHandlerBias() {
-        dragHandlerVerticalBias?.let {
+    private fun updateDragHandlerBias() {
+        dragHandlerBias?.let {
             val layoutParams = iv_drag_handler.layoutParams as ConstraintLayout.LayoutParams
             layoutParams.verticalBias = it
             iv_drag_handler.layoutParams = layoutParams
         }
+    }
+
+    companion object {
+        private const val DRAG_BIAS_DELTA_TOLERANCE = 0.3f
+        private const val DRAG_MILLIS_MAX_DELTA_TRIGGER = 500L
     }
 }
