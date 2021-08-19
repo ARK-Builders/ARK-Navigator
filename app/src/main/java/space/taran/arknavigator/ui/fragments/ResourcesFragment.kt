@@ -270,10 +270,8 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
                         abs(biasDelta) > DRAG_BIAS_DELTA_TOLERANCE
                     ) {
                         val sign = sign(biasDelta)
-                        if (sign != 0f) {
-                            dragHandlerBias = if (sign > 0f) 0f else 1f
-                            updateDragHandlerBias()
-                        }
+                        dragHandlerBias = if (sign > 0f) 0f else 1f
+                        updateDragHandlerBias()
                     }
                 }
             }
