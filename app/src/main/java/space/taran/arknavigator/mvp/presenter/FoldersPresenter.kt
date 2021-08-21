@@ -1,6 +1,7 @@
 package space.taran.arknavigator.mvp.presenter
 
 import android.util.Log
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import space.taran.arknavigator.mvp.view.FoldersView
 import moxy.InjectViewState
@@ -50,7 +51,7 @@ class FoldersPresenter: MvpPresenter<FoldersView>() {
         }
     }
 
-    fun addRoot(root: Path) = presenterScope.launch {
+    fun addRoot(root: Path) = presenterScope.launch(NonCancellable) {
         viewState.setProgressVisibility(true)
         Log.d(FOLDERS_SCREEN, "root $root added in RootsPresenter")
         val path = root.toRealPath()
@@ -73,7 +74,7 @@ class FoldersPresenter: MvpPresenter<FoldersView>() {
         viewState.setProgressVisibility(false)
     }
 
-    fun addFavorite(favorite: Path) = presenterScope.launch {
+    fun addFavorite(favorite: Path) = presenterScope.launch(NonCancellable) {
         viewState.setProgressVisibility(true)
         Log.d(FOLDERS_SCREEN, "favorite $favorite added in RootsPresenter")
         val path = favorite.toRealPath()

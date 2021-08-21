@@ -1,6 +1,7 @@
 package space.taran.arknavigator.mvp.presenter
 
 import android.util.Log
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import moxy.MvpPresenter
 import moxy.presenterScope
@@ -40,7 +41,7 @@ class GalleryPresenter(
         viewState.init(previews)
     }
 
-    fun deleteResource(resource: ResourceId) = presenterScope.launch {
+    fun deleteResource(resource: ResourceId) = presenterScope.launch(NonCancellable) {
         Log.d(GALLERY_SCREEN, "deleting resource $resource")
 
         storage.remove(resource)
@@ -56,7 +57,7 @@ class GalleryPresenter(
         return tags
     }
 
-    fun replaceTags(resource: ResourceId, tags: Tags) = presenterScope.launch {
+    fun replaceTags(resource: ResourceId, tags: Tags) = presenterScope.launch(NonCancellable) {
         Log.d(GALLERY_SCREEN, "tags $tags added to $resource")
         storage.setTags(resource, tags)
     }
