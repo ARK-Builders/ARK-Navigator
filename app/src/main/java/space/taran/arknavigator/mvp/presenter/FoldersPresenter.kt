@@ -35,6 +35,7 @@ class FoldersPresenter: MvpPresenter<FoldersView>() {
         super.onFirstViewAttach()
 
         presenterScope.launch {
+            viewState.setProgressVisibility(true)
             val folders = foldersRepo.query()
             Log.d(FOLDERS_SCREEN, "folders retrieved: $folders")
 
@@ -45,10 +46,12 @@ class FoldersPresenter: MvpPresenter<FoldersView>() {
                 .toMutableMap()
 
             viewState.loadFolders(favoritesByRoot)
+            viewState.setProgressVisibility(false)
         }
     }
 
     fun addRoot(root: Path) = presenterScope.launch {
+        viewState.setProgressVisibility(true)
         Log.d(FOLDERS_SCREEN, "root $root added in RootsPresenter")
         val path = root.toRealPath()
 
@@ -67,9 +70,11 @@ class FoldersPresenter: MvpPresenter<FoldersView>() {
         resourcesIndexFactory.buildFromFilesystem(root)
 
         viewState.loadFolders(favoritesByRoot)
+        viewState.setProgressVisibility(false)
     }
 
     fun addFavorite(favorite: Path) = presenterScope.launch {
+        viewState.setProgressVisibility(true)
         Log.d(FOLDERS_SCREEN, "favorite $favorite added in RootsPresenter")
         val path = favorite.toRealPath()
 
@@ -86,6 +91,7 @@ class FoldersPresenter: MvpPresenter<FoldersView>() {
         foldersRepo.insertFavorite(root, relative)
 
         viewState.loadFolders(favoritesByRoot)
+        viewState.setProgressVisibility(false)
     }
 
     fun resume() {

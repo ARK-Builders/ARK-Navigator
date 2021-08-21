@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.GridLayoutManager
 import kotlinx.android.synthetic.main.dialog_roots_new.view.*
 import kotlinx.android.synthetic.main.fragment_folders.*
@@ -63,6 +64,11 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
 
         roots = folders.keys
         favorites = folders.values.flatten().toSet()
+    }
+
+    override fun setProgressVisibility(isVisible: Boolean) {
+        progress_circular.isVisible = isVisible
+        layout_items.isVisible = !isVisible
     }
 
     override fun onCreateView(
