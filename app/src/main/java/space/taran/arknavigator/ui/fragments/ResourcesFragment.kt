@@ -26,7 +26,6 @@ import space.taran.arknavigator.utils.extension
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.math.abs
-import kotlin.math.sign
 
 
 //`root` is used for querying tags storage and resources index,
@@ -59,15 +58,17 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
     private var sorting: Sorting = Sorting.DEFAULT
     private var ascending: Boolean = true
 
-    private val rootLayoutTopY by lazy {
+    private val frameTop by lazy {
         val loc = IntArray(2)
         layout_root.getLocationOnScreen(loc)
         loc[1]
     }
-    private val rootLayoutHeight by lazy { layout_root.height }
-    private var dragHandlerBias: Float? = null
-    private var dragHandlerStartDraggingBias: Float? = null
-    private var dragHandlerStartDraggingTime: Long? = null
+    private val frameHeight by lazy { layout_root.height }
+
+    private var selectorHeight: Float = 0.3f //ratio
+
+    private var selectorDragStartBias: Float = -1f
+    private var selectorDragStartTime: Long = -1
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -259,48 +260,56 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         when (event.action and MotionEvent.ACTION_MASK) {
             MotionEvent.ACTION_DOWN -> {
                 val layoutParams = iv_drag_handler.layoutParams as ConstraintLayout.LayoutParams
-                dragHandlerStartDraggingBias = layoutParams.verticalBias
-                dragHandlerStartDraggingTime = System.currentTimeMillis()
+                selectorDragStartBias = layoutParams.verticalBias
+                selectorDragStartTime = System.currentTimeMillis()
             }
             MotionEvent.ACTION_UP -> {
                 view.performClick()
-                dragHandlerBias?.let { actualBias ->
-                    val biasDelta = dragHandlerStartDraggingBias!! - actualBias
-                    if (System.currentTimeMillis() - dragHandlerStartDraggingTime!! < DRAG_MILLIS_MAX_DELTA_TRIGGER &&
-                        abs(biasDelta) > DRAG_BIAS_DELTA_TOLERANCE
-                    ) {
-                        dragHandlerBias = if (biasDelta > 0f) 0f else 1f
+
+                val travelTime = System.currentTimeMillis() - selectorDragStartTime
+                val travelDelta = selectorDragStartBias - (1f - selectorHeight)
+                val travelSpeed = 100f * travelDelta / (travelTime / 1000f)
+                Log.d(RESOURCES_SCREEN, "draggable bar of tags selector was moved:")
+                Log.d(RESOURCES_SCREEN, "delta=${100f * travelDelta}%")
+                Log.d(RESOURCES_SCREEN, "time=${ 100f * travelTime }%")
+                Log.d(RESOURCES_SCREEN, "speed=${100f * travelSpeed}%")
+
+                if (travelTime > DRAG_TRAVEL_TIME_THRESHOLD &&
+                    abs(travelDelta) > DRAG_TRAVEL_DELTA_THRESHOLD &&
+                    abs(travelSpeed) > DRAG_TRAVEL_SPEED_THRESHOLD) {
+                        selectorHeight = if (travelDelta > 0f) 1f else 0f
                         updateDragHandlerBias()
-                    }
                 }
             }
             MotionEvent.ACTION_MOVE -> {
-                val relativeEventY = event.rawY - rootLayoutTopY
-                var newBias = relativeEventY / rootLayoutHeight
-                // check out of bounds
-                if (newBias < 0f)
-                    newBias = 0f
-                if (newBias > 1f)
-                    newBias = 1f
-                val layoutParams = view.layoutParams as ConstraintLayout.LayoutParams
-                layoutParams.verticalBias = newBias
-                dragHandlerBias = newBias
-                view.layoutParams = layoutParams
+                val distanceFromTop = event.rawY - frameTop
+                selectorHeight = if (distanceFromTop < 0f) {
+                    1f
+                } else if (distanceFromTop > frameHeight) {
+                    0f
+                } else {
+                    1f - distanceFromTop / frameHeight
+                }
+
+                updateVerticalBias(view)
             }
         }
         return true
     }
 
+    private fun updateVerticalBias(view: View) {
+        val layoutParams = view.layoutParams as ConstraintLayout.LayoutParams
+        layoutParams.verticalBias = 1f - selectorHeight
+        view.layoutParams = layoutParams
+    }
+
     private fun updateDragHandlerBias() {
-        dragHandlerBias?.let {
-            val layoutParams = iv_drag_handler.layoutParams as ConstraintLayout.LayoutParams
-            layoutParams.verticalBias = it
-            iv_drag_handler.layoutParams = layoutParams
-        }
+        updateVerticalBias(iv_drag_handler)
     }
 
     companion object {
-        private const val DRAG_BIAS_DELTA_TOLERANCE = 0.3f
-        private const val DRAG_MILLIS_MAX_DELTA_TRIGGER = 500L
+        private const val DRAG_TRAVEL_TIME_THRESHOLD = 50      //milliseconds
+        private const val DRAG_TRAVEL_DELTA_THRESHOLD = 0.1    //ratio
+        private const val DRAG_TRAVEL_SPEED_THRESHOLD = 150    //percents per second
     }
 }
