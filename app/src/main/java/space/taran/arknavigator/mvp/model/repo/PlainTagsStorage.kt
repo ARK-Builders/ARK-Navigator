@@ -22,13 +22,15 @@ import java.nio.file.attribute.FileTime
 class PlainTagsStorage
     private constructor(
         root: Path,
-        resources: Collection<ResourceId>): TagsStorage {
+        val resources: Collection<ResourceId>): TagsStorage {
 
     private val storageFile: Path = root.resolve(STORAGE_FILENAME)
 
     private var lastModified: FileTime = FileTime.fromMillis(0L)
 
-    private val tagsById: MutableMap<ResourceId, Tags> = runBlocking(Dispatchers.IO) {
+    private lateinit var tagsById: MutableMap<ResourceId, Tags>
+
+    private suspend fun init() = withContext(Dispatchers.IO) {
         val result = resources.map { it to NO_TAGS }
             .toMap()
             .toMutableMap()
@@ -44,7 +46,7 @@ class PlainTagsStorage
         } else {
             Log.d(TAGS_STORAGE, "file $storageFile doesn't exist")
         }
-        result
+        tagsById = result
     }
 
     override fun contains(id: ResourceId): Boolean = tagsById.containsKey(id)
@@ -189,7 +191,7 @@ class PlainTagsStorage
 
         private val storageByRoot = mutableMapOf<Path, PlainTagsStorage>()
 
-        fun provide(root: Path, resources: Collection<ResourceId>): PlainTagsStorage {
+        suspend fun provide(root: Path, resources: Collection<ResourceId>): PlainTagsStorage = withContext(Dispatchers.IO) {
             val storage = storageByRoot[root]
             if (storage != null) {
                 if (storage.tagsById.keys.toSet() != resources.toSet()) {
@@ -197,12 +199,13 @@ class PlainTagsStorage
                     Log.d(TAGS_STORAGE, "resources in the index: $resources")
                     throw AssertionError("Index and storage diverged")
                 }
-                return storage
+                return@withContext storage
             }
 
             val fresh = PlainTagsStorage(root, resources)
+            fresh.init()
             storageByRoot[root] = fresh
-            return fresh
+            return@withContext fresh
         }
 
         private fun verifyVersion(header: String) {
