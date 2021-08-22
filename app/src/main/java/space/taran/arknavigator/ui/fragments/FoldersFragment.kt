@@ -67,8 +67,7 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
     }
 
     override fun setProgressVisibility(isVisible: Boolean) {
-        progress_circular.isVisible = isVisible
-        layout_items.isVisible = !isVisible
+        layout_progress.isVisible = isVisible
     }
 
     override fun onCreateView(
