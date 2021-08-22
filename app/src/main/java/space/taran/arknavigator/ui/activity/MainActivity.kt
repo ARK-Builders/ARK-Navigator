@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.View
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.forEach
 import androidx.core.view.isVisible
 import space.taran.arknavigator.R
 import space.taran.arknavigator.mvp.presenter.MainPresenter
@@ -51,7 +52,7 @@ class MainActivity : MvpAppCompatActivity(), MainView {
     override fun init() {
         Log.d(MAIN, "initializing")
         setSupportActionBar(toolbar)
-        bottom_navigation.setOnNavigationItemSelectedListener { item ->
+        bottom_navigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.page_roots -> {
                     Log.d(MAIN, "switching to Folders screen")
@@ -69,6 +70,7 @@ class MainActivity : MvpAppCompatActivity(), MainView {
                 }
             }
         }
+        bottom_navigation.setOnItemReselectedListener{}
     }
 
     override fun requestPerms() {
@@ -143,6 +145,12 @@ class MainActivity : MvpAppCompatActivity(), MainView {
     fun setSelectedTab(pos: Int) {
         Log.d(MAIN, "tab $pos selected")
         bottom_navigation.menu.getItem(pos).isChecked = true
+    }
+
+    fun setBottomNavigationEnabled(isEnabled: Boolean) {
+        bottom_navigation.menu.forEach { item ->
+            item.isEnabled = isEnabled
+        }
     }
 
     override fun notifyUser(message: String, moreTime: Boolean) {
