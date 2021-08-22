@@ -32,18 +32,6 @@
 
     </RelativeLayout>
 
-    <FrameLayout
-        android:id="@+id/layout_progress"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/grayTransparent"
-        android:clickable="true">
-
-        <com.google.android.material.progressindicator.CircularProgressIndicator
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:indeterminate="true" />
-    </FrameLayout>
+    <include layout="@layout/layout_progress"/>
 
 </RelativeLayout>

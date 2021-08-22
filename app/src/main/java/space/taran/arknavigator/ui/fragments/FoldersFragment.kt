@@ -11,6 +11,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.GridLayoutManager
 import kotlinx.android.synthetic.main.dialog_roots_new.view.*
 import kotlinx.android.synthetic.main.fragment_folders.*
+import kotlinx.android.synthetic.main.layout_progress.*
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import moxy.presenter.InjectPresenter

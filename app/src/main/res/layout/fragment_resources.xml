@@ -44,3 +44,5 @@
     </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <include layout="@layout/layout_progress"/>

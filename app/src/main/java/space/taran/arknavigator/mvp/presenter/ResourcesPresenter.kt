@@ -54,6 +54,7 @@ class ResourcesPresenter(
         super.onFirstViewAttach()
 
         presenterScope.launch {
+            viewState.setProgressVisibility(true)
             val folders = foldersRepo.query()
             Log.d(RESOURCES_SCREEN, "folders retrieved: $folders")
 
@@ -102,6 +103,7 @@ class ResourcesPresenter(
             }()
 
             viewState.setToolbarTitle("$title${roots.size} of roots chosen")
+            viewState.setProgressVisibility(false)
         }
     }
 

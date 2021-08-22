@@ -4,10 +4,12 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import androidx.appcompat.app.AlertDialog
+import androidx.core.view.isVisible
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.GridLayoutManager
 import kotlinx.android.synthetic.main.dialog_sort.view.*
 import kotlinx.android.synthetic.main.fragment_resources.*
+import kotlinx.android.synthetic.main.layout_progress.*
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import moxy.presenter.InjectPresenter
@@ -132,6 +134,11 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
 
     override fun setToolbarTitle(title: String) {
         (activity as MainActivity).setTitle(title)
+    }
+
+    override fun setProgressVisibility(isVisible: Boolean) {
+        layout_progress.isVisible = isVisible
+        (activity as MainActivity).setBottomNavigationEnabled(!isVisible)
     }
 
     override fun notifyUser(message: String, moreTime: Boolean) {
