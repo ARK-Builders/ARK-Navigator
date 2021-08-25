@@ -46,8 +46,13 @@ class PlainTagsStorage
         result
     }()
 
+    override fun contains(id: ResourceId): Boolean = tagsById.containsKey(id)
+
     // if this id isn't present in storage, then the call is wrong
+    // because the caller always takes this id from ResourcesIndex
+    // and the index and storage must be in sync
     override fun getTags(id: ResourceId): Tags = tagsById[id]!!
+    //todo: check the file's modification date and pull external updates
 
     override fun setTags(id: ResourceId, tags: Tags) {
         if (!tagsById.containsKey(id)) {
@@ -169,12 +174,9 @@ class PlainTagsStorage
         Log.d(TAGS_STORAGE, "${tagsById.size} entries has been written")
     }
 
-    //todo tags query functions, with checking lastModified
-
-    //todo tags modification, with immediate writing to the storageFile, with checking lastModified
-
     //todo: clean up storage when items are removed
     // (OR their ids are present but files not found)
+    // (+ trash can for tags of removed resources)
 
     companion object {
         const val STORAGE_FILENAME = ".ark-tags"

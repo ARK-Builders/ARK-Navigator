@@ -6,6 +6,8 @@ import space.taran.arknavigator.utils.Tags
 
 interface TagsStorage {
 
+    fun contains(id: ResourceId): Boolean
+
     fun getTags(id: ResourceId): Tags
 
     fun setTags(id: ResourceId, tags: Tags)

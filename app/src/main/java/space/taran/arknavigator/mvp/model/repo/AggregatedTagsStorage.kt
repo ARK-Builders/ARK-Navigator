@@ -8,13 +8,19 @@ class AggregatedTagsStorage(
     private val shards: Collection<PlainTagsStorage>)
     : TagsStorage {
 
+    override fun contains(id: ResourceId): Boolean =
+        shards.any { it.contains(id) }
+
     // if we have several copies of a resource across shards,
     // then we would receive all tags for the resource. but
     // copies of the same resource under different roots
     // are forbidden now
     override fun getTags(id: ResourceId): Tags =
         shards
-            .flatMap { it.getTags(id) }
+            .flatMap {
+                if (it.contains(id)) it.getTags(id)
+                else emptySet()
+            }
             .toSet()
 
     override fun setTags(id: ResourceId, tags: Tags) =

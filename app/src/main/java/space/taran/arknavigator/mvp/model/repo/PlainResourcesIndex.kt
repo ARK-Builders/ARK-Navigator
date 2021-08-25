@@ -72,10 +72,6 @@ class PlainResourcesIndex internal constructor (
         return path
     }
 
-    //todo query functions
-
-    //todo modification functions with immediate persisting
-
     internal fun reindexRoot(diff: Difference) {
         diff.deleted.forEach {
             pathById[metaByPath[it]!!.id]
@@ -84,7 +80,12 @@ class PlainResourcesIndex internal constructor (
 
         val pathsToDelete = diff.deleted + diff.updated
         CoroutineRunner.runAndBlock {
-            dao.deletePaths(pathsToDelete.map { it.toString() })
+            Log.d(RESOURCES_INDEX, "removing ${pathsToDelete.size} paths")
+            val chunks = pathsToDelete.chunked(512)
+            Log.d(RESOURCES_INDEX, "splitting into ${chunks.size} chunks")
+            chunks.forEach { paths ->
+                dao.deletePaths(paths.map { it.toString() })
+            }
         }
 
         val toInsert = diff.updated + diff.added
