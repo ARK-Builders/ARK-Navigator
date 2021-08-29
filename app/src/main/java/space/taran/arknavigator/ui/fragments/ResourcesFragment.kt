@@ -50,6 +50,7 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
 
     private var tagsSelector: TagsSelector? = null
     private var resourcesAdapter: ResourcesRVAdapter? = null
+    private var dialog: AlertDialog? = null
 
     private lateinit var menuTagsOn: MenuItem
     private lateinit var menuTagsOff: MenuItem
@@ -84,7 +85,7 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         App.instance.appComponent.inject(this)
     }
 
-    override fun init(grid: ResourcesList) {
+    override fun init() {
         Log.d(RESOURCES_SCREEN, "initializing ResourcesFragment")
         (activity as MainActivity).setSelectedTab(1)
         (activity as MainActivity).setToolbarVisibility(true)
@@ -94,7 +95,6 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         rv_resources.adapter = resourcesAdapter
         rv_resources.layoutManager = GridLayoutManager(context, 3)
 
-        initResources(grid)
         binding.ivDragHandler.setOnTouchListener(::dragHandlerTouchListener)
     }
 
@@ -151,6 +151,28 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         Notifications.notifyUser(context, message, moreTime)
     }
 
+    override fun setTagsEnabled(enabled: Boolean) {
+        if (this::menuTagsOn.isInitialized && this::menuTagsOff.isInitialized) {
+            Log.d(RESOURCES_SCREEN, "showing tags selector? $tagsEnabled")
+            menuTagsOn.isVisible = !enabled
+            menuTagsOff.isVisible = enabled
+        }
+
+        tags_cg.isVisible = enabled
+    }
+
+    override fun drawChips(tagsSelector: TagsSelector?) {
+        tagsSelector?.drawChips(tags_cg, requireContext())
+            ?: notifyUser("You don't have any tags here yet", moreTime = true)
+    }
+
+    override fun setSortDialogVisibility(isVisible: Boolean, sorting: Sorting, ascending: Boolean) {
+        if (isVisible)
+            showSortByDialog(sorting, ascending)
+        else
+            dialog?.dismiss()
+    }
+
     private fun initResources(resources: ResourcesList) {
         gridAdapter = ResourcesGrid(resources)
 
@@ -175,10 +197,7 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
 
         binding.tagsCg.visibility = View.VISIBLE
 
-        tagsSelector!!.drawChips(binding.tagsCg, requireContext()) { selection ->
-            notifyUser("${selection.size} resources selected")
-            gridAdapter.updateItems(selection.toList())
-        }
+        tagsSelector!!.drawChips(tags_cg, requireContext())
     }
 
     //showing only untagged resources, hiding tags selector
@@ -202,7 +221,7 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         }
     }
 
-    private fun showSortByDialog() {
+    private fun showSortByDialog(sorting: Sorting, ascending: Boolean) {
         Log.d(RESOURCES_SCREEN, "showing sort-by dialog in ResourcesFragment")
         val dialogBinding = DialogSortBinding.inflate(LayoutInflater.from(requireContext()))
 

@@ -47,6 +47,7 @@ class ResourcesPresenter(
     inner class ResourcesGridPresenter: IResourcesGridPresenter {
         private var resources = mutableListOf<ResourceId>()
         private var sorting = Sorting.DEFAULT
+        private var ascending: Boolean = true
 
         override fun getCount() = resources.size
 
@@ -98,14 +99,12 @@ class ResourcesPresenter(
             return null
         }
 
-        return TagsSelector(tags, resources().toSet(), storage)
+        return TagsSelector(tags, resources().toSet(), storage, ::onTagsChanged)
     }
 
-    private fun getSorting() = presenterScope.launch {
-        sorting = userPreferences.getSorting()
-        sortOrderAscending = userPreferences.isSortingAscending()
-
-        viewState.sortingValuesReceived()
+    private fun onTagsChanged(selection: Set<ResourceId>) {
+        viewState.notifyUser("${selection.size} resources selected")
+        gridPresenter.updateResources(selection.toList())
     }
 
     override fun onFirstViewAttach() {
