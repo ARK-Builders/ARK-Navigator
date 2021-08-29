@@ -41,13 +41,15 @@ class ResourcesPresenter(
 
     private lateinit var index: ResourcesIndex
     private lateinit var storage: TagsStorage
+    private var tagsSelector: TagsSelector? = null
+    var tagsEnabled: Boolean = true
 
     val gridPresenter = ResourcesGridPresenter()
 
     inner class ResourcesGridPresenter: IResourcesGridPresenter {
         private var resources = mutableListOf<ResourceId>()
-        private var sorting = Sorting.DEFAULT
-        private var ascending: Boolean = true
+        var sorting = Sorting.DEFAULT
+        var ascending: Boolean = true
 
         override fun getCount() = resources.size
 
@@ -72,45 +74,41 @@ class ResourcesPresenter(
 
         fun updateResources(resources: List<ResourceId>) {
             this.resources = resources.toMutableList()
-            sortBy(sorting)
+            push()
         }
 
-        fun sortBy(sorting: Sorting) {
+        fun updateSorting(sorting: Sorting) {
+            if (sorting == Sorting.DEFAULT)
+                throw AssertionError("Not possible")
+            this.sorting = sorting
+            push()
+        }
+
+        fun updateAscending(ascending: Boolean) {
+            this.ascending = ascending
+            push()
+        }
+
+        private fun push() {
             when(sorting) {
                 Sorting.NAME -> resources.sortBy { index.getPath(it)!!.fileName }
                 Sorting.SIZE -> resources.sortBy { Files.size(index.getPath(it)!!) }
                 Sorting.TYPE -> resources.sortBy { extension(index.getPath(it)!!) }
                 Sorting.LAST_MODIFIED -> resources.sortBy { Files.getLastModifiedTime(index.getPath(it)!!) }
-                Sorting.DEFAULT -> throw AssertionError("Not possible")
+                Sorting.DEFAULT -> {}
             }
+            if (!ascending)
+                resources.reverse()
             viewState.updateAdapter()
         }
-    }
 
-    fun listTagsForAllResources(): Tags = resources()
-        .flatMap { storage.getTags(it) }
-        .toSet()
-
-    fun createTagsSelector(): TagsSelector? {
-        val tags = listTagsForAllResources()
-        Log.d(RESOURCES_SCREEN, "tags loaded: $tags")
-
-        if (tags.isEmpty()) {
-            return null
-        }
-
-        return TagsSelector(tags, resources().toSet(), storage, ::onTagsChanged)
-    }
-
-    private fun onTagsChanged(selection: Set<ResourceId>) {
-        viewState.notifyUser("${selection.size} resources selected")
-        gridPresenter.updateResources(selection.toList())
     }
 
     override fun onFirstViewAttach() {
         Log.d(RESOURCES_SCREEN, "first view attached in ResourcesPresenter")
         super.onFirstViewAttach()
 
+        viewState.init()
         presenterScope.launch {
             viewState.setProgressVisibility(true)
             val folders = foldersRepo.query()
@@ -153,8 +151,9 @@ class ResourcesPresenter(
             index = AggregatedResourcesIndex(rootToIndex.values)
             storage = AggregatedTagsStorage(rootToStorage.values)
 
-            viewState.init(provideResourcesList())
-            getSorting()
+        createTagsSelector()
+        gridPresenter.updateResources(resources())
+        viewState.drawChips(tagsSelector)
 
             val title = {
                 val path = (prefix ?: root)
@@ -171,18 +170,44 @@ class ResourcesPresenter(
         super.onDestroy()
     }
 
-    fun provideResourcesList(untagged: Boolean = false): ResourcesList {
-        var resourcesList: ResourcesList? = null
-        resourcesList = ResourcesList(index, resources(untagged)) { position, resource ->
-            Log.d(RESOURCES_SCREEN, "resource $resource at $position clicked ItemGridPresenter")
-
-            router.navigateTo(Screens.GalleryScreen(index, storage, resourcesList!!, position))
+    fun onMenuTagsToggle(enabled: Boolean) {
+        tagsEnabled = enabled
+        viewState.setTagsEnabled(tagsEnabled)
+        gridPresenter.updateResources(resources(untagged = !tagsEnabled))
+        if (tagsEnabled && listTagsForAllResources().isEmpty()) {
+            viewState.notifyUser("Tag something first")
         }
-
-        return resourcesList
     }
 
-    fun resources(untagged: Boolean = false): List<ResourceId> {
+    fun onMenuSortDialogClick() {
+        viewState.setSortDialogVisibility(true, gridPresenter.sorting, gridPresenter.ascending)
+    }
+
+    fun onSortDialogClose() {
+        viewState.setSortDialogVisibility(false, gridPresenter.sorting, gridPresenter.ascending)
+    }
+
+    private fun onTagsChanged(selection: Set<ResourceId>) {
+        viewState.notifyUser("${selection.size} resources selected")
+        gridPresenter.updateResources(selection.toList())
+    }
+
+    private fun listTagsForAllResources(): Tags = resources()
+        .flatMap { storage.getTags(it) }
+        .toSet()
+
+    private fun createTagsSelector() {
+        val tags = listTagsForAllResources()
+        Log.d(RESOURCES_SCREEN, "tags loaded: $tags")
+
+        if (tags.isEmpty()) {
+            tagsSelector = null
+        }
+
+        tagsSelector = TagsSelector(tags, resources().toSet(), storage, ::onTagsChanged)
+    }
+
+    private fun resources(untagged: Boolean = false): List<ResourceId> {
         val underPrefix = index.listIds(prefix)
 
         val result = if (untagged) {
