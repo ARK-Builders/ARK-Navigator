@@ -14,16 +14,13 @@ import space.taran.arknavigator.databinding.DialogSortBinding
 import space.taran.arknavigator.databinding.FragmentResourcesBinding
 import space.taran.arknavigator.mvp.presenter.ResourcesPresenter
 import space.taran.arknavigator.mvp.presenter.TagsSelector
-import space.taran.arknavigator.mvp.presenter.adapter.ResourcesList
 import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.activity.MainActivity
-import space.taran.arknavigator.ui.adapter.ResourcesGrid
 import space.taran.arknavigator.ui.adapter.ResourcesRVAdapter
 import space.taran.arknavigator.ui.fragments.utils.Notifications
-import space.taran.arknavigator.utils.*
-import space.taran.arknavigator.utils.extensions.changeEnabledStatus
-import java.nio.file.Files
+import space.taran.arknavigator.utils.RESOURCES_SCREEN
+import space.taran.arknavigator.utils.Sorting
 import java.nio.file.Path
 import kotlin.math.abs
 
@@ -45,16 +42,9 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         }
     }
 
-    private lateinit var gridAdapter: ResourcesGrid
     private lateinit var binding: FragmentResourcesBinding
-
-    private var tagsSelector: TagsSelector? = null
     private var resourcesAdapter: ResourcesRVAdapter? = null
-    private var dialog: AlertDialog? = null
-
-    private lateinit var menuTagsOn: MenuItem
-    private lateinit var menuTagsOff: MenuItem
-    private var tagsEnabled = true
+    private var sortByDialog: AlertDialog? = null
 
     private val frameTop by lazy {
         val loc = IntArray(2)
@@ -92,8 +82,8 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         setHasOptionsMenu(true)
 
         resourcesAdapter = ResourcesRVAdapter(presenter.gridPresenter)
-        rv_resources.adapter = resourcesAdapter
-        rv_resources.layoutManager = GridLayoutManager(context, 3)
+        binding.rvResources.adapter = ResourcesRVAdapter(presenter.gridPresenter)
+        binding.rvResources.layoutManager = GridLayoutManager(context, 3)
 
         binding.ivDragHandler.setOnTouchListener(::dragHandlerTouchListener)
     }
@@ -101,31 +91,23 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         Log.d(RESOURCES_SCREEN, "options item selected in ResourcesFragment")
         when(item.itemId) {
-            R.id.menu_tags_sort_by -> showSortByDialog()
-            R.id.menu_tags_off -> disableTags()
-
-            R.id.menu_tags_on -> {
-                val tags = presenter.listTagsForAllResources()
-                if (tags.isNotEmpty()) {
-                    initResources(presenter.provideResourcesList())
-                } else {
-                    notifyUser("Tag something first")
-                }
-            }
+            R.id.menu_tags_sort_by -> presenter.onMenuSortDialogClick()
+            R.id.menu_tags_off -> presenter.onMenuTagsToggle(false)
+            R.id.menu_tags_on -> presenter.onMenuTagsToggle(true)
         }
         return true
     }
 
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        super.onPrepareOptionsMenu(menu)
+        menu.findItem(R.id.menu_tags_on).isVisible = !presenter.tagsEnabled
+        menu.findItem(R.id.menu_tags_off).isVisible = presenter.tagsEnabled
+    }
+
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
         Log.d(RESOURCES_SCREEN, "inflating options menu in ResourcesFragment")
         inflater.inflate(R.menu.menu_tags_screen, menu)
-
-        menuTagsOn = menu.findItem(R.id.menu_tags_on)
-        menuTagsOff = menu.findItem(R.id.menu_tags_off)
-
-        showTagsOnOffButtons()
-
-        super.onCreateOptionsMenu(menu, inflater)
     }
 
     override fun onResume() {
@@ -152,12 +134,7 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
     }
 
     override fun setTagsEnabled(enabled: Boolean) {
-        if (this::menuTagsOn.isInitialized && this::menuTagsOff.isInitialized) {
-            Log.d(RESOURCES_SCREEN, "showing tags selector? $tagsEnabled")
-            menuTagsOn.isVisible = !enabled
-            menuTagsOff.isVisible = enabled
-        }
-
+        requireActivity().invalidateOptionsMenu()
         tags_cg.isVisible = enabled
     }
 
@@ -170,55 +147,7 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         if (isVisible)
             showSortByDialog(sorting, ascending)
         else
-            dialog?.dismiss()
-    }
-
-    private fun initResources(resources: ResourcesList) {
-        gridAdapter = ResourcesGrid(resources)
-
-        binding.rvResources.adapter = gridAdapter
-        binding.rvResources.layoutManager = GridLayoutManager(context, 3)
-
-        tagsSelector = presenter.createTagsSelector()
-        if (tagsSelector != null) {
-            enableTags()
-        } else {
-            notifyUser("You don't have any tags here yet", moreTime = true)
-            disableTags()
-        }
-    }
-
-    //showing all resources, displaying tags selector
-    private fun enableTags() {
-        Log.d(RESOURCES_SCREEN, "enabling tags mode")
-
-        tagsEnabled = true
-        showTagsOnOffButtons()
-
-        binding.tagsCg.visibility = View.VISIBLE
-
-        tagsSelector!!.drawChips(tags_cg, requireContext())
-    }
-
-    //showing only untagged resources, hiding tags selector
-    private fun disableTags() {
-        Log.d(RESOURCES_SCREEN, "disabling tags mode")
-
-        tagsEnabled = false
-        showTagsOnOffButtons()
-
-        binding.tagsCg.visibility = View.GONE
-
-        val untagged = presenter.resources(untagged = true)
-        gridAdapter.updateItems(untagged)
-    }
-
-    private fun showTagsOnOffButtons() {
-        if (this::menuTagsOn.isInitialized && this::menuTagsOff.isInitialized) {
-            Log.d(RESOURCES_SCREEN, "showing tags selector? $tagsEnabled")
-            menuTagsOn.isVisible = !tagsEnabled
-            menuTagsOff.isVisible = tagsEnabled
-        }
+            sortByDialog?.dismiss()
     }
 
     private fun showSortByDialog(sorting: Sorting, ascending: Boolean) {
