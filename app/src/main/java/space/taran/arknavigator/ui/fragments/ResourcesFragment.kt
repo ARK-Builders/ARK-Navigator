@@ -19,6 +19,7 @@ import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.adapter.ResourcesGrid
+import space.taran.arknavigator.ui.adapter.ResourcesRVAdapter
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.utils.*
 import space.taran.arknavigator.utils.extensions.changeEnabledStatus
@@ -48,6 +49,7 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
     private lateinit var binding: FragmentResourcesBinding
 
     private var tagsSelector: TagsSelector? = null
+    private var resourcesAdapter: ResourcesRVAdapter? = null
 
     private lateinit var menuTagsOn: MenuItem
     private lateinit var menuTagsOff: MenuItem
@@ -87,6 +89,10 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         (activity as MainActivity).setSelectedTab(1)
         (activity as MainActivity).setToolbarVisibility(true)
         setHasOptionsMenu(true)
+
+        resourcesAdapter = ResourcesRVAdapter(presenter.gridPresenter)
+        rv_resources.adapter = resourcesAdapter
+        rv_resources.layoutManager = GridLayoutManager(context, 3)
 
         initResources(grid)
         binding.ivDragHandler.setOnTouchListener(::dragHandlerTouchListener)
@@ -132,13 +138,13 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         (activity as MainActivity).setTitle(title)
     }
 
-    override fun sortingValuesReceived() {
-        sortAccordingToChoice(true)
-    }
-
     override fun setProgressVisibility(isVisible: Boolean) {
         binding.layoutProgress.root.isVisible = isVisible
         (activity as MainActivity).setBottomNavigationEnabled(!isVisible)
+    }
+
+    override fun updateAdapter() {
+        resourcesAdapter?.notifyDataSetChanged()
     }
 
     override fun notifyUser(message: String, moreTime: Boolean) {

@@ -8,7 +8,7 @@ import space.taran.arknavigator.mvp.presenter.adapter.ResourcesList
 @StateStrategyType(AddToEndSingleStrategy::class)
 interface ResourcesView: MvpView, NotifiableView {
     fun init(grid: ResourcesList)
+    fun updateAdapter()
     fun setProgressVisibility(isVisible: Boolean)
     fun setToolbarTitle(title: String)
-    fun sortingValuesReceived()
 }

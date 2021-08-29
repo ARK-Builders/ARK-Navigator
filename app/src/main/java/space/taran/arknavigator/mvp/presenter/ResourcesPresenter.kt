@@ -7,14 +7,18 @@ import moxy.presenterScope
 import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.dao.ResourceId
+import space.taran.arknavigator.mvp.model.dao.common.Preview
 import space.taran.arknavigator.mvp.model.repo.*
+import space.taran.arknavigator.mvp.presenter.adapter.IResourcesGridPresenter
 import space.taran.arknavigator.mvp.presenter.adapter.ResourcesList
-import space.taran.arknavigator.mvp.view.ResourcesView
+import space.taran.arknavigator.mvp.view.item.FileItemView
 import space.taran.arknavigator.navigation.Screens
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.utils.RESOURCES_SCREEN
 import space.taran.arknavigator.utils.Sorting
 import space.taran.arknavigator.utils.Tags
+import space.taran.arknavigator.utils.extension
+import java.nio.file.Files
 import java.nio.file.Path
 import javax.inject.Inject
 
@@ -38,17 +42,49 @@ class ResourcesPresenter(
     private lateinit var index: ResourcesIndex
     private lateinit var storage: TagsStorage
 
-    var sorting: Sorting = Sorting.DEFAULT
-        set(value) {
-            field = value
-            presenterScope.launch { userPreferences.setSorting(value) }
+    val gridPresenter = ResourcesGridPresenter()
+
+    inner class ResourcesGridPresenter: IResourcesGridPresenter {
+        private var resources = mutableListOf<ResourceId>()
+        private var sorting = Sorting.DEFAULT
+
+        override fun getCount() = resources.size
+
+        override fun bindView(view: FileItemView) {
+            val resource = resources[view.position()]
+
+            val path = index.getPath(resource)
+                ?: throw java.lang.AssertionError("Resource to display must be indexed")
+
+            view.setText(path.fileName.toString())
+
+            if (Files.isDirectory(path)) {
+                throw java.lang.AssertionError("Resource can't be a directory")
+            }
+
+            view.setIcon(Preview.provide(path))
         }
 
-    var sortOrderAscending: Boolean = true
-        set(value) {
-            field = value
-            presenterScope.launch { userPreferences.setSortingAscending(value) }
+        override fun onItemClick(pos: Int) {
+            router.navigateTo(Screens.GalleryScreen(index, storage, ResourcesList(index, resources) { i: Int, l: ResourceId -> }, pos))
         }
+
+        fun updateResources(resources: List<ResourceId>) {
+            this.resources = resources.toMutableList()
+            sortBy(sorting)
+        }
+
+        fun sortBy(sorting: Sorting) {
+            when(sorting) {
+                Sorting.NAME -> resources.sortBy { index.getPath(it)!!.fileName }
+                Sorting.SIZE -> resources.sortBy { Files.size(index.getPath(it)!!) }
+                Sorting.TYPE -> resources.sortBy { extension(index.getPath(it)!!) }
+                Sorting.LAST_MODIFIED -> resources.sortBy { Files.getLastModifiedTime(index.getPath(it)!!) }
+                Sorting.DEFAULT -> throw AssertionError("Not possible")
+            }
+            viewState.updateAdapter()
+        }
+    }
 
     fun listTagsForAllResources(): Tags = resources()
         .flatMap { storage.getTags(it) }
