@@ -21,7 +21,8 @@ typealias Handler = (Set<ResourceId>) -> Unit
 class TagsSelector(
     private val tags: Tags,
     private val resources: Collection<ResourceId>,
-    private val storage: TagsStorage) {
+    private val storage: TagsStorage,
+    private val update: Handler) {
 
     private lateinit var chips: Map<Tag, Chip>
 
@@ -35,7 +36,7 @@ class TagsSelector(
 
     private lateinit var clear: Chip
 
-    fun drawChips(chipGroup: ChipGroup, context: Context, update: Handler) {
+    fun drawChips(chipGroup: ChipGroup, context: Context) {
         this.chipGroup = chipGroup
 
         val chips = mutableMapOf<Tag, Chip>()
