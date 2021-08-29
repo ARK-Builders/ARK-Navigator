@@ -13,8 +13,7 @@
         android:clipToPadding="false"
         android:padding="10dp"
         app:layout_constraintBottom_toTopOf="@+id/iv_drag_handler"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
         android:id="@+id/iv_drag_handler"
@@ -27,13 +26,13 @@
         app:layout_constraintTop_toTopOf="parent"/>
 
     <ScrollView
+        android:id="@+id/layout_tags"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_below="@id/iv_drag_handler"
         android:background="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/iv_drag_handler"
-        app:layout_constraintVertical_bias="0.0">
+        app:layout_constraintTop_toBottomOf="@+id/iv_drag_handler">
 
         <com.google.android.material.chip.ChipGroup
             android:id="@+id/tags_cg"

@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.*
 import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.GridLayoutManager
 import moxy.MvpAppCompatFragment
@@ -135,7 +136,19 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
 
     override fun setTagsEnabled(enabled: Boolean) {
         requireActivity().invalidateOptionsMenu()
-        tags_cg.isVisible = enabled
+        layout_tags.isVisible = enabled
+        iv_drag_handler.isVisible = enabled
+        if (enabled) {
+            val constraintSet = ConstraintSet()
+            constraintSet.clone(layout_root)
+            constraintSet.connect(rv_resources.id, ConstraintSet.BOTTOM, iv_drag_handler.id, ConstraintSet.TOP)
+            constraintSet.applyTo(layout_root)
+        } else {
+            val constraintSet = ConstraintSet()
+            constraintSet.clone(layout_root)
+            constraintSet.connect(rv_resources.id, ConstraintSet.BOTTOM, layout_root.id, ConstraintSet.BOTTOM)
+            constraintSet.applyTo(layout_root)
+        }
     }
 
     override fun drawChips(tagsSelector: TagsSelector?) {
