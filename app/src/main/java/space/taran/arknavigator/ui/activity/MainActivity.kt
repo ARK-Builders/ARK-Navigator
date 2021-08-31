@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.View
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.forEach
 import androidx.core.view.isVisible
 import space.taran.arknavigator.R
 import space.taran.arknavigator.mvp.presenter.MainPresenter
@@ -15,6 +16,7 @@ import space.taran.arknavigator.mvp.view.MainView
 import space.taran.arknavigator.ui.fragments.BackButtonListener
 import kotlinx.android.synthetic.main.activity_main.*
 import moxy.MvpAppCompatActivity
+import moxy.ktx.moxyPresenter
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
 import ru.terrakok.cicerone.NavigatorHolder
@@ -31,8 +33,12 @@ class MainActivity : MvpAppCompatActivity(), MainView {
     @Inject
     lateinit var navigatorHolder: NavigatorHolder
 
-    @InjectPresenter
-    lateinit var presenter: MainPresenter
+    private val presenter by moxyPresenter {
+        MainPresenter().apply {
+            Log.d(MAIN, "creating MainPresenter")
+            App.instance.appComponent.inject(this)
+        }
+    }
 
     private val navigator = SupportAppNavigator(this, R.id.container)
 
@@ -43,16 +49,10 @@ class MainActivity : MvpAppCompatActivity(), MainView {
         App.instance.appComponent.inject(this)
     }
 
-    @ProvidePresenter
-    fun providePresenter() = MainPresenter().apply {
-        Log.d(MAIN, "creating MainPresenter")
-        App.instance.appComponent.inject(this)
-    }
-
     override fun init() {
         Log.d(MAIN, "initializing")
         setSupportActionBar(toolbar)
-        bottom_navigation.setOnNavigationItemSelectedListener { item ->
+        bottom_navigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.page_roots -> {
                     Log.d(MAIN, "switching to Folders screen")
@@ -70,6 +70,7 @@ class MainActivity : MvpAppCompatActivity(), MainView {
                 }
             }
         }
+        bottom_navigation.setOnItemReselectedListener{}
     }
 
     override fun requestPerms() {
@@ -144,6 +145,12 @@ class MainActivity : MvpAppCompatActivity(), MainView {
     fun setSelectedTab(pos: Int) {
         Log.d(MAIN, "tab $pos selected")
         bottom_navigation.menu.getItem(pos).isChecked = true
+    }
+
+    fun setBottomNavigationEnabled(isEnabled: Boolean) {
+        bottom_navigation.menu.forEach { item ->
+            item.isEnabled = isEnabled
+        }
     }
 
     override fun notifyUser(message: String, moreTime: Boolean) {

@@ -1,6 +1,8 @@
 package space.taran.arknavigator.mvp.model.repo
 
 import android.util.Log
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import space.taran.arknavigator.mvp.model.dao.Favorite
 import space.taran.arknavigator.mvp.model.dao.FolderDao
 import space.taran.arknavigator.mvp.model.dao.Root
@@ -14,12 +16,10 @@ typealias Folders = Map<Path, List<Path>>
 
 class FoldersRepo(private val dao: FolderDao) {
 
-    fun query(): PartialResult<Folders, List<Path>> {
+    suspend fun query(): PartialResult<Folders, List<Path>> = withContext(Dispatchers.IO) {
         val missingPaths = mutableListOf<Path>()
 
-        val rootsWithFavorites = CoroutineRunner.runAndBlock {
-            dao.query()
-        }
+        val rootsWithFavorites = dao.query()
 
         val validPaths = rootsWithFavorites
             .flatMap {
@@ -50,26 +50,20 @@ class FoldersRepo(private val dao: FolderDao) {
                 }
             }
 
-        return PartialResult(
+        return@withContext PartialResult(
             validPaths.toMap(),
             missingPaths.toList())
     }
 
-    fun insertRoot(path: Path) {
+    suspend fun insertRoot(path: Path) = withContext(Dispatchers.IO) {
         val entity = Root(path.toString())
         Log.d(DATABASE, "storing $entity")
-
-        CoroutineRunner.runAndBlock {
-            dao.insert(entity)
-        }
+        dao.insert(entity)
     }
 
-    fun insertFavorite(root: Path, favorite: Path) {
+    suspend fun insertFavorite(root: Path, favorite: Path) = withContext(Dispatchers.IO) {
         val entity = Favorite(root.toString(), favorite.toString())
-
         Log.d(DATABASE, "storing $entity")
-        CoroutineRunner.runAndBlock {
-            dao.insert(entity)
-        }
+        dao.insert(entity)
     }
 }

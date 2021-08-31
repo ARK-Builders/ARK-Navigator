@@ -1,15 +1,14 @@
 package space.taran.arknavigator.mvp.model.repo
 
 import android.util.Log
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import space.taran.arknavigator.mvp.model.dao.Resource
+import space.taran.arknavigator.mvp.model.dao.ResourceDao
 import space.taran.arknavigator.mvp.model.dao.ResourceId
 import space.taran.arknavigator.mvp.model.dao.computeId
-import space.taran.arknavigator.mvp.model.dao.ResourceDao
-import space.taran.arknavigator.utils.CoroutineRunner
 import space.taran.arknavigator.utils.RESOURCES_INDEX
 import space.taran.arknavigator.utils.isHidden
-import java.lang.AssertionError
-import java.lang.IllegalStateException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -72,20 +71,19 @@ class PlainResourcesIndex internal constructor (
         return path
     }
 
-    internal fun reindexRoot(diff: Difference) {
+    internal suspend fun reindexRoot(diff: Difference) = withContext(Dispatchers.IO) {
         diff.deleted.forEach {
             pathById[metaByPath[it]!!.id]
             metaByPath.remove(it)
         }
 
         val pathsToDelete = diff.deleted + diff.updated
-        CoroutineRunner.runAndBlock {
-            Log.d(RESOURCES_INDEX, "removing ${pathsToDelete.size} paths")
-            val chunks = pathsToDelete.chunked(512)
-            Log.d(RESOURCES_INDEX, "splitting into ${chunks.size} chunks")
-            chunks.forEach { paths ->
-                dao.deletePaths(paths.map { it.toString() })
-            }
+        
+        Log.d(RESOURCES_INDEX, "removing ${pathsToDelete.size} paths")
+        val chunks = pathsToDelete.chunked(512)
+        Log.d(RESOURCES_INDEX, "splitting into ${chunks.size} chunks")
+        chunks.forEach { paths ->
+            dao.deletePaths(paths.map { it.toString() })
         }
 
         val toInsert = diff.updated + diff.added
@@ -105,7 +103,7 @@ class PlainResourcesIndex internal constructor (
         persistResources(newResources)
     }
 
-    internal fun calculateDifference(): Difference {
+    internal suspend fun calculateDifference(): Difference = withContext(Dispatchers.IO) {
         val (present, absent) = metaByPath.keys.partition {
             Files.exists(it)
         }
@@ -124,10 +122,10 @@ class PlainResourcesIndex internal constructor (
         Log.d(RESOURCES_INDEX, "${absent.size} absent, " +
                 "${updated.size} updated, ${added.size} added")
 
-        return Difference(absent, updated, added)
+        Difference(absent, updated, added)
     }
 
-    internal fun persistResources(resources: Map<Path, ResourceMeta>) {
+    internal suspend fun persistResources(resources: Map<Path, ResourceMeta>) = withContext(Dispatchers.IO) {
         Log.d(RESOURCES_INDEX, "persisting "
                 + "${resources.size} resources from root $root")
 
@@ -139,21 +137,21 @@ class PlainResourcesIndex internal constructor (
                 modified = it.value.modified.toMillis())
             }
 
-        CoroutineRunner.runAndBlock {
-            dao.insertAll(entities)
-        }
+        dao.insertAll(entities)
+
         Log.d(RESOURCES_INDEX, "${entities.size} resources persisted")
     }
 
     companion object {
         //todo: parallel and asynchronous
-        internal fun scanResources(files: List<Path>): Map<Path, ResourceMeta> =
+        internal suspend fun scanResources(files: List<Path>): Map<Path, ResourceMeta> = withContext(Dispatchers.IO) {
             files.map {
                 it to ResourceMeta(
                     id = computeId(it),
-                    modified = Files.getLastModifiedTime(it))
-            }
-            .toMap()
+                    modified = Files.getLastModifiedTime(it)
+                )
+            }.toMap()
+        }
 
         internal fun groupResources(resources: List<Resource>): Map<Path, ResourceMeta> =
             resources
@@ -170,13 +168,13 @@ class PlainResourcesIndex internal constructor (
                 }
                 .mapKeys { (path, _) -> Paths.get(path) }
 
-        internal fun listAllFiles(folder: Path): List<Path> {
+        internal suspend fun listAllFiles(folder: Path): List<Path> = withContext(Dispatchers.IO) {
             val (directories, files) = folder
                 .listDirectoryEntries()
                 .filter { !isHidden(it) }
                 .partition { Files.isDirectory(it) }
 
-            return files + directories.flatMap {
+            return@withContext files + directories.flatMap {
                 listAllFiles(it)
             }
         }

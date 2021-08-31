@@ -8,4 +8,5 @@ import space.taran.arknavigator.mvp.model.repo.Folders
 @StateStrategyType(AddToEndSingleStrategy::class)
 interface FoldersView: MvpView, NotifiableView {
     fun loadFolders(folders: Folders)
+    fun setProgressVisibility(isVisible: Boolean)
 }

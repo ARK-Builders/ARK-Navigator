@@ -1,9 +1,12 @@
 package space.taran.arknavigator.mvp.presenter
 
 import android.util.Log
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.launch
 import space.taran.arknavigator.mvp.view.FoldersView
 import moxy.InjectViewState
 import moxy.MvpPresenter
+import moxy.presenterScope
 import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.mvp.model.repo.FoldersRepo
 import space.taran.arknavigator.mvp.model.repo.ResourcesIndexFactory
@@ -16,7 +19,6 @@ import javax.inject.Inject
 
 //todo: protect foldersRepo when enabling real concurrency
 
-//todo @InjectViewState ?
 class FoldersPresenter: MvpPresenter<FoldersView>() {
     @Inject
     lateinit var router: Router
@@ -33,19 +35,24 @@ class FoldersPresenter: MvpPresenter<FoldersView>() {
         Log.d(FOLDERS_SCREEN, "first view attached in RootsPresenter")
         super.onFirstViewAttach()
 
-        val folders = foldersRepo.query()
-        Log.d(FOLDERS_SCREEN, "folders retrieved: $folders")
+        presenterScope.launch {
+            viewState.setProgressVisibility(true)
+            val folders = foldersRepo.query()
+            Log.d(FOLDERS_SCREEN, "folders retrieved: $folders")
 
-        Notifications.notifyIfFailedPaths(viewState, folders.failed)
+            Notifications.notifyIfFailedPaths(viewState, folders.failed)
 
-        favoritesByRoot = folders.succeeded
-            .mapValues { (_, favorites) -> favorites.toMutableList() }
-            .toMutableMap()
+            favoritesByRoot = folders.succeeded
+                .mapValues { (_, favorites) -> favorites.toMutableList() }
+                .toMutableMap()
 
-        viewState.loadFolders(favoritesByRoot)
+            viewState.loadFolders(favoritesByRoot)
+            viewState.setProgressVisibility(false)
+        }
     }
 
-    fun addRoot(root: Path) {
+    fun addRoot(root: Path) = presenterScope.launch(NonCancellable) {
+        viewState.setProgressVisibility(true)
         Log.d(FOLDERS_SCREEN, "root $root added in RootsPresenter")
         val path = root.toRealPath()
 
@@ -58,15 +65,17 @@ class FoldersPresenter: MvpPresenter<FoldersView>() {
         foldersRepo.insertRoot(path)
 
         viewState.notifyUser(
-            message = "indexing of huge folders can take minutes",
+            message = "Indexing of huge folders can take minutes",
             moreTime = true)
 
         resourcesIndexFactory.buildFromFilesystem(root)
 
         viewState.loadFolders(favoritesByRoot)
+        viewState.setProgressVisibility(false)
     }
 
-    fun addFavorite(favorite: Path) {
+    fun addFavorite(favorite: Path) = presenterScope.launch(NonCancellable) {
+        viewState.setProgressVisibility(true)
         Log.d(FOLDERS_SCREEN, "favorite $favorite added in RootsPresenter")
         val path = favorite.toRealPath()
 
@@ -83,11 +92,11 @@ class FoldersPresenter: MvpPresenter<FoldersView>() {
         foldersRepo.insertFavorite(root, relative)
 
         viewState.loadFolders(favoritesByRoot)
+        viewState.setProgressVisibility(false)
     }
 
     fun resume() {
         Log.d(FOLDERS_SCREEN, "view resumed in RootsPresenter")
-        viewState.loadFolders(favoritesByRoot)
     }
 
     fun quit(): Boolean {

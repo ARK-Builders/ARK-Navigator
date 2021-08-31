@@ -7,10 +7,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.GridLayoutManager
 import kotlinx.android.synthetic.main.dialog_roots_new.view.*
 import kotlinx.android.synthetic.main.fragment_folders.*
+import kotlinx.android.synthetic.main.layout_progress.*
 import moxy.MvpAppCompatFragment
+import moxy.ktx.moxyPresenter
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
 import ru.terrakok.cicerone.Router
@@ -43,16 +46,12 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
     @Inject
     lateinit var router: Router
 
-    @InjectPresenter
-    lateinit var presenter: FoldersPresenter
-
-    @ProvidePresenter
-    fun providePresenter() =
+    private val presenter by moxyPresenter {
         FoldersPresenter().apply {
             Log.d(FOLDERS_SCREEN, "RootsPresenter created")
             App.instance.appComponent.inject(this)
         }
-
+    }
 
     override fun loadFolders(folders: Folders) {
         Log.d(FOLDERS_SCREEN, "loading roots in FoldersFragment")
@@ -66,6 +65,11 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
 
         roots = folders.keys
         favorites = folders.values.flatten().toSet()
+    }
+
+    override fun setProgressVisibility(isVisible: Boolean) {
+        layout_progress.isVisible = isVisible
+        (activity as MainActivity).setBottomNavigationEnabled(!isVisible)
     }
 
     override fun onCreateView(

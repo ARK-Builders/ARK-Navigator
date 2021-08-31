@@ -23,7 +23,7 @@ class AggregatedTagsStorage(
             }
             .toSet()
 
-    override fun setTags(id: ResourceId, tags: Tags) =
+    override suspend fun setTags(id: ResourceId, tags: Tags) =
         shards.forEach {
             it.setTags(id, tags)
         }
@@ -34,12 +34,12 @@ class AggregatedTagsStorage(
             .flatMap { it.listUntaggedResources() }
             .toSet()
 
-    override fun cleanup(existing: Collection<ResourceId>) =
+    override suspend fun cleanup(existing: Collection<ResourceId>) =
         shards.forEach {
             it.cleanup(existing)
         }
 
-    override fun remove(id: ResourceId) =
+    override suspend fun remove(id: ResourceId) =
         shards.forEach {
             it.remove(id)
         }
