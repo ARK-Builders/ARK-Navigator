@@ -11,7 +11,6 @@ import space.taran.arknavigator.ui.fragments.utils.Preview
 import space.taran.arknavigator.mvp.model.repo.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.TagsStorage
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
-import space.taran.arknavigator.mvp.presenter.adapter.ResourcesList
 import space.taran.arknavigator.mvp.view.GalleryView
 import space.taran.arknavigator.mvp.view.item.PreviewItemView
 import space.taran.arknavigator.utils.GALLERY_SCREEN
@@ -24,7 +23,7 @@ typealias PreviewClickHandler = () -> Unit
 class GalleryPresenter(
     private val index: ResourcesIndex,
     private val storage: TagsStorage,
-    resources: ResourcesList)
+    resources: MutableList<ResourceId>)
     : MvpPresenter<GalleryView>() {
 
     private var isFullscreen = false
@@ -32,7 +31,7 @@ class GalleryPresenter(
     @Inject
     lateinit var router: Router
 
-    private val previews = PreviewsList(resources.items().map {
+    private val previews = PreviewsList(resources.map {
         Preview.provide(index.getPath(it)!!)
     }, ::onPreviewsItemClick, ::onPreviewsItemZoom)
 

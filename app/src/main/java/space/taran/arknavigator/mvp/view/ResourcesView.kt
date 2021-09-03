@@ -4,7 +4,6 @@ import moxy.MvpView
 import moxy.viewstate.strategy.AddToEndSingleStrategy
 import moxy.viewstate.strategy.StateStrategyType
 import space.taran.arknavigator.mvp.presenter.TagsSelector
-import space.taran.arknavigator.mvp.presenter.adapter.ResourcesList
 import space.taran.arknavigator.utils.Sorting
 
 @StateStrategyType(AddToEndSingleStrategy::class)

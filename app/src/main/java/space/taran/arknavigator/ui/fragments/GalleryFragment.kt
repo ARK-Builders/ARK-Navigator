@@ -23,7 +23,6 @@ import space.taran.arknavigator.mvp.model.repo.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.TagsStorage
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
-import space.taran.arknavigator.mvp.presenter.adapter.ResourcesList
 import space.taran.arknavigator.mvp.view.GalleryView
 import space.taran.arknavigator.mvp.view.NotifiableView
 import space.taran.arknavigator.ui.App
@@ -37,7 +36,7 @@ import space.taran.arknavigator.utils.*
 class GalleryFragment(
     private val index: ResourcesIndex,
     private val storage: TagsStorage,
-    private val resources: ResourcesList,
+    private val resources: MutableList<ResourceId>,
     private val startAt: Int
 )
     : MvpAppCompatFragment(), GalleryView, BackButtonListener, NotifiableView {
@@ -172,13 +171,13 @@ class GalleryFragment(
 
         presenter.deleteResource(resource)
 
-        if (resources.items().isEmpty()) {
+        if (resources.isEmpty()) {
             presenter.quit()
         }
     }
 
     private fun shareResource(position: Int) {
-        val resource = resources.items()[position]
+        val resource = resources[position]
         val path = index.getPath(resource)!!
 
         val context = requireContext()
@@ -195,7 +194,7 @@ class GalleryFragment(
     }
 
     private fun showEditTagsDialog(position: Int) {
-        val resource = resources.items()[position]
+        val resource = resources[position]
         Log.d(GALLERY_SCREEN, "showing [edit-tags] dialog for position $position")
         showEditTagsDialog(resource)
     }
@@ -240,7 +239,7 @@ class GalleryFragment(
     }
 
     private fun displayPreview(position: Int) {
-        val resource = resources.items()[position]
+        val resource = resources[position]
         val tags = presenter.listTags(resource)
         displayPreviewTags(resource, tags)
         setTitle(index.getPath(resource)!!.fileName.toString())
