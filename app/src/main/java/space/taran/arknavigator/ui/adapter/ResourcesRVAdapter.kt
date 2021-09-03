@@ -4,11 +4,11 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import space.taran.arknavigator.R
-import space.taran.arknavigator.mvp.presenter.adapter.IResourcesGridPresenter
+import space.taran.arknavigator.mvp.presenter.adapter.ResourcesGridPresenter
 import space.taran.arknavigator.mvp.view.item.FileItemViewHolder
 
 class ResourcesRVAdapter(
-    private val presenter: IResourcesGridPresenter
+    private val presenter: ResourcesGridPresenter
 ): RecyclerView.Adapter<FileItemViewHolder>() {
     override fun getItemCount() = presenter.getCount()
 
