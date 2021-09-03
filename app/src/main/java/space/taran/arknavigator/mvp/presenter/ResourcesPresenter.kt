@@ -10,7 +10,6 @@ import space.taran.arknavigator.mvp.model.dao.ResourceId
 import space.taran.arknavigator.mvp.model.dao.common.Preview
 import space.taran.arknavigator.mvp.model.repo.*
 import space.taran.arknavigator.mvp.presenter.adapter.IResourcesGridPresenter
-import space.taran.arknavigator.mvp.presenter.adapter.ResourcesList
 import space.taran.arknavigator.mvp.view.item.FileItemView
 import space.taran.arknavigator.navigation.Screens
 import space.taran.arknavigator.ui.fragments.utils.Notifications
@@ -69,7 +68,7 @@ class ResourcesPresenter(
         }
 
         override fun onItemClick(pos: Int) {
-            router.navigateTo(Screens.GalleryScreen(index, storage, ResourcesList(index, resources) { i: Int, l: ResourceId -> }, pos))
+            router.navigateTo(Screens.GalleryScreen(index, storage, resources, pos))
         }
 
         fun updateResources(resources: List<ResourceId>) {
