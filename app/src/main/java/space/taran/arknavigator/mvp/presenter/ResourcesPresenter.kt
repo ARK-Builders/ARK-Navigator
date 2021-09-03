@@ -7,17 +7,11 @@ import moxy.presenterScope
 import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.dao.ResourceId
-import space.taran.arknavigator.mvp.model.dao.common.Preview
 import space.taran.arknavigator.mvp.model.repo.*
-import space.taran.arknavigator.mvp.presenter.adapter.IResourcesGridPresenter
-import space.taran.arknavigator.mvp.view.item.FileItemView
-import space.taran.arknavigator.navigation.Screens
+import space.taran.arknavigator.mvp.presenter.adapter.ResourcesGridPresenter
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.utils.RESOURCES_SCREEN
-import space.taran.arknavigator.utils.Sorting
 import space.taran.arknavigator.utils.Tags
-import space.taran.arknavigator.utils.extension
-import java.nio.file.Files
 import java.nio.file.Path
 import javax.inject.Inject
 
@@ -43,65 +37,7 @@ class ResourcesPresenter(
     private var tagsSelector: TagsSelector? = null
     var tagsEnabled: Boolean = true
 
-    val gridPresenter = ResourcesGridPresenter()
-
-    inner class ResourcesGridPresenter: IResourcesGridPresenter {
-        private var resources = mutableListOf<ResourceId>()
-        var sorting = Sorting.DEFAULT
-        var ascending: Boolean = true
-
-        override fun getCount() = resources.size
-
-        override fun bindView(view: FileItemView) {
-            val resource = resources[view.position()]
-
-            val path = index.getPath(resource)
-                ?: throw java.lang.AssertionError("Resource to display must be indexed")
-
-            view.setText(path.fileName.toString())
-
-            if (Files.isDirectory(path)) {
-                throw java.lang.AssertionError("Resource can't be a directory")
-            }
-
-            view.setIcon(Preview.provide(path))
-        }
-
-        override fun onItemClick(pos: Int) {
-            router.navigateTo(Screens.GalleryScreen(index, storage, resources, pos))
-        }
-
-        fun updateResources(resources: List<ResourceId>) {
-            this.resources = resources.toMutableList()
-            push()
-        }
-
-        fun updateSorting(sorting: Sorting) {
-            if (sorting == Sorting.DEFAULT)
-                throw AssertionError("Not possible")
-            this.sorting = sorting
-            push()
-        }
-
-        fun updateAscending(ascending: Boolean) {
-            this.ascending = ascending
-            push()
-        }
-
-        private fun push() {
-            when(sorting) {
-                Sorting.NAME -> resources.sortBy { index.getPath(it)!!.fileName }
-                Sorting.SIZE -> resources.sortBy { Files.size(index.getPath(it)!!) }
-                Sorting.TYPE -> resources.sortBy { extension(index.getPath(it)!!) }
-                Sorting.LAST_MODIFIED -> resources.sortBy { Files.getLastModifiedTime(index.getPath(it)!!) }
-                Sorting.DEFAULT -> {}
-            }
-            if (!ascending)
-                resources.reverse()
-            viewState.updateAdapter()
-        }
-
-    }
+    val gridPresenter = ResourcesGridPresenter(viewState)
 
     override fun onFirstViewAttach() {
         Log.d(RESOURCES_SCREEN, "first view attached in ResourcesPresenter")
@@ -151,6 +87,7 @@ class ResourcesPresenter(
             storage = AggregatedTagsStorage(rootToStorage.values)
 
         createTagsSelector()
+        gridPresenter.init(index, storage, router)
         gridPresenter.updateResources(resources())
         viewState.drawChips(tagsSelector)
 
