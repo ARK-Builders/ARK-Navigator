@@ -11,4 +11,5 @@ interface GalleryView: MvpView {
     fun init(previews: PreviewsList)
     fun setTitle(title: String)
     fun setFullscreen(fullscreen: Boolean)
+    fun setViewPagerInputEnabled(enabled: Boolean)
 }

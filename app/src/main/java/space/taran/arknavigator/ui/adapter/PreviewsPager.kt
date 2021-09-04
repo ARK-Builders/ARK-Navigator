@@ -20,13 +20,13 @@ class PreviewsPager(val presenter: PreviewsList) : RecyclerView.Adapter<PreviewI
             LayoutInflater.from(parent.context).inflate(
                 R.layout.item_image,
                 parent,
-                false))
+                false), presenter)
 
     override fun onBindViewHolder(holder: PreviewItemViewHolder, position: Int) {
         holder.pos = position
         presenter.bindView(holder)
         val gestureDetector = getGestureDetector(holder)
-        holder.itemView.layout_root.setOnTouchListener { view, motionEvent ->
+        holder.itemView.iv_image.setOnTouchListener { view, motionEvent ->
             if (motionEvent.action == MotionEvent.ACTION_UP)
                 view.performClick()
             gestureDetector.onTouchEvent(motionEvent)
@@ -47,8 +47,8 @@ class PreviewsPager(val presenter: PreviewsList) : RecyclerView.Adapter<PreviewI
                 return true
             }
 
-            override fun onSingleTapUp(e: MotionEvent?): Boolean {
-                presenter.itemClicked(holder.pos)
+            override fun onSingleTapConfirmed(e: MotionEvent?): Boolean {
+                presenter.onItemClick(holder)
                 return true
             }
 
