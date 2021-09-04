@@ -25,7 +25,8 @@ class AggregatedTagsStorage(
 
     override suspend fun setTags(id: ResourceId, tags: Tags) =
         shards.forEach {
-            it.setTags(id, tags)
+            if (it.contains(id))
+                it.setTags(id, tags)
         }
 
     // assuming that resources in the shards do not overlap
