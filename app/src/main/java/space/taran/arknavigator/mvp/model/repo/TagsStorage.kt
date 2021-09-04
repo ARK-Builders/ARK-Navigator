@@ -8,6 +8,8 @@ interface TagsStorage {
 
     fun contains(id: ResourceId): Boolean
 
+    fun listAllTags(): Tags
+
     fun getTags(id: ResourceId): Tags
 
     suspend fun setTags(id: ResourceId, tags: Tags)
