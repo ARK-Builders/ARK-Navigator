@@ -9,6 +9,7 @@ import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.dao.ResourceId
 import space.taran.arknavigator.mvp.model.repo.*
 import space.taran.arknavigator.mvp.presenter.adapter.ResourcesGridPresenter
+import space.taran.arknavigator.mvp.presenter.adapter.TagsSelectorPresenter
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.utils.RESOURCES_SCREEN
 import space.taran.arknavigator.utils.Tags
@@ -34,10 +35,10 @@ class ResourcesPresenter(
 
     private lateinit var index: ResourcesIndex
     private lateinit var storage: TagsStorage
-    private var tagsSelector: TagsSelector? = null
     var tagsEnabled: Boolean = true
 
     val gridPresenter = ResourcesGridPresenter(viewState)
+    val tagsSelectorPresenter = TagsSelectorPresenter(viewState, ::onSelectionChange)
 
     override fun onFirstViewAttach() {
         Log.d(RESOURCES_SCREEN, "first view attached in ResourcesPresenter")
@@ -86,10 +87,10 @@ class ResourcesPresenter(
             index = AggregatedResourcesIndex(rootToIndex.values)
             storage = AggregatedTagsStorage(rootToStorage.values)
 
-        createTagsSelector()
         gridPresenter.init(index, storage, router)
         gridPresenter.updateResources(resources())
-        viewState.drawChips(tagsSelector)
+        tagsSelectorPresenter.init(resources(), storage)
+        tagsSelectorPresenter.calculateTagsAndSelection()
 
             val title = {
                 val path = (prefix ?: root)
@@ -104,6 +105,10 @@ class ResourcesPresenter(
     override fun onDestroy() {
         Log.d(RESOURCES_SCREEN, "destroying ResourcesPresenter")
         super.onDestroy()
+    }
+
+    fun onViewResume() {
+        tagsSelectorPresenter.calculateTagsAndSelection()
     }
 
     fun onMenuTagsToggle(enabled: Boolean) {
@@ -123,7 +128,7 @@ class ResourcesPresenter(
         viewState.setSortDialogVisibility(false, gridPresenter.sorting, gridPresenter.ascending)
     }
 
-    private fun onTagsChanged(selection: Set<ResourceId>) {
+    private fun onSelectionChange(selection: Set<ResourceId>) {
         viewState.notifyUser("${selection.size} resources selected")
         gridPresenter.updateResources(selection.toList())
     }
@@ -131,17 +136,6 @@ class ResourcesPresenter(
     private fun listTagsForAllResources(): Tags = resources()
         .flatMap { storage.getTags(it) }
         .toSet()
-
-    private fun createTagsSelector() {
-        val tags = listTagsForAllResources()
-        Log.d(RESOURCES_SCREEN, "tags loaded: $tags")
-
-        if (tags.isEmpty()) {
-            tagsSelector = null
-        }
-
-        tagsSelector = TagsSelector(tags, resources().toSet(), storage, ::onTagsChanged)
-    }
 
     private fun resources(untagged: Boolean = false): List<ResourceId> {
         val underPrefix = index.listIds(prefix)

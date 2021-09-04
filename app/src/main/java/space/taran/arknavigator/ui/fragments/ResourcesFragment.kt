@@ -14,11 +14,11 @@ import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.DialogSortBinding
 import space.taran.arknavigator.databinding.FragmentResourcesBinding
 import space.taran.arknavigator.mvp.presenter.ResourcesPresenter
-import space.taran.arknavigator.mvp.presenter.TagsSelector
 import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.adapter.ResourcesRVAdapter
+import space.taran.arknavigator.ui.adapter.TagsSelectorAdapter
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.utils.RESOURCES_SCREEN
 import space.taran.arknavigator.utils.Sorting
@@ -59,6 +59,8 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
     private var selectorDragStartBias: Float = -1f
     private var selectorDragStartTime: Long = -1
 
+    private var tagsSelectorAdapter: TagsSelectorAdapter? = null
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -86,6 +88,7 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         binding.rvResources.adapter = ResourcesRVAdapter(presenter.gridPresenter)
         binding.rvResources.layoutManager = GridLayoutManager(context, 3)
 
+        tagsSelectorAdapter = TagsSelectorAdapter(tags_cg, presenter.tagsSelectorPresenter)
         binding.ivDragHandler.setOnTouchListener(::dragHandlerTouchListener)
     }
 
@@ -114,6 +117,7 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
     override fun onResume() {
         Log.d(RESOURCES_SCREEN, "resuming in ResourcesFragment")
         super.onResume()
+        presenter.onViewResume()
         updateDragHandlerBias()
     }
 
@@ -151,9 +155,8 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         }
     }
 
-    override fun drawChips(tagsSelector: TagsSelector?) {
-        tagsSelector?.drawChips(tags_cg, requireContext())
-            ?: notifyUser("You don't have any tags here yet", moreTime = true)
+    override fun drawTags() {
+        tagsSelectorAdapter?.drawTags()
     }
 
     override fun setSortDialogVisibility(isVisible: Boolean, sorting: Sorting, ascending: Boolean) {
