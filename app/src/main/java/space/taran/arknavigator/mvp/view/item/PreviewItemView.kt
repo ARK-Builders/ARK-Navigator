@@ -9,4 +9,8 @@ interface PreviewItemView {
     fun setImage(file: Path)
 
     fun setPredefined(resource: PredefinedIcon)
+
+    fun setZoomEnabled(enabled: Boolean)
+
+    fun resetZoom()
 }

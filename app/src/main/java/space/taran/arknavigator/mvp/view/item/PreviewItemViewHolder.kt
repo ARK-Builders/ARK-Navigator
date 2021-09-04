@@ -2,15 +2,19 @@ package space.taran.arknavigator.mvp.view.item
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
+import com.ortiz.touchview.OnTouchImageViewListener
+import com.ortiz.touchview.TouchImageView
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.item_image.view.*
 import space.taran.arknavigator.mvp.model.dao.common.PredefinedIcon
+import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
 import space.taran.arknavigator.utils.imageForPredefinedIcon
 import space.taran.arknavigator.utils.loadImage
+import space.taran.arknavigator.utils.loadZoomImage
 import java.nio.file.Path
 
 //todo join with FileItemViewHolder, it is basically the same, just different sizes
-class PreviewItemViewHolder(override val containerView: View) :
+class PreviewItemViewHolder(override val containerView: View, val presenter: PreviewsList) :
     RecyclerView.ViewHolder(containerView),
     LayoutContainer, PreviewItemView {
 
@@ -21,6 +25,24 @@ class PreviewItemViewHolder(override val containerView: View) :
     }
 
     override fun setImage(file: Path): Unit = with(containerView) {
-        loadImage(file, iv_image)
+        loadZoomImage(file, iv_image)
     }
+
+    override fun setZoomEnabled(enabled: Boolean): Unit =
+        containerView.iv_image.let { touchImageView ->
+            touchImageView.isZoomEnabled = enabled
+            if (enabled) {
+                touchImageView.setOnTouchImageViewListener(object : OnTouchImageViewListener {
+                    override fun onMove() {
+                        presenter.onImageZoom(touchImageView.isZoomed)
+                    }
+                })
+            } else {
+                touchImageView.setOnTouchImageViewListener(object : OnTouchImageViewListener {
+                    override fun onMove() {}
+                })
+            }
+        }
+
+    override fun resetZoom() = containerView.iv_image.resetZoom()
 }

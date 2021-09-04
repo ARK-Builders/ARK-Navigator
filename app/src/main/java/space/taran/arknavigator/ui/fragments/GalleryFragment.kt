@@ -130,6 +130,10 @@ class GalleryFragment(
         }
     }
 
+    override fun setViewPagerInputEnabled(enabled: Boolean) {
+        view_pager.isUserInputEnabled = enabled
+    }
+
     override fun setFullscreen(fullscreen: Boolean) {
         val isControlsVisible = !fullscreen
         (activity as MainActivity).setBottomNavigationVisibility(isControlsVisible)
