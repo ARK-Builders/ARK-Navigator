@@ -1,19 +1,19 @@
 package space.taran.arknavigator.ui.fragments
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.view.*
 import androidx.appcompat.app.AlertDialog
-import androidx.core.view.isVisible
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.GridLayoutManager
 import kotlinx.android.synthetic.main.dialog_sort.view.*
 import kotlinx.android.synthetic.main.fragment_resources.*
 import kotlinx.android.synthetic.main.layout_progress.*
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
-import moxy.presenter.InjectPresenter
-import moxy.presenter.ProvidePresenter
 import space.taran.arknavigator.R
 import space.taran.arknavigator.mvp.presenter.ResourcesPresenter
 import space.taran.arknavigator.mvp.presenter.TagsSelector
@@ -51,6 +51,8 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
     private lateinit var gridAdapter: ResourcesGrid
     private var tagsSelector: TagsSelector? = null
 
+    private lateinit var sharedPrefs: SharedPreferences
+
     private lateinit var menuTagsOn: MenuItem
     private lateinit var menuTagsOff: MenuItem
     private var tagsEnabled = true
@@ -76,6 +78,11 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         savedInstanceState: Bundle?): View? {
 
         Log.d(RESOURCES_SCREEN, "inflating layout for ResourcesFragment")
+        sharedPrefs = requireContext().getSharedPreferences("user_preferences", Context.MODE_PRIVATE)
+
+        sorting = Sorting.values()[sharedPrefs.getInt("sorting_preference", 0)]
+        ascending = sharedPrefs.getBoolean("sorting_preference_is_ascending", true)
+
         return inflater.inflate(R.layout.fragment_resources, container, false)
     }
 
@@ -224,15 +231,11 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         var dialog: AlertDialog? = null
 
         view.rg_sorting.setOnCheckedChangeListener { _, checkedId ->
-            when(checkedId) {
-                R.id.rb_default -> throw AssertionError("As-is sorting is initial, unsorted order")
 
-                R.id.rb_name -> sorting = Sorting.NAME
-                R.id.rb_size -> sorting = Sorting.SIZE
-                R.id.rb_last_modified -> sorting = Sorting.LAST_MODIFIED
-                R.id.rb_type -> sorting = Sorting.TYPE
-            }
-            Log.d(RESOURCES_SCREEN, "sorting criteria changed, sorting = $sorting")
+            sorting = sortingCategorySelected(checkedId)
+            sharedPrefs.edit().putInt("sorting_preference", sorting.ordinal).apply()
+
+            Log.d(RESOURCES_SCREEN, "sorting criteria changed, sorting = $sorting, ordinal = ${sorting.ordinal}")
 
             when(sorting) {
                 Sorting.NAME -> gridAdapter.sortBy { it.fileName }
@@ -251,6 +254,8 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
                 R.id.rb_ascending -> ascending = true
                 R.id.rb_descending -> ascending = false
             }
+
+            sharedPrefs.edit().putBoolean("sorting_preference_is_ascending", ascending).apply()
             Log.d(RESOURCES_SCREEN, "sorting direction changed, ascending = $ascending")
 
             gridAdapter.reverse()
@@ -259,6 +264,20 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         }
 
         dialog = alertBuilder.show()
+    }
+
+    private fun sortingCategorySelected(itemID: Int): Sorting{
+        return when(itemID) {
+            R.id.rb_default -> {
+                Sorting.DEFAULT
+                throw AssertionError("As-is sorting is initial, unsorted order")
+            }
+            R.id.rb_name -> Sorting.NAME
+            R.id.rb_size -> Sorting.SIZE
+            R.id.rb_last_modified -> Sorting.LAST_MODIFIED
+            R.id.rb_type -> Sorting.TYPE
+            else -> Sorting.DEFAULT
+        }
     }
 
     private fun dragHandlerTouchListener(view: View, event: MotionEvent): Boolean {
@@ -282,8 +301,8 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
                 if (travelTime > DRAG_TRAVEL_TIME_THRESHOLD &&
                     abs(travelDelta) > DRAG_TRAVEL_DELTA_THRESHOLD &&
                     abs(travelSpeed) > DRAG_TRAVEL_SPEED_THRESHOLD) {
-                        selectorHeight = if (travelDelta > 0f) 1f else 0f
-                        updateDragHandlerBias()
+                    selectorHeight = if (travelDelta > 0f) 1f else 0f
+                    updateDragHandlerBias()
                 }
             }
             MotionEvent.ACTION_MOVE -> {
