@@ -1,11 +1,12 @@
 package space.taran.arknavigator.ui.fragments
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.view.inputmethod.EditorInfo
+import android.webkit.MimeTypeMap
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
@@ -13,8 +14,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.chip.Chip
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
-import moxy.presenter.InjectPresenter
-import moxy.presenter.ProvidePresenter
+import space.taran.arknavigator.BuildConfig
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.DialogTagsBinding
 import space.taran.arknavigator.databinding.FragmentGalleryBinding
@@ -30,6 +30,9 @@ import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.adapter.PreviewsPager
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.utils.*
+import java.io.File
+import java.nio.file.Path
+
 
 //todo: use Bundle if resume doesn't work
 
@@ -132,6 +135,12 @@ class GalleryFragment(
                 showEditTagsDialog(position)
             }
         }
+
+        open_resource_chooser_fab.setOnClickListener {
+            val position = view_pager.currentItem
+            Log.d(GALLERY_SCREEN, "[open_chooser] clicked at position $position")
+            openIntentChooser(position)
+        }
     }
 
     override fun setPreviewsScrollingEnabled(enabled: Boolean) {
@@ -197,6 +206,31 @@ class GalleryFragment(
         val resource = resources[position]
         Log.d(GALLERY_SCREEN, "showing [edit-tags] dialog for position $position")
         showEditTagsDialog(resource)
+    }
+
+    private fun openIntentChooser(position: Int){
+        val resource = resources.items()[position]
+        val filePath = index.getPath(resource)
+
+        if (filePath == null || filePath.toString().trim().isEmpty())
+            Toast.makeText(requireContext(), "Error reading file.", Toast.LENGTH_LONG).show()
+        else{
+            //Create intent, and set the data and extension to it
+            val intent = Intent()
+            intent.action = Intent.ACTION_VIEW
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+
+            val file = File(filePath.toString())
+            val extension: String = extension(filePath)
+
+            val fileURI = FileProvider.getUriForFile(requireContext(),
+                BuildConfig.APPLICATION_ID + ".provider", file)
+
+            intent.setDataAndType(fileURI,
+                MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension))
+
+            requireContext().startActivity(Intent.createChooser(intent, "Choose application:"))
+        }
     }
 
     private fun showEditTagsDialog(resource: ResourceId) {
