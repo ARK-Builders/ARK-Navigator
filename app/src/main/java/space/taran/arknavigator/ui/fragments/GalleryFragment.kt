@@ -130,7 +130,7 @@ class GalleryFragment(
         }
     }
 
-    override fun setViewPagerInputEnabled(enabled: Boolean) {
+    override fun setPreviewsScrollingEnabled(enabled: Boolean) {
         view_pager.isUserInputEnabled = enabled
     }
 
