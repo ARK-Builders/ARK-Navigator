@@ -76,10 +76,10 @@ class GalleryPresenter(
         if (zoomed) {
             isFullscreen = true
             viewState.setFullscreen(isFullscreen)
-            viewState.setViewPagerInputEnabled(false)
+            viewState.setPreviewsScrollingEnabled(false)
         }
         else
-            viewState.setViewPagerInputEnabled(true)
+            viewState.setPreviewsScrollingEnabled(true)
     }
 
     private fun onPreviewsItemClick(itemView: PreviewItemView) {
