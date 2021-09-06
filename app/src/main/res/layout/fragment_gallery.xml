@@ -50,6 +50,19 @@
             app:tint="@color/white" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/open_resource_chooser_fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentTop="true"
+            android:layout_margin="16dp"
+            android:backgroundTint="@color/colorPrimary"
+            android:src="@drawable/ic_baseline_chooser_24"
+            app:borderWidth="0dp"
+            app:elevation="6dp"
+            app:tint="@color/white"/>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/edit_tags_fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
