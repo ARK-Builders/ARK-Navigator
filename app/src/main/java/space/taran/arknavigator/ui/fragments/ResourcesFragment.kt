@@ -1,10 +1,9 @@
 package space.taran.arknavigator.ui.fragments
 
-import android.content.Context
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
@@ -15,6 +14,7 @@ import kotlinx.android.synthetic.main.layout_progress.*
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import space.taran.arknavigator.R
+import space.taran.arknavigator.extensions.changeEnabledStatus
 import space.taran.arknavigator.mvp.presenter.ResourcesPresenter
 import space.taran.arknavigator.mvp.presenter.TagsSelector
 import space.taran.arknavigator.mvp.presenter.adapter.ResourcesList
@@ -23,9 +23,7 @@ import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.adapter.ResourcesGrid
 import space.taran.arknavigator.ui.fragments.utils.Notifications
-import space.taran.arknavigator.utils.RESOURCES_SCREEN
-import space.taran.arknavigator.utils.Sorting
-import space.taran.arknavigator.utils.extension
+import space.taran.arknavigator.utils.*
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.math.abs
@@ -51,14 +49,9 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
     private lateinit var gridAdapter: ResourcesGrid
     private var tagsSelector: TagsSelector? = null
 
-    private lateinit var sharedPrefs: SharedPreferences
-
     private lateinit var menuTagsOn: MenuItem
     private lateinit var menuTagsOff: MenuItem
     private var tagsEnabled = true
-
-    private var sorting: Sorting = Sorting.DEFAULT
-    private var ascending: Boolean = true
 
     private val frameTop by lazy {
         val loc = IntArray(2)
@@ -78,10 +71,6 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         savedInstanceState: Bundle?): View? {
 
         Log.d(RESOURCES_SCREEN, "inflating layout for ResourcesFragment")
-        sharedPrefs = requireContext().getSharedPreferences("user_preferences", Context.MODE_PRIVATE)
-
-        sorting = Sorting.values()[sharedPrefs.getInt("sorting_preference", 0)]
-        ascending = sharedPrefs.getBoolean("sorting_preference_is_ascending", true)
 
         return inflater.inflate(R.layout.fragment_resources, container, false)
     }
@@ -141,6 +130,10 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
 
     override fun setToolbarTitle(title: String) {
         (activity as MainActivity).setTitle(title)
+    }
+
+    override fun sortingValuesReceived() {
+        sortAccordingToChoice()
     }
 
     override fun setProgressVisibility(isVisible: Boolean) {
@@ -208,7 +201,9 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         val view = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_sort, null)!!
         val alertBuilder = AlertDialog.Builder(requireContext()).setView(view)
 
-        when(sorting) {
+        changeSortOrderLockStatus(view, true)
+
+        when(presenter.sorting) {
             Sorting.DEFAULT -> view.rb_default.isChecked = true
             Sorting.NAME -> view.rb_name.isChecked = true
             Sorting.SIZE -> view.rb_size.isChecked = true
@@ -216,12 +211,11 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
             Sorting.TYPE -> view.rb_type.isChecked = true
         }
 
-        if (sorting == Sorting.DEFAULT) {
-            view.rb_ascending.isEnabled = false
-            view.rb_descending.isEnabled = false
-            view.rg_sorting_direction.isEnabled = false
-        } else {
-            if (ascending) {
+        if (presenter.sorting == Sorting.DEFAULT) {
+            changeSortOrderLockStatus(view, false)
+        }
+        else {
+            if (presenter.sortOrderAscending) {
                 view.rb_ascending.isChecked = true
             } else {
                 view.rb_descending.isChecked = true
@@ -232,31 +226,23 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
 
         view.rg_sorting.setOnCheckedChangeListener { _, checkedId ->
 
-            sorting = sortingCategorySelected(checkedId)
-            sharedPrefs.edit().putInt("sorting_preference", sorting.ordinal).apply()
+            presenter.sorting = (sortingCategorySelected(checkedId))
 
-            Log.d(RESOURCES_SCREEN, "sorting criteria changed, sorting = $sorting, ordinal = ${sorting.ordinal}")
+            Log.d(RESOURCES_SCREEN, "sorting criteria changed, sorting = ${presenter.sorting}")
 
-            when(sorting) {
-                Sorting.NAME -> gridAdapter.sortBy { it.fileName }
-                Sorting.SIZE -> gridAdapter.sortBy { Files.size(it) }
-                Sorting.TYPE -> gridAdapter.sortBy { extension(it) }
-                Sorting.LAST_MODIFIED -> gridAdapter.sortBy { Files.getLastModifiedTime(it) }
-                Sorting.DEFAULT -> throw AssertionError("Not possible")
-            }
+            presenter.sortOrderAscending = true
 
-            ascending = true
+            sortAccordingToChoice()
             dialog!!.dismiss()
         }
 
         view.rg_sorting_direction.setOnCheckedChangeListener { _, checkedId ->
             when(checkedId) {
-                R.id.rb_ascending -> ascending = true
-                R.id.rb_descending -> ascending = false
+                R.id.rb_ascending -> presenter.sortOrderAscending = true
+                R.id.rb_descending -> presenter.sortOrderAscending = false
             }
 
-            sharedPrefs.edit().putBoolean("sorting_preference_is_ascending", ascending).apply()
-            Log.d(RESOURCES_SCREEN, "sorting direction changed, ascending = $ascending")
+            Log.d(RESOURCES_SCREEN, "sorting direction changed, ascending = ${presenter.sortOrderAscending}")
 
             gridAdapter.reverse()
 
@@ -266,12 +252,25 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         dialog = alertBuilder.show()
     }
 
+    private fun sortAccordingToChoice(){
+        when(presenter.sorting) {
+            Sorting.NAME -> gridAdapter.sortBy { it.fileName }
+            Sorting.SIZE -> gridAdapter.sortBy { Files.size(it) }
+            Sorting.TYPE -> gridAdapter.sortBy { extension(it) }
+            Sorting.LAST_MODIFIED -> gridAdapter.sortBy { Files.getLastModifiedTime(it) }
+            Sorting.DEFAULT -> {
+                sendShortToastMessage(requireActivity().getString(R.string.as_is_sorting_selected))
+            }
+        }
+
+        Log.d("TAG", "sortAccordingToChoice: sorting: ${presenter.sorting}, reverse = ${presenter.sortOrderAscending}")
+        if (!presenter.sortOrderAscending)
+            gridAdapter.reverse()
+    }
+
     private fun sortingCategorySelected(itemID: Int): Sorting{
         return when(itemID) {
-            R.id.rb_default -> {
-                Sorting.DEFAULT
-                throw AssertionError("As-is sorting is initial, unsorted order")
-            }
+            R.id.rb_default -> { Sorting.DEFAULT }
             R.id.rb_name -> Sorting.NAME
             R.id.rb_size -> Sorting.SIZE
             R.id.rb_last_modified -> Sorting.LAST_MODIFIED
@@ -329,6 +328,17 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
 
     private fun updateDragHandlerBias() {
         updateVerticalBias(iv_drag_handler)
+    }
+
+    private fun sendShortToastMessage(message: String){
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun changeSortOrderLockStatus(dialogView: View, isEnabledStatus: Boolean){
+        val childCount = dialogView.rg_sorting_direction.childCount
+        for (radioButton in 0 until childCount){
+            dialogView.rg_sorting_direction?.getChildAt(radioButton)?.changeEnabledStatus(isEnabledStatus)
+        }
     }
 
     companion object {

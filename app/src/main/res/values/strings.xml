@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">ARK Navigator</string>
+    <string name="as_is_sorting_selected">This option will be applied when the screen is re-opened.</string>
 </resources>

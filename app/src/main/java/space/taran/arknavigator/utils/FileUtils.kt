@@ -5,6 +5,7 @@ import java.lang.IllegalArgumentException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import kotlin.io.path.extension
 
 typealias Milliseconds = Long
 typealias StringPath = String
@@ -94,13 +95,5 @@ fun findLongestCommonPrefix(paths: List<Path>): Path {
     return tailrec(ROOT_PATH, paths).first
 }
 
-fun extension(path: Path): String {
-    val pathString = path.fileName.toString()
-    return if (pathString.contains(".") &&
-        !pathString.split(".").drop(1).isNullOrEmpty())
-        pathString
-            .split('.')
-            .drop(1)
-            .last()
-    else ""
-}
+fun extension(path: Path): String =
+    path.fileName.extension

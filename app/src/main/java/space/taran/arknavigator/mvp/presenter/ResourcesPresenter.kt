@@ -11,15 +11,17 @@ import space.taran.arknavigator.mvp.presenter.adapter.ResourcesList
 import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.navigation.Screens
 import space.taran.arknavigator.ui.fragments.utils.Notifications
+import space.taran.arknavigator.utils.DataStoreManager
 import space.taran.arknavigator.utils.RESOURCES_SCREEN
+import space.taran.arknavigator.utils.Sorting
 import space.taran.arknavigator.utils.Tags
 import java.nio.file.Path
 import javax.inject.Inject
 
 class ResourcesPresenter(
     val root: Path?,
-    private val prefix: Path?)
-    : MvpPresenter<ResourcesView>() {
+    private val prefix: Path?
+) : MvpPresenter<ResourcesView>() {
 
     @Inject
     lateinit var router: Router
@@ -30,8 +32,23 @@ class ResourcesPresenter(
     @Inject
     lateinit var resourcesIndexFactory: ResourcesIndexFactory
 
+    @Inject
+    lateinit var dataStoreManager: DataStoreManager
+
     private lateinit var index: ResourcesIndex
     private lateinit var storage: TagsStorage
+
+    var sorting: Sorting = Sorting.DEFAULT
+        set(value) {
+            field = value
+            presenterScope.launch { dataStoreManager.setUserSorting(value.ordinal) }
+        }
+
+    var sortOrderAscending: Boolean = true
+        set(value) {
+            field = value
+            presenterScope.launch { dataStoreManager.setUserSortOrder(value) }
+        }
 
     fun listTagsForAllResources(): Tags = resources()
         .flatMap { storage.getTags(it) }
@@ -48,6 +65,12 @@ class ResourcesPresenter(
         return TagsSelector(tags, resources().toSet(), storage)
     }
 
+    private fun getSorting() = presenterScope.launch {
+        sorting = Sorting.values()[dataStoreManager.getUserSorting()]
+        sortOrderAscending = dataStoreManager.getUserSortOrder()
+
+        viewState.sortingValuesReceived()
+    }
 
     override fun onFirstViewAttach() {
         Log.d(RESOURCES_SCREEN, "first view attached in ResourcesPresenter")
@@ -96,6 +119,7 @@ class ResourcesPresenter(
             storage = AggregatedTagsStorage(rootToStorage.values)
 
             viewState.init(provideResourcesList())
+            getSorting()
 
             val title = {
                 val path = (prefix ?: root)
