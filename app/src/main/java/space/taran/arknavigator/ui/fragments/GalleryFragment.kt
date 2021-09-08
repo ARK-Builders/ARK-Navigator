@@ -3,6 +3,7 @@ package space.taran.arknavigator.ui.fragments
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.util.TypedValue
 import android.view.*
 import android.view.inputmethod.EditorInfo
 import android.webkit.MimeTypeMap
@@ -31,7 +32,6 @@ import space.taran.arknavigator.ui.adapter.PreviewsPager
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.utils.*
 import java.io.File
-import java.nio.file.Path
 
 
 //todo: use Bundle if resume doesn't work
@@ -129,17 +129,11 @@ class GalleryFragment(
                 shareResource(position)
             }
 
-            editTagsFab.setOnClickListener {
+            openResourceChooserFab.setOnClickListener {
                 val position = viewPager.currentItem
-                Log.d(GALLERY_SCREEN, "[edit_tags] clicked at position $position")
-                showEditTagsDialog(position)
+                Log.d(GALLERY_SCREEN, "[open_chooser] clicked at position $position")
+                openIntentChooser(position)
             }
-        }
-
-        open_resource_chooser_fab.setOnClickListener {
-            val position = view_pager.currentItem
-            Log.d(GALLERY_SCREEN, "[open_chooser] clicked at position $position")
-            openIntentChooser(position)
         }
     }
 
@@ -209,7 +203,7 @@ class GalleryFragment(
     }
 
     private fun openIntentChooser(position: Int){
-        val resource = resources.items()[position]
+        val resource = resources[position]
         val filePath = index.getPath(resource)
 
         if (filePath == null || filePath.toString().trim().isEmpty())
@@ -318,6 +312,8 @@ class GalleryFragment(
 
             binding.tagsCg.addView(chip)
         }
+
+        binding.tagsCg.addView(createEditChip())
     }
 
     private fun removeTag(resource: ResourceId, tags: Tags, tag: Tag) {
@@ -330,6 +326,33 @@ class GalleryFragment(
         presenter.replaceTags(resource, tags)
         displayPreviewTags(resource, tags)
         displayDialogTags(resource, tags)
+    }
+
+    private fun getPXFromDP(dpValue: Float): Float{
+        return TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            dpValue,
+            getResources().displayMetrics
+        )
+    }
+
+    private fun createEditChip(): Chip {
+        return Chip(context).also {
+            it.apply {
+                setChipIconResource(R.drawable.ic_baseline_edit_24)
+                chipBackgroundColor = requireActivity().getColorStateList(R.color.colorPrimary)
+                chipStartPadding = getPXFromDP(12f)
+                chipEndPadding = getPXFromDP(12f)
+                textStartPadding = 0f
+                textEndPadding = 0f
+
+                setOnClickListener {
+                    val position = binding.viewPager.currentItem
+                    Log.d(GALLERY_SCREEN, "[edit_tags] clicked at position $position")
+                    showEditTagsDialog(position)
+                }
+            }
+        }
     }
 
     private fun closeEditTagsDialog() {
