@@ -41,8 +41,7 @@ class GalleryFragment(
     private val storage: TagsStorage,
     private val resources: MutableList<ResourceId>,
     private val startAt: Int
-)
-    : MvpAppCompatFragment(), GalleryView, BackButtonListener, NotifiableView {
+) : MvpAppCompatFragment(), GalleryView, BackButtonListener, NotifiableView {
 
     private lateinit var dialogBinding: DialogTagsBinding
     private var dialog: AlertDialog? = null
@@ -129,11 +128,7 @@ class GalleryFragment(
                 shareResource(position)
             }
 
-            openResourceChooserFab.setOnClickListener {
-                val position = viewPager.currentItem
-                Log.d(GALLERY_SCREEN, "[open_chooser] clicked at position $position")
-                openIntentChooser(position)
-            }
+            setupOpenEditFABs(binding.viewPager.currentItem)
         }
     }
 
@@ -186,7 +181,8 @@ class GalleryFragment(
         val context = requireContext()
         val uri = FileProvider.getUriForFile(
             context, "space.taran.arknavigator.provider",
-            path.toFile())
+            path.toFile()
+        )
         val mime = context.contentResolver.getType(uri)
         Log.d(GALLERY_SCREEN, "sharing $uri of type $mime")
 
@@ -202,28 +198,70 @@ class GalleryFragment(
         showEditTagsDialog(resource)
     }
 
-    private fun openIntentChooser(position: Int){
+    private fun setupOpenEditFABs(currentPosition: Int) {
+        binding.apply {
+            openResourceChooserFab.setOnClickListener(null)
+            openFileEditFab.setOnClickListener(null)
+
+            val resource = resources[currentPosition]
+            val filePath = index.getPath(resource)
+
+            if (!isFileEmpty(filePath)) {
+                when (getFileActionType(filePath!!)) {
+                    FileActionType.OPEN_ONLY -> {
+                        openFileEditFab.makeGone()
+                        openResourceChooserFab.makeVisibleAndSetOnClickListener{
+                            openIntentChooser(currentPosition, Intent.ACTION_VIEW)
+                        }
+                    }
+                    FileActionType.EDIT_AND_OPEN -> {
+                        openFileEditFab.makeVisibleAndSetOnClickListener {
+                            openIntentChooser(currentPosition, Intent.ACTION_EDIT) }
+
+                        openResourceChooserFab.makeVisibleAndSetOnClickListener {
+                            openIntentChooser(currentPosition, Intent.ACTION_VIEW) }
+                    }
+
+                    FileActionType.EDIT_AS_OPEN -> {
+                        openFileEditFab.makeGone()
+                        openResourceChooserFab.makeVisibleAndSetOnClickListener {
+                            openIntentChooser(currentPosition, Intent.ACTION_EDIT) }
+                    }
+                }
+            } else {
+                openResourceChooserFab.makeGone()
+                openFileEditFab.makeGone()
+            }
+        }
+    }
+
+    private fun openIntentChooser(position: Int, actionType: String){
         val resource = resources[position]
         val filePath = index.getPath(resource)
 
-        if (filePath == null || filePath.toString().trim().isEmpty())
-            Toast.makeText(requireContext(), "Error reading file.", Toast.LENGTH_LONG).show()
-        else{
+        if (!isFileEmpty(filePath)) {
             //Create intent, and set the data and extension to it
             val intent = Intent()
-            intent.action = Intent.ACTION_VIEW
+            intent.action = actionType
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
 
             val file = File(filePath.toString())
-            val extension: String = extension(filePath)
+            val extension: String = extension(filePath!!)
 
-            val fileURI = FileProvider.getUriForFile(requireContext(),
-                BuildConfig.APPLICATION_ID + ".provider", file)
+            val fileURI = FileProvider.getUriForFile(
+                requireContext(),
+                BuildConfig.APPLICATION_ID + ".provider", file
+            )
 
-            intent.setDataAndType(fileURI,
-                MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension))
+            intent.setDataAndType(
+                fileURI,
+                MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
+            )
 
-            requireContext().startActivity(Intent.createChooser(intent, "Choose application:"))
+            val actionString = if (actionType == Intent.ACTION_VIEW)
+                "Open with:"
+            else "Choose application to edit:"
+            requireContext().startActivity(Intent.createChooser(intent, actionString))
         }
     }
 
@@ -328,7 +366,7 @@ class GalleryFragment(
         displayDialogTags(resource, tags)
     }
 
-    private fun getPXFromDP(dpValue: Float): Float{
+    private fun getPXFromDP(dpValue: Float): Float {
         return TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP,
             dpValue,

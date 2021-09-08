@@ -18,6 +18,19 @@ enum class Sorting {
     DEFAULT, NAME, SIZE, LAST_MODIFIED, TYPE
 }
 
+enum class FileActionType{
+    EDIT_AS_OPEN, EDIT_AND_OPEN, OPEN_ONLY
+}
+
+private val acceptedImageExt = listOf(".jpg", ".jpeg", ".png")
+private val acceptedEditOnlyExt = arrayListOf(".txt", ".doc", ".docx", ".odt", "ods")
+    .also { it.addAll(acceptedImageExt) }
+private val acceptedReadAndEditExt = listOf(".pdf", ".md")
+
+// todo: https://www.toptal.com/android/android-threading-all-you-need-to-know
+//https://developer.android.com/reference/androidx/work/WorkManager.html
+//https://developer.android.com/reference/androidx/core/app/JobIntentService.html
+
 fun provideIconImage(file: Path): Path? =
     providePreview(file) //todo downscale to, say, 128x128
 
@@ -35,11 +48,15 @@ fun providePreview(file: Path): Path? =
 
 fun isImage(file: Path): Boolean {
     val name = file.fileName.toString()
-    val result = name.endsWith(".jpg")
-            || name.endsWith(".jpeg")
-            || name.endsWith(".png")
+    return acceptedImageExt.contains(name)
+}
 
-    return result
+fun getFileActionType(filePath: Path): FileActionType{
+    return when(".${extension(filePath)}"){
+        in acceptedEditOnlyExt -> FileActionType.EDIT_AS_OPEN
+        in acceptedReadAndEditExt -> FileActionType.EDIT_AND_OPEN
+        else -> FileActionType.OPEN_ONLY
+    }
 }
 
 fun isHidden(path: Path): Boolean =
@@ -47,6 +64,9 @@ fun isHidden(path: Path): Boolean =
 
 fun folderExists(path: Path): Boolean =
     Files.exists(path) || Files.isDirectory(path)
+
+fun isFileEmpty(filePath: Path?): Boolean =
+    filePath == null || filePath.toString().trim().isEmpty()
 
 fun listDevices(): List<Path> =
     App.instance.getExternalFilesDirs(null)
