@@ -50,12 +50,27 @@
             app:tint="@color/white" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/open_file_edit_fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/tags_cg"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:layout_toStartOf="@+id/open_resource_chooser_fab"
+            android:backgroundTint="@color/colorPrimary"
+            android:src="@drawable/ic_edit_file"
+            app:borderWidth="0dp"
+            app:elevation="6dp"
+            app:tint="@color/white"/>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/open_resource_chooser_fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_above="@+id/tags_cg"
+            android:layout_marginBottom="16dp"
             android:layout_alignParentEnd="true"
-            android:layout_margin="16dp"
+            android:layout_marginEnd="16dp"
             android:backgroundTint="@color/colorPrimary"
             android:src="@drawable/ic_baseline_chooser_24"
             app:borderWidth="0dp"
