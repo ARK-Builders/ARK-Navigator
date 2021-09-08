@@ -3,13 +3,13 @@ package space.taran.arknavigator.di.modules
 import android.content.Context
 import dagger.Module
 import dagger.Provides
+import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.ui.App
-import space.taran.arknavigator.utils.DataStoreManager
 import javax.inject.Singleton
 
 
 @Module
-class AppModule(val app: App, val context: Context) {
+class AppModule(val app: App) {
 
     @Provides
     fun app(): App {
@@ -18,13 +18,13 @@ class AppModule(val app: App, val context: Context) {
 
     @Provides
     @Singleton
-    fun provideDataStoreManager(appContext: Context): DataStoreManager
-            = DataStoreManager(appContext)
+    fun provideUserPreferences(appContext: Context): UserPreferences
+            = UserPreferences(appContext)
 
     @Singleton
     @Provides
     fun provideContext(): Context {
-        return context
+        return app
     }
 
 }

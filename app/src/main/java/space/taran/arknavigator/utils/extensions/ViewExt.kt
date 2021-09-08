@@ -1,4 +1,4 @@
-package space.taran.arknavigator.extensions
+package space.taran.arknavigator.utils.extensions
 
 import android.view.View
 
