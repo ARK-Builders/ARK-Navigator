@@ -1,7 +1,8 @@
 package space.taran.arknavigator.ui.adapter
 
 import android.view.View
-import kotlinx.android.synthetic.main.dialog_roots_new.view.*
+import androidx.viewbinding.ViewBinding
+import space.taran.arknavigator.databinding.DialogRootsNewBinding
 import space.taran.arknavigator.mvp.presenter.adapter.FoldersWalker
 import space.taran.arknavigator.mvp.presenter.adapter.ItemClickHandler
 import java.nio.file.Path
@@ -13,18 +14,18 @@ import kotlin.io.path.listDirectoryEntries
 class FolderPicker(
     paths: List<Path>,
     handler: ItemClickHandler<Path>,
-    private val view: View)
+    private val binding: DialogRootsNewBinding)
     : FilesReversibleRVAdapter<Path, Path>(FoldersWalker(paths, handler)) {
 
     init {
-        view.rv_roots_dialog.adapter = this
-        view.tv_roots_dialog_path.text = super.getLabel().toString()
+        binding.rvRootsDialog.adapter = this
+        binding.tvRootsDialogPath.text = super.getLabel().toString()
     }
 
     override fun backClicked(): Path? {
         val label = super.backClicked()
         if (label != null) {
-            view.tv_roots_dialog_path.text = label.toString()
+            binding.tvRootsDialogPath.text = label.toString()
         }
         return label
     }
@@ -33,6 +34,6 @@ class FolderPicker(
         val children = path.listDirectoryEntries().sorted()
         this.updateItems(path, children)
 
-        view.tv_roots_dialog_path.text = path.toString()
+        binding.tvRootsDialogPath.text = path.toString()
     }
 }

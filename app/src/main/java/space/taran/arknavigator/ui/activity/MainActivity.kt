@@ -14,13 +14,13 @@ import space.taran.arknavigator.R
 import space.taran.arknavigator.mvp.presenter.MainPresenter
 import space.taran.arknavigator.mvp.view.MainView
 import space.taran.arknavigator.ui.fragments.BackButtonListener
-import kotlinx.android.synthetic.main.activity_main.*
 import moxy.MvpAppCompatActivity
 import moxy.ktx.moxyPresenter
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
 import ru.terrakok.cicerone.NavigatorHolder
 import ru.terrakok.cicerone.android.support.SupportAppNavigator
+import space.taran.arknavigator.databinding.ActivityMainBinding
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.utils.MAIN
@@ -41,36 +41,40 @@ class MainActivity : MvpAppCompatActivity(), MainView {
     }
 
     private val navigator = SupportAppNavigator(this, R.id.container)
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(MAIN, "creating")
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         App.instance.appComponent.inject(this)
     }
 
     override fun init() {
-        Log.d(MAIN, "initializing")
-        setSupportActionBar(toolbar)
-        bottom_navigation.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.page_roots -> {
-                    Log.d(MAIN, "switching to Folders screen")
-                    presenter.goToFoldersScreen()
-                    true
-                }
-                R.id.page_tags -> {
-                    Log.d(MAIN, "switching to Resources screen")
-                    presenter.goToResourcesScreen()
-                    true
-                }
-                else -> {
-                    Log.w(MAIN, "no handler found")
-                    true
+        binding.apply {
+            Log.d(MAIN, "initializing")
+            setSupportActionBar(toolbar)
+            bottomNavigation.setOnItemSelectedListener { item ->
+                when (item.itemId) {
+                    R.id.page_roots -> {
+                        Log.d(MAIN, "switching to Folders screen")
+                        presenter.goToFoldersScreen()
+                        true
+                    }
+                    R.id.page_tags -> {
+                        Log.d(MAIN, "switching to Resources screen")
+                        presenter.goToResourcesScreen()
+                        true
+                    }
+                    else -> {
+                        Log.w(MAIN, "no handler found")
+                        true
+                    }
                 }
             }
+            bottomNavigation.setOnItemReselectedListener{}
         }
-        bottom_navigation.setOnItemReselectedListener{}
     }
 
     override fun requestPerms() {
@@ -127,7 +131,7 @@ class MainActivity : MvpAppCompatActivity(), MainView {
     }
 
     fun setBottomNavigationVisibility(isVisible: Boolean) {
-        bottom_navigation.isVisible = isVisible
+        binding.bottomNavigation.isVisible = isVisible
     }
 
     fun setTitle(title: String) {
@@ -136,19 +140,19 @@ class MainActivity : MvpAppCompatActivity(), MainView {
 
     fun setToolbarVisibility(show: Boolean) {
         if (show) {
-            layout_toolbar.visibility = View.VISIBLE
+            binding.layoutToolbar.visibility = View.VISIBLE
         } else {
-            layout_toolbar.visibility = View.GONE
+            binding.layoutToolbar.visibility = View.GONE
         }
     }
 
     fun setSelectedTab(pos: Int) {
         Log.d(MAIN, "tab $pos selected")
-        bottom_navigation.menu.getItem(pos).isChecked = true
+        binding.bottomNavigation.menu.getItem(pos).isChecked = true
     }
 
     fun setBottomNavigationEnabled(isEnabled: Boolean) {
-        bottom_navigation.menu.forEach { item ->
+        binding.bottomNavigation.menu.forEach { item ->
             item.isEnabled = isEnabled
         }
     }

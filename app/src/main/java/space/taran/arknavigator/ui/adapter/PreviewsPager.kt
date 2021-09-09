@@ -1,13 +1,14 @@
 package space.taran.arknavigator.ui.adapter
 
+import android.annotation.SuppressLint
 import android.view.GestureDetector
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.ViewGroup
 import androidx.core.view.GestureDetectorCompat
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.item_image.view.*
 import space.taran.arknavigator.R
+import space.taran.arknavigator.databinding.ItemImageBinding
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
 import space.taran.arknavigator.mvp.view.item.PreviewItemViewHolder
 
@@ -17,16 +18,15 @@ class PreviewsPager(val presenter: PreviewsList) : RecyclerView.Adapter<PreviewI
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         PreviewItemViewHolder(
-            LayoutInflater.from(parent.context).inflate(
-                R.layout.item_image,
-                parent,
-                false))
+            ItemImageBinding.inflate(LayoutInflater.from(parent.context), parent, false))
 
+
+    @SuppressLint("ClickableViewAccessibility")
     override fun onBindViewHolder(holder: PreviewItemViewHolder, position: Int) {
         holder.pos = position
         presenter.bindView(holder)
         val gestureDetector = getGestureDetector(holder)
-        holder.itemView.layout_root.setOnTouchListener { view, motionEvent ->
+        holder.binding.layoutRoot.setOnTouchListener { view, motionEvent ->
             if (motionEvent.action == MotionEvent.ACTION_UP)
                 view.performClick()
             gestureDetector.onTouchEvent(motionEvent)

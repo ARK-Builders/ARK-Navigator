@@ -43,6 +43,8 @@
             android:visibility="visible" />
     </ScrollView>
 
-    <include layout="@layout/layout_progress"/>
+    <include
+        android:id="@+id/layout_progress"
+        layout="@layout/layout_progress"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
