@@ -42,7 +42,6 @@ class GalleryFragment(
 )
     : MvpAppCompatFragment(), GalleryView, BackButtonListener, NotifiableView {
 
-    private var dialogView: View? = null
     private lateinit var dialogBinding: DialogTagsBinding
     private var dialog: AlertDialog? = null
     private lateinit var binding: FragmentGalleryBinding
@@ -202,7 +201,6 @@ class GalleryFragment(
 
         val tags = presenter.listTags(resource)
 
-        //dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_tags, null)
         dialogBinding = DialogTagsBinding.inflate(LayoutInflater.from(requireContext()))
 
         val alertDialogBuilder = AlertDialog.Builder(requireContext()).setView(dialogBinding.root)

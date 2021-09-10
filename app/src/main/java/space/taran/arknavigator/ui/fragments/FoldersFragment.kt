@@ -123,10 +123,6 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
     private fun openFolderPicker(paths: List<Path>) {
         Log.d(FOLDERS_SCREEN, "initializing root picker")
 
-//        val dialogView = LayoutInflater.from(requireContext())
-//            .inflate(R.layout.dialog_roots_new, null)
-//            ?: throw IllegalStateException("Failed to inflate dialog View for roots picker")
-
         val dialogBinding = DialogRootsNewBinding.inflate(
             LayoutInflater.from(requireContext()))
 

@@ -1,10 +1,8 @@
 package space.taran.arknavigator.mvp.view.item
 
-import android.view.View
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.extensions.LayoutContainer
 import space.taran.arknavigator.databinding.ItemImageBinding
-import space.taran.arknavigator.mvp.model.dao.common.PredefinedIcon
+import space.taran.arknavigator.ui.fragments.utils.PredefinedIcon
 import space.taran.arknavigator.utils.imageForPredefinedIcon
 import space.taran.arknavigator.utils.loadImage
 import java.nio.file.Path

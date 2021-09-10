@@ -1,7 +1,7 @@
 package space.taran.arknavigator.mvp.presenter.adapter
 
 
-import space.taran.arknavigator.mvp.model.dao.common.Preview
+import space.taran.arknavigator.ui.fragments.utils.Preview
 import space.taran.arknavigator.mvp.model.dao.ResourceId
 import space.taran.arknavigator.mvp.model.repo.ResourcesIndex
 import space.taran.arknavigator.mvp.view.item.FileItemView

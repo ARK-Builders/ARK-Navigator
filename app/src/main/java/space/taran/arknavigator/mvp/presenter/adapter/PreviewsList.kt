@@ -1,6 +1,6 @@
 package space.taran.arknavigator.mvp.presenter.adapter
 
-import space.taran.arknavigator.mvp.model.dao.common.Preview
+import space.taran.arknavigator.ui.fragments.utils.Preview
 import space.taran.arknavigator.mvp.view.item.PreviewItemView
 
 typealias PreviewClickHandler = ItemClickHandler<Preview>

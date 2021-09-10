@@ -7,7 +7,6 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.first
 import space.taran.arknavigator.utils.Sorting
-import space.taran.arknavigator.utils.extensions.convertToSorting
 import javax.inject.Inject
 
 class UserPreferences @Inject constructor(val context: Context) {
@@ -17,23 +16,28 @@ class UserPreferences @Inject constructor(val context: Context) {
 
     private val dataStore = context.preferencesDatastore
 
-    suspend fun setUserSorting(sorting: Sorting) {
+    suspend fun setSorting(sorting: Sorting) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.SORTING_PREFERENCE] = sorting.ordinal
         }
     }
 
-    suspend fun getUserSorting(): Sorting =
-        dataStore.data.first()[PreferencesKeys.SORTING_PREFERENCE]
-            ?.convertToSorting()
-            ?: Sorting.DEFAULT
+    suspend fun getSorting(): Sorting {
+        val intValue = dataStore.data.first()[PreferencesKeys.SORTING_PREFERENCE]
+        return convertIntToSorting(intValue)
+    }
 
-    suspend fun setUserSortAscending(isAscending: Boolean) {
+    suspend fun setSortingAscending(isAscending: Boolean) {
         dataStore.edit { preferences -> preferences[PreferencesKeys.SORTING_ORDER] = isAscending }
     }
 
-    suspend fun isUserSortAscending(): Boolean =
+    suspend fun isSortingAscending(): Boolean =
         dataStore.data.first()[PreferencesKeys.SORTING_ORDER] ?: true
+
+    private fun convertIntToSorting(intValue: Int?): Sorting {
+        return if (intValue == null) Sorting.DEFAULT
+        else Sorting.values()[intValue]
+    }
 
     private object PreferencesKeys {
         val SORTING_PREFERENCE = intPreferencesKey("sorting_preference")

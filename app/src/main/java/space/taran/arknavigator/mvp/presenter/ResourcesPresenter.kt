@@ -41,13 +41,13 @@ class ResourcesPresenter(
     var sorting: Sorting = Sorting.DEFAULT
         set(value) {
             field = value
-            presenterScope.launch { userPreferences.setUserSorting(value) }
+            presenterScope.launch { userPreferences.setSorting(value) }
         }
 
     var sortOrderAscending: Boolean = true
         set(value) {
             field = value
-            presenterScope.launch { userPreferences.setUserSortAscending(value) }
+            presenterScope.launch { userPreferences.setSortingAscending(value) }
         }
 
     fun listTagsForAllResources(): Tags = resources()
@@ -66,8 +66,8 @@ class ResourcesPresenter(
     }
 
     private fun getSorting() = presenterScope.launch {
-        sorting = userPreferences.getUserSorting()
-        sortOrderAscending = userPreferences.isUserSortAscending()
+        sorting = userPreferences.getSorting()
+        sortOrderAscending = userPreferences.isSortingAscending()
 
         viewState.sortingValuesReceived()
     }

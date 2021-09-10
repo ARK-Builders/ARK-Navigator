@@ -1,4 +1,4 @@
-package space.taran.arknavigator.mvp.model.dao.common
+package space.taran.arknavigator.ui.fragments.utils
 
 import space.taran.arknavigator.utils.provideIconImage
 import java.nio.file.Files

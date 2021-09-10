@@ -229,7 +229,7 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
 
             rgSorting.setOnCheckedChangeListener { _, checkedId ->
 
-                presenter.sorting = (sortingCategorySelected(checkedId))
+                presenter.sorting = sortingCategorySelected(checkedId)
 
                 Log.d(RESOURCES_SCREEN, "sorting criteria changed, sorting = ${presenter.sorting}")
 

@@ -1,6 +1,6 @@
 package space.taran.arknavigator.mvp.view.item
 
-import space.taran.arknavigator.mvp.model.dao.common.Preview
+import space.taran.arknavigator.ui.fragments.utils.Preview
 
 interface FileItemView {
 
