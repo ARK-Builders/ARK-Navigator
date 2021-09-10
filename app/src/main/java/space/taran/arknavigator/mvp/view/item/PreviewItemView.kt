@@ -1,6 +1,6 @@
 package space.taran.arknavigator.mvp.view.item
 
-import space.taran.arknavigator.mvp.model.dao.common.PredefinedIcon
+import space.taran.arknavigator.ui.fragments.utils.PredefinedIcon
 import java.nio.file.Path
 
 interface PreviewItemView {

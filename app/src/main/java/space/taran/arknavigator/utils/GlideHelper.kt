@@ -6,7 +6,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import space.taran.arknavigator.R
-import space.taran.arknavigator.mvp.model.dao.common.PredefinedIcon
+import space.taran.arknavigator.ui.fragments.utils.PredefinedIcon
 import java.nio.file.Path
 
 fun imageForPredefinedIcon(icon: PredefinedIcon): Int =

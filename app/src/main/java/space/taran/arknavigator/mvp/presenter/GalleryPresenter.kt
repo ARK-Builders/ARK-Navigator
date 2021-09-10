@@ -7,7 +7,7 @@ import moxy.MvpPresenter
 import moxy.presenterScope
 import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.mvp.model.dao.ResourceId
-import space.taran.arknavigator.mvp.model.dao.common.Preview
+import space.taran.arknavigator.ui.fragments.utils.Preview
 import space.taran.arknavigator.mvp.model.repo.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.TagsStorage
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
@@ -59,7 +59,7 @@ class GalleryPresenter(
     }
 
     fun replaceTags(resource: ResourceId, tags: Tags) = presenterScope.launch(NonCancellable) {
-        Log.d(GALLERY_SCREEN, "tags $tags added to $resource")
+        Log.d(GALLERY_SCREEN, "tags $tags set to $resource")
         storage.setTags(resource, tags)
     }
 

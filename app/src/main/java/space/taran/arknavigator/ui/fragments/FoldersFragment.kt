@@ -200,9 +200,6 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
             val rootPrefix = roots.find { path.startsWith(it) }
             if (rootPrefix != null) {
                 if (rootPrefix == path) {
-                    //todo fake disabling (still show messages when pressing on disabled button)
-                    //todo consistent rules for onPick messages and gray-out
-                    //todo revert button state when backClicked
                     dialogView.btn_roots_dialog_pick.isEnabled = false
                     dialogView.btn_roots_dialog_pick.text = PICK_ROOT
                     rootNotFavorite = true

@@ -3,13 +3,11 @@ package space.taran.arknavigator.mvp.view.item
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.ortiz.touchview.OnTouchImageViewListener
-import com.ortiz.touchview.TouchImageView
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.item_image.view.*
-import space.taran.arknavigator.mvp.model.dao.common.PredefinedIcon
+import space.taran.arknavigator.ui.fragments.utils.PredefinedIcon
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
 import space.taran.arknavigator.utils.imageForPredefinedIcon
-import space.taran.arknavigator.utils.loadImage
 import space.taran.arknavigator.utils.loadZoomImage
 import java.nio.file.Path
 
