@@ -9,15 +9,15 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.GridLayoutManager
-import kotlinx.android.synthetic.main.dialog_roots_new.view.*
-import kotlinx.android.synthetic.main.fragment_folders.*
-import kotlinx.android.synthetic.main.layout_progress.*
+
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
 import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.R
+import space.taran.arknavigator.databinding.DialogRootsNewBinding
+import space.taran.arknavigator.databinding.FragmentFoldersBinding
 import space.taran.arknavigator.mvp.model.repo.Folders
 import space.taran.arknavigator.mvp.presenter.FoldersPresenter
 import space.taran.arknavigator.ui.adapter.FoldersTree
@@ -43,6 +43,8 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
     private lateinit var roots: Set<Path>
     private lateinit var favorites: Set<Path>
 
+    private lateinit var binding: FragmentFoldersBinding
+
     @Inject
     lateinit var router: Router
 
@@ -61,24 +63,25 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
         }
 
         foldersTree = FoldersTree(devices, folders, handler, router)
-        rv_roots.adapter = foldersTree
+        binding.rvRoots.adapter = foldersTree
 
         roots = folders.keys
         favorites = folders.values.flatten().toSet()
     }
 
     override fun setProgressVisibility(isVisible: Boolean) {
-        layout_progress.isVisible = isVisible
+        binding.layoutProgress.root.isVisible = isVisible
         (activity as MainActivity).setBottomNavigationEnabled(!isVisible)
     }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?): View? {
+        savedInstanceState: Bundle?): View {
 
         Log.d(FOLDERS_SCREEN, "inflating layout for FoldersFragment")
-        return inflater.inflate(R.layout.fragment_folders, container, false)
+        binding = FragmentFoldersBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -112,7 +115,7 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
         (activity as MainActivity).setSelectedTab(0)
         (activity as MainActivity).setToolbarVisibility(false)
 
-        fab_add_roots.setOnClickListener {
+        binding.fabAddRoots.setOnClickListener {
             openFolderPicker(devices)
         }
     }
@@ -120,20 +123,19 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
     private fun openFolderPicker(paths: List<Path>) {
         Log.d(FOLDERS_SCREEN, "initializing root picker")
 
-        val dialogView = LayoutInflater.from(requireContext())
-            .inflate(R.layout.dialog_roots_new, null)
-            ?: throw IllegalStateException("Failed to inflate dialog View for roots picker")
+        val dialogBinding = DialogRootsNewBinding.inflate(
+            LayoutInflater.from(requireContext()))
 
-        dialogView.rv_roots_dialog.layoutManager = GridLayoutManager(context, 2)
-        folderPicker = FolderPicker(paths, rootPickerClickHandler(dialogView), dialogView)
+        dialogBinding.rvRootsDialog.layoutManager = GridLayoutManager(context, 2)
+        folderPicker = FolderPicker(paths, rootPickerClickHandler(dialogBinding), dialogBinding)
 
         var alertDialog: AlertDialog? = null
 
-        dialogView.btn_roots_dialog_cancel.setOnClickListener {
+        dialogBinding.btnRootsDialogCancel.setOnClickListener {
             Log.d(FOLDER_PICKER, "[cancel] pressed, closing root picker")
             alertDialog?.dismiss()
         }
-        dialogView.btn_roots_dialog_pick.setOnClickListener {
+        dialogBinding.btnRootsDialogPick.setOnClickListener {
             Log.d(FOLDER_PICKER, "[pick] pressed")
 
             val path = folderPicker.getLabel()
@@ -161,7 +163,7 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
             }
         }
 
-        alertDialog = rootPickerAlertDialog(dialogView)
+        alertDialog = rootPickerAlertDialog(dialogBinding.root)
         Log.d(FOLDERS_SCREEN, "root picker initialized")
     }
 
@@ -191,31 +193,33 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
     }
 
     //todo don't pass dialogView here, draw it from new "model"
-    private fun rootPickerClickHandler(dialogView: View): ItemClickHandler<Path> = { _, path: Path ->
+    private fun rootPickerClickHandler(dialogBinding: DialogRootsNewBinding): ItemClickHandler<Path> = { _, path: Path ->
         Log.d(FOLDER_PICKER,"path $path was clicked")
 
-        if (Files.isDirectory(path)) {
-            folderPicker.updatePath(path)
+        dialogBinding.apply {
+            if (Files.isDirectory(path)) {
+                folderPicker.updatePath(path)
 
-            val rootPrefix = roots.find { path.startsWith(it) }
-            if (rootPrefix != null) {
-                if (rootPrefix == path) {
-                    dialogView.btn_roots_dialog_pick.isEnabled = false
-                    dialogView.btn_roots_dialog_pick.text = PICK_ROOT
-                    rootNotFavorite = true
+                val rootPrefix = roots.find { path.startsWith(it) }
+                if (rootPrefix != null) {
+                    if (rootPrefix == path) {
+                        btnRootsDialogPick.isEnabled = false
+                        btnRootsDialogPick.text = PICK_ROOT
+                        rootNotFavorite = true
+                    } else {
+                        btnRootsDialogPick.isEnabled = true
+                        btnRootsDialogPick.text = PICK_FAVORITE
+                        rootNotFavorite = false
+                    }
                 } else {
-                    dialogView.btn_roots_dialog_pick.isEnabled = true
-                    dialogView.btn_roots_dialog_pick.text = PICK_FAVORITE
-                    rootNotFavorite = false
+                    btnRootsDialogPick.isEnabled = true
+                    btnRootsDialogPick.text = PICK_ROOT
+                    rootNotFavorite = true
                 }
             } else {
-                dialogView.btn_roots_dialog_pick.isEnabled = true
-                dialogView.btn_roots_dialog_pick.text = PICK_ROOT
-                rootNotFavorite = true
+                Log.d(FOLDER_PICKER,"but it is not a directory")
+                notifyUser(FILE_CHOSEN_AS_ROOT)
             }
-        } else {
-            Log.d(FOLDER_PICKER,"but it is not a directory")
-            notifyUser(FILE_CHOSEN_AS_ROOT)
         }
     }
 

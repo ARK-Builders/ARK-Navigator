@@ -3,15 +3,18 @@ package space.taran.arknavigator.mvp.view.item
 import android.animation.ValueAnimator
 import android.content.Context
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
 import com.ekezet.treeview.AnyTreeItemView
 import com.ekezet.treeview.ITreeViewAdapter
 import com.ekezet.treeview.TreeItem
 import com.ekezet.treeview.TreeViewAdapter
-import kotlinx.android.synthetic.main.item_view_folder_tree_root.view.*
 import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.R
+import space.taran.arknavigator.databinding.ItemViewFolderTreeDeviceBinding
+import space.taran.arknavigator.databinding.ItemViewFolderTreeFavoriteBinding
+import space.taran.arknavigator.databinding.ItemViewFolderTreeRootBinding
 import space.taran.arknavigator.ui.adapter.DeviceNode
 import space.taran.arknavigator.ui.adapter.FavoriteNode
 import space.taran.arknavigator.ui.adapter.FolderTreeNode
@@ -46,18 +49,21 @@ private class FavoriteFolderView(context: Context,
                                  private val router: Router)
     : FrameLayout(context), TreeViewAdapter.TreeItemView<FavoriteNode> {
 
+    private var binding: ItemViewFolderTreeFavoriteBinding =
+        ItemViewFolderTreeFavoriteBinding
+            .inflate(LayoutInflater.from(context), this, true)
+
     init {
-        inflate(context, R.layout.item_view_folder_tree_favorite, this)
         layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
     }
 
     override fun bind(item: TreeItem<FavoriteNode>, position: Int) {
         Log.d(FOLDERS_TREE, "binding ${item.data}")
 
-        name_txt.text = item.data.name
-        type_txt.text = FAVORITE_LABEL
+        binding.nameTxt.text = item.data.name
+        binding.typeTxt.text = FAVORITE_LABEL
 
-        this.navigate_btn.setOnClickListener {
+        binding.navigateBtn.setOnClickListener {
             Log.d(FOLDERS_TREE, "navigating to path ${item.data.path} under root ${item.data.root}")
             router.navigateTo(Screens.ResourcesScreen(item.data.root, item.data.path))
         }
@@ -74,20 +80,34 @@ private class RootFolderView(context: Context,
                              private val router: Router)
     : ExpandableFolderView<FavoriteNode, RootNode>(context) {
 
+    private var binding: ItemViewFolderTreeRootBinding =
+        ItemViewFolderTreeRootBinding
+            .inflate(LayoutInflater.from(context), this, true)
+            .also {
+                chevron = it.chevron
+            }
+
     init {
-        inflate(context, R.layout.item_view_folder_tree_root, this)
         layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
     }
 
     override fun bind(item: TreeItem<RootNode>, position: Int) {
         super.bind(item, position)
 
-        this.add_btn.setOnClickListener {
+        binding.nameTxt.text = item.data.name
+        binding.typeTxt.text = label()
+
+        binding.chevron.rotation = if (item.isExpanded)
+            90F
+        else
+            0F
+
+        binding.addBtn.setOnClickListener {
             Log.d(FOLDERS_TREE, "choosing a favorite under ${item.data.path}")
             picker(item.data.path)
         }
 
-        this.navigate_btn.setOnClickListener {
+        binding.navigateBtn.setOnClickListener {
             Log.d(FOLDERS_TREE, "navigating to root ${item.data.path}")
             router.navigateTo(Screens.ResourcesScreen(item.data.path, null))
         }
@@ -101,9 +121,26 @@ private class RootFolderView(context: Context,
 private class DeviceFolderView(context: Context)
     : ExpandableFolderView<RootNode, DeviceNode>(context) {
 
+    private val binding = ItemViewFolderTreeDeviceBinding.inflate(
+        LayoutInflater.from(context), this, true
+    ).also {
+        chevron = it.chevron
+    }
+
     init {
-        inflate(context, R.layout.item_view_folder_tree_device, this)
         layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
+    }
+
+    override fun bind(item: TreeItem<DeviceNode>, position: Int) {
+        super.bind(item, position)
+
+        binding.nameTxt.text = item.data.name
+        binding.typeTxt.text = label()
+
+        binding.chevron.rotation = if (item.isExpanded)
+            90F
+        else
+            0F
     }
 
     override fun label(): String {
@@ -114,10 +151,12 @@ private class DeviceFolderView(context: Context)
 private abstract class ExpandableFolderView<C, N: FolderTreeNode<C>>(context: Context)
     : FrameLayout(context), TreeViewAdapter.TreeItemView<N> {
 
-    private val animator = ValueAnimator().apply {
+    protected var chevron: View? = null
+
+    protected var animator = ValueAnimator().apply {
         duration = 500L
         addUpdateListener {
-            chevron.rotation = animatedValue as Float
+            chevron?.rotation = animatedValue as Float
         }
     }
 
@@ -125,14 +164,6 @@ private abstract class ExpandableFolderView<C, N: FolderTreeNode<C>>(context: Co
 
     override fun bind(item: TreeItem<N>, position: Int) {
         Log.d(FOLDERS_TREE, "binding ${item.data}")
-
-        name_txt.text = item.data.name
-        type_txt.text = label()
-
-        chevron.rotation = if (item.isExpanded)
-            90F
-        else
-            0F
     }
 
     override fun onExpandChildren(item: TreeItem<N>,
