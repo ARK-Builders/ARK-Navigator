@@ -7,14 +7,13 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.GridLayoutManager
-import kotlinx.android.synthetic.main.dialog_sort.view.*
-import kotlinx.android.synthetic.main.fragment_resources.*
-import kotlinx.android.synthetic.main.layout_progress.*
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
 import space.taran.arknavigator.R
+import space.taran.arknavigator.databinding.DialogSortBinding
+import space.taran.arknavigator.databinding.FragmentResourcesBinding
 import space.taran.arknavigator.mvp.presenter.ResourcesPresenter
 import space.taran.arknavigator.mvp.presenter.TagsSelector
 import space.taran.arknavigator.mvp.presenter.adapter.ResourcesList
@@ -60,23 +59,26 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
 
     private val frameTop by lazy {
         val loc = IntArray(2)
-        layout_root.getLocationOnScreen(loc)
+        binding.layoutRoot.getLocationOnScreen(loc)
         loc[1]
     }
-    private val frameHeight by lazy { layout_root.height }
+    private val frameHeight by lazy { binding.layoutRoot.height }
 
     private var selectorHeight: Float = 0.3f //ratio
 
     private var selectorDragStartBias: Float = -1f
     private var selectorDragStartTime: Long = -1
 
+    private lateinit var binding: FragmentResourcesBinding
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?): View? {
+        savedInstanceState: Bundle?): View {
 
         Log.d(RESOURCES_SCREEN, "inflating layout for ResourcesFragment")
-        return inflater.inflate(R.layout.fragment_resources, container, false)
+        binding = FragmentResourcesBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -93,7 +95,7 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         setHasOptionsMenu(true)
 
         initResources(grid)
-        iv_drag_handler.setOnTouchListener(::dragHandlerTouchListener)
+        binding.ivDragHandler.setOnTouchListener(::dragHandlerTouchListener)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -137,7 +139,7 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
     }
 
     override fun setProgressVisibility(isVisible: Boolean) {
-        layout_progress.isVisible = isVisible
+        binding.layoutProgress.root.isVisible = isVisible
         (activity as MainActivity).setBottomNavigationEnabled(!isVisible)
     }
 
@@ -148,8 +150,8 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
     private fun initResources(resources: ResourcesList) {
         gridAdapter = ResourcesGrid(resources)
 
-        rv_resources.adapter = gridAdapter
-        rv_resources.layoutManager = GridLayoutManager(context, 3)
+        binding.rvResources.adapter = gridAdapter
+        binding.rvResources.layoutManager = GridLayoutManager(context, 3)
 
         tagsSelector = presenter.createTagsSelector()
         if (tagsSelector != null) {
@@ -167,9 +169,9 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         tagsEnabled = true
         showTagsOnOffButtons()
 
-        tags_cg.visibility = View.VISIBLE
+        binding.tagsCg.visibility = View.VISIBLE
 
-        tagsSelector!!.drawChips(tags_cg, requireContext()) { selection ->
+        tagsSelector!!.drawChips(binding.tagsCg, requireContext()) { selection ->
             notifyUser("${selection.size} resources selected")
             gridAdapter.updateItems(selection.toList())
         }
@@ -182,7 +184,7 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         tagsEnabled = false
         showTagsOnOffButtons()
 
-        tags_cg.visibility = View.GONE
+        binding.tagsCg.visibility = View.GONE
 
         val untagged = presenter.resources(untagged = true)
         gridAdapter.updateItems(untagged)
@@ -198,73 +200,76 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
 
     private fun showSortByDialog() {
         Log.d(RESOURCES_SCREEN, "showing sort-by dialog in ResourcesFragment")
-        val view = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_sort, null)!!
-        val alertBuilder = AlertDialog.Builder(requireContext()).setView(view)
+        val dialogBinding = DialogSortBinding.inflate(LayoutInflater.from(requireContext()))
 
-        when(sorting) {
-            Sorting.DEFAULT -> view.rb_default.isChecked = true
-            Sorting.NAME -> view.rb_name.isChecked = true
-            Sorting.SIZE -> view.rb_size.isChecked = true
-            Sorting.LAST_MODIFIED -> view.rb_last_modified.isChecked = true
-            Sorting.TYPE -> view.rb_type.isChecked = true
-        }
+        val alertBuilder = AlertDialog.Builder(requireContext()).setView(dialogBinding.root)
 
-        if (sorting == Sorting.DEFAULT) {
-            view.rb_ascending.isEnabled = false
-            view.rb_descending.isEnabled = false
-            view.rg_sorting_direction.isEnabled = false
-        } else {
-            if (ascending) {
-                view.rb_ascending.isChecked = true
-            } else {
-                view.rb_descending.isChecked = true
-            }
-        }
-
-        var dialog: AlertDialog? = null
-
-        view.rg_sorting.setOnCheckedChangeListener { _, checkedId ->
-            when(checkedId) {
-                R.id.rb_default -> throw AssertionError("As-is sorting is initial, unsorted order")
-
-                R.id.rb_name -> sorting = Sorting.NAME
-                R.id.rb_size -> sorting = Sorting.SIZE
-                R.id.rb_last_modified -> sorting = Sorting.LAST_MODIFIED
-                R.id.rb_type -> sorting = Sorting.TYPE
-            }
-            Log.d(RESOURCES_SCREEN, "sorting criteria changed, sorting = $sorting")
-
+        dialogBinding.apply {
             when(sorting) {
-                Sorting.NAME -> gridAdapter.sortBy { it.fileName }
-                Sorting.SIZE -> gridAdapter.sortBy { Files.size(it) }
-                Sorting.TYPE -> gridAdapter.sortBy { extension(it) }
-                Sorting.LAST_MODIFIED -> gridAdapter.sortBy { Files.getLastModifiedTime(it) }
-                Sorting.DEFAULT -> throw AssertionError("Not possible")
+                Sorting.DEFAULT -> rbDefault.isChecked = true
+                Sorting.NAME -> rbName.isChecked = true
+                Sorting.SIZE -> rbSize.isChecked = true
+                Sorting.LAST_MODIFIED -> rbLastModified.isChecked = true
+                Sorting.TYPE -> rbType.isChecked = true
             }
 
-            ascending = true
-            dialog!!.dismiss()
-        }
-
-        view.rg_sorting_direction.setOnCheckedChangeListener { _, checkedId ->
-            when(checkedId) {
-                R.id.rb_ascending -> ascending = true
-                R.id.rb_descending -> ascending = false
+            if (sorting == Sorting.DEFAULT) {
+                rbAscending.isEnabled = false
+                rbDescending.isEnabled = false
+                rgSortingDirection.isEnabled = false
+            } else {
+                if (ascending) {
+                    rbAscending.isChecked = true
+                } else {
+                    rbDescending.isChecked = true
+                }
             }
-            Log.d(RESOURCES_SCREEN, "sorting direction changed, ascending = $ascending")
 
-            gridAdapter.reverse()
+            var dialog: AlertDialog? = null
 
-            dialog!!.dismiss()
+            rgSorting.setOnCheckedChangeListener { _, checkedId ->
+                when(checkedId) {
+                    R.id.rb_default -> throw AssertionError("As-is sorting is initial, unsorted order")
+
+                    R.id.rb_name -> sorting = Sorting.NAME
+                    R.id.rb_size -> sorting = Sorting.SIZE
+                    R.id.rb_last_modified -> sorting = Sorting.LAST_MODIFIED
+                    R.id.rb_type -> sorting = Sorting.TYPE
+                }
+                Log.d(RESOURCES_SCREEN, "sorting criteria changed, sorting = $sorting")
+
+                when(sorting) {
+                    Sorting.NAME -> gridAdapter.sortBy { it.fileName }
+                    Sorting.SIZE -> gridAdapter.sortBy { Files.size(it) }
+                    Sorting.TYPE -> gridAdapter.sortBy { extension(it) }
+                    Sorting.LAST_MODIFIED -> gridAdapter.sortBy { Files.getLastModifiedTime(it) }
+                    Sorting.DEFAULT -> throw AssertionError("Not possible")
+                }
+
+                ascending = true
+                dialog!!.dismiss()
+            }
+
+            rgSortingDirection.setOnCheckedChangeListener { _, checkedId ->
+                when(checkedId) {
+                    R.id.rb_ascending -> ascending = true
+                    R.id.rb_descending -> ascending = false
+                }
+                Log.d(RESOURCES_SCREEN, "sorting direction changed, ascending = $ascending")
+
+                gridAdapter.reverse()
+
+                dialog!!.dismiss()
+            }
+
+            dialog = alertBuilder.show()
         }
-
-        dialog = alertBuilder.show()
     }
 
     private fun dragHandlerTouchListener(view: View, event: MotionEvent): Boolean {
         when (event.action and MotionEvent.ACTION_MASK) {
             MotionEvent.ACTION_DOWN -> {
-                val layoutParams = iv_drag_handler.layoutParams as ConstraintLayout.LayoutParams
+                val layoutParams = binding.ivDragHandler.layoutParams as ConstraintLayout.LayoutParams
                 selectorDragStartBias = layoutParams.verticalBias
                 selectorDragStartTime = System.currentTimeMillis()
             }
@@ -309,7 +314,7 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
     }
 
     private fun updateDragHandlerBias() {
-        updateVerticalBias(iv_drag_handler)
+        updateVerticalBias(binding.ivDragHandler)
     }
 
     companion object {

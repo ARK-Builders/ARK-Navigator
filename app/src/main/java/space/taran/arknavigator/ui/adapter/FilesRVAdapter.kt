@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import space.taran.arknavigator.R
+import space.taran.arknavigator.databinding.ItemFileGridBinding
 import space.taran.arknavigator.mvp.presenter.adapter.ItemsClickablePresenter
 import space.taran.arknavigator.mvp.view.item.FileItemView
 import space.taran.arknavigator.mvp.view.item.FileItemViewHolder
@@ -18,10 +19,8 @@ open class FilesRVAdapter<Item>(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         FileItemViewHolder(
-            LayoutInflater.from(parent.context).inflate(
-                R.layout.item_file_grid,
-                parent,
-                false))
+            ItemFileGridBinding
+                .inflate(LayoutInflater.from(parent.context), parent, false))
 
     override fun onBindViewHolder(holder: FileItemViewHolder, position: Int) {
         presenter.bindView(holder)

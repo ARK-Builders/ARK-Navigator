@@ -11,13 +11,13 @@ import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.chip.Chip
-import kotlinx.android.synthetic.main.dialog_tags.view.*
-import kotlinx.android.synthetic.main.fragment_gallery.*
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
 import space.taran.arknavigator.R
+import space.taran.arknavigator.databinding.DialogTagsBinding
+import space.taran.arknavigator.databinding.FragmentGalleryBinding
 import space.taran.arknavigator.mvp.model.dao.ResourceId
 import space.taran.arknavigator.mvp.model.repo.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.TagsStorage
@@ -42,8 +42,9 @@ class GalleryFragment(
 )
     : MvpAppCompatFragment(), GalleryView, BackButtonListener, NotifiableView {
 
-    private var dialogView: View? = null
+    private lateinit var dialogBinding: DialogTagsBinding
     private var dialog: AlertDialog? = null
+    private lateinit var binding: FragmentGalleryBinding
 
     private val presenter by moxyPresenter {
         GalleryPresenter(index, storage, resources).apply {
@@ -58,10 +59,11 @@ class GalleryFragment(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
 
         Log.d(GALLERY_SCREEN, "inflating layout for GalleryFragment")
-        return inflater.inflate(R.layout.fragment_gallery, container, false)
+        binding = FragmentGalleryBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -72,7 +74,7 @@ class GalleryFragment(
 
     override fun init(previews: PreviewsList) {
         Log.d(GALLERY_SCREEN, "initializing GalleryFragment, position = $startAt")
-        Log.d(GALLERY_SCREEN, "currentItem = ${view_pager.currentItem}")
+        Log.d(GALLERY_SCREEN, "currentItem = ${binding.viewPager.currentItem}")
 
         (activity as MainActivity).setToolbarVisibility(true)
 
@@ -86,59 +88,62 @@ class GalleryFragment(
 
         pagerAdapter = PreviewsPager(previews)
 
-        view_pager.adapter = pagerAdapter
-        view_pager.offscreenPageLimit = 2
+        binding.apply {
+            viewPager.apply {
+                adapter = pagerAdapter
+                offscreenPageLimit = 2
+                setCurrentItem(startAt, false)
 
-        view_pager.setCurrentItem(startAt, false)
+                registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                    private var workaround = true
 
-        view_pager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-            private var workaround = true
+                    override fun onPageSelected(position: Int) {
+                        if (this@GalleryFragment.resources.items().isEmpty()) {
+                            return
+                        }
 
-            override fun onPageSelected(position: Int) {
-                if (resources.items().isEmpty()) {
-                    return
-                }
-
-                if (startAt > 0 || !workaround) {
-                    //weird bug causes this callback be called redundantly if startAt == 0
-                    Log.d(GALLERY_SCREEN, "changing to preview at position $position")
-                    displayPreview(position)
-                }
-                workaround = false
+                        if (startAt > 0 || !workaround) {
+                            //weird bug causes this callback be called redundantly if startAt == 0
+                            Log.d(GALLERY_SCREEN, "changing to preview at position $position")
+                            displayPreview(position)
+                        }
+                        workaround = false
+                    }
+                })
             }
-        })
 
-        displayPreview(startAt)
+            displayPreview(startAt)
 
-        remove_resource_fab.setOnLongClickListener {
-            val position = view_pager.currentItem
-            Log.d(GALLERY_SCREEN, "[remove_resource] long-clicked at position $position")
-            deleteResource(position)
-            true
-        }
+            removeResourceFab.setOnLongClickListener {
+                val position = viewPager.currentItem
+                Log.d(GALLERY_SCREEN, "[remove_resource] long-clicked at position $position")
+                deleteResource(position)
+                true
+            }
 
-        share_resource_fab.setOnClickListener {
-            val position = view_pager.currentItem
-            Log.d(GALLERY_SCREEN, "[share_resource] clicked at position $position")
-            shareResource(position)
-        }
+            shareResourceFab.setOnClickListener {
+                val position = viewPager.currentItem
+                Log.d(GALLERY_SCREEN, "[share_resource] clicked at position $position")
+                shareResource(position)
+            }
 
-        edit_tags_fab.setOnClickListener {
-            val position = view_pager.currentItem
-            Log.d(GALLERY_SCREEN, "[edit_tags] clicked at position $position")
-            showEditTagsDialog(position)
+            editTagsFab.setOnClickListener {
+                val position = viewPager.currentItem
+                Log.d(GALLERY_SCREEN, "[edit_tags] clicked at position $position")
+                showEditTagsDialog(position)
+            }
         }
     }
 
     override fun setPreviewsScrollingEnabled(enabled: Boolean) {
-        view_pager.isUserInputEnabled = enabled
+        binding.viewPager.isUserInputEnabled = enabled
     }
 
     override fun setFullscreen(fullscreen: Boolean) {
         val isControlsVisible = !fullscreen
         (activity as MainActivity).setBottomNavigationVisibility(isControlsVisible)
         (activity as MainActivity).setToolbarVisibility(isControlsVisible)
-        preview_controls.isVisible = isControlsVisible
+        binding.previewControls.isVisible = isControlsVisible
         FullscreenHelper.setSystemUIVisibility(isControlsVisible, requireActivity().window)
     }
 
@@ -200,22 +205,23 @@ class GalleryFragment(
 
         val tags = presenter.listTags(resource)
 
-        dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_tags, null)
-        val alertDialogBuilder = AlertDialog.Builder(requireContext()).setView(dialogView)
+        dialogBinding = DialogTagsBinding.inflate(LayoutInflater.from(requireContext()))
+
+        val alertDialogBuilder = AlertDialog.Builder(requireContext()).setView(dialogBinding.root)
 
         if (tags.isNotEmpty()) {
-            dialogView!!.chipg_dialog_detail.visibility = View.VISIBLE
+            dialogBinding.chipgDialogDetail.visibility = View.VISIBLE
         } else {
-            dialogView!!.chipg_dialog_detail.visibility = View.GONE
+            dialogBinding.chipgDialogDetail.visibility = View.GONE
         }
 
-        dialogView?.chipg_dialog_detail?.removeAllViews()
+        dialogBinding.chipgDialogDetail.removeAllViews()
 
         displayDialogTags(resource, tags)
 
-        dialogView!!.new_tags.setOnEditorActionListener { _, actionId, _ ->
+        dialogBinding.newTags.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
-                val newTags = Converters.tagsFromString(dialogView!!.new_tags.text.toString())
+                val newTags = Converters.tagsFromString(dialogBinding.newTags.text.toString())
                 if (newTags.isEmpty() || newTags.contains(Constants.EMPTY_TAG)) {
                     return@setOnEditorActionListener false
                 }
@@ -244,11 +250,11 @@ class GalleryFragment(
         Log.d(GALLERY_SCREEN, "displaying tags resource $resource for edit")
 
         if (tags.isNotEmpty()) {
-            dialogView?.chipg_dialog_detail?.visibility = View.VISIBLE
+            dialogBinding.chipgDialogDetail.visibility = View.VISIBLE
         } else {
-            dialogView?.chipg_dialog_detail?.visibility = View.GONE
+            dialogBinding.chipgDialogDetail.visibility = View.GONE
         }
-        dialogView?.chipg_dialog_detail?.removeAllViews()
+        dialogBinding.chipgDialogDetail.removeAllViews()
 
         tags.forEach { tag ->
             val chip = Chip(context)
@@ -258,14 +264,14 @@ class GalleryFragment(
                 Log.d(GALLERY_SCREEN, "tag $tag on resource $resource close-icon-clicked")
                 removeTag(resource, tags, tag)
             }
-            dialogView?.chipg_dialog_detail?.addView(chip)
+            dialogBinding.chipgDialogDetail.addView(chip)
         }
     }
 
     private fun displayPreviewTags(resource: ResourceId, tags: Tags) {
         Log.d(GALLERY_SCREEN, "displaying tags of resource $resource for preview")
 
-        tags_cg.removeAllViews()
+        binding.tagsCg.removeAllViews()
 
         tags.forEach { tag ->
             val chip = Chip(context)
@@ -277,7 +283,7 @@ class GalleryFragment(
                 true
             }
 
-            tags_cg.addView(chip)
+            binding.tagsCg.addView(chip)
         }
     }
 

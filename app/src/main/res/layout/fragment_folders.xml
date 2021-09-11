@@ -32,6 +32,8 @@
 
     </RelativeLayout>
 
-    <include layout="@layout/layout_progress"/>
+    <include
+        android:id="@+id/layoutProgress"
+        layout="@layout/layout_progress"/>
 
 </RelativeLayout>
