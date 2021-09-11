@@ -44,7 +44,7 @@
     </ScrollView>
 
     <include
-        android:id="@+id/layout_progress"
+        android:id="@+id/layoutProgress"
         layout="@layout/layout_progress"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

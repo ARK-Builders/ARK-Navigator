@@ -7,16 +7,16 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.io.path.extension
 
+val ROOT_PATH: Path = Paths.get("/")
+
+val ANDROID_DIRECTORY: Path = Paths.get("Android")
+
 typealias Milliseconds = Long
 typealias StringPath = String
 
 enum class Sorting {
     DEFAULT, NAME, SIZE, LAST_MODIFIED, TYPE
 }
-
-// todo: https://www.toptal.com/android/android-threading-all-you-need-to-know
-//https://developer.android.com/reference/androidx/work/WorkManager.html
-//https://developer.android.com/reference/androidx/core/app/JobIntentService.html
 
 fun provideIconImage(file: Path): Path? =
     providePreview(file) //todo downscale to, say, 128x128
@@ -61,14 +61,6 @@ fun listDevices(context: Context): List<Path> =
                     parent.resolve(child)
                 }
         }
-
-val ANDROID_DIRECTORY = Paths.get("Android")
-
-val ROOT_PATH = Paths.get("/")
-
-//fun getExtSdCardBaseFolder(context: Context, file: Path): Path? =
-//    getExtSdCards(context).find { file.startsWith(it) }
-//todo fs.normalize `path` before check
 
 fun findLongestCommonPrefix(paths: List<Path>): Path {
     if (paths.isEmpty()) {

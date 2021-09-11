@@ -33,6 +33,8 @@ class MainActivity : MvpAppCompatActivity(), MainView {
     @Inject
     lateinit var navigatorHolder: NavigatorHolder
 
+    private lateinit var binding: ActivityMainBinding
+
     private val presenter by moxyPresenter {
         MainPresenter().apply {
             Log.d(MAIN, "creating MainPresenter")
@@ -41,7 +43,6 @@ class MainActivity : MvpAppCompatActivity(), MainView {
     }
 
     private val navigator = SupportAppNavigator(this, R.id.container)
-    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(MAIN, "creating")
@@ -52,29 +53,28 @@ class MainActivity : MvpAppCompatActivity(), MainView {
     }
 
     override fun init() {
-        binding.apply {
-            Log.d(MAIN, "initializing")
-            setSupportActionBar(toolbar)
-            bottomNavigation.setOnItemSelectedListener { item ->
-                when (item.itemId) {
-                    R.id.page_roots -> {
-                        Log.d(MAIN, "switching to Folders screen")
-                        presenter.goToFoldersScreen()
-                        true
-                    }
-                    R.id.page_tags -> {
-                        Log.d(MAIN, "switching to Resources screen")
-                        presenter.goToResourcesScreen()
-                        true
-                    }
-                    else -> {
-                        Log.w(MAIN, "no handler found")
-                        true
-                    }
+        Log.d(MAIN, "initializing")
+        setSupportActionBar(binding.toolbar)
+        binding.bottomNavigation.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.page_roots -> {
+                    Log.d(MAIN, "switching to Folders screen")
+                    presenter.goToFoldersScreen()
+                    true
+                }
+                R.id.page_tags -> {
+                    Log.d(MAIN, "switching to Resources screen")
+                    presenter.goToResourcesScreen()
+                    true
+                }
+                else -> {
+                    Log.w(MAIN, "no handler found")
+                    true
                 }
             }
-            bottomNavigation.setOnItemReselectedListener{}
         }
+        
+        binding.bottomNavigation.setOnItemReselectedListener{}
     }
 
     override fun requestPerms() {

@@ -149,7 +149,6 @@ private class DeviceFolderView(context: Context)
     }
 }
 
-//todo smart unfolding
 private abstract class ExpandableFolderView<C, N: FolderTreeNode<C>>(context: Context)
     : FrameLayout(context), TreeViewAdapter.TreeItemView<N> {
 

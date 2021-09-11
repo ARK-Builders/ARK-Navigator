@@ -77,10 +77,8 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?): View {
-
-        binding = FragmentFoldersBinding.inflate(inflater, container, false)
-
         Log.d(FOLDERS_SCREEN, "inflating layout for FoldersFragment")
+        binding = FragmentFoldersBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -203,9 +201,6 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
                 val rootPrefix = roots.find { path.startsWith(it) }
                 if (rootPrefix != null) {
                     if (rootPrefix == path) {
-                        //todo fake disabling (still show messages when pressing on disabled button)
-                        //todo consistent rules for onPick messages and gray-out
-                        //todo revert button state when backClicked
                         btnRootsDialogPick.isEnabled = false
                         btnRootsDialogPick.text = PICK_ROOT
                         rootNotFavorite = true

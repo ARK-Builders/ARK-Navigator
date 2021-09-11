@@ -71,7 +71,6 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         savedInstanceState: Bundle?): View {
 
         Log.d(RESOURCES_SCREEN, "inflating layout for ResourcesFragment")
-
         binding = FragmentResourcesBinding.inflate(inflater, container, false)
         return binding.root
     }

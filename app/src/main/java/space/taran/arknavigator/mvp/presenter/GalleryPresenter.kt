@@ -13,6 +13,7 @@ import space.taran.arknavigator.mvp.model.repo.TagsStorage
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
 import space.taran.arknavigator.mvp.presenter.adapter.ResourcesList
 import space.taran.arknavigator.mvp.view.GalleryView
+import space.taran.arknavigator.mvp.view.item.PreviewItemView
 import space.taran.arknavigator.utils.GALLERY_SCREEN
 import space.taran.arknavigator.utils.Tags
 import java.nio.file.Files
@@ -33,7 +34,7 @@ class GalleryPresenter(
 
     private val previews = PreviewsList(resources.items().map {
         Preview.provide(index.getPath(it)!!)
-    }, ::onPreviewsItemClick)
+    }, ::onPreviewsItemClick, ::onPreviewsItemZoom)
 
     override fun onFirstViewAttach() {
         Log.d(GALLERY_SCREEN, "first view attached in GalleryPresenter")
@@ -58,7 +59,7 @@ class GalleryPresenter(
     }
 
     fun replaceTags(resource: ResourceId, tags: Tags) = presenterScope.launch(NonCancellable) {
-        Log.d(GALLERY_SCREEN, "tags $tags added to $resource")
+        Log.d(GALLERY_SCREEN, "tags $tags set to $resource")
         storage.setTags(resource, tags)
     }
 
@@ -71,10 +72,22 @@ class GalleryPresenter(
         viewState.setFullscreen(isFullscreen)
     }
 
-     private fun onPreviewsItemClick(pos: Int, preview: Preview) {
-        Log.d(GALLERY_SCREEN, "preview at $pos clicked, switching controls on/off")
+    private fun onPreviewsItemZoom(zoomed: Boolean) {
+        if (zoomed) {
+            isFullscreen = true
+            viewState.setFullscreen(isFullscreen)
+            viewState.setPreviewsScrollingEnabled(false)
+        }
+        else
+            viewState.setPreviewsScrollingEnabled(true)
+    }
+
+    private fun onPreviewsItemClick(itemView: PreviewItemView) {
+        Log.d(GALLERY_SCREEN, "preview at ${itemView.pos} clicked, switching controls on/off")
         isFullscreen = !isFullscreen
         viewState.setFullscreen(isFullscreen)
+         if (!isFullscreen)
+             itemView.resetZoom()
     }
 
     fun quit(): Boolean {
