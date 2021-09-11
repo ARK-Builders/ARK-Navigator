@@ -200,7 +200,6 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
 
     private fun showSortByDialog() {
         Log.d(RESOURCES_SCREEN, "showing sort-by dialog in ResourcesFragment")
-        //val view = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_sort, null)!!
         val dialogBinding = DialogSortBinding.inflate(LayoutInflater.from(requireContext()))
 
         val alertBuilder = AlertDialog.Builder(requireContext()).setView(dialogBinding.root)

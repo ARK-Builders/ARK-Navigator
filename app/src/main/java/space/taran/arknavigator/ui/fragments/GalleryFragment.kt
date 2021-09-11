@@ -42,7 +42,6 @@ class GalleryFragment(
 )
     : MvpAppCompatFragment(), GalleryView, BackButtonListener, NotifiableView {
 
-    //private var dialogView: View? = null
     private lateinit var dialogBinding: DialogTagsBinding
     private var dialog: AlertDialog? = null
     private lateinit var binding: FragmentGalleryBinding
