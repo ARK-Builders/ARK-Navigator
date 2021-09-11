@@ -73,6 +73,7 @@ class MainActivity : MvpAppCompatActivity(), MainView {
                 }
             }
         }
+        
         binding.bottomNavigation.setOnItemReselectedListener{}
     }
 

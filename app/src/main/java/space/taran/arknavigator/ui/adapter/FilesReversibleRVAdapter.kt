@@ -14,9 +14,7 @@ open class FilesReversibleRVAdapter<Label, Item>(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         FileItemViewHolder(
-            ItemFileGridBinding
-                .inflate(LayoutInflater
-                    .from(parent.context), parent, false))
+            ItemFileGridBinding.inflate(LayoutInflater.from(parent.context), parent, false))
 
     override fun onBindViewHolder(holder: FileItemViewHolder, position: Int) {
         presenter.bindView(holder)

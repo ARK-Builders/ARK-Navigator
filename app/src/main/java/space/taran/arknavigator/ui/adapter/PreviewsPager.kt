@@ -18,8 +18,7 @@ class PreviewsPager(val presenter: PreviewsList) : RecyclerView.Adapter<PreviewI
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         PreviewItemViewHolder(
-            ItemImageBinding
-                .inflate(LayoutInflater.from(parent.context), parent, false), presenter)
+            ItemImageBinding.inflate(LayoutInflater.from(parent.context), parent, false), presenter)
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onBindViewHolder(holder: PreviewItemViewHolder, position: Int) {

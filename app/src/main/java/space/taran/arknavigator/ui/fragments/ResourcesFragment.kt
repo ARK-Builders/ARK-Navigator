@@ -4,13 +4,11 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import androidx.appcompat.app.AlertDialog
-import androidx.core.view.isVisible
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.GridLayoutManager
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
-import moxy.presenter.InjectPresenter
-import moxy.presenter.ProvidePresenter
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.DialogSortBinding
 import space.taran.arknavigator.databinding.FragmentResourcesBinding
@@ -22,9 +20,8 @@ import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.adapter.ResourcesGrid
 import space.taran.arknavigator.ui.fragments.utils.Notifications
-import space.taran.arknavigator.utils.RESOURCES_SCREEN
-import space.taran.arknavigator.utils.Sorting
-import space.taran.arknavigator.utils.extension
+import space.taran.arknavigator.utils.*
+import space.taran.arknavigator.utils.extensions.changeEnabledStatus
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.math.abs
@@ -48,28 +45,25 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
     }
 
     private lateinit var gridAdapter: ResourcesGrid
+    private lateinit var binding: FragmentResourcesBinding
+
     private var tagsSelector: TagsSelector? = null
 
     private lateinit var menuTagsOn: MenuItem
     private lateinit var menuTagsOff: MenuItem
     private var tagsEnabled = true
 
-    private var sorting: Sorting = Sorting.DEFAULT
-    private var ascending: Boolean = true
-
     private val frameTop by lazy {
         val loc = IntArray(2)
-        binding.layoutRoot.getLocationOnScreen(loc)
+        binding.root.getLocationOnScreen(loc)
         loc[1]
     }
-    private val frameHeight by lazy { binding.layoutRoot.height }
+    private val frameHeight by lazy { binding.root.height }
 
     private var selectorHeight: Float = 0.3f //ratio
 
     private var selectorDragStartBias: Float = -1f
     private var selectorDragStartTime: Long = -1
-
-    private lateinit var binding: FragmentResourcesBinding
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -138,6 +132,10 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         (activity as MainActivity).setTitle(title)
     }
 
+    override fun sortingValuesReceived() {
+        sortAccordingToChoice(true)
+    }
+
     override fun setProgressVisibility(isVisible: Boolean) {
         binding.layoutProgress.root.isVisible = isVisible
         (activity as MainActivity).setBottomNavigationEnabled(!isVisible)
@@ -204,8 +202,10 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
 
         val alertBuilder = AlertDialog.Builder(requireContext()).setView(dialogBinding.root)
 
+        changeSortOrderEnabledStatus(dialogBinding, true)
+
         dialogBinding.apply {
-            when(sorting) {
+            when(presenter.sorting) {
                 Sorting.DEFAULT -> rbDefault.isChecked = true
                 Sorting.NAME -> rbName.isChecked = true
                 Sorting.SIZE -> rbSize.isChecked = true
@@ -213,12 +213,11 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
                 Sorting.TYPE -> rbType.isChecked = true
             }
 
-            if (sorting == Sorting.DEFAULT) {
-                rbAscending.isEnabled = false
-                rbDescending.isEnabled = false
-                rgSortingDirection.isEnabled = false
-            } else {
-                if (ascending) {
+            if (presenter.sorting == Sorting.DEFAULT) {
+                changeSortOrderEnabledStatus(dialogBinding, false)
+            }
+            else {
+                if (presenter.sortOrderAscending) {
                     rbAscending.isChecked = true
                 } else {
                     rbDescending.isChecked = true
@@ -228,34 +227,24 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
             var dialog: AlertDialog? = null
 
             rgSorting.setOnCheckedChangeListener { _, checkedId ->
-                when(checkedId) {
-                    R.id.rb_default -> throw AssertionError("As-is sorting is initial, unsorted order")
 
-                    R.id.rb_name -> sorting = Sorting.NAME
-                    R.id.rb_size -> sorting = Sorting.SIZE
-                    R.id.rb_last_modified -> sorting = Sorting.LAST_MODIFIED
-                    R.id.rb_type -> sorting = Sorting.TYPE
-                }
-                Log.d(RESOURCES_SCREEN, "sorting criteria changed, sorting = $sorting")
+                presenter.sorting = sortingCategorySelected(checkedId)
 
-                when(sorting) {
-                    Sorting.NAME -> gridAdapter.sortBy { it.fileName }
-                    Sorting.SIZE -> gridAdapter.sortBy { Files.size(it) }
-                    Sorting.TYPE -> gridAdapter.sortBy { extension(it) }
-                    Sorting.LAST_MODIFIED -> gridAdapter.sortBy { Files.getLastModifiedTime(it) }
-                    Sorting.DEFAULT -> throw AssertionError("Not possible")
-                }
+                Log.d(RESOURCES_SCREEN, "sorting criteria changed, sorting = ${presenter.sorting}")
 
-                ascending = true
+                presenter.sortOrderAscending = true
+
+                sortAccordingToChoice()
                 dialog!!.dismiss()
             }
 
             rgSortingDirection.setOnCheckedChangeListener { _, checkedId ->
                 when(checkedId) {
-                    R.id.rb_ascending -> ascending = true
-                    R.id.rb_descending -> ascending = false
+                    R.id.rb_ascending -> presenter.sortOrderAscending = true
+                    R.id.rb_descending -> presenter.sortOrderAscending = false
                 }
-                Log.d(RESOURCES_SCREEN, "sorting direction changed, ascending = $ascending")
+
+                Log.d(RESOURCES_SCREEN, "sorting direction changed, ascending = ${presenter.sortOrderAscending}")
 
                 gridAdapter.reverse()
 
@@ -263,6 +252,33 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
             }
 
             dialog = alertBuilder.show()
+        }
+    }
+
+    private fun sortAccordingToChoice(isFirstLaunch: Boolean = false){
+        when(presenter.sorting) {
+            Sorting.NAME -> gridAdapter.sortBy { it.fileName }
+            Sorting.SIZE -> gridAdapter.sortBy { Files.size(it) }
+            Sorting.TYPE -> gridAdapter.sortBy { extension(it) }
+            Sorting.LAST_MODIFIED -> gridAdapter.sortBy { Files.getLastModifiedTime(it) }
+            Sorting.DEFAULT -> {
+                if (!isFirstLaunch)
+                    notifyUser(requireActivity().getString(R.string.as_is_sorting_selected))
+            }
+        }
+
+        if (!presenter.sortOrderAscending)
+            gridAdapter.reverse()
+    }
+
+    private fun sortingCategorySelected(itemID: Int): Sorting{
+        return when(itemID) {
+            R.id.rb_default -> { Sorting.DEFAULT }
+            R.id.rb_name -> Sorting.NAME
+            R.id.rb_size -> Sorting.SIZE
+            R.id.rb_last_modified -> Sorting.LAST_MODIFIED
+            R.id.rb_type -> Sorting.TYPE
+            else -> Sorting.DEFAULT
         }
     }
 
@@ -287,8 +303,8 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
                 if (travelTime > DRAG_TRAVEL_TIME_THRESHOLD &&
                     abs(travelDelta) > DRAG_TRAVEL_DELTA_THRESHOLD &&
                     abs(travelSpeed) > DRAG_TRAVEL_SPEED_THRESHOLD) {
-                        selectorHeight = if (travelDelta > 0f) 1f else 0f
-                        updateDragHandlerBias()
+                    selectorHeight = if (travelDelta > 0f) 1f else 0f
+                    updateDragHandlerBias()
                 }
             }
             MotionEvent.ACTION_MOVE -> {
@@ -315,6 +331,13 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
 
     private fun updateDragHandlerBias() {
         updateVerticalBias(binding.ivDragHandler)
+    }
+
+    private fun changeSortOrderEnabledStatus(dialogBinding:DialogSortBinding, isEnabledStatus: Boolean){
+        val childCount = dialogBinding.rgSortingDirection.childCount
+        for (radioButton in 0 until childCount){
+            dialogBinding.rgSortingDirection.getChildAt(radioButton).changeEnabledStatus(isEnabledStatus)
+        }
     }
 
     companion object {

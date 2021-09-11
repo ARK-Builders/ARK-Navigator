@@ -1,6 +1,5 @@
 package space.taran.arknavigator.mvp.view.item
 
-import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.ortiz.touchview.OnTouchImageViewListener
 import kotlinx.android.extensions.LayoutContainer

@@ -2,7 +2,6 @@ package space.taran.arknavigator.mvp.view.item
 
 import android.content.res.ColorStateList
 import android.util.Log
-import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.extensions.LayoutContainer

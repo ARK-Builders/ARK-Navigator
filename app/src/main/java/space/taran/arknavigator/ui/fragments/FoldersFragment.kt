@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.GridLayoutManager
-
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import moxy.presenter.InjectPresenter
@@ -78,7 +77,6 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?): View {
-
         Log.d(FOLDERS_SCREEN, "inflating layout for FoldersFragment")
         binding = FragmentFoldersBinding.inflate(inflater, container, false)
         return binding.root

@@ -5,7 +5,6 @@ import space.taran.arknavigator.databinding.DialogRootsNewBinding
 import space.taran.arknavigator.mvp.presenter.adapter.FoldersWalker
 import space.taran.arknavigator.mvp.presenter.adapter.ItemClickHandler
 import java.nio.file.Path
-
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.listDirectoryEntries
 

@@ -10,4 +10,5 @@ interface ResourcesView: MvpView, NotifiableView {
     fun init(grid: ResourcesList)
     fun setProgressVisibility(isVisible: Boolean)
     fun setToolbarTitle(title: String)
+    fun sortingValuesReceived()
 }

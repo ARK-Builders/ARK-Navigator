@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
+import androidx.viewbinding.ViewBinding
 import com.ekezet.treeview.AnyTreeItemView
 import com.ekezet.treeview.ITreeViewAdapter
 import com.ekezet.treeview.TreeItem

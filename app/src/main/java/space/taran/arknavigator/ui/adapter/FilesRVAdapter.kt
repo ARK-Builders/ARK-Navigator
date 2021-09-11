@@ -12,15 +12,14 @@ import space.taran.arknavigator.mvp.view.item.FileItemViewHolder
 import space.taran.arknavigator.utils.ITEMS_CONTAINER
 
 open class FilesRVAdapter<Item>(
-    private val presenter: ItemsClickablePresenter<Item, FileItemView>)
-    : RecyclerView.Adapter<FileItemViewHolder>() {
+    private val presenter: ItemsClickablePresenter<Item, FileItemView>
+) : RecyclerView.Adapter<FileItemViewHolder>() {
 
     override fun getItemCount() = presenter.getCount()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         FileItemViewHolder(
-            ItemFileGridBinding
-                .inflate(LayoutInflater.from(parent.context), parent, false))
+            ItemFileGridBinding.inflate(LayoutInflater.from(parent.context), parent, false))
 
     override fun onBindViewHolder(holder: FileItemViewHolder, position: Int) {
         presenter.bindView(holder)

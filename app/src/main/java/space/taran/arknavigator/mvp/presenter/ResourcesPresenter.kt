@@ -5,6 +5,7 @@ import kotlinx.coroutines.launch
 import moxy.MvpPresenter
 import moxy.presenterScope
 import ru.terrakok.cicerone.Router
+import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.dao.ResourceId
 import space.taran.arknavigator.mvp.model.repo.*
 import space.taran.arknavigator.mvp.presenter.adapter.ResourcesList
@@ -12,14 +13,15 @@ import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.navigation.Screens
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.utils.RESOURCES_SCREEN
+import space.taran.arknavigator.utils.Sorting
 import space.taran.arknavigator.utils.Tags
 import java.nio.file.Path
 import javax.inject.Inject
 
 class ResourcesPresenter(
     val root: Path?,
-    private val prefix: Path?)
-    : MvpPresenter<ResourcesView>() {
+    private val prefix: Path?
+) : MvpPresenter<ResourcesView>() {
 
     @Inject
     lateinit var router: Router
@@ -30,8 +32,23 @@ class ResourcesPresenter(
     @Inject
     lateinit var resourcesIndexFactory: ResourcesIndexFactory
 
+    @Inject
+    lateinit var userPreferences: UserPreferences
+
     private lateinit var index: ResourcesIndex
     private lateinit var storage: TagsStorage
+
+    var sorting: Sorting = Sorting.DEFAULT
+        set(value) {
+            field = value
+            presenterScope.launch { userPreferences.setSorting(value) }
+        }
+
+    var sortOrderAscending: Boolean = true
+        set(value) {
+            field = value
+            presenterScope.launch { userPreferences.setSortingAscending(value) }
+        }
 
     fun listTagsForAllResources(): Tags = resources()
         .flatMap { storage.getTags(it) }
@@ -48,6 +65,12 @@ class ResourcesPresenter(
         return TagsSelector(tags, resources().toSet(), storage)
     }
 
+    private fun getSorting() = presenterScope.launch {
+        sorting = userPreferences.getSorting()
+        sortOrderAscending = userPreferences.isSortingAscending()
+
+        viewState.sortingValuesReceived()
+    }
 
     override fun onFirstViewAttach() {
         Log.d(RESOURCES_SCREEN, "first view attached in ResourcesPresenter")
@@ -96,6 +119,7 @@ class ResourcesPresenter(
             storage = AggregatedTagsStorage(rootToStorage.values)
 
             viewState.init(provideResourcesList())
+            getSorting()
 
             val title = {
                 val path = (prefix ?: root)

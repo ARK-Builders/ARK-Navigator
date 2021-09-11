@@ -61,8 +61,8 @@ class GalleryFragment(
         savedInstanceState: Bundle?
     ): View {
 
-        Log.d(GALLERY_SCREEN, "inflating layout for GalleryFragment")
         binding = FragmentGalleryBinding.inflate(inflater, container, false)
+        Log.d(GALLERY_SCREEN, "inflating layout for GalleryFragment")
         return binding.root
     }
 
