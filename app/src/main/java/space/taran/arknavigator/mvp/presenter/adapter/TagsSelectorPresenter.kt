@@ -19,6 +19,8 @@ class TagsSelectorPresenter(
     private val included = mutableSetOf<Tag>()
     private val excluded = mutableSetOf<Tag>()
 
+    var selection = setOf<ResourceId>()
+
     //this data is used by TagsSelectorAdapter
     var includedTags = listOf<Tag>()
     var excludedTags = listOf<Tag>()
@@ -70,7 +72,7 @@ class TagsSelectorPresenter(
         val selectionWithTags = (selectionAndComplementWithTags[true] ?: emptyList()).toMap()
         val complementWithTags = (selectionAndComplementWithTags[false] ?: emptyList()).toMap()
 
-        val selection = selectionWithTags.keys
+        selection = selectionWithTags.keys
         val tagsOfSelectedResources = selectionWithTags.values.flatten()
         val tagsOfUnselectedResources = complementWithTags.values.flatten()
 

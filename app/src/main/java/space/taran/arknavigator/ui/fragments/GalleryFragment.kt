@@ -97,7 +97,7 @@ class GalleryFragment(
                     private var workaround = true
 
                     override fun onPageSelected(position: Int) {
-                        if (this@GalleryFragment.resources.items().isEmpty()) {
+                        if (this@GalleryFragment.resources.isEmpty()) {
                             return
                         }
 
