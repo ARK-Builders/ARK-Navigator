@@ -10,6 +10,8 @@ import space.taran.arknavigator.mvp.model.dao.ResourceId
 import space.taran.arknavigator.mvp.model.repo.*
 import space.taran.arknavigator.mvp.presenter.adapter.ResourcesGridPresenter
 import space.taran.arknavigator.mvp.presenter.adapter.TagsSelectorPresenter
+import space.taran.arknavigator.mvp.view.ResourcesView
+import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.utils.RESOURCES_SCREEN
 import space.taran.arknavigator.utils.Tags
@@ -37,7 +39,9 @@ class ResourcesPresenter(
     private lateinit var storage: TagsStorage
     var tagsEnabled: Boolean = true
 
-    val gridPresenter = ResourcesGridPresenter(viewState)
+    val gridPresenter = ResourcesGridPresenter(viewState, presenterScope).apply {
+        App.instance.appComponent.inject(this)
+    }
     val tagsSelectorPresenter = TagsSelectorPresenter(viewState, ::onSelectionChange)
 
     override fun onFirstViewAttach() {
@@ -87,10 +91,9 @@ class ResourcesPresenter(
             index = AggregatedResourcesIndex(rootToIndex.values)
             storage = AggregatedTagsStorage(rootToStorage.values)
 
-        gridPresenter.init(index, storage, router)
-        gridPresenter.updateResources(resources())
-        tagsSelectorPresenter.init(resources(), storage)
-        tagsSelectorPresenter.calculateTagsAndSelection()
+            gridPresenter.init(index, storage, router)
+            tagsSelectorPresenter.init(resources(), storage)
+            tagsSelectorPresenter.calculateTagsAndSelection()
 
             val title = {
                 val path = (prefix ?: root)
@@ -109,23 +112,28 @@ class ResourcesPresenter(
 
     fun onViewResume() {
         tagsSelectorPresenter.calculateTagsAndSelection()
+        if (!tagsEnabled)
+            gridPresenter.updateResources(resources(untagged = true))
     }
 
     fun onMenuTagsToggle(enabled: Boolean) {
         tagsEnabled = enabled
         viewState.setTagsEnabled(tagsEnabled)
-        gridPresenter.updateResources(resources(untagged = !tagsEnabled))
+        if (tagsEnabled)
+            gridPresenter.updateResources(tagsSelectorPresenter.selection.toList())
+        else
+            gridPresenter.updateResources(resources(untagged = true))
         if (tagsEnabled && listTagsForAllResources().isEmpty()) {
             viewState.notifyUser("Tag something first")
         }
     }
 
     fun onMenuSortDialogClick() {
-        viewState.setSortDialogVisibility(true, gridPresenter.sorting, gridPresenter.ascending)
+        viewState.showSortDialog(gridPresenter.sorting, gridPresenter.ascending)
     }
 
     fun onSortDialogClose() {
-        viewState.setSortDialogVisibility(false, gridPresenter.sorting, gridPresenter.ascending)
+        viewState.closeSortDialog()
     }
 
     private fun onSelectionChange(selection: Set<ResourceId>) {
