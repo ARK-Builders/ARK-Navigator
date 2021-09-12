@@ -25,22 +25,38 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
 
-    <ScrollView
+    <LinearLayout
         android:id="@+id/layout_tags"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_below="@id/iv_drag_handler"
+        android:orientation="vertical"
         android:background="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/iv_drag_handler">
 
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/tags_cg"
+        <TextView
+            android:id="@+id/tv_tags_selector_hint"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="10dp"
-            android:visibility="visible" />
-    </ScrollView>
+            android:layout_margin="10dp"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:visibility="gone"
+            android:text="@string/resources_tags_selector_hint"/>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/tags_cg"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:visibility="visible" />
+        </ScrollView>
+
+    </LinearLayout>
 
     <include
         android:id="@+id/layoutProgress"

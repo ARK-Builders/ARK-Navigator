@@ -16,8 +16,8 @@ class TagsSelectorPresenter(
     private var resources: List<ResourceId>? = null
     private var storage: TagsStorage? = null
 
-    private val included = mutableSetOf<Tag>()
-    private val excluded = mutableSetOf<Tag>()
+    private var included = mutableSetOf<Tag>()
+    private var excluded = mutableSetOf<Tag>()
 
     var selection = setOf<ResourceId>()
 
@@ -60,6 +60,9 @@ class TagsSelectorPresenter(
 
         val allTags = storage!!.listAllTags()
 
+        excluded = excluded.intersect(allTags).toMutableSet()
+        included = included.intersect(allTags).toMutableSet()
+
         val selectionAndComplementWithTags = resources!!
             .map { resource ->
                 val tags = storage!!.getTags(resource)
@@ -95,6 +98,12 @@ class TagsSelectorPresenter(
         isClearBtnVisible = (included + excluded).size > 1
 
         onSelectionChangeListener(selection)
+
+        if (allTags.isEmpty())
+            viewState.setTagsSelectorHintEnabled(true)
+        else
+            viewState.setTagsSelectorHintEnabled(false)
+
         viewState.drawTags()
     }
 
