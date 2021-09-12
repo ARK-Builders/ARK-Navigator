@@ -12,6 +12,7 @@ interface ResourcesView: MvpView, NotifiableView {
     fun setProgressVisibility(isVisible: Boolean)
     fun setToolbarTitle(title: String)
     fun setTagsEnabled(enabled: Boolean)
+    fun setTagsSelectorHintEnabled(enabled: Boolean)
     fun drawTags()
     fun showSortDialog(sorting: Sorting, ascending: Boolean)
     fun closeSortDialog()

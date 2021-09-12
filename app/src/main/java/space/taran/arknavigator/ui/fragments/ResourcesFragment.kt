@@ -156,6 +156,10 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         }
     }
 
+    override fun setTagsSelectorHintEnabled(enabled: Boolean) {
+        binding.tvTagsSelectorHint.isVisible = enabled
+    }
+
     override fun drawTags() {
         tagsSelectorAdapter?.drawTags()
     }

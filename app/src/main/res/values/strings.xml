@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">ARK Navigator</string>
     <string name="as_is_sorting_selected">This option will be applied during next resources selection</string>
+    <string name="resources_tags_selector_hint">Label some resources with tags to enable tags selector</string>
 </resources>
