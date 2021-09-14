@@ -46,13 +46,13 @@ fun providePreview(file: Path): Path? =
         }
     }
 
-fun isImage(file: Path): Boolean {
-    val name = file.fileName.toString()
-    return acceptedImageExt.contains(name)
+fun isImage(filePath: Path): Boolean {
+    val extension = extension(filePath)
+    return acceptedImageExt.contains(extension)
 }
 
 fun getFileActionType(filePath: Path): FileActionType{
-    return when(".${extension(filePath)}"){
+    return when(extension(filePath)){
         in acceptedEditOnlyExt -> FileActionType.EDIT_AS_OPEN
         in acceptedReadAndEditExt -> FileActionType.EDIT_AND_OPEN
         else -> FileActionType.OPEN_ONLY
@@ -106,6 +106,9 @@ fun findLongestCommonPrefix(paths: List<Path>): Path {
 
     return tailrec(ROOT_PATH, paths).first
 }
+
+fun extension(path: Path): String =
+    ".${path.extension}"
 
 fun reifySorting(sorting: Sorting): Comparator<Path>? =
     when (sorting) {
