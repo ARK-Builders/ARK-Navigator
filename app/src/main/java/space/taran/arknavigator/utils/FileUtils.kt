@@ -22,30 +22,40 @@ enum class FileActionType{
     EDIT_AS_OPEN, EDIT_AND_OPEN, OPEN_ONLY, OPEN_ONLY_DETACH_PROCESS
 }
 
+enum class FileType {
+    IMAGE, VIDEO, GIF, PDF, UNDEFINED
+}
+
 private val acceptedImageExt = listOf(".jpg", ".jpeg", ".png")
+private val acceptedVideoExt = listOf(".mp4", ".avi", ".mov", ".wmv", ".flv")
 private val acceptedEditOnlyExt = arrayListOf(".txt", ".doc", ".docx", ".odt", "ods")
     .also { it.addAll(acceptedImageExt) }
 private val acceptedReadAndEditExt = listOf(".pdf", ".md")
-private val acceptedVideoExt = listOf(".mp4", ".wmv", ".avi", ".flv", ".mkv")
 
-fun provideIconImage(file: Path): Path? =
+fun provideIconImage(file: Path): Pair<FileType, Path>? =
     providePreview(file) //todo downscale to, say, 128x128
 
 //might be a temporary file
-fun providePreview(file: Path): Path? =
-    if (isImage(file)) {
-        file
-    } else {
-        if (false) { //todo: create previews from videos, pdfs, etc.
-            TODO()
-        } else {
-            null
-        }
+fun providePreview(file: Path): Pair<FileType, Path>? {
+    return when{
+        isImage(file) -> Pair(FileType.IMAGE, file)
+        isVideo(file) -> Pair(FileType.VIDEO, file)
+        isGif(file) -> Pair(FileType.GIF, file)
+        else -> { null }
     }
+}
+
 
 fun isImage(filePath: Path): Boolean {
-    val extension = ".${extension(filePath)}"
+    val extension = extension(filePath)
     return acceptedImageExt.contains(extension)
+}
+fun isVideo(filePath: Path): Boolean {
+    val extension = extension(filePath)
+    return acceptedVideoExt.contains(extension)
+}
+fun isGif(filePath: Path): Boolean {
+    return extension(filePath) == ".gif"
 }
 
 fun getFileActionType(filePath: Path): FileActionType{
@@ -102,8 +112,9 @@ fun findLongestCommonPrefix(paths: List<Path>): Path {
     return tailrec(ROOT_PATH, paths).first
 }
 
-fun extension(path: Path): String =
-    path.extension
+fun extension(path: Path): String {
+    return ".${path.extension.lowercase()}"
+}
 
 fun reifySorting(sorting: Sorting): Comparator<Path>? =
     when (sorting) {

@@ -24,6 +24,18 @@ fun loadImage(file: Path, container: ImageView) =
         .load(file.toFile())
         .into(container)
 
+fun loadGifThumbnail(file: Path, container: ImageView) =
+    Glide.with(container.context)
+        .asBitmap()
+        .load(file.toFile())
+        .into(container)
+
+fun loadGif(file: Path, container: ImageView) =
+    Glide.with(container.context)
+        .asGif()
+        .load(file.toFile())
+        .into(container)
+
 fun loadZoomImage(file: Path, container: ImageView) =
     Glide.with(container.context)
         .load(file.toFile())
