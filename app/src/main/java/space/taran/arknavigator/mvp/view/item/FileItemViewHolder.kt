@@ -7,9 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.ItemFileGridBinding
 import space.taran.arknavigator.ui.fragments.utils.Preview
-import space.taran.arknavigator.utils.ITEMS_CONTAINER
-import space.taran.arknavigator.utils.imageForPredefinedIcon
-import space.taran.arknavigator.utils.loadImage
+import space.taran.arknavigator.utils.*
 
 class FileItemViewHolder(private val binding: ItemFileGridBinding) :
     RecyclerView.ViewHolder(binding.root),
@@ -23,7 +21,10 @@ class FileItemViewHolder(private val binding: ItemFileGridBinding) :
             binding.iv.setImageResource(imageForPredefinedIcon(icon.predefined))
             binding.iv.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.gray))
         } else {
-            loadImage(icon.image!!, binding.iv)
+            when(icon.fileType){
+                FileType.GIF -> loadGifThumbnail(icon.image!!, binding.iv)
+                else -> loadImage(icon.image!!, binding.iv)
+            }
         }
     }
 
