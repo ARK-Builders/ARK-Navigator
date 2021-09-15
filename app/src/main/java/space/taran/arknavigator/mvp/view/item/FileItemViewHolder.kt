@@ -4,10 +4,16 @@ import android.content.res.ColorStateList
 import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.android.extensions.LayoutContainer
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.ItemFileGridBinding
+import space.taran.arknavigator.ui.fragments.utils.PredefinedIcon
 import space.taran.arknavigator.ui.fragments.utils.Preview
 import space.taran.arknavigator.utils.*
+import space.taran.arknavigator.utils.extensions.autoDisposeScope
 
 class FileItemViewHolder(private val binding: ItemFileGridBinding) :
     RecyclerView.ViewHolder(binding.root),
@@ -23,6 +29,19 @@ class FileItemViewHolder(private val binding: ItemFileGridBinding) :
         } else {
             when(icon.fileType){
                 FileType.GIF -> loadGifThumbnail(icon.image!!, binding.iv)
+                FileType.PDF -> {
+                    //Temporary workaround for asynchronous loading.
+                    //To be changed later on, when indexing will be asynchronous
+                    binding.iv.setImageResource(imageForPredefinedIcon(PredefinedIcon.FILE))
+                    itemView.autoDisposeScope.launch {
+                        withContext(Dispatchers.IO){
+                            val bitmap = createPdfPreview(icon.image!!, binding.root.context)
+                            withContext(Dispatchers.Main){
+                                loadCroppedBitmap(bitmap, binding.iv)
+                            }
+                        }
+                    }
+                }
                 else -> loadImage(icon.image!!, binding.iv)
             }
         }

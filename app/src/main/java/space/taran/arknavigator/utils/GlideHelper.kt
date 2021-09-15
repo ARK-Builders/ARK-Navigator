@@ -1,8 +1,10 @@
 package space.taran.arknavigator.utils
 
+import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.widget.ImageView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import space.taran.arknavigator.R
@@ -28,6 +30,13 @@ fun loadGifThumbnail(file: Path, container: ImageView) =
     Glide.with(container.context)
         .asBitmap()
         .load(file.toFile())
+        .into(container)
+
+fun loadCroppedBitmap(bitmap: Bitmap, container: ImageView) =
+    Glide.with(container.context)
+        .load(bitmap)
+        .transition(DrawableTransitionOptions.withCrossFade())
+        .centerCrop()
         .into(container)
 
 fun loadGif(file: Path, container: ImageView) =

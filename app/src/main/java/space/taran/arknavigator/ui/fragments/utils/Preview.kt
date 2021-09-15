@@ -20,11 +20,11 @@ data class Preview(
                 return Preview(predefined = PredefinedIcon.FOLDER)
             }
 
-            val filePair = provideIconImage(path)
-            val image = filePair?.second
+            val previewFile = provideIconImage(path)
                 ?: return Preview(predefined = PredefinedIcon.FILE, fileType = FileType.UNDEFINED)
 
-            return Preview(image = image, fileType = filePair.first)
+            val filePath = previewFile.file
+            return Preview(image = filePath, fileType = previewFile.fileType)
         }
     }
 }

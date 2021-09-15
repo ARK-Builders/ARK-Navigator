@@ -1,6 +1,12 @@
 package space.taran.arknavigator.utils
 
+import android.content.Context
 import space.taran.arknavigator.ui.App
+import android.graphics.Bitmap
+import android.net.Uri
+import android.os.ParcelFileDescriptor
+import com.shockwave.pdfium.PdfDocument
+import com.shockwave.pdfium.PdfiumCore
 import java.lang.IllegalArgumentException
 import java.nio.file.Files
 import java.nio.file.Path
@@ -26,23 +32,32 @@ enum class FileType {
     IMAGE, VIDEO, GIF, PDF, UNDEFINED
 }
 
+class PreviewFile(val fileType: FileType, val file: Path){
+    companion object PreviewCompanion{
+        fun createPair(file: Path): PreviewFile? {
+            return when{
+                isImage(file) -> PreviewFile(FileType.IMAGE, file)
+                isVideo(file) -> PreviewFile(FileType.VIDEO, file)
+                isGif(file) -> PreviewFile(FileType.GIF, file)
+                isPDF(file) -> PreviewFile(FileType.PDF, file)
+                else -> null
+            }
+        }
+    }
+}
+
 private val acceptedImageExt = listOf(".jpg", ".jpeg", ".png")
 private val acceptedVideoExt = listOf(".mp4", ".avi", ".mov", ".wmv", ".flv")
 private val acceptedEditOnlyExt = arrayListOf(".txt", ".doc", ".docx", ".odt", "ods")
     .also { it.addAll(acceptedImageExt) }
 private val acceptedReadAndEditExt = listOf(".pdf", ".md")
 
-fun provideIconImage(file: Path): Pair<FileType, Path>? =
+fun provideIconImage(file: Path): PreviewFile? =
     providePreview(file) //todo downscale to, say, 128x128
 
 //might be a temporary file
-fun providePreview(file: Path): Pair<FileType, Path>? {
-    return when{
-        isImage(file) -> Pair(FileType.IMAGE, file)
-        isVideo(file) -> Pair(FileType.VIDEO, file)
-        isGif(file) -> Pair(FileType.GIF, file)
-        else -> { null }
-    }
+fun providePreview(file: Path): PreviewFile? {
+    return PreviewFile.createPair(file)
 }
 
 
@@ -58,8 +73,31 @@ fun isGif(filePath: Path): Boolean {
     return extension(filePath) == ".gif"
 }
 
+fun isPDF(filePath: Path): Boolean {
+    return extension(filePath) == ".pdf"
+}
+
+fun createPdfPreview(filePath: Path, context: Context): Bitmap {
+    val pageNumber = 0
+
+    val pdfiumCore = PdfiumCore(context)
+    val fd: ParcelFileDescriptor =
+        context.contentResolver.openFileDescriptor(Uri.fromFile(filePath.toFile()), "r")!!
+
+    val pdfDocument: PdfDocument = pdfiumCore.newDocument(fd)
+    pdfiumCore.openPage(pdfDocument, pageNumber)
+
+    val width = pdfiumCore.getPageWidthPoint(pdfDocument, pageNumber)
+    val height = pdfiumCore.getPageHeightPoint(pdfDocument, pageNumber)
+    val bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+
+    pdfiumCore.renderPageBitmap(pdfDocument, bmp, pageNumber, 0, 0, width, height)
+    pdfiumCore.closeDocument(pdfDocument)
+    return bmp
+}
+
 fun getFileActionType(filePath: Path): FileActionType{
-    return when(".${extension(filePath)}"){
+    return when(extension(filePath)){
         in acceptedEditOnlyExt -> FileActionType.EDIT_AS_OPEN
         in acceptedReadAndEditExt -> FileActionType.EDIT_AND_OPEN
         in acceptedVideoExt -> FileActionType.OPEN_ONLY_DETACH_PROCESS
