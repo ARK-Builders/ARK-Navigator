@@ -1,5 +1,6 @@
 package space.taran.arknavigator.mvp.model.repo
 
+import android.graphics.Bitmap
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -7,8 +8,9 @@ import space.taran.arknavigator.mvp.model.dao.Resource
 import space.taran.arknavigator.mvp.model.dao.ResourceDao
 import space.taran.arknavigator.mvp.model.dao.ResourceId
 import space.taran.arknavigator.mvp.model.dao.computeId
-import space.taran.arknavigator.utils.RESOURCES_INDEX
-import space.taran.arknavigator.utils.isHidden
+import space.taran.arknavigator.utils.*
+import java.io.File
+import java.io.FileOutputStream
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -21,7 +23,8 @@ data class ResourceMeta(val id: ResourceId, val modified: FileTime)
 internal data class Difference(
     val deleted: List<Path>,
     val updated: List<Path>,
-    val added: List<Path>)
+    val added: List<Path>
+)
 
 @OptIn(ExperimentalPathApi::class)
 // The index must read from the DAO only during application startup,
@@ -78,7 +81,7 @@ class PlainResourcesIndex internal constructor (
         }
 
         val pathsToDelete = diff.deleted + diff.updated
-        
+
         Log.d(RESOURCES_INDEX, "removing ${pathsToDelete.size} paths")
         val chunks = pathsToDelete.chunked(512)
         Log.d(RESOURCES_INDEX, "splitting into ${chunks.size} chunks")
@@ -96,11 +99,45 @@ class PlainResourcesIndex internal constructor (
             pathById[id] = it
         }
 
+        generatePdfPreviews()
+
         Log.d(RESOURCES_INDEX, "re-scanning ${toInsert.size} resources")
 
         //todo: streaming/iterating
         val newResources = scanResources(toInsert)
         persistResources(newResources)
+    }
+
+    private fun generatePdfPreviews() {
+        val previewsFolder = getPdfPreviewsFolder()
+        val savedPreviews = getSavedPdfPreviews()
+
+        metaByPath.forEach {
+            val path = it.key
+            var out: FileOutputStream? = null
+            val id = computeId(path)
+
+            if (savedPreviews == null || !savedPreviews.contains(id)) {
+                val fileSize = getFileSizeMB(path)
+
+                if (isPDF(path) && fileSize >= 10) {
+                    try {
+                        if (!previewsFolder.exists()) previewsFolder.mkdirs()
+
+                        val file = File(previewsFolder, "$id.png")
+                        out = FileOutputStream(file)
+                        createPdfPreview(path)
+                            .compress(Bitmap.CompressFormat.PNG, 100, out)
+                    } catch (e: Exception) {
+                    } finally {
+                        try {
+                            out?.close()
+                        } catch (e: Exception) {
+                        }
+                    }
+                }
+            }
+        }
     }
 
     internal suspend fun calculateDifference(): Difference = withContext(Dispatchers.IO) {
@@ -144,14 +181,15 @@ class PlainResourcesIndex internal constructor (
 
     companion object {
         //todo: parallel and asynchronous
-        internal suspend fun scanResources(files: List<Path>): Map<Path, ResourceMeta> = withContext(Dispatchers.IO) {
-            files.map {
-                it to ResourceMeta(
-                    id = computeId(it),
-                    modified = Files.getLastModifiedTime(it)
-                )
-            }.toMap()
-        }
+        internal suspend fun scanResources(files: List<Path>): Map<Path, ResourceMeta> =
+            withContext(Dispatchers.IO) {
+                files.map {
+                    it to ResourceMeta(
+                        id = computeId(it),
+                        modified = Files.getLastModifiedTime(it)
+                    )
+                }.toMap()
+            }
 
         internal fun groupResources(resources: List<Resource>): Map<Path, ResourceMeta> =
             resources

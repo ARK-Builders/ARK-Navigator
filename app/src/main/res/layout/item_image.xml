@@ -1,13 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/black"
     android:id="@+id/layout_root">
 
     <com.ortiz.touchview.TouchImageView
         android:id="@+id/iv_image"
+        tools:src="@mipmap/ic_launcher"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
-</LinearLayout>
+    <include
+        android:id="@+id/layout_progress"
+        layout="@layout/layout_progress"/>
+
+</FrameLayout>

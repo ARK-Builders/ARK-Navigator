@@ -8,6 +8,8 @@ interface PreviewItemView {
 
     fun setImage(file: Path)
 
+    fun setPDFPreview(file: Path)
+
     fun setPredefined(resource: PredefinedIcon)
 
     fun setZoomEnabled(enabled: Boolean)
