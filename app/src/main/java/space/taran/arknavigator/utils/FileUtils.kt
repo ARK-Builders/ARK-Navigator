@@ -1,6 +1,15 @@
 package space.taran.arknavigator.utils
 
+import android.content.Context
 import space.taran.arknavigator.ui.App
+import android.graphics.Bitmap
+import android.net.Uri
+import android.os.ParcelFileDescriptor
+import android.util.Log
+import com.shockwave.pdfium.PdfDocument
+import com.shockwave.pdfium.PdfiumCore
+import space.taran.arknavigator.mvp.model.dao.computeId
+import java.io.File
 import java.lang.IllegalArgumentException
 import java.nio.file.Files
 import java.nio.file.Path
@@ -26,23 +35,46 @@ enum class FileType {
     IMAGE, VIDEO, GIF, PDF, UNDEFINED
 }
 
+const val PDF_PREVIEW_FOLDER_NAME = "pdf_preview"
+
+class PreviewFile(val fileType: FileType, val file: Path) {
+    companion object PreviewCompanion {
+        fun createPair(file: Path): PreviewFile? {
+            return when {
+                isImage(file) -> PreviewFile(FileType.IMAGE, file)
+                isVideo(file) -> PreviewFile(FileType.VIDEO, file)
+                isGif(file) -> PreviewFile(FileType.GIF, file)
+                isPDF(file) -> {
+                    Log.d("TAG", "createPair isPDF: $file")
+                    getPdfPreview(file)
+                }
+                else -> null
+            }
+        }
+
+        private fun getPdfPreview(file: Path): PreviewFile {
+            val id = computeId(file)
+            val savedPreviews = getSavedPdfPreviews()
+            return if (savedPreviews?.contains(id) == true){
+                PreviewFile(FileType.PDF, getPdfPreviewByID(id))
+            }
+            else PreviewFile(FileType.PDF, file)
+        }
+    }
+}
+
 private val acceptedImageExt = listOf(".jpg", ".jpeg", ".png")
 private val acceptedVideoExt = listOf(".mp4", ".avi", ".mov", ".wmv", ".flv")
 private val acceptedEditOnlyExt = arrayListOf(".txt", ".doc", ".docx", ".odt", "ods")
     .also { it.addAll(acceptedImageExt) }
 private val acceptedReadAndEditExt = listOf(".pdf", ".md")
 
-fun provideIconImage(file: Path): Pair<FileType, Path>? =
+fun provideIconImage(file: Path): PreviewFile? =
     providePreview(file) //todo downscale to, say, 128x128
 
 //might be a temporary file
-fun providePreview(file: Path): Pair<FileType, Path>? {
-    return when{
-        isImage(file) -> Pair(FileType.IMAGE, file)
-        isVideo(file) -> Pair(FileType.VIDEO, file)
-        isGif(file) -> Pair(FileType.GIF, file)
-        else -> { null }
-    }
+fun providePreview(file: Path): PreviewFile? {
+    return PreviewFile.createPair(file)
 }
 
 
@@ -58,8 +90,48 @@ fun isGif(filePath: Path): Boolean {
     return extension(filePath) == ".gif"
 }
 
+fun isPDF(filePath: Path): Boolean {
+    return extension(filePath) == ".pdf"
+}
+
+fun getPdfPreviewsFolder(): File =
+    File("${App.instance.cacheDir}/$PDF_PREVIEW_FOLDER_NAME")
+
+fun getPdfPreviewByID(id: Long): Path {
+    val pathName = "${App.instance.cacheDir}/$PDF_PREVIEW_FOLDER_NAME/$id.png"
+    Log.d("TAG", "getPdfPreview: $pathName")
+    return File(pathName).toPath()
+}
+
+fun getSavedPdfPreviews(): List<Long?>? =
+    getPdfPreviewsFolder()
+        .listFiles()
+        ?.map {
+            it.nameWithoutExtension.toLongOrNull()
+        }
+
+fun createPdfPreview(filePath: Path, context: Context? = null): Bitmap {
+    val pageNumber = 0
+    val finalContext = context ?: App.instance
+
+    val pdfiumCore = PdfiumCore(finalContext)
+    val fd: ParcelFileDescriptor =
+        finalContext.contentResolver.openFileDescriptor(Uri.fromFile(filePath.toFile()), "r")!!
+
+    val pdfDocument: PdfDocument = pdfiumCore.newDocument(fd)
+    pdfiumCore.openPage(pdfDocument, pageNumber)
+
+    val width = pdfiumCore.getPageWidthPoint(pdfDocument, pageNumber)
+    val height = pdfiumCore.getPageHeightPoint(pdfDocument, pageNumber)
+    val bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+
+    pdfiumCore.renderPageBitmap(pdfDocument, bmp, pageNumber, 0, 0, width, height)
+    pdfiumCore.closeDocument(pdfDocument)
+    return bmp
+}
+
 fun getFileActionType(filePath: Path): FileActionType{
-    return when(".${extension(filePath)}"){
+    return when(extension(filePath)){
         in acceptedEditOnlyExt -> FileActionType.EDIT_AS_OPEN
         in acceptedReadAndEditExt -> FileActionType.EDIT_AND_OPEN
         in acceptedVideoExt -> FileActionType.OPEN_ONLY_DETACH_PROCESS
@@ -111,6 +183,9 @@ fun findLongestCommonPrefix(paths: List<Path>): Path {
 
     return tailrec(ROOT_PATH, paths).first
 }
+
+fun getFileSizeMB(path: Path): Int =
+    (path.toFile().length() / (1024 * 1024)).toInt()
 
 fun extension(path: Path): String {
     return ".${path.extension.lowercase()}"

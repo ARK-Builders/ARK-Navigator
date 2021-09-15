@@ -2,6 +2,7 @@ package space.taran.arknavigator.mvp.presenter.adapter
 
 import space.taran.arknavigator.ui.fragments.utils.Preview
 import space.taran.arknavigator.mvp.view.item.PreviewItemView
+import space.taran.arknavigator.utils.FileType
 
 class PreviewsList(
     private var previews: List<Preview>,
@@ -22,9 +23,13 @@ class PreviewsList(
         if (preview.predefined != null) {
             view.setPredefined(preview.predefined)
             view.setZoomEnabled(false)
-        } else {
-            view.setImage(preview.image!!)
+        } else if (preview.fileType != FileType.PDF){
+            view.setImage(preview.previewPath!!)
             view.setZoomEnabled(true)
+        }
+        else if (preview.fileType == FileType.PDF){
+            view.setPDFPreview(preview.previewPath!!)
+            view.setZoomEnabled(false)
         }
     }
 
