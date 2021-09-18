@@ -2,34 +2,43 @@ package space.taran.arknavigator.mvp.presenter.adapter
 
 import android.util.Log
 import space.taran.arknavigator.mvp.model.dao.ResourceId
+import space.taran.arknavigator.mvp.model.repo.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.TagsStorage
 import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.utils.Popularity
 import space.taran.arknavigator.utils.TAGS_SELECTOR
 import space.taran.arknavigator.utils.Tag
 import java.lang.AssertionError
+import java.nio.file.Path
 
 class TagsSelectorPresenter(
-    val viewState: ResourcesView,
-    val onSelectionChangeListener: (Set<ResourceId>) -> Unit
+    private val viewState: ResourcesView,
+    private val prefix: Path?,
+    private val onSelectionChangeListener: (Set<ResourceId>) -> Unit
 ) {
-    private var resources: List<ResourceId>? = null
+    private var index: ResourcesIndex? = null
     private var storage: TagsStorage? = null
 
-    private var included = mutableSetOf<Tag>()
-    private var excluded = mutableSetOf<Tag>()
+    var included = mutableSetOf<Tag>()
+        private set
+    var excluded = mutableSetOf<Tag>()
+        private set
 
     var selection = setOf<ResourceId>()
+        private set
 
     //this data is used by TagsSelectorAdapter
-    var includedTags = listOf<Tag>()
-    var excludedTags = listOf<Tag>()
+    var includedAndExcludedTags = listOf<Tag>()
+        private set
     var availableTags = listOf<Tag>()
+        private set
     var unavailableTags = listOf<Tag>()
+        private set
     var isClearBtnVisible = false
+        private set
 
-    fun init(resources: List<ResourceId>, storage: TagsStorage) {
-        this.resources = resources
+    fun init(index: ResourcesIndex, storage: TagsStorage) {
+        this.index = index
         this.storage = storage
     }
 
@@ -55,19 +64,19 @@ class TagsSelectorPresenter(
     }
 
     fun calculateTagsAndSelection() {
-        if (storage == null || resources == null)
+        if (storage == null || index == null)
             return
 
-        val allTags = storage!!.listAllTags()
+        val resources = index!!.listIds(prefix)
+        val tagsByResources = storage!!.groupTagsByResources(resources)
+        val allTags = tagsByResources.values.flatten().toSet()
 
+        //some tags could have been removed from storage
         excluded = excluded.intersect(allTags).toMutableSet()
         included = included.intersect(allTags).toMutableSet()
 
-        val selectionAndComplementWithTags = resources!!
-            .map { resource ->
-                val tags = storage!!.getTags(resource)
-                resource to tags
-            }
+        val selectionAndComplementWithTags = tagsByResources
+            .toList()
             .groupBy { (_, tags) ->
                 tags.containsAll(included) && !excluded.any { tags.contains(it) }
             }
@@ -84,14 +93,14 @@ class TagsSelectorPresenter(
 
         val tagsOfSelectedResPopularity = Popularity.calculate(tagsOfSelectedResources)
         val tagsOfUnselectedResPopularity = Popularity.calculate(tagsOfUnselectedResources)
+        val tagsPopularity = Popularity.calculate(tagsByResources.values.flatten())
 
-        includedTags = included.toMutableList().sortedByDescending { tagsOfSelectedResPopularity[it] }
-        excludedTags = excluded.toMutableList().sortedByDescending { tagsOfSelectedResPopularity[it] }
-        availableTags = available.toMutableList().sortedByDescending { tagsOfSelectedResPopularity[it] }
-        unavailableTags = unavailable.toMutableList().sortedByDescending { tagsOfUnselectedResPopularity[it] }
+        includedAndExcludedTags = (included + excluded).sortedByDescending { tagsPopularity[it] }
+        availableTags = available.sortedByDescending { tagsOfSelectedResPopularity[it] }
+        unavailableTags = unavailable.sortedByDescending { tagsOfUnselectedResPopularity[it] }
 
-        Log.d(TAGS_SELECTOR, "tags included: $includedTags")
-        Log.d(TAGS_SELECTOR, "tags excluded: $excludedTags")
+        Log.d(TAGS_SELECTOR, "tags included: $included")
+        Log.d(TAGS_SELECTOR, "tags excluded: $excluded")
         Log.d(TAGS_SELECTOR, "tags available: $availableTags")
         Log.d(TAGS_SELECTOR, "tags unavailable: $unavailableTags")
 

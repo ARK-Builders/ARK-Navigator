@@ -11,8 +11,6 @@ class AggregatedTagsStorage(
     override fun contains(id: ResourceId): Boolean =
         shards.any { it.contains(id) }
 
-    override fun listAllTags(): Tags = shards.flatMap { it.listAllTags() }.toSet()
-
     // if we have several copies of a resource across shards,
     // then we would receive all tags for the resource. but
     // copies of the same resource under different roots
@@ -24,6 +22,8 @@ class AggregatedTagsStorage(
                 else emptySet()
             }
             .toSet()
+
+    override fun getTags(ids: List<ResourceId>): Tags = ids.flatMap { id -> getTags(id) }.toSet()
 
     override suspend fun setTags(id: ResourceId, tags: Tags) =
         shards.forEach {

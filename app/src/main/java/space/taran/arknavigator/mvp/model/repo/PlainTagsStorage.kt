@@ -51,13 +51,13 @@ class PlainTagsStorage
 
     override fun contains(id: ResourceId): Boolean = tagsById.containsKey(id)
 
-    override fun listAllTags(): Tags = tagsById.values.flatten().toSet()
-
     // if this id isn't present in storage, then the call is wrong
     // because the caller always takes this id from ResourcesIndex
     // and the index and storage must be in sync
     override fun getTags(id: ResourceId): Tags = tagsById[id]!!
     //todo: check the file's modification date and pull external updates
+
+    override fun getTags(ids: List<ResourceId>): Tags = ids.flatMap { id -> getTags(id) }.toSet()
 
     override suspend fun setTags(id: ResourceId, tags: Tags) = withContext(Dispatchers.IO) {
         if (!tagsById.containsKey(id)) {
