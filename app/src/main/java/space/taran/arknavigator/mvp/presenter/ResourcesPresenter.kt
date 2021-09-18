@@ -42,7 +42,7 @@ class ResourcesPresenter(
     val gridPresenter = ResourcesGridPresenter(viewState, presenterScope).apply {
         App.instance.appComponent.inject(this)
     }
-    val tagsSelectorPresenter = TagsSelectorPresenter(viewState, ::onSelectionChange)
+    val tagsSelectorPresenter = TagsSelectorPresenter(viewState, prefix, ::onSelectionChange)
 
     override fun onFirstViewAttach() {
         Log.d(RESOURCES_SCREEN, "first view attached in ResourcesPresenter")
@@ -78,9 +78,6 @@ class ResourcesPresenter(
                 .map { it to PlainTagsStorage.provide(it, rootToIndex[it]!!.listAllIds()) }
                 .toMap()
 
-            //todo: when async indexing will be ready, tagged ids must be boosted
-            //in the indexing queue and be removed if they fail to be indexed
-
             roots.forEach { root ->
                 val storage = rootToStorage[root]!!
                 val indexed = rootToIndex[root]!!.listAllIds()
@@ -92,7 +89,7 @@ class ResourcesPresenter(
             storage = AggregatedTagsStorage(rootToStorage.values)
 
             gridPresenter.init(index, storage, router)
-            tagsSelectorPresenter.init(resources(), storage)
+            tagsSelectorPresenter.init(index, storage)
             tagsSelectorPresenter.calculateTagsAndSelection()
 
             val title = {
@@ -123,7 +120,7 @@ class ResourcesPresenter(
             gridPresenter.updateResources(tagsSelectorPresenter.selection.toList())
         else
             gridPresenter.updateResources(resources(untagged = true))
-        if (tagsEnabled && listTagsForAllResources().isEmpty()) {
+        if (tagsEnabled && storage.getTags(resources()).isEmpty()) {
             viewState.notifyUser("Tag something first")
         }
     }
@@ -140,10 +137,6 @@ class ResourcesPresenter(
         viewState.notifyUser("${selection.size} resources selected")
         gridPresenter.updateResources(selection.toList())
     }
-
-    private fun listTagsForAllResources(): Tags = resources()
-        .flatMap { storage.getTags(it) }
-        .toSet()
 
     private fun resources(untagged: Boolean = false): List<ResourceId> {
         val underPrefix = index.listIds(prefix)

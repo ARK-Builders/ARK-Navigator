@@ -1,7 +1,6 @@
 package space.taran.arknavigator.mvp.presenter.adapter
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.mvp.model.UserPreferences
@@ -29,13 +28,13 @@ class ResourcesGridPresenter(
     private lateinit var storage: TagsStorage
     private lateinit var router: Router
     var sorting = Sorting.DEFAULT
-        set(value) {
+        private set(value) {
             field = value
             scope.launch { userPreferences.setSorting(value) }
         }
 
     var ascending: Boolean = true
-        set(value) {
+        private set(value) {
             field = value
             scope.launch { userPreferences.setSortingAscending(value) }
         }
@@ -71,20 +70,20 @@ class ResourcesGridPresenter(
 
     fun updateResources(resources: List<ResourceId>) {
         this.resources = resources.toMutableList()
-        push()
+        sortAndUpdateAdapter()
     }
 
     fun updateSorting(sorting: Sorting) {
         this.sorting = sorting
-        push()
+        sortAndUpdateAdapter()
     }
 
     fun updateAscending(ascending: Boolean) {
         this.ascending = ascending
-        push()
+        sortAndUpdateAdapter()
     }
 
-    private fun push() {
+    private fun sortAndUpdateAdapter() {
         when (sorting) {
             Sorting.NAME -> resources.sortBy { index.getPath(it)!!.fileName }
             Sorting.SIZE -> resources.sortBy { Files.size(index.getPath(it)!!) }

@@ -8,9 +8,17 @@ interface TagsStorage {
 
     fun contains(id: ResourceId): Boolean
 
-    fun listAllTags(): Tags
-
     fun getTags(id: ResourceId): Tags
+
+    fun getTags(ids: List<ResourceId>): Tags
+
+    fun groupTagsByResources(ids: List<ResourceId>): Map<ResourceId, Tags> {
+        val resourcesWithTags = mutableMapOf<ResourceId, Tags>()
+        ids.forEach { id ->
+            resourcesWithTags[id] = getTags(id)
+        }
+        return resourcesWithTags
+    }
 
     suspend fun setTags(id: ResourceId, tags: Tags)
 

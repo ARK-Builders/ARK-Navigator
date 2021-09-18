@@ -18,8 +18,6 @@ import space.taran.arknavigator.utils.Tags
 import java.nio.file.Files
 import javax.inject.Inject
 
-typealias PreviewClickHandler = () -> Unit
-
 class GalleryPresenter(
     private val index: ResourcesIndex,
     private val storage: TagsStorage,
