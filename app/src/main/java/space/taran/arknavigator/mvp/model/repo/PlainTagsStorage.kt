@@ -49,6 +49,13 @@ class PlainTagsStorage
         tagsById = result
     }
 
+    fun register(id: ResourceId) {
+        //this registration isn't really needed,
+        //but should help to prevent bugs, see `setTags`
+        tagsById[id] = setOf()
+        //we don't need to persist since we never store empty tag sets
+    }
+
     override fun contains(id: ResourceId): Boolean = tagsById.containsKey(id)
 
     // if this id isn't present in storage, then the call is wrong
@@ -62,6 +69,11 @@ class PlainTagsStorage
     override suspend fun setTags(id: ResourceId, tags: Tags) = withContext(Dispatchers.IO) {
         if (!tagsById.containsKey(id)) {
             throw AssertionError("Storage isn't aware about this resource id")
+        }
+
+        if (tags.isEmpty()) {
+            Log.d(TAGS_STORAGE, "erasing tags for $id and removing the resource")
+            tagsById.remove(id)
         }
 
         Log.d(TAGS_STORAGE, "new tags for resource $id: $tags")
@@ -193,13 +205,22 @@ class PlainTagsStorage
 
         private val storageByRoot = mutableMapOf<Path, PlainTagsStorage>()
 
-        suspend fun provide(root: Path, resources: Collection<ResourceId>): PlainTagsStorage = withContext(Dispatchers.IO) {
+        suspend fun provide(root: Path, index: ResourcesIndex): PlainTagsStorage = withContext(Dispatchers.IO) {
+            val resources = index.listAllIds()
             val storage = storageByRoot[root]
             if (storage != null) {
-                if (storage.tagsById.keys.toSet() != resources.toSet()) {
-                    Log.d(TAGS_STORAGE, "resources in the storage: ${storage.tagsById.keys}")
-                    Log.d(TAGS_STORAGE, "resources in the index: $resources")
-                    throw AssertionError("Index and storage diverged")
+                val knownResources = storage.tagsById.keys.toSet()
+                val indexedResources = resources.toSet()
+
+                val lostResources = knownResources.subtract(indexedResources)
+                if (lostResources.isNotEmpty()) {
+                    Log.d(TAGS_STORAGE, "lostResources: $lostResources")
+                    throw AssertionError("Index lost resources")
+                }
+
+                val newResources = indexedResources.subtract(knownResources)
+                for (resource in newResources) {
+                    storage.register(resource)
                 }
                 return@withContext storage
             }

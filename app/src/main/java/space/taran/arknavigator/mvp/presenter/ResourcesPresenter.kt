@@ -75,7 +75,7 @@ class ResourcesPresenter(
                 .toMap()
 
             val rootToStorage = roots
-                .map { it to PlainTagsStorage.provide(it, rootToIndex[it]!!.listAllIds()) }
+                .map { it to PlainTagsStorage.provide(it, rootToIndex[it]!!) }
                 .toMap()
 
             roots.forEach { root ->
