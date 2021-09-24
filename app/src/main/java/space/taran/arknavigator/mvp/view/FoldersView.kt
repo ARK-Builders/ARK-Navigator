@@ -10,7 +10,8 @@ import java.nio.file.Path
 interface FoldersView: MvpView, NotifiableView {
     fun init()
     fun setProgressVisibility(isVisible: Boolean)
-    fun setRootPickerDialogVisibility(paths: List<Path>?)
+    fun openRootPickerDialog(paths: List<Path>)
+    fun closeRootPickerDialog()
     fun updateFoldersTree(devices: List<Path>, folders: Folders)
     fun updateRootPickerDialogPath(path: Path)
     fun updateRootPickerDialogPickBtnState(isEnabled: Boolean, isRoot: Boolean)
