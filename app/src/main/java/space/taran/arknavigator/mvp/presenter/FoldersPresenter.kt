@@ -38,7 +38,6 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
     lateinit var stringProvider: StringProvider
 
     private lateinit var devices: List<Path>
-    //todo treat syncthing folder as special storage device
 
     private var favoritesByRoot: MutableMap<Path, MutableList<Path>> = mutableMapOf()
         set(value) {
@@ -74,11 +73,11 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
     }
 
     fun onFoldersTreeAddFavoriteBtnClick(path: Path) {
-        viewState.setRootPickerDialogVisibility(listOf(path))
+        viewState.openRootPickerDialog(listOf(path))
     }
 
     fun onAddRootBtnClick() {
-        viewState.setRootPickerDialogVisibility(devices)
+        viewState.openRootPickerDialog(devices)
     }
 
     fun onRootPickerItemClick(): ItemClickHandler<Path> = { _, path ->
@@ -107,14 +106,11 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
     }
 
     fun onRootPickerCancelClick() {
-        viewState.setRootPickerDialogVisibility(null)
+        viewState.closeRootPickerDialog()
     }
 
     fun onRootPickerBackClick() {
-        //todo: the business logic of dialog back click should be here
-        // e.g. viewState.updateRootPickerDialog(newPath)
-        // now this method is only called if the root picker cannot handle the back click
-        viewState.setRootPickerDialogVisibility(null)
+        viewState.closeRootPickerDialog()
     }
 
     fun onPickRootBtnClick(path: Path) {
@@ -125,7 +121,7 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
                     viewState.notifyUser(stringProvider.getString(R.string.folders_root_is_already_picked))
                 } else {
                     addRoot(path)
-                    viewState.setRootPickerDialogVisibility(null)
+                    viewState.closeRootPickerDialog()
                 }
             } else {
                 // adding path as favorite
@@ -133,7 +129,7 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
                     viewState.notifyUser(stringProvider.getString(R.string.folders_favorite_is_alreay_picked))
                 } else {
                     addFavorite(path)
-                    viewState.setRootPickerDialogVisibility(null)
+                    viewState.closeRootPickerDialog()
                 }
             }
         } else {

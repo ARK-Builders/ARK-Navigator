@@ -19,7 +19,6 @@ import space.taran.arknavigator.mvp.model.repo.Folders
 import space.taran.arknavigator.mvp.presenter.FoldersPresenter
 import space.taran.arknavigator.ui.adapter.FoldersTree
 import space.taran.arknavigator.ui.adapter.FolderPicker
-import space.taran.arknavigator.mvp.presenter.adapter.ItemClickHandler
 import space.taran.arknavigator.mvp.view.FoldersView
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.activity.MainActivity
@@ -34,10 +33,10 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
     lateinit var router: Router
 
     private lateinit var foldersTree: FoldersTree
-    private var folderPicker: FolderPicker? = null
 
-    private var rootPickerDialogView: View? = null
+    private var folderPicker: FolderPicker? = null
     private var rootPickerDialog: AlertDialog? = null
+    private var rootPickerBinding: DialogRootsNewBinding? = null
 
     private lateinit var binding: FragmentFoldersBinding
     private val presenter by moxyPresenter {
@@ -45,11 +44,6 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
             Log.d(FOLDERS_SCREEN, "RootsPresenter created")
             App.instance.appComponent.inject(this)
         }
-    }
-
-    override fun setProgressVisibility(isVisible: Boolean) {
-        binding.layoutProgress.root.isVisible = isVisible
-        (activity as MainActivity).setBottomNavigationEnabled(!isVisible)
     }
 
     override fun onCreateView(
@@ -72,58 +66,58 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
         (activity as MainActivity).setSelectedTab(0)
         (activity as MainActivity).setToolbarVisibility(false)
 
-        fab_add_roots.setOnClickListener {
+        binding.fabAddRoots.setOnClickListener {
             presenter.onAddRootBtnClick()
         }
     }
 
+    override fun setProgressVisibility(isVisible: Boolean) {
+        binding.layoutProgress.root.isVisible = isVisible
+        (activity as MainActivity).setBottomNavigationEnabled(!isVisible)
+    }
+
     override fun updateFoldersTree(devices: List<Path>, folders: Folders) {
         foldersTree = FoldersTree(devices, folders, presenter::onFoldersTreeAddFavoriteBtnClick, router)
-        rv_roots.adapter = foldersTree
+        binding.rvRoots.adapter = foldersTree
     }
 
     override fun updateRootPickerDialogPath(path: Path) {
         folderPicker?.updatePath(path)
     }
 
-    //todo fake disabling (still show messages when pressing on disabled button)
-    //todo consistent rules for onPick messages and gray-out
-    //todo revert button state when backClicked
     override fun updateRootPickerDialogPickBtnState(isEnabled: Boolean, isRoot: Boolean) {
-        rootPickerDialogView?.btn_roots_dialog_pick?.isEnabled = isEnabled
+        rootPickerBinding?.btnRootsDialogPick?.isEnabled = isEnabled
         if (isRoot)
-            rootPickerDialogView?.btn_roots_dialog_pick?.text = requireContext().getString(R.string.folders_pick_root)
+            rootPickerBinding?.btnRootsDialogPick?.text = requireContext().getString(R.string.folders_pick_root)
         else
-            rootPickerDialogView?.btn_roots_dialog_pick?.text = requireContext().getString(R.string.folders_pick_favorite)
+            rootPickerBinding?.btnRootsDialogPick?.text = requireContext().getString(R.string.folders_pick_favorite)
     }
 
-    //provide null to close the dialog
-    override fun setRootPickerDialogVisibility(paths: List<Path>?) {
-        if (paths == null) {
-            rootPickerDialog?.dismiss()
-            return
-        }
-
+    override fun openRootPickerDialog(paths: List<Path>) {
         Log.d(FOLDERS_SCREEN, "initializing root picker")
 
-        rootPickerDialogView = LayoutInflater.from(requireContext())
-            .inflate(R.layout.dialog_roots_new, null)
+        rootPickerBinding = DialogRootsNewBinding.inflate(
+            LayoutInflater.from(requireContext()))
             ?: throw IllegalStateException("Failed to inflate dialog View for roots picker")
 
-        rootPickerDialogView!!.rv_roots_dialog.layoutManager = GridLayoutManager(context, 2)
-        folderPicker = FolderPicker(paths, presenter.onRootPickerItemClick(), rootPickerDialogView!!)
+        rootPickerBinding!!.rvRootsDialog.layoutManager = GridLayoutManager(context, 2)
+        folderPicker = FolderPicker(paths, presenter.onRootPickerItemClick(), rootPickerBinding!!)
 
-        rootPickerDialogView!!.btn_roots_dialog_cancel.setOnClickListener {
+        rootPickerBinding!!.btnRootsDialogCancel.setOnClickListener {
             Log.d(FOLDER_PICKER, "[cancel] pressed, closing root picker")
             presenter.onRootPickerCancelClick()
         }
-        rootPickerDialogView!!.btn_roots_dialog_pick.setOnClickListener {
+        rootPickerBinding!!.btnRootsDialogPick.setOnClickListener {
             Log.d(FOLDER_PICKER, "[pick] pressed")
             presenter.onPickRootBtnClick(folderPicker!!.getLabel())
         }
 
-        rootPickerDialog = rootPickerAlertDialog(rootPickerDialogView!!)
+        rootPickerDialog = rootPickerAlertDialog(rootPickerBinding!!.root)
         Log.d(FOLDERS_SCREEN, "root picker initialized")
+    }
+
+    override fun closeRootPickerDialog() {
+        rootPickerDialog?.dismiss()
     }
 
     override fun notifyUser(message: String, moreTime: Boolean) {
