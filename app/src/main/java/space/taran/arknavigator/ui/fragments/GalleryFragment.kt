@@ -206,21 +206,27 @@ class GalleryFragment(
             val resource = resources[currentPosition]
             val filePath = index.getPath(resource)
 
-            if (!isFileEmpty(filePath)) {
-                when (getFileActionType(filePath!!)) {
-                    FileActionType.OPEN_ONLY -> {
-                        openFileEditFab.makeGone()
-                        openResourceChooserFab.makeVisibleAndSetOnClickListener{
-                            openIntentChooser(currentPosition, Intent.ACTION_VIEW)
-                        }
+        if (!isFileEmpty(filePath)) {
+            when (getFileActionType(filePath!!)) {
+                FileActionType.OPEN_ONLY -> {
+                    openFileEditFab.makeGone()
+                    openResourceChooserFab.makeVisibleAndSetOnClickListener{
+                        openIntentChooser(currentPosition, Intent.ACTION_VIEW)
                     }
-                    FileActionType.EDIT_AND_OPEN -> {
-                        openFileEditFab.makeVisibleAndSetOnClickListener {
-                            openIntentChooser(currentPosition, Intent.ACTION_EDIT) }
+                }
+                FileActionType.OPEN_ONLY_DETACH_PROCESS -> {
+                    openFileEditFab.makeGone()
+                    openResourceChooserFab.makeVisibleAndSetOnClickListener{
+                        openIntentChooser(currentPosition, Intent.ACTION_VIEW, true)
+                    }
+                }
+                FileActionType.EDIT_AND_OPEN -> {
+                    openFileEditFab.makeVisibleAndSetOnClickListener {
+                        openIntentChooser(currentPosition, Intent.ACTION_EDIT) }
 
-                        openResourceChooserFab.makeVisibleAndSetOnClickListener {
-                            openIntentChooser(currentPosition, Intent.ACTION_VIEW) }
-                    }
+                    openResourceChooserFab.makeVisibleAndSetOnClickListener {
+                        openIntentChooser(currentPosition, Intent.ACTION_VIEW, true) }
+                }
 
                     FileActionType.EDIT_AS_OPEN -> {
                         openFileEditFab.makeGone()
@@ -235,7 +241,7 @@ class GalleryFragment(
         }
     }
 
-    private fun openIntentChooser(position: Int, actionType: String){
+    private fun openIntentChooser(position: Int, actionType: String, detachProcess: Boolean = false) {
         val resource = resources[position]
         val filePath = index.getPath(resource)
 
@@ -244,6 +250,9 @@ class GalleryFragment(
             val intent = Intent()
             intent.action = actionType
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+
+            if (detachProcess)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
             val file = File(filePath.toString())
             val extension: String = extension(filePath!!)
