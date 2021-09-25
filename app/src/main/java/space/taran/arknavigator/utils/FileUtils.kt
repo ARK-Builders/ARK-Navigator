@@ -5,8 +5,11 @@ import space.taran.arknavigator.ui.App
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.ParcelFileDescriptor
+import android.util.Log
 import com.shockwave.pdfium.PdfDocument
 import com.shockwave.pdfium.PdfiumCore
+import space.taran.arknavigator.mvp.model.dao.computeId
+import java.io.File
 import java.lang.IllegalArgumentException
 import java.nio.file.Files
 import java.nio.file.Path
@@ -32,16 +35,30 @@ enum class FileType {
     IMAGE, VIDEO, GIF, PDF, UNDEFINED
 }
 
-class PreviewFile(val fileType: FileType, val file: Path){
-    companion object PreviewCompanion{
+const val PDF_PREVIEW_FOLDER_NAME = "pdf_preview"
+
+class PreviewFile(val fileType: FileType, val file: Path) {
+    companion object PreviewCompanion {
         fun createPair(file: Path): PreviewFile? {
-            return when{
+            return when {
                 isImage(file) -> PreviewFile(FileType.IMAGE, file)
                 isVideo(file) -> PreviewFile(FileType.VIDEO, file)
                 isGif(file) -> PreviewFile(FileType.GIF, file)
-                isPDF(file) -> PreviewFile(FileType.PDF, file)
+                isPDF(file) -> {
+                    Log.d("TAG", "createPair isPDF: $file")
+                    getPdfPreview(file)
+                }
                 else -> null
             }
+        }
+
+        private fun getPdfPreview(file: Path): PreviewFile {
+            val id = computeId(file)
+            val savedPreviews = getSavedPdfPreviews()
+            return if (savedPreviews?.contains(id) == true){
+                PreviewFile(FileType.PDF, getPdfPreviewByID(id))
+            }
+            else PreviewFile(FileType.PDF, file)
         }
     }
 }
@@ -77,12 +94,29 @@ fun isPDF(filePath: Path): Boolean {
     return extension(filePath) == ".pdf"
 }
 
-fun createPdfPreview(filePath: Path, context: Context): Bitmap {
-    val pageNumber = 0
+fun getPdfPreviewsFolder(): File =
+    File("${App.instance.cacheDir}/$PDF_PREVIEW_FOLDER_NAME")
 
-    val pdfiumCore = PdfiumCore(context)
+fun getPdfPreviewByID(id: Long): Path {
+    val pathName = "${App.instance.cacheDir}/$PDF_PREVIEW_FOLDER_NAME/$id.png"
+    Log.d("TAG", "getPdfPreview: $pathName")
+    return File(pathName).toPath()
+}
+
+fun getSavedPdfPreviews(): List<Long?>? =
+    getPdfPreviewsFolder()
+        .listFiles()
+        ?.map {
+            it.nameWithoutExtension.toLongOrNull()
+        }
+
+fun createPdfPreview(filePath: Path, context: Context? = null): Bitmap {
+    val pageNumber = 0
+    val finalContext = context ?: App.instance
+
+    val pdfiumCore = PdfiumCore(finalContext)
     val fd: ParcelFileDescriptor =
-        context.contentResolver.openFileDescriptor(Uri.fromFile(filePath.toFile()), "r")!!
+        finalContext.contentResolver.openFileDescriptor(Uri.fromFile(filePath.toFile()), "r")!!
 
     val pdfDocument: PdfDocument = pdfiumCore.newDocument(fd)
     pdfiumCore.openPage(pdfDocument, pageNumber)
@@ -149,6 +183,9 @@ fun findLongestCommonPrefix(paths: List<Path>): Path {
 
     return tailrec(ROOT_PATH, paths).first
 }
+
+fun getFileSizeMB(path: Path): Int =
+    (path.toFile().length() / (1024 * 1024)).toInt()
 
 fun extension(path: Path): String {
     return ".${path.extension.lowercase()}"

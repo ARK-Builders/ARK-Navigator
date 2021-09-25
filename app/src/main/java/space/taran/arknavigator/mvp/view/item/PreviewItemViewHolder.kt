@@ -9,10 +9,8 @@ import kotlinx.coroutines.withContext
 import space.taran.arknavigator.databinding.ItemImageBinding
 import space.taran.arknavigator.ui.fragments.utils.PredefinedIcon
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
-import space.taran.arknavigator.utils.createPdfPreview
+import space.taran.arknavigator.utils.*
 import space.taran.arknavigator.utils.extensions.autoDisposeScope
-import space.taran.arknavigator.utils.imageForPredefinedIcon
-import space.taran.arknavigator.utils.loadZoomImage
 import java.nio.file.Path
 
 //todo join with FileItemViewHolder, it is basically the same, just different sizes
@@ -36,10 +34,18 @@ class PreviewItemViewHolder(val binding: ItemImageBinding, val presenter: Previe
         binding.layoutProgress.root.isVisible = true
         itemView.autoDisposeScope.launch {
             withContext(Dispatchers.IO){
-                val bitmap = createPdfPreview(file, binding.root.context)
-                withContext(Dispatchers.Main){
+                if (isPDF(file)){
+                    val bitmap = createPdfPreview(file, binding.root.context)
+                    withContext(Dispatchers.Main){
+                        binding.layoutProgress.root.isVisible = false
+                        binding.ivImage.setImageBitmap(bitmap)
+                        setZoomEnabled(false)
+                    }
+                }
+                else withContext(Dispatchers.Main){
                     binding.layoutProgress.root.isVisible = false
-                    binding.ivImage.setImageBitmap(bitmap)
+                    loadZoomImage(file, binding.ivImage)
+                    setZoomEnabled(true)
                 }
             }
         }

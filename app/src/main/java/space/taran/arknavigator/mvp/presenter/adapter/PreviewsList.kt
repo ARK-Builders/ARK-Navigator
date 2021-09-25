@@ -24,11 +24,11 @@ class PreviewsList(
             view.setPredefined(preview.predefined)
             view.setZoomEnabled(false)
         } else if (preview.fileType != FileType.PDF){
-            view.setImage(preview.image!!)
+            view.setImage(preview.previewPath!!)
             view.setZoomEnabled(true)
         }
         else if (preview.fileType == FileType.PDF){
-            view.setPDFPreview(preview.image!!)
+            view.setPDFPreview(preview.previewPath!!)
             view.setZoomEnabled(false)
         }
     }

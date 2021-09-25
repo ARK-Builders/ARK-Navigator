@@ -11,7 +11,7 @@ enum class PredefinedIcon {
 
 data class Preview(
     val predefined: PredefinedIcon? = null,
-    val image: Path? = null,
+    val previewPath: Path? = null,
     val fileType: FileType? = FileType.UNDEFINED
 ) {
     companion object {
@@ -24,7 +24,7 @@ data class Preview(
                 ?: return Preview(predefined = PredefinedIcon.FILE, fileType = FileType.UNDEFINED)
 
             val filePath = previewFile.file
-            return Preview(image = filePath, fileType = previewFile.fileType)
+            return Preview(previewPath = filePath, fileType = previewFile.fileType)
         }
     }
 }

@@ -26,6 +26,13 @@ fun loadImage(file: Path, container: ImageView) =
         .load(file.toFile())
         .into(container)
 
+fun loadCroppedImage(file: Path, container: ImageView) =
+    Glide.with(container.context)
+        .load(file.toFile())
+        .transition(DrawableTransitionOptions.withCrossFade())
+        .centerCrop()
+        .into(container)
+
 fun loadGifThumbnail(file: Path, container: ImageView) =
     Glide.with(container.context)
         .asBitmap()

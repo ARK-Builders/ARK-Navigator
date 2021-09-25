@@ -28,21 +28,26 @@ class FileItemViewHolder(private val binding: ItemFileGridBinding) :
             binding.iv.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.gray))
         } else {
             when(icon.fileType){
-                FileType.GIF -> loadGifThumbnail(icon.image!!, binding.iv)
+                FileType.GIF -> loadGifThumbnail(icon.previewPath!!, binding.iv)
                 FileType.PDF -> {
                     //Temporary workaround for asynchronous loading.
                     //To be changed later on, when indexing will be asynchronous
                     binding.iv.setImageResource(imageForPredefinedIcon(PredefinedIcon.FILE))
                     itemView.autoDisposeScope.launch {
                         withContext(Dispatchers.IO){
-                            val bitmap = createPdfPreview(icon.image!!, binding.root.context)
-                            withContext(Dispatchers.Main){
-                                loadCroppedBitmap(bitmap, binding.iv)
+                            if (isPDF(icon.previewPath!!)){
+                                val bitmap = createPdfPreview(icon.previewPath, binding.root.context)
+                                withContext(Dispatchers.Main){
+                                    loadCroppedBitmap(bitmap, binding.iv)
+                                }
+                            }
+                            else withContext(Dispatchers.Main){
+                                loadCroppedImage(icon.previewPath, binding.iv)
                             }
                         }
                     }
                 }
-                else -> loadImage(icon.image!!, binding.iv)
+                else -> loadImage(icon.previewPath!!, binding.iv)
             }
         }
     }
