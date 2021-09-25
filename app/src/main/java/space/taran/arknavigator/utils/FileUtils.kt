@@ -19,17 +19,14 @@ enum class Sorting {
 }
 
 enum class FileActionType{
-    EDIT_AS_OPEN, EDIT_AND_OPEN, OPEN_ONLY
+    EDIT_AS_OPEN, EDIT_AND_OPEN, OPEN_ONLY, OPEN_ONLY_DETACH_PROCESS
 }
 
 private val acceptedImageExt = listOf(".jpg", ".jpeg", ".png")
 private val acceptedEditOnlyExt = arrayListOf(".txt", ".doc", ".docx", ".odt", "ods")
     .also { it.addAll(acceptedImageExt) }
 private val acceptedReadAndEditExt = listOf(".pdf", ".md")
-
-// todo: https://www.toptal.com/android/android-threading-all-you-need-to-know
-//https://developer.android.com/reference/androidx/work/WorkManager.html
-//https://developer.android.com/reference/androidx/core/app/JobIntentService.html
+private val acceptedVideoExt = listOf(".mp4", ".wmv", ".avi", ".flv", ".mkv")
 
 fun provideIconImage(file: Path): Path? =
     providePreview(file) //todo downscale to, say, 128x128
@@ -52,9 +49,10 @@ fun isImage(filePath: Path): Boolean {
 }
 
 fun getFileActionType(filePath: Path): FileActionType{
-    return when(extension(filePath)){
+    return when(".${extension(filePath)}"){
         in acceptedEditOnlyExt -> FileActionType.EDIT_AS_OPEN
         in acceptedReadAndEditExt -> FileActionType.EDIT_AND_OPEN
+        in acceptedVideoExt -> FileActionType.OPEN_ONLY_DETACH_PROCESS
         else -> FileActionType.OPEN_ONLY
     }
 }
@@ -108,7 +106,7 @@ fun findLongestCommonPrefix(paths: List<Path>): Path {
 }
 
 fun extension(path: Path): String =
-    ".${path.extension}"
+    path.extension
 
 fun reifySorting(sorting: Sorting): Comparator<Path>? =
     when (sorting) {
