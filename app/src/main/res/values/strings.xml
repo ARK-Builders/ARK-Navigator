@@ -11,4 +11,7 @@
     <string name="dialog_roots_new_title">Add new root to the index</string>
     <string name="all_cancel">Cancel</string>
     <string name="all_pick">Pick</string>
+    <string name="item_device_type">[device]</string>
+    <string name="item_favorite_type">[favorite]</string>
+    <string name="item_root_type">[root]</string>
 </resources>

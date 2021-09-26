@@ -10,7 +10,9 @@ import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.R
 import space.taran.arknavigator.mvp.model.repo.FoldersRepo
 import space.taran.arknavigator.mvp.model.repo.ResourcesIndexFactory
+import space.taran.arknavigator.mvp.presenter.adapter.folderstree.FoldersTreePresenter
 import space.taran.arknavigator.mvp.presenter.adapter.ItemClickHandler
+import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.ui.resource.StringProvider
 import space.taran.arknavigator.utils.FOLDERS_SCREEN
@@ -36,6 +38,11 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
 
     @Inject
     lateinit var stringProvider: StringProvider
+
+    var foldersTreePresenter = FoldersTreePresenter(viewState, ::onFoldersTreeAddFavoriteBtnClick)
+        .apply {
+            App.instance.appComponent.inject(this)
+        }
 
     private lateinit var devices: List<Path>
 
@@ -67,7 +74,7 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
                 .mapValues { (_, favorites) -> favorites.toMutableList() }
                 .toMutableMap()
 
-            viewState.updateFoldersTree(devices, favoritesByRoot)
+            foldersTreePresenter.updateNodes(devices, favoritesByRoot)
             viewState.setProgressVisibility(false)
         }
     }
@@ -157,7 +164,7 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
 
         resourcesIndexFactory.buildFromFilesystem(root)
 
-        viewState.updateFoldersTree(devices, favoritesByRoot)
+        foldersTreePresenter.updateNodes(devices, favoritesByRoot)
         viewState.setProgressVisibility(false)
     }
 
@@ -178,7 +185,7 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
 
         foldersRepo.insertFavorite(root, relative)
 
-        viewState.updateFoldersTree(devices, favoritesByRoot)
+        foldersTreePresenter.updateNodes(devices, favoritesByRoot)
         viewState.setProgressVisibility(false)
     }
 

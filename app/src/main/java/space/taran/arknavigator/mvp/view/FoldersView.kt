@@ -12,7 +12,7 @@ interface FoldersView: MvpView, NotifiableView {
     fun setProgressVisibility(isVisible: Boolean)
     fun openRootPickerDialog(paths: List<Path>)
     fun closeRootPickerDialog()
-    fun updateFoldersTree(devices: List<Path>, folders: Folders)
+    fun updateFoldersTree()
     fun updateRootPickerDialogPath(path: Path)
     fun updateRootPickerDialogPickBtnState(isEnabled: Boolean, isRoot: Boolean)
 }
