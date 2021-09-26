@@ -9,6 +9,7 @@ import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.fragments.*
 import dagger.Component
 import space.taran.arknavigator.mvp.presenter.adapter.ResourcesGridPresenter
+import space.taran.arknavigator.mvp.presenter.adapter.folderstree.FoldersTreePresenter
 import javax.inject.Singleton
 
 @Singleton
@@ -31,4 +32,5 @@ interface AppComponent {
     fun inject(galleryPresenter: GalleryPresenter)
     fun inject(galleryFragment: GalleryFragment)
     fun inject(resourcesGridPresenter: ResourcesGridPresenter)
+    fun inject(foldersTreePresenter: FoldersTreePresenter)
 }

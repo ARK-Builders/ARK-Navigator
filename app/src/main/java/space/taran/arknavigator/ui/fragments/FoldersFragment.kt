@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import ru.terrakok.cicerone.Router
@@ -17,11 +18,11 @@ import space.taran.arknavigator.databinding.DialogRootsNewBinding
 import space.taran.arknavigator.databinding.FragmentFoldersBinding
 import space.taran.arknavigator.mvp.model.repo.Folders
 import space.taran.arknavigator.mvp.presenter.FoldersPresenter
-import space.taran.arknavigator.ui.adapter.FoldersTree
 import space.taran.arknavigator.ui.adapter.FolderPicker
 import space.taran.arknavigator.mvp.view.FoldersView
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.activity.MainActivity
+import space.taran.arknavigator.ui.adapter.folderstree.FoldersTreeAdapter
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.utils.FOLDERS_SCREEN
 import space.taran.arknavigator.utils.FOLDER_PICKER
@@ -32,7 +33,7 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
     @Inject
     lateinit var router: Router
 
-    private lateinit var foldersTree: FoldersTree
+    private var foldersTreeAdapter: FoldersTreeAdapter? = null
 
     private var folderPicker: FolderPicker? = null
     private var rootPickerDialog: AlertDialog? = null
@@ -65,6 +66,10 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
         Log.d(FOLDERS_SCREEN, "initializing FoldersFragment")
         (activity as MainActivity).setSelectedTab(0)
         (activity as MainActivity).setToolbarVisibility(false)
+        foldersTreeAdapter = FoldersTreeAdapter(presenter.foldersTreePresenter)
+        binding.rvRoots.layoutManager = LinearLayoutManager(context)
+        binding.rvRoots.adapter = foldersTreeAdapter
+
 
         binding.fabAddRoots.setOnClickListener {
             presenter.onAddRootBtnClick()
@@ -76,9 +81,8 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
         (activity as MainActivity).setBottomNavigationEnabled(!isVisible)
     }
 
-    override fun updateFoldersTree(devices: List<Path>, folders: Folders) {
-        foldersTree = FoldersTree(devices, folders, presenter::onFoldersTreeAddFavoriteBtnClick, router)
-        binding.rvRoots.adapter = foldersTree
+    override fun updateFoldersTree() {
+        foldersTreeAdapter?.dispatchUpdates()
     }
 
     override fun updateRootPickerDialogPath(path: Path) {

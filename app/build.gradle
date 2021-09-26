@@ -52,9 +52,6 @@ dependencies {
     implementation "androidx.recyclerview:recyclerview:1.1.0"
     implementation "androidx.documentfile:documentfile:1.0.1"
 
-    implementation "co.lujun:androidtagview:1.1.7"
-    implementation "com.github.atomgomba:treeviewadapter:master"
-
     implementation "com.github.moxy-community:moxy:2.1.2"
     implementation "com.github.moxy-community:moxy-androidx:2.1.2"
     implementation "com.github.moxy-community:moxy-ktx:2.1.2"
