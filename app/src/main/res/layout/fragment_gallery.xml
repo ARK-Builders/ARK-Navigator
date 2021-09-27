@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:layout_height="match_parent">
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/view_pager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
 
     <RelativeLayout
         android:id="@+id/preview_controls"
@@ -21,7 +21,7 @@
             android:layout_alignParentStart="true"
             android:layout_alignParentBottom="true"
             android:padding="10dp"
-            android:visibility="visible"/>
+            android:visibility="visible" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/remove_resource_fab"
@@ -34,14 +34,14 @@
             android:src="@drawable/ic_baseline_delete_24"
             app:borderWidth="0dp"
             app:elevation="6dp"
-            app:tint="@color/white"/>
+            app:tint="@color/white" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/share_resource_fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
             android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
             android:layout_margin="16dp"
             android:backgroundTint="@color/colorPrimary"
             android:src="@drawable/ic_baseline_share"
@@ -49,33 +49,38 @@
             app:elevation="6dp"
             app:tint="@color/white" />
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/open_file_edit_fab"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_above="@+id/tags_cg"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="16dp"
-            android:layout_toStartOf="@+id/open_resource_chooser_fab"
-            android:backgroundTint="@color/colorPrimary"
-            android:src="@drawable/ic_edit_file"
-            app:borderWidth="0dp"
-            app:elevation="6dp"
-            app:tint="@color/white"/>
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/open_resource_chooser_fab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/tags_cg"
-            android:layout_marginBottom="16dp"
             android:layout_alignParentEnd="true"
             android:layout_marginEnd="16dp"
-            android:backgroundTint="@color/colorPrimary"
-            android:src="@drawable/ic_baseline_chooser_24"
-            app:borderWidth="0dp"
-            app:elevation="6dp"
-            app:tint="@color/white"/>
+            android:layout_marginBottom="16dp"
+            android:orientation="horizontal">
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/open_file_edit_fab"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:backgroundTint="@color/colorPrimary"
+                android:src="@drawable/ic_edit_file"
+                app:borderWidth="0dp"
+                app:elevation="6dp"
+                app:tint="@color/white" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/open_resource_chooser_fab"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/colorPrimary"
+                android:src="@drawable/ic_baseline_chooser_24"
+                app:borderWidth="0dp"
+                app:elevation="6dp"
+                app:tint="@color/white" />
+
+        </LinearLayout>
+
     </RelativeLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
