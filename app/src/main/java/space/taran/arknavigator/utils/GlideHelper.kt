@@ -13,17 +13,27 @@ import java.nio.file.Path
 
 fun imageForPredefinedIcon(icon: PredefinedIcon): Int =
     when(icon) {
-        PredefinedIcon.FOLDER -> {
-            R.drawable.ic_baseline_folder
-        }
-        PredefinedIcon.FILE -> {
-            R.drawable.ic_file
-        }
+        PredefinedIcon.FOLDER -> R.drawable.ic_baseline_folder
+        PredefinedIcon.PDF -> R.drawable.ic_file_pdf
+        PredefinedIcon.GIF -> R.drawable.ic_file_gif
+        PredefinedIcon.DOC -> R.drawable.ic_file_doc
+        PredefinedIcon.DOCX -> R.drawable.ic_file_docx
+        PredefinedIcon.HTML -> R.drawable.ic_file_html
+        PredefinedIcon.ODT -> R.drawable.ic_file_odt
+        PredefinedIcon.ODS -> R.drawable.ic_file_ods
+        PredefinedIcon.XLS -> R.drawable.ic_file_xls
+        PredefinedIcon.XLSX -> R.drawable.ic_file_xlsx
+        else -> R.drawable.ic_file
     }
 
 fun loadImage(file: Path, container: ImageView) =
     Glide.with(container.context)
         .load(file.toFile())
+        .into(container)
+
+fun loadResource(resourceId: Int, container: ImageView) =
+    Glide.with(container.context)
+        .load(resourceId)
         .into(container)
 
 fun loadCroppedImage(file: Path, container: ImageView) =
@@ -36,6 +46,13 @@ fun loadCroppedImage(file: Path, container: ImageView) =
 fun loadGifThumbnail(file: Path, container: ImageView) =
     Glide.with(container.context)
         .asBitmap()
+        .load(file.toFile())
+        .into(container)
+
+fun loadGifThumbnailWithPlaceHolder(file: Path, placeHolder: Int, container: ImageView) =
+    Glide.with(container.context)
+        .asBitmap()
+        .placeholder(placeHolder)
         .load(file.toFile())
         .into(container)
 
