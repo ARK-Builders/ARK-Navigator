@@ -24,7 +24,8 @@ class PreviewItemViewHolder(val binding: ItemImageBinding, val presenter: Previe
         binding.ivImage.setImageResource(imageForPredefinedIcon(resource))
     }
 
-    override fun setImage(file: Path): Unit = with(binding.root) {
+    override fun setImage(file: Path, playVisible: Boolean): Unit = with(binding.root) {
+        binding.icPlay.isVisible = playVisible
         loadZoomImage(file, binding.ivImage)
     }
 

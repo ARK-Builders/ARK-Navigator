@@ -2,7 +2,7 @@ package space.taran.arknavigator.mvp.view.item
 
 import android.content.res.ColorStateList
 import android.util.Log
-import androidx.core.content.ContextCompat
+import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -25,30 +25,51 @@ class FileItemViewHolder(private val binding: ItemFileGridBinding) :
         Log.d(ITEMS_CONTAINER, "setting icon $icon")
         if (icon.predefined != null) {
             binding.iv.setImageResource(imageForPredefinedIcon(icon.predefined))
-            binding.iv.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.gray))
         } else {
-            when(icon.fileType){
-                FileType.GIF -> loadGifThumbnail(icon.previewPath!!, binding.iv)
+            when (icon.fileType) {
+                FileType.GIF ->
+                    loadGifThumbnailWithPlaceHolder(
+                        icon.previewPath!!,
+                        imageForPredefinedIcon(PredefinedIcon.GIF),
+                        binding.iv)
                 FileType.PDF -> {
                     //Temporary workaround for asynchronous loading.
                     //To be changed later on, when indexing will be asynchronous
-                    binding.iv.setImageResource(imageForPredefinedIcon(PredefinedIcon.FILE))
+                    binding.iv.setImageResource(imageForPredefinedIcon(PredefinedIcon.PDF))
                     itemView.autoDisposeScope.launch {
-                        withContext(Dispatchers.IO){
-                            if (isPDF(icon.previewPath!!)){
-                                val bitmap = createPdfPreview(icon.previewPath, binding.root.context)
-                                withContext(Dispatchers.Main){
+                        withContext(Dispatchers.IO) {
+                            if (isPDF(icon.previewPath!!)) {
+                                val bitmap =
+                                    createPdfPreview(icon.previewPath, binding.root.context)
+                                withContext(Dispatchers.Main) {
                                     loadCroppedBitmap(bitmap, binding.iv)
                                 }
-                            }
-                            else withContext(Dispatchers.Main){
+                            } else withContext(Dispatchers.Main) {
                                 loadCroppedImage(icon.previewPath, binding.iv)
                             }
                         }
                     }
                 }
-                else -> loadImage(icon.previewPath!!, binding.iv)
+                else -> loadCroppedImage(icon.previewPath!!, binding.iv)
             }
+        }
+
+        if (icon.extraInfo != null) {
+            binding.apply {
+                resolutionTV.text = icon.extraInfo[Preview.ExtraInfoTag.MEDIA_RESOLUTION]
+                durationTV.text = icon.extraInfo[Preview.ExtraInfoTag.MEDIA_DURATION]
+
+                resolutionTV.visibility =
+                    if (icon.extraInfo[Preview.ExtraInfoTag.MEDIA_RESOLUTION] == null) View.GONE
+                    else View.VISIBLE
+
+                durationTV.visibility =
+                    if (icon.extraInfo[Preview.ExtraInfoTag.MEDIA_DURATION] == null) View.GONE
+                    else View.VISIBLE
+            }
+        } else {
+            binding.durationTV.visibility = View.GONE
+            binding.resolutionTV.visibility = View.GONE
         }
     }
 
