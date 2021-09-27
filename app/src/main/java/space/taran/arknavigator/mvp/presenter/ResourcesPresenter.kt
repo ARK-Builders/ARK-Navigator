@@ -14,10 +14,8 @@ import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.utils.RESOURCES_SCREEN
-import space.taran.arknavigator.utils.Tags
 import java.nio.file.Path
 import javax.inject.Inject
-import kotlin.system.measureTimeMillis
 
 class ResourcesPresenter(
     val root: Path?,
@@ -90,7 +88,7 @@ class ResourcesPresenter(
             storage = AggregatedTagsStorage(rootToStorage.values)
 
             gridPresenter.init(index, storage, router)
-            gridPresenter.updateResources(resources())
+            gridPresenter.resetResources(resources())
             tagsSelectorPresenter.init(index, storage)
             tagsSelectorPresenter.calculateTagsAndSelection()
 
@@ -112,17 +110,17 @@ class ResourcesPresenter(
     fun onViewResume() {
         tagsSelectorPresenter.calculateTagsAndSelection()
         if (!tagsEnabled)
-            gridPresenter.updateResources(resources(untagged = true))
+            gridPresenter.resetResources(resources(untagged = true))
     }
 
     fun onMenuTagsToggle(enabled: Boolean) {
         tagsEnabled = enabled
         viewState.setTagsEnabled(tagsEnabled)
         if (tagsEnabled) {
-            gridPresenter.updateResources(resources())
-            gridPresenter.updateSelection(tagsSelectorPresenter.selection.toList())
+            gridPresenter.resetResources(resources())
+            gridPresenter.updateSelection(tagsSelectorPresenter.selection)
         } else
-            gridPresenter.updateResources(resources(untagged = true))
+            gridPresenter.resetResources(resources(untagged = true))
         if (tagsEnabled && storage.getTags(resources()).isEmpty()) {
             viewState.notifyUser("Tag something first")
         }
@@ -138,17 +136,16 @@ class ResourcesPresenter(
 
     private fun onSelectionChange(selection: Set<ResourceId>) {
         viewState.notifyUser("${selection.size} resources selected")
-        gridPresenter.updateSelection(selection.toList())
+        gridPresenter.updateSelection(selection)
     }
 
-    private fun resources(untagged: Boolean = false): List<ResourceId> {
+    private fun resources(untagged: Boolean = false): Set<ResourceId> {
         val underPrefix = index.listIds(prefix)
 
         val result = if (untagged) {
             storage
                 .listUntaggedResources()
                 .intersect(underPrefix)
-                .toList()
         } else {
             underPrefix
         }

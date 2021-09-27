@@ -1,7 +1,6 @@
 package space.taran.arknavigator.mvp.model.repo
 
 import space.taran.arknavigator.mvp.model.dao.ResourceId
-import space.taran.arknavigator.utils.Tag
 import space.taran.arknavigator.utils.Tags
 
 interface TagsStorage {
@@ -10,15 +9,11 @@ interface TagsStorage {
 
     fun getTags(id: ResourceId): Tags
 
-    fun getTags(ids: List<ResourceId>): Tags
+    fun getTags(ids: Iterable<ResourceId>): Tags
 
-    fun groupTagsByResources(ids: List<ResourceId>): Map<ResourceId, Tags> {
-        val resourcesWithTags = mutableMapOf<ResourceId, Tags>()
-        ids.forEach { id ->
-            resourcesWithTags[id] = getTags(id)
-        }
-        return resourcesWithTags
-    }
+    fun groupTagsByResources(ids: Iterable<ResourceId>): Map<ResourceId, Tags> =
+        ids.map { it to getTags(it) }
+           .toMap()
 
     suspend fun setTags(id: ResourceId, tags: Tags)
 

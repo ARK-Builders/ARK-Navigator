@@ -7,13 +7,13 @@ interface ResourcesIndex {
 
     //todo: with async indexing we must emit ids of not-indexed-yet resources too
 
-    fun listIds(prefix: Path?): List<ResourceId>
+    fun listIds(prefix: Path?): Set<ResourceId>
 
     // we pass all known resource ids to a storage because
     // 1) any storage exists globally
     // 2) we maintain only 1 storage per root
     // 3) every storage is initialized with resource ids
-    fun listAllIds(): List<ResourceId> = listIds(null)
+    fun listAllIds(): Set<ResourceId> = listIds(null)
 
     fun getPath(id: ResourceId): Path?
 
