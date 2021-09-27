@@ -3,17 +3,22 @@ package space.taran.arknavigator.utils
 import android.content.Context
 import space.taran.arknavigator.ui.App
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.ParcelFileDescriptor
 import android.util.Log
 import com.shockwave.pdfium.PdfDocument
 import com.shockwave.pdfium.PdfiumCore
 import space.taran.arknavigator.mvp.model.dao.computeId
+import space.taran.arknavigator.ui.fragments.utils.PredefinedIcon
+import space.taran.arknavigator.ui.fragments.utils.Preview
 import java.io.File
 import java.lang.IllegalArgumentException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.util.concurrent.TimeUnit
 import kotlin.io.path.extension
 
 val ROOT_PATH: Path = Paths.get("/")
@@ -37,17 +42,36 @@ enum class FileType {
 
 const val PDF_PREVIEW_FOLDER_NAME = "pdf_preview"
 
-class PreviewFile(val fileType: FileType, val file: Path) {
+class PreviewFile(
+    val fileType: FileType? = null,
+    val file: Path? = null,
+    val predefinedIcon: PredefinedIcon? = null,
+    val extraInfo: MutableMap<Preview.ExtraInfoTag, String>? = null
+) {
     companion object PreviewCompanion {
         fun createPair(file: Path): PreviewFile? {
             return when {
-                isImage(file) -> PreviewFile(FileType.IMAGE, file)
-                isVideo(file) -> PreviewFile(FileType.VIDEO, file)
-                isGif(file) -> PreviewFile(FileType.GIF, file)
-                isPDF(file) -> {
-                    Log.d("TAG", "createPair isPDF: $file")
-                    getPdfPreview(file)
+                isImage(file) -> {
+                    PreviewFile(
+                        FileType.IMAGE,
+                        file)
                 }
+                isVideo(file) -> {
+                    PreviewFile(
+                        FileType.VIDEO,
+                        file,
+                        extraInfo = getVideoInfo(file))
+                }
+                isFormat(file, ".gif") -> PreviewFile(FileType.GIF, file)
+                isFormat(file, ".txt") -> PreviewFile(predefinedIcon = PredefinedIcon.TXT)
+                isFormat(file, ".html") -> PreviewFile(predefinedIcon = PredefinedIcon.HTML)
+                isFormat(file, ".doc") -> PreviewFile(predefinedIcon = PredefinedIcon.DOC)
+                isFormat(file, ".docx") -> PreviewFile(predefinedIcon = PredefinedIcon.DOCX)
+                isFormat(file, ".odt") -> PreviewFile(predefinedIcon = PredefinedIcon.ODT)
+                isFormat(file, ".ods") -> PreviewFile(predefinedIcon = PredefinedIcon.ODS)
+                isFormat(file, ".xls") -> PreviewFile(predefinedIcon = PredefinedIcon.XLS)
+                isFormat(file, ".xlsx") -> PreviewFile(predefinedIcon = PredefinedIcon.XLSX)
+                isPDF(file) -> getPdfPreview(file)
                 else -> null
             }
         }
@@ -55,10 +79,9 @@ class PreviewFile(val fileType: FileType, val file: Path) {
         private fun getPdfPreview(file: Path): PreviewFile {
             val id = computeId(file)
             val savedPreviews = getSavedPdfPreviews()
-            return if (savedPreviews?.contains(id) == true){
+            return if (savedPreviews?.contains(id) == true) {
                 PreviewFile(FileType.PDF, getPdfPreviewByID(id))
-            }
-            else PreviewFile(FileType.PDF, file)
+            } else PreviewFile(FileType.PDF, file)
         }
     }
 }
@@ -86,12 +109,13 @@ fun isVideo(filePath: Path): Boolean {
     val extension = extension(filePath)
     return acceptedVideoExt.contains(extension)
 }
-fun isGif(filePath: Path): Boolean {
-    return extension(filePath) == ".gif"
-}
 
 fun isPDF(filePath: Path): Boolean {
     return extension(filePath) == ".pdf"
+}
+
+fun isFormat(filePath: Path, format: String): Boolean {
+    return extension(filePath) == format
 }
 
 fun getPdfPreviewsFolder(): File =
@@ -110,6 +134,54 @@ fun getSavedPdfPreviews(): List<Long?>? =
             it.nameWithoutExtension.toLongOrNull()
         }
 
+fun getVideoInfo(filePath: Path): MutableMap<Preview.ExtraInfoTag, String> {
+    val retriever = MediaMetadataRetriever()
+
+    retriever.setDataSource(App.instance, Uri.fromFile(filePath.toFile()))
+    val timeMillis =
+        retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong() ?: 0L
+    val width =
+        retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toLong() ?: 0L
+    val height =
+        retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toLong() ?: 0L
+
+
+    var minutes = TimeUnit.MILLISECONDS.toMinutes(timeMillis).toString()
+    val minutesPassedInMillis = TimeUnit.MINUTES.toMillis(minutes.toLong()).toString()
+    var seconds =
+        TimeUnit.MILLISECONDS.toSeconds(timeMillis - minutesPassedInMillis.toLong()).toString()
+
+    if (minutes.length == 1) minutes = "0$minutes"
+    if (seconds.length == 1) seconds = "0$seconds"
+
+    val duration = "$minutes:$seconds"
+    val resolution = convertToResolution(width, height)
+
+    val mutableMap = mutableMapOf<Preview.ExtraInfoTag, String>()
+    mutableMap[Preview.ExtraInfoTag.MEDIA_DURATION] = duration
+
+    if (resolution != null)
+        mutableMap[Preview.ExtraInfoTag.MEDIA_RESOLUTION] = resolution
+
+    retriever.release()
+    return mutableMap
+}
+
+fun convertToResolution(width: Long, height: Long): String? {
+    val resolutionPair = listOf(width, height)
+
+    return when {
+        resolutionPair.containsAll(listOf(256, 144)) -> "144p"
+        resolutionPair.containsAll(listOf(426, 240)) -> "240p"
+        resolutionPair.containsAll(listOf(640, 360)) -> "360p"
+        resolutionPair.containsAll(listOf(854, 480)) -> "480p"
+        resolutionPair.containsAll(listOf(1280, 720)) -> "720p"
+        resolutionPair.containsAll(listOf(1920, 1080)) -> "1080p"
+        resolutionPair.containsAll(listOf(2560, 1440)) -> "1440p"
+        resolutionPair.containsAll(listOf(3840, 2160)) -> "2160p"
+        else -> null
+    }
+}
 fun createPdfPreview(filePath: Path, context: Context? = null): Bitmap {
     val pageNumber = 0
     val finalContext = context ?: App.instance

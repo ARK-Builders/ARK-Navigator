@@ -69,6 +69,9 @@ class GalleryPresenter(
         viewState.setFullscreen(isFullscreen)
     }
 
+    fun getExtraInfoAt(position: Int): MutableMap<Preview.ExtraInfoTag, String>? =
+        previews.getItem(position).extraInfo
+
     private fun onPreviewsItemZoom(zoomed: Boolean) {
         if (zoomed) {
             isFullscreen = true
