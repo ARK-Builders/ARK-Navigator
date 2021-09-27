@@ -7,3 +7,16 @@ fun View.changeEnabledStatus(isEnabledStatus: Boolean){
     isClickable = isEnabledStatus
     isFocusable = isEnabledStatus
 }
+
+fun View.makeGone(){
+    visibility = View.GONE
+}
+
+fun View.makeVisible(){
+    visibility = View.VISIBLE
+}
+
+fun View.makeVisibleAndSetOnClickListener(action: () -> Unit){
+    setOnClickListener{ action() }
+    visibility = View.VISIBLE
+}

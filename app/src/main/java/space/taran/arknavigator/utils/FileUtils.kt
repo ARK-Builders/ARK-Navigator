@@ -44,7 +44,7 @@ fun providePreview(file: Path): Path? =
     }
 
 fun isImage(filePath: Path): Boolean {
-    val extension = extension(filePath)
+    val extension = ".${extension(filePath)}"
     return acceptedImageExt.contains(extension)
 }
 
@@ -62,9 +62,6 @@ fun isHidden(path: Path): Boolean =
 
 fun folderExists(path: Path): Boolean =
     Files.exists(path) || Files.isDirectory(path)
-
-fun isFileEmpty(filePath: Path?): Boolean =
-    filePath == null || filePath.toString().trim().isEmpty()
 
 fun listDevices(): List<Path> =
     App.instance.getExternalFilesDirs(null)
