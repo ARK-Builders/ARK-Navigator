@@ -11,7 +11,7 @@ import space.taran.arknavigator.utils.Tag
 
 class TagsSelectorAdapter(val chipGroup: ChipGroup, val presenter: TagsSelectorPresenter) {
     private val clearChip = createClearChip()
-    private var chipsByTags = mutableMapOf<Tag, Chip>()
+    private val chipsByTags = mutableMapOf<Tag, Chip>()
 
     fun drawTags() {
         chipGroup.removeAllViews()
@@ -23,7 +23,7 @@ class TagsSelectorAdapter(val chipGroup: ChipGroup, val presenter: TagsSelectorP
     }
 
     private fun createChips() {
-        chipsByTags = mutableMapOf()
+        chipsByTags.clear()
         presenter.included.forEach { tag ->
             val chip = createDefaultChip(tag)
             chip.setTextColor(Color.BLUE)

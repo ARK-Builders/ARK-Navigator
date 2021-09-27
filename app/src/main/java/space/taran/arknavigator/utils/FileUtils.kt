@@ -87,5 +87,11 @@ fun findLongestCommonPrefix(paths: List<Path>): Path {
     return tailrec(ROOT_PATH, paths).first
 }
 
-fun extension(path: Path): String =
-    path.fileName.extension
+fun reifySorting(sorting: Sorting): Comparator<Path>? =
+    when (sorting) {
+        Sorting.NAME -> compareBy { it.fileName }
+        Sorting.SIZE -> compareBy { Files.size(it) }
+        Sorting.TYPE -> compareBy { it.fileName.extension }
+        Sorting.LAST_MODIFIED -> compareBy { Files.getLastModifiedTime(it) }
+        Sorting.DEFAULT -> null
+    }

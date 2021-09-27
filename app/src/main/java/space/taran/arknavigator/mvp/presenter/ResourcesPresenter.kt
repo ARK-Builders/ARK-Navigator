@@ -14,7 +14,6 @@ import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.utils.RESOURCES_SCREEN
-import space.taran.arknavigator.utils.Tags
 import java.nio.file.Path
 import javax.inject.Inject
 
@@ -110,7 +109,7 @@ class ResourcesPresenter(
     fun onViewResume() {
         tagsSelectorPresenter.calculateTagsAndSelection()
         if (!tagsEnabled)
-            gridPresenter.updateResources(resources(untagged = true))
+            gridPresenter.updateResources(listResources(untagged = true))
     }
 
     fun onMenuTagsToggle(enabled: Boolean) {
@@ -119,8 +118,8 @@ class ResourcesPresenter(
         if (tagsEnabled)
             gridPresenter.updateResources(tagsSelectorPresenter.selection.toList())
         else
-            gridPresenter.updateResources(resources(untagged = true))
-        if (tagsEnabled && storage.getTags(resources()).isEmpty()) {
+            gridPresenter.updateResources(listResources(untagged = true))
+        if (tagsEnabled && storage.getTags(listResources()).isEmpty()) {
             viewState.notifyUser("Tag something first")
         }
     }
@@ -138,7 +137,7 @@ class ResourcesPresenter(
         gridPresenter.updateResources(selection.toList())
     }
 
-    private fun resources(untagged: Boolean = false): List<ResourceId> {
+    private fun listResources(untagged: Boolean = false): List<ResourceId> {
         val underPrefix = index.listIds(prefix)
 
         val result = if (untagged) {

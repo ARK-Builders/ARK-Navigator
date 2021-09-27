@@ -59,7 +59,8 @@ class TagsSelectorPresenter(
     }
 
     fun onClearClick() {
-        (included + excluded).forEach { uncheckTag(it, needToCalculate = false) }
+        included.clear()
+        excluded.clear()
         calculateTagsAndSelection()
     }
 
@@ -104,7 +105,7 @@ class TagsSelectorPresenter(
         Log.d(TAGS_SELECTOR, "tags available: $availableTags")
         Log.d(TAGS_SELECTOR, "tags unavailable: $unavailableTags")
 
-        isClearBtnVisible = (included + excluded).size > 1
+        isClearBtnVisible = included.isNotEmpty() || excluded.isNotEmpty()
 
         onSelectionChangeListener(selection)
 

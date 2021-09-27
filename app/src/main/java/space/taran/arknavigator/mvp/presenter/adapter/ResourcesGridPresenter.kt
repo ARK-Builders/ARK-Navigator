@@ -12,7 +12,7 @@ import space.taran.arknavigator.mvp.view.item.FileItemView
 import space.taran.arknavigator.navigation.Screens
 import space.taran.arknavigator.ui.fragments.utils.Preview
 import space.taran.arknavigator.utils.Sorting
-import space.taran.arknavigator.utils.extension
+import space.taran.arknavigator.utils.reifySorting
 import java.nio.file.Files
 import javax.inject.Inject
 
@@ -23,7 +23,7 @@ class ResourcesGridPresenter(
     @Inject
     lateinit var userPreferences: UserPreferences
 
-    private var resources = mutableListOf<ResourceId>()
+    private var resources = listOf<ResourceId>()
     private lateinit var index: ResourcesIndex
     private lateinit var storage: TagsStorage
     private lateinit var router: Router
@@ -69,7 +69,7 @@ class ResourcesGridPresenter(
     }
 
     fun updateResources(resources: List<ResourceId>) {
-        this.resources = resources.toMutableList()
+        this.resources = resources
         sortAndUpdateAdapter()
     }
 
@@ -84,15 +84,19 @@ class ResourcesGridPresenter(
     }
 
     private fun sortAndUpdateAdapter() {
-        when (sorting) {
-            Sorting.NAME -> resources.sortBy { index.getPath(it)!!.fileName }
-            Sorting.SIZE -> resources.sortBy { Files.size(index.getPath(it)!!) }
-            Sorting.TYPE -> resources.sortBy { extension(index.getPath(it)!!) }
-            Sorting.LAST_MODIFIED -> resources.sortBy { Files.getLastModifiedTime(index.getPath(it)!!) }
-            Sorting.DEFAULT -> {}
+        val comparator = reifySorting(sorting)
+        if (comparator != null) {
+            resources = resources.map { index.getPath(it)!! to it }
+                .toMap()
+                .toSortedMap(comparator)
+                .values
+                .toList()
+
+            if (!ascending) {
+                resources = resources.reversed()
+            }
         }
-        if (sorting != Sorting.DEFAULT && !ascending)
-            resources.reverse()
+
         viewState.updateAdapter()
     }
 }
