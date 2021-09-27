@@ -17,6 +17,7 @@ import space.taran.arknavigator.utils.RESOURCES_SCREEN
 import space.taran.arknavigator.utils.Tags
 import java.nio.file.Path
 import javax.inject.Inject
+import kotlin.system.measureTimeMillis
 
 class ResourcesPresenter(
     val root: Path?,
@@ -89,6 +90,7 @@ class ResourcesPresenter(
             storage = AggregatedTagsStorage(rootToStorage.values)
 
             gridPresenter.init(index, storage, router)
+            gridPresenter.updateResources(resources())
             tagsSelectorPresenter.init(index, storage)
             tagsSelectorPresenter.calculateTagsAndSelection()
 
@@ -116,9 +118,10 @@ class ResourcesPresenter(
     fun onMenuTagsToggle(enabled: Boolean) {
         tagsEnabled = enabled
         viewState.setTagsEnabled(tagsEnabled)
-        if (tagsEnabled)
-            gridPresenter.updateResources(tagsSelectorPresenter.selection.toList())
-        else
+        if (tagsEnabled) {
+            gridPresenter.updateResources(resources())
+            gridPresenter.updateSelection(tagsSelectorPresenter.selection.toList())
+        } else
             gridPresenter.updateResources(resources(untagged = true))
         if (tagsEnabled && storage.getTags(resources()).isEmpty()) {
             viewState.notifyUser("Tag something first")
@@ -135,7 +138,7 @@ class ResourcesPresenter(
 
     private fun onSelectionChange(selection: Set<ResourceId>) {
         viewState.notifyUser("${selection.size} resources selected")
-        gridPresenter.updateResources(selection.toList())
+        gridPresenter.updateSelection(selection.toList())
     }
 
     private fun resources(untagged: Boolean = false): List<ResourceId> {

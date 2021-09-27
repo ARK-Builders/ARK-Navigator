@@ -23,7 +23,8 @@ class ResourcesGridPresenter(
     @Inject
     lateinit var userPreferences: UserPreferences
 
-    private var resources = mutableListOf<ResourceId>()
+    private var resources = listOf<ResourceId>()
+    private var selection = listOf<ResourceId>()
     private lateinit var index: ResourcesIndex
     private lateinit var storage: TagsStorage
     private lateinit var router: Router
@@ -39,10 +40,10 @@ class ResourcesGridPresenter(
             scope.launch { userPreferences.setSortingAscending(value) }
         }
 
-    fun getCount() = resources.size
+    fun getCount() = selection.size
 
     fun bindView(view: FileItemView) {
-        val resource = resources[view.position()]
+        val resource = selection[view.position()]
 
         val path = index.getPath(resource)
             ?: throw java.lang.AssertionError("Resource to display must be indexed")
@@ -57,7 +58,7 @@ class ResourcesGridPresenter(
     }
 
     fun onItemClick(pos: Int) {
-        router.navigateTo(Screens.GalleryScreen(index, storage, resources, pos))
+        router.navigateTo(Screens.GalleryScreen(index, storage, resources.toMutableList(), pos))
     }
 
     suspend fun init(index: ResourcesIndex, storage: TagsStorage, router: Router) {
@@ -68,8 +69,14 @@ class ResourcesGridPresenter(
         ascending = userPreferences.isSortingAscending()
     }
 
+    fun updateSelection(newSelection: List<ResourceId>) {
+        selection = resources.intersect(newSelection).toList()
+        viewState.updateAdapter()
+    }
+
     fun updateResources(resources: List<ResourceId>) {
-        this.resources = resources.toMutableList()
+        this.resources = resources
+        this.selection = resources
         sortAndUpdateAdapter()
     }
 
@@ -84,15 +91,16 @@ class ResourcesGridPresenter(
     }
 
     private fun sortAndUpdateAdapter() {
-        when (sorting) {
-            Sorting.NAME -> resources.sortBy { index.getPath(it)!!.fileName }
-            Sorting.SIZE -> resources.sortBy { Files.size(index.getPath(it)!!) }
-            Sorting.TYPE -> resources.sortBy { extension(index.getPath(it)!!) }
-            Sorting.LAST_MODIFIED -> resources.sortBy { Files.getLastModifiedTime(index.getPath(it)!!) }
-            Sorting.DEFAULT -> {}
+        resources = when (sorting) {
+            Sorting.NAME -> resources.sortedBy { index.getPath(it)!!.fileName }
+            Sorting.SIZE -> resources.sortedBy { Files.size(index.getPath(it)!!) }
+            Sorting.TYPE -> resources.sortedBy { extension(index.getPath(it)!!) }
+            Sorting.LAST_MODIFIED -> resources.sortedBy { Files.getLastModifiedTime(index.getPath(it)!!) }
+            Sorting.DEFAULT -> resources
         }
         if (sorting != Sorting.DEFAULT && !ascending)
-            resources.reverse()
+            resources = resources.reversed()
+        selection = resources.intersect(selection).toList()
         viewState.updateAdapter()
     }
 }
