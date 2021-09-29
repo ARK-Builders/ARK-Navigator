@@ -1,4 +1,4 @@
-package space.taran.arknavigator.mvp.presenter.adapter
+package space.taran.arknavigator.mvp.presenter.adapter.tagsselector
 
 import android.util.Log
 import space.taran.arknavigator.mvp.model.dao.ResourceId
@@ -8,6 +8,7 @@ import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.utils.Popularity
 import space.taran.arknavigator.utils.TAGS_SELECTOR
 import space.taran.arknavigator.utils.Tag
+import space.taran.arknavigator.utils.Tags
 import java.lang.AssertionError
 import java.nio.file.Path
 
@@ -18,6 +19,7 @@ class TagsSelectorPresenter(
 ) {
     private var index: ResourcesIndex? = null
     private var storage: TagsStorage? = null
+    private val actions = ArrayDeque<TagsSelectorAction>()
 
     var included = mutableSetOf<Tag>()
         private set
@@ -43,22 +45,41 @@ class TagsSelectorPresenter(
     }
 
     fun onTagClick(tag: Tag) {
-        if (excluded.contains(tag) || included.contains(tag)) {
-            uncheckTag(tag)
-        } else {
-            includeTag(tag)
+        when {
+            excluded.contains(tag) -> {
+                actions.addLast(UncheckExcluded(tag))
+                uncheckTag(tag)
+            }
+            included.contains(tag) -> {
+                actions.addLast(UncheckIncluded(tag))
+                uncheckTag(tag)
+            }
+            else -> {
+                actions.addLast(Include(tag))
+                includeTag(tag)
+            }
         }
     }
 
     fun onTagLongClick(tag: Tag) {
-        if (!excluded.contains(tag) || included.contains(tag)) {
-            excludeTag(tag)
-        } else {
-            uncheckTag(tag)
+        when {
+            included.contains(tag) -> {
+                actions.addLast(UncheckAndExclude(tag))
+                excludeTag(tag)
+            }
+            !excluded.contains(tag) -> {
+                actions.addLast(Exclude(tag))
+                excludeTag(tag)
+            }
+            else -> {
+                actions.addLast(UncheckExcluded(tag))
+                uncheckTag(tag)
+            }
         }
     }
 
     fun onClearClick() {
+        actions.addLast(Clear(included.toSet(), excluded.toSet()))
         included.clear()
         excluded.clear()
         calculateTagsAndSelection()
@@ -115,6 +136,69 @@ class TagsSelectorPresenter(
             viewState.setTagsSelectorHintEnabled(false)
 
         viewState.drawTags()
+    }
+
+    fun onBackClick(): Boolean {
+        if (actions.isEmpty())
+            return false
+
+        val action = findLastActualAction() ?: return false
+
+        when(action) {
+            is Include -> {
+                included.remove(action.tag!!)
+            }
+            is Exclude -> {
+                excluded.remove(action.tag!!)
+            }
+            is UncheckIncluded -> {
+                included.add(action.tag!!)
+            }
+            is UncheckExcluded -> {
+                excluded.add(action.tag!!)
+            }
+            is UncheckAndExclude -> {
+                excluded.remove(action.tag!!)
+                included.add(action.tag)
+            }
+            is Clear -> {
+                included = action.included.toMutableSet()
+                excluded = action.excluded.toMutableSet()
+            }
+        }
+
+        actions.removeLast()
+
+        calculateTagsAndSelection()
+
+        return true
+    }
+
+    private fun findLastActualAction(): TagsSelectorAction? {
+        val allTags = storage!!.getTags(index!!.listIds(prefix))
+
+        while (actions.lastOrNull() != null) {
+            val lastAction = actions.last()
+            if (isActionActual(lastAction, allTags)) {
+                return lastAction
+            } else
+                actions.removeLast()
+        }
+
+        return null
+    }
+
+    private fun isActionActual(action: TagsSelectorAction, allTags: Tags): Boolean {
+        action.tag?.let { tag ->
+            if (!allTags.contains(tag))
+                return false
+        } ?: let {
+            action as Clear
+            if (action.excluded.intersect(allTags).isEmpty() &&
+                action.included.intersect(allTags).isEmpty())
+                return false
+        }
+        return true
     }
 
     private fun includeTag(tag: Tag) {

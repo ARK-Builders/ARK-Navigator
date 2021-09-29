@@ -6,7 +6,7 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import space.taran.arknavigator.R
-import space.taran.arknavigator.mvp.presenter.adapter.TagsSelectorPresenter
+import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagsSelectorPresenter
 import space.taran.arknavigator.utils.Tag
 
 class TagsSelectorAdapter(val chipGroup: ChipGroup, val presenter: TagsSelectorPresenter) {

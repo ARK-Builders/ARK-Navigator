@@ -35,7 +35,7 @@ import kotlin.math.abs
 //`path` is used for filtering resources' paths
 //       if it is `null`, then no filtering is performed
 //       (recommended instead of passing same value for `path` and `root)
-class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(), ResourcesView {
+class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(), ResourcesView, BackButtonListener {
 
     private val presenter by moxyPresenter {
         ResourcesPresenter(root, path).apply {
@@ -170,6 +170,10 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
 
     override fun closeSortDialog() {
         sortByDialog?.dismiss()
+    }
+
+    override fun backClicked(): Boolean {
+        return presenter.onBackClick()
     }
 
     private fun showSortByDialog(sorting: Sorting, ascending: Boolean) {

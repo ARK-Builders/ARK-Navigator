@@ -9,7 +9,7 @@ import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.dao.ResourceId
 import space.taran.arknavigator.mvp.model.repo.*
 import space.taran.arknavigator.mvp.presenter.adapter.ResourcesGridPresenter
-import space.taran.arknavigator.mvp.presenter.adapter.TagsSelectorPresenter
+import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagsSelectorPresenter
 import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.fragments.utils.Notifications
@@ -130,6 +130,12 @@ class ResourcesPresenter(
 
     fun onSortDialogClose() {
         viewState.closeSortDialog()
+    }
+
+    fun onBackClick(): Boolean {
+        if (!tagsSelectorPresenter.onBackClick())
+            router.exit()
+        return true
     }
 
     private fun onSelectionChange(selection: Set<ResourceId>) {
