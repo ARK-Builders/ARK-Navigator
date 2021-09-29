@@ -3,9 +3,14 @@ package space.taran.arknavigator.ui.activity
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.Environment
+import android.provider.Settings
 import android.util.Log
 import android.view.View
+import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.forEach
@@ -20,12 +25,12 @@ import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
 import ru.terrakok.cicerone.NavigatorHolder
 import ru.terrakok.cicerone.android.support.SupportAppNavigator
+import space.taran.arknavigator.BuildConfig
 import space.taran.arknavigator.databinding.ActivityMainBinding
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.utils.MAIN
 import space.taran.arknavigator.utils.PERMISSIONS
-import java.lang.AssertionError
 import javax.inject.Inject
 
 class MainActivity : MvpAppCompatActivity(), MainView {
@@ -73,28 +78,44 @@ class MainActivity : MvpAppCompatActivity(), MainView {
                 }
             }
         }
-        
-        binding.bottomNavigation.setOnItemReselectedListener{}
+
+        binding.bottomNavigation.setOnItemReselectedListener {}
     }
 
     override fun requestPerms() {
-        //todo: are *_EXTERNAL_STORAGE permissions really necessary?
-        val writePermission = ContextCompat.checkSelfPermission(this,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        val readPermission = ContextCompat.checkSelfPermission(this,
-            Manifest.permission.READ_EXTERNAL_STORAGE)
-
-        if (writePermission == PackageManager.PERMISSION_GRANTED &&
-                readPermission == PackageManager.PERMISSION_GRANTED) {
-            Log.d(PERMISSIONS, "already granted")
-            presenter.permsGranted()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (!Environment.isExternalStorageManager()) {
+                val packageUri = Uri.parse("package:" + BuildConfig.APPLICATION_ID)
+                val intent =
+                    Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, packageUri)
+                startActivityForResult(intent, REQUEST_CODE_ALL_FILES_ACCESS)
+            } else
+                presenter.permsGranted()
         } else {
-            val permissions = arrayOf(
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.READ_EXTERNAL_STORAGE)
+            //todo: are *_EXTERNAL_STORAGE permissions really necessary?
+            val writePermission = ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+            val readPermission = ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            )
 
-            Log.d(PERMISSIONS, "requesting $permissions")
-            ActivityCompat.requestPermissions(this, permissions, REQUEST_CODE_PERMISSIONS)
+            if (writePermission == PackageManager.PERMISSION_GRANTED &&
+                readPermission == PackageManager.PERMISSION_GRANTED
+            ) {
+                Log.d(PERMISSIONS, "already granted")
+                presenter.permsGranted()
+            } else {
+                val permissions = arrayOf(
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                )
+
+                Log.d(PERMISSIONS, "requesting $permissions")
+                ActivityCompat.requestPermissions(this, permissions, REQUEST_CODE_PERMISSIONS)
+            }
         }
     }
 
@@ -161,16 +182,21 @@ class MainActivity : MvpAppCompatActivity(), MainView {
         Notifications.notifyUser(this, message, moreTime)
     }
 
+    @RequiresApi(Build.VERSION_CODES.R)
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
-        if (requestCode == REQUEST_CODE_SD_CARD_URI) {
-            Log.d(MAIN, "sdcard uri request resulted," +
-                    "code $resultCode, intent: $intent")
+        when (requestCode) {
+            REQUEST_CODE_SD_CARD_URI -> {
+                Log.d(MAIN, "sdcard uri request resulted, code $resultCode, intent: $intent")
 
-            val treeUri = intent!!.data!!
-            contentResolver.takePersistableUriPermission(treeUri,
-                Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-        } else {
-            Log.d(MAIN, "unknown activity result received")
+                val treeUri = intent!!.data!!
+                contentResolver.takePersistableUriPermission(treeUri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+            }
+            REQUEST_CODE_ALL_FILES_ACCESS -> {
+                if (Environment.isExternalStorageManager())
+                    presenter.permsGranted()
+            }
+            else -> Log.d(MAIN, "unknown activity result received")
         }
 
         super.onActivityResult(requestCode, resultCode, intent)
@@ -201,5 +227,6 @@ class MainActivity : MvpAppCompatActivity(), MainView {
     companion object {
         const val REQUEST_CODE_PERMISSIONS: Int = 1
         const val REQUEST_CODE_SD_CARD_URI: Int = 2
+        const val REQUEST_CODE_ALL_FILES_ACCESS = 3
     }
 }
