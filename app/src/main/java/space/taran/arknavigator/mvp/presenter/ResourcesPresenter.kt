@@ -88,6 +88,7 @@ class ResourcesPresenter(
             storage = AggregatedTagsStorage(rootToStorage.values)
 
             gridPresenter.init(index, storage, router)
+            gridPresenter.resetResources(resources())
             tagsSelectorPresenter.init(index, storage)
             tagsSelectorPresenter.calculateTagsAndSelection()
 
@@ -109,17 +110,18 @@ class ResourcesPresenter(
     fun onViewResume() {
         tagsSelectorPresenter.calculateTagsAndSelection()
         if (!tagsEnabled)
-            gridPresenter.updateResources(listResources(untagged = true))
+            gridPresenter.resetResources(resources(untagged = true))
     }
 
     fun onMenuTagsToggle(enabled: Boolean) {
         tagsEnabled = enabled
         viewState.setTagsEnabled(tagsEnabled)
-        if (tagsEnabled)
-            gridPresenter.updateResources(tagsSelectorPresenter.selection.toList())
-        else
-            gridPresenter.updateResources(listResources(untagged = true))
-        if (tagsEnabled && storage.getTags(listResources()).isEmpty()) {
+        if (tagsEnabled) {
+            gridPresenter.resetResources(resources())
+            gridPresenter.updateSelection(tagsSelectorPresenter.selection)
+        } else
+            gridPresenter.resetResources(resources(untagged = true))
+        if (tagsEnabled && storage.getTags(resources()).isEmpty()) {
             viewState.notifyUser("Tag something first")
         }
     }
@@ -140,7 +142,7 @@ class ResourcesPresenter(
 
     private fun onSelectionChange(selection: Set<ResourceId>) {
         viewState.notifyUser("${selection.size} resources selected")
-        gridPresenter.updateResources(selection.toList())
+        gridPresenter.updateSelection(selection)
     }
 
     private fun listResources(untagged: Boolean = false): List<ResourceId> {
@@ -150,7 +152,6 @@ class ResourcesPresenter(
             storage
                 .listUntaggedResources()
                 .intersect(underPrefix)
-                .toList()
         } else {
             underPrefix
         }

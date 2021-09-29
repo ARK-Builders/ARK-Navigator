@@ -12,7 +12,8 @@ import space.taran.arknavigator.mvp.view.item.FileItemView
 import space.taran.arknavigator.navigation.Screens
 import space.taran.arknavigator.ui.fragments.utils.Preview
 import space.taran.arknavigator.utils.Sorting
-import space.taran.arknavigator.utils.reifySorting
+import space.taran.arknavigator.utils.extension
+import java.lang.AssertionError
 import java.nio.file.Files
 import javax.inject.Inject
 
@@ -24,6 +25,8 @@ class ResourcesGridPresenter(
     lateinit var userPreferences: UserPreferences
 
     private var resources = listOf<ResourceId>()
+    private var selection = listOf<ResourceId>()
+
     private lateinit var index: ResourcesIndex
     private lateinit var storage: TagsStorage
     private lateinit var router: Router
@@ -39,25 +42,25 @@ class ResourcesGridPresenter(
             scope.launch { userPreferences.setSortingAscending(value) }
         }
 
-    fun getCount() = resources.size
+    fun getCount() = selection.size
 
     fun bindView(view: FileItemView) {
-        val resource = resources[view.position()]
+        val resource = selection[view.position()]
 
         val path = index.getPath(resource)
-            ?: throw java.lang.AssertionError("Resource to display must be indexed")
+            ?: throw AssertionError("Resource to display must be indexed")
 
         view.setText(path.fileName.toString())
 
         if (Files.isDirectory(path)) {
-            throw java.lang.AssertionError("Resource can't be a directory")
+            throw AssertionError("Resource can't be a directory")
         }
 
         view.setIcon(Preview.provide(path))
     }
 
     fun onItemClick(pos: Int) {
-        router.navigateTo(Screens.GalleryScreen(index, storage, resources, pos))
+        router.navigateTo(Screens.GalleryScreen(index, storage, resources.toMutableList(), pos))
     }
 
     suspend fun init(index: ResourcesIndex, storage: TagsStorage, router: Router) {
@@ -68,35 +71,46 @@ class ResourcesGridPresenter(
         ascending = userPreferences.isSortingAscending()
     }
 
-    fun updateResources(resources: List<ResourceId>) {
-        this.resources = resources
-        sortAndUpdateAdapter()
+    fun updateSelection(selection: Set<ResourceId>) {
+        this.selection = resources.filter { selection.contains(it) }
+        viewState.updateAdapter()
+    }
+
+    fun resetResources(resources: Set<ResourceId>) {
+        sortAllResources(resources)
+        this.selection = this.resources
+        viewState.updateAdapter()
     }
 
     fun updateSorting(sorting: Sorting) {
         this.sorting = sorting
-        sortAndUpdateAdapter()
+        sortAllResources(this.resources)
+        sortSelectionAndUpdateAdapter()
     }
 
     fun updateAscending(ascending: Boolean) {
         this.ascending = ascending
-        sortAndUpdateAdapter()
+        sortAllResources(this.resources)
+        sortSelectionAndUpdateAdapter()
     }
 
-    private fun sortAndUpdateAdapter() {
-        val comparator = reifySorting(sorting)
-        if (comparator != null) {
-            resources = resources.map { index.getPath(it)!! to it }
-                .toMap()
-                .toSortedMap(comparator)
-                .values
-                .toList()
-
-            if (!ascending) {
-                resources = resources.reversed()
-            }
+    private fun sortAllResources(resources: Iterable<ResourceId>) {
+        this.resources = when (sorting) {
+            Sorting.NAME -> resources.sortedBy { index.getPath(it)!!.fileName }
+            Sorting.SIZE -> resources.sortedBy { Files.size(index.getPath(it)!!) }
+            Sorting.TYPE -> resources.sortedBy { extension(index.getPath(it)!!) }
+            Sorting.LAST_MODIFIED -> resources.sortedBy { Files.getLastModifiedTime(index.getPath(it)!!) }
+            Sorting.DEFAULT -> resources.toList()
         }
 
+        if (sorting != Sorting.DEFAULT && !ascending) {
+            this.resources = this.resources.reversed()
+        }
+    }
+
+    private fun sortSelectionAndUpdateAdapter() {
+        val selection = this.selection.toSet()
+        this.selection = resources.filter { selection.contains(it) }
         viewState.updateAdapter()
     }
 }

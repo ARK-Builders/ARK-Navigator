@@ -64,7 +64,7 @@ class PlainTagsStorage
     override fun getTags(id: ResourceId): Tags = tagsById[id]!!
     //todo: check the file's modification date and pull external updates
 
-    override fun getTags(ids: List<ResourceId>): Tags = ids.flatMap { id -> getTags(id) }.toSet()
+    override fun getTags(ids: Iterable<ResourceId>): Tags = ids.flatMap { id -> getTags(id) }.toSet()
 
     override suspend fun setTags(id: ResourceId, tags: Tags) = withContext(Dispatchers.IO) {
         if (!tagsById.containsKey(id)) {
