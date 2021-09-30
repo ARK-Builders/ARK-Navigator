@@ -88,7 +88,7 @@ class ResourcesPresenter(
             storage = AggregatedTagsStorage(rootToStorage.values)
 
             gridPresenter.init(index, storage, router)
-            gridPresenter.resetResources(resources())
+            gridPresenter.resetResources(listResources())
             tagsSelectorPresenter.init(index, storage)
             tagsSelectorPresenter.calculateTagsAndSelection()
 
@@ -110,18 +110,18 @@ class ResourcesPresenter(
     fun onViewResume() {
         tagsSelectorPresenter.calculateTagsAndSelection()
         if (!tagsEnabled)
-            gridPresenter.resetResources(resources(untagged = true))
+            gridPresenter.resetResources(listResources(untagged = true))
     }
 
     fun onMenuTagsToggle(enabled: Boolean) {
         tagsEnabled = enabled
         viewState.setTagsEnabled(tagsEnabled)
         if (tagsEnabled) {
-            gridPresenter.resetResources(resources())
+            gridPresenter.resetResources(listResources())
             gridPresenter.updateSelection(tagsSelectorPresenter.selection)
         } else
-            gridPresenter.resetResources(resources(untagged = true))
-        if (tagsEnabled && storage.getTags(resources()).isEmpty()) {
+            gridPresenter.resetResources(listResources(untagged = true))
+        if (tagsEnabled && storage.getTags(listResources()).isEmpty()) {
             viewState.notifyUser("Tag something first")
         }
     }
@@ -145,7 +145,7 @@ class ResourcesPresenter(
         gridPresenter.updateSelection(selection)
     }
 
-    private fun listResources(untagged: Boolean = false): List<ResourceId> {
+    private fun listResources(untagged: Boolean = false): Set<ResourceId> {
         val underPrefix = index.listIds(prefix)
 
         val result = if (untagged) {

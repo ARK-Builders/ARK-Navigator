@@ -13,6 +13,7 @@ import space.taran.arknavigator.navigation.Screens
 import space.taran.arknavigator.ui.fragments.utils.Preview
 import space.taran.arknavigator.utils.Sorting
 import space.taran.arknavigator.utils.extension
+import space.taran.arknavigator.utils.reifySorting
 import java.lang.AssertionError
 import java.nio.file.Files
 import javax.inject.Inject
@@ -60,7 +61,7 @@ class ResourcesGridPresenter(
     }
 
     fun onItemClick(pos: Int) {
-        router.navigateTo(Screens.GalleryScreen(index, storage, resources.toMutableList(), pos))
+        router.navigateTo(Screens.GalleryScreen(index, storage, selection, pos))
     }
 
     suspend fun init(index: ResourcesIndex, storage: TagsStorage, router: Router) {
@@ -77,34 +78,36 @@ class ResourcesGridPresenter(
     }
 
     fun resetResources(resources: Set<ResourceId>) {
-        sortAllResources(resources)
-        this.selection = this.resources
+        this.resources = resources.toList()
+        sortAllResources()
+        selection = this.resources
         viewState.updateAdapter()
     }
 
     fun updateSorting(sorting: Sorting) {
         this.sorting = sorting
-        sortAllResources(this.resources)
+        sortAllResources()
         sortSelectionAndUpdateAdapter()
     }
 
     fun updateAscending(ascending: Boolean) {
         this.ascending = ascending
-        sortAllResources(this.resources)
+        sortAllResources()
         sortSelectionAndUpdateAdapter()
     }
 
-    private fun sortAllResources(resources: Iterable<ResourceId>) {
-        this.resources = when (sorting) {
-            Sorting.NAME -> resources.sortedBy { index.getPath(it)!!.fileName }
-            Sorting.SIZE -> resources.sortedBy { Files.size(index.getPath(it)!!) }
-            Sorting.TYPE -> resources.sortedBy { extension(index.getPath(it)!!) }
-            Sorting.LAST_MODIFIED -> resources.sortedBy { Files.getLastModifiedTime(index.getPath(it)!!) }
-            Sorting.DEFAULT -> resources.toList()
+    private fun sortAllResources() {
+        val comparator = reifySorting(sorting)
+        if (comparator != null) {
+            resources = resources.map { index.getPath(it)!! to it }
+                .toMap()
+                .toSortedMap(comparator)
+                .values
+                .toList()
         }
 
         if (sorting != Sorting.DEFAULT && !ascending) {
-            this.resources = this.resources.reversed()
+            resources = resources.reversed()
         }
     }
 
