@@ -7,8 +7,9 @@ class AggregatedResourcesIndex(
     private val shards: Collection<PlainResourcesIndex>)
     : ResourcesIndex {
 
-    override fun listIds(prefix: Path?): List<ResourceId> =
+    override fun listIds(prefix: Path?): Set<ResourceId> =
         shards.flatMap { it.listIds(prefix) }
+            .toSet()
 
     override fun getPath(id: ResourceId): Path? =
         //todo: iterators or streams would optimize out redundant maps
