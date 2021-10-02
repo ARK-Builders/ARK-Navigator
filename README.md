@@ -23,10 +23,13 @@ How does it work?
 
 In short, the app works this way - Bookmark the relevant folders, add tags to the items, filter the items using the added tags.
 
-Bookmark folders: To bookmark a folder, press the plus (+) button located on the right side of the app, navigate to the folder you wish to bookmark, and press the “Add root” button. Folders added this way will be listed in the “Manage Folders'' view as Root folders. Subfolders in the root folders can be bookmarked/favorited again for easier access. To do that, open “Manage Folders”, press the plus (+) button next to the relevant root folder, navigate to a subfolder, and press the “Favorite” button. Subfolders favorited like this are listed when you expand the Root folders
-View the contents of root/favorite folder: To view the contents of a root/favorite button, press the compass button located next to it under the “Manage Folders” section
-Add tags to an item: To add tags to an item, open the item by tapping on it, press the pen icon, and jot down the tags that you find relevant to the item.
-Filter items based on tags: If you have successfully completed Steps 1 to 3, then you have successfully managed to add tags to at least some of the images, videos, and documents that you have in your root/favorite folders. Some tags might even be shared by multiple items. To filter items based on tags, simply open the root/favorite folder (step 2), and tap on the tags that you are interested in. All the files that are irrelevant to the selected tags will be filtered out.
+**Bookmark folders:** To bookmark a folder, press the plus (+) button located on the right side of the app, navigate to the folder you wish to bookmark, and press the “Add root” button. Folders added this way will be listed in the “Manage Folders'' view as Root folders. Subfolders in the root folders can be bookmarked/favorited again for easier access. To do that, open “Manage Folders”, press the plus (+) button next to the relevant root folder, navigate to a subfolder, and press the “Favorite” button. Subfolders favorited like this are listed when you expand the Root folders.
+
+**View the contents of root/favorite folder:** To view the contents of a root/favorite button, press the compass button located next to it under the “Manage Folders” section.
+
+**Add tags to an item:** To add tags to an item, open the item by tapping on it, press the pen icon, and jot down the tags that you find relevant to the item.
+
+**Filter items based on tags:** If you have successfully completed Steps 1 to 3, then you have successfully managed to add tags to at least some of the images, videos, and documents that you have in your root/favorite folders. Some tags might even be shared by multiple items. To filter items based on tags, simply open the root/favorite folder (step 2), and tap on the tags that you are interested in. All the files that are irrelevant to the selected tags will be filtered out.
 
 
 What to expect going forward?
