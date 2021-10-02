@@ -9,7 +9,7 @@ import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.dao.ResourceId
 import space.taran.arknavigator.mvp.model.repo.*
 import space.taran.arknavigator.mvp.presenter.adapter.ResourcesGridPresenter
-import space.taran.arknavigator.mvp.presenter.adapter.TagsSelectorPresenter
+import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagsSelectorPresenter
 import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.fragments.utils.Notifications
@@ -88,6 +88,7 @@ class ResourcesPresenter(
             storage = AggregatedTagsStorage(rootToStorage.values)
 
             gridPresenter.init(index, storage, router)
+            gridPresenter.resetResources(listResources())
             tagsSelectorPresenter.init(index, storage)
             tagsSelectorPresenter.calculateTagsAndSelection()
 
@@ -109,16 +110,17 @@ class ResourcesPresenter(
     fun onViewResume() {
         tagsSelectorPresenter.calculateTagsAndSelection()
         if (!tagsEnabled)
-            gridPresenter.updateResources(listResources(untagged = true))
+            gridPresenter.resetResources(listResources(untagged = true))
     }
 
     fun onMenuTagsToggle(enabled: Boolean) {
         tagsEnabled = enabled
         viewState.setTagsEnabled(tagsEnabled)
-        if (tagsEnabled)
-            gridPresenter.updateResources(tagsSelectorPresenter.selection.toList())
-        else
-            gridPresenter.updateResources(listResources(untagged = true))
+        if (tagsEnabled) {
+            gridPresenter.resetResources(listResources())
+            gridPresenter.updateSelection(tagsSelectorPresenter.selection)
+        } else
+            gridPresenter.resetResources(listResources(untagged = true))
         if (tagsEnabled && storage.getTags(listResources()).isEmpty()) {
             viewState.notifyUser("Tag something first")
         }
@@ -132,19 +134,24 @@ class ResourcesPresenter(
         viewState.closeSortDialog()
     }
 
-    private fun onSelectionChange(selection: Set<ResourceId>) {
-        viewState.notifyUser("${selection.size} resources selected")
-        gridPresenter.updateResources(selection.toList())
+    fun onBackClick(): Boolean {
+        if (!tagsSelectorPresenter.onBackClick())
+            router.exit()
+        return true
     }
 
-    private fun listResources(untagged: Boolean = false): List<ResourceId> {
+    private fun onSelectionChange(selection: Set<ResourceId>) {
+        viewState.notifyUser("${selection.size} resources selected")
+        gridPresenter.updateSelection(selection)
+    }
+
+    private fun listResources(untagged: Boolean = false): Set<ResourceId> {
         val underPrefix = index.listIds(prefix)
 
         val result = if (untagged) {
             storage
                 .listUntaggedResources()
                 .intersect(underPrefix)
-                .toList()
         } else {
             underPrefix
         }
