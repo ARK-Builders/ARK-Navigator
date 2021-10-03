@@ -32,7 +32,7 @@ enum class Sorting {
     DEFAULT, NAME, SIZE, LAST_MODIFIED, TYPE
 }
 
-enum class FileActionType{
+enum class FileActionType {
     EDIT_AS_OPEN, EDIT_AND_OPEN, OPEN_ONLY, OPEN_ONLY_DETACH_PROCESS
 }
 
@@ -45,34 +45,35 @@ const val PDF_PREVIEW_FOLDER_NAME = "pdf_preview"
 class PreviewFile(
     val fileType: FileType? = null,
     val file: Path? = null,
-    val predefinedIcon: PredefinedIcon? = null,
+    val fileExtension: String? = null,
     val extraInfo: MutableMap<Preview.ExtraInfoTag, String>? = null
 ) {
     companion object PreviewCompanion {
-        fun createPair(file: Path): PreviewFile? {
+        fun createPair(file: Path): PreviewFile {
             return when {
                 isImage(file) -> {
                     PreviewFile(
                         FileType.IMAGE,
-                        file)
+                        file,
+                        fileExtension = extensionWithoutDot(file)
+                    )
                 }
                 isVideo(file) -> {
                     PreviewFile(
                         FileType.VIDEO,
                         file,
-                        extraInfo = getVideoInfo(file))
+                        fileExtension = extensionWithoutDot(file),
+                        extraInfo = getVideoInfo(file)
+                    )
                 }
-                isFormat(file, ".gif") -> PreviewFile(FileType.GIF, file)
-                isFormat(file, ".txt") -> PreviewFile(predefinedIcon = PredefinedIcon.TXT)
-                isFormat(file, ".html") -> PreviewFile(predefinedIcon = PredefinedIcon.HTML)
-                isFormat(file, ".doc") -> PreviewFile(predefinedIcon = PredefinedIcon.DOC)
-                isFormat(file, ".docx") -> PreviewFile(predefinedIcon = PredefinedIcon.DOCX)
-                isFormat(file, ".odt") -> PreviewFile(predefinedIcon = PredefinedIcon.ODT)
-                isFormat(file, ".ods") -> PreviewFile(predefinedIcon = PredefinedIcon.ODS)
-                isFormat(file, ".xls") -> PreviewFile(predefinedIcon = PredefinedIcon.XLS)
-                isFormat(file, ".xlsx") -> PreviewFile(predefinedIcon = PredefinedIcon.XLSX)
                 isPDF(file) -> getPdfPreview(file)
-                else -> null
+                isFormat(file, ".gif") ->
+                    PreviewFile(
+                        FileType.GIF,
+                        file,
+                        fileExtension = extensionWithoutDot(file)
+                    )
+                else -> PreviewFile(fileExtension = extensionWithoutDot(file))
             }
         }
 
@@ -80,8 +81,8 @@ class PreviewFile(
             val id = computeId(file)
             val savedPreviews = getSavedPdfPreviews()
             return if (savedPreviews?.contains(id) == true) {
-                PreviewFile(FileType.PDF, getPdfPreviewByID(id))
-            } else PreviewFile(FileType.PDF, file)
+                PreviewFile(FileType.PDF, getPdfPreviewByID(id), fileExtension = extension(file))
+            } else PreviewFile(FileType.PDF, file, fileExtension = extension(file))
         }
     }
 }
@@ -92,11 +93,11 @@ private val acceptedEditOnlyExt = arrayListOf(".txt", ".doc", ".docx", ".odt", "
     .also { it.addAll(acceptedImageExt) }
 private val acceptedReadAndEditExt = listOf(".pdf", ".md")
 
-fun provideIconImage(file: Path): PreviewFile? =
+fun provideIconImage(file: Path): PreviewFile =
     providePreview(file) //todo downscale to, say, 128x128
 
 //might be a temporary file
-fun providePreview(file: Path): PreviewFile? {
+fun providePreview(file: Path): PreviewFile {
     return PreviewFile.createPair(file)
 }
 
@@ -105,6 +106,7 @@ fun isImage(filePath: Path): Boolean {
     val extension = extension(filePath)
     return acceptedImageExt.contains(extension)
 }
+
 fun isVideo(filePath: Path): Boolean {
     val extension = extension(filePath)
     return acceptedVideoExt.contains(extension)
@@ -182,6 +184,7 @@ fun convertToResolution(width: Long, height: Long): String? {
         else -> null
     }
 }
+
 fun createPdfPreview(filePath: Path, context: Context? = null): Bitmap {
     val pageNumber = 0
     val finalContext = context ?: App.instance
@@ -202,8 +205,8 @@ fun createPdfPreview(filePath: Path, context: Context? = null): Bitmap {
     return bmp
 }
 
-fun getFileActionType(filePath: Path): FileActionType{
-    return when(extension(filePath)){
+fun getFileActionType(filePath: Path): FileActionType {
+    return when (extension(filePath)) {
         in acceptedEditOnlyExt -> FileActionType.EDIT_AS_OPEN
         in acceptedReadAndEditExt -> FileActionType.EDIT_AND_OPEN
         in acceptedVideoExt -> FileActionType.OPEN_ONLY_DETACH_PROCESS
@@ -261,6 +264,10 @@ fun getFileSizeMB(path: Path): Int =
 
 fun extension(path: Path): String {
     return ".${path.extension.lowercase()}"
+}
+
+fun extensionWithoutDot(path: Path): String {
+    return path.extension.lowercase()
 }
 
 fun reifySorting(sorting: Sorting): Comparator<Path>? =
