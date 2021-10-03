@@ -6,7 +6,7 @@ import java.nio.file.Path
 interface PreviewItemView {
     var pos: Int
 
-    fun setImage(file: Path, playVisible: Boolean = false)
+    fun setImage(file: Path?, playVisible: Boolean = false, extension: String? = null)
 
     fun setPDFPreview(file: Path)
 

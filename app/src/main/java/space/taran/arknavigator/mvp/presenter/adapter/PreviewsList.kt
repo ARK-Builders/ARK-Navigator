@@ -24,8 +24,8 @@ class PreviewsList(
         val preview = previews[view.pos]
 
         when {
-            preview.predefined != null -> {
-                view.setPredefined(preview.predefined)
+            preview.predefinedFolder != null -> {
+                view.setPredefined(preview.predefinedFolder)
                 view.setZoomEnabled(false)
             }
             preview.fileType == FileType.PDF -> {
@@ -33,11 +33,18 @@ class PreviewsList(
                 view.setZoomEnabled(false)
             }
             preview.fileType == FileType.VIDEO -> {
-                view.setImage(preview.previewPath!!, true)
+                view.setImage(
+                    preview.previewPath!!,
+                    true,
+                    preview.fileExtension
+                )
                 view.setZoomEnabled(false)
             }
             else -> {
-                view.setImage(preview.previewPath!!)
+                view.setImage(
+                    preview.previewPath,
+                    extension = preview.fileExtension
+                )
                 view.setZoomEnabled(true)
             }
         }

@@ -24,9 +24,16 @@ class PreviewItemViewHolder(val binding: ItemImageBinding, val presenter: Previe
         binding.ivImage.setImageResource(imageForPredefinedIcon(resource))
     }
 
-    override fun setImage(file: Path, playVisible: Boolean): Unit = with(binding.root) {
+    override fun setImage(file: Path?, playVisible: Boolean, extension: String?) {
+        if (file != null && extension != null){
+            loadZoomImagePlaceholder(file,
+                imageForPredefinedExtension(extension),
+                binding.ivImage
+            )
+        }
+        else if (file == null)
+            binding.ivImage.setImageResource(imageForPredefinedExtension(extension))
         binding.icPlay.isVisible = playVisible
-        loadZoomImage(file, binding.ivImage)
     }
 
     override fun setPDFPreview(file: Path): Unit = with(binding.root) {

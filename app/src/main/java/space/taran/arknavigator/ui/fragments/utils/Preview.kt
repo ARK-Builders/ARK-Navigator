@@ -6,33 +6,28 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 enum class PredefinedIcon {
-    FOLDER, FILE, PDF, DOCX, DOC, GIF, HTML, TXT, ODT, ODS, XLS, XLSX
+    FOLDER, FILE
 }
 
 data class Preview(
-    val predefined: PredefinedIcon? = null,
+    val predefinedFolder: PredefinedIcon? = null,
     val previewPath: Path? = null,
     val fileType: FileType? = FileType.UNDEFINED,
+    val fileExtension: String? = null,
     val extraInfo: MutableMap<ExtraInfoTag, String>? = null
 ) {
     companion object {
         fun provide(path: Path): Preview {
             if (Files.isDirectory(path)) {
-                return Preview(predefined = PredefinedIcon.FOLDER)
+                return Preview(predefinedFolder = PredefinedIcon.FOLDER)
             }
 
             val previewFile = provideIconImage(path)
-                ?: return Preview(predefined = PredefinedIcon.FILE, fileType = FileType.UNDEFINED)
 
-            if (previewFile.predefinedIcon != null)
-                return Preview(
-                    predefined = previewFile.predefinedIcon,
-                    fileType = FileType.UNDEFINED)
-
-            val filePath = previewFile.file
             return Preview(
-                previewPath = filePath,
+                previewPath = previewFile.file,
                 fileType = previewFile.fileType,
+                fileExtension = previewFile.fileExtension,
                 extraInfo = previewFile.extraInfo
             )
         }
