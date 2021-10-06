@@ -26,7 +26,6 @@ import space.taran.arknavigator.mvp.model.repo.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.TagsStorage
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
-import space.taran.arknavigator.mvp.presenter.adapter.ResourcesList
 import space.taran.arknavigator.mvp.view.GalleryView
 import space.taran.arknavigator.mvp.view.NotifiableView
 import space.taran.arknavigator.ui.App
