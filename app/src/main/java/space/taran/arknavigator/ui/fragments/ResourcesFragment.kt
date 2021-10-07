@@ -1,6 +1,7 @@
 package space.taran.arknavigator.ui.fragments
 
 import android.os.Bundle
+import android.os.SystemClock
 import android.util.Log
 import android.view.*
 import androidx.appcompat.app.AlertDialog
@@ -254,18 +255,18 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
             MotionEvent.ACTION_DOWN -> {
                 val layoutParams = binding.ivDragHandler.layoutParams as ConstraintLayout.LayoutParams
                 selectorDragStartBias = layoutParams.verticalBias
-                selectorDragStartTime = System.currentTimeMillis()
+                selectorDragStartTime = SystemClock.uptimeMillis()
             }
             MotionEvent.ACTION_UP -> {
                 view.performClick()
 
-                val travelTime = System.currentTimeMillis() - selectorDragStartTime
+                val travelTime = SystemClock.uptimeMillis() - selectorDragStartTime
                 val travelDelta = selectorDragStartBias - (1f - selectorHeight)
                 val travelSpeed = 100f * travelDelta / (travelTime / 1000f)
                 Log.d(RESOURCES_SCREEN, "draggable bar of tags selector was moved:")
                 Log.d(RESOURCES_SCREEN, "delta=${100f * travelDelta}%")
-                Log.d(RESOURCES_SCREEN, "time=${ 100f * travelTime }%")
-                Log.d(RESOURCES_SCREEN, "speed=${100f * travelSpeed}%")
+                Log.d(RESOURCES_SCREEN, "time=${travelTime}ms")
+                Log.d(RESOURCES_SCREEN, "speed=${travelSpeed}%/sec")
 
                 if (travelTime > DRAG_TRAVEL_TIME_THRESHOLD &&
                     abs(travelDelta) > DRAG_TRAVEL_DELTA_THRESHOLD &&
@@ -284,16 +285,35 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
                     1f - distanceFromTop / frameHeight
                 }
 
-                updateVerticalBias(view)
+                val newBias = updateVerticalBias(view)
+
+                val historySize = event.historySize
+                if (historySize >= 2) {
+                    val oldest = event.getHistoricalY(historySize - 2)
+                    val old = event.getHistoricalY(historySize - 1)
+
+                    val turnedFromDownToUp = event.y < old && old > oldest
+                    val turnedFromUpToDown = event.y > old && old < oldest
+
+                    Log.d("debug", "oldest: $oldest, old: $old, last: ${event.y}")
+
+                    if (turnedFromDownToUp || turnedFromUpToDown) {
+                        Log.d("debug", "!!! TURN")
+                        selectorDragStartBias = newBias
+                        selectorDragStartTime = SystemClock.uptimeMillis()
+                    }
+                }
             }
         }
         return true
     }
 
-    private fun updateVerticalBias(view: View) {
+    private fun updateVerticalBias(view: View): Float {
         val layoutParams = view.layoutParams as ConstraintLayout.LayoutParams
         layoutParams.verticalBias = 1f - selectorHeight
         view.layoutParams = layoutParams
+        
+        return layoutParams.verticalBias
     }
 
     private fun updateDragHandlerBias() {
@@ -308,7 +328,7 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
     }
 
     companion object {
-        private const val DRAG_TRAVEL_TIME_THRESHOLD = 50      //milliseconds
+        private const val DRAG_TRAVEL_TIME_THRESHOLD = 30      //milliseconds
         private const val DRAG_TRAVEL_DELTA_THRESHOLD = 0.1    //ratio
         private const val DRAG_TRAVEL_SPEED_THRESHOLD = 150    //percents per second
     }
