@@ -92,7 +92,6 @@ class MainActivity : MvpAppCompatActivity(), MainView {
             } else
                 presenter.permsGranted()
         } else {
-            //todo: are *_EXTERNAL_STORAGE permissions really necessary?
             val writePermission = ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE

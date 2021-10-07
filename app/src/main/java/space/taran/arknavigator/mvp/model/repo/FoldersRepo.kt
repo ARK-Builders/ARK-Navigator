@@ -33,7 +33,7 @@ class FoldersRepo(private val dao: FolderDao) {
                 } else {
                     val favorites = it.favorites.flatMap { favorite ->
                         if (favorite.root != it.root.path) {
-                            throw AssertionError("foreign key violation")
+                            throw AssertionError("Foreign key violation")
                         }
 
                         val folder = root.resolve(favorite.relative)

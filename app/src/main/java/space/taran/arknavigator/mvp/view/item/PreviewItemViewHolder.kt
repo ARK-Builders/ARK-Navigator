@@ -2,7 +2,6 @@ package space.taran.arknavigator.mvp.view.item
 
 import androidx.recyclerview.widget.RecyclerView
 import com.ortiz.touchview.OnTouchImageViewListener
-import kotlinx.android.extensions.LayoutContainer
 import space.taran.arknavigator.databinding.ItemImageBinding
 import space.taran.arknavigator.ui.fragments.utils.PredefinedIcon
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList

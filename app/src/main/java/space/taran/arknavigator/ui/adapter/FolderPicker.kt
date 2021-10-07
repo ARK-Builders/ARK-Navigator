@@ -1,6 +1,5 @@
 package space.taran.arknavigator.ui.adapter
 
-import android.view.View
 import space.taran.arknavigator.databinding.DialogRootsNewBinding
 import space.taran.arknavigator.mvp.presenter.adapter.FoldersWalker
 import space.taran.arknavigator.mvp.presenter.adapter.ItemClickHandler
