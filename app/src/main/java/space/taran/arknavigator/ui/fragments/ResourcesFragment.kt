@@ -8,6 +8,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.isVisible
+import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.GridLayoutManager
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
@@ -24,6 +25,9 @@ import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.utils.RESOURCES_SCREEN
 import space.taran.arknavigator.utils.Sorting
 import space.taran.arknavigator.utils.extensions.changeEnabledStatus
+import space.taran.arknavigator.utils.extensions.closeKeyboard
+import space.taran.arknavigator.utils.extensions.placeCursorToEnd
+import space.taran.arknavigator.utils.extensions.showKeyboard
 import java.nio.file.Path
 import kotlin.math.abs
 
@@ -90,8 +94,11 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         binding.rvResources.adapter = resourcesAdapter
         binding.rvResources.layoutManager = GridLayoutManager(context, 3)
 
-        tagsSelectorAdapter = TagsSelectorAdapter(binding.tagsCg, presenter.tagsSelectorPresenter)
+        tagsSelectorAdapter = TagsSelectorAdapter(binding.cgTagsChecked, binding.tagsCg, presenter.tagsSelectorPresenter)
         binding.ivDragHandler.setOnTouchListener(::dragHandlerTouchListener)
+        binding.etTagsFilter.doAfterTextChanged {
+            presenter.tagsSelectorPresenter.onFilterChanged(it.toString())
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -159,6 +166,20 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
 
     override fun setTagsSelectorHintEnabled(enabled: Boolean) {
         binding.tvTagsSelectorHint.isVisible = enabled
+    }
+
+    override fun setTagsFilterEnabled(enabled: Boolean) {
+        binding.layoutInput.isVisible = enabled
+        binding.cgTagsChecked.isVisible = enabled
+        if (enabled) {
+            binding.etTagsFilter.placeCursorToEnd()
+            binding.etTagsFilter.showKeyboard()
+        } else
+            binding.etTagsFilter.closeKeyboard()
+    }
+
+    override fun setTagsFilterText(filter: String) {
+        binding.etTagsFilter.setText(filter)
     }
 
     override fun drawTags() {
@@ -271,17 +292,25 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
                 if (travelTime > DRAG_TRAVEL_TIME_THRESHOLD &&
                     abs(travelDelta) > DRAG_TRAVEL_DELTA_THRESHOLD &&
                     abs(travelSpeed) > DRAG_TRAVEL_SPEED_THRESHOLD) {
-                    selectorHeight = if (travelDelta > 0f) 1f else 0f
+                    selectorHeight = if (travelDelta > 0f) {
+                        presenter.tagsSelectorPresenter.onFilterToggle(true)
+                        1f
+                    } else  {
+                        presenter.tagsSelectorPresenter.onFilterToggle(false)
+                        0f
+                    }
                     updateDragHandlerBias()
                 }
             }
             MotionEvent.ACTION_MOVE -> {
                 val distanceFromTop = event.rawY - frameTop
                 selectorHeight = if (distanceFromTop < 0f) {
+                    presenter.tagsSelectorPresenter.onFilterToggle(true)
                     1f
                 } else if (distanceFromTop > frameHeight) {
                     0f
                 } else {
+                    presenter.tagsSelectorPresenter.onFilterToggle(false)
                     1f - distanceFromTop / frameHeight
                 }
 
@@ -312,7 +341,7 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         val layoutParams = view.layoutParams as ConstraintLayout.LayoutParams
         layoutParams.verticalBias = 1f - selectorHeight
         view.layoutParams = layoutParams
-        
+
         return layoutParams.verticalBias
     }
 
