@@ -9,12 +9,17 @@ import space.taran.arknavigator.R
 import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagsSelectorPresenter
 import space.taran.arknavigator.utils.Tag
 
-class TagsSelectorAdapter(val chipGroup: ChipGroup, val presenter: TagsSelectorPresenter) {
+class TagsSelectorAdapter(
+    private val checkedChipGroup: ChipGroup,
+    private val chipGroup: ChipGroup,
+    private val presenter: TagsSelectorPresenter
+) {
     private val clearChip = createClearChip()
     private val chipsByTags = mutableMapOf<Tag, Chip>()
 
     fun drawTags() {
         chipGroup.removeAllViews()
+        checkedChipGroup.removeAllViews()
         createChips()
         drawIncludedAndExcludedTags()
         drawAvailableTags()
@@ -24,23 +29,23 @@ class TagsSelectorAdapter(val chipGroup: ChipGroup, val presenter: TagsSelectorP
 
     private fun createChips() {
         chipsByTags.clear()
-        presenter.included.forEach { tag ->
+        presenter.includedTags.forEach { tag ->
             val chip = createDefaultChip(tag)
             chip.setTextColor(Color.BLUE)
             chip.isChecked = true
             chipsByTags[tag] = chip
         }
-        presenter.excluded.forEach { tag ->
+        presenter.excludedTags.forEach { tag ->
             val chip = createDefaultChip(tag)
             chip.setTextColor(Color.RED)
             chip.isLongClickable = false
             chipsByTags[tag] = chip
         }
-        presenter.availableTags.forEach { tag ->
+        presenter.availableTagsForDisplay.forEach { tag ->
             val chip = createDefaultChip(tag)
             chipsByTags[tag] = chip
         }
-        presenter.unavailableTags.forEach { tag ->
+        presenter.unavailableTagsForDisplay.forEach { tag ->
             val chip = createDefaultChip(tag)
             chip.setTextColor(Color.GRAY)
             chip.isLongClickable = false
@@ -51,26 +56,33 @@ class TagsSelectorAdapter(val chipGroup: ChipGroup, val presenter: TagsSelectorP
     }
 
     private fun drawIncludedAndExcludedTags() {
-        presenter.includedAndExcludedTags.forEach { tag ->
-            chipGroup.addView(chipsByTags[tag])
+        presenter.includedAndExcludedTagsForDisplay.forEach { tag ->
+            if (presenter.filterEnabled)
+                checkedChipGroup.addView(chipsByTags[tag])
+            else
+                chipGroup.addView(chipsByTags[tag])
         }
     }
 
     private fun drawAvailableTags() {
-        presenter.availableTags.forEach { tag ->
+        presenter.availableTagsForDisplay.forEach { tag ->
             chipGroup.addView(chipsByTags[tag])
         }
     }
 
     private fun drawUnavailableTags() {
-        presenter.unavailableTags.forEach { tag ->
+        presenter.unavailableTagsForDisplay.forEach { tag ->
             chipGroup.addView(chipsByTags[tag])
         }
     }
 
     private fun drawClearBtn() {
-        if (presenter.isClearBtnVisible)
-            chipGroup.addView(clearChip)
+        if (presenter.isClearBtnVisible) {
+            if (presenter.filterEnabled)
+                checkedChipGroup.addView(clearChip)
+            else
+                chipGroup.addView(clearChip)
+        }
     }
 
     private fun createDefaultChip(tag: Tag) = Chip(chipGroup.context).apply {
