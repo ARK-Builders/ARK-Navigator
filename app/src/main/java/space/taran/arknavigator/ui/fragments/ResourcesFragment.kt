@@ -8,8 +8,10 @@ import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.GridLayoutManager
+import kotlinx.coroutines.launch
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import space.taran.arknavigator.R
@@ -134,13 +136,25 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         (activity as MainActivity).setTitle(title)
     }
 
-    override fun setProgressVisibility(isVisible: Boolean) {
-        binding.layoutProgress.root.isVisible = isVisible
-        (activity as MainActivity).setBottomNavigationEnabled(!isVisible)
+    override fun setProgressVisibility(isVisible: Boolean, withText: String) {
+        binding.layoutProgress.apply {
+            root.isVisible = isVisible
+            (activity as MainActivity).setBottomNavigationEnabled(!isVisible)
+
+            if (withText.isNotEmpty()) {
+                progressText.setVisibilityAndLoadingStatus(View.VISIBLE)
+                progressText.loadingText = withText
+            } else {
+                progressText.setVisibilityAndLoadingStatus(View.GONE)
+            }
+        }
     }
 
     override fun updateAdapter() {
-        resourcesAdapter?.notifyDataSetChanged()
+        requireActivity().runOnUiThread {
+            setProgressVisibility(false)
+            resourcesAdapter?.notifyDataSetChanged()
+        }
     }
 
     override fun notifyUser(message: String, moreTime: Boolean) {
@@ -235,7 +249,10 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
                 if (newSorting == Sorting.DEFAULT)
                     notifyUser(requireActivity().getString(R.string.as_is_sorting_selected))
 
-                presenter.gridPresenter.updateSorting(newSorting)
+                setProgressVisibility(true, "Sorting")
+                viewLifecycleOwner.lifecycleScope.launch {
+                    presenter.gridPresenter.updateSorting(newSorting)
+                }
                 presenter.onSortDialogClose()
             }
 
@@ -248,7 +265,10 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
 
                 Log.d(RESOURCES_SCREEN, "sorting direction changed, ascending = $newAscending")
 
-                presenter.gridPresenter.updateAscending(newAscending)
+                setProgressVisibility(true, "Sorting")
+                viewLifecycleOwner.lifecycleScope.launch {
+                    presenter.gridPresenter.updateAscending(newAscending)
+                }
                 presenter.onSortDialogClose()
             }
 

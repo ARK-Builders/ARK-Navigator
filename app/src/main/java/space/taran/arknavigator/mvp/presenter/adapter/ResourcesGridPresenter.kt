@@ -1,7 +1,9 @@
 package space.taran.arknavigator.mvp.presenter.adapter
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.dao.ResourceId
@@ -72,26 +74,26 @@ class ResourcesGridPresenter(
         ascending = userPreferences.isSortingAscending()
     }
 
-    fun updateSelection(selection: Set<ResourceId>) {
-        this.selection = resources.filter { selection.contains(it) }
+    suspend fun updateSelection(selection: Set<ResourceId>) = withContext(Dispatchers.Default) {
+        this@ResourcesGridPresenter.selection = resources.filter { selection.contains(it) }
         viewState.updateAdapter()
     }
 
-    fun resetResources(resources: Set<ResourceId>) {
-        this.resources = resources.toList()
+    suspend fun resetResources(resources: Set<ResourceId>) = withContext(Dispatchers.Default) {
+        this@ResourcesGridPresenter.resources = resources.toList()
         sortAllResources()
-        selection = this.resources
+        selection = this@ResourcesGridPresenter.resources
         viewState.updateAdapter()
     }
 
-    fun updateSorting(sorting: Sorting) {
-        this.sorting = sorting
+    suspend fun updateSorting(sorting: Sorting) = withContext(Dispatchers.Default) {
+        this@ResourcesGridPresenter.sorting = sorting
         sortAllResources()
         sortSelectionAndUpdateAdapter()
     }
 
-    fun updateAscending(ascending: Boolean) {
-        this.ascending = ascending
+    suspend fun updateAscending(ascending: Boolean) = withContext(Dispatchers.Default) {
+        this@ResourcesGridPresenter.ascending = ascending
         sortAllResources()
         sortSelectionAndUpdateAdapter()
     }
