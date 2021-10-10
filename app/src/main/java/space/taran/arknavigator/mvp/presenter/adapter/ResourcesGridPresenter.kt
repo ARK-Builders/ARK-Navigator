@@ -16,6 +16,7 @@ import space.taran.arknavigator.ui.fragments.utils.Preview
 import space.taran.arknavigator.utils.Sorting
 import space.taran.arknavigator.utils.extension
 import space.taran.arknavigator.utils.reifySorting
+import space.taran.arknavigator.utils.unequalCompareBy
 import java.lang.AssertionError
 import java.nio.file.Files
 import javax.inject.Inject
@@ -103,7 +104,7 @@ class ResourcesGridPresenter(
         if (comparator != null) {
             resources = resources.map { index.getPath(it)!! to it }
                 .toMap()
-                .toSortedMap(comparator)
+                .toSortedMap(unequalCompareBy(comparator))
                 .values
                 .toList()
         }
