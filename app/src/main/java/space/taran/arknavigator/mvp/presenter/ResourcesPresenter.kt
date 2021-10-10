@@ -49,7 +49,7 @@ class ResourcesPresenter(
 
         viewState.init()
         presenterScope.launch {
-            viewState.setProgressVisibility(true)
+            viewState.setProgressVisibility(true, "Indexing")
             val folders = foldersRepo.query()
             Log.d(RESOURCES_SCREEN, "folders retrieved: $folders")
 
@@ -88,7 +88,11 @@ class ResourcesPresenter(
             storage = AggregatedTagsStorage(rootToStorage.values)
 
             gridPresenter.init(index, storage, router)
-            gridPresenter.resetResources(listResources())
+
+            val listedResources = listResources()
+            viewState.setProgressVisibility(true, "Sorting")
+
+            gridPresenter.resetResources(listedResources)
             tagsSelectorPresenter.init(index, storage)
             tagsSelectorPresenter.calculateTagsAndSelection()
 
@@ -110,17 +114,21 @@ class ResourcesPresenter(
     fun onViewResume() {
         tagsSelectorPresenter.calculateTagsAndSelection()
         if (!tagsEnabled)
-            gridPresenter.resetResources(listResources(untagged = true))
+            presenterScope.launch { gridPresenter.resetResources(listResources(untagged = true)) }
     }
 
     fun onMenuTagsToggle(enabled: Boolean) {
         tagsEnabled = enabled
         viewState.setTagsEnabled(tagsEnabled)
-        if (tagsEnabled) {
-            gridPresenter.resetResources(listResources())
-            gridPresenter.updateSelection(tagsSelectorPresenter.selection)
-        } else
-            gridPresenter.resetResources(listResources(untagged = true))
+
+        presenterScope.launch {
+            if (tagsEnabled) {
+                gridPresenter.resetResources(listResources())
+                gridPresenter.updateSelection(tagsSelectorPresenter.selection)
+            } else
+                gridPresenter.resetResources(listResources(untagged = true))
+        }
+
         if (tagsEnabled && storage.getTags(listResources()).isEmpty()) {
             viewState.notifyUser("Tag something first")
         }
@@ -142,7 +150,7 @@ class ResourcesPresenter(
 
     private fun onSelectionChange(selection: Set<ResourceId>) {
         viewState.notifyUser("${selection.size} resources selected")
-        gridPresenter.updateSelection(selection)
+        presenterScope.launch { gridPresenter.updateSelection(selection) }
     }
 
     private fun listResources(untagged: Boolean = false): Set<ResourceId> {

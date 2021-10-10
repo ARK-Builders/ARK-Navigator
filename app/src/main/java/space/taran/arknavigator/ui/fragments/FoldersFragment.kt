@@ -76,9 +76,17 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
         }
     }
 
-    override fun setProgressVisibility(isVisible: Boolean) {
-        binding.layoutProgress.root.isVisible = isVisible
-        (activity as MainActivity).setBottomNavigationEnabled(!isVisible)
+    override fun setProgressVisibility(isVisible: Boolean, withText: String) {
+        binding.layoutProgress.apply {
+            root.isVisible = isVisible
+            (activity as MainActivity).setBottomNavigationEnabled(!isVisible)
+
+            if (withText.isNotEmpty()) {
+                progressText.setVisibilityAndLoadingStatus(View.VISIBLE)
+                progressText.loadingText = withText
+            }
+            else progressText.setVisibilityAndLoadingStatus(View.GONE)
+        }
     }
 
     override fun updateFoldersTree() {

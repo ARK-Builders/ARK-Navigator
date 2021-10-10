@@ -49,6 +49,8 @@ dependencies {
     implementation "androidx.recyclerview:recyclerview:1.2.1"
     implementation "androidx.documentfile:documentfile:1.0.1"
 
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.4.0-rc01"
+
     implementation "com.github.moxy-community:moxy:2.1.2"
     implementation "com.github.moxy-community:moxy-androidx:2.1.2"
     implementation "com.github.moxy-community:moxy-ktx:2.1.2"

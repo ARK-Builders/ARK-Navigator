@@ -9,7 +9,7 @@ import space.taran.arknavigator.utils.Sorting
 interface ResourcesView: MvpView, NotifiableView {
     fun init()
     fun updateAdapter()
-    fun setProgressVisibility(isVisible: Boolean)
+    fun setProgressVisibility(isVisible: Boolean, withText: String = "")
     fun setToolbarTitle(title: String)
     fun setTagsEnabled(enabled: Boolean)
     fun setTagsSelectorHintEnabled(enabled: Boolean)

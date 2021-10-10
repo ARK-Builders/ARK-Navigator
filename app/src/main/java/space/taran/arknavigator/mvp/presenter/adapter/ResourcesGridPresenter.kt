@@ -1,7 +1,9 @@
 package space.taran.arknavigator.mvp.presenter.adapter
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.dao.ResourceId
@@ -73,28 +75,40 @@ class ResourcesGridPresenter(
         ascending = userPreferences.isSortingAscending()
     }
 
-    fun updateSelection(selection: Set<ResourceId>) {
-        this.selection = resources.filter { selection.contains(it) }
-        viewState.updateAdapter()
+    suspend fun updateSelection(selection: Set<ResourceId>) = withContext(Dispatchers.Default) {
+        this@ResourcesGridPresenter.selection = resources.filter { selection.contains(it) }
+        withContext(Dispatchers.Main) {
+            setProgressVisibility(false)
+            viewState.updateAdapter()
+        }
     }
 
-    fun resetResources(resources: Set<ResourceId>) {
-        this.resources = resources.toList()
+    suspend fun resetResources(resources: Set<ResourceId>) = withContext(Dispatchers.Default) {
+        this@ResourcesGridPresenter.resources = resources.toList()
         sortAllResources()
-        selection = this.resources
-        viewState.updateAdapter()
+        selection = this@ResourcesGridPresenter.resources
+        withContext(Dispatchers.Main) {
+            setProgressVisibility(false)
+            viewState.updateAdapter()
+        }
     }
 
     fun updateSorting(sorting: Sorting) {
-        this.sorting = sorting
-        sortAllResources()
-        sortSelectionAndUpdateAdapter()
+        scope.launch(Dispatchers.Default) {
+            setProgressVisibility(true, "Sorting")
+            this@ResourcesGridPresenter.sorting = sorting
+            sortAllResources()
+            sortSelectionAndUpdateAdapter()
+        }
     }
 
     fun updateAscending(ascending: Boolean) {
-        this.ascending = ascending
-        sortAllResources()
-        sortSelectionAndUpdateAdapter()
+        scope.launch(Dispatchers.Default) {
+            setProgressVisibility(true, "Sorting")
+            this@ResourcesGridPresenter.ascending = ascending
+            sortAllResources()
+            sortSelectionAndUpdateAdapter()
+        }
     }
 
     private fun sortAllResources() {
@@ -115,6 +129,14 @@ class ResourcesGridPresenter(
     private fun sortSelectionAndUpdateAdapter() {
         val selection = this.selection.toSet()
         this.selection = resources.filter { selection.contains(it) }
-        viewState.updateAdapter()
+        scope.launch(Dispatchers.Main) {
+            setProgressVisibility(false)
+            viewState.updateAdapter()
+        }
     }
+
+    private suspend fun setProgressVisibility(isVisible: Boolean, withText: String = "") =
+        withContext(Dispatchers.Main) {
+            viewState.setProgressVisibility(isVisible, withText)
+        }
 }
