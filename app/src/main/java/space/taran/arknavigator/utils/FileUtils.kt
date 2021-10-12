@@ -108,8 +108,14 @@ fun isImage(filePath: Path): Boolean {
 }
 
 fun isVideo(filePath: Path): Boolean {
+    if (!isValidFile(filePath)) return false
+
     val extension = extension(filePath)
     return acceptedVideoExt.contains(extension)
+}
+
+fun isValidFile(filePath: Path): Boolean {
+    return getFileSizeMB(filePath) != 0
 }
 
 fun isPDF(filePath: Path): Boolean {
