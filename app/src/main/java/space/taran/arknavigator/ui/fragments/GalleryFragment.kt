@@ -105,6 +105,7 @@ class GalleryFragment(
                         if (startAt > 0 || !workaround) {
                             //weird bug causes this callback be called redundantly if startAt == 0
                             Log.d(GALLERY_SCREEN, "changing to preview at position $position")
+                            setupOpenEditFABs()
                             displayPreview(position)
                         }
                         workaround = false
@@ -127,7 +128,7 @@ class GalleryFragment(
                 shareResource(position)
             }
 
-            setupOpenEditFABs(binding.viewPager.currentItem)
+            setupOpenEditFABs()
         }
     }
 
@@ -191,7 +192,10 @@ class GalleryFragment(
         dialog.show(childFragmentManager, dialog.TAG)
     }
 
-    private fun setupOpenEditFABs(currentPosition: Int) {
+    private fun setupOpenEditFABs() {
+
+        val currentPosition = binding.viewPager.currentItem
+
         binding.apply {
             openResourceChooserFab.setOnClickListener(null)
             openFileEditFab.setOnClickListener(null)
@@ -199,31 +203,31 @@ class GalleryFragment(
             val resource = resources[currentPosition]
             val filePath = index.getPath(resource)
 
-        when (getFileActionType(filePath!!)) {
-            FileActionType.OPEN_ONLY -> {
-                openFileEditFab.makeGone()
-                openResourceChooserFab.makeVisibleAndSetOnClickListener{
-                    openIntentChooser(currentPosition, Intent.ACTION_VIEW)
+            when (getFileActionType(filePath!!)) {
+                FileActionType.OPEN_ONLY -> {
+                    openFileEditFab.makeGone()
+                    openResourceChooserFab.makeVisibleAndSetOnClickListener{
+                        openIntentChooser(currentPosition, Intent.ACTION_VIEW)
+                    }
                 }
-            }
-            FileActionType.OPEN_ONLY_DETACH_PROCESS -> {
-                openFileEditFab.makeGone()
-                openResourceChooserFab.makeVisibleAndSetOnClickListener{
-                    openIntentChooser(currentPosition, Intent.ACTION_VIEW, true)
+                FileActionType.OPEN_ONLY_DETACH_PROCESS -> {
+                    openFileEditFab.makeGone()
+                    openResourceChooserFab.makeVisibleAndSetOnClickListener{
+                        openIntentChooser(currentPosition, Intent.ACTION_VIEW, true)
+                    }
                 }
-            }
-            FileActionType.EDIT_AND_OPEN -> {
-                openFileEditFab.makeVisibleAndSetOnClickListener {
-                    openIntentChooser(currentPosition, Intent.ACTION_EDIT) }
+                FileActionType.EDIT_AND_OPEN -> {
+                    openFileEditFab.makeVisibleAndSetOnClickListener {
+                        openIntentChooser(currentPosition, Intent.ACTION_EDIT) }
 
-                openResourceChooserFab.makeVisibleAndSetOnClickListener {
-                    openIntentChooser(currentPosition, Intent.ACTION_VIEW, true) }
-            }
+                    openResourceChooserFab.makeVisibleAndSetOnClickListener {
+                        openIntentChooser(currentPosition, Intent.ACTION_VIEW, true) }
+                }
 
-            FileActionType.EDIT_AS_OPEN -> {
-                openResourceChooserFab.makeGone()
-                openFileEditFab.makeVisibleAndSetOnClickListener {
-                    openIntentChooser(currentPosition, Intent.ACTION_EDIT) }
+                FileActionType.EDIT_AS_OPEN -> {
+                    openResourceChooserFab.makeGone()
+                    openFileEditFab.makeVisibleAndSetOnClickListener {
+                        openIntentChooser(currentPosition, Intent.ACTION_EDIT) }
                 }
             }
         }

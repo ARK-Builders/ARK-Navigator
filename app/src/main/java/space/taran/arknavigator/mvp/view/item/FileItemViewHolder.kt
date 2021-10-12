@@ -1,14 +1,11 @@
 package space.taran.arknavigator.mvp.view.item
 
-import android.content.res.ColorStateList
 import android.util.Log
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.android.extensions.LayoutContainer
-import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.ItemFileGridBinding
 import space.taran.arknavigator.ui.fragments.utils.Preview
 import space.taran.arknavigator.utils.*
@@ -22,8 +19,8 @@ class FileItemViewHolder(private val binding: ItemFileGridBinding) :
 
     override fun setIcon(icon: Preview): Unit = with(binding.root) {
         Log.d(ITEMS_CONTAINER, "setting icon $icon")
-        if (icon.predefinedFolder != null) {
-            binding.iv.setImageResource(imageForPredefinedIcon(icon.predefinedFolder))
+        if (icon.predefinedIcon != null) {
+            binding.iv.setImageResource(imageForPredefinedIcon(icon.predefinedIcon))
         } else {
             when (icon.fileType) {
                 FileType.GIF -> loadGifThumbnailWithPlaceHolder(
@@ -66,16 +63,17 @@ class FileItemViewHolder(private val binding: ItemFileGridBinding) :
         }
 
         if (icon.extraInfo != null) {
+            val extraInfo = icon.extraInfo!!
             binding.apply {
-                resolutionTV.text = icon.extraInfo[Preview.ExtraInfoTag.MEDIA_RESOLUTION]
-                durationTV.text = icon.extraInfo[Preview.ExtraInfoTag.MEDIA_DURATION]
+                resolutionTV.text = extraInfo[Preview.ExtraInfoTag.MEDIA_RESOLUTION]
+                durationTV.text = extraInfo[Preview.ExtraInfoTag.MEDIA_DURATION]
 
                 resolutionTV.visibility =
-                    if (icon.extraInfo[Preview.ExtraInfoTag.MEDIA_RESOLUTION] == null) View.GONE
+                    if (extraInfo[Preview.ExtraInfoTag.MEDIA_RESOLUTION] == null) View.GONE
                     else View.VISIBLE
 
                 durationTV.visibility =
-                    if (icon.extraInfo[Preview.ExtraInfoTag.MEDIA_DURATION] == null) View.GONE
+                    if (extraInfo[Preview.ExtraInfoTag.MEDIA_DURATION] == null) View.GONE
                     else View.VISIBLE
             }
         } else {
