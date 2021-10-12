@@ -60,7 +60,7 @@ class ResourcesGridPresenter(
             throw AssertionError("Resource can't be a directory")
         }
 
-        view.setIcon(Preview.provide(path))
+        view.setIcon(Preview.provide(path, resource))
     }
 
     fun onItemClick(pos: Int) {

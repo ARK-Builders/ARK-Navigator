@@ -30,7 +30,7 @@ class GalleryPresenter(
     lateinit var router: Router
 
     private val previews = PreviewsList(resources.map {
-        Preview.provide(index.getPath(it)!!)
+        Preview.provide(index.getPath(it)!!, it)
     }, ::onPreviewsItemClick, ::onPreviewsItemZoom)
 
     override fun onFirstViewAttach() {

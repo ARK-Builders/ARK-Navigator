@@ -10,6 +10,7 @@ import android.os.ParcelFileDescriptor
 import android.util.Log
 import com.shockwave.pdfium.PdfDocument
 import com.shockwave.pdfium.PdfiumCore
+import space.taran.arknavigator.mvp.model.dao.ResourceId
 import space.taran.arknavigator.mvp.model.dao.computeId
 import space.taran.arknavigator.ui.fragments.utils.PredefinedIcon
 import space.taran.arknavigator.ui.fragments.utils.Preview
@@ -42,63 +43,18 @@ enum class FileType {
 
 const val PDF_PREVIEW_FOLDER_NAME = "pdf_preview"
 
-class PreviewFile(
-    val fileType: FileType? = null,
-    val file: Path? = null,
-    val fileExtension: String? = null,
-    val extraInfo: MutableMap<Preview.ExtraInfoTag, String>? = null
-) {
-    companion object PreviewCompanion {
-        fun createPair(file: Path): PreviewFile {
-            return when {
-                isImage(file) -> {
-                    PreviewFile(
-                        FileType.IMAGE,
-                        file,
-                        fileExtension = extensionWithoutDot(file)
-                    )
-                }
-                isVideo(file) -> {
-                    PreviewFile(
-                        FileType.VIDEO,
-                        file,
-                        fileExtension = extensionWithoutDot(file),
-                        extraInfo = getVideoInfo(file)
-                    )
-                }
-                isPDF(file) -> getPdfPreview(file)
-                isFormat(file, ".gif") ->
-                    PreviewFile(
-                        FileType.GIF,
-                        file,
-                        fileExtension = extensionWithoutDot(file)
-                    )
-                else -> PreviewFile(fileExtension = extensionWithoutDot(file))
-            }
-        }
-
-        private fun getPdfPreview(file: Path): PreviewFile {
-            val id = computeId(file)
-            val savedPreviews = getSavedPdfPreviews()
-            return if (savedPreviews?.contains(id) == true) {
-                PreviewFile(FileType.PDF, getPdfPreviewByID(id), fileExtension = extension(file))
-            } else PreviewFile(FileType.PDF, file, fileExtension = extension(file))
-        }
-    }
-}
-
 private val acceptedImageExt = listOf(".jpg", ".jpeg", ".png")
 private val acceptedVideoExt = listOf(".mp4", ".avi", ".mov", ".wmv", ".flv")
 private val acceptedEditOnlyExt = arrayListOf(".txt", ".doc", ".docx", ".odt", "ods")
     .also { it.addAll(acceptedImageExt) }
 private val acceptedReadAndEditExt = listOf(".pdf", ".md")
 
-fun provideIconImage(file: Path): PreviewFile =
-    providePreview(file) //todo downscale to, say, 128x128
+fun provideIconImage(file: Path, id: ResourceId?): Preview =
+    providePreview(file, id) //todo downscale to, say, 128x128
 
 //might be a temporary file
-fun providePreview(file: Path): PreviewFile {
-    return PreviewFile.createPair(file)
+fun providePreview(file: Path, id: ResourceId?): Preview {
+    return Preview.createPair(file, id)
 }
 
 
