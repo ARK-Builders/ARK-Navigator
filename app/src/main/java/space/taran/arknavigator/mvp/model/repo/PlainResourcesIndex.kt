@@ -115,7 +115,7 @@ class PlainResourcesIndex internal constructor (
         metaByPath.forEach {
             val path = it.key
             var out: FileOutputStream? = null
-            val id = computeId(path)
+            val id = it.value.id
 
             if (savedPreviews == null || !savedPreviews.contains(id)) {
                 val fileSize = getFileSizeMB(path)

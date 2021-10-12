@@ -24,8 +24,8 @@ class PreviewsList(
         val preview = previews[view.pos]
 
         when {
-            preview.predefinedFolder != null -> {
-                view.setPredefined(preview.predefinedFolder)
+            preview.predefinedIcon != null -> {
+                view.setPredefined(preview.predefinedIcon)
                 view.setZoomEnabled(false)
             }
             preview.fileType == FileType.PDF -> {

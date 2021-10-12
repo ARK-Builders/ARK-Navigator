@@ -21,10 +21,12 @@ class PreviewItemViewHolder(val binding: ItemImageBinding, val presenter: Previe
     override var pos = -1
 
     override fun setPredefined(resource: PredefinedIcon): Unit = with(binding.root) {
+        binding.layoutProgress.root.isVisible = false
         binding.ivImage.setImageResource(imageForPredefinedIcon(resource))
     }
 
     override fun setImage(file: Path?, playVisible: Boolean, extension: String?) {
+        binding.layoutProgress.root.isVisible = false
         if (file != null && extension != null){
             loadZoomImagePlaceholder(file,
                 imageForPredefinedExtension(extension),

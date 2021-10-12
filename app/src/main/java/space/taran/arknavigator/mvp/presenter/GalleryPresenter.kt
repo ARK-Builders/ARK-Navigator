@@ -7,6 +7,7 @@ import moxy.MvpPresenter
 import moxy.presenterScope
 import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.mvp.model.dao.ResourceId
+import space.taran.arknavigator.mvp.model.repo.PreviewRepo
 import space.taran.arknavigator.ui.fragments.utils.Preview
 import space.taran.arknavigator.mvp.model.repo.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.TagsStorage
@@ -21,19 +22,24 @@ import javax.inject.Inject
 class GalleryPresenter(
     private val index: ResourcesIndex,
     private val storage: TagsStorage,
-    resources: MutableList<ResourceId>)
-    : MvpPresenter<GalleryView>() {
+    private val resources: MutableList<ResourceId>
+) : MvpPresenter<GalleryView>() {
 
     private var isFullscreen = false
 
     @Inject
     lateinit var router: Router
 
-    private val previews = PreviewsList(resources.map {
-        Preview.provide(index.getPath(it)!!)
-    }, ::onPreviewsItemClick, ::onPreviewsItemZoom)
+    @Inject
+    lateinit var previewRepo: PreviewRepo
+
+    private lateinit var previews: PreviewsList
 
     override fun onFirstViewAttach() {
+        previews = PreviewsList(resources.map {
+            previewRepo.providePreview(index.getPath(it)!!, it)
+        }, ::onPreviewsItemClick, ::onPreviewsItemZoom)
+
         Log.d(GALLERY_SCREEN, "first view attached in GalleryPresenter")
         super.onFirstViewAttach()
         viewState.init(previews)

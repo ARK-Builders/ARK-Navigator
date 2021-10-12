@@ -7,6 +7,7 @@ import kotlinx.coroutines.withContext
 import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.dao.ResourceId
+import space.taran.arknavigator.mvp.model.repo.PreviewRepo
 import space.taran.arknavigator.mvp.model.repo.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.TagsStorage
 import space.taran.arknavigator.mvp.view.ResourcesView
@@ -27,6 +28,9 @@ class ResourcesGridPresenter(
 ) {
     @Inject
     lateinit var userPreferences: UserPreferences
+
+    @Inject
+    lateinit var previewRepo: PreviewRepo
 
     private var resources = listOf<ResourceId>()
     private var selection = listOf<ResourceId>()
@@ -60,7 +64,7 @@ class ResourcesGridPresenter(
             throw AssertionError("Resource can't be a directory")
         }
 
-        view.setIcon(Preview.provide(path))
+        view.setIcon(previewRepo.providePreview(path, resource))
     }
 
     fun onItemClick(pos: Int) {

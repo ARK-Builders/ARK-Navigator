@@ -1,7 +1,8 @@
 package space.taran.arknavigator.ui.fragments.utils
 
-import space.taran.arknavigator.utils.FileType
-import space.taran.arknavigator.utils.provideIconImage
+import space.taran.arknavigator.mvp.model.dao.ResourceId
+import space.taran.arknavigator.mvp.model.dao.computeId
+import space.taran.arknavigator.utils.*
 import java.nio.file.Files
 import java.nio.file.Path
 
@@ -10,27 +11,15 @@ enum class PredefinedIcon {
 }
 
 data class Preview(
-    val predefinedFolder: PredefinedIcon? = null,
+    val predefinedIcon: PredefinedIcon? = null,
     val previewPath: Path? = null,
     val fileType: FileType? = FileType.UNDEFINED,
-    val fileExtension: String? = null,
-    val extraInfo: MutableMap<ExtraInfoTag, String>? = null
+    val fileExtension: String? = null
 ) {
-    companion object {
-        fun provide(path: Path): Preview {
-            if (Files.isDirectory(path)) {
-                return Preview(predefinedFolder = PredefinedIcon.FOLDER)
-            }
-
-            val previewFile = provideIconImage(path)
-
-            return Preview(
-                previewPath = previewFile.file,
-                fileType = previewFile.fileType,
-                fileExtension = previewFile.fileExtension,
-                extraInfo = previewFile.extraInfo
-            )
-        }
+    val extraInfo by lazy {
+        if (previewPath != null && isVideo(previewPath))
+            getVideoInfo(previewPath)
+        else null
     }
 
     enum class ExtraInfoTag {
