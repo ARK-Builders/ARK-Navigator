@@ -8,7 +8,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.isVisible
-import androidx.lifecycle.lifecycleScope
 import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.GridLayoutManager
 import kotlinx.coroutines.launch
@@ -42,7 +41,8 @@ import kotlin.math.abs
 //`path` is used for filtering resources' paths
 //       if it is `null`, then no filtering is performed
 //       (recommended instead of passing same value for `path` and `root)
-class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(), ResourcesView, BackButtonListener {
+class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment(), ResourcesView,
+    BackButtonListener {
 
     private val presenter by moxyPresenter {
         ResourcesPresenter(root, path).apply {
@@ -72,7 +72,8 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?): View {
+        savedInstanceState: Bundle?
+    ): View {
 
         Log.d(RESOURCES_SCREEN, "inflating layout for ResourcesFragment")
         binding = FragmentResourcesBinding.inflate(inflater, container, false)
@@ -96,7 +97,11 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         binding.rvResources.adapter = resourcesAdapter
         binding.rvResources.layoutManager = GridLayoutManager(context, 3)
 
-        tagsSelectorAdapter = TagsSelectorAdapter(binding.cgTagsChecked, binding.tagsCg, presenter.tagsSelectorPresenter)
+        tagsSelectorAdapter = TagsSelectorAdapter(
+            binding.cgTagsChecked,
+            binding.tagsCg,
+            presenter.tagsSelectorPresenter
+        )
         binding.ivDragHandler.setOnTouchListener(::dragHandlerTouchListener)
         binding.etTagsFilter.doAfterTextChanged {
             presenter.tagsSelectorPresenter.onFilterChanged(it.toString())
@@ -105,7 +110,7 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         Log.d(RESOURCES_SCREEN, "options item selected in ResourcesFragment")
-        when(item.itemId) {
+        when (item.itemId) {
             R.id.menu_tags_sort_by -> presenter.onMenuSortDialogClick()
             R.id.menu_tags_off -> presenter.onMenuTagsToggle(false)
             R.id.menu_tags_on -> presenter.onMenuTagsToggle(true)
@@ -151,10 +156,7 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
     }
 
     override fun updateAdapter() {
-        requireActivity().runOnUiThread {
-            setProgressVisibility(false)
-            resourcesAdapter?.notifyDataSetChanged()
-        }
+        resourcesAdapter?.notifyDataSetChanged()
     }
 
     override fun notifyUser(message: String, moreTime: Boolean) {
@@ -168,12 +170,22 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         if (enabled) {
             val constraintSet = ConstraintSet()
             constraintSet.clone(binding.root)
-            constraintSet.connect(binding.rvResources.id, ConstraintSet.BOTTOM, binding.ivDragHandler.id, ConstraintSet.TOP)
+            constraintSet.connect(
+                binding.rvResources.id,
+                ConstraintSet.BOTTOM,
+                binding.ivDragHandler.id,
+                ConstraintSet.TOP
+            )
             constraintSet.applyTo(binding.root)
         } else {
             val constraintSet = ConstraintSet()
             constraintSet.clone(binding.root)
-            constraintSet.connect(binding.rvResources.id, ConstraintSet.BOTTOM, binding.root.id, ConstraintSet.BOTTOM)
+            constraintSet.connect(
+                binding.rvResources.id,
+                ConstraintSet.BOTTOM,
+                binding.root.id,
+                ConstraintSet.BOTTOM
+            )
             constraintSet.applyTo(binding.root)
         }
     }
@@ -221,7 +233,7 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         changeSortOrderEnabledStatus(dialogBinding, true)
 
         dialogBinding.apply {
-            when(sorting) {
+            when (sorting) {
                 Sorting.DEFAULT -> rbDefault.isChecked = true
                 Sorting.NAME -> rbName.isChecked = true
                 Sorting.SIZE -> rbSize.isChecked = true
@@ -231,8 +243,7 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
 
             if (sorting == Sorting.DEFAULT) {
                 changeSortOrderEnabledStatus(dialogBinding, false)
-            }
-            else {
+            } else {
                 if (ascending) {
                     rbAscending.isChecked = true
                 } else {
@@ -249,26 +260,22 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
                 if (newSorting == Sorting.DEFAULT)
                     notifyUser(requireActivity().getString(R.string.as_is_sorting_selected))
 
-                setProgressVisibility(true, "Sorting")
-                viewLifecycleOwner.lifecycleScope.launch {
-                    presenter.gridPresenter.updateSorting(newSorting)
-                }
+
+                presenter.gridPresenter.updateSorting(newSorting)
                 presenter.onSortDialogClose()
             }
 
             rgSortingDirection.setOnCheckedChangeListener { _, checkedId ->
                 var newAscending = false
-                when(checkedId) {
+                when (checkedId) {
                     R.id.rb_ascending -> newAscending = true
                     R.id.rb_descending -> newAscending = false
                 }
 
                 Log.d(RESOURCES_SCREEN, "sorting direction changed, ascending = $newAscending")
 
-                setProgressVisibility(true, "Sorting")
-                viewLifecycleOwner.lifecycleScope.launch {
-                    presenter.gridPresenter.updateAscending(newAscending)
-                }
+                presenter.gridPresenter.updateAscending(newAscending)
+
                 presenter.onSortDialogClose()
             }
 
@@ -280,9 +287,11 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         }
     }
 
-    private fun sortingCategorySelected(itemID: Int): Sorting{
-        return when(itemID) {
-            R.id.rb_default -> { Sorting.DEFAULT }
+    private fun sortingCategorySelected(itemID: Int): Sorting {
+        return when (itemID) {
+            R.id.rb_default -> {
+                Sorting.DEFAULT
+            }
             R.id.rb_name -> Sorting.NAME
             R.id.rb_size -> Sorting.SIZE
             R.id.rb_last_modified -> Sorting.LAST_MODIFIED
@@ -294,7 +303,8 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
     private fun dragHandlerTouchListener(view: View, event: MotionEvent): Boolean {
         when (event.action and MotionEvent.ACTION_MASK) {
             MotionEvent.ACTION_DOWN -> {
-                val layoutParams = binding.ivDragHandler.layoutParams as ConstraintLayout.LayoutParams
+                val layoutParams =
+                    binding.ivDragHandler.layoutParams as ConstraintLayout.LayoutParams
                 selectorDragStartBias = layoutParams.verticalBias
                 selectorDragStartTime = SystemClock.uptimeMillis()
             }
@@ -311,11 +321,12 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
 
                 if (travelTime > DRAG_TRAVEL_TIME_THRESHOLD &&
                     abs(travelDelta) > DRAG_TRAVEL_DELTA_THRESHOLD &&
-                    abs(travelSpeed) > DRAG_TRAVEL_SPEED_THRESHOLD) {
+                    abs(travelSpeed) > DRAG_TRAVEL_SPEED_THRESHOLD
+                ) {
                     selectorHeight = if (travelDelta > 0f) {
                         presenter.tagsSelectorPresenter.onFilterToggle(true)
                         1f
-                    } else  {
+                    } else {
                         presenter.tagsSelectorPresenter.onFilterToggle(false)
                         0f
                     }
@@ -344,10 +355,7 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
                     val turnedFromDownToUp = event.y < old && old > oldest
                     val turnedFromUpToDown = event.y > old && old < oldest
 
-                    Log.d("debug", "oldest: $oldest, old: $old, last: ${event.y}")
-
                     if (turnedFromDownToUp || turnedFromUpToDown) {
-                        Log.d("debug", "!!! TURN")
                         selectorDragStartBias = newBias
                         selectorDragStartTime = SystemClock.uptimeMillis()
                     }
@@ -369,10 +377,14 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
         updateVerticalBias(binding.ivDragHandler)
     }
 
-    private fun changeSortOrderEnabledStatus(dialogBinding:DialogSortBinding, isEnabledStatus: Boolean){
+    private fun changeSortOrderEnabledStatus(
+        dialogBinding: DialogSortBinding,
+        isEnabledStatus: Boolean
+    ) {
         val childCount = dialogBinding.rgSortingDirection.childCount
-        for (radioButton in 0 until childCount){
-            dialogBinding.rgSortingDirection.getChildAt(radioButton).changeEnabledStatus(isEnabledStatus)
+        for (radioButton in 0 until childCount) {
+            dialogBinding.rgSortingDirection.getChildAt(radioButton)
+                .changeEnabledStatus(isEnabledStatus)
         }
     }
 

@@ -1,4 +1,4 @@
-package space.taran.arknavigator.mvp.view
+package space.taran.arknavigator.ui.view
 
 import android.content.Context
 import android.os.Handler

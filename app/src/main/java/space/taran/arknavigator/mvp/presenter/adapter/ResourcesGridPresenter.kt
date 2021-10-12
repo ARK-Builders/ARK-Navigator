@@ -77,26 +77,38 @@ class ResourcesGridPresenter(
 
     suspend fun updateSelection(selection: Set<ResourceId>) = withContext(Dispatchers.Default) {
         this@ResourcesGridPresenter.selection = resources.filter { selection.contains(it) }
-        viewState.updateAdapter()
+        withContext(Dispatchers.Main) {
+            setProgressVisibility(false)
+            viewState.updateAdapter()
+        }
     }
 
     suspend fun resetResources(resources: Set<ResourceId>) = withContext(Dispatchers.Default) {
         this@ResourcesGridPresenter.resources = resources.toList()
         sortAllResources()
         selection = this@ResourcesGridPresenter.resources
-        viewState.updateAdapter()
+        withContext(Dispatchers.Main) {
+            setProgressVisibility(false)
+            viewState.updateAdapter()
+        }
     }
 
-    suspend fun updateSorting(sorting: Sorting) = withContext(Dispatchers.Default) {
-        this@ResourcesGridPresenter.sorting = sorting
-        sortAllResources()
-        sortSelectionAndUpdateAdapter()
+    fun updateSorting(sorting: Sorting) {
+        scope.launch(Dispatchers.Default) {
+            setProgressVisibility(true, "Sorting")
+            this@ResourcesGridPresenter.sorting = sorting
+            sortAllResources()
+            sortSelectionAndUpdateAdapter()
+        }
     }
 
-    suspend fun updateAscending(ascending: Boolean) = withContext(Dispatchers.Default) {
-        this@ResourcesGridPresenter.ascending = ascending
-        sortAllResources()
-        sortSelectionAndUpdateAdapter()
+    fun updateAscending(ascending: Boolean) {
+        scope.launch(Dispatchers.Default) {
+            setProgressVisibility(true, "Sorting")
+            this@ResourcesGridPresenter.ascending = ascending
+            sortAllResources()
+            sortSelectionAndUpdateAdapter()
+        }
     }
 
     private fun sortAllResources() {
@@ -117,6 +129,14 @@ class ResourcesGridPresenter(
     private fun sortSelectionAndUpdateAdapter() {
         val selection = this.selection.toSet()
         this.selection = resources.filter { selection.contains(it) }
-        viewState.updateAdapter()
+        scope.launch(Dispatchers.Main) {
+            setProgressVisibility(false)
+            viewState.updateAdapter()
+        }
     }
+
+    private suspend fun setProgressVisibility(isVisible: Boolean, withText: String = "") =
+        withContext(Dispatchers.Main) {
+            viewState.setProgressVisibility(isVisible, withText)
+        }
 }
