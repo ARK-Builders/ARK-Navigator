@@ -13,6 +13,7 @@ import moxy.ktx.moxyPresenter
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.DialogSortBinding
 import space.taran.arknavigator.databinding.FragmentResourcesBinding
+import space.taran.arknavigator.mvp.model.RootAndFav
 import space.taran.arknavigator.mvp.presenter.ResourcesPresenter
 import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.ui.App
@@ -38,7 +39,7 @@ import kotlin.math.abs
 class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(), ResourcesView, BackButtonListener {
 
     private val presenter by moxyPresenter {
-        ResourcesPresenter(root, path).apply {
+        ResourcesPresenter(RootAndFav(root, path)).apply {
             Log.d(RESOURCES_SCREEN, "creating ResourcesPresenter")
             App.instance.appComponent.inject(this)
         }
@@ -118,7 +119,6 @@ class ResourcesFragment(val root: Path?, val path: Path?): MvpAppCompatFragment(
     override fun onResume() {
         Log.d(RESOURCES_SCREEN, "resuming in ResourcesFragment")
         super.onResume()
-        presenter.onViewResume()
         updateDragHandlerBias()
     }
 

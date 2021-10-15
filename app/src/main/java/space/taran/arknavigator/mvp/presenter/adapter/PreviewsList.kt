@@ -1,12 +1,20 @@
 package space.taran.arknavigator.mvp.presenter.adapter
 
+import space.taran.arknavigator.mvp.model.IndexCache
+import space.taran.arknavigator.mvp.model.IndexingEngine
+import space.taran.arknavigator.mvp.model.dao.ResourceId
 import space.taran.arknavigator.ui.fragments.utils.Preview
 import space.taran.arknavigator.mvp.view.item.PreviewItemView
+import javax.inject.Inject
 
 class PreviewsList(
-    private var previews: List<Preview>,
     private val onItemClickListener: (PreviewItemView) -> Unit,
     private val onImageZoomListener: (Boolean) -> Unit) {
+
+    @Inject
+    lateinit var indexCache: IndexCache
+
+    private var previews = listOf<Preview>()
 
     fun items() = previews
 
@@ -14,6 +22,10 @@ class PreviewsList(
 
     fun updateItems(items: List<Preview>) {
         previews = items
+    }
+
+    fun init(resources: List<ResourceId>) {
+        previews = resources.map { Preview.provide(indexCache.getPath(it)!!) }
     }
 
     fun bindView(view: PreviewItemView) {

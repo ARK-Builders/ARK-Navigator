@@ -16,10 +16,8 @@ class Screens {
         override fun getFragment() = ResourcesFragment(root, path)
     }
 
-    class GalleryScreen(val index: ResourcesIndex,
-                        val storage: TagsStorage,
-                        val resources: List<ResourceId>,
+    class GalleryScreen(val resources: List<ResourceId>,
                         val position: Int): SupportAppScreen() {
-        override fun getFragment() = GalleryFragment(index, storage, resources.toMutableList(), position)
+        override fun getFragment() = GalleryFragment(resources.toMutableList(), position)
     }
 }

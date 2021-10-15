@@ -8,6 +8,7 @@ import moxy.MvpPresenter
 import moxy.presenterScope
 import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.R
+import space.taran.arknavigator.mvp.model.IndexingEngine
 import space.taran.arknavigator.mvp.model.repo.FoldersRepo
 import space.taran.arknavigator.mvp.model.repo.ResourcesIndexFactory
 import space.taran.arknavigator.mvp.presenter.adapter.folderstree.FoldersTreePresenter
@@ -34,7 +35,7 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
     lateinit var foldersRepo: FoldersRepo
 
     @Inject
-    lateinit var resourcesIndexFactory: ResourcesIndexFactory
+    lateinit var indexingEngine: IndexingEngine
 
     @Inject
     lateinit var stringProvider: StringProvider
@@ -162,7 +163,7 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
             message = "Indexing of huge folders can take minutes",
             moreTime = true)
 
-        resourcesIndexFactory.buildFromFilesystem(root)
+        indexingEngine.index(root)
 
         foldersTreePresenter.updateNodes(devices, favoritesByRoot)
         viewState.setProgressVisibility(false)

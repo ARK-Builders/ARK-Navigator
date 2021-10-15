@@ -8,8 +8,10 @@ import space.taran.arknavigator.mvp.presenter.*
 import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.fragments.*
 import dagger.Component
+import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
 import space.taran.arknavigator.mvp.presenter.adapter.ResourcesGridPresenter
 import space.taran.arknavigator.mvp.presenter.adapter.folderstree.FoldersTreePresenter
+import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagsSelectorPresenter
 import javax.inject.Singleton
 
 @Singleton
@@ -33,4 +35,6 @@ interface AppComponent {
     fun inject(galleryFragment: GalleryFragment)
     fun inject(resourcesGridPresenter: ResourcesGridPresenter)
     fun inject(foldersTreePresenter: FoldersTreePresenter)
+    fun inject(tagsSelectorPresenter: TagsSelectorPresenter)
+    fun inject(previewsList: PreviewsList)
 }

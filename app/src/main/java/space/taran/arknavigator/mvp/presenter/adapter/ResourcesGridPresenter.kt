@@ -3,16 +3,16 @@ package space.taran.arknavigator.mvp.presenter.adapter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import ru.terrakok.cicerone.Router
+import space.taran.arknavigator.mvp.model.IndexCache
+import space.taran.arknavigator.mvp.model.IndexingEngine
+import space.taran.arknavigator.mvp.model.TagsCache
 import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.dao.ResourceId
-import space.taran.arknavigator.mvp.model.repo.ResourcesIndex
-import space.taran.arknavigator.mvp.model.repo.TagsStorage
 import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.mvp.view.item.FileItemView
 import space.taran.arknavigator.navigation.Screens
 import space.taran.arknavigator.ui.fragments.utils.Preview
 import space.taran.arknavigator.utils.Sorting
-import space.taran.arknavigator.utils.extension
 import space.taran.arknavigator.utils.reifySorting
 import java.lang.AssertionError
 import java.nio.file.Files
@@ -25,12 +25,15 @@ class ResourcesGridPresenter(
     @Inject
     lateinit var userPreferences: UserPreferences
 
+    @Inject
+    lateinit var indexCache: IndexCache
+
+    @Inject
+    lateinit var router: Router
+
     private var resources = listOf<ResourceId>()
     private var selection = listOf<ResourceId>()
 
-    private lateinit var index: ResourcesIndex
-    private lateinit var storage: TagsStorage
-    private lateinit var router: Router
     var sorting = Sorting.DEFAULT
         private set(value) {
             field = value
@@ -48,7 +51,7 @@ class ResourcesGridPresenter(
     fun bindView(view: FileItemView) {
         val resource = selection[view.position()]
 
-        val path = index.getPath(resource)
+        val path = indexCache.getPath(resource)
             ?: throw AssertionError("Resource to display must be indexed")
 
         view.setText(path.fileName.toString())
@@ -61,13 +64,10 @@ class ResourcesGridPresenter(
     }
 
     fun onItemClick(pos: Int) {
-        router.navigateTo(Screens.GalleryScreen(index, storage, selection, pos))
+        router.navigateTo(Screens.GalleryScreen(selection, pos))
     }
 
-    suspend fun init(index: ResourcesIndex, storage: TagsStorage, router: Router) {
-        this.index = index
-        this.storage = storage
-        this.router = router
+    suspend fun init() {
         sorting = userPreferences.getSorting()
         ascending = userPreferences.isSortingAscending()
     }
@@ -99,7 +99,7 @@ class ResourcesGridPresenter(
     private fun sortAllResources() {
         val comparator = reifySorting(sorting)
         if (comparator != null) {
-            resources = resources.map { index.getPath(it)!! to it }
+            resources = resources.map { indexCache.getPath(it)!! to it }
                 .toMap()
                 .toSortedMap(comparator)
                 .values

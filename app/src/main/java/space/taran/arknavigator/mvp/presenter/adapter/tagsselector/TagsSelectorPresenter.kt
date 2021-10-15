@@ -1,24 +1,28 @@
 package space.taran.arknavigator.mvp.presenter.adapter.tagsselector
 
 import android.util.Log
+import space.taran.arknavigator.mvp.model.IndexCache
+import space.taran.arknavigator.mvp.model.RootAndFav
+import space.taran.arknavigator.mvp.model.TagsCache
 import space.taran.arknavigator.mvp.model.dao.ResourceId
-import space.taran.arknavigator.mvp.model.repo.ResourcesIndex
-import space.taran.arknavigator.mvp.model.repo.TagsStorage
 import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.utils.Popularity
 import space.taran.arknavigator.utils.TAGS_SELECTOR
 import space.taran.arknavigator.utils.Tag
 import space.taran.arknavigator.utils.Tags
-import java.lang.AssertionError
-import java.nio.file.Path
+import javax.inject.Inject
 
 class TagsSelectorPresenter(
     private val viewState: ResourcesView,
-    private val prefix: Path?,
+    private val rootAndFav: RootAndFav,
     private val onSelectionChangeListener: (Set<ResourceId>) -> Unit
 ) {
-    private var index: ResourcesIndex? = null
-    private var storage: TagsStorage? = null
+    @Inject
+    lateinit var indexCache: IndexCache
+
+    @Inject
+    lateinit var tagsCache: TagsCache
+
     private val actions = ArrayDeque<TagsSelectorAction>()
 
     var included = mutableSetOf<Tag>()
@@ -38,11 +42,6 @@ class TagsSelectorPresenter(
         private set
     var isClearBtnVisible = false
         private set
-
-    fun init(index: ResourcesIndex, storage: TagsStorage) {
-        this.index = index
-        this.storage = storage
-    }
 
     fun onTagClick(tag: Tag) {
         when {
@@ -86,11 +85,8 @@ class TagsSelectorPresenter(
     }
 
     fun calculateTagsAndSelection() {
-        if (storage == null || index == null)
-            return
-
-        val resources = index!!.listIds(prefix)
-        val tagsByResources = storage!!.groupTagsByResources(resources)
+        val resources = indexCache.listIds(rootAndFav) ?: emptySet()
+        val tagsByResources = tagsCache.groupTagsByResources(resources)
         val allTags = tagsByResources.values.flatten().toSet()
 
         //some tags could have been removed from storage
@@ -175,7 +171,7 @@ class TagsSelectorPresenter(
     }
 
     private fun findLastActualAction(): TagsSelectorAction? {
-        val allTags = storage!!.getTags(index!!.listIds(prefix))
+        val allTags = tagsCache.getTags(rootAndFav)
 
         while (actions.lastOrNull() != null) {
             val lastAction = actions.last()

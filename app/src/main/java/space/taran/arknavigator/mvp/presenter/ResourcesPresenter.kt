@@ -1,11 +1,12 @@
 package space.taran.arknavigator.mvp.presenter
 
 import android.util.Log
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import moxy.MvpPresenter
 import moxy.presenterScope
 import ru.terrakok.cicerone.Router
-import space.taran.arknavigator.mvp.model.UserPreferences
+import space.taran.arknavigator.mvp.model.*
 import space.taran.arknavigator.mvp.model.dao.ResourceId
 import space.taran.arknavigator.mvp.model.repo.*
 import space.taran.arknavigator.mvp.presenter.adapter.ResourcesGridPresenter
@@ -18,8 +19,7 @@ import java.nio.file.Path
 import javax.inject.Inject
 
 class ResourcesPresenter(
-    val root: Path?,
-    private val prefix: Path?
+    val rootAndFav: RootAndFav
 ) : MvpPresenter<ResourcesView>() {
 
     @Inject
@@ -29,19 +29,22 @@ class ResourcesPresenter(
     lateinit var foldersRepo: FoldersRepo
 
     @Inject
-    lateinit var resourcesIndexFactory: ResourcesIndexFactory
+    lateinit var indexCache: IndexCache
 
     @Inject
-    lateinit var userPreferences: UserPreferences
+    lateinit var tagsCache: TagsCache
 
-    private lateinit var index: ResourcesIndex
-    private lateinit var storage: TagsStorage
     var tagsEnabled: Boolean = true
 
     val gridPresenter = ResourcesGridPresenter(viewState, presenterScope).apply {
         App.instance.appComponent.inject(this)
     }
-    val tagsSelectorPresenter = TagsSelectorPresenter(viewState, prefix, ::onSelectionChange)
+    val tagsSelectorPresenter = TagsSelectorPresenter(viewState, rootAndFav, ::onSelectionChange).apply {
+        App.instance.appComponent.inject(this)
+    }
+
+    private var resources = setOf<ResourceId>()
+    private var untaggedResources = setOf<ResourceId>()
 
     override fun onFirstViewAttach() {
         Log.d(RESOURCES_SCREEN, "first view attached in ResourcesPresenter")
@@ -52,8 +55,12 @@ class ResourcesPresenter(
             viewState.setProgressVisibility(true)
             val folders = foldersRepo.query()
             Log.d(RESOURCES_SCREEN, "folders retrieved: $folders")
+            listenRootAndFav()
 
             Notifications.notifyIfFailedPaths(viewState, folders.failed)
+
+            val root = rootAndFav.root
+            val prefix = rootAndFav.fav
 
             val roots: List<Path> = {
                 val all = folders.succeeded.keys
@@ -69,27 +76,7 @@ class ResourcesPresenter(
             }()
             Log.d(RESOURCES_SCREEN, "using roots $roots")
 
-            val rootToIndex = roots
-                .map { it to resourcesIndexFactory.loadFromDatabase(it) }
-                .toMap()
-
-            val rootToStorage = roots
-                .map { it to PlainTagsStorage.provide(it, rootToIndex[it]!!) }
-                .toMap()
-
-            roots.forEach { root ->
-                val storage = rootToStorage[root]!!
-                val indexed = rootToIndex[root]!!.listAllIds()
-
-                storage.cleanup(indexed)
-            }
-
-            index = AggregatedResourcesIndex(rootToIndex.values)
-            storage = AggregatedTagsStorage(rootToStorage.values)
-
-            gridPresenter.init(index, storage, router)
-            gridPresenter.resetResources(listResources())
-            tagsSelectorPresenter.init(index, storage)
+            gridPresenter.init()
             tagsSelectorPresenter.calculateTagsAndSelection()
 
             val title = {
@@ -107,21 +94,15 @@ class ResourcesPresenter(
         super.onDestroy()
     }
 
-    fun onViewResume() {
-        tagsSelectorPresenter.calculateTagsAndSelection()
-        if (!tagsEnabled)
-            gridPresenter.resetResources(listResources(untagged = true))
-    }
-
     fun onMenuTagsToggle(enabled: Boolean) {
         tagsEnabled = enabled
         viewState.setTagsEnabled(tagsEnabled)
         if (tagsEnabled) {
-            gridPresenter.resetResources(listResources())
+            gridPresenter.resetResources(resources)
             gridPresenter.updateSelection(tagsSelectorPresenter.selection)
         } else
-            gridPresenter.resetResources(listResources(untagged = true))
-        if (tagsEnabled && storage.getTags(listResources()).isEmpty()) {
+            gridPresenter.resetResources(untaggedResources)
+        if (tagsEnabled && tagsCache.getTags(rootAndFav).isEmpty()) {
             viewState.notifyUser("Tag something first")
         }
     }
@@ -142,21 +123,30 @@ class ResourcesPresenter(
 
     private fun onSelectionChange(selection: Set<ResourceId>) {
         viewState.notifyUser("${selection.size} resources selected")
-        gridPresenter.updateSelection(selection)
+        if (tagsEnabled)
+            gridPresenter.updateSelection(selection)
     }
 
-    private fun listResources(untagged: Boolean = false): Set<ResourceId> {
-        val underPrefix = index.listIds(prefix)
-
-        val result = if (untagged) {
-            storage
-                .listUntaggedResources()
-                .intersect(underPrefix)
-        } else {
-            underPrefix
+    private suspend fun listenRootAndFav() {
+        presenterScope.launch {
+            indexCache.listenResourcesChanges(rootAndFav).collect { resources ->
+                resources?.let {
+                    viewState.setProgressVisibility(false)
+                    this@ResourcesPresenter.resources = resources
+                    this@ResourcesPresenter.untaggedResources = tagsCache.listUntagged(rootAndFav)!!
+                    if (tagsEnabled) {
+                        gridPresenter.resetResources(resources)
+                        tagsSelectorPresenter.calculateTagsAndSelection()
+                    } else {
+                        gridPresenter.resetResources(untaggedResources)
+                    }
+                }
+            }
         }
-
-        viewState.notifyUser("${result.size} resources selected")
-        return result
+        presenterScope.launch {
+            tagsCache.listenTagsChanges(rootAndFav).collect { tags ->
+                tags?.let { tagsSelectorPresenter.calculateTagsAndSelection() }
+            }
+        }
     }
 }

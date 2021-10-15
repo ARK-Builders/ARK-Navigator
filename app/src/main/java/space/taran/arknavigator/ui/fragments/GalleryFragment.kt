@@ -18,9 +18,9 @@ import space.taran.arknavigator.BuildConfig
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.DialogTagsBinding
 import space.taran.arknavigator.databinding.FragmentGalleryBinding
+import space.taran.arknavigator.mvp.model.IndexCache
+import space.taran.arknavigator.mvp.model.IndexingEngine
 import space.taran.arknavigator.mvp.model.dao.ResourceId
-import space.taran.arknavigator.mvp.model.repo.ResourcesIndex
-import space.taran.arknavigator.mvp.model.repo.TagsStorage
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
 import space.taran.arknavigator.mvp.view.GalleryView
@@ -33,20 +33,22 @@ import space.taran.arknavigator.utils.*
 import space.taran.arknavigator.utils.extensions.makeGone
 import space.taran.arknavigator.utils.extensions.makeVisibleAndSetOnClickListener
 import java.io.File
+import javax.inject.Inject
 
 class GalleryFragment(
-    private val index: ResourcesIndex,
-    private val storage: TagsStorage,
     private val resources: MutableList<ResourceId>,
     private val startAt: Int
 ) : MvpAppCompatFragment(), GalleryView, BackButtonListener, NotifiableView {
+
+    @Inject
+    lateinit var indexCache: IndexCache
 
     private lateinit var dialogBinding: DialogTagsBinding
     private var dialog: AlertDialog? = null
     private lateinit var binding: FragmentGalleryBinding
 
     private val presenter by moxyPresenter {
-        GalleryPresenter(index, storage, resources).apply {
+        GalleryPresenter(resources).apply {
             Log.d(GALLERY_SCREEN, "creating GalleryPresenter")
             App.instance.appComponent.inject(this)
         }
@@ -174,7 +176,7 @@ class GalleryFragment(
 
     private fun shareResource(position: Int) {
         val resource = resources[position]
-        val path = index.getPath(resource)!!
+        val path = indexCache.getPath(resource)!!
 
         val context = requireContext()
         val uri = FileProvider.getUriForFile(
@@ -202,7 +204,7 @@ class GalleryFragment(
             openFileEditFab.setOnClickListener(null)
 
             val resource = resources[currentPosition]
-            val filePath = index.getPath(resource)
+            val filePath = indexCache.getPath(resource)!!
 
         when (getFileActionType(filePath!!)) {
             FileActionType.OPEN_ONLY -> {
@@ -236,7 +238,7 @@ class GalleryFragment(
 
     private fun openIntentChooser(position: Int, actionType: String, detachProcess: Boolean = false) {
         val resource = resources[position]
-        val filePath = index.getPath(resource)
+        val filePath = indexCache.getPath(resource)!!
 
         //Create intent, and set the data and extension to it
         val intent = Intent()
@@ -308,7 +310,7 @@ class GalleryFragment(
         val resource = resources[position]
         val tags = presenter.listTags(resource)
         displayPreviewTags(resource, tags)
-        setTitle(index.getPath(resource)!!.fileName.toString())
+        setTitle(indexCache.getPath(resource)!!.fileName.toString())
     }
 
     private fun displayDialogTags(resource: ResourceId, tags: Tags) {
