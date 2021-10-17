@@ -92,23 +92,33 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
 
         if (Files.isDirectory(path)) {
             viewState.updateRootPickerDialogPath(path)
-
-            val rootPrefix = roots.find { path.startsWith(it) }
-            if (rootPrefix != null) {
-                if (rootPrefix == path) {
-                    viewState.updateRootPickerDialogPickBtnState(isEnabled = false, isRoot = true)
-                    rootNotFavorite = true
-                } else {
-                    viewState.updateRootPickerDialogPickBtnState(isEnabled = true, isRoot = false)
-                    rootNotFavorite = false
-                }
-            } else {
-                viewState.updateRootPickerDialogPickBtnState(isEnabled = true, isRoot = true)
-                rootNotFavorite = true
-            }
+            updateFolderAndButtonState(path)
         } else {
             Log.d(FOLDER_PICKER, "but it is not a directory")
             viewState.notifyUser(stringProvider.getString(R.string.folders_file_chosen_as_root))
+        }
+    }
+
+    private fun updateFolderAndButtonState(path: Path) {
+        val rootPrefix = roots.find { path.startsWith(it) }
+
+        if (rootPrefix != null) {
+            if (rootPrefix == path) {
+                viewState.updateRootPickerDialogPickBtnState(isEnabled = false, isRoot = true)
+                rootNotFavorite = true
+            } else {
+                var foundAsFavorite = false
+                getFavorites().forEach {
+                    if (path.endsWith(it)) {
+                        foundAsFavorite = true
+                    }
+                }
+                viewState.updateRootPickerDialogPickBtnState(isEnabled = !foundAsFavorite, isRoot = false)
+                rootNotFavorite = false
+            }
+        } else {
+            viewState.updateRootPickerDialogPickBtnState(isEnabled = true, isRoot = true)
+            rootNotFavorite = true
         }
     }
 
@@ -132,7 +142,7 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
                 }
             } else {
                 // adding path as favorite
-                if (favorites.contains(path)) {
+                if (getFavorites().contains(path)) {
                     viewState.notifyUser(stringProvider.getString(R.string.folders_favorite_is_alreay_picked))
                 } else {
                     addFavorite(path)
@@ -169,6 +179,12 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
         foldersTreePresenter.updateNodes(devices, favoritesByRoot)
     }
 
+    private fun getFavorites(): Set<Path> {
+        favorites = favoritesByRoot.values.flatten().toSet()
+        return favorites
+    }
+
+
     fun addFavorite(favorite: Path) = presenterScope.launch(NonCancellable) {
         viewState.setProgressVisibility(true, "Adding folder")
         Log.d(FOLDERS_SCREEN, "favorite $favorite added in RootsPresenter")
@@ -189,6 +205,12 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
         foldersTreePresenter.updateNodes(devices, favoritesByRoot)
         viewState.setProgressVisibility(false)
     }
+
+    fun navigateBackClick(path: Path?) {
+        Log.d(FOLDERS_SCREEN, "[back] clicked, path: $path")
+        if (path != null) updateFolderAndButtonState(path)
+    }
+
 
     fun onBackClick(): Boolean {
         Log.d(FOLDERS_SCREEN, "[back] clicked")
