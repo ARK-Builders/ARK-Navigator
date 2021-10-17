@@ -157,6 +157,9 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
                     Log.d(FOLDER_PICKER, "can't go back, closing root picker")
                     presenter.onRootPickerBackClick()
                 }
+                else {
+                    presenter.navigateBackClick(folderPicker!!.currentLabel)
+                }
                 return@setOnKeyListener true
             }
             false

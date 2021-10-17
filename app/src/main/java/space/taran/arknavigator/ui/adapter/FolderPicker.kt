@@ -19,12 +19,14 @@ class FolderPicker(
         dialogBinding.tvRootsDialogPath.text = super.getLabel().toString()
     }
 
+    var currentLabel: Path? = null
+
     override fun backClicked(): Path? {
-        val label = super.backClicked()
-        if (label != null) {
-            dialogBinding.tvRootsDialogPath.text = label.toString()
+        currentLabel = super.backClicked()
+        if (currentLabel != null) {
+            dialogBinding.tvRootsDialogPath.text = currentLabel.toString()
         }
-        return label
+        return currentLabel
     }
 
     fun updatePath(path: Path) {
