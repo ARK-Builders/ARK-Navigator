@@ -49,15 +49,6 @@ private val acceptedEditOnlyExt = arrayListOf(".txt", ".doc", ".docx", ".odt", "
     .also { it.addAll(acceptedImageExt) }
 private val acceptedReadAndEditExt = listOf(".pdf", ".md")
 
-fun provideIconImage(file: Path, id: ResourceId?): Preview =
-    providePreview(file, id) //todo downscale to, say, 128x128
-
-//might be a temporary file
-fun providePreview(file: Path, id: ResourceId?): Preview {
-    return Preview.createPair(file, id)
-}
-
-
 fun isImage(filePath: Path): Boolean {
     val extension = extension(filePath)
     return acceptedImageExt.contains(extension)
@@ -87,7 +78,6 @@ fun getPdfPreviewsFolder(): File =
 
 fun getPdfPreviewByID(id: Long): Path {
     val pathName = "${App.instance.cacheDir}/$PDF_PREVIEW_FOLDER_NAME/$id.png"
-    Log.d("TAG", "getPdfPreview: $pathName")
     return File(pathName).toPath()
 }
 
