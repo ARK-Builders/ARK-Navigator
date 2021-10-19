@@ -1,7 +1,6 @@
 package space.taran.arknavigator.mvp.presenter.adapter
 
-import space.taran.arknavigator.mvp.model.repo.PreviewRepo
-import space.taran.arknavigator.ui.fragments.utils.Preview
+import space.taran.arknavigator.mvp.model.repo.PreviewsRepo
 import space.taran.arknavigator.mvp.view.item.FileItemView
 import space.taran.arknavigator.utils.findLongestCommonPrefix
 import java.nio.file.Path
@@ -12,12 +11,12 @@ class FoldersWalker(paths: List<Path>, onClick: ItemClickHandler<Path>)
         findLongestCommonPrefix(paths), paths, onClick) {
 
     @Inject
-    lateinit var previewRepo: PreviewRepo
+    lateinit var previewsRepo: PreviewsRepo
 
     override fun bindView(view: FileItemView) {
         val path = items()[view.position()]
         view.setText(path.fileName.toString())
 
-        view.setIcon(previewRepo.providePreview(path))
+        view.setIcon(previewsRepo.providePreview(path))
     }
 }

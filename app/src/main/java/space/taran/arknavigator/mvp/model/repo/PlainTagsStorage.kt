@@ -191,10 +191,6 @@ class PlainTagsStorage
         Log.d(TAGS_STORAGE, "${tagsById.size} entries has been written")
     }
 
-    //todo: clean up storage when items are removed
-    // (OR their ids are present but files not found)
-    // (+ trash can for tags of removed resources)
-
     companion object {
         const val STORAGE_FILENAME = ".ark-tags"
 

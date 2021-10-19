@@ -8,7 +8,7 @@ import space.taran.arknavigator.utils.*
 import java.nio.file.Files
 import java.nio.file.Path
 
-class PreviewRepo {
+class PreviewsRepo {
 
     fun providePreview(path: Path, resourceID: ResourceId? = null): Preview {
         if (Files.isDirectory(path)) {

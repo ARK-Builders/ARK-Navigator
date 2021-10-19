@@ -1,9 +1,6 @@
 package space.taran.arknavigator.ui.fragments.utils
 
-import space.taran.arknavigator.mvp.model.dao.ResourceId
-import space.taran.arknavigator.mvp.model.dao.computeId
 import space.taran.arknavigator.utils.*
-import java.nio.file.Files
 import java.nio.file.Path
 
 enum class PredefinedIcon {

@@ -7,7 +7,7 @@ import moxy.MvpPresenter
 import moxy.presenterScope
 import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.mvp.model.dao.ResourceId
-import space.taran.arknavigator.mvp.model.repo.PreviewRepo
+import space.taran.arknavigator.mvp.model.repo.PreviewsRepo
 import space.taran.arknavigator.ui.fragments.utils.Preview
 import space.taran.arknavigator.mvp.model.repo.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.TagsStorage
@@ -31,13 +31,13 @@ class GalleryPresenter(
     lateinit var router: Router
 
     @Inject
-    lateinit var previewRepo: PreviewRepo
+    lateinit var previewsRepo: PreviewsRepo
 
     private lateinit var previews: PreviewsList
 
     override fun onFirstViewAttach() {
         previews = PreviewsList(resources.map {
-            previewRepo.providePreview(index.getPath(it)!!, it)
+            previewsRepo.providePreview(index.getPath(it)!!, it)
         }, ::onPreviewsItemClick, ::onPreviewsItemZoom)
 
         Log.d(GALLERY_SCREEN, "first view attached in GalleryPresenter")
