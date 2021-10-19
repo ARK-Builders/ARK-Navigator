@@ -7,15 +7,13 @@ import kotlinx.coroutines.withContext
 import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.dao.ResourceId
-import space.taran.arknavigator.mvp.model.repo.PreviewRepo
+import space.taran.arknavigator.mvp.model.repo.PreviewsRepo
 import space.taran.arknavigator.mvp.model.repo.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.TagsStorage
 import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.mvp.view.item.FileItemView
 import space.taran.arknavigator.navigation.Screens
-import space.taran.arknavigator.ui.fragments.utils.Preview
 import space.taran.arknavigator.utils.Sorting
-import space.taran.arknavigator.utils.extension
 import space.taran.arknavigator.utils.reifySorting
 import space.taran.arknavigator.utils.unequalCompareBy
 import java.lang.AssertionError
@@ -30,7 +28,7 @@ class ResourcesGridPresenter(
     lateinit var userPreferences: UserPreferences
 
     @Inject
-    lateinit var previewRepo: PreviewRepo
+    lateinit var previewsRepo: PreviewsRepo
 
     private var resources = listOf<ResourceId>()
     private var selection = listOf<ResourceId>()
@@ -64,7 +62,7 @@ class ResourcesGridPresenter(
             throw AssertionError("Resource can't be a directory")
         }
 
-        view.setIcon(previewRepo.providePreview(path, resource))
+        view.setIcon(previewsRepo.providePreview(path, resource))
     }
 
     fun onItemClick(pos: Int) {

@@ -2,6 +2,8 @@ package space.taran.arknavigator.utils
 
 const val MAIN: String = "main"
 
+const val MODULES: String = "modules"
+
 const val PERMISSIONS: String = "permissions"
 
 const val RESOURCES_SCREEN: String = "resources-screen"

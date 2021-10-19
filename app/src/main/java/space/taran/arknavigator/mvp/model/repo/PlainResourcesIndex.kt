@@ -7,18 +7,14 @@ import kotlinx.coroutines.withContext
 import space.taran.arknavigator.mvp.model.dao.Resource
 import space.taran.arknavigator.mvp.model.dao.ResourceDao
 import space.taran.arknavigator.mvp.model.dao.ResourceId
-import space.taran.arknavigator.mvp.model.dao.computeId
 import space.taran.arknavigator.utils.*
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
-import java.nio.file.attribute.FileTime
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.listDirectoryEntries
-
-data class ResourceMeta(val id: ResourceId, val modified: FileTime)
 
 internal data class Difference(
     val deleted: List<Path>,
@@ -62,6 +58,15 @@ class PlainResourcesIndex internal constructor (
 
     override fun getPath(id: ResourceId): Path? = pathById[id]
 
+    override fun getMeta(id: ResourceId): ResourceMeta? {
+        val path = getPath(id)
+        return if (path != null) {
+            metaByPath[path]
+        } else {
+            null
+        }
+    }
+
     override fun remove(id: ResourceId): Path? {
         Log.d(RESOURCES_INDEX, "forgetting resource $id")
         val path = pathById.remove(id)
@@ -91,12 +96,9 @@ class PlainResourcesIndex internal constructor (
 
         val toInsert = diff.updated + diff.added
         toInsert.forEach {
-            val id = computeId(it)
-
-            metaByPath[it] = ResourceMeta(
-                id = id,
-                modified = Files.getLastModifiedTime(it))
-            pathById[id] = it
+            val meta = ResourceMeta.fromPath(it)
+            metaByPath[it] = meta
+            pathById[meta.id] = it
         }
 
         generatePdfPreviews()
@@ -118,9 +120,7 @@ class PlainResourcesIndex internal constructor (
             val id = it.value.id
 
             if (savedPreviews == null || !savedPreviews.contains(id)) {
-                val fileSize = getFileSizeMB(path)
-
-                if (isPDF(path) && fileSize >= 10) {
+                if (isPDF(path) && it.value.size / MEGABYTE >= 10) {
                     try {
                         if (!previewsFolder.exists()) previewsFolder.mkdirs()
 
@@ -167,12 +167,7 @@ class PlainResourcesIndex internal constructor (
                 + "${resources.size} resources from root $root")
 
         val entities = resources.entries.toList()
-            .map { Resource(
-                id = it.value.id,
-                root = root.toString(),
-                path = it.key.toString(),
-                modified = it.value.modified.toMillis())
-            }
+            .map { Resource.fromMeta(it.value, root, it.key) }
 
         dao.insertAll(entities)
 
@@ -180,14 +175,11 @@ class PlainResourcesIndex internal constructor (
     }
 
     companion object {
-        //todo: parallel and asynchronous
+
         internal suspend fun scanResources(files: List<Path>): Map<Path, ResourceMeta> =
             withContext(Dispatchers.IO) {
                 files.map {
-                    it to ResourceMeta(
-                        id = computeId(it),
-                        modified = Files.getLastModifiedTime(it)
-                    )
+                    it to ResourceMeta.fromPath(it)
                 }.toMap()
             }
 
@@ -199,10 +191,7 @@ class PlainResourcesIndex internal constructor (
                         throw IllegalStateException("Index must not have" +
                                 "several resources for the same path")
                     }
-                    val resource = resources[0]
-                    ResourceMeta(
-                        id = resource.id,
-                        modified = FileTime.fromMillis(resource.modified))
+                    ResourceMeta.fromRoom(resources[0])
                 }
                 .mapKeys { (path, _) -> Paths.get(path) }
 
