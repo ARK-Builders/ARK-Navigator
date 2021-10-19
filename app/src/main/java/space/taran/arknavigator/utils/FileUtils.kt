@@ -3,16 +3,11 @@ package space.taran.arknavigator.utils
 import android.content.Context
 import space.taran.arknavigator.ui.App
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.ParcelFileDescriptor
-import android.util.Log
 import com.shockwave.pdfium.PdfDocument
 import com.shockwave.pdfium.PdfiumCore
-import space.taran.arknavigator.mvp.model.dao.ResourceId
-import space.taran.arknavigator.mvp.model.dao.computeId
-import space.taran.arknavigator.ui.fragments.utils.PredefinedIcon
 import space.taran.arknavigator.ui.fragments.utils.Preview
 import java.io.File
 import java.lang.IllegalArgumentException
@@ -21,6 +16,7 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.concurrent.TimeUnit
 import kotlin.io.path.extension
+import kotlin.io.path.fileSize
 
 val ROOT_PATH: Path = Paths.get("/")
 
@@ -37,10 +33,6 @@ enum class FileActionType {
     EDIT_AS_OPEN, EDIT_AND_OPEN, OPEN_ONLY, OPEN_ONLY_DETACH_PROCESS
 }
 
-enum class FileType {
-    IMAGE, VIDEO, GIF, PDF, UNDEFINED
-}
-
 const val PDF_PREVIEW_FOLDER_NAME = "pdf_preview"
 
 private val acceptedImageExt = listOf(".jpg", ".jpeg", ".png")
@@ -55,14 +47,12 @@ fun isImage(filePath: Path): Boolean {
 }
 
 fun isVideo(filePath: Path): Boolean {
-    if (!isValidFile(filePath)) return false
-
-    val extension = extension(filePath)
-    return acceptedVideoExt.contains(extension)
-}
-
-fun isValidFile(filePath: Path): Boolean {
-    return getFileSizeMB(filePath) != 0
+    return if (filePath.fileSize() > 0) {
+        val extension = extension(filePath)
+        acceptedVideoExt.contains(extension)
+    } else {
+        false
+    }
 }
 
 fun isPDF(filePath: Path): Boolean {
@@ -211,9 +201,6 @@ fun findLongestCommonPrefix(paths: List<Path>): Path {
     return tailrec(ROOT_PATH, paths).first
 }
 
-fun getFileSizeMB(path: Path): Int =
-    (path.toFile().length() / (1024 * 1024)).toInt()
-
 fun extension(path: Path): String {
     return ".${path.extension.lowercase()}"
 }
@@ -230,3 +217,6 @@ fun reifySorting(sorting: Sorting): Comparator<Path>? =
         Sorting.LAST_MODIFIED -> compareBy { Files.getLastModifiedTime(it) }
         Sorting.DEFAULT -> null
     }
+
+const val KILOBYTE = 1024
+const val MEGABYTE = 1024 * KILOBYTE

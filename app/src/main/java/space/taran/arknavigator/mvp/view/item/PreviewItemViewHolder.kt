@@ -13,7 +13,6 @@ import space.taran.arknavigator.utils.*
 import space.taran.arknavigator.utils.extensions.autoDisposeScope
 import java.nio.file.Path
 
-//todo join with FileItemViewHolder, it is basically the same, just different sizes
 class PreviewItemViewHolder(val binding: ItemImageBinding, val presenter: PreviewsList) :
     RecyclerView.ViewHolder(binding.root),
     PreviewItemView {

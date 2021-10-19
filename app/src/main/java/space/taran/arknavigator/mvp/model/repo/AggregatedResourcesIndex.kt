@@ -16,6 +16,11 @@ class AggregatedResourcesIndex(
         shards.mapNotNull { it.getPath(id) }
             .firstOrNull()
 
+    override fun getMeta(id: ResourceId): ResourceMeta? =
+        //todo: iterators or streams would optimize out redundant maps
+        shards.mapNotNull { it.getMeta(id) }
+            .firstOrNull()
+
     override fun remove(id: ResourceId): Path? =
         shards.mapNotNull { it.remove(id) }
             .firstOrNull()

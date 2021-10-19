@@ -3,13 +3,15 @@ package space.taran.arknavigator.mvp.model.dao
 import android.util.Log
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import space.taran.arknavigator.mvp.model.repo.ResourceMeta
+import space.taran.arknavigator.mvp.model.repo.ResourceMetaExtra
+import space.taran.arknavigator.utils.*
 import java.util.zip.CRC32
 
-import space.taran.arknavigator.utils.StringPath
-import space.taran.arknavigator.utils.Milliseconds
-import space.taran.arknavigator.utils.RESOURCES_INDEX
 import java.nio.file.Files
 import java.nio.file.Path
+
+typealias ResourceExtra = Boolean //TODO: PR #33
 
 @Entity
 data class Resource (
@@ -17,8 +19,21 @@ data class Resource (
     val id: ResourceId,
     val root: StringPath,
     val path: StringPath,
-    val modified: Milliseconds
-)
+    val modified: Milliseconds,
+    val size: Long,
+    val extra: ResourceExtra?
+) {
+    companion object {
+        fun fromMeta(meta: ResourceMeta, root: Path, path: Path): Resource =
+            Resource(
+                id = meta.id,
+                root = root.toString(),
+                path = path.toString(),
+                modified = meta.modified.toMillis(),
+                size = meta.size,
+                extra = meta.extra?.roomData())
+    }
+}
 
 typealias ResourceId = Long
 
@@ -54,8 +69,5 @@ fun computeId(file: Path): ResourceId {
 
     return crc32.value
 }
-
-private const val KILOBYTE = 1024
-private const val MEGABYTE = 1024 * KILOBYTE
 
 private const val BUFFER_CAPACITY = 512 * KILOBYTE

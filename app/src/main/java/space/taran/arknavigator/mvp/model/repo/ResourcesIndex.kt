@@ -17,6 +17,8 @@ interface ResourcesIndex {
 
     fun getPath(id: ResourceId): Path?
 
+    fun getMeta(id: ResourceId): ResourceMeta?
+
     fun remove(id: ResourceId): Path?
 
 }
