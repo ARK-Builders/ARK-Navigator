@@ -11,6 +11,7 @@ import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.ItemImageBinding
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
 import space.taran.arknavigator.mvp.view.item.PreviewItemViewHolder
+import space.taran.arknavigator.ui.App
 
 class PreviewsPager(val presenter: PreviewsList) : RecyclerView.Adapter<PreviewItemViewHolder>() {
 
@@ -18,7 +19,10 @@ class PreviewsPager(val presenter: PreviewsList) : RecyclerView.Adapter<PreviewI
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         PreviewItemViewHolder(
-            ItemImageBinding.inflate(LayoutInflater.from(parent.context), parent, false), presenter)
+            ItemImageBinding.inflate(LayoutInflater.from(parent.context), parent, false), presenter
+        ).also {
+            App.instance.appComponent.inject(it)
+        }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onBindViewHolder(holder: PreviewItemViewHolder, position: Int) {

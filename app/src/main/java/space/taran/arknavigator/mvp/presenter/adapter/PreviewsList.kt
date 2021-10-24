@@ -1,13 +1,15 @@
 package space.taran.arknavigator.mvp.presenter.adapter
 
+import space.taran.arknavigator.mvp.model.repo.ResourceMeta
 import space.taran.arknavigator.ui.fragments.utils.Preview
 import space.taran.arknavigator.mvp.view.item.PreviewItemView
-import space.taran.arknavigator.utils.FileType
 
 class PreviewsList(
     private var previews: List<Preview>,
+    private var resourceMetas: List<ResourceMeta?>?,
     private val onItemClickListener: (PreviewItemView) -> Unit,
-    private val onImageZoomListener: (Boolean) -> Unit) {
+    private val onImageZoomListener: (Boolean) -> Unit,
+    private val onPlayButtonListener: (Int) -> Unit) {
 
     fun items() = previews
 
@@ -20,34 +22,14 @@ class PreviewsList(
     fun getItem(position: Int): Preview =
         previews[position]
 
+    fun getExtraMetaAt(position: Int): ResourceMeta? =
+        resourceMetas?.getOrNull(position)
+
     fun bindView(view: PreviewItemView) {
         val preview = previews[view.pos]
+        val extraMeta = resourceMetas?.getOrNull(view.pos)?.extra
 
-        when {
-            preview.predefinedIcon != null -> {
-                view.setPredefined(preview.predefinedIcon)
-                view.setZoomEnabled(false)
-            }
-            preview.fileType == FileType.PDF -> {
-                view.setPDFPreview(preview.previewPath!!)
-                view.setZoomEnabled(false)
-            }
-            preview.fileType == FileType.VIDEO -> {
-                view.setImage(
-                    preview.previewPath!!,
-                    true,
-                    preview.fileExtension
-                )
-                view.setZoomEnabled(false)
-            }
-            else -> {
-                view.setImage(
-                    preview.previewPath,
-                    extension = preview.fileExtension
-                )
-                view.setZoomEnabled(true)
-            }
-        }
+        view.setSource(preview, extraMeta)
     }
 
     fun onImageZoom(zoomed: Boolean) {
@@ -56,5 +38,9 @@ class PreviewsList(
 
     fun onItemClick(itemView: PreviewItemView) {
         onItemClickListener(itemView)
+    }
+
+    fun onPlayButtonCLick(position: Int) {
+        onPlayButtonListener(position)
     }
 }

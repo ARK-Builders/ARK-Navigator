@@ -1,16 +1,12 @@
 package space.taran.arknavigator.mvp.view.item
 
-import space.taran.arknavigator.ui.fragments.utils.PredefinedIcon
-import java.nio.file.Path
+import space.taran.arknavigator.mvp.model.repo.ResourceMetaExtra
+import space.taran.arknavigator.ui.fragments.utils.Preview
 
 interface PreviewItemView {
     var pos: Int
 
-    fun setImage(file: Path?, playVisible: Boolean = false, extension: String? = null)
-
-    fun setPDFPreview(file: Path)
-
-    fun setPredefined(resource: PredefinedIcon)
+    fun setSource(preview: Preview, extraMeta: ResourceMetaExtra?)
 
     fun setZoomEnabled(enabled: Boolean)
 
