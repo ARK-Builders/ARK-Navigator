@@ -29,6 +29,7 @@ internal data class Difference(
 class PlainResourcesIndex internal constructor (
     private val root: Path,
     private val dao: ResourceDao,
+    private val previewsRepo: PreviewsRepo,
     resources: Map<Path, ResourceMeta>)
     : ResourcesIndex {
 
@@ -101,43 +102,13 @@ class PlainResourcesIndex internal constructor (
             pathById[meta.id] = it
         }
 
-        generatePdfPreviews()
+        previewsRepo.generatePdfPreviewsForMeta(metaByPath)
 
         Log.d(RESOURCES_INDEX, "re-scanning ${toInsert.size} resources")
 
         //todo: streaming/iterating
         val newResources = scanResources(toInsert)
         persistResources(newResources)
-    }
-
-    private fun generatePdfPreviews() {
-        val previewsFolder = getPdfPreviewsFolder()
-        val savedPreviews = getSavedPdfPreviews()
-
-        metaByPath.forEach {
-            val path = it.key
-            var out: FileOutputStream? = null
-            val id = it.value.id
-
-            if (savedPreviews == null || !savedPreviews.contains(id)) {
-                if (isPDF(path) && it.value.size / MEGABYTE >= 10) {
-                    try {
-                        if (!previewsFolder.exists()) previewsFolder.mkdirs()
-
-                        val file = File(previewsFolder, "$id.png")
-                        out = FileOutputStream(file)
-                        createPdfPreview(path)
-                            .compress(Bitmap.CompressFormat.PNG, 100, out)
-                    } catch (e: Exception) {
-                    } finally {
-                        try {
-                            out?.close()
-                        } catch (e: Exception) {
-                        }
-                    }
-                }
-            }
-        }
     }
 
     internal suspend fun calculateDifference(): Difference = withContext(Dispatchers.IO) {

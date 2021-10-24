@@ -11,6 +11,8 @@ import dagger.Component
 import space.taran.arknavigator.mvp.presenter.adapter.FoldersWalker
 import space.taran.arknavigator.mvp.presenter.adapter.ResourcesGridPresenter
 import space.taran.arknavigator.mvp.presenter.adapter.folderstree.FoldersTreePresenter
+import space.taran.arknavigator.mvp.view.item.FileItemViewHolder
+import space.taran.arknavigator.mvp.view.item.PreviewItemViewHolder
 import javax.inject.Singleton
 
 @Singleton
@@ -35,4 +37,6 @@ interface AppComponent {
     fun inject(resourcesGridPresenter: ResourcesGridPresenter)
     fun inject(foldersTreePresenter: FoldersTreePresenter)
     fun inject(foldersWalker: FoldersWalker)
+    fun inject(fileItemViewHolder: FileItemViewHolder)
+    fun inject(previewItemViewHolder: PreviewItemViewHolder)
 }

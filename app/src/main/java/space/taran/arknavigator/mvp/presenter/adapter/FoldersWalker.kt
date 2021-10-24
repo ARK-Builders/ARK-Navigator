@@ -17,6 +17,6 @@ class FoldersWalker(paths: List<Path>, onClick: ItemClickHandler<Path>)
         val path = items()[view.position()]
         view.setText(path.fileName.toString())
 
-        view.setIcon(previewsRepo.providePreview(path))
+        view.setIcon(previewsRepo.providePreview(path), null)
     }
 }

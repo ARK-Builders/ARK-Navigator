@@ -11,7 +11,10 @@ import space.taran.arknavigator.utils.RESOURCES_INDEX
 import java.nio.file.Path
 import kotlin.system.measureTimeMillis
 
-class ResourcesIndexFactory(private val dao: ResourceDao) {
+class ResourcesIndexFactory(
+    private val dao: ResourceDao,
+    private val previewsRepo: PreviewsRepo)
+{
     suspend fun loadFromDatabase(root: Path): PlainResourcesIndex = withContext(Dispatchers.IO) {
         Log.d(RESOURCES_INDEX, "loading index for $root from the database")
 
@@ -19,7 +22,7 @@ class ResourcesIndexFactory(private val dao: ResourceDao) {
 
         Log.d(RESOURCES_INDEX, "${resources.size} resources retrieved from DB")
 
-        val index = PlainResourcesIndex(root, dao, groupResources(resources))
+        val index = PlainResourcesIndex(root, dao, previewsRepo, groupResources(resources))
         Log.d(RESOURCES_INDEX, "index created")
 
         index.reindexRoot(index.calculateDifference())
@@ -43,7 +46,7 @@ class ResourcesIndexFactory(private val dao: ResourceDao) {
         }
         Log.d(RESOURCES_INDEX, "hashes calculation took $time2 milliseconds")
 
-        val index = PlainResourcesIndex(root, dao, metadata)
+        val index = PlainResourcesIndex(root, dao, previewsRepo, metadata)
 
         index.persistResources(index.metaByPath)
         return@withContext index

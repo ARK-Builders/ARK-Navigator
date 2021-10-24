@@ -21,9 +21,9 @@ class RepoModule {
 
     @Singleton
     @Provides
-    fun resourcesIndexesRepo(database: Database): ResourcesIndexFactory {
+    fun resourcesIndexesRepo(database: Database, previewsRepo: PreviewsRepo): ResourcesIndexFactory {
         Log.d(MAIN, "creating ResourcesIndexesRepo")
-        return ResourcesIndexFactory(database.resourceDao())
+        return ResourcesIndexFactory(database.resourceDao(), previewsRepo)
     }
 
     @Singleton

@@ -1,7 +1,6 @@
 package space.taran.arknavigator.ui.fragments
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
@@ -16,8 +15,6 @@ import com.google.android.material.chip.Chip
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import space.taran.arknavigator.BuildConfig
-import moxy.presenter.InjectPresenter
-import moxy.presenter.ProvidePresenter
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.DialogTagsBinding
 import space.taran.arknavigator.databinding.FragmentGalleryBinding
@@ -255,7 +252,7 @@ class GalleryFragment(
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
         val file = File(filePath.toString())
-        val extension: String = extension(filePath!!)
+        val extension = ".${extension(filePath!!)}"
 
         val fileURI = FileProvider.getUriForFile(
             requireContext(),

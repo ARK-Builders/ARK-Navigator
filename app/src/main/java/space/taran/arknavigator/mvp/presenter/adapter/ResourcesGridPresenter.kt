@@ -8,6 +8,7 @@ import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.dao.ResourceId
 import space.taran.arknavigator.mvp.model.repo.PreviewsRepo
+import space.taran.arknavigator.mvp.model.repo.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.TagsStorage
 import space.taran.arknavigator.mvp.view.ResourcesView
@@ -31,11 +32,24 @@ class ResourcesGridPresenter(
     lateinit var previewsRepo: PreviewsRepo
 
     private var resources = listOf<ResourceId>()
+    set(value) {
+        field = value
+        resourcesMeta = value.map { index.getMeta(it) }
+    }
+    private var resourcesMeta = listOf<ResourceMeta?>()
+
     private var selection = listOf<ResourceId>()
+        set(value) {
+            field = value
+            selectionMeta = value.map { index.getMeta(it) }
+        }
+
+    private var selectionMeta = listOf<ResourceMeta?>()
 
     private lateinit var index: ResourcesIndex
     private lateinit var storage: TagsStorage
     private lateinit var router: Router
+
     var sorting = Sorting.DEFAULT
         private set(value) {
             field = value
@@ -62,7 +76,7 @@ class ResourcesGridPresenter(
             throw AssertionError("Resource can't be a directory")
         }
 
-        view.setIcon(previewsRepo.providePreview(path, resource))
+        view.setIcon(previewsRepo.providePreview(path), selectionMeta.getOrNull(view.position()))
     }
 
     fun onItemClick(pos: Int) {

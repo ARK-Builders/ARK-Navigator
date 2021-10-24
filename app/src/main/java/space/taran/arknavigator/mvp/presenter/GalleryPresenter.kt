@@ -37,7 +37,9 @@ class GalleryPresenter(
 
     override fun onFirstViewAttach() {
         previews = PreviewsList(resources.map {
-            previewsRepo.providePreview(index.getPath(it)!!, it)
+            previewsRepo.providePreview(index.getPath(it)!!)
+        }, resources.map {
+            index.getMeta(it)
         }, ::onPreviewsItemClick, ::onPreviewsItemZoom)
 
         Log.d(GALLERY_SCREEN, "first view attached in GalleryPresenter")
@@ -76,7 +78,7 @@ class GalleryPresenter(
     }
 
     fun getExtraInfoAt(position: Int): MutableMap<Preview.ExtraInfoTag, String>? =
-        previews.getItem(position).extraInfo
+        previews.getExtraMetaAt(position)?.extra?.appData()
 
     private fun onPreviewsItemZoom(zoomed: Boolean) {
         if (zoomed) {
