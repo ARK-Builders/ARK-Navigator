@@ -1,7 +1,6 @@
 package space.taran.arknavigator.ui.fragments
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
@@ -14,11 +13,10 @@ import com.google.android.material.chip.Chip
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import space.taran.arknavigator.BuildConfig
-import moxy.presenter.InjectPresenter
-import moxy.presenter.ProvidePresenter
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.FragmentGalleryBinding
 import space.taran.arknavigator.mvp.model.dao.ResourceId
+import space.taran.arknavigator.mvp.model.repo.PreviewsRepo
 import space.taran.arknavigator.mvp.model.repo.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.TagsStorage
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
@@ -30,11 +28,14 @@ import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.adapter.PreviewsPager
 import space.taran.arknavigator.ui.fragments.dialog.EditTagsDialogFragment
 import space.taran.arknavigator.ui.fragments.utils.Notifications
+import space.taran.arknavigator.ui.fragments.utils.Preview
 import space.taran.arknavigator.utils.*
 import space.taran.arknavigator.utils.extensions.makeGone
 import space.taran.arknavigator.utils.extensions.makeVisibleAndSetOnClickListener
 import space.taran.arknavigator.ui.fragments.utils.Preview.ExtraInfoTag.*
+import space.taran.arknavigator.utils.extensions.textOrGone
 import java.io.File
+import javax.inject.Inject
 
 class GalleryFragment(
     private val index: ResourcesIndex,
@@ -51,6 +52,9 @@ class GalleryFragment(
             App.instance.appComponent.inject(this)
         }
     }
+
+    @Inject
+    lateinit var previewsRepo: PreviewsRepo
 
     private lateinit var pagerAdapter: PreviewsPager
 
@@ -136,6 +140,10 @@ class GalleryFragment(
         binding.viewPager.isUserInputEnabled = enabled
     }
 
+    override fun openResourceDetached(pos: Int) {
+        openIntentChooser(pos, Intent.ACTION_VIEW, true)
+    }
+
     override fun setFullscreen(fullscreen: Boolean) {
         val isControlsVisible = !fullscreen
         (activity as MainActivity).setToolbarVisibility(isControlsVisible)
@@ -211,10 +219,12 @@ class GalleryFragment(
                     }
                 }
                 FileActionType.OPEN_ONLY_DETACH_PROCESS -> {
+                    //todo remove after thorough testing
                     openFileEditFab.makeGone()
-                    openResourceChooserFab.makeVisibleAndSetOnClickListener{
-                        openIntentChooser(currentPosition, Intent.ACTION_VIEW, true)
-                    }
+                    openResourceChooserFab.makeGone()
+//                    openResourceChooserFab.makeVisibleAndSetOnClickListener{
+//                        openIntentChooser(currentPosition, Intent.ACTION_VIEW, true)
+//                    }
                 }
                 FileActionType.EDIT_AND_OPEN -> {
                     openFileEditFab.makeVisibleAndSetOnClickListener {
@@ -246,7 +256,7 @@ class GalleryFragment(
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
         val file = File(filePath.toString())
-        val extension: String = extension(filePath!!)
+        val extension = ".${extension(filePath)}"
 
         val fileURI = FileProvider.getUriForFile(
             requireContext(),
@@ -274,24 +284,20 @@ class GalleryFragment(
         val resource = resources[position]
         val tags = presenter.listTags(resource)
         displayPreviewTags(resource, tags)
-        setTitle(index.getPath(resource)!!.fileName.toString())
+        val filePath = index.getPath(resource)
+        setTitle(filePath?.fileName.toString())
 
-        val extraInfo = presenter.getExtraInfoAt(position)
-        if (extraInfo != null){
-            binding.apply {
-                resolutionTV.text = extraInfo[MEDIA_RESOLUTION]
-                durationTV.text = extraInfo[MEDIA_DURATION]
+        binding.resolutionTV.textOrGone(previewsRepo.loadExtraMeta(
+            extraInfo = presenter.getExtraInfoAt(position, filePath),
+            filePath = filePath,
+            infoTag = MEDIA_RESOLUTION
+        ))
 
-                resolutionTV.visibility = if (extraInfo[MEDIA_RESOLUTION] == null) View.GONE
-                else View.VISIBLE
-
-                durationTV.visibility = if (extraInfo[MEDIA_DURATION] == null) View.GONE
-                else View.VISIBLE
-            }
-        } else {
-            binding.durationTV.visibility = View.GONE
-            binding.resolutionTV.visibility = View.GONE
-        }
+        binding.durationTV.textOrGone(previewsRepo.loadExtraMeta(
+            extraInfo = presenter.getExtraInfoAt(position, filePath),
+            filePath = filePath,
+            infoTag = MEDIA_DURATION
+        ))
     }
 
     private fun displayPreviewTags(resource: ResourceId, tags: Tags) {

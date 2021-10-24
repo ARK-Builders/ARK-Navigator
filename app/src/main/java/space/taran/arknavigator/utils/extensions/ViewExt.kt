@@ -1,6 +1,7 @@
 package space.taran.arknavigator.utils.extensions
 
 import android.view.View
+import android.widget.TextView
 import kotlinx.coroutines.*
 import space.taran.arknavigator.R
 import kotlin.coroutines.Continuation
@@ -24,6 +25,14 @@ fun View.makeVisible(){
 fun View.makeVisibleAndSetOnClickListener(action: () -> Unit){
     setOnClickListener{ action() }
     visibility = View.VISIBLE
+}
+
+fun TextView?.textOrGone(string: String?){
+    if (string.isNullOrEmpty()) this?.makeGone()
+    else {
+        this?.text = string
+        this?.makeVisible()
+    }
 }
 
 val View.autoDisposeScope: CoroutineScope
