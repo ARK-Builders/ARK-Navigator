@@ -73,6 +73,13 @@ fun loadGifThumbnailWithPlaceHolder(file: Path?, placeHolder: Int, container: Im
         .load(file?.toFile())
         .into(container)
 
+fun loadBitmap(bitmap: Bitmap?, container: ImageView) {
+    Glide.with(container.context)
+        .load(bitmap)
+        .transition(DrawableTransitionOptions.withCrossFade())
+        .into(container)
+}
+
 fun loadCroppedBitmap(bitmap: Bitmap?, container: ImageView) {
     Glide.with(container.context)
         .load(bitmap)

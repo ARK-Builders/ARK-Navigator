@@ -38,7 +38,7 @@ fun isImage(filePath: Path?): Boolean {
 }
 
 fun isVideo(filePath: Path?): Boolean {
-    return if (filePath?.fileSize()?: 0 > 0) {
+    return if (filePath?.toFile()?.exists() == true && filePath.fileSize() > 0) {
         val extension = extension(filePath)
         acceptedVideoExt.contains(extension)
     } else {
@@ -46,30 +46,14 @@ fun isVideo(filePath: Path?): Boolean {
     }
 }
 
-fun isPDF(filePath: Path?): Boolean {
-    return extension(filePath) == "pdf"
-}
-
-fun isFormat(filePath: Path?, formatWithoutDot: String): Boolean {
-    return extension(filePath) == formatWithoutDot
+fun isFormat(filePath: Path?, ext: String): Boolean {
+    return extension(filePath) == ext
 }
 
 fun getPdfPreviewsFolder(): File =
-    File("${App.instance.cacheDir}/$PDF_PREVIEW_FOLDER_NAME")
+    Paths.get("${App.instance.cacheDir}/$PDF_PREVIEW_FOLDER_NAME").toFile()
 
-fun getPdfPreviewPathByID(id: Any): Path {
-    val pathName = "${App.instance.cacheDir}/$PDF_PREVIEW_FOLDER_NAME/$id.png"
-    return File(pathName).toPath()
-}
-
-fun getSavedPdfPreviews(): List<Long?>? =
-    getPdfPreviewsFolder()
-        .listFiles()
-        ?.map {
-            it.nameWithoutExtension.toLongOrNull()
-        }
-
-fun getSavedPdfPreviewsDecoded(): List<String?>? =
+fun getSavedPdfPreviews(): List<String?>? =
     getPdfPreviewsFolder()
         .listFiles()
         ?.map {
@@ -130,9 +114,15 @@ fun findLongestCommonPrefix(paths: List<Path>): Path {
     return tailrec(ROOT_PATH, paths).first
 }
 
+fun deleteFile(filePath: Path?) {
+    val file = filePath?.toFile()
+    if (file?.exists() == true) {
+        file.delete()
+    }
+}
 
 fun extension(path: Path?): String {
-    return path?.extension?.lowercase()?: ""
+    return path?.extension?.lowercase() ?: ""
 }
 
 fun reifySorting(sorting: Sorting): Comparator<Path>? =

@@ -7,7 +7,6 @@ import space.taran.arknavigator.mvp.model.dao.computeId
 import space.taran.arknavigator.ui.fragments.utils.Preview
 import space.taran.arknavigator.utils.isFormat
 import space.taran.arknavigator.utils.isImage
-import space.taran.arknavigator.utils.isPDF
 import space.taran.arknavigator.utils.isVideo
 import java.nio.file.Files
 import java.nio.file.Path
@@ -47,30 +46,30 @@ enum class ResourceType {
 
 
 abstract class ResourceMetaExtra {
-
-    abstract var filePath: Path?
-
     companion object {
-        fun provideMetaExtraInstance(filePath: Path?): ResourceMetaExtra {
+        fun provideMetaExtraInstance(filePath: Path?): ResourceMetaExtra? {
             return when {
-                isVideo(filePath) -> VideoMetaExtra(filePath)
-                else -> BaseMetaExtra(filePath)
+                isVideo(filePath) -> VideoMetaExtra()
+                isFormat(filePath, "pdf") -> PdfMetaExtra()
+                else -> null
             }
         }
     }
 
-    fun type(): ResourceType {
+    protected abstract var appData: MutableMap<Preview.ExtraInfoTag, String>
+
+    fun type(filePath: Path?): ResourceType {
         return when {
             filePath == null -> ResourceType.UNDEFINED
             isImage(filePath) -> ResourceType.IMAGE
             isVideo(filePath) -> ResourceType.VIDEO
-            isPDF(filePath) -> ResourceType.PDF
+            isFormat(filePath, "pdf") -> ResourceType.PDF
             isFormat(filePath, "gif") -> ResourceType.GIF
             else -> ResourceType.UNDEFINED
         }
     }
 
-    abstract fun appData(): MutableMap<Preview.ExtraInfoTag, String>
+    abstract fun appData(filePath: Path?): MutableMap<Preview.ExtraInfoTag, String>
 
     abstract fun roomData(): ResourceExtra //TODO: PR #33
 }

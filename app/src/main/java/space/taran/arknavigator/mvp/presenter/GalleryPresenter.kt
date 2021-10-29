@@ -7,16 +7,15 @@ import moxy.MvpPresenter
 import moxy.presenterScope
 import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.mvp.model.dao.ResourceId
-import space.taran.arknavigator.mvp.model.repo.PreviewsRepo
+import space.taran.arknavigator.mvp.model.repo.*
 import space.taran.arknavigator.ui.fragments.utils.Preview
-import space.taran.arknavigator.mvp.model.repo.ResourcesIndex
-import space.taran.arknavigator.mvp.model.repo.TagsStorage
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
 import space.taran.arknavigator.mvp.view.GalleryView
 import space.taran.arknavigator.mvp.view.item.PreviewItemView
 import space.taran.arknavigator.utils.GALLERY_SCREEN
 import space.taran.arknavigator.utils.Tags
 import java.nio.file.Files
+import java.nio.file.Path
 import javax.inject.Inject
 
 class GalleryPresenter(
@@ -36,11 +35,24 @@ class GalleryPresenter(
     private lateinit var previews: PreviewsList
 
     override fun onFirstViewAttach() {
-        previews = PreviewsList(resources.map {
-            previewsRepo.providePreview(index.getPath(it)!!)
-        }, resources.map {
-            index.getMeta(it)
-        }, ::onPreviewsItemClick, ::onPreviewsItemZoom)
+        val previewList = arrayListOf<Preview>()
+        val resourceMetas = arrayListOf<ResourceMeta?>()
+
+        resources.forEach { id ->
+            val path = index.getPath(id)
+            val meta = index.getMeta(id)
+
+            previewList.add(previewsRepo.providePreview(path!!, meta))
+            resourceMetas.add(meta)
+        }
+
+        previews = PreviewsList(
+            previewList,
+            resourceMetas,
+            ::onPreviewsItemClick,
+            ::onPreviewsItemZoom,
+            ::onPlayButtonClick
+        )
 
         Log.d(GALLERY_SCREEN, "first view attached in GalleryPresenter")
         super.onFirstViewAttach()
@@ -77,16 +89,15 @@ class GalleryPresenter(
         viewState.setFullscreen(isFullscreen)
     }
 
-    fun getExtraInfoAt(position: Int): MutableMap<Preview.ExtraInfoTag, String>? =
-        previews.getExtraMetaAt(position)?.extra?.appData()
+    fun getExtraInfoAt(position: Int, path: Path?): MutableMap<Preview.ExtraInfoTag, String>? =
+        previews.getExtraMetaAt(position)?.extra?.appData(path)
 
     private fun onPreviewsItemZoom(zoomed: Boolean) {
         if (zoomed) {
             isFullscreen = true
             viewState.setFullscreen(isFullscreen)
             viewState.setPreviewsScrollingEnabled(false)
-        }
-        else
+        } else
             viewState.setPreviewsScrollingEnabled(true)
     }
 
@@ -94,8 +105,12 @@ class GalleryPresenter(
         Log.d(GALLERY_SCREEN, "preview at ${itemView.pos} clicked, switching controls on/off")
         isFullscreen = !isFullscreen
         viewState.setFullscreen(isFullscreen)
-         if (!isFullscreen)
-             itemView.resetZoom()
+        if (!isFullscreen)
+            itemView.resetZoom()
+    }
+
+    private fun onPlayButtonClick(position: Int) {
+        viewState.openResourceDetached(position)
     }
 
     fun quit(): Boolean {

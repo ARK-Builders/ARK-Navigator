@@ -7,6 +7,7 @@ import space.taran.arknavigator.mvp.model.repo.PreviewsRepo
 import space.taran.arknavigator.mvp.model.repo.ResourceMeta
 import space.taran.arknavigator.ui.fragments.utils.Preview
 import space.taran.arknavigator.utils.*
+import space.taran.arknavigator.utils.extensions.textOrGone
 import javax.inject.Inject
 
 class FileItemViewHolder(private val binding: ItemFileGridBinding) :
@@ -25,7 +26,17 @@ class FileItemViewHolder(private val binding: ItemFileGridBinding) :
             binding.iv.setImageResource(imageForPredefinedIcon(icon.isFolder))
         } else previewsRepo.loadPreview(binding.iv, icon, meta?.extra, true)
 
-        previewsRepo.loadExtraMeta(meta?.extra, binding.resolutionTV, binding.durationTV)
+        binding.resolutionTV.textOrGone(previewsRepo.loadExtraMeta(
+            extraMeta = meta?.extra,
+            filePath = icon.filePath,
+            infoTag = Preview.ExtraInfoTag.MEDIA_RESOLUTION
+        ))
+
+        binding.durationTV.textOrGone(previewsRepo.loadExtraMeta(
+            extraMeta = meta?.extra,
+            filePath = icon.filePath,
+            infoTag = Preview.ExtraInfoTag.MEDIA_DURATION
+        ))
     }
 
     override fun setText(title: String) = with(binding.root) {

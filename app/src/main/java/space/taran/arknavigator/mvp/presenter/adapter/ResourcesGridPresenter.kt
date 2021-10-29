@@ -1,5 +1,6 @@
 package space.taran.arknavigator.mvp.presenter.adapter
 
+import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -76,7 +77,8 @@ class ResourcesGridPresenter(
             throw AssertionError("Resource can't be a directory")
         }
 
-        view.setIcon(previewsRepo.providePreview(path), selectionMeta.getOrNull(view.position()))
+        val resourceMeta = selectionMeta.getOrNull(view.position())
+        view.setIcon(previewsRepo.providePreview(path, resourceMeta), resourceMeta)
     }
 
     fun onItemClick(pos: Int) {

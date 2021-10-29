@@ -4,10 +4,12 @@ import space.taran.arknavigator.mvp.model.dao.ResourceExtra
 import space.taran.arknavigator.ui.fragments.utils.Preview
 import java.nio.file.Path
 
-class BaseMetaExtra(override var filePath: Path?) : ResourceMetaExtra() {
+class BaseMetaExtra: ResourceMetaExtra() {
 
-    override fun appData(): MutableMap<Preview.ExtraInfoTag, String> {
-        return mutableMapOf()
+    override var appData = mutableMapOf<Preview.ExtraInfoTag, String>()
+
+    override fun appData(filePath: Path?): MutableMap<Preview.ExtraInfoTag, String> {
+        return appData
     }
 
     override fun roomData(): ResourceExtra {

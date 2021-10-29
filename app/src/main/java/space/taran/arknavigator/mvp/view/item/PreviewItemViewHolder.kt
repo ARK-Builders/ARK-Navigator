@@ -8,6 +8,7 @@ import space.taran.arknavigator.mvp.model.repo.PreviewsRepo
 import space.taran.arknavigator.mvp.model.repo.ResourceMetaExtra
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
 import space.taran.arknavigator.ui.fragments.utils.Preview
+import space.taran.arknavigator.utils.extensions.makeVisibleAndSetOnClickListener
 import javax.inject.Inject
 
 class PreviewItemViewHolder(val binding: ItemImageBinding, val presenter: PreviewsList) :
@@ -27,9 +28,14 @@ class PreviewItemViewHolder(val binding: ItemImageBinding, val presenter: Previe
             extraMeta = extraMeta
         )
 
-        binding.icPlay.isVisible = previewsRepo.isPlayButtonVisible(preview)
+        if (preview.isPlayButtonVisible){
+            binding.icPlay.makeVisibleAndSetOnClickListener {
+                presenter.onPlayButtonCLick(pos)
+            }
+        }
+        else binding.icPlay.isVisible = false
 
-        setZoomEnabled(previewsRepo.isZoomEnabled(preview, extraMeta))
+        setZoomEnabled(preview.isZoomEnabled)
     }
 
     override fun setZoomEnabled(enabled: Boolean): Unit =

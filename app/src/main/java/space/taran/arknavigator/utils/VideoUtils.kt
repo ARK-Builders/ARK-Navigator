@@ -28,7 +28,7 @@ fun getVideoInfo(filePath: Path?): MutableMap<Preview.ExtraInfoTag, String> {
     if (seconds.length == 1) seconds = "0$seconds"
 
     val duration = "$minutes:$seconds"
-    val resolution = convertToResolution(width, height)
+    val resolution = qualityTextCode(width, height)
 
     val mutableMap = mutableMapOf<Preview.ExtraInfoTag, String>()
     mutableMap[Preview.ExtraInfoTag.MEDIA_DURATION] = duration
@@ -40,7 +40,7 @@ fun getVideoInfo(filePath: Path?): MutableMap<Preview.ExtraInfoTag, String> {
     return mutableMap
 }
 
-fun convertToResolution(width: Long, height: Long): String? {
+fun qualityTextCode(width: Long, height: Long): String? {
     val resolutionPair = listOf(width, height)
 
     return when {

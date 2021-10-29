@@ -81,10 +81,16 @@ class PlainResourcesIndex internal constructor (
     }
 
     internal suspend fun reindexRoot(diff: Difference) = withContext(Dispatchers.IO) {
+        val savedDeletedMetas = mutableMapOf<Path, ResourceMeta?>()
         diff.deleted.forEach {
             pathById[metaByPath[it]!!.id]
+            savedDeletedMetas[it] = metaByPath[it]
             metaByPath.remove(it)
         }
+
+        Log.d(RESOURCES_INDEX, "deleting ${savedDeletedMetas.size} pdf previews")
+        previewsRepo.deletePdfPreviews(
+            savedDeletedMetas.values.toList().map { it?.id?.toString() ?: "" })
 
         val pathsToDelete = diff.deleted + diff.updated
 
@@ -96,13 +102,13 @@ class PlainResourcesIndex internal constructor (
         }
 
         val toInsert = diff.updated + diff.added
-        toInsert.forEach {
-            val meta = ResourceMeta.fromPath(it)
-            metaByPath[it] = meta
-            pathById[meta.id] = it
+        toInsert.forEach { path ->
+            val meta = ResourceMeta.fromPath(path)
+            metaByPath[path] = meta
+            pathById[meta.id] = path
+            if (isFormat(path, "pdf"))
+                previewsRepo.generatePdfPreview(path, meta)
         }
-
-        previewsRepo.generatePdfPreviewsForMeta(metaByPath)
 
         Log.d(RESOURCES_INDEX, "re-scanning ${toInsert.size} resources")
 
@@ -137,13 +143,17 @@ class PlainResourcesIndex internal constructor (
         Log.d(RESOURCES_INDEX, "persisting "
                 + "${resources.size} resources from root $root")
 
-        val entities = resources.entries.toList()
-            .map { Resource.fromMeta(it.value, root, it.key) }
+            val entities = resources.entries.toList()
+                .map {
+                    if (isFormat(it.key, "pdf"))
+                        previewsRepo.generatePdfPreview(it.key, it.value)
+                    Resource.fromMeta(it.value, root, it.key)
+                }
 
-        dao.insertAll(entities)
+            dao.insertAll(entities)
 
-        Log.d(RESOURCES_INDEX, "${entities.size} resources persisted")
-    }
+            Log.d(RESOURCES_INDEX, "${entities.size} resources persisted")
+        }
 
     companion object {
 

@@ -11,4 +11,5 @@ interface GalleryView: MvpView {
     fun setTitle(title: String)
     fun setFullscreen(fullscreen: Boolean)
     fun setPreviewsScrollingEnabled(enabled: Boolean)
+    fun openResourceDetached(pos: Int)
 }
