@@ -6,7 +6,9 @@ import kotlinx.coroutines.launch
 import moxy.MvpPresenter
 import moxy.presenterScope
 import ru.terrakok.cicerone.Router
+import space.taran.arknavigator.mvp.model.IndexCache
 import space.taran.arknavigator.mvp.model.IndexingEngine
+import space.taran.arknavigator.mvp.model.RootAndFav
 import space.taran.arknavigator.mvp.model.TagsCache
 import space.taran.arknavigator.mvp.model.dao.ResourceId
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
@@ -15,9 +17,11 @@ import space.taran.arknavigator.mvp.view.item.PreviewItemView
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.utils.GALLERY_SCREEN
 import space.taran.arknavigator.utils.Tags
+import java.nio.file.Files
 import javax.inject.Inject
 
 class GalleryPresenter(
+    private val rootAndFav: RootAndFav,
     private val resources: MutableList<ResourceId>)
     : MvpPresenter<GalleryView>() {
 
@@ -27,7 +31,7 @@ class GalleryPresenter(
     lateinit var router: Router
 
     @Inject
-    lateinit var indexingEngine: IndexingEngine
+    lateinit var indexCache: IndexCache
 
     @Inject
     lateinit var tagsCache: TagsCache
@@ -46,7 +50,8 @@ class GalleryPresenter(
     fun deleteResource(resource: ResourceId) = presenterScope.launch(NonCancellable) {
         Log.d(GALLERY_SCREEN, "deleting resource $resource")
 
-        val path = indexingEngine.remove(resource)
+        val path = indexCache.getPath(resource)
+        Files.delete(path)
         Log.d(GALLERY_SCREEN, "path $path removed from index")
     }
 
@@ -58,7 +63,7 @@ class GalleryPresenter(
 
     fun replaceTags(resource: ResourceId, tags: Tags) = presenterScope.launch(NonCancellable) {
         Log.d(GALLERY_SCREEN, "tags $tags set to $resource")
-        tagsCache.setTags(resource, tags)
+        tagsCache.setTags(rootAndFav, resource, tags)
     }
 
     fun onSystemUIVisibilityChange(isVisible: Boolean) {

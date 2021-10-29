@@ -20,6 +20,7 @@ import space.taran.arknavigator.databinding.DialogTagsBinding
 import space.taran.arknavigator.databinding.FragmentGalleryBinding
 import space.taran.arknavigator.mvp.model.IndexCache
 import space.taran.arknavigator.mvp.model.IndexingEngine
+import space.taran.arknavigator.mvp.model.RootAndFav
 import space.taran.arknavigator.mvp.model.dao.ResourceId
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
@@ -36,6 +37,7 @@ import java.io.File
 import javax.inject.Inject
 
 class GalleryFragment(
+    private val rootAndFav: RootAndFav,
     private val resources: MutableList<ResourceId>,
     private val startAt: Int
 ) : MvpAppCompatFragment(), GalleryView, BackButtonListener, NotifiableView {
@@ -48,7 +50,7 @@ class GalleryFragment(
     private lateinit var binding: FragmentGalleryBinding
 
     private val presenter by moxyPresenter {
-        GalleryPresenter(resources).apply {
+        GalleryPresenter(rootAndFav, resources).apply {
             Log.d(GALLERY_SCREEN, "creating GalleryPresenter")
             App.instance.appComponent.inject(this)
         }

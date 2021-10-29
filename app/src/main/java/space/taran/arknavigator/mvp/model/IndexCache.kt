@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import space.taran.arknavigator.mvp.model.dao.ResourceId
 import space.taran.arknavigator.mvp.model.repo.AggregatedResourcesIndex
+import space.taran.arknavigator.mvp.model.repo.Difference
 import space.taran.arknavigator.mvp.model.repo.PlainResourcesIndex
 import java.nio.file.Path
 
@@ -15,21 +16,35 @@ class IndexCache {
 
     suspend fun onIndexChange(root: Path, index: PlainResourcesIndex) {
         indexByRoot[root] = index
-        aggregatedIndex = AggregatedResourcesIndex(indexByRoot.values)
-        val affectedRootAndFavs = flowByRootAndFav.keys.filter { it.root == root }
-        affectedRootAndFavs.forEach {
-            flowByRootAndFav[it]!!.emit(indexByRoot[root]!!.listIds(it.fav))
-        }
+        emitChangesToAffectedRootAndFav(root, index)
+    }
+
+    suspend fun onResourceCreated(root: Path, resourcePath: Path) {
+        val index = indexByRoot[root]!!
+        index.reindexRoot(Difference(emptyList(), emptyList(), listOf(resourcePath)))
+        emitChangesToAffectedRootAndFav(root, index)
+    }
+
+    suspend fun onResourceDeleted(root: Path, resourcePath: Path): ResourceId  {
+        val index = indexByRoot[root]!!
+        val id = index.metaByPath[resourcePath]!!.id
+        index.remove(id)
+        emitChangesToAffectedRootAndFav(root, indexByRoot[root]!!)
+        return id
+    }
+
+    suspend fun onResourceModified(root: Path, resourcePath: Path): PlainResourcesIndex {
+        val index = indexByRoot[root]!!
+        index.reindexRoot(Difference(emptyList(), listOf(resourcePath), emptyList()))
+        emitChangesToAffectedRootAndFav(root, index)
+        return index
     }
 
     suspend fun onReindexFinish() {
         allRootsFlow.emit(aggregatedIndex.listAllIds())
     }
 
-    fun remove(resourceId: ResourceId): Path? {
-        val path = aggregatedIndex.remove(resourceId)
-        return path
-    }
+    fun getIndexByRoot(root: Path) = indexByRoot[root]!!
 
     fun listenResourcesChanges(rootAndFav: RootAndFav): StateFlow<Set<ResourceId>?> {
         return if (rootAndFav.isAllRoots()) {
@@ -55,5 +70,17 @@ class IndexCache {
 
     fun getPath(resourceId: ResourceId): Path? {
         return aggregatedIndex.getPath(resourceId)
+    }
+
+    private suspend fun emitChangesToAffectedRootAndFav(root: Path, index: PlainResourcesIndex) {
+        aggregatedIndex = AggregatedResourcesIndex(indexByRoot.values)
+        if (allRootsFlow.value != null)
+            allRootsFlow.emit(aggregatedIndex.listAllIds())
+
+        val affectedRootAndFavs = flowByRootAndFav.keys.filter { it.root == root }
+        affectedRootAndFavs.forEach {
+            if (flowByRootAndFav[it]!!.value != index.listIds(it.fav))
+                flowByRootAndFav[it]!!.emit(index.listIds(it.fav))
+        }
     }
 }

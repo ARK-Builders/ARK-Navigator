@@ -1,5 +1,6 @@
 package space.taran.arknavigator.utils
 
+import space.taran.arknavigator.mvp.model.repo.PlainTagsStorage
 import space.taran.arknavigator.ui.App
 import java.lang.IllegalArgumentException
 import java.nio.file.Files
@@ -56,6 +57,8 @@ fun getFileActionType(filePath: Path): FileActionType{
         else -> FileActionType.OPEN_ONLY
     }
 }
+
+fun isTagsStorage(path: Path): Boolean = path.fileName.toString() == PlainTagsStorage.STORAGE_FILENAME
 
 fun isHidden(path: Path): Boolean =
     path.fileName.toString().startsWith('.')

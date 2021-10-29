@@ -36,7 +36,7 @@ class ResourcesPresenter(
 
     var tagsEnabled: Boolean = true
 
-    val gridPresenter = ResourcesGridPresenter(viewState, presenterScope).apply {
+    val gridPresenter = ResourcesGridPresenter(rootAndFav, viewState, presenterScope).apply {
         App.instance.appComponent.inject(this)
     }
     val tagsSelectorPresenter = TagsSelectorPresenter(viewState, rootAndFav, ::onSelectionChange).apply {

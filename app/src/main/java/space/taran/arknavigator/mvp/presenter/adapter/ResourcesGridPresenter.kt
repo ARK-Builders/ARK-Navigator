@@ -3,10 +3,7 @@ package space.taran.arknavigator.mvp.presenter.adapter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import ru.terrakok.cicerone.Router
-import space.taran.arknavigator.mvp.model.IndexCache
-import space.taran.arknavigator.mvp.model.IndexingEngine
-import space.taran.arknavigator.mvp.model.TagsCache
-import space.taran.arknavigator.mvp.model.UserPreferences
+import space.taran.arknavigator.mvp.model.*
 import space.taran.arknavigator.mvp.model.dao.ResourceId
 import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.mvp.view.item.FileItemView
@@ -19,6 +16,7 @@ import java.nio.file.Files
 import javax.inject.Inject
 
 class ResourcesGridPresenter(
+    val rootAndFav: RootAndFav,
     val viewState: ResourcesView,
     val scope: CoroutineScope
 ) {
@@ -64,7 +62,7 @@ class ResourcesGridPresenter(
     }
 
     fun onItemClick(pos: Int) {
-        router.navigateTo(Screens.GalleryScreen(selection, pos))
+        router.navigateTo(Screens.GalleryScreen(rootAndFav, selection, pos))
     }
 
     suspend fun init() {

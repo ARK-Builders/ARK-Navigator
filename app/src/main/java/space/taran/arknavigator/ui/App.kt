@@ -4,6 +4,7 @@ import android.app.Application
 import space.taran.arknavigator.di.AppComponent
 import space.taran.arknavigator.di.DaggerAppComponent
 import space.taran.arknavigator.di.modules.AppModule
+import timber.log.Timber
 
 class App: Application() {
 
@@ -18,6 +19,8 @@ class App: Application() {
         super.onCreate()
 
         instance = this
+
+        Timber.plant(Timber.DebugTree())
 
         appComponent = DaggerAppComponent.builder()
             .appModule(AppModule(this))

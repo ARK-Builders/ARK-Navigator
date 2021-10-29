@@ -2,7 +2,6 @@ package space.taran.arknavigator.mvp.model
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import space.taran.arknavigator.mvp.model.dao.ResourceId
 import space.taran.arknavigator.mvp.model.repo.AggregatedTagsStorage
 import space.taran.arknavigator.mvp.model.repo.PlainResourcesIndex
@@ -21,11 +20,7 @@ class TagsCache(val indexCache: IndexCache) {
         storageByRoot[root] = storage
         val allIds = index.listAllIds()
         storage.cleanup(allIds)
-        aggregatedTagsStorage = AggregatedTagsStorage(storageByRoot.values)
-        val affectedRootAndFavs = flowByRootAndFav.keys.filter { it.root == root }
-        affectedRootAndFavs.forEach {
-            flowByRootAndFav[it]!!.emit(storage.getTags(index.listIds(it.fav)))
-        }
+        emitChangesToAffectedRootAndFav(root, storage, index)
     }
 
     suspend fun onReindexFinish() {
@@ -81,7 +76,32 @@ class TagsCache(val indexCache: IndexCache) {
         aggregatedTagsStorage.remove(resourceId)
     }
 
-    suspend fun setTags(id: ResourceId, tags: Tags) {
-        aggregatedTagsStorage.setTags(id, tags)
+    suspend fun setTags(rootAndFav: RootAndFav, id: ResourceId, tags: Tags) {
+        if (rootAndFav.isAllRoots()) {
+            aggregatedTagsStorage.setTags(id, tags)
+            emitChangesToAllRootsFlow()
+        } else {
+            val root = rootAndFav.root!!
+            val storage =  storageByRoot[root]!!
+            storage.setTags(id, tags)
+            emitChangesToAffectedRootAndFav(root, storage, indexCache.getIndexByRoot(root))
+        }
+    }
+
+    private suspend fun emitChangesToAllRootsFlow() {
+        aggregatedTagsStorage = AggregatedTagsStorage(storageByRoot.values)
+        if (allRootsFlow.value != null)
+            allRootsFlow.emit(aggregatedTagsStorage.getTags(indexCache.listIds(RootAndFav(null, null))))
+    }
+
+    private suspend fun emitChangesToAffectedRootAndFav(root: Path, storage: PlainTagsStorage, index: PlainResourcesIndex) {
+        emitChangesToAllRootsFlow()
+
+        val affectedRootAndFavs = flowByRootAndFav.keys.filter { it.root == root }
+        affectedRootAndFavs.forEach {
+            val tags = storage.getTags(index.listIds(it.fav))
+            if (flowByRootAndFav[it]!!.value != tags)
+                flowByRootAndFav[it]!!.emit(tags)
+        }
     }
 }

@@ -1,38 +1,35 @@
 package space.taran.arknavigator.mvp.model
 
-import space.taran.arknavigator.mvp.model.dao.ResourceId
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import space.taran.arknavigator.mvp.model.fsmonitoring.FSMonitoring
 import space.taran.arknavigator.mvp.model.repo.FoldersRepo
 import space.taran.arknavigator.mvp.model.repo.ResourcesIndexFactory
-import java.nio.file.Files
 import java.nio.file.Path
 
 class IndexingEngine(
     private val indexCache: IndexCache,
     private val tagsCache: TagsCache,
     private val foldersRepo: FoldersRepo,
-    private val resourcesIndexFactory: ResourcesIndexFactory
+    private val resourcesIndexFactory: ResourcesIndexFactory,
+    private val fsMonitoring: FSMonitoring
 ) {
-    suspend fun reindex() {
+    suspend fun reindex() = withContext(Dispatchers.Default) {
         val roots = foldersRepo.query().succeeded.keys
         roots.forEach {
             val index = resourcesIndexFactory.loadFromDatabase(it)
             tagsCache.onIndexChanged(it, index)
             indexCache.onIndexChange(it, index)
+            fsMonitoring.startWatchingRoot(it.toString())
         }
         indexCache.onReindexFinish()
         tagsCache.onReindexFinish()
     }
 
-    suspend fun index(path: Path) {
-        val index = resourcesIndexFactory.buildFromFilesystem(path)
-        indexCache.onIndexChange(path, index)
-        tagsCache.onIndexChanged(path, index)
-    }
-
-    suspend fun remove(resourceId: ResourceId): Path? {
-        val path = indexCache.remove(resourceId)
-        tagsCache.remove(resourceId)
-        Files.delete(path)
-        return path
+    suspend fun index(root: Path) = withContext(Dispatchers.Default)  {
+        val index = resourcesIndexFactory.buildFromFilesystem(root)
+        indexCache.onIndexChange(root, index)
+        tagsCache.onIndexChanged(root, index)
+        fsMonitoring.startWatchingRoot(root.toString())
     }
 }
