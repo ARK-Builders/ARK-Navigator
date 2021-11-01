@@ -50,11 +50,9 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
         set(value) {
             field = value
             roots = value.keys
-            favorites = value.values.flatten().toSet()
         }
 
     private lateinit var roots: Set<Path>
-    private lateinit var favorites: Set<Path>
     private var rootNotFavorite: Boolean = true
 
     override fun onFirstViewAttach() {
@@ -179,13 +177,9 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
         foldersTreePresenter.updateNodes(devices, favoritesByRoot)
     }
 
-    private fun getFavorites(): Set<Path> {
-        favorites = favoritesByRoot.values.flatten().toSet()
-        return favorites
-    }
+    private fun getFavorites(): Set<Path> = favoritesByRoot.values.flatten().toSet()
 
-
-    fun addFavorite(favorite: Path) = presenterScope.launch(NonCancellable) {
+    private fun addFavorite(favorite: Path) = presenterScope.launch(NonCancellable) {
         viewState.setProgressVisibility(true, "Adding folder")
         Log.d(FOLDERS_SCREEN, "favorite $favorite added in RootsPresenter")
         val path = favorite.toRealPath()
