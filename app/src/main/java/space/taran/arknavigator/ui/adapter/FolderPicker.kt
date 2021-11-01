@@ -20,6 +20,7 @@ class FolderPicker(
     }
 
     var currentLabel: Path? = null
+        private set
 
     override fun backClicked(): Path? {
         currentLabel = super.backClicked()
