@@ -49,6 +49,10 @@ class GalleryPresenter(
         Files.delete(path)
     }
 
+    fun onEditTagsDialogBtnClick(position: Int) {
+        viewState.showEditTagsDialog(position)
+    }
+
     fun listTags(resource: ResourceId): Tags {
         val tags = storage.getTags(resource)
         Log.d(GALLERY_SCREEN, "resource $resource has tags $tags")

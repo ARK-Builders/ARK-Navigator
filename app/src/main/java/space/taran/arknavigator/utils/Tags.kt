@@ -26,3 +26,5 @@ class Converters {
             .toSet()
     }
 }
+
+fun findLastTagInString(string: String): String = string.split(',').last().trim()

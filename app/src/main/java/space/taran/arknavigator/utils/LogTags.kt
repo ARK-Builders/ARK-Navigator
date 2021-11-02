@@ -1,5 +1,8 @@
 package space.taran.arknavigator.utils
 
+val Any.TAG: String
+    get() = this::class.java.simpleName
+
 const val MAIN: String = "main"
 
 const val PERMISSIONS: String = "permissions"
