@@ -41,7 +41,7 @@ class GalleryFragment(
     private val startAt: Int
 ) : MvpAppCompatFragment(), GalleryView, BackButtonListener, NotifiableView {
 
-    private lateinit var dialogBinding: DialogTagsBinding
+    private var dialogBinding: DialogTagsBinding? = null
     private var dialog: AlertDialog? = null
     private lateinit var binding: FragmentGalleryBinding
 
@@ -126,7 +126,7 @@ class GalleryFragment(
                 shareResource(position)
             }
 
-            setupOpenEditFABs(binding.viewPager.currentItem)
+            setupOpenEditFABs()
         }
     }
 
@@ -196,7 +196,10 @@ class GalleryFragment(
         showEditTagsDialog(resource)
     }
 
-    private fun setupOpenEditFABs(currentPosition: Int) {
+    private fun setupOpenEditFABs() {
+
+        val currentPosition = binding.viewPager.currentItem
+
         binding.apply {
             openResourceChooserFab.setOnClickListener(null)
             openFileEditFab.setOnClickListener(null)
@@ -219,7 +222,7 @@ class GalleryFragment(
             }
             FileActionType.EDIT_AND_OPEN -> {
                 openFileEditFab.makeVisibleAndSetOnClickListener {
-                    openIntentChooser(currentPosition, Intent.ACTION_EDIT) }
+                    openIntentChooser(currentPosition, Intent.ACTION_EDIT, true) }
 
                 openResourceChooserFab.makeVisibleAndSetOnClickListener {
                     openIntentChooser(currentPosition, Intent.ACTION_VIEW, true) }
@@ -228,7 +231,7 @@ class GalleryFragment(
             FileActionType.EDIT_AS_OPEN -> {
                 openResourceChooserFab.makeGone()
                 openFileEditFab.makeVisibleAndSetOnClickListener {
-                    openIntentChooser(currentPosition, Intent.ACTION_EDIT) }
+                    openIntentChooser(currentPosition, Intent.ACTION_EDIT, true) }
                 }
             }
         }
@@ -272,21 +275,21 @@ class GalleryFragment(
 
         dialogBinding = DialogTagsBinding.inflate(LayoutInflater.from(requireContext()))
 
-        val alertDialogBuilder = AlertDialog.Builder(requireContext()).setView(dialogBinding.root)
+        val alertDialogBuilder = AlertDialog.Builder(requireContext()).setView(dialogBinding?.root)
 
         if (tags.isNotEmpty()) {
-            dialogBinding.chipgDialogDetail.visibility = View.VISIBLE
+            dialogBinding?.chipgDialogDetail?.visibility = View.VISIBLE
         } else {
-            dialogBinding.chipgDialogDetail.visibility = View.GONE
+            dialogBinding?.chipgDialogDetail?.visibility = View.GONE
         }
 
-        dialogBinding.chipgDialogDetail.removeAllViews()
+        dialogBinding?.chipgDialogDetail?.removeAllViews()
 
         displayDialogTags(resource, tags)
 
-        dialogBinding.newTags.setOnEditorActionListener { _, actionId, _ ->
+        dialogBinding?.newTags?.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
-                val newTags = Converters.tagsFromString(dialogBinding.newTags.text.toString())
+                val newTags = Converters.tagsFromString(dialogBinding?.newTags?.text.toString())
                 if (newTags.isEmpty() || newTags.contains(Constants.EMPTY_TAG)) {
                     return@setOnEditorActionListener false
                 }
@@ -315,11 +318,11 @@ class GalleryFragment(
         Log.d(GALLERY_SCREEN, "displaying tags resource $resource for edit")
 
         if (tags.isNotEmpty()) {
-            dialogBinding.chipgDialogDetail.visibility = View.VISIBLE
+            dialogBinding?.chipgDialogDetail?.visibility = View.VISIBLE
         } else {
-            dialogBinding.chipgDialogDetail.visibility = View.GONE
+            dialogBinding?.chipgDialogDetail?.visibility = View.GONE
         }
-        dialogBinding.chipgDialogDetail.removeAllViews()
+        dialogBinding?.chipgDialogDetail?.removeAllViews()
 
         tags.forEach { tag ->
             val chip = Chip(context)
@@ -329,7 +332,7 @@ class GalleryFragment(
                 Log.d(GALLERY_SCREEN, "tag $tag on resource $resource close-icon-clicked")
                 removeTag(resource, tags, tag)
             }
-            dialogBinding.chipgDialogDetail.addView(chip)
+            dialogBinding?.chipgDialogDetail?.addView(chip)
         }
     }
 

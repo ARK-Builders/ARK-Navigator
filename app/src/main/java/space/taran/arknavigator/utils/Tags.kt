@@ -20,7 +20,7 @@ class Converters {
             .split(',')
             .map { it.trim() }
             .filter {
-                if (it.isEmpty()) throw AssertionError("No tag can be empty")
+                if (it.isEmpty()) return@filter false
                 true
             }
             .toSet()

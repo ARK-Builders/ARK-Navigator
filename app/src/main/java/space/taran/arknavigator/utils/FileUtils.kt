@@ -22,11 +22,11 @@ enum class FileActionType{
     EDIT_AS_OPEN, EDIT_AND_OPEN, OPEN_ONLY, OPEN_ONLY_DETACH_PROCESS
 }
 
-private val acceptedImageExt = listOf(".jpg", ".jpeg", ".png")
-private val acceptedEditOnlyExt = arrayListOf(".txt", ".doc", ".docx", ".odt", "ods")
+private val acceptedImageExt = listOf("jpg", "jpeg", "png")
+private val acceptedEditOnlyExt = arrayListOf("txt", "doc", "docx", "odt", "ods")
     .also { it.addAll(acceptedImageExt) }
-private val acceptedReadAndEditExt = listOf(".pdf", ".md")
-private val acceptedVideoExt = listOf(".mp4", ".wmv", ".avi", ".flv", ".mkv")
+private val acceptedReadAndEditExt = listOf("pdf", "md")
+private val acceptedVideoExt = listOf("mp4", "wmv", "avi", "flv", "mkv")
 
 fun provideIconImage(file: Path): Path? =
     providePreview(file) //todo downscale to, say, 128x128
@@ -43,13 +43,11 @@ fun providePreview(file: Path): Path? =
         }
     }
 
-fun isImage(filePath: Path): Boolean {
-    val extension = ".${extension(filePath)}"
-    return acceptedImageExt.contains(extension)
-}
+fun isImage(filePath: Path): Boolean =
+    acceptedImageExt.contains(extension(filePath))
 
 fun getFileActionType(filePath: Path): FileActionType{
-    return when(".${extension(filePath)}"){
+    return when(extension(filePath)){
         in acceptedEditOnlyExt -> FileActionType.EDIT_AS_OPEN
         in acceptedReadAndEditExt -> FileActionType.EDIT_AND_OPEN
         in acceptedVideoExt -> FileActionType.OPEN_ONLY_DETACH_PROCESS

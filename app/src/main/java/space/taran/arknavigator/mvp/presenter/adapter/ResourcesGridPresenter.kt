@@ -52,7 +52,7 @@ class ResourcesGridPresenter(
         val resource = selection[view.position()]
 
         val path = index.getPath(resource)
-            ?: throw AssertionError("Resource to display must be indexed")
+            ?: return
 
         view.setText(path.fileName.toString())
 
