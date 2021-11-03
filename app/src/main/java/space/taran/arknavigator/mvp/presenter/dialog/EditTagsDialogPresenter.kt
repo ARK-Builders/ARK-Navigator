@@ -8,6 +8,7 @@ import space.taran.arknavigator.mvp.model.repo.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.TagsStorage
 import space.taran.arknavigator.mvp.view.dialog.EditTagsDialogView
 import space.taran.arknavigator.utils.*
+import space.taran.arknavigator.utils.Converters.Companion.tagsListFromString
 
 class EditTagsDialogPresenter(
     private val resourceId: ResourceId,
@@ -25,9 +26,10 @@ class EditTagsDialogPresenter(
     }
 
     fun onInputDone(input: String) = presenterScope.launch {
+        val inputTags = Converters.tagsFromString(input, strict = false)
+        if (inputTags.isEmpty()) return@launch
+
         val tags = storage.getTags(resourceId)
-        val inputTags = Converters.tagsFromString(input)
-        if (inputTags.isEmpty() || inputTags.contains(Constants.EMPTY_TAG)) return@launch
         val newTags = tags + inputTags
         storage.setTags(resourceId, newTags)
 
@@ -50,7 +52,12 @@ class EditTagsDialogPresenter(
     }
 
     fun onInputChanged(input: String) {
-        filter = findLastTagInString(input)
+        if (input.isEmpty()) {
+            //this handler is called also when we reset input
+            return
+        }
+
+        filter = tagsListFromString(input, strict = false).last()
         viewState.setRootTags(listRootTags())
     }
 
@@ -66,8 +73,11 @@ class EditTagsDialogPresenter(
             .flatten()
         val popularity = Popularity.calculate(allTags)
         val result = (popularity.keys - storage.getTags(resourceId))
-            .filter {tag -> tag.startsWith(filter, true)}
-        return result.sortedByDescending{ tag -> popularity[tag] }
+            .filter {
+                tag -> tag.startsWith(filter, true)
+            }
+
+        return result.sortedByDescending { popularity[it] }
     }
 
     private fun listResourceTags() = storage.getTags(resourceId)
