@@ -4,10 +4,11 @@ import space.taran.arknavigator.mvp.model.dao.Resource
 import space.taran.arknavigator.mvp.model.dao.ResourceExtra
 import space.taran.arknavigator.mvp.model.dao.ResourceId
 import space.taran.arknavigator.mvp.model.dao.computeId
-import space.taran.arknavigator.ui.fragments.utils.Preview
-import space.taran.arknavigator.utils.isFormat
-import space.taran.arknavigator.utils.isImage
-import space.taran.arknavigator.utils.isVideo
+import space.taran.arknavigator.mvp.model.repo.extra.AnimationMetaExtra
+import space.taran.arknavigator.mvp.model.repo.extra.ImageMetaExtra
+import space.taran.arknavigator.mvp.model.repo.extra.DocumentMetaExtra
+import space.taran.arknavigator.mvp.model.repo.extra.VideoMetaExtra
+import space.taran.arknavigator.utils.extension
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -26,7 +27,7 @@ data class ResourceMeta(
                 id = id,
                 modified = Files.getLastModifiedTime(path),
                 size = Files.size(path),
-                extra = ResourceMetaExtra.provideMetaExtraInstance(path)
+                extra = ResourceMetaExtra.provide(path)
             )
         }
 
@@ -35,41 +36,37 @@ data class ResourceMeta(
                 id = resource.id,
                 modified = FileTime.fromMillis(resource.modified),
                 size = resource.size,
-                extra = ResourceMetaExtra.provideMetaExtraInstance(Paths.get(resource.path))
+                extra = ResourceMetaExtra.provide(Paths.get(resource.path))
             )
     }
 }
 
 enum class ResourceType {
-    IMAGE, VIDEO, GIF, PDF, UNDEFINED
+    IMAGE, VIDEO, ANIMATION, DOCUMENT
 }
 
-
-abstract class ResourceMetaExtra {
+abstract class ResourceMetaExtra(val type: ResourceType) {
     companion object {
-        fun provideMetaExtraInstance(filePath: Path?): ResourceMetaExtra? {
-            return when {
-                isVideo(filePath) -> VideoMetaExtra()
-                isFormat(filePath, "pdf") -> PdfMetaExtra()
+        fun provide(filePath: Path): ResourceMetaExtra? {
+            return when(extension(filePath)) {
+                in ImageMetaExtra.ACCEPTED_EXTENSIONS -> ImageMetaExtra()
+                in VideoMetaExtra.ACCEPTED_EXTENSIONS -> VideoMetaExtra()
+                in DocumentMetaExtra.ACCEPTED_EXTENSIONS -> DocumentMetaExtra()
+                in AnimationMetaExtra.ACCEPTED_EXTENSIONS -> AnimationMetaExtra()
                 else -> null
             }
         }
-    }
 
-    protected abstract var appData: MutableMap<Preview.ExtraInfoTag, String>
-
-    fun type(filePath: Path?): ResourceType {
-        return when {
-            filePath == null -> ResourceType.UNDEFINED
-            isImage(filePath) -> ResourceType.IMAGE
-            isVideo(filePath) -> ResourceType.VIDEO
-            isFormat(filePath, "pdf") -> ResourceType.PDF
-            isFormat(filePath, "gif") -> ResourceType.GIF
-            else -> ResourceType.UNDEFINED
+        fun fromRoom(room: ResourceExtra): ResourceMetaExtra {
+            TODO()
         }
     }
 
-    abstract fun appData(filePath: Path?): MutableMap<Preview.ExtraInfoTag, String>
+    abstract val data: Map<ExtraInfoTag, String>
 
-    abstract fun roomData(): ResourceExtra //TODO: PR #33
+    abstract fun toRoom(): ResourceExtra
+}
+
+enum class ExtraInfoTag {
+    MEDIA_RESOLUTION, MEDIA_DURATION
 }
