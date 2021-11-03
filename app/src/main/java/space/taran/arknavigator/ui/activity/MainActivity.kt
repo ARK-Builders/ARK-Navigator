@@ -58,6 +58,7 @@ class MainActivity : MvpAppCompatActivity(), MainView {
     override fun init() {
         Log.d(MAIN, "initializing")
         setSupportActionBar(binding.toolbar)
+        binding.bottomNavigation.setOnApplyWindowInsetsListener(null)
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.page_roots -> {
