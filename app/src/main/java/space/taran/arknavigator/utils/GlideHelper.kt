@@ -13,12 +13,7 @@ import space.taran.arknavigator.R
 import space.taran.arknavigator.ui.App
 import java.nio.file.Path
 
-fun imageForPredefinedIcon(isFolder: Boolean): Int {
-    return if (isFolder) R.drawable.ic_baseline_folder
-    else R.drawable.ic_file
-}
-
-fun imageForPredefinedExtension(ext: String?): Int {
+fun iconForExtension(ext: String?): Int {
     val drawableID = getDrawableIDByName(ext ?: "")
     return if (drawableID > 0) drawableID
     else R.drawable.ic_file

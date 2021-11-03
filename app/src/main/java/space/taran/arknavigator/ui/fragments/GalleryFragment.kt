@@ -19,6 +19,7 @@ import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.DialogTagsBinding
 import space.taran.arknavigator.databinding.FragmentGalleryBinding
 import space.taran.arknavigator.mvp.model.dao.ResourceId
+import space.taran.arknavigator.mvp.model.repo.ExtraInfoTag
 import space.taran.arknavigator.mvp.model.repo.PreviewsRepo
 import space.taran.arknavigator.mvp.model.repo.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.TagsStorage
@@ -30,11 +31,9 @@ import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.adapter.PreviewsPager
 import space.taran.arknavigator.ui.fragments.utils.Notifications
-import space.taran.arknavigator.ui.fragments.utils.Preview
 import space.taran.arknavigator.utils.*
 import space.taran.arknavigator.utils.extensions.makeGone
 import space.taran.arknavigator.utils.extensions.makeVisibleAndSetOnClickListener
-import space.taran.arknavigator.ui.fragments.utils.Preview.ExtraInfoTag.*
 import space.taran.arknavigator.utils.extensions.textOrGone
 import java.io.File
 import javax.inject.Inject
@@ -329,17 +328,15 @@ class GalleryFragment(
         val filePath = index.getPath(resource)
         setTitle(filePath?.fileName.toString())
 
-        binding.resolutionTV.textOrGone(previewsRepo.loadExtraMeta(
-            extraInfo = presenter.getExtraInfoAt(position, filePath),
-            filePath = filePath,
-            infoTag = MEDIA_RESOLUTION
-        ))
-
-        binding.durationTV.textOrGone(previewsRepo.loadExtraMeta(
-            extraInfo = presenter.getExtraInfoAt(position, filePath),
-            filePath = filePath,
-            infoTag = MEDIA_DURATION
-        ))
+        val extra = presenter.getExtraAt(position)
+        //todo make it more generic
+        if (extra != null) {
+            binding.resolutionTV.textOrGone(extra.data[ExtraInfoTag.MEDIA_RESOLUTION])
+            binding.durationTV.textOrGone(extra.data[ExtraInfoTag.MEDIA_DURATION])
+        } else {
+            binding.resolutionTV.makeGone()
+            binding.durationTV.makeGone()
+        }
     }
 
     private fun displayDialogTags(resource: ResourceId, tags: Tags) {

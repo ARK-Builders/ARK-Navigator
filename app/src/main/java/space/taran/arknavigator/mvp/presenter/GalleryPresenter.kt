@@ -15,7 +15,6 @@ import space.taran.arknavigator.mvp.view.item.PreviewItemView
 import space.taran.arknavigator.utils.GALLERY_SCREEN
 import space.taran.arknavigator.utils.Tags
 import java.nio.file.Files
-import java.nio.file.Path
 import javax.inject.Inject
 
 class GalleryPresenter(
@@ -29,34 +28,35 @@ class GalleryPresenter(
     @Inject
     lateinit var router: Router
 
-    @Inject
-    lateinit var previewsRepo: PreviewsRepo
-
-    private lateinit var previews: PreviewsList
+    private lateinit var previews: List<Preview>
+    private lateinit var extras: List<ResourceMetaExtra?>
 
     override fun onFirstViewAttach() {
-        val previewList = arrayListOf<Preview>()
-        val resourceMetas = arrayListOf<ResourceMeta?>()
+        Log.d(GALLERY_SCREEN, "first view attached in GalleryPresenter")
+
+        val _previews = mutableListOf<Preview>()
+        val _extras = mutableListOf<ResourceMetaExtra?>()
 
         resources.forEach { id ->
             val path = index.getPath(id)
             val meta = index.getMeta(id)
 
-            previewList.add(previewsRepo.providePreview(path!!, meta))
-            resourceMetas.add(meta)
+            _previews.add(Preview.provide(path!!, meta!!))
+            _extras.add(meta.extra)
         }
 
-        previews = PreviewsList(
-            previewList,
-            resourceMetas,
+        previews = _previews.toList()
+        extras = _extras.toList()
+
+        super.onFirstViewAttach()
+
+        viewState.init(PreviewsList(
+            previews.toList(),
+            extras.toList(),
             ::onPreviewsItemClick,
             ::onPreviewsItemZoom,
             ::onPlayButtonClick
-        )
-
-        Log.d(GALLERY_SCREEN, "first view attached in GalleryPresenter")
-        super.onFirstViewAttach()
-        viewState.init(previews)
+        ))
     }
 
     fun deleteResource(resource: ResourceId) = presenterScope.launch(NonCancellable) {
@@ -80,6 +80,9 @@ class GalleryPresenter(
         storage.setTags(resource, tags)
     }
 
+    fun getExtraAt(position: Int): ResourceMetaExtra? =
+        extras[position]
+
     fun onSystemUIVisibilityChange(isVisible: Boolean) {
         val newFullscreen = !isVisible
         // prevent loop
@@ -88,9 +91,6 @@ class GalleryPresenter(
         isFullscreen = newFullscreen
         viewState.setFullscreen(isFullscreen)
     }
-
-    fun getExtraInfoAt(position: Int, path: Path?): MutableMap<Preview.ExtraInfoTag, String>? =
-        previews.getExtraMetaAt(position)?.extra?.appData(path)
 
     private fun onPreviewsItemZoom(zoomed: Boolean) {
         if (zoomed) {

@@ -6,6 +6,7 @@ import com.ortiz.touchview.OnTouchImageViewListener
 import space.taran.arknavigator.databinding.ItemImageBinding
 import space.taran.arknavigator.mvp.model.repo.PreviewsRepo
 import space.taran.arknavigator.mvp.model.repo.ResourceMetaExtra
+import space.taran.arknavigator.mvp.model.repo.ResourceType
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
 import space.taran.arknavigator.ui.fragments.utils.Preview
 import space.taran.arknavigator.utils.extensions.makeVisibleAndSetOnClickListener
@@ -28,7 +29,7 @@ class PreviewItemViewHolder(val binding: ItemImageBinding, val presenter: Previe
             extraMeta = extraMeta
         )
 
-        if (preview.isPlayButtonVisible){
+        if (extraMeta?.type != ResourceType.VIDEO){
             binding.icPlay.makeVisibleAndSetOnClickListener {
                 presenter.onPlayButtonCLick(pos)
             }

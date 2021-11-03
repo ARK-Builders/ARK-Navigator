@@ -32,20 +32,8 @@ class ResourcesGridPresenter(
     @Inject
     lateinit var previewsRepo: PreviewsRepo
 
-    private var resources = listOf<ResourceId>()
-    set(value) {
-        field = value
-        resourcesMeta = value.map { index.getMeta(it) }
-    }
-    private var resourcesMeta = listOf<ResourceMeta?>()
-
-    private var selection = listOf<ResourceId>()
-        set(value) {
-            field = value
-            selectionMeta = value.map { index.getMeta(it) }
-        }
-
-    private var selectionMeta = listOf<ResourceMeta?>()
+    private var resources = listOf<ResourceMeta>()
+    private var selection = listOf<ResourceMeta>()
 
     private lateinit var index: ResourcesIndex
     private lateinit var storage: TagsStorage
@@ -68,7 +56,7 @@ class ResourcesGridPresenter(
     fun bindView(view: FileItemView) {
         val resource = selection[view.position()]
 
-        val path = index.getPath(resource)
+        val path = index.getPath(resource.id)
             ?: throw AssertionError("Resource to display must be indexed")
 
         view.setText(path.fileName.toString())
@@ -77,8 +65,7 @@ class ResourcesGridPresenter(
             throw AssertionError("Resource can't be a directory")
         }
 
-        val resourceMeta = selectionMeta.getOrNull(view.position())
-        view.setIcon(previewsRepo.providePreview(path, resourceMeta), resourceMeta)
+        view.setIconOrPreview(path, resource)
     }
 
     fun onItemClick(pos: Int) {

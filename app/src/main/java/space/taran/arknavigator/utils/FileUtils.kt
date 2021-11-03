@@ -24,18 +24,14 @@ enum class FileActionType {
     EDIT_AS_OPEN, EDIT_AND_OPEN, OPEN_ONLY, OPEN_ONLY_DETACH_PROCESS
 }
 
-const val PDF_PREVIEW_FOLDER_NAME = "pdf_preview"
-
 private val acceptedImageExt = listOf("jpg", "jpeg", "png")
 private val acceptedVideoExt = listOf("mp4", "avi", "mov", "wmv", "flv")
 private val acceptedEditOnlyExt = arrayListOf("txt", "doc", "docx", "odt", "ods")
     .also { it.addAll(acceptedImageExt) }
 private val acceptedReadAndEditExt = listOf("pdf", "md")
 
-fun isImage(filePath: Path?): Boolean {
-    val extension = extension(filePath)
-    return acceptedImageExt.contains(extension)
-}
+fun isImage(filePath: Path?): Boolean =
+    acceptedImageExt.contains(extension(filePath))
 
 fun isVideo(filePath: Path?): Boolean {
     return if (filePath?.toFile()?.exists() == true && filePath.fileSize() > 0) {
@@ -49,16 +45,6 @@ fun isVideo(filePath: Path?): Boolean {
 fun isFormat(filePath: Path?, ext: String): Boolean {
     return extension(filePath) == ext
 }
-
-fun getPdfPreviewsFolder(): File =
-    Paths.get("${App.instance.cacheDir}/$PDF_PREVIEW_FOLDER_NAME").toFile()
-
-fun getSavedPdfPreviews(): List<String?>? =
-    getPdfPreviewsFolder()
-        .listFiles()
-        ?.map {
-            it.nameWithoutExtension
-        }
 
 fun getFileActionType(filePath: Path): FileActionType {
     return when (extension(filePath)) {
@@ -112,13 +98,6 @@ fun findLongestCommonPrefix(paths: List<Path>): Path {
     }
 
     return tailrec(ROOT_PATH, paths).first
-}
-
-fun deleteFile(filePath: Path?) {
-    val file = filePath?.toFile()
-    if (file?.exists() == true) {
-        file.delete()
-    }
 }
 
 fun extension(path: Path?): String {

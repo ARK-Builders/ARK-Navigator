@@ -7,6 +7,7 @@ import kotlinx.coroutines.withContext
 import space.taran.arknavigator.mvp.model.dao.Resource
 import space.taran.arknavigator.mvp.model.dao.ResourceDao
 import space.taran.arknavigator.mvp.model.dao.ResourceId
+import space.taran.arknavigator.ui.fragments.utils.Preview
 import space.taran.arknavigator.utils.*
 import java.io.File
 import java.io.FileOutputStream
@@ -83,14 +84,13 @@ class PlainResourcesIndex internal constructor (
     internal suspend fun reindexRoot(diff: Difference) = withContext(Dispatchers.IO) {
         val savedDeletedMetas = mutableMapOf<Path, ResourceMeta?>()
         diff.deleted.forEach {
-            pathById[metaByPath[it]!!.id]
-            savedDeletedMetas[it] = metaByPath[it]
+            val id = metaByPath[it]!!.id
+            pathById[id]
             metaByPath.remove(it)
+            Preview.forget(id)
         }
 
         Log.d(RESOURCES_INDEX, "deleting ${savedDeletedMetas.size} pdf previews")
-        previewsRepo.deletePdfPreviews(
-            savedDeletedMetas.values.toList().map { it?.id?.toString() ?: "" })
 
         val pathsToDelete = diff.deleted + diff.updated
 
@@ -106,8 +106,6 @@ class PlainResourcesIndex internal constructor (
             val meta = ResourceMeta.fromPath(path)
             metaByPath[path] = meta
             pathById[meta.id] = path
-            if (isFormat(path, "pdf"))
-                previewsRepo.generatePdfPreview(path, meta)
         }
 
         Log.d(RESOURCES_INDEX, "re-scanning ${toInsert.size} resources")
@@ -141,19 +139,18 @@ class PlainResourcesIndex internal constructor (
 
     internal suspend fun persistResources(resources: Map<Path, ResourceMeta>) = withContext(Dispatchers.IO) {
         Log.d(RESOURCES_INDEX, "persisting "
-                + "${resources.size} resources from root $root")
+            + "${resources.size} resources from root $root")
 
-            val entities = resources.entries.toList()
-                .map {
-                    if (isFormat(it.key, "pdf"))
-                        previewsRepo.generatePdfPreview(it.key, it.value)
-                    Resource.fromMeta(it.value, root, it.key)
-                }
+        val entities = resources.entries.toList()
+            .map {
+                Preview.provide(it.key, it.value)
+                Resource.fromMeta(it.value, root, it.key)
+            }
 
-            dao.insertAll(entities)
+        dao.insertAll(entities)
 
-            Log.d(RESOURCES_INDEX, "${entities.size} resources persisted")
-        }
+        Log.d(RESOURCES_INDEX, "${entities.size} resources persisted")
+    }
 
     companion object {
 
