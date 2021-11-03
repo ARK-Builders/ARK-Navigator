@@ -7,19 +7,21 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.load.resource.gif.GifDrawable
 import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
 import com.ortiz.touchview.TouchImageView
 import space.taran.arknavigator.R
 import space.taran.arknavigator.ui.App
+import space.taran.arknavigator.ui.activity.MainActivity
 import java.nio.file.Path
 
-fun imageForPredefinedIcon(isFolder: Boolean): Int {
-    return if (isFolder) R.drawable.ic_baseline_folder
-    else R.drawable.ic_file
-}
+fun iconForExtension(ext: String): Int {
+    val drawableID = App.instance.resources
+        .getIdentifier(
+            "ic_file_${ext}",
+            "drawable",
+            App.instance.packageName)
 
-fun imageForPredefinedExtension(ext: String?): Int {
-    val drawableID = getDrawableIDByName(ext ?: "")
     return if (drawableID > 0) drawableID
     else R.drawable.ic_file
 }
@@ -141,11 +143,3 @@ fun loadZoomImagePlaceholder(file: Path, placeHolder: Int, container: ImageView)
 
             override fun onLoadCleared(placeholder: Drawable?) {}
         })
-
-fun getDrawableIDByName(name: String): Int {
-    val nameFinal = if (name.startsWith("."))
-        name.substring(1, name.lastIndex)
-    else name
-    return App.instance.resources
-        .getIdentifier("ic_file_${nameFinal}", "drawable", App.instance.packageName)
-}

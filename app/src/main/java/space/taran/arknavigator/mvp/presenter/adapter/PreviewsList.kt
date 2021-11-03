@@ -1,12 +1,12 @@
 package space.taran.arknavigator.mvp.presenter.adapter
 
-import space.taran.arknavigator.mvp.model.repo.ResourceMeta
+import space.taran.arknavigator.mvp.model.repo.ResourceMetaExtra
 import space.taran.arknavigator.ui.fragments.utils.Preview
 import space.taran.arknavigator.mvp.view.item.PreviewItemView
 
 class PreviewsList(
     private var previews: List<Preview>,
-    private var resourceMetas: List<ResourceMeta?>?,
+    private var extras: List<ResourceMetaExtra?>,
     private val onItemClickListener: (PreviewItemView) -> Unit,
     private val onImageZoomListener: (Boolean) -> Unit,
     private val onPlayButtonListener: (Int) -> Unit) {
@@ -19,17 +19,11 @@ class PreviewsList(
         previews = items
     }
 
-    fun getItem(position: Int): Preview =
-        previews[position]
-
-    fun getExtraMetaAt(position: Int): ResourceMeta? =
-        resourceMetas?.getOrNull(position)
-
     fun bindView(view: PreviewItemView) {
         val preview = previews[view.pos]
-        val extraMeta = resourceMetas?.getOrNull(view.pos)?.extra
+        val extra = extras[view.pos]
 
-        view.setSource(preview, extraMeta)
+        view.setSource(preview, extra)
     }
 
     fun onImageZoom(zoomed: Boolean) {
