@@ -6,9 +6,9 @@ import space.taran.arknavigator.ui.fragments.utils.Preview
 interface PreviewItemView {
     var pos: Int
 
-    fun setSource(preview: Preview, extraMeta: ResourceMetaExtra?)
+    fun setSource(preview: Preview, extra: ResourceMetaExtra?)
 
-    fun setZoomEnabled(enabled: Boolean)
+    fun enableZoom()
 
     fun resetZoom()
 }

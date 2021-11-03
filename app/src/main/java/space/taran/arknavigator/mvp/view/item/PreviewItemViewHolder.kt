@@ -6,6 +6,7 @@ import com.ortiz.touchview.OnTouchImageViewListener
 import space.taran.arknavigator.databinding.ItemImageBinding
 import space.taran.arknavigator.mvp.model.repo.PreviewsRepo
 import space.taran.arknavigator.mvp.model.repo.ResourceMetaExtra
+import space.taran.arknavigator.mvp.model.repo.ResourceType
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
 import space.taran.arknavigator.ui.fragments.utils.Preview
 import space.taran.arknavigator.utils.extensions.makeVisibleAndSetOnClickListener
@@ -20,39 +21,39 @@ class PreviewItemViewHolder(val binding: ItemImageBinding, val presenter: Previe
     @Inject
     lateinit var previewsRepo: PreviewsRepo
 
-    override fun setSource(preview: Preview, extraMeta: ResourceMetaExtra?) {
+    override fun setSource(preview: Preview, extra: ResourceMetaExtra?) {
         binding.layoutProgress.root.isVisible = false
         previewsRepo.loadPreview(
             targetView = binding.ivImage,
             preview = preview,
-            extraMeta = extraMeta
+            extraMeta = extra,
+            centerCrop = false
         )
 
-        if (preview.isPlayButtonVisible){
+        if (extra?.type != ResourceType.VIDEO){
             binding.icPlay.makeVisibleAndSetOnClickListener {
                 presenter.onPlayButtonCLick(pos)
             }
+        } else {
+            binding.icPlay.isVisible = false
         }
-        else binding.icPlay.isVisible = false
 
-        setZoomEnabled(preview.isZoomEnabled)
+        if (extra?.type == ResourceType.IMAGE ||
+            extra?.type == ResourceType.DOCUMENT) {
+                enableZoom()
+        }
     }
 
-    override fun setZoomEnabled(enabled: Boolean): Unit =
-        binding.ivImage.let { touchImageView ->
-            touchImageView.isZoomEnabled = enabled
-            if (enabled) {
-                touchImageView.setOnTouchImageViewListener(object : OnTouchImageViewListener {
-                    override fun onMove() {
-                        presenter.onImageZoom(touchImageView.isZoomed)
-                    }
-                })
-            } else {
-                touchImageView.setOnTouchImageViewListener(object : OnTouchImageViewListener {
-                    override fun onMove() {}
-                })
-            }
+    override fun enableZoom(): Unit =
+        binding.ivImage.let { view ->
+            view.isZoomEnabled = true
+            view.setOnTouchImageViewListener(object : OnTouchImageViewListener {
+                override fun onMove() {
+                    presenter.onImageZoom(view.isZoomed)
+                }
+            })
         }
 
-    override fun resetZoom() = binding.ivImage.resetZoom()
+    override fun resetZoom() =
+        binding.ivImage.resetZoom()
 }

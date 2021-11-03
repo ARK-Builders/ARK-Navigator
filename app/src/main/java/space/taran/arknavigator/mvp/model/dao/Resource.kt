@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import space.taran.arknavigator.mvp.model.repo.ResourceMeta
-import space.taran.arknavigator.mvp.model.repo.ResourceMetaExtra
 import space.taran.arknavigator.utils.*
 import java.util.zip.CRC32
 
@@ -31,7 +30,7 @@ data class Resource (
                 path = path.toString(),
                 modified = meta.modified.toMillis(),
                 size = meta.size,
-                extra = meta.extra?.roomData())
+                extra = meta.extra?.toRoom())
     }
 }
 

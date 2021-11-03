@@ -1,13 +1,14 @@
 package space.taran.arknavigator.utils
 
+import space.taran.arknavigator.mvp.model.repo.extra.DocumentMetaExtra
+import space.taran.arknavigator.mvp.model.repo.extra.ImageMetaExtra
+import space.taran.arknavigator.mvp.model.repo.extra.VideoMetaExtra
 import space.taran.arknavigator.ui.App
-import java.io.File
 import java.lang.IllegalArgumentException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.io.path.extension
-import kotlin.io.path.fileSize
 
 val ROOT_PATH: Path = Paths.get("/")
 
@@ -24,47 +25,12 @@ enum class FileActionType {
     EDIT_AS_OPEN, EDIT_AND_OPEN, OPEN_ONLY, OPEN_ONLY_DETACH_PROCESS
 }
 
-const val PDF_PREVIEW_FOLDER_NAME = "pdf_preview"
-
-private val acceptedImageExt = listOf("jpg", "jpeg", "png")
-private val acceptedVideoExt = listOf("mp4", "avi", "mov", "wmv", "flv")
-private val acceptedEditOnlyExt = arrayListOf("txt", "doc", "docx", "odt", "ods")
-    .also { it.addAll(acceptedImageExt) }
-private val acceptedReadAndEditExt = listOf("pdf", "md")
-
-fun isImage(filePath: Path?): Boolean {
-    val extension = extension(filePath)
-    return acceptedImageExt.contains(extension)
-}
-
-fun isVideo(filePath: Path?): Boolean {
-    return if (filePath?.toFile()?.exists() == true && filePath.fileSize() > 0) {
-        val extension = extension(filePath)
-        acceptedVideoExt.contains(extension)
-    } else {
-        false
-    }
-}
-
-fun isFormat(filePath: Path?, ext: String): Boolean {
-    return extension(filePath) == ext
-}
-
-fun getPdfPreviewsFolder(): File =
-    Paths.get("${App.instance.cacheDir}/$PDF_PREVIEW_FOLDER_NAME").toFile()
-
-fun getSavedPdfPreviews(): List<String?>? =
-    getPdfPreviewsFolder()
-        .listFiles()
-        ?.map {
-            it.nameWithoutExtension
-        }
-
 fun getFileActionType(filePath: Path): FileActionType {
     return when (extension(filePath)) {
-        in acceptedEditOnlyExt -> FileActionType.EDIT_AS_OPEN
-        in acceptedReadAndEditExt -> FileActionType.EDIT_AND_OPEN
-        in acceptedVideoExt -> FileActionType.OPEN_ONLY_DETACH_PROCESS
+        "pdf" -> FileActionType.EDIT_AND_OPEN
+        in ImageMetaExtra.ACCEPTED_EXTENSIONS -> FileActionType.EDIT_AS_OPEN
+        in DocumentMetaExtra.ACCEPTED_EXTENSIONS -> FileActionType.EDIT_AS_OPEN
+        in VideoMetaExtra.ACCEPTED_EXTENSIONS -> FileActionType.OPEN_ONLY_DETACH_PROCESS
         else -> FileActionType.OPEN_ONLY
     }
 }
@@ -114,17 +80,11 @@ fun findLongestCommonPrefix(paths: List<Path>): Path {
     return tailrec(ROOT_PATH, paths).first
 }
 
-fun deleteFile(filePath: Path?) {
-    val file = filePath?.toFile()
-    if (file?.exists() == true) {
-        file.delete()
-    }
+fun extension(path: Path): String {
+    return path.extension.lowercase()
 }
 
-fun extension(path: Path?): String {
-    return path?.extension?.lowercase() ?: ""
-}
-
+//todo use meta extra
 fun reifySorting(sorting: Sorting): Comparator<Path>? =
     when (sorting) {
         Sorting.NAME -> compareBy { it.fileName }
