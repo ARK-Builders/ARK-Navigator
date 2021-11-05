@@ -29,10 +29,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="16dp"
-            android:text="Root:"
+            android:text="Quick tags:"
             android:textSize="16sp"
-            app:layout_constraintBottom_toTopOf="@+id/textView2"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/layout_input"
+            app:layout_constraintEnd_toStartOf="@+id/horizontalScrollView"
             app:layout_constraintHorizontal_bias="0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -43,72 +43,58 @@
             android:id="@+id/horizontalScrollView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            app:layout_constraintBottom_toBottomOf="@+id/textView"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintBottom_toTopOf="@+id/layout_input"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/textView2"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintStart_toEndOf="@+id/textView"
+            app:layout_constraintTop_toTopOf="@id/textView">
 
             <com.google.android.material.chip.ChipGroup
-                android:id="@+id/cg_popular"
+                android:id="@+id/cg_quick"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
         </HorizontalScrollView>
 
-
-        <TextView
-            android:id="@+id/textView2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="16dp"
-            android:text="Resource:"
-            android:textSize="16sp"
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@android:color/darker_gray"
             app:layout_constraintBottom_toTopOf="@+id/layout_input"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="1" />
+            app:layout_constraintTop_toBottomOf="@+id/textView" />
 
-        <HorizontalScrollView
-            android:id="@+id/horizontalScrollView2"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            app:layout_constraintBottom_toTopOf="@+id/layout_input"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/textView2"
-            app:layout_constraintTop_toTopOf="@+id/textView2">
-
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/cg_resource"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-        </HorizontalScrollView>
-
-
-        <com.google.android.material.textfield.TextInputLayout
+        <com.google.android.flexbox.FlexboxLayout
             android:id="@+id/layout_input"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Input comma-separated tags"
-            android:padding="10dp"
+            android:layout_gravity="center_vertical"
+            android:paddingStart="16dp"
+            android:paddingBottom="16dp"
+            android:paddingEnd="16dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="1">
+            app:layout_constraintVertical_bias="1"
+            app:flexWrap="wrap"
+            app:alignItems="center"
+            app:showDivider="middle"
+            app:dividerDrawable="@drawable/tags_divider">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_new_tags"
-                android:layout_width="match_parent"
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="Resource tags:"
+                android:textSize="16sp" />
+
+            <space.taran.arknavigator.ui.view.BackButtonEditText
+                android:id="@+id/et_new_tags"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                app:layout_flexGrow="1"
                 android:imeOptions="actionDone"
                 android:inputType="text" />
 
-        </com.google.android.material.textfield.TextInputLayout>
+        </com.google.android.flexbox.FlexboxLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

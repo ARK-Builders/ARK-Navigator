@@ -16,21 +16,15 @@ class Converters {
         fun stringFromTags(tags: Tags): String = tags
             .joinToString(",")
 
-        fun tagsFromString(string: String, strict: Boolean = true): Tags =
-            tagsListFromString(string, strict)
-                .toSet()
-
-        fun tagsListFromString(string: String, strict: Boolean = true): List<Tag> = string
+        fun tagsFromString(string: String): Tags = string
             .split(',')
             .map { it.trim() }
             .filter {
-                if (it.isEmpty()) {
-                    if (strict) {
-                        throw AssertionError("No tag can be empty")
-                    }
-                    false
-                }
+                if (it.isEmpty()) throw AssertionError("No tag can be empty")
                 true
             }
+            .toSet()
     }
 }
+
+fun findLastTagInString(string: String): String = string.split(',').last().trim()

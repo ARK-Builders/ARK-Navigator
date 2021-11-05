@@ -1,13 +1,11 @@
 package space.taran.arknavigator.ui.fragments.dialog
 
-import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.core.widget.doAfterTextChanged
-import androidx.fragment.app.DialogFragment
 import com.google.android.material.chip.Chip
 import moxy.MvpAppCompatDialogFragment
 import moxy.ktx.moxyPresenter
@@ -54,37 +52,40 @@ class EditTagsDialogFragment(resourceId: ResourceId, storage: TagsStorage, index
             true
         }
 
+        etNewTags.setOnBackPressedListener {
+            dismiss()
+        }
+
         binding.layoutOutside.setOnClickListener {
             dismiss()
         }
     }
 
     override fun setResourceTags(tags: Tags) {
-        binding.cgResource.removeAllViews()
+        binding.layoutInput.removeViews(1, binding.layoutInput.childCount - 2)
 
         tags.forEach { tag ->
-            val chip = Chip(context)
+            val chip = Chip(requireContext())
             chip.text = tag
 
             chip.setOnClickListener {
                 presenter.onResourceTagClick(tag)
             }
-
-            binding.cgResource.addView(chip)
+            binding.layoutInput.addView(chip, binding.layoutInput.childCount - 1)
         }
     }
 
-    override fun setRootTags(tags: List<Tag>) {
-        binding.cgPopular.removeAllViews()
+    override fun setQuickTags(tags: List<Tag>) {
+        binding.cgQuick.removeAllViews()
 
         tags.forEach { tag ->
-            val chip = Chip(context)
+            val chip = Chip(requireContext())
             chip.text = tag
 
             chip.setOnClickListener {
-                presenter.onRootTagClick(tag)
+                presenter.onQuickTagClick(tag)
             }
-            binding.cgPopular.addView(chip)
+            binding.cgQuick.addView(chip)
         }
     }
 
