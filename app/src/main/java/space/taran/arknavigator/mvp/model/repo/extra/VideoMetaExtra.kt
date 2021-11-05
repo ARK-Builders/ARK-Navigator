@@ -13,4 +13,9 @@ class VideoMetaExtra: ResourceMetaExtra(ResourceType.VIDEO) {
     override fun toRoom(): ResourceExtra {
         TODO("Not yet implemented")
     }
+
+    companion object {
+        val ACCEPTED_EXTENSIONS: Set<String> =
+            setOf("mp4", "avi", "mov", "wmv", "flv")
+    }
 }

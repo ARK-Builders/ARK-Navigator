@@ -19,10 +19,7 @@ import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.DialogTagsBinding
 import space.taran.arknavigator.databinding.FragmentGalleryBinding
 import space.taran.arknavigator.mvp.model.dao.ResourceId
-import space.taran.arknavigator.mvp.model.repo.ExtraInfoTag
-import space.taran.arknavigator.mvp.model.repo.PreviewsRepo
-import space.taran.arknavigator.mvp.model.repo.ResourcesIndex
-import space.taran.arknavigator.mvp.model.repo.TagsStorage
+import space.taran.arknavigator.mvp.model.repo.*
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
 import space.taran.arknavigator.mvp.view.GalleryView
@@ -41,7 +38,7 @@ import javax.inject.Inject
 class GalleryFragment(
     private val index: ResourcesIndex,
     private val storage: TagsStorage,
-    private val resources: MutableList<ResourceId>,
+    private val resources: MutableList<ResourceMeta>,
     private val startAt: Int
 ) : MvpAppCompatFragment(), GalleryView, BackButtonListener, NotifiableView {
 
@@ -177,7 +174,7 @@ class GalleryFragment(
         pagerAdapter.removeItem(position)
         val resource = resources.removeAt(position)
 
-        presenter.deleteResource(resource)
+        presenter.deleteResource(resource.id)
 
         if (resources.isEmpty()) {
             presenter.quit()
@@ -186,7 +183,7 @@ class GalleryFragment(
 
     private fun shareResource(position: Int) {
         val resource = resources[position]
-        val path = index.getPath(resource)!!
+        val path = index.getPath(resource.id)
 
         val context = requireContext()
         val uri = FileProvider.getUriForFile(
@@ -205,7 +202,7 @@ class GalleryFragment(
     private fun showEditTagsDialog(position: Int) {
         val resource = resources[position]
         Log.d(GALLERY_SCREEN, "showing [edit-tags] dialog for position $position")
-        showEditTagsDialog(resource)
+        showEditTagsDialog(resource.id)
     }
 
     private fun setupOpenEditFABs() {
@@ -217,7 +214,7 @@ class GalleryFragment(
             openFileEditFab.setOnClickListener(null)
 
             val resource = resources[currentPosition]
-            val filePath = index.getPath(resource)
+            val filePath = index.getPath(resource.id)
 
             when (getFileActionType(filePath!!)) {
                 FileActionType.OPEN_ONLY -> {
@@ -253,7 +250,7 @@ class GalleryFragment(
 
     private fun openIntentChooser(position: Int, actionType: String, detachProcess: Boolean = false) {
         val resource = resources[position]
-        val filePath = index.getPath(resource)
+        val filePath = index.getPath(resource.id)
 
         //Create intent, and set the data and extension to it
         val intent = Intent()
@@ -323,10 +320,10 @@ class GalleryFragment(
 
     private fun displayPreview(position: Int) {
         val resource = resources[position]
-        val tags = presenter.listTags(resource)
-        displayPreviewTags(resource, tags)
-        val filePath = index.getPath(resource)
-        setTitle(filePath?.fileName.toString())
+        val tags = presenter.listTags(resource.id)
+        displayPreviewTags(resource.id, tags)
+        val filePath = index.getPath(resource.id)
+        setTitle(filePath.fileName.toString())
 
         val extra = presenter.getExtraAt(position)
         //todo make it more generic

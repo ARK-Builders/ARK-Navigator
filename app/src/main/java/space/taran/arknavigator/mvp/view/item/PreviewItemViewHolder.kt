@@ -26,7 +26,8 @@ class PreviewItemViewHolder(val binding: ItemImageBinding, val presenter: Previe
         previewsRepo.loadPreview(
             targetView = binding.ivImage,
             preview = preview,
-            extraMeta = extraMeta
+            extraMeta = extraMeta,
+            centerCrop = false
         )
 
         if (extraMeta?.type != ResourceType.VIDEO){

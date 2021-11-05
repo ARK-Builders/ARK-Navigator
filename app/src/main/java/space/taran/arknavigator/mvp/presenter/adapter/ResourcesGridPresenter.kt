@@ -1,13 +1,11 @@
 package space.taran.arknavigator.mvp.presenter.adapter
 
-import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.mvp.model.UserPreferences
-import space.taran.arknavigator.mvp.model.dao.ResourceId
 import space.taran.arknavigator.mvp.model.repo.PreviewsRepo
 import space.taran.arknavigator.mvp.model.repo.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.ResourcesIndex
@@ -57,7 +55,6 @@ class ResourcesGridPresenter(
         val resource = selection[view.position()]
 
         val path = index.getPath(resource.id)
-            ?: throw AssertionError("Resource to display must be indexed")
 
         view.setText(path.fileName.toString())
 
@@ -80,7 +77,7 @@ class ResourcesGridPresenter(
         ascending = userPreferences.isSortingAscending()
     }
 
-    suspend fun updateSelection(selection: Set<ResourceId>) = withContext(Dispatchers.Default) {
+    suspend fun updateSelection(selection: Set<ResourceMeta>) = withContext(Dispatchers.Default) {
         this@ResourcesGridPresenter.selection = resources.filter { selection.contains(it) }
         withContext(Dispatchers.Main) {
             setProgressVisibility(false)
@@ -88,7 +85,7 @@ class ResourcesGridPresenter(
         }
     }
 
-    suspend fun resetResources(resources: Set<ResourceId>) = withContext(Dispatchers.Default) {
+    suspend fun resetResources(resources: Set<ResourceMeta>) = withContext(Dispatchers.Default) {
         this@ResourcesGridPresenter.resources = resources.toList()
         sortAllResources()
         selection = this@ResourcesGridPresenter.resources
@@ -119,7 +116,7 @@ class ResourcesGridPresenter(
     private fun sortAllResources() {
         val comparator = reifySorting(sorting)
         if (comparator != null) {
-            resources = resources.map { index.getPath(it)!! to it }
+            resources = resources.map { index.getPath(it.id) to it }
                 .toMap()
                 .toSortedMap(unequalCompareBy(comparator))
                 .values

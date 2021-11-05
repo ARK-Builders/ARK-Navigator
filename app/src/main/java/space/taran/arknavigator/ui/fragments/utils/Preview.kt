@@ -20,20 +20,13 @@ data class Preview(
     companion object {
         private val PRIMARY_STORAGE: Path =
             Paths.get("${App.instance.cacheDir}/previews")
-        private val SECONDARY_STORAGE: Path =
-            Paths.get("${App.instance.cacheDir}/previews2")
 
         init {
             Files.createDirectory(PRIMARY_STORAGE)
-            Files.createDirectory(SECONDARY_STORAGE)
         }
 
         private fun imagePath(id: ResourceId): Path =
             PRIMARY_STORAGE.resolve(id.toString())
-
-//        private fun imagePath(path: Path): Path =
-//            SECONDARY_STORAGE.resolve(path.base)
-
 
         fun forget(id: ResourceId) {
             Files.delete(imagePath(id))

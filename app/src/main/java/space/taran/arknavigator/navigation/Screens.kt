@@ -2,7 +2,7 @@ package space.taran.arknavigator.navigation
 
 import space.taran.arknavigator.ui.fragments.*
 import ru.terrakok.cicerone.android.support.SupportAppScreen
-import space.taran.arknavigator.mvp.model.dao.ResourceId
+import space.taran.arknavigator.mvp.model.repo.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.TagsStorage
 import java.nio.file.Path
@@ -18,8 +18,8 @@ class Screens {
 
     class GalleryScreen(val index: ResourcesIndex,
                         val storage: TagsStorage,
-                        val resources: List<ResourceId>,
+                        val selection: List<ResourceMeta>,
                         val position: Int): SupportAppScreen() {
-        override fun getFragment() = GalleryFragment(index, storage, resources.toMutableList(), position)
+        override fun getFragment() = GalleryFragment(index, storage, selection.toMutableList(), position)
     }
 }

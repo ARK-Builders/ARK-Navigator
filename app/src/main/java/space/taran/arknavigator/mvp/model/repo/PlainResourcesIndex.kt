@@ -1,6 +1,5 @@
 package space.taran.arknavigator.mvp.model.repo
 
-import android.graphics.Bitmap
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -9,8 +8,6 @@ import space.taran.arknavigator.mvp.model.dao.ResourceDao
 import space.taran.arknavigator.mvp.model.dao.ResourceId
 import space.taran.arknavigator.ui.fragments.utils.Preview
 import space.taran.arknavigator.utils.*
-import java.io.File
-import java.io.FileOutputStream
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -30,7 +27,6 @@ internal data class Difference(
 class PlainResourcesIndex internal constructor (
     private val root: Path,
     private val dao: ResourceDao,
-    private val previewsRepo: PreviewsRepo,
     resources: Map<Path, ResourceMeta>)
     : ResourcesIndex {
 
@@ -58,20 +54,31 @@ class PlainResourcesIndex internal constructor (
         return ids.toSet()
     }
 
-    override fun getPath(id: ResourceId): Path? = pathById[id]
+    override fun getPath(id: ResourceId): Path = tryGetPath(id)!!
 
-    override fun getMeta(id: ResourceId): ResourceMeta? {
-        val path = getPath(id)
-        return if (path != null) {
-            metaByPath[path]
-        } else {
-            null
-        }
+    override fun getMeta(id: ResourceId): ResourceMeta = tryGetMeta(id)!!
+
+    override fun remove(id: ResourceId): Path {
+        Log.d(RESOURCES_INDEX, "forgetting resource $id")
+        return tryRemove(id)!!
     }
 
-    override fun remove(id: ResourceId): Path? {
-        Log.d(RESOURCES_INDEX, "forgetting resource $id")
-        val path = pathById.remove(id)
+    //should be only used in AggregatedResourcesIndex
+    fun tryGetPath(id: ResourceId): Path? = pathById[id]
+
+    //should be only used in AggregatedResourcesIndex
+    fun tryGetMeta(id: ResourceId): ResourceMeta? {
+        val path = tryGetPath(id)
+        if (path != null) {
+            return metaByPath[path]
+        }
+        return null
+    }
+
+    //should be only used in AggregatedResourcesIndex
+    fun tryRemove(id: ResourceId): Path? {
+        val path = pathById.remove(id) ?: return null
+
         val idRemoved = metaByPath.remove(path)!!.id
 
         if (id != idRemoved) {

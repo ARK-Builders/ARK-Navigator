@@ -15,10 +15,10 @@ class PreviewsRepo {
         targetView: ImageView,
         preview: Preview,
         extraMeta: ResourceMetaExtra?,
-        centerCrop: Boolean = false
+        centerCrop: Boolean
     ) {
         when (extraMeta?.type) {
-            ResourceType.GIF -> {
+            ResourceType.ANIMATION -> {
                 if (targetView is TouchImageView) {
                     loadGif(
                         preview.imagePath,
@@ -32,7 +32,7 @@ class PreviewsRepo {
                     )
                 }
             }
-            ResourceType.PDF -> {
+            ResourceType.DOCUMENT -> {
                 targetView.setImageResource(iconForExtension("pdf"))
                 targetView.autoDisposeScope.launch {
                     withContext(Dispatchers.Main) {

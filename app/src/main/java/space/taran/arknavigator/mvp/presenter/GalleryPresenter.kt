@@ -20,7 +20,7 @@ import javax.inject.Inject
 class GalleryPresenter(
     private val index: ResourcesIndex,
     private val storage: TagsStorage,
-    private val resources: MutableList<ResourceId>
+    private val resources: MutableList<ResourceMeta>
 ) : MvpPresenter<GalleryView>() {
 
     private var isFullscreen = false
@@ -34,14 +34,14 @@ class GalleryPresenter(
     override fun onFirstViewAttach() {
         Log.d(GALLERY_SCREEN, "first view attached in GalleryPresenter")
 
+        //todo rename
         val _previews = mutableListOf<Preview>()
         val _extras = mutableListOf<ResourceMetaExtra?>()
 
-        resources.forEach { id ->
-            val path = index.getPath(id)
-            val meta = index.getMeta(id)
+        resources.forEach { meta ->
+            val path = index.getPath(meta.id)
 
-            _previews.add(Preview.provide(path!!, meta!!))
+            _previews.add(Preview.provide(path, meta))
             _extras.add(meta.extra)
         }
 

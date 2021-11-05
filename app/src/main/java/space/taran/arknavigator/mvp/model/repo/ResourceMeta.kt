@@ -4,13 +4,11 @@ import space.taran.arknavigator.mvp.model.dao.Resource
 import space.taran.arknavigator.mvp.model.dao.ResourceExtra
 import space.taran.arknavigator.mvp.model.dao.ResourceId
 import space.taran.arknavigator.mvp.model.dao.computeId
-import space.taran.arknavigator.mvp.model.repo.extra.GifMetaExtra
+import space.taran.arknavigator.mvp.model.repo.extra.AnimationMetaExtra
 import space.taran.arknavigator.mvp.model.repo.extra.ImageMetaExtra
-import space.taran.arknavigator.mvp.model.repo.extra.PdfMetaExtra
+import space.taran.arknavigator.mvp.model.repo.extra.DocumentMetaExtra
 import space.taran.arknavigator.mvp.model.repo.extra.VideoMetaExtra
-import space.taran.arknavigator.utils.isFormat
-import space.taran.arknavigator.utils.isImage
-import space.taran.arknavigator.utils.isVideo
+import space.taran.arknavigator.utils.extension
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -44,24 +42,23 @@ data class ResourceMeta(
 }
 
 enum class ResourceType {
-    IMAGE, VIDEO, GIF, PDF
+    IMAGE, VIDEO, ANIMATION, DOCUMENT
 }
 
 abstract class ResourceMetaExtra(val type: ResourceType) {
-
     companion object {
         fun provide(filePath: Path): ResourceMetaExtra? {
-            return when {
-                isImage(filePath) -> ImageMetaExtra()
-                isVideo(filePath) -> VideoMetaExtra()
-                isFormat(filePath, "pdf") -> PdfMetaExtra()
-                isFormat(filePath, "gif") -> GifMetaExtra()
+            return when(extension(filePath)) {
+                in ImageMetaExtra.ACCEPTED_EXTENSIONS -> ImageMetaExtra()
+                in VideoMetaExtra.ACCEPTED_EXTENSIONS -> VideoMetaExtra()
+                in DocumentMetaExtra.ACCEPTED_EXTENSIONS -> DocumentMetaExtra()
+                in AnimationMetaExtra.ACCEPTED_EXTENSIONS -> AnimationMetaExtra()
                 else -> null
             }
         }
 
         fun fromRoom(room: ResourceExtra): ResourceMetaExtra {
-            throw NotImplementedError()
+            TODO()
         }
     }
 

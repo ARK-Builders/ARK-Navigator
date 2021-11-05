@@ -35,7 +35,11 @@ class FileItemViewHolder(private val binding: ItemFileGridBinding) :
 
         val preview = Preview.provide(path, meta)
 
-        previewsRepo.loadPreview(binding.iv, preview, meta.extra, true)
+        previewsRepo.loadPreview(
+            targetView = binding.iv,
+            preview = preview,
+            extraMeta = meta.extra,
+            centerCrop = true)
 
         //todo make it more generic
         if (meta.extra != null) {

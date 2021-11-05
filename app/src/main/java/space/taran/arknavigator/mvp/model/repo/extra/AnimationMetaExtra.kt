@@ -5,12 +5,15 @@ import space.taran.arknavigator.mvp.model.repo.ExtraInfoTag
 import space.taran.arknavigator.mvp.model.repo.ResourceMetaExtra
 import space.taran.arknavigator.mvp.model.repo.ResourceType
 
-class PdfMetaExtra: ResourceMetaExtra(ResourceType.PDF) {
-    override val data: MutableMap<ExtraInfoTag, String> =
-        //TODO: PR #33
-        mutableMapOf()
+class AnimationMetaExtra: ResourceMetaExtra(ResourceType.ANIMATION) {
+    override val data = mapOf<ExtraInfoTag, String>()
 
     override fun toRoom(): ResourceExtra {
         TODO("Not yet implemented")
+    }
+
+    companion object {
+        val ACCEPTED_EXTENSIONS: Set<String> =
+            setOf("gif")
     }
 }

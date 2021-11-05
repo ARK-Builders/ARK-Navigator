@@ -11,4 +11,9 @@ class ImageMetaExtra: ResourceMetaExtra(ResourceType.IMAGE) {
     override fun toRoom(): ResourceExtra {
         TODO("Not yet implemented")
     }
+
+    companion object {
+        val ACCEPTED_EXTENSIONS: Set<String> =
+            setOf("jpg", "jpeg", "png")
+    }
 }
