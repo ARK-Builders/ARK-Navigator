@@ -150,16 +150,16 @@ data class PreviewAndThumbnail(val preview: Path, val thumbnail: Path) {
     private class ThumbnailTarget(val emit: (Bitmap) -> Unit)
         : CustomTarget<Bitmap>(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT) {
 
-        override fun onResourceReady(bitmap: Bitmap,transition: Transition<in Bitmap>?) {
-            emit(bitmap)
-        }
-
         override fun onLoadCleared(placeholder: Drawable?) {
             throw AssertionError("Must not be cancelled")
         }
 
         override fun onLoadFailed(errorDrawable: Drawable?) {
             Log.e(PREVIEWS, "Thumbnail loading failed")
+        }
+
+        override fun onResourceReady(bitmap: Bitmap,transition: Transition<in Bitmap>?) {
+            emit(bitmap)
         }
     }
 }

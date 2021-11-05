@@ -4,6 +4,7 @@ import space.taran.arknavigator.databinding.DialogRootsNewBinding
 import space.taran.arknavigator.mvp.presenter.adapter.FoldersWalker
 import space.taran.arknavigator.mvp.presenter.adapter.ItemClickHandler
 import space.taran.arknavigator.ui.App
+import space.taran.arknavigator.utils.listChildren
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.ExperimentalPathApi
@@ -32,20 +33,11 @@ class FolderPicker(
     }
 
     fun updatePath(path: Path) {
-        val grouped = path
-            .listDirectoryEntries()
-            .groupBy { Files.isDirectory(it) }
-
-        val directories = grouped[true]?.sorted()
-        val files = grouped[false]?.sorted()
+        val (directories, files) = listChildren(path)
 
         val children = mutableListOf<Path>()
-        if (directories != null) {
-            children.addAll(directories)
-        }
-        if (files != null) {
-            children.addAll(files)
-        }
+        children.addAll(directories.sorted())
+        children.addAll(files.sorted())
 
         this.updateItems(path, children)
 
