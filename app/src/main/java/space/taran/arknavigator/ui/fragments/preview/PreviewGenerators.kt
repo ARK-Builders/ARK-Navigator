@@ -6,7 +6,7 @@ import java.nio.file.Path
 
 object PreviewGenerators {
     var BY_EXT: Map<String, (Path) -> Bitmap> = mapOf(
-        "gif" to { path: Path -> PdfPreviewGenerator.generate(path) }
+        "pdf" to { path: Path -> PdfPreviewGenerator.generate(path) }
         //todo moar
     )
 }

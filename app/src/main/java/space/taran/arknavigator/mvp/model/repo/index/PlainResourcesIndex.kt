@@ -1,5 +1,6 @@
 package space.taran.arknavigator.mvp.model.repo.index
 
+import android.os.FileUtils
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -179,10 +180,7 @@ class PlainResourcesIndex internal constructor (
                 .mapKeys { (path, _) -> Paths.get(path) }
 
         internal suspend fun listAllFiles(folder: Path): List<Path> = withContext(Dispatchers.IO) {
-            val (directories, files) = folder
-                .listDirectoryEntries()
-                .filter { !isHidden(it) }
-                .partition { Files.isDirectory(it) }
+            val (directories, files) = listChildren(folder)
 
             return@withContext files + directories.flatMap {
                 listAllFiles(it)
