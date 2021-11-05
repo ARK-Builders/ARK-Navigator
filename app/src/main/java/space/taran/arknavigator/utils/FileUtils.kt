@@ -1,8 +1,5 @@
 package space.taran.arknavigator.utils
 
-import space.taran.arknavigator.mvp.model.repo.extra.DocumentMetaExtra
-import space.taran.arknavigator.mvp.model.repo.extra.ImageMetaExtra
-import space.taran.arknavigator.mvp.model.repo.extra.VideoMetaExtra
 import space.taran.arknavigator.ui.App
 import java.lang.IllegalArgumentException
 import java.nio.file.Files
@@ -19,20 +16,6 @@ typealias StringPath = String
 
 enum class Sorting {
     DEFAULT, NAME, SIZE, LAST_MODIFIED, TYPE
-}
-
-enum class FileActionType {
-    EDIT_AS_OPEN, EDIT_AND_OPEN, OPEN_ONLY, OPEN_ONLY_DETACH_PROCESS
-}
-
-fun getFileActionType(filePath: Path): FileActionType {
-    return when (extension(filePath)) {
-        "pdf" -> FileActionType.EDIT_AND_OPEN
-        in ImageMetaExtra.ACCEPTED_EXTENSIONS -> FileActionType.EDIT_AS_OPEN
-        in DocumentMetaExtra.ACCEPTED_EXTENSIONS -> FileActionType.EDIT_AS_OPEN
-        in VideoMetaExtra.ACCEPTED_EXTENSIONS -> FileActionType.OPEN_ONLY_DETACH_PROCESS
-        else -> FileActionType.OPEN_ONLY
-    }
 }
 
 fun isHidden(path: Path): Boolean =

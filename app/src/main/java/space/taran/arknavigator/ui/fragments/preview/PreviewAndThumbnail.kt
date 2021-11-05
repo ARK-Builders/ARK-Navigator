@@ -5,8 +5,8 @@ import android.graphics.drawable.Drawable
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
-import space.taran.arknavigator.mvp.model.dao.ResourceId
-import space.taran.arknavigator.mvp.model.repo.ResourceMeta
+import space.taran.arknavigator.mvp.model.repo.index.ResourceId
+import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.extra.ImageMetaExtra
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.utils.extension
@@ -39,9 +39,8 @@ data class PreviewAndThumbnail(val preview: Path, val thumbnail: Path) {
             Files.createDirectory(THUMBNAILS_STORAGE)
         }
 
-        //todo: use index
-        fun locate(path: Path, meta: ResourceMeta): PreviewAndThumbnail? {
-            val thumbnail = thumbnailPath(meta.id)
+        fun locate(path: Path, resource: ResourceMeta): PreviewAndThumbnail? {
+            val thumbnail = thumbnailPath(resource.id)
             if (!Files.exists(thumbnail)) {
                 //means that we couldn't generate anything for this kind of resource
                 return null
@@ -54,7 +53,7 @@ data class PreviewAndThumbnail(val preview: Path, val thumbnail: Path) {
             }
 
             return PreviewAndThumbnail(
-                preview = previewPath(meta.id),
+                preview = previewPath(resource.id),
                 thumbnail = thumbnail)
         }
 

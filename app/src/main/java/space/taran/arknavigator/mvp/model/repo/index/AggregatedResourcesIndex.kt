@@ -1,6 +1,6 @@
-package space.taran.arknavigator.mvp.model.repo
+package space.taran.arknavigator.mvp.model.repo.index
 
-import space.taran.arknavigator.mvp.model.dao.ResourceId
+import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import java.lang.AssertionError
 import java.nio.file.Path
 

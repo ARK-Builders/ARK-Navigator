@@ -6,10 +6,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.mvp.model.UserPreferences
-import space.taran.arknavigator.mvp.model.dao.ResourceId
-import space.taran.arknavigator.mvp.model.repo.ResourceMeta
-import space.taran.arknavigator.mvp.model.repo.ResourcesIndex
-import space.taran.arknavigator.mvp.model.repo.TagsStorage
+import space.taran.arknavigator.mvp.model.repo.index.ResourceId
+import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
+import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
+import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.mvp.view.item.FileItemView
 import space.taran.arknavigator.navigation.Screens

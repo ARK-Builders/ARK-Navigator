@@ -1,12 +1,12 @@
-package space.taran.arknavigator.mvp.model.repo
+package space.taran.arknavigator.mvp.model.repo.index
 
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import space.taran.arknavigator.mvp.model.dao.ResourceDao
-import space.taran.arknavigator.mvp.model.repo.PlainResourcesIndex.Companion.groupResources
-import space.taran.arknavigator.mvp.model.repo.PlainResourcesIndex.Companion.listAllFiles
-import space.taran.arknavigator.mvp.model.repo.PlainResourcesIndex.Companion.scanResources
+import space.taran.arknavigator.mvp.model.repo.index.PlainResourcesIndex.Companion.loadResources
+import space.taran.arknavigator.mvp.model.repo.index.PlainResourcesIndex.Companion.listAllFiles
+import space.taran.arknavigator.mvp.model.repo.index.PlainResourcesIndex.Companion.scanResources
 import space.taran.arknavigator.utils.RESOURCES_INDEX
 import java.nio.file.Path
 import kotlin.system.measureTimeMillis
@@ -21,7 +21,7 @@ class ResourcesIndexFactory(
 
         Log.d(RESOURCES_INDEX, "${resources.size} resources retrieved from DB")
 
-        val index = PlainResourcesIndex(root, dao, groupResources(resources))
+        val index = PlainResourcesIndex(root, dao, loadResources(resources))
         Log.d(RESOURCES_INDEX, "index created")
 
         index.reindexRoot(index.calculateDifference())

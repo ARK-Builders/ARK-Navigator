@@ -1,11 +1,11 @@
-package space.taran.arknavigator.mvp.model.repo
+package space.taran.arknavigator.mvp.model.repo.index
 
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import space.taran.arknavigator.mvp.model.dao.Resource
 import space.taran.arknavigator.mvp.model.dao.ResourceDao
-import space.taran.arknavigator.mvp.model.dao.ResourceId
+import space.taran.arknavigator.mvp.model.dao.ResourceWithExtra
 import space.taran.arknavigator.ui.fragments.preview.PreviewAndThumbnail
 import space.taran.arknavigator.utils.*
 import java.nio.file.Files
@@ -152,7 +152,7 @@ class PlainResourcesIndex internal constructor (
                 Resource.fromMeta(it.value, root, it.key)
             }
 
-        dao.insertAll(entities)
+        dao.insertResources(entities)
 
         Log.d(RESOURCES_INDEX, "${entities.size} resources persisted")
     }
@@ -166,9 +166,9 @@ class PlainResourcesIndex internal constructor (
                 }.toMap()
             }
 
-        internal fun groupResources(resources: List<Resource>): Map<Path, ResourceMeta> =
+        internal fun loadResources(resources: List<ResourceWithExtra>): Map<Path, ResourceMeta> =
             resources
-                .groupBy { resource -> resource.path }
+                .groupBy { room -> room.resource.path }
                 .mapValues { (_, resources) ->
                     if (resources.size > 1) {
                         throw IllegalStateException("Index must not have" +

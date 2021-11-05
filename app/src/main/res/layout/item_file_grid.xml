@@ -42,7 +42,7 @@
                     app:tint="@color/colorPrimary" />
 
                 <TextView
-                    android:id="@+id/durationTV"
+                    android:id="@+id/primary_extra"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
@@ -58,7 +58,7 @@
                     tools:text="00:25" />
 
                 <TextView
-                    android:id="@+id/resolutionTV"
+                    android:id="@+id/secondary_extra"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="@drawable/bg_rounded_black_transparent_small"

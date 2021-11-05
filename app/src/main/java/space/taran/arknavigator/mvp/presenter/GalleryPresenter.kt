@@ -6,8 +6,11 @@ import kotlinx.coroutines.launch
 import moxy.MvpPresenter
 import moxy.presenterScope
 import ru.terrakok.cicerone.Router
-import space.taran.arknavigator.mvp.model.dao.ResourceId
-import space.taran.arknavigator.mvp.model.repo.*
+import space.taran.arknavigator.mvp.model.repo.index.ResourceId
+import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
+import space.taran.arknavigator.mvp.model.repo.index.ResourceMetaExtra
+import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
+import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
 import space.taran.arknavigator.mvp.view.GalleryView
 import space.taran.arknavigator.mvp.view.item.PreviewItemView
@@ -31,31 +34,25 @@ class GalleryPresenter(
     @Inject
     lateinit var router: Router
 
-    private lateinit var extras: List<ResourceMetaExtra?>
-
     override fun onFirstViewAttach() {
         Log.d(GALLERY_SCREEN, "first view attached in GalleryPresenter")
 
         val previews = mutableListOf<Path?>()
         val placeholders = mutableListOf<Int>()
-        val extras = mutableListOf<ResourceMetaExtra?>()
 
         resources.forEach { meta ->
             val path = index.getPath(meta.id)
 
             previews.add(PreviewAndThumbnail.locate(path, meta)?.preview)
             placeholders.add(ImageUtils.iconForExtension(extension(path)))
-            extras.add(meta.extra)
         }
-
-        this.extras = extras
 
         super.onFirstViewAttach()
 
         viewState.init(PreviewsList(
             previews,
             placeholders,
-            extras,
+            resources,
             ::onPreviewsItemClick,
             ::onPreviewsItemZoom,
             ::onPlayButtonClick
@@ -82,9 +79,6 @@ class GalleryPresenter(
         Log.d(GALLERY_SCREEN, "tags $tags set to $resource")
         storage.setTags(resource, tags)
     }
-
-    fun getExtraAt(position: Int): ResourceMetaExtra? =
-        extras[position]
 
     fun onSystemUIVisibilityChange(isVisible: Boolean) {
         val newFullscreen = !isVisible

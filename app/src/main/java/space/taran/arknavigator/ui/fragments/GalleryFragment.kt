@@ -18,8 +18,11 @@ import space.taran.arknavigator.BuildConfig
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.DialogTagsBinding
 import space.taran.arknavigator.databinding.FragmentGalleryBinding
-import space.taran.arknavigator.mvp.model.dao.ResourceId
 import space.taran.arknavigator.mvp.model.repo.*
+import space.taran.arknavigator.mvp.model.repo.extra.DocumentMetaExtra
+import space.taran.arknavigator.mvp.model.repo.extra.VideoMetaExtra
+import space.taran.arknavigator.mvp.model.repo.index.*
+import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
 import space.taran.arknavigator.mvp.view.GalleryView
@@ -209,32 +212,24 @@ class GalleryFragment(
             openResourceFab.setOnClickListener(null)
             editResourceFab.setOnClickListener(null)
 
-            val resource = resources[currentPosition]
-            val filePath = index.getPath(resource.id)
-
-            when (getFileActionType(filePath)) {
-                FileActionType.OPEN_ONLY -> {
-                    editResourceFab.makeGone()
-                    openResourceFab.makeVisibleAndSetOnClickListener{
-                        openIntentChooser(currentPosition, Intent.ACTION_VIEW)
-                    }
-                }
-                FileActionType.OPEN_ONLY_DETACH_PROCESS -> {
-                    //todo test it
+            when(resources[currentPosition].kind) {
+                ResourceKind.VIDEO -> {
+                    // "open" capabilities only
                     editResourceFab.makeGone()
                     openResourceFab.makeVisibleAndSetOnClickListener{
                         openIntentChooser(currentPosition, Intent.ACTION_VIEW, true)
                     }
                 }
-                FileActionType.EDIT_AND_OPEN -> {
+                ResourceKind.DOCUMENT -> {
+                    // both "open" and "edit" capabilities
                     editResourceFab.makeVisibleAndSetOnClickListener {
                         openIntentChooser(currentPosition, Intent.ACTION_EDIT) }
 
                     openResourceFab.makeVisibleAndSetOnClickListener {
                         openIntentChooser(currentPosition, Intent.ACTION_VIEW, true) }
                 }
-
-                FileActionType.EDIT_AS_OPEN -> {
+                ResourceKind.IMAGE -> {
+                    // "edit" capabilities only
                     openResourceFab.makeGone()
                     editResourceFab.makeVisibleAndSetOnClickListener {
                         openIntentChooser(currentPosition, Intent.ACTION_EDIT) }
@@ -320,15 +315,11 @@ class GalleryFragment(
         val filePath = index.getPath(resource.id)
         setTitle(filePath.fileName.toString())
 
-        val extra = presenter.getExtraAt(position)
-        //todo make it more generic
-        if (extra != null) {
-            binding.resolutionTV.textOrGone(extra.data[ExtraInfoTag.MEDIA_RESOLUTION])
-            binding.durationTV.textOrGone(extra.data[ExtraInfoTag.MEDIA_DURATION])
-        } else {
-            binding.resolutionTV.makeGone()
-            binding.durationTV.makeGone()
-        }
+        ResourceMetaExtra.draw(
+            resource.kind,
+            resource.extra,
+            arrayOf(binding.primaryExtra, binding.secondaryExtra),
+            verbose = true)
     }
 
     private fun displayDialogTags(resource: ResourceId, tags: Tags) {
