@@ -55,18 +55,16 @@ class ResourcesPresenter(
 
             Notifications.notifyIfFailedPaths(viewState, folders.failed)
 
-            val roots: List<Path> = {
-                val all = folders.succeeded.keys
-                if (root != null) {
-                    if (!all.contains(root)) {
-                        throw AssertionError("Requested root wasn't found in DB")
-                    }
-
-                    listOf(root)
-                } else {
-                    all.toList()
+            val all = folders.succeeded.keys
+            val roots: List<Path> = if (root != null) {
+                if (!all.contains(root)) {
+                    throw AssertionError("Requested root wasn't found in DB")
                 }
-            }()
+
+                listOf(root)
+            } else {
+                all.toList()
+            }
             Log.d(RESOURCES_SCREEN, "using roots $roots")
 
             val rootToIndex = roots
@@ -96,10 +94,8 @@ class ResourcesPresenter(
             tagsSelectorPresenter.init(index, storage)
             tagsSelectorPresenter.calculateTagsAndSelection()
 
-            val title = {
-                val path = (prefix ?: root)
-                if (path != null) "$path, " else ""
-            }()
+            val path = (prefix ?: root)
+            val title = if (path != null) "$path, " else ""
 
             viewState.setToolbarTitle("$title${roots.size} of roots chosen")
             viewState.setProgressVisibility(false)
@@ -114,7 +110,7 @@ class ResourcesPresenter(
     fun onViewResume() {
         tagsSelectorPresenter.calculateTagsAndSelection()
         if (!tagsEnabled)
-            presenterScope.launch { gridPresenter.resetResources(listResources(untagged = true)) }
+            presenterScope.launch { gridPresenter.resetResources(listResources(untaggedOnly = true)) }
     }
 
     fun onMenuTagsToggle(enabled: Boolean) {
@@ -126,10 +122,11 @@ class ResourcesPresenter(
                 gridPresenter.resetResources(listResources())
                 gridPresenter.updateSelection(tagsSelectorPresenter.selection)
             } else
-                gridPresenter.resetResources(listResources(untagged = true))
+                gridPresenter.resetResources(listResources(untaggedOnly = true))
         }
 
-        if (tagsEnabled && storage.getTags(listResources()).isEmpty()) {
+        val ids = listResources().map { it.id }
+        if (tagsEnabled && storage.getTags(ids).isEmpty()) {
             viewState.notifyUser("Tag something first")
         }
     }
@@ -153,18 +150,17 @@ class ResourcesPresenter(
         presenterScope.launch { gridPresenter.updateSelection(selection) }
     }
 
-    private fun listResources(untagged: Boolean = false): Set<ResourceId> {
-        val underPrefix = index.listIds(prefix)
+    private fun listResources(untaggedOnly: Boolean = false): Set<ResourceMeta> {
+        val underPrefix = index.listResources(prefix)
 
-        val result = if (untagged) {
-            storage
-                .listUntaggedResources()
-                .intersect(underPrefix)
+        val result = if (untaggedOnly) {
+            val untagged = storage.listUntaggedResources()
+            underPrefix.filter { untagged.contains(it.id) }
         } else {
             underPrefix
         }
 
         viewState.notifyUser("${result.size} resources selected")
-        return result
+        return result.toSet()
     }
 }

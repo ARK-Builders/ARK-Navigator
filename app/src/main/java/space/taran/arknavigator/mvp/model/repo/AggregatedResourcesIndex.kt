@@ -8,8 +8,8 @@ class AggregatedResourcesIndex(
     private val shards: Collection<PlainResourcesIndex>)
     : ResourcesIndex {
 
-    override fun listIds(prefix: Path?): Set<ResourceId> =
-        shards.flatMap { it.listIds(prefix) }
+    override fun listResources(prefix: Path?): Set<ResourceMeta> =
+        shards.flatMap { it.listResources(prefix) }
             .toSet()
 
     override fun getPath(id: ResourceId): Path =

@@ -2,12 +2,12 @@ package space.taran.arknavigator.utils
 
 import android.media.MediaMetadataRetriever
 import android.net.Uri
+import space.taran.arknavigator.mvp.model.repo.ExtraInfoTag
 import space.taran.arknavigator.ui.App
-import space.taran.arknavigator.ui.fragments.utils.Preview
 import java.nio.file.Path
 import java.util.concurrent.TimeUnit
 
-fun getVideoInfo(filePath: Path?): MutableMap<Preview.ExtraInfoTag, String> {
+fun getVideoInfo(filePath: Path?): Map<ExtraInfoTag, String> {
     val retriever = MediaMetadataRetriever()
 
     retriever.setDataSource(App.instance, Uri.fromFile(filePath?.toFile()))
@@ -30,14 +30,14 @@ fun getVideoInfo(filePath: Path?): MutableMap<Preview.ExtraInfoTag, String> {
     val duration = "$minutes:$seconds"
     val resolution = qualityTextCode(width, height)
 
-    val mutableMap = mutableMapOf<Preview.ExtraInfoTag, String>()
-    mutableMap[Preview.ExtraInfoTag.MEDIA_DURATION] = duration
+    val result = mutableMapOf<ExtraInfoTag, String>()
+    result[ExtraInfoTag.MEDIA_DURATION] = duration
 
     if (resolution != null)
-        mutableMap[Preview.ExtraInfoTag.MEDIA_RESOLUTION] = resolution
+        result[ExtraInfoTag.MEDIA_RESOLUTION] = resolution
 
     retriever.release()
-    return mutableMap
+    return result
 }
 
 fun qualityTextCode(width: Long, height: Long): String? {

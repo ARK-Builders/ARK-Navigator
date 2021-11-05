@@ -8,13 +8,16 @@ import moxy.presenterScope
 import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.mvp.model.dao.ResourceId
 import space.taran.arknavigator.mvp.model.repo.*
-import space.taran.arknavigator.ui.fragments.utils.Preview
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
 import space.taran.arknavigator.mvp.view.GalleryView
 import space.taran.arknavigator.mvp.view.item.PreviewItemView
+import space.taran.arknavigator.ui.fragments.preview.PreviewAndThumbnail
 import space.taran.arknavigator.utils.GALLERY_SCREEN
+import space.taran.arknavigator.utils.ImageUtils
 import space.taran.arknavigator.utils.Tags
+import space.taran.arknavigator.utils.extension
 import java.nio.file.Files
+import java.nio.file.Path
 import javax.inject.Inject
 
 class GalleryPresenter(
@@ -28,31 +31,31 @@ class GalleryPresenter(
     @Inject
     lateinit var router: Router
 
-    private lateinit var previews: List<Preview>
     private lateinit var extras: List<ResourceMetaExtra?>
 
     override fun onFirstViewAttach() {
         Log.d(GALLERY_SCREEN, "first view attached in GalleryPresenter")
 
-        //todo rename
-        val _previews = mutableListOf<Preview>()
-        val _extras = mutableListOf<ResourceMetaExtra?>()
+        val previews = mutableListOf<Path?>()
+        val placeholders = mutableListOf<Int>()
+        val extras = mutableListOf<ResourceMetaExtra?>()
 
         resources.forEach { meta ->
             val path = index.getPath(meta.id)
 
-            _previews.add(Preview.provide(path, meta))
-            _extras.add(meta.extra)
+            previews.add(PreviewAndThumbnail.locate(path, meta)?.preview)
+            placeholders.add(ImageUtils.iconForExtension(extension(path)))
+            extras.add(meta.extra)
         }
 
-        previews = _previews.toList()
-        extras = _extras.toList()
+        this.extras = extras
 
         super.onFirstViewAttach()
 
         viewState.init(PreviewsList(
-            previews.toList(),
-            extras.toList(),
+            previews,
+            placeholders,
+            extras,
             ::onPreviewsItemClick,
             ::onPreviewsItemZoom,
             ::onPlayButtonClick

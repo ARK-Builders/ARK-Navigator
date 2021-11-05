@@ -40,18 +40,16 @@ class PlainResourcesIndex internal constructor (
         .toMap()
         .toMutableMap()
 
-    override fun listIds(prefix: Path?): Set<ResourceId> {
-        val ids = if (prefix != null) {
+    override fun listResources(prefix: Path?): Set<ResourceMeta> {
+        val metas = if (prefix != null) {
             metaByPath.filterKeys { it.startsWith(prefix) }
         } else {
             metaByPath
         }
         .values
-        .map { it.id }
 
-        Log.d(RESOURCES_INDEX, "${ids.size} of ids returned, " +
-            "checksum is ${ids.foldRight(0L, { id, acc -> acc + id })}")
-        return ids.toSet()
+        Log.d(RESOURCES_INDEX, "${metas.size} resources returned")
+        return metas.toSet()
     }
 
     override fun getPath(id: ResourceId): Path = tryGetPath(id)!!

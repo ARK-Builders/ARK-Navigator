@@ -33,7 +33,6 @@ import space.taran.arknavigator.utils.extensions.makeGone
 import space.taran.arknavigator.utils.extensions.makeVisibleAndSetOnClickListener
 import space.taran.arknavigator.utils.extensions.textOrGone
 import java.io.File
-import javax.inject.Inject
 
 class GalleryFragment(
     private val index: ResourcesIndex,
@@ -52,9 +51,6 @@ class GalleryFragment(
             App.instance.appComponent.inject(this)
         }
     }
-
-    @Inject
-    lateinit var previewsRepo: PreviewsRepo
 
     private lateinit var pagerAdapter: PreviewsPager
 
@@ -210,38 +206,37 @@ class GalleryFragment(
         val currentPosition = binding.viewPager.currentItem
 
         binding.apply {
-            openResourceChooserFab.setOnClickListener(null)
-            openFileEditFab.setOnClickListener(null)
+            openResourceFab.setOnClickListener(null)
+            editResourceFab.setOnClickListener(null)
 
             val resource = resources[currentPosition]
             val filePath = index.getPath(resource.id)
 
-            when (getFileActionType(filePath!!)) {
+            when (getFileActionType(filePath)) {
                 FileActionType.OPEN_ONLY -> {
-                    openFileEditFab.makeGone()
-                    openResourceChooserFab.makeVisibleAndSetOnClickListener{
+                    editResourceFab.makeGone()
+                    openResourceFab.makeVisibleAndSetOnClickListener{
                         openIntentChooser(currentPosition, Intent.ACTION_VIEW)
                     }
                 }
                 FileActionType.OPEN_ONLY_DETACH_PROCESS -> {
-                    //todo remove after thorough testing
-                    openFileEditFab.makeGone()
-                    openResourceChooserFab.makeGone()
-//                    openResourceChooserFab.makeVisibleAndSetOnClickListener{
-//                        openIntentChooser(currentPosition, Intent.ACTION_VIEW, true)
-//                    }
+                    //todo test it
+                    editResourceFab.makeGone()
+                    openResourceFab.makeVisibleAndSetOnClickListener{
+                        openIntentChooser(currentPosition, Intent.ACTION_VIEW, true)
+                    }
                 }
                 FileActionType.EDIT_AND_OPEN -> {
-                    openFileEditFab.makeVisibleAndSetOnClickListener {
+                    editResourceFab.makeVisibleAndSetOnClickListener {
                         openIntentChooser(currentPosition, Intent.ACTION_EDIT) }
 
-                    openResourceChooserFab.makeVisibleAndSetOnClickListener {
+                    openResourceFab.makeVisibleAndSetOnClickListener {
                         openIntentChooser(currentPosition, Intent.ACTION_VIEW, true) }
                 }
 
                 FileActionType.EDIT_AS_OPEN -> {
-                    openResourceChooserFab.makeGone()
-                    openFileEditFab.makeVisibleAndSetOnClickListener {
+                    openResourceFab.makeGone()
+                    editResourceFab.makeVisibleAndSetOnClickListener {
                         openIntentChooser(currentPosition, Intent.ACTION_EDIT) }
                 }
             }

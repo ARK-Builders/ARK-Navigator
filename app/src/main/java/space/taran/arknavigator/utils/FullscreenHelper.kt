@@ -8,7 +8,7 @@ object FullscreenHelper {
         if (isVisible) showSystemUI(window) else hideSystemUI(window)
     }
 
-    fun hideSystemUI(window: Window) {
+    private fun hideSystemUI(window: Window) {
         window.decorView.systemUiVisibility =
             (View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                     or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
@@ -17,7 +17,7 @@ object FullscreenHelper {
                     or View.SYSTEM_UI_FLAG_FULLSCREEN)
     }
 
-    fun showSystemUI(window: Window) {
+    private fun showSystemUI(window: Window) {
         window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
     }
 }

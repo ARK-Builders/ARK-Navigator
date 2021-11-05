@@ -96,7 +96,7 @@
             android:orientation="horizontal">
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/open_file_edit_fab"
+                android:id="@+id/edit_resource_fab"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/colorPrimary"
@@ -106,7 +106,7 @@
                 app:tint="@color/white" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/open_resource_chooser_fab"
+                android:id="@+id/open_resource_fab"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"

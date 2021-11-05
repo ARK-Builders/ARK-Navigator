@@ -4,13 +4,12 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.ortiz.touchview.OnTouchImageViewListener
 import space.taran.arknavigator.databinding.ItemImageBinding
-import space.taran.arknavigator.mvp.model.repo.PreviewsRepo
 import space.taran.arknavigator.mvp.model.repo.ResourceMetaExtra
 import space.taran.arknavigator.mvp.model.repo.ResourceType
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
-import space.taran.arknavigator.ui.fragments.utils.Preview
+import space.taran.arknavigator.utils.ImageUtils
 import space.taran.arknavigator.utils.extensions.makeVisibleAndSetOnClickListener
-import javax.inject.Inject
+import java.nio.file.Path
 
 class PreviewItemViewHolder(val binding: ItemImageBinding, val presenter: PreviewsList) :
     RecyclerView.ViewHolder(binding.root),
@@ -18,17 +17,10 @@ class PreviewItemViewHolder(val binding: ItemImageBinding, val presenter: Previe
 
     override var pos = -1
 
-    @Inject
-    lateinit var previewsRepo: PreviewsRepo
-
-    override fun setSource(preview: Preview, extra: ResourceMetaExtra?) {
+    override fun setSource(preview: Path?, placeholder: Int, extra: ResourceMetaExtra?) {
         binding.layoutProgress.root.isVisible = false
-        previewsRepo.loadPreview(
-            targetView = binding.ivImage,
-            preview = preview,
-            extraMeta = extra,
-            centerCrop = false
-        )
+
+        ImageUtils.loadImageWithPlaceholder(preview, placeholder, binding.ivImage)
 
         if (extra?.type != ResourceType.VIDEO){
             binding.icPlay.makeVisibleAndSetOnClickListener {
