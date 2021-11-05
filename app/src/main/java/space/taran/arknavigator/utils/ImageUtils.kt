@@ -31,7 +31,7 @@ object ImageUtils {
         view.autoDisposeScope.launch {
             withContext(Dispatchers.Main) {
                 Glide.with(view.context)
-                    .load(image)
+                    .load(image?.toFile())
                     .placeholder(placeHolder)
                     .transition(DrawableTransitionOptions.withCrossFade())
                     .into(object : CustomTarget<Drawable>() {

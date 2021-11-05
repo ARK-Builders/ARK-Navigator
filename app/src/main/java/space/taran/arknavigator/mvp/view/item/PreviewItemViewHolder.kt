@@ -22,7 +22,7 @@ class PreviewItemViewHolder(val binding: ItemImageBinding, val presenter: Previe
 
         ImageUtils.loadImageWithPlaceholder(preview, placeholder, binding.ivImage)
 
-        if (resource.kind != ResourceKind.VIDEO){
+        if (resource.kind == ResourceKind.VIDEO){
             binding.icPlay.makeVisibleAndSetOnClickListener {
                 presenter.onPlayButtonCLick(pos)
             }

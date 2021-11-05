@@ -35,6 +35,7 @@ object VideoMetaExtra {
 
         retriever.release()
         if (result.isEmpty()) {
+            TODO()
             return null
         }
 
@@ -62,7 +63,18 @@ object VideoMetaExtra {
         val minutes = seconds / 60
         val hours = minutes / 60
 
-        return "$hours:${minutes % 60}:${seconds % 60}"
+        fun toText(n: Long): String =
+            when {
+                n <= 0 -> ""
+                n < 10 -> "0$n"
+                else -> "$n"
+            }
+
+        val minAndSec = "${toText(minutes % 60)}:${toText(seconds % 60)}"
+        if (hours > 0) {
+            return "${toText(hours)}:$minAndSec"
+        }
+        return minAndSec
     }
 
     private fun qualityTextCode(width: Int, height: Int): String {
