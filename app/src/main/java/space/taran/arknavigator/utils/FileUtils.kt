@@ -6,6 +6,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.io.path.extension
+import kotlin.io.path.listDirectoryEntries
 
 val ROOT_PATH: Path = Paths.get("/")
 
@@ -17,9 +18,6 @@ typealias StringPath = String
 enum class Sorting {
     DEFAULT, NAME, SIZE, LAST_MODIFIED, TYPE
 }
-
-fun isHidden(path: Path): Boolean =
-    path.fileName.toString().startsWith('.')
 
 fun folderExists(path: Path): Boolean =
     Files.exists(path) || Files.isDirectory(path)
@@ -37,6 +35,11 @@ fun listDevices(): List<Path> =
                     parent.resolve(child)
                 }
         }
+
+fun listChildren(folder: Path): Pair<List<Path>, List<Path>> = folder
+    .listDirectoryEntries()
+    .filter { !Files.isHidden(it) }
+    .partition { Files.isDirectory(it) }
 
 fun findLongestCommonPrefix(paths: List<Path>): Path {
     if (paths.isEmpty()) {
@@ -67,7 +70,7 @@ fun extension(path: Path): String {
     return path.extension.lowercase()
 }
 
-//todo use meta extra
+//todo use metadata
 fun reifySorting(sorting: Sorting): Comparator<Path>? =
     when (sorting) {
         Sorting.NAME -> compareBy { it.fileName }
