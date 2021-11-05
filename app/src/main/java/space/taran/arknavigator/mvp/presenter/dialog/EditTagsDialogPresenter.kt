@@ -8,7 +8,6 @@ import space.taran.arknavigator.mvp.model.repo.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.TagsStorage
 import space.taran.arknavigator.mvp.view.dialog.EditTagsDialogView
 import space.taran.arknavigator.utils.*
-import space.taran.arknavigator.utils.Converters.Companion.tagsListFromString
 
 class EditTagsDialogPresenter(
     private val resourceId: ResourceId,
@@ -21,16 +20,20 @@ class EditTagsDialogPresenter(
 
     override fun onFirstViewAttach() {
         viewState.init()
-        viewState.setResourceTags(storage.getTags(resourceId))
-        viewState.setRootTags(listRootTags())
+        viewState.setResourceTags(listResourceTags())
+        viewState.setQuickTags(listQuickTags())
+    }
+
+    fun onInputChanged(input: String) {
+        filter = findLastTagInString(input)
+        viewState.setQuickTags(listQuickTags())
     }
 
     fun onInputDone(input: String) = presenterScope.launch {
-        val inputTags = Converters.tagsFromString(input, strict = false)
+        val inputTags = Converters.tagsFromString(input)
         if (inputTags.isEmpty()) return@launch
 
-        val tags = storage.getTags(resourceId)
-        val newTags = tags + inputTags
+        val newTags = listResourceTags() + inputTags
         storage.setTags(resourceId, newTags)
 
         updateTags()
@@ -44,35 +47,25 @@ class EditTagsDialogPresenter(
         updateTags()
     }
 
-    fun onRootTagClick(tag: Tag) = presenterScope.launch  {
+    fun onQuickTagClick(tag: Tag) = presenterScope.launch  {
         val newTags = listResourceTags() + tag
         storage.setTags(resourceId, newTags)
 
         updateTags()
     }
 
-    fun onInputChanged(input: String) {
-        if (input.isEmpty()) {
-            //this handler is called also when we reset input
-            return
-        }
-
-        filter = tagsListFromString(input, strict = false).last()
-        viewState.setRootTags(listRootTags())
-    }
-
     private fun updateTags() {
         viewState.setResourceTags(listResourceTags())
-        viewState.setRootTags(listRootTags())
+        viewState.setQuickTags(listQuickTags())
         onTagsChangedListener(resourceId)
     }
 
-    private fun listRootTags(): List<Tag> {
+    private fun listQuickTags(): List<Tag> {
         val allTags = storage.groupTagsByResources(index.listAllIds())
             .values
             .flatten()
         val popularity = Popularity.calculate(allTags)
-        val result = (popularity.keys - storage.getTags(resourceId))
+        val result = (popularity.keys - listResourceTags())
             .filter {
                 tag -> tag.startsWith(filter, true)
             }
