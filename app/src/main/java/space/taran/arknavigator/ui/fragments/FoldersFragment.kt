@@ -16,7 +16,6 @@ import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.DialogRootsNewBinding
 import space.taran.arknavigator.databinding.FragmentFoldersBinding
-import space.taran.arknavigator.mvp.model.repo.Folders
 import space.taran.arknavigator.mvp.presenter.FoldersPresenter
 import space.taran.arknavigator.ui.adapter.FolderPicker
 import space.taran.arknavigator.mvp.view.FoldersView
@@ -110,7 +109,6 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
 
         rootPickerBinding = DialogRootsNewBinding.inflate(
             LayoutInflater.from(requireContext()))
-            ?: throw IllegalStateException("Failed to inflate dialog View for roots picker")
 
         rootPickerBinding!!.rvRootsDialog.layoutManager = GridLayoutManager(context, 2)
         folderPicker = FolderPicker(paths, presenter.onRootPickerItemClick(), rootPickerBinding!!)

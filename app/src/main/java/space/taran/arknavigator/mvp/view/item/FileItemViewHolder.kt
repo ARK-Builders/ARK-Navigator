@@ -1,25 +1,17 @@
 package space.taran.arknavigator.mvp.view.item
 
-import android.util.Log
 import androidx.recyclerview.widget.RecyclerView
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.ItemFileGridBinding
-import space.taran.arknavigator.mvp.model.repo.ExtraInfoTag
-import space.taran.arknavigator.mvp.model.repo.PreviewsRepo
-import space.taran.arknavigator.mvp.model.repo.ResourceMeta
-import space.taran.arknavigator.ui.fragments.utils.Preview
+import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
+import space.taran.arknavigator.mvp.model.repo.index.ResourceMetaExtra
+import space.taran.arknavigator.ui.fragments.preview.PreviewAndThumbnail
 import space.taran.arknavigator.utils.*
-import space.taran.arknavigator.utils.extensions.makeGone
-import space.taran.arknavigator.utils.extensions.textOrGone
 import java.nio.file.Path
-import javax.inject.Inject
 
 class FileItemViewHolder(private val binding: ItemFileGridBinding) :
     RecyclerView.ViewHolder(binding.root),
     FileItemView {
-
-    @Inject
-    lateinit var previewsRepo: PreviewsRepo
 
     override fun position(): Int = this.layoutPosition
 
@@ -27,28 +19,21 @@ class FileItemViewHolder(private val binding: ItemFileGridBinding) :
         binding.iv.setImageResource(R.drawable.ic_baseline_folder)
 
     override fun setGenericIcon(path: Path) {
-        TODO("Not yet implemented")
+        val placeholder = ImageUtils.iconForExtension(extension(path))
+        binding.iv.setImageResource(placeholder)
     }
 
-    override fun setIconOrPreview(path: Path, meta: ResourceMeta): Unit = with(binding.root) {
-        Log.d(ITEMS_CONTAINER, "setting icon for ${meta.id}")
+    override fun setIconOrPreview(path: Path, resource: ResourceMeta): Unit = with(binding.root) {
+        val placeholder = ImageUtils.iconForExtension(extension(path))
+        val thumbnail = PreviewAndThumbnail.locate(path, resource)?.thumbnail
 
-        val preview = Preview.provide(path, meta)
+        ImageUtils.loadImageWithPlaceholder(thumbnail, placeholder, binding.iv)
 
-        previewsRepo.loadPreview(
-            targetView = binding.iv,
-            preview = preview,
-            extraMeta = meta.extra,
-            centerCrop = true)
-
-        //todo make it more generic
-        if (meta.extra != null) {
-            binding.resolutionTV.textOrGone(meta.extra.data[ExtraInfoTag.MEDIA_RESOLUTION])
-            binding.durationTV.textOrGone(meta.extra.data[ExtraInfoTag.MEDIA_DURATION])
-        } else {
-            binding.resolutionTV.makeGone()
-            binding.durationTV.makeGone()
-        }
+        ResourceMetaExtra.draw(
+            resource.kind,
+            resource.extra,
+            arrayOf(binding.primaryExtra, binding.secondaryExtra),
+            verbose = false)
     }
 
     override fun setText(title: String) = with(binding.root) {

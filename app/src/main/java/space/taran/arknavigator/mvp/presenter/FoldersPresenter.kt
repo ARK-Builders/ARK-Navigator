@@ -9,7 +9,7 @@ import moxy.presenterScope
 import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.R
 import space.taran.arknavigator.mvp.model.repo.FoldersRepo
-import space.taran.arknavigator.mvp.model.repo.ResourcesIndexFactory
+import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexFactory
 import space.taran.arknavigator.mvp.presenter.adapter.folderstree.FoldersTreePresenter
 import space.taran.arknavigator.mvp.presenter.adapter.ItemClickHandler
 import space.taran.arknavigator.ui.App

@@ -7,7 +7,6 @@ import android.view.MotionEvent
 import android.view.ViewGroup
 import androidx.core.view.GestureDetectorCompat
 import androidx.recyclerview.widget.RecyclerView
-import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.ItemImageBinding
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
 import space.taran.arknavigator.mvp.view.item.PreviewItemViewHolder
@@ -38,9 +37,7 @@ class PreviewsPager(val presenter: PreviewsList) : RecyclerView.Adapter<PreviewI
     }
 
     fun removeItem(position: Int) {
-        val items = presenter.items().toMutableList()
-        items.removeAt(position)
-        presenter.updateItems(items.toList())
+        presenter.remove(position)
         super.notifyItemRemoved(position)
     }
 

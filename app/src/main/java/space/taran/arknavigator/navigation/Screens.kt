@@ -2,9 +2,9 @@ package space.taran.arknavigator.navigation
 
 import space.taran.arknavigator.ui.fragments.*
 import ru.terrakok.cicerone.android.support.SupportAppScreen
-import space.taran.arknavigator.mvp.model.repo.ResourceMeta
-import space.taran.arknavigator.mvp.model.repo.ResourcesIndex
-import space.taran.arknavigator.mvp.model.repo.TagsStorage
+import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
+import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
+import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import java.nio.file.Path
 
 class Screens {

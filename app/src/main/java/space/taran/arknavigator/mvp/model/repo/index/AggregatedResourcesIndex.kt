@@ -1,6 +1,6 @@
-package space.taran.arknavigator.mvp.model.repo
+package space.taran.arknavigator.mvp.model.repo.index
 
-import space.taran.arknavigator.mvp.model.dao.ResourceId
+import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import java.lang.AssertionError
 import java.nio.file.Path
 
@@ -8,8 +8,8 @@ class AggregatedResourcesIndex(
     private val shards: Collection<PlainResourcesIndex>)
     : ResourcesIndex {
 
-    override fun listIds(prefix: Path?): Set<ResourceId> =
-        shards.flatMap { it.listIds(prefix) }
+    override fun listResources(prefix: Path?): Set<ResourceMeta> =
+        shards.flatMap { it.listResources(prefix) }
             .toSet()
 
     override fun getPath(id: ResourceId): Path =

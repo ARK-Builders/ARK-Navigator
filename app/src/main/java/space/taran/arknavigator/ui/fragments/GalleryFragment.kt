@@ -15,8 +15,11 @@ import moxy.ktx.moxyPresenter
 import space.taran.arknavigator.BuildConfig
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.FragmentGalleryBinding
-import space.taran.arknavigator.mvp.model.dao.ResourceId
 import space.taran.arknavigator.mvp.model.repo.*
+import space.taran.arknavigator.mvp.model.repo.extra.DocumentMetaExtra
+import space.taran.arknavigator.mvp.model.repo.extra.VideoMetaExtra
+import space.taran.arknavigator.mvp.model.repo.index.*
+import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
 import space.taran.arknavigator.mvp.view.GalleryView
@@ -31,7 +34,6 @@ import space.taran.arknavigator.utils.extensions.makeGone
 import space.taran.arknavigator.utils.extensions.makeVisibleAndSetOnClickListener
 import space.taran.arknavigator.utils.extensions.textOrGone
 import java.io.File
-import javax.inject.Inject
 
 class GalleryFragment(
     private val index: ResourcesIndex,
@@ -48,9 +50,6 @@ class GalleryFragment(
             App.instance.appComponent.inject(this)
         }
     }
-
-    @Inject
-    lateinit var previewsRepo: PreviewsRepo
 
     private lateinit var pagerAdapter: PreviewsPager
 
@@ -201,38 +200,29 @@ class GalleryFragment(
         val currentPosition = binding.viewPager.currentItem
 
         binding.apply {
-            openResourceChooserFab.setOnClickListener(null)
-            openFileEditFab.setOnClickListener(null)
+            openResourceFab.setOnClickListener(null)
+            editResourceFab.setOnClickListener(null)
 
-            val resource = resources[currentPosition]
-            val filePath = index.getPath(resource.id)
-
-            when (getFileActionType(filePath!!)) {
-                FileActionType.OPEN_ONLY -> {
-                    openFileEditFab.makeGone()
-                    openResourceChooserFab.makeVisibleAndSetOnClickListener{
-                        openIntentChooser(currentPosition, Intent.ACTION_VIEW)
+            when(resources[currentPosition].kind) {
+                ResourceKind.VIDEO -> {
+                    // "open" capabilities only
+                    editResourceFab.makeGone()
+                    openResourceFab.makeVisibleAndSetOnClickListener{
+                        openIntentChooser(currentPosition, Intent.ACTION_VIEW, true)
                     }
                 }
-                FileActionType.OPEN_ONLY_DETACH_PROCESS -> {
-                    //todo remove after thorough testing
-                    openFileEditFab.makeGone()
-                    openResourceChooserFab.makeGone()
-//                    openResourceChooserFab.makeVisibleAndSetOnClickListener{
-//                        openIntentChooser(currentPosition, Intent.ACTION_VIEW, true)
-//                    }
-                }
-                FileActionType.EDIT_AND_OPEN -> {
-                    openFileEditFab.makeVisibleAndSetOnClickListener {
+                ResourceKind.DOCUMENT -> {
+                    // both "open" and "edit" capabilities
+                    editResourceFab.makeVisibleAndSetOnClickListener {
                         openIntentChooser(currentPosition, Intent.ACTION_EDIT) }
 
-                    openResourceChooserFab.makeVisibleAndSetOnClickListener {
+                    openResourceFab.makeVisibleAndSetOnClickListener {
                         openIntentChooser(currentPosition, Intent.ACTION_VIEW, true) }
                 }
-
-                FileActionType.EDIT_AS_OPEN -> {
-                    openResourceChooserFab.makeGone()
-                    openFileEditFab.makeVisibleAndSetOnClickListener {
+                ResourceKind.IMAGE -> {
+                    // "edit" capabilities only
+                    openResourceFab.makeGone()
+                    editResourceFab.makeVisibleAndSetOnClickListener {
                         openIntentChooser(currentPosition, Intent.ACTION_EDIT) }
                 }
             }
@@ -283,15 +273,11 @@ class GalleryFragment(
         val filePath = index.getPath(resource.id)
         setTitle(filePath.fileName.toString())
 
-        val extra = presenter.getExtraAt(position)
-        //todo make it more generic
-        if (extra != null) {
-            binding.resolutionTV.textOrGone(extra.data[ExtraInfoTag.MEDIA_RESOLUTION])
-            binding.durationTV.textOrGone(extra.data[ExtraInfoTag.MEDIA_DURATION])
-        } else {
-            binding.resolutionTV.makeGone()
-            binding.durationTV.makeGone()
-        }
+        ResourceMetaExtra.draw(
+            resource.kind,
+            resource.extra,
+            arrayOf(binding.primaryExtra, binding.secondaryExtra),
+            verbose = true)
     }
 
     private fun displayPreviewTags(resource: ResourceId, tags: Tags) {

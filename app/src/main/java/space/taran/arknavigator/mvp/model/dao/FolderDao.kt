@@ -21,5 +21,4 @@ interface FolderDao {
     @Transaction
     @Query("SELECT * FROM Root")
     suspend fun query(): List<RootWithFavorites>
-    //todo: looks like it will not yield roots without favorites
 }

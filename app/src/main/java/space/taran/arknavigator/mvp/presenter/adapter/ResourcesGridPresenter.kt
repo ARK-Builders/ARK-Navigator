@@ -6,10 +6,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.mvp.model.UserPreferences
-import space.taran.arknavigator.mvp.model.repo.PreviewsRepo
-import space.taran.arknavigator.mvp.model.repo.ResourceMeta
-import space.taran.arknavigator.mvp.model.repo.ResourcesIndex
-import space.taran.arknavigator.mvp.model.repo.TagsStorage
+import space.taran.arknavigator.mvp.model.repo.index.ResourceId
+import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
+import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
+import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.mvp.view.item.FileItemView
 import space.taran.arknavigator.navigation.Screens
@@ -26,9 +26,6 @@ class ResourcesGridPresenter(
 ) {
     @Inject
     lateinit var userPreferences: UserPreferences
-
-    @Inject
-    lateinit var previewsRepo: PreviewsRepo
 
     private var resources = listOf<ResourceMeta>()
     private var selection = listOf<ResourceMeta>()
@@ -77,8 +74,8 @@ class ResourcesGridPresenter(
         ascending = userPreferences.isSortingAscending()
     }
 
-    suspend fun updateSelection(selection: Set<ResourceMeta>) = withContext(Dispatchers.Default) {
-        this@ResourcesGridPresenter.selection = resources.filter { selection.contains(it) }
+    suspend fun updateSelection(selection: Set<ResourceId>) = withContext(Dispatchers.Default) {
+        this@ResourcesGridPresenter.selection = resources.filter { selection.contains(it.id) }
         withContext(Dispatchers.Main) {
             setProgressVisibility(false)
             viewState.updateAdapter()
