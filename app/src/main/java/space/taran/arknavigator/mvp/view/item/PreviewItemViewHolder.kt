@@ -4,13 +4,12 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.ortiz.touchview.OnTouchImageViewListener
 import space.taran.arknavigator.databinding.ItemImageBinding
-import space.taran.arknavigator.mvp.model.repo.PreviewsRepo
-import space.taran.arknavigator.mvp.model.repo.ResourceMetaExtra
-import space.taran.arknavigator.mvp.model.repo.ResourceType
+import space.taran.arknavigator.mvp.model.repo.index.ResourceKind
+import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
-import space.taran.arknavigator.ui.fragments.utils.Preview
+import space.taran.arknavigator.utils.ImageUtils
 import space.taran.arknavigator.utils.extensions.makeVisibleAndSetOnClickListener
-import javax.inject.Inject
+import java.nio.file.Path
 
 class PreviewItemViewHolder(val binding: ItemImageBinding, val presenter: PreviewsList) :
     RecyclerView.ViewHolder(binding.root),
@@ -18,19 +17,12 @@ class PreviewItemViewHolder(val binding: ItemImageBinding, val presenter: Previe
 
     override var pos = -1
 
-    @Inject
-    lateinit var previewsRepo: PreviewsRepo
-
-    override fun setSource(preview: Preview, extra: ResourceMetaExtra?) {
+    override fun setSource(preview: Path?, placeholder: Int, resource: ResourceMeta) {
         binding.layoutProgress.root.isVisible = false
-        previewsRepo.loadPreview(
-            targetView = binding.ivImage,
-            preview = preview,
-            extraMeta = extra,
-            centerCrop = false
-        )
 
-        if (extra?.type != ResourceType.VIDEO){
+        ImageUtils.loadImageWithPlaceholder(preview, placeholder, binding.ivImage)
+
+        if (resource.kind != ResourceKind.VIDEO){
             binding.icPlay.makeVisibleAndSetOnClickListener {
                 presenter.onPlayButtonCLick(pos)
             }
@@ -38,8 +30,8 @@ class PreviewItemViewHolder(val binding: ItemImageBinding, val presenter: Previe
             binding.icPlay.isVisible = false
         }
 
-        if (extra?.type == ResourceType.IMAGE ||
-            extra?.type == ResourceType.DOCUMENT) {
+        if (resource.kind == ResourceKind.IMAGE ||
+            resource.kind == ResourceKind.DOCUMENT) {
                 enableZoom()
         }
     }
