@@ -1,19 +1,11 @@
 package space.taran.arknavigator.mvp.model.repo.extra
 
-import space.taran.arknavigator.mvp.model.dao.ResourceExtra
-import space.taran.arknavigator.mvp.model.repo.ExtraInfoTag
-import space.taran.arknavigator.mvp.model.repo.ResourceMetaExtra
-import space.taran.arknavigator.mvp.model.repo.ResourceType
+import space.taran.arknavigator.mvp.model.repo.index.ResourceMetaExtra
+import java.nio.file.Path
 
-class ImageMetaExtra: ResourceMetaExtra(ResourceType.IMAGE) {
-    override val data = mapOf<ExtraInfoTag, String>()
+object ImageMetaExtra {
+    val ACCEPTED_EXTENSIONS: Set<String> =
+        setOf("jpg", "jpeg", "png")
 
-    override fun toRoom(): ResourceExtra {
-        TODO("Not yet implemented")
-    }
-
-    companion object {
-        val ACCEPTED_EXTENSIONS: Set<String> =
-            setOf("jpg", "jpeg", "png")
-    }
+    fun extract(path: Path): ResourceMetaExtra? = null
 }

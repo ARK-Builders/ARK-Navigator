@@ -1,6 +1,6 @@
-package space.taran.arknavigator.mvp.model.repo
+package space.taran.arknavigator.mvp.model.repo.tags
 
-import space.taran.arknavigator.mvp.model.dao.ResourceId
+import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.utils.Tags
 
 interface TagsStorage {

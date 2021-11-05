@@ -1,10 +1,10 @@
-package space.taran.arknavigator.mvp.model.repo
+package space.taran.arknavigator.mvp.model.repo.tags
 
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import space.taran.arknavigator.mvp.model.dao.ResourceId
+import space.taran.arknavigator.mvp.model.repo.index.ResourceId
+import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.utils.Constants.Companion.NO_TAGS
 import space.taran.arknavigator.utils.Converters.Companion.stringFromTags
 import space.taran.arknavigator.utils.Converters.Companion.tagsFromString

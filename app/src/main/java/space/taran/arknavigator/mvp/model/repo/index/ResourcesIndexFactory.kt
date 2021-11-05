@@ -1,19 +1,18 @@
-package space.taran.arknavigator.mvp.model.repo
+package space.taran.arknavigator.mvp.model.repo.index
 
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import space.taran.arknavigator.mvp.model.dao.ResourceDao
-import space.taran.arknavigator.mvp.model.repo.PlainResourcesIndex.Companion.groupResources
-import space.taran.arknavigator.mvp.model.repo.PlainResourcesIndex.Companion.listAllFiles
-import space.taran.arknavigator.mvp.model.repo.PlainResourcesIndex.Companion.scanResources
+import space.taran.arknavigator.mvp.model.repo.index.PlainResourcesIndex.Companion.loadResources
+import space.taran.arknavigator.mvp.model.repo.index.PlainResourcesIndex.Companion.listAllFiles
+import space.taran.arknavigator.mvp.model.repo.index.PlainResourcesIndex.Companion.scanResources
 import space.taran.arknavigator.utils.RESOURCES_INDEX
 import java.nio.file.Path
 import kotlin.system.measureTimeMillis
 
 class ResourcesIndexFactory(
-    private val dao: ResourceDao,
-    private val previewsRepo: PreviewsRepo)
+    private val dao: ResourceDao)
 {
     suspend fun loadFromDatabase(root: Path): PlainResourcesIndex = withContext(Dispatchers.IO) {
         Log.d(RESOURCES_INDEX, "loading index for $root from the database")
@@ -22,7 +21,7 @@ class ResourcesIndexFactory(
 
         Log.d(RESOURCES_INDEX, "${resources.size} resources retrieved from DB")
 
-        val index = PlainResourcesIndex(root, dao, previewsRepo, groupResources(resources))
+        val index = PlainResourcesIndex(root, dao, loadResources(resources))
         Log.d(RESOURCES_INDEX, "index created")
 
         index.reindexRoot(index.calculateDifference())
@@ -46,7 +45,7 @@ class ResourcesIndexFactory(
         }
         Log.d(RESOURCES_INDEX, "hashes calculation took $time2 milliseconds")
 
-        val index = PlainResourcesIndex(root, dao, previewsRepo, metadata)
+        val index = PlainResourcesIndex(root, dao, metadata)
 
         index.persistResources(index.metaByPath)
         return@withContext index

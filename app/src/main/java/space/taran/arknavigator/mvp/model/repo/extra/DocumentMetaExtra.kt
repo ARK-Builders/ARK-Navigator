@@ -1,21 +1,22 @@
 package space.taran.arknavigator.mvp.model.repo.extra
 
-import space.taran.arknavigator.mvp.model.dao.ResourceExtra
-import space.taran.arknavigator.mvp.model.repo.ExtraInfoTag
-import space.taran.arknavigator.mvp.model.repo.ResourceMetaExtra
-import space.taran.arknavigator.mvp.model.repo.ResourceType
+import android.widget.TextView
+import space.taran.arknavigator.mvp.model.repo.index.MetaExtraTag
+import space.taran.arknavigator.mvp.model.repo.index.ResourceMetaExtra
+import space.taran.arknavigator.utils.extensions.textOrGone
+import java.nio.file.Path
 
-class DocumentMetaExtra: ResourceMetaExtra(ResourceType.DOCUMENT) {
-    override val data: MutableMap<ExtraInfoTag, String> =
-        //TODO: PR #33
-        mutableMapOf()
+object DocumentMetaExtra {
+    val ACCEPTED_EXTENSIONS: Set<String> =
+        setOf("pdf", "txt", "doc", "docx", "odt", "ods", "md")
 
-    override fun toRoom(): ResourceExtra {
-        TODO("Not yet implemented")
-    }
+    fun extract(path: Path): ResourceMetaExtra? = null
 
-    companion object {
-        val ACCEPTED_EXTENSIONS: Set<String> =
-            setOf("pdf", "txt", "doc", "docx", "odt", "ods", "md")
+    fun draw(extra: ResourceMetaExtra, pagesTV: TextView, verbose: Boolean) {
+        val pages = extra.data[MetaExtraTag.PAGES]
+        if (pages != null) {
+            val label = if (verbose) "$pages pages" else "$pages"
+            pagesTV.textOrGone(label)
+        }
     }
 }

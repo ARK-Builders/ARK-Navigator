@@ -6,7 +6,8 @@ import androidx.room.RoomDatabase
     entities = [
         Root::class,
         Favorite::class,
-        Resource::class
+        Resource::class,
+        ResourceExtra::class
     ],
     version = 13,
     exportSchema = false
