@@ -5,7 +5,7 @@ import com.ortiz.touchview.TouchImageView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import space.taran.arknavigator.ui.fragments.utils.Preview
+import space.taran.arknavigator.ui.fragments.preview.PreviewAndThumbnail
 import space.taran.arknavigator.utils.*
 import space.taran.arknavigator.utils.extensions.*
 
@@ -13,7 +13,7 @@ class PreviewsRepo {
 
     fun loadPreview(
         targetView: ImageView,
-        preview: Preview,
+        preview: PreviewAndThumbnail,
         extraMeta: ResourceMetaExtra?,
         centerCrop: Boolean
     ) {

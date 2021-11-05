@@ -6,7 +6,7 @@ import kotlinx.coroutines.withContext
 import space.taran.arknavigator.mvp.model.dao.Resource
 import space.taran.arknavigator.mvp.model.dao.ResourceDao
 import space.taran.arknavigator.mvp.model.dao.ResourceId
-import space.taran.arknavigator.ui.fragments.utils.Preview
+import space.taran.arknavigator.ui.fragments.preview.PreviewAndThumbnail
 import space.taran.arknavigator.utils.*
 import java.nio.file.Files
 import java.nio.file.Path
@@ -94,7 +94,7 @@ class PlainResourcesIndex internal constructor (
             val id = metaByPath[it]!!.id
             pathById[id]
             metaByPath.remove(it)
-            Preview.forget(id)
+            PreviewAndThumbnail.forget(id)
         }
 
         Log.d(RESOURCES_INDEX, "deleting ${savedDeletedMetas.size} pdf previews")
@@ -150,7 +150,7 @@ class PlainResourcesIndex internal constructor (
 
         val entities = resources.entries.toList()
             .map {
-                Preview.provide(it.key, it.value)
+                PreviewAndThumbnail.generate(it.key, it.value)
                 Resource.fromMeta(it.value, root, it.key)
             }
 
