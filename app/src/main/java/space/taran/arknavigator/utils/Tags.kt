@@ -19,12 +19,7 @@ class Converters {
         fun tagsFromString(string: String): Tags = string
             .split(',')
             .map { it.trim() }
-            .filter {
-                if (it.isEmpty()) throw AssertionError("No tag can be empty")
-                true
-            }
+            .filter { it.isNotEmpty() }
             .toSet()
     }
 }
-
-fun findLastTagInString(string: String): String = string.split(',').last().trim()

@@ -25,7 +25,7 @@ class EditTagsDialogPresenter(
     }
 
     fun onInputChanged(input: String) {
-        filter = findLastTagInString(input)
+        filter = input.split(',').last().trim()
         viewState.setQuickTags(listQuickTags())
     }
 

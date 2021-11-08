@@ -48,6 +48,7 @@ class EditTagsDialogFragment(resourceId: ResourceId, storage: TagsStorage, index
         etNewTags.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 presenter.onInputDone(etNewTags.text.toString())
+                    .invokeOnCompletion { dismiss() }
             }
             true
         }
