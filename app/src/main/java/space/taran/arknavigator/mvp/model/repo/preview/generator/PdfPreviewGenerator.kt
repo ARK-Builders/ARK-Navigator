@@ -1,4 +1,4 @@
-package space.taran.arknavigator.ui.fragments.preview.generator
+package space.taran.arknavigator.mvp.model.repo.preview.generator
 
 import android.graphics.Bitmap
 import android.net.Uri

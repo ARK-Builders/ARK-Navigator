@@ -9,6 +9,8 @@ import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
+import space.taran.arknavigator.mvp.model.repo.preview.PlainPreviewStorage
+import space.taran.arknavigator.mvp.model.repo.preview.PreviewStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.mvp.view.item.FileItemView
@@ -33,6 +35,7 @@ class ResourcesGridPresenter(
     private lateinit var index: ResourcesIndex
     private lateinit var storage: TagsStorage
     private lateinit var router: Router
+    private lateinit var previewStorage: PreviewStorage
 
     var sorting = Sorting.DEFAULT
         private set(value) {
@@ -52,6 +55,7 @@ class ResourcesGridPresenter(
         val resource = selection[view.position()]
 
         val path = index.getPath(resource.id)
+        val preview = previewStorage.getPreview(resource.id)
 
         view.setText(path.fileName.toString())
 
@@ -59,17 +63,18 @@ class ResourcesGridPresenter(
             throw AssertionError("Resource can't be a directory")
         }
 
-        view.setIconOrPreview(path, resource)
+        view.setIconOrPreview(path, preview)
     }
 
     fun onItemClick(pos: Int) {
-        router.navigateTo(Screens.GalleryScreen(index, storage, selection, pos))
+        router.navigateTo(Screens.GalleryScreen(index, storage, previewStorage, selection, pos))
     }
 
-    suspend fun init(index: ResourcesIndex, storage: TagsStorage, router: Router) {
+    suspend fun init(index: ResourcesIndex, storage: TagsStorage, previewStorage: PreviewStorage, router: Router) {
         this.index = index
         this.storage = storage
         this.router = router
+        this.previewStorage = previewStorage
         sorting = userPreferences.getSorting()
         ascending = userPreferences.isSortingAscending()
     }

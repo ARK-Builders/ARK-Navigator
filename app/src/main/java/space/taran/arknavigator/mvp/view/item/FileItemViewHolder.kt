@@ -3,10 +3,10 @@ package space.taran.arknavigator.mvp.view.item
 import androidx.recyclerview.widget.RecyclerView
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.ItemFileGridBinding
-import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMetaExtra
-import space.taran.arknavigator.ui.fragments.preview.PreviewAndThumbnail
-import space.taran.arknavigator.utils.*
+import space.taran.arknavigator.mvp.model.repo.preview.Preview
+import space.taran.arknavigator.utils.ImageUtils
+import space.taran.arknavigator.utils.extension
 import java.nio.file.Path
 
 class FileItemViewHolder(private val binding: ItemFileGridBinding) :
@@ -23,15 +23,14 @@ class FileItemViewHolder(private val binding: ItemFileGridBinding) :
         binding.iv.setImageResource(placeholder)
     }
 
-    override fun setIconOrPreview(path: Path, resource: ResourceMeta): Unit = with(binding.root) {
+    override fun setIconOrPreview(path: Path, preview: Preview): Unit = with(binding.root) {
         val placeholder = ImageUtils.iconForExtension(extension(path))
-        val thumbnail = PreviewAndThumbnail.locate(path, resource)?.thumbnail
 
-        ImageUtils.loadImageWithPlaceholder(thumbnail, placeholder, binding.iv)
+        ImageUtils.loadImageWithPlaceholder(preview.thumbnail, placeholder, binding.iv)
 
         ResourceMetaExtra.draw(
-            resource.kind,
-            resource.extra,
+            preview.meta.kind,
+            preview.meta.extra,
             arrayOf(binding.primaryExtra, binding.secondaryExtra),
             verbose = false)
     }

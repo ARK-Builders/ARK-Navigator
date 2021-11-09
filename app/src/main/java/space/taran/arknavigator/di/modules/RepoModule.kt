@@ -6,6 +6,7 @@ import dagger.Module
 import dagger.Provides
 import space.taran.arknavigator.mvp.model.repo.FoldersRepo
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexFactory
+import space.taran.arknavigator.mvp.model.repo.preview.PreviewStorageRepo
 import space.taran.arknavigator.utils.MAIN
 import javax.inject.Singleton
 
@@ -24,4 +25,8 @@ class RepoModule {
         Log.d(MAIN, "creating ResourcesIndexesRepo")
         return ResourcesIndexFactory(database.resourceDao())
     }
+
+    @Singleton
+    @Provides
+    fun previewStorageRepo(): PreviewStorageRepo = PreviewStorageRepo()
 }

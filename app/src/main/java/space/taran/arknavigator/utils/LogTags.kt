@@ -22,6 +22,8 @@ const val TAGS_SELECTOR: String = "tags-selector"
 
 const val TAGS_STORAGE: String = "tags-storage"
 
+const val PREVIEW_STORAGE: String = "preview-storage"
+
 const val ITEMS_CONTAINER: String = "item-container"
 
 const val CONCURRENT: String = "concurrent"

@@ -6,6 +6,7 @@ import com.ortiz.touchview.OnTouchImageViewListener
 import space.taran.arknavigator.databinding.ItemImageBinding
 import space.taran.arknavigator.mvp.model.repo.index.ResourceKind
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
+import space.taran.arknavigator.mvp.model.repo.preview.Preview
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
 import space.taran.arknavigator.utils.ImageUtils
 import space.taran.arknavigator.utils.extensions.makeVisibleAndSetOnClickListener
@@ -17,12 +18,12 @@ class PreviewItemViewHolder(val binding: ItemImageBinding, val presenter: Previe
 
     override var pos = -1
 
-    override fun setSource(preview: Path?, placeholder: Int, resource: ResourceMeta) {
+    override fun setSource(preview: Preview, placeholder: Int) {
         binding.layoutProgress.root.isVisible = false
 
-        ImageUtils.loadImageWithPlaceholder(preview, placeholder, binding.ivImage)
+        ImageUtils.loadImageWithPlaceholder(preview.preview, placeholder, binding.ivImage)
 
-        if (resource.kind == ResourceKind.VIDEO){
+        if (preview.meta.kind == ResourceKind.VIDEO){
             binding.icPlay.makeVisibleAndSetOnClickListener {
                 presenter.onPlayButtonCLick(pos)
             }
@@ -30,8 +31,8 @@ class PreviewItemViewHolder(val binding: ItemImageBinding, val presenter: Previe
             binding.icPlay.isVisible = false
         }
 
-        if (resource.kind == ResourceKind.IMAGE ||
-            resource.kind == ResourceKind.DOCUMENT) {
+        if (preview.meta.kind == ResourceKind.IMAGE ||
+            preview.meta.kind == ResourceKind.DOCUMENT) {
                 enableZoom()
         }
     }

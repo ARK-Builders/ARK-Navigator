@@ -12,6 +12,9 @@ import space.taran.arknavigator.mvp.model.repo.index.AggregatedResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexFactory
+import space.taran.arknavigator.mvp.model.repo.preview.AggregatedPreviewStorage
+import space.taran.arknavigator.mvp.model.repo.preview.PreviewStorage
+import space.taran.arknavigator.mvp.model.repo.preview.PreviewStorageRepo
 import space.taran.arknavigator.mvp.model.repo.tags.AggregatedTagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.PlainTagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
@@ -41,8 +44,12 @@ class ResourcesPresenter(
     @Inject
     lateinit var userPreferences: UserPreferences
 
+    @Inject
+    lateinit var previewStorageRepo: PreviewStorageRepo
+
     private lateinit var index: ResourcesIndex
-    private lateinit var storage: TagsStorage
+    private lateinit var tagsStorage: TagsStorage
+    private lateinit var previewStorage: PreviewStorage
     var tagsEnabled: Boolean = true
 
     val gridPresenter = ResourcesGridPresenter(viewState, presenterScope).apply {
@@ -78,27 +85,34 @@ class ResourcesPresenter(
                 .map { it to resourcesIndexFactory.loadFromDatabase(it) }
                 .toMap()
 
-            val rootToStorage = roots
+            val rootToTagsStorage = roots
                 .map { it to PlainTagsStorage.provide(it, rootToIndex[it]!!) }
                 .toMap()
 
+            val rootToPreviewStorage = roots
+                .map { it to previewStorageRepo.provide(it, rootToIndex[it]!!) }
+                .toMap()
+
             roots.forEach { root ->
-                val storage = rootToStorage[root]!!
+                val tagsStorage = rootToTagsStorage[root]!!
+                val previewStorage = rootToPreviewStorage[root]!!
                 val indexed = rootToIndex[root]!!.listAllIds()
 
-                storage.cleanup(indexed)
+                tagsStorage.cleanup(indexed)
+                previewStorage.cleanup(indexed)
             }
 
             index = AggregatedResourcesIndex(rootToIndex.values)
-            storage = AggregatedTagsStorage(rootToStorage.values)
+            tagsStorage = AggregatedTagsStorage(rootToTagsStorage.values)
+            previewStorage = AggregatedPreviewStorage(rootToPreviewStorage.values)
 
-            gridPresenter.init(index, storage, router)
+            gridPresenter.init(index, tagsStorage, previewStorage, router)
 
             val listedResources = listResources()
             viewState.setProgressVisibility(true, "Sorting")
 
             gridPresenter.resetResources(listedResources)
-            tagsSelectorPresenter.init(index, storage)
+            tagsSelectorPresenter.init(index, tagsStorage)
             tagsSelectorPresenter.calculateTagsAndSelection()
 
             val path = (prefix ?: root)
@@ -133,7 +147,7 @@ class ResourcesPresenter(
         }
 
         val ids = listResources().map { it.id }
-        if (tagsEnabled && storage.getTags(ids).isEmpty()) {
+        if (tagsEnabled && tagsStorage.getTags(ids).isEmpty()) {
             viewState.notifyUser("Tag something first")
         }
     }
@@ -161,7 +175,7 @@ class ResourcesPresenter(
         val underPrefix = index.listResources(prefix)
 
         val result = if (untaggedOnly) {
-            val untagged = storage.listUntaggedResources()
+            val untagged = tagsStorage.listUntaggedResources()
             underPrefix.filter { untagged.contains(it.id) }
         } else {
             underPrefix
