@@ -36,8 +36,8 @@ class EditTagsDialogPresenter(
         val newTags = listResourceTags() + inputTags
         storage.setTags(resourceId, newTags)
 
-        updateTags()
         viewState.clearInput()
+        updateTags()
     }
 
     fun onResourceTagClick(tag: Tag) = presenterScope.launch {
@@ -51,6 +51,7 @@ class EditTagsDialogPresenter(
         val newTags = listResourceTags() + tag
         storage.setTags(resourceId, newTags)
 
+        viewState.clearInput()
         updateTags()
     }
 
