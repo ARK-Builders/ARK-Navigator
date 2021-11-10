@@ -78,9 +78,9 @@ enum class MetaExtraTag {
 data class ResourceMetaExtra(val data: Map<MetaExtraTag, Long>) {
     companion object {
         fun fromRoom(room: List<ResourceExtra>): ResourceMetaExtra {
-            TODO()
+            val data = room.map { MetaExtraTag.values()[it.key] to it.value }.toMap()
+            return ResourceMetaExtra(data)
         }
-
         fun provide(kind: ResourceKind?, path: Path): ResourceMetaExtra? {
             return when (kind) {
                 ResourceKind.IMAGE -> ImageMetaExtra.extract(path)

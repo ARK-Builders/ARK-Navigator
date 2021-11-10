@@ -22,12 +22,12 @@ data class ResourceExtra(
     val value: Long
 ) {
     companion object {
-        fun fromMetaExtra(id: ResourceId, extra: ResourceMetaExtra): List<ResourceExtra> =
-            extra.data.entries.map { (tag,value) ->
+        fun fromMetaExtra(id: ResourceId, extra: ResourceMetaExtra?): List<ResourceExtra> =
+            extra?.data?.entries?.map { (tag,value) ->
                 ResourceExtra(
                     resource = id,
                     key = tag.ordinal,
                     value = value)
-            }
+            } ?: emptyList()
     }
 }
