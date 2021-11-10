@@ -20,13 +20,14 @@ object ImageUtils {
             .getIdentifier(
                 "ic_file_${ext}",
                 "drawable",
-                App.instance.packageName)
+                App.instance.packageName
+            )
 
         return if (drawableID > 0) drawableID
         else R.drawable.ic_file
     }
 
-    fun loadImageWithPlaceholder(image: Path?, placeHolder: Int, view: ImageView) {
+    fun loadZoomImageWithPlaceholder(image: Path?, placeHolder: Int, view: ImageView) {
         view.setImageResource(placeHolder)
         view.autoDisposeScope.launch {
             withContext(Dispatchers.Main) {
@@ -37,13 +38,27 @@ object ImageUtils {
                     .into(object : CustomTarget<Drawable>() {
                         override fun onResourceReady(
                             resource: Drawable,
-                            transition: Transition<in Drawable?>?) {
-                                view.setImageDrawable(resource)
+                            transition: Transition<in Drawable?>?
+                        ) {
+                            view.setImageDrawable(resource)
                         }
 
                         override fun onLoadCleared(placeholder: Drawable?) {
                         }
                     })
+            }
+        }
+    }
+
+    fun loadImageWithPlaceholder(image: Path?, placeHolder: Int, view: ImageView) {
+        view.setImageResource(placeHolder)
+        view.autoDisposeScope.launch {
+            withContext(Dispatchers.Main) {
+                Glide.with(view)
+                    .load(image?.toFile())
+                    .placeholder(placeHolder)
+                    .transition(DrawableTransitionOptions.withCrossFade())
+                    .into(view)
             }
         }
     }
