@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.util.Log
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -91,15 +92,14 @@ data class PreviewAndThumbnail(val preview: Path, val thumbnail: Path) {
                 // we don't need to store preview file for them,
                 // we only need to downscale them into thumbnail
 
-                val thumbnail: Bitmap = suspendCoroutine { continuation ->
-                    Glide.with(App.instance)
+                val thumbnail: Bitmap = Glide.with(App.instance)
                         .asBitmap()
-                        .fitCenter()
                         .load(path.toFile())
-                        .into(ThumbnailTarget { bitmap ->
-                            continuation.resume(bitmap)
-                        })
-                }
+                        .apply(RequestOptions().override(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT))
+                        .fitCenter()
+                        .submit()
+                        .get()
+
 
                 storeThumbnail(thumbnailPath, thumbnail)
                 return
@@ -109,15 +109,14 @@ data class PreviewAndThumbnail(val preview: Path, val thumbnail: Path) {
             if (generator != null) {
                 val preview = generator(path)
 
-                val thumbnail: Bitmap = suspendCoroutine { continuation ->
-                    Glide.with(App.instance)
+                val thumbnail: Bitmap = Glide.with(App.instance)
                         .asBitmap()
-                        .fitCenter()
                         .load(preview)
-                        .into(ThumbnailTarget { bitmap ->
-                            continuation.resume(bitmap)
-                        })
-                }
+                        .apply(RequestOptions().override(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT))
+                        .fitCenter()
+                        .submit()
+                        .get()
+
 
                 storePreview(previewPath, preview)
                 storeThumbnail(thumbnailPath, thumbnail)
@@ -145,22 +144,6 @@ data class PreviewAndThumbnail(val preview: Path, val thumbnail: Path) {
                 bitmap.compress(Bitmap.CompressFormat.PNG, COMPRESSION_QUALITY, out)
                 out.flush()
             }
-        }
-    }
-
-    private class ThumbnailTarget(val emit: (Bitmap) -> Unit)
-        : CustomTarget<Bitmap>(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT) {
-
-        override fun onLoadCleared(placeholder: Drawable?) {
-            throw AssertionError("Must not be cancelled")
-        }
-
-        override fun onLoadFailed(errorDrawable: Drawable?) {
-            Log.e(PREVIEWS, "Thumbnail loading failed")
-        }
-
-        override fun onResourceReady(bitmap: Bitmap,transition: Transition<in Bitmap>?) {
-            emit(bitmap)
         }
     }
 }
