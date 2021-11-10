@@ -20,7 +20,7 @@ class PreviewItemViewHolder(val binding: ItemImageBinding, val presenter: Previe
     override fun setSource(preview: Path?, placeholder: Int, resource: ResourceMeta) {
         binding.layoutProgress.root.isVisible = false
 
-        ImageUtils.loadImageWithPlaceholder(preview, placeholder, binding.ivImage)
+        ImageUtils.loadZoomImageWithPlaceholder(preview, placeholder, binding.ivImage)
 
         if (resource.kind == ResourceKind.VIDEO){
             binding.icPlay.makeVisibleAndSetOnClickListener {

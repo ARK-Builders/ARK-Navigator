@@ -32,8 +32,8 @@ data class PreviewAndThumbnail(val preview: Path, val thumbnail: Path) {
             THUMBNAILS_STORAGE.resolve(id.toString())
 
         init {
-            if (PREVIEWS_STORAGE.notExists()) Files.createDirectories(PREVIEWS_STORAGE)
-            if (THUMBNAILS_STORAGE.notExists()) Files.createDirectories(THUMBNAILS_STORAGE)
+            Files.createDirectories(PREVIEWS_STORAGE)
+            Files.createDirectories(THUMBNAILS_STORAGE)
         }
 
         fun locate(path: Path, resource: ResourceMeta): PreviewAndThumbnail? {
