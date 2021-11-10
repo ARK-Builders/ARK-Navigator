@@ -70,7 +70,6 @@ fun extension(path: Path): String {
     return path.extension.lowercase()
 }
 
-//todo use metadata
 fun reifySorting(sorting: Sorting): Comparator<Path>? =
     when (sorting) {
         Sorting.NAME -> compareBy { it.fileName }

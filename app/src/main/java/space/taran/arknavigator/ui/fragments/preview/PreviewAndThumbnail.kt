@@ -1,30 +1,20 @@
 package space.taran.arknavigator.ui.fragments.preview
 
 import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
-import android.util.Log
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
-import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.transition.Transition
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.extra.ImageMetaExtra
 import space.taran.arknavigator.ui.App
-import space.taran.arknavigator.utils.PREVIEWS
 import space.taran.arknavigator.utils.extension
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 import kotlin.io.path.notExists
 
 data class PreviewAndThumbnail(val preview: Path, val thumbnail: Path) {
 
-    //todo: separate PreviewRepos similar to ResourceIndexes
-    // this would replicate generated previews to other devices
     companion object {
 
         private val PREVIEWS_STORAGE: Path =
@@ -69,8 +59,7 @@ data class PreviewAndThumbnail(val preview: Path, val thumbnail: Path) {
             Files.deleteIfExists(thumbnailPath(id))
         }
 
-        @ExperimentalCoroutinesApi
-        suspend fun generate(path: Path, meta: ResourceMeta) {
+        fun generate(path: Path, meta: ResourceMeta) {
             if (Files.isDirectory(path)) {
                 throw AssertionError("Previews for folders are constant")
             }

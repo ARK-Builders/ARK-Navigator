@@ -15,7 +15,7 @@ data class ResourceWithExtra(
 interface ResourceDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertResources(resources: List<Resource>)
-    //todo: possible to merge?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertExtras(resources: List<ResourceExtra>)
 

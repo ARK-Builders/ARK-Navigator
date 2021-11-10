@@ -24,8 +24,6 @@ import java.nio.file.Files
 import java.nio.file.Path
 import javax.inject.Inject
 
-//todo: protect foldersRepo when enabling real concurrency
-
 class FoldersPresenter : MvpPresenter<FoldersView>() {
     @Inject
     lateinit var router: Router
@@ -153,7 +151,7 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
         }
     }
 
-    fun addRoot(root: Path) = presenterScope.launch(NonCancellable) {
+    private fun addRoot(root: Path) = presenterScope.launch(NonCancellable) {
         viewState.setProgressVisibility(true, "Adding folder")
         Log.d(FOLDERS_SCREEN, "root $root added in RootsPresenter")
         val path = root.toRealPath()
