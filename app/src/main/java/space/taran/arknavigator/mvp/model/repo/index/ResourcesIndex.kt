@@ -1,6 +1,5 @@
 package space.taran.arknavigator.mvp.model.repo.index
 
-import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import java.nio.file.Path
 
 interface ResourcesIndex {
@@ -14,12 +13,9 @@ interface ResourcesIndex {
     fun listIds(prefix: Path?): Set<ResourceId> =
         listResources(prefix).map { it.id }.toSet()
 
-    //todo leave only one of listIds and listResources
     fun listResources(prefix: Path?): Set<ResourceMeta>
 
     fun listAllIds(): Set<ResourceId> = listIds(null)
-
-    fun listAllResources(): Set<ResourceMeta> = listResources(null)
 
     // whenever we have an id, we assume that we have this id in the index
     // we must load/calculate all necessary ids before we load presenters

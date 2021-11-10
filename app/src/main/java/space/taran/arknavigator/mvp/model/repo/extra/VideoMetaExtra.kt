@@ -35,7 +35,6 @@ object VideoMetaExtra {
 
         retriever.release()
         if (result.isEmpty()) {
-            TODO()
             return null
         }
 
