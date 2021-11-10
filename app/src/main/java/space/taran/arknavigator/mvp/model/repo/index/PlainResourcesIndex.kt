@@ -6,6 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import space.taran.arknavigator.mvp.model.dao.Resource
 import space.taran.arknavigator.mvp.model.dao.ResourceDao
+import space.taran.arknavigator.mvp.model.dao.ResourceExtra
 import space.taran.arknavigator.mvp.model.dao.ResourceWithExtra
 import space.taran.arknavigator.ui.fragments.preview.PreviewAndThumbnail
 import space.taran.arknavigator.utils.*
@@ -147,15 +148,20 @@ class PlainResourcesIndex internal constructor (
         Log.d(RESOURCES_INDEX, "persisting "
             + "${resources.size} resources from root $root")
 
-        val entities = resources.entries.toList()
-            .map {
+        val roomResources = mutableListOf<Resource>()
+        val roomExtra = mutableListOf<ResourceExtra>()
+
+        resources.entries.toList()
+            .forEach {
                 PreviewAndThumbnail.generate(it.key, it.value)
-                Resource.fromMeta(it.value, root, it.key)
+                roomResources.add(Resource.fromMeta(it.value, root, it.key))
+                roomExtra.addAll(ResourceExtra.fromMetaExtra(it.value.id, it.value.extra))
             }
 
-        dao.insertResources(entities)
+        dao.insertResources(roomResources)
+        dao.insertExtras(roomExtra)
 
-        Log.d(RESOURCES_INDEX, "${entities.size} resources persisted")
+        Log.d(RESOURCES_INDEX, "${resources.size} resources persisted")
     }
 
     companion object {
