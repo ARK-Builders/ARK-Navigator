@@ -1,13 +1,11 @@
 package space.taran.arknavigator.mvp.model.repo.index
 
-import android.widget.TextView
 import space.taran.arknavigator.mvp.model.dao.ResourceExtra
 import space.taran.arknavigator.mvp.model.dao.ResourceWithExtra
-import space.taran.arknavigator.mvp.model.repo.extra.ImageMetaExtra
 import space.taran.arknavigator.mvp.model.repo.extra.DocumentMetaExtra
+import space.taran.arknavigator.mvp.model.repo.extra.ImageMetaExtra
 import space.taran.arknavigator.mvp.model.repo.extra.VideoMetaExtra
 import space.taran.arknavigator.utils.extension
-import space.taran.arknavigator.utils.extensions.makeGone
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.attribute.FileTime
@@ -87,20 +85,6 @@ data class ResourceMetaExtra(val data: Map<MetaExtraTag, Long>) {
                 ResourceKind.VIDEO -> VideoMetaExtra.extract(path)
                 ResourceKind.DOCUMENT -> DocumentMetaExtra.extract(path)
                 null -> null
-            }
-        }
-
-        fun draw(kind: ResourceKind?, extra: ResourceMetaExtra?, extraTVs: Array<TextView>, verbose: Boolean) {
-            extraTVs.forEach { it.makeGone() }
-
-            if (extra != null) {
-                when(kind) {
-                    ResourceKind.VIDEO -> VideoMetaExtra.draw(extra,
-                        extraTVs[0], extraTVs[1])
-                    ResourceKind.DOCUMENT -> DocumentMetaExtra.draw(extra,
-                        extraTVs[0], verbose)
-                    else -> {}
-                }
             }
         }
     }
