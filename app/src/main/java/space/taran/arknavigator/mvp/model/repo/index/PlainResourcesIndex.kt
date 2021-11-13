@@ -1,6 +1,5 @@
 package space.taran.arknavigator.mvp.model.repo.index
 
-import android.os.FileUtils
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -8,13 +7,12 @@ import space.taran.arknavigator.mvp.model.dao.Resource
 import space.taran.arknavigator.mvp.model.dao.ResourceDao
 import space.taran.arknavigator.mvp.model.dao.ResourceExtra
 import space.taran.arknavigator.mvp.model.dao.ResourceWithExtra
-import space.taran.arknavigator.ui.fragments.preview.PreviewAndThumbnail
+import space.taran.arknavigator.mvp.model.repo.preview.PreviewAndThumbnail
 import space.taran.arknavigator.utils.*
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.io.path.ExperimentalPathApi
-import kotlin.io.path.listDirectoryEntries
 
 internal data class Difference(
     val deleted: List<Path>,

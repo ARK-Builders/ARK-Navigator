@@ -10,7 +10,6 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.GridLayoutManager
-import kotlinx.coroutines.launch
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import space.taran.arknavigator.R
@@ -91,6 +90,7 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
         Log.d(RESOURCES_SCREEN, "initializing ResourcesFragment")
         (activity as MainActivity).setSelectedTab(1)
         (activity as MainActivity).setToolbarVisibility(true)
+        (requireActivity() as MainActivity).setBottomNavigationVisibility(true)
         setHasOptionsMenu(true)
 
         resourcesAdapter = ResourcesRVAdapter(presenter.gridPresenter)

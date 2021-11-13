@@ -16,8 +16,6 @@ import space.taran.arknavigator.BuildConfig
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.FragmentGalleryBinding
 import space.taran.arknavigator.mvp.model.repo.*
-import space.taran.arknavigator.mvp.model.repo.extra.DocumentMetaExtra
-import space.taran.arknavigator.mvp.model.repo.extra.VideoMetaExtra
 import space.taran.arknavigator.mvp.model.repo.index.*
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
@@ -27,12 +25,12 @@ import space.taran.arknavigator.mvp.view.NotifiableView
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.adapter.PreviewsPager
+import space.taran.arknavigator.ui.extra.ExtraLoader
 import space.taran.arknavigator.ui.fragments.dialog.EditTagsDialogFragment
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.utils.*
 import space.taran.arknavigator.utils.extensions.makeGone
 import space.taran.arknavigator.utils.extensions.makeVisibleAndSetOnClickListener
-import space.taran.arknavigator.utils.extensions.textOrGone
 import java.io.File
 
 class GalleryFragment(
@@ -191,7 +189,7 @@ class GalleryFragment(
     override fun showEditTagsDialog(position: Int) {
         val resource = resources[position]
         Log.d(GALLERY_SCREEN, "showing [edit-tags] dialog for resource $resource")
-        val dialog = EditTagsDialogFragment(resource, storage, index, ::onTagsChanged)
+        val dialog = EditTagsDialogFragment(resource.id, storage, index, ::onTagsChanged)
         dialog.show(childFragmentManager, dialog.TAG)
     }
 
@@ -203,33 +201,40 @@ class GalleryFragment(
             openResourceFab.setOnClickListener(null)
             editResourceFab.setOnClickListener(null)
 
-            when(resources[currentPosition].kind) {
+            when (resources[currentPosition].kind) {
                 ResourceKind.VIDEO -> {
                     // "open" capabilities only
                     editResourceFab.makeGone()
-                    openResourceFab.makeVisibleAndSetOnClickListener{
+                    openResourceFab.makeVisibleAndSetOnClickListener {
                         openIntentChooser(currentPosition, Intent.ACTION_VIEW, true)
                     }
                 }
                 ResourceKind.DOCUMENT -> {
                     // both "open" and "edit" capabilities
                     editResourceFab.makeVisibleAndSetOnClickListener {
-                        openIntentChooser(currentPosition, Intent.ACTION_EDIT) }
+                        openIntentChooser(currentPosition, Intent.ACTION_EDIT)
+                    }
 
                     openResourceFab.makeVisibleAndSetOnClickListener {
-                        openIntentChooser(currentPosition, Intent.ACTION_VIEW, true) }
+                        openIntentChooser(currentPosition, Intent.ACTION_VIEW, true)
+                    }
                 }
                 ResourceKind.IMAGE -> {
                     // "edit" capabilities only
                     openResourceFab.makeGone()
                     editResourceFab.makeVisibleAndSetOnClickListener {
-                        openIntentChooser(currentPosition, Intent.ACTION_EDIT) }
+                        openIntentChooser(currentPosition, Intent.ACTION_EDIT)
+                    }
                 }
             }
         }
     }
 
-    private fun openIntentChooser(position: Int, actionType: String, detachProcess: Boolean = false) {
+    private fun openIntentChooser(
+        position: Int,
+        actionType: String,
+        detachProcess: Boolean = false
+    ) {
         val resource = resources[position]
         val filePath = index.getPath(resource.id)
 
@@ -273,11 +278,11 @@ class GalleryFragment(
         val filePath = index.getPath(resource.id)
         setTitle(filePath.fileName.toString())
 
-        ResourceMetaExtra.draw(
-            resource.kind,
-            resource.extra,
-            arrayOf(binding.primaryExtra, binding.secondaryExtra),
-            verbose = true)
+        ExtraLoader.load(
+            resource,
+            listOf(binding.primaryExtra, binding.secondaryExtra),
+            verbose = true
+        )
     }
 
     private fun displayPreviewTags(resource: ResourceId, tags: Tags) {
