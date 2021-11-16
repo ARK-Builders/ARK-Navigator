@@ -110,7 +110,7 @@ class GalleryPresenter(
     }
 
     private fun onPlayButtonClick(position: Int) {
-        viewState.openResourceDetached(position)
+        viewState.viewInExternalApp(position)
     }
 
     fun quit(): Boolean {

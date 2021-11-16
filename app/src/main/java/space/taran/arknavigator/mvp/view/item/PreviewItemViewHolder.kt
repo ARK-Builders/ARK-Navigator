@@ -24,7 +24,7 @@ class PreviewItemViewHolder(val binding: ItemImageBinding, val presenter: Previe
 
         if (resource.kind == ResourceKind.VIDEO){
             binding.icPlay.makeVisibleAndSetOnClickListener {
-                presenter.onPlayButtonCLick(pos)
+                presenter.onPlayButtonClick(pos)
             }
         } else {
             binding.icPlay.isVisible = false
