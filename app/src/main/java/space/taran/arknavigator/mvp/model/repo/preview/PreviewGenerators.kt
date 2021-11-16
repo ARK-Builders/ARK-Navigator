@@ -2,6 +2,7 @@ package space.taran.arknavigator.mvp.model.repo.preview
 
 import android.graphics.Bitmap
 import com.bumptech.glide.Glide
+import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.request.RequestOptions
 import space.taran.arknavigator.mvp.model.repo.extra.ImageMetaExtra
 import space.taran.arknavigator.mvp.model.repo.preview.generator.PdfPreviewGenerator
@@ -10,14 +11,18 @@ import space.taran.arknavigator.utils.extension
 import java.nio.file.Files
 import java.nio.file.Path
 
-object PreviewAndThumbnailGenerator {
+object PreviewGenerators {
 
     private const val THUMBNAIL_WIDTH = 72
     private const val THUMBNAIL_HEIGHT = 128
     private const val COMPRESSION_QUALITY = 100
 
+    // Use this map to declare new types of generators
+    private var generatorsByExt: Map<String, (Path) -> Bitmap> = mapOf(
+        "pdf" to { path: Path -> PdfPreviewGenerator.generate(path) }
+    )
+
     fun generate(path: Path, previewPath: Path, thumbnailPath: Path) {
-        if (previewExists(previewPath, thumbnailPath)) return
         val ext = extension(path)
 
         if (ImageMetaExtra.ACCEPTED_EXTENSIONS.contains(ext)) {
@@ -35,26 +40,6 @@ object PreviewAndThumbnailGenerator {
             storePreview(previewPath, preview)
             storeThumbnail(thumbnailPath, thumbnail)
         }
-    }
-
-    private fun resizePreviewToThumbnail(preview: Bitmap): Bitmap {
-        return Glide.with(App.instance)
-            .asBitmap()
-            .load(preview)
-            .apply(RequestOptions().override(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT))
-            .fitCenter()
-            .submit()
-            .get()
-    }
-
-    private fun resizePreviewToThumbnail(path: Path): Bitmap {
-        return Glide.with(App.instance)
-            .asBitmap()
-            .load(path.toFile())
-            .apply(RequestOptions().override(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT))
-            .fitCenter()
-            .submit()
-            .get()
     }
 
     private fun storePreview(path: Path, bitmap: Bitmap) =
@@ -78,17 +63,20 @@ object PreviewAndThumbnailGenerator {
         }
     }
 
-    private fun previewExists(previewPath: Path, thumbnailPath: Path): Boolean {
-        if (Files.exists(previewPath)) {
-            if (!Files.exists(thumbnailPath)) {
-                throw AssertionError("Thumbnails must always exist if corresponding preview exists")
-            }
-            return true
-        }
-        return false
-    }
+    private fun resizePreviewToThumbnail(preview: Bitmap): Bitmap =
+        resizeToThumbnail(bitmapBuilder().load(preview))
 
-    private var generatorsByExt: Map<String, (Path) -> Bitmap> = mapOf(
-        "pdf" to { path: Path -> PdfPreviewGenerator.generate(path) }
-    )
+    private fun resizePreviewToThumbnail(path: Path): Bitmap =
+        resizeToThumbnail(bitmapBuilder().load(path.toFile()))
+
+    private fun bitmapBuilder(): RequestBuilder<Bitmap> =
+        Glide.with(App.instance)
+            .asBitmap()
+
+    private fun resizeToThumbnail(builder: RequestBuilder<Bitmap>): Bitmap =
+        builder
+            .apply(RequestOptions().override(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT))
+            .fitCenter()
+            .submit()
+            .get()
 }
