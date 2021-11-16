@@ -5,12 +5,16 @@ import space.taran.arknavigator.mvp.view.item.PreviewItemView
 import java.nio.file.Path
 
 class PreviewsList(
-    private val previews: MutableList<Path?>,
-    private val placeholders: MutableList<Int>,
-    private val resources: MutableList<ResourceMeta>,
+    previews: List<Path?>,
+    placeholders: List<Int>,
+    resources: List<ResourceMeta>,
     private val onItemClickListener: (PreviewItemView) -> Unit,
     private val onImageZoomListener: (Boolean) -> Unit,
     private val onPlayButtonListener: (Int) -> Unit) {
+
+    private val previews: MutableList<Path?> = previews.toMutableList()
+    private val placeholders: MutableList<Int> = placeholders.toMutableList()
+    private val resources: MutableList<ResourceMeta> = resources.toMutableList()
 
     fun getCount() = previews.size
 
