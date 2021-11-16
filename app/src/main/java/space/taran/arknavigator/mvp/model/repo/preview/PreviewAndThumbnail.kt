@@ -59,7 +59,19 @@ data class PreviewAndThumbnail(val preview: Path, val thumbnail: Path) {
             val previewPath = previewPath(meta.id)
             val thumbnailPath = thumbnailPath(meta.id)
 
-            PreviewAndThumbnailGenerator.generate(path, previewPath, thumbnailPath)
+            if (!previewExists(previewPath, thumbnailPath)) {
+                PreviewGenerators.generate(path, previewPath, thumbnailPath)
+            }
+        }
+
+        private fun previewExists(previewPath: Path, thumbnailPath: Path): Boolean {
+            if (Files.exists(previewPath)) {
+                if (!Files.exists(thumbnailPath)) {
+                    throw AssertionError("Thumbnails must always exist if corresponding preview exists")
+                }
+                return true
+            }
+            return false
         }
     }
 }
