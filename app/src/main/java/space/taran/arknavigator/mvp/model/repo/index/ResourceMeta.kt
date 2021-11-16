@@ -18,17 +18,21 @@ data class ResourceMeta(
     val extra: ResourceMetaExtra?) {
 
     companion object {
-        fun fromPath(path: Path): ResourceMeta {
-            val id = computeId(path)
+        fun fromPath(path: Path): ResourceMeta? {
+            val size = Files.size(path)
+            if (size < 1) {
+                return null
+            }
+
+            val id = computeId(size, path)
             val kind = kindByExt(extension(path))
 
             return ResourceMeta(
                 id = id,
                 modified = Files.getLastModifiedTime(path),
-                size = Files.size(path),
+                size = size,
                 kind = kind,
-                extra = ResourceMetaExtra.provide(kind, path)
-            )
+                extra = ResourceMetaExtra.provide(kind, path))
         }
 
         fun fromRoom(room: ResourceWithExtra): ResourceMeta {
