@@ -14,11 +14,9 @@ typealias ResourceId = Long
 // Calculating CRC-32 hash of a file takes about the
 // same time as reading the file from internal storage.
 
-fun computeId(file: Path): ResourceId {
-    val size = Files.size(file)
-    Log.d(
-        RESOURCES_INDEX, "calculating hash of $file " +
-            "(size is ${size / MEGABYTE} megabytes)")
+fun computeId(size: Long, file: Path): ResourceId {
+    Log.d(RESOURCES_INDEX,
+        "calculating hash of $file (size is ${size / MEGABYTE} megabytes)")
 
     val crc32 = CRC32()
     //todo: synchronize access

@@ -109,8 +109,10 @@ class PlainResourcesIndex internal constructor (
         val toInsert = diff.updated + diff.added
         toInsert.forEach { path ->
             val meta = ResourceMeta.fromPath(path)
-            metaByPath[path] = meta
-            pathById[meta.id] = path
+            if (meta != null) {
+                metaByPath[path] = meta
+                pathById[meta.id] = path
+            }
         }
 
         Log.d(RESOURCES_INDEX, "re-scanning ${toInsert.size} resources")
@@ -166,8 +168,10 @@ class PlainResourcesIndex internal constructor (
 
         internal suspend fun scanResources(files: List<Path>): Map<Path, ResourceMeta> =
             withContext(Dispatchers.IO) {
-                files.map {
-                    it to ResourceMeta.fromPath(it)
+                files.mapNotNull {
+                    ResourceMeta.fromPath(it)?.let { meta ->
+                        it to meta
+                    }
                 }.toMap()
             }
 
