@@ -36,7 +36,7 @@ class PreviewsList(
         onItemClickListener(itemView)
     }
 
-    fun onPlayButtonCLick(position: Int) {
+    fun onPlayButtonClick(position: Int) {
         onPlayButtonListener(position)
     }
 }

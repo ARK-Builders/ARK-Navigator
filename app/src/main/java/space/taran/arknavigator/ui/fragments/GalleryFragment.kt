@@ -31,7 +31,6 @@ import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.utils.*
 import space.taran.arknavigator.utils.extensions.makeGone
 import space.taran.arknavigator.utils.extensions.makeVisibleAndSetOnClickListener
-import java.io.File
 
 class GalleryFragment(
     private val index: ResourcesIndex,
@@ -133,7 +132,7 @@ class GalleryFragment(
         binding.viewPager.isUserInputEnabled = enabled
     }
 
-    override fun openResourceDetached(pos: Int) {
+    override fun viewInExternalApp(pos: Int) {
         openIntentChooser(pos, Intent.ACTION_VIEW, true)
     }
 
@@ -168,24 +167,6 @@ class GalleryFragment(
         }
     }
 
-    private fun shareResource(position: Int) {
-        val resource = resources[position]
-        val path = index.getPath(resource.id)
-
-        val context = requireContext()
-        val uri = FileProvider.getUriForFile(
-            context, "space.taran.arknavigator.provider",
-            path.toFile()
-        )
-        val mime = context.contentResolver.getType(uri)
-        Log.d(GALLERY_SCREEN, "sharing $uri of type $mime")
-
-        val intent = Intent(Intent.ACTION_SEND)
-        intent.type = mime
-        intent.putExtra(Intent.EXTRA_STREAM, uri)
-        startActivity(Intent.createChooser(intent, "Share using"))
-    }
-
     override fun showEditTagsDialog(position: Int) {
         val resource = resources[position]
         Log.d(GALLERY_SCREEN, "showing [edit-tags] dialog for resource $resource")
@@ -194,75 +175,93 @@ class GalleryFragment(
     }
 
     private fun setupOpenEditFABs() {
-
-        val currentPosition = binding.viewPager.currentItem
+        val position = binding.viewPager.currentItem
 
         binding.apply {
             openResourceFab.setOnClickListener(null)
             editResourceFab.setOnClickListener(null)
 
-            when (resources[currentPosition].kind) {
+            when (resources[position].kind) {
                 ResourceKind.VIDEO -> {
                     // "open" capabilities only
                     editResourceFab.makeGone()
                     openResourceFab.makeVisibleAndSetOnClickListener {
-                        openIntentChooser(currentPosition, Intent.ACTION_VIEW, true)
+                        viewInExternalApp(position)
                     }
                 }
                 ResourceKind.DOCUMENT -> {
                     // both "open" and "edit" capabilities
                     editResourceFab.makeVisibleAndSetOnClickListener {
-                        openIntentChooser(currentPosition, Intent.ACTION_EDIT)
+                        editResource(position)
                     }
 
                     openResourceFab.makeVisibleAndSetOnClickListener {
-                        openIntentChooser(currentPosition, Intent.ACTION_VIEW, true)
+                        viewInExternalApp(position)
                     }
                 }
                 ResourceKind.IMAGE -> {
                     // "edit" capabilities only
                     openResourceFab.makeGone()
                     editResourceFab.makeVisibleAndSetOnClickListener {
-                        openIntentChooser(currentPosition, Intent.ACTION_EDIT)
+                        editResource(position)
                     }
                 }
             }
         }
     }
 
+    private fun editResource(position: Int) =
+        openIntentChooser(position, Intent.ACTION_EDIT, detachProcess = true)
+
+    private fun shareResource(position: Int) =
+        openIntentChooser(position, Intent.ACTION_SEND, detachProcess = false)
+
     private fun openIntentChooser(
         position: Int,
         actionType: String,
-        detachProcess: Boolean = false
-    ) {
-        val resource = resources[position]
-        val filePath = index.getPath(resource.id)
+        detachProcess: Boolean) {
 
-        //Create intent, and set the data and extension to it
+        val resource = resources[position]
+        val path = index.getPath(resource.id)
+        Log.i(GALLERY_SCREEN, "Opening resource in an external application")
+        Log.i(GALLERY_SCREEN, "id: ${resource.id}")
+        Log.i(GALLERY_SCREEN, "path: $path")
+        Log.i(GALLERY_SCREEN, "action: $actionType")
+
+        val file = path.toFile()
+        val extension: String = extension(path)
+
+        val context = requireContext()
+
+        val uri = FileProvider.getUriForFile(
+            context,
+            BuildConfig.APPLICATION_ID + ".provider", file)
+
         val intent = Intent()
+        intent.setDataAndType(uri, context.contentResolver.getType(uri))
+        Log.d(GALLERY_SCREEN, "URI: ${intent.data}")
+        Log.d(GALLERY_SCREEN, "MIME: ${intent.type}")
+
         intent.action = actionType
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-
-        if (detachProcess)
+        val actionString = when(actionType) {
+            Intent.ACTION_VIEW -> "View the resource with:"
+            Intent.ACTION_EDIT -> {
+                intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                "Edit the resource with:"
+            }
+            Intent.ACTION_SEND -> {
+                intent.putExtra(Intent.EXTRA_STREAM, uri)
+                "Share the resource with:"
+            }
+            else -> "Open the resource with:"
+        }
+        if (detachProcess) {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
 
-        val file = File(filePath.toString())
-        val extension = ".${extension(filePath)}"
-
-        val fileURI = FileProvider.getUriForFile(
-            requireContext(),
-            BuildConfig.APPLICATION_ID + ".provider", file
-        )
-
-        intent.setDataAndType(
-            fileURI,
-            MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
-        )
-
-        val actionString = if (actionType == Intent.ACTION_VIEW)
-            "Open with:"
-        else "Choose application to edit:"
-        requireContext().startActivity(Intent.createChooser(intent, actionString))
+        val chooser = Intent.createChooser(intent, actionString)
+        context.startActivity(chooser)
     }
 
 
