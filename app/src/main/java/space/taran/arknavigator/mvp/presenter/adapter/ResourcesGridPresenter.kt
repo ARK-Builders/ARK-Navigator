@@ -1,5 +1,6 @@
 package space.taran.arknavigator.mvp.presenter.adapter
 
+import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -13,6 +14,7 @@ import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.mvp.view.item.FileItemView
 import space.taran.arknavigator.navigation.Screens
+import space.taran.arknavigator.utils.RESOURCES_SCREEN
 import space.taran.arknavigator.utils.Sorting
 import space.taran.arknavigator.utils.reifySorting
 import space.taran.arknavigator.utils.unequalCompareBy
@@ -50,6 +52,7 @@ class ResourcesGridPresenter(
 
     fun bindView(view: FileItemView) {
         val resource = selection[view.position()]
+        Log.d(RESOURCES_SCREEN, "binding view for resource ${resource.id}")
 
         val path = index.getPath(resource.id)
 

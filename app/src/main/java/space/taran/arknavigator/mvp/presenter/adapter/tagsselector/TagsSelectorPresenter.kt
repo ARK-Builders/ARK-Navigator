@@ -114,6 +114,7 @@ class TagsSelectorPresenter(
     }
 
     fun calculateTagsAndSelection() {
+        Log.d(TAGS_SELECTOR, "calculating tags and selection")
         if (storage == null || index == null)
             return
 

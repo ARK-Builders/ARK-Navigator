@@ -90,7 +90,7 @@ class PlainResourcesIndex internal constructor (
         val savedDeletedMetas = mutableMapOf<Path, ResourceMeta?>()
         diff.deleted.forEach {
             val id = metaByPath[it]!!.id
-            pathById[id]
+            pathById.remove(id)
             metaByPath.remove(it)
             PreviewAndThumbnail.forget(id)
         }
