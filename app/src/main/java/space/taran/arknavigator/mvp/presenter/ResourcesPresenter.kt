@@ -94,10 +94,10 @@ class ResourcesPresenter(
 
             gridPresenter.init(index, storage, router)
 
-            val listedResources = listResources()
+            val resources = listResources()
             viewState.setProgressVisibility(true, "Sorting")
 
-            gridPresenter.resetResources(listedResources)
+            resetResources(resources)
             tagsSelectorPresenter.init(index, storage)
             tagsSelectorPresenter.calculateTagsAndSelection()
 
@@ -116,8 +116,11 @@ class ResourcesPresenter(
 
     fun onViewResume() {
         tagsSelectorPresenter.calculateTagsAndSelection()
-        if (!tagsEnabled)
-            presenterScope.launch { gridPresenter.resetResources(listResources(untaggedOnly = true)) }
+        if (!tagsEnabled) {
+            presenterScope.launch {
+                resetResources(listResources(untaggedOnly = true))
+            }
+        }
     }
 
     fun onMenuTagsToggle(enabled: Boolean) {
@@ -127,9 +130,10 @@ class ResourcesPresenter(
         presenterScope.launch {
             if (tagsEnabled) {
                 gridPresenter.resetResources(listResources())
-                gridPresenter.updateSelection(tagsSelectorPresenter.selection)
-            } else
-                gridPresenter.resetResources(listResources(untaggedOnly = true))
+                updateSelection(tagsSelectorPresenter.selection)
+            } else {
+                resetResources(listResources(untaggedOnly = true))
+            }
         }
 
         val ids = listResources().map { it.id }
@@ -153,8 +157,7 @@ class ResourcesPresenter(
     }
 
     private fun onSelectionChange(selection: Set<ResourceId>) {
-        viewState.notifyUser("${selection.size} resources selected")
-        presenterScope.launch { gridPresenter.updateSelection(selection) }
+        presenterScope.launch { updateSelection(selection) }
     }
 
     private fun listResources(untaggedOnly: Boolean = false): Set<ResourceMeta> {
@@ -167,7 +170,20 @@ class ResourcesPresenter(
             underPrefix
         }
 
-        viewState.notifyUser("${result.size} resources selected")
         return result.toSet()
+    }
+
+    private suspend fun updateSelection(selection: Set<ResourceId>) {
+        if (this.tagsEnabled) {
+            viewState.notifyUser("${selection.size} resources selected")
+            gridPresenter.updateSelection(selection)
+        }
+    }
+
+    private suspend fun resetResources(resources: Set<ResourceMeta>) {
+        if (!this.tagsEnabled) {
+            viewState.notifyUser("${resources.size} resources selected")
+        }
+        gridPresenter.resetResources(resources)
     }
 }
