@@ -4,11 +4,11 @@ import android.util.Log
 import androidx.recyclerview.widget.DiffUtil
 import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.mvp.model.repo.Folders
+import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.view.FoldersView
 import space.taran.arknavigator.navigation.Screens
 import space.taran.arknavigator.ui.adapter.folderstree.FolderNodeView
 import space.taran.arknavigator.utils.FOLDERS_TREE
-import java.lang.IllegalStateException
 import java.nio.file.Path
 import javax.inject.Inject
 
@@ -44,8 +44,8 @@ class FoldersTreePresenter(
     fun onNavigateBtnClick(view: FolderNodeView) {
         when (val node = nodes[view.position()]) {
             is DeviceNode -> { }
-            is RootNode -> router.navigateTo(Screens.ResourcesScreen(node.path, null))
-            is FavoriteNode -> router.navigateTo(Screens.ResourcesScreen(node.root, node.path))
+            is RootNode -> router.navigateTo(Screens.ResourcesScreen(RootAndFav(node.path.toString(), null)))
+            is FavoriteNode -> router.navigateTo(Screens.ResourcesScreen(RootAndFav(node.root.toString(), node.path.toString())))
         }
     }
 
