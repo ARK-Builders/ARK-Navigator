@@ -3,6 +3,7 @@ package space.taran.arknavigator.mvp.model.repo.tags
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.utils.Constants.Companion.NO_TAGS
@@ -10,7 +11,6 @@ import space.taran.arknavigator.utils.Converters.Companion.stringFromTags
 import space.taran.arknavigator.utils.Converters.Companion.tagsFromString
 import space.taran.arknavigator.utils.TAGS_STORAGE
 import space.taran.arknavigator.utils.Tags
-import java.lang.IllegalStateException
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
@@ -225,6 +225,13 @@ class PlainTagsStorage
             fresh.init()
             storageByRoot[root] = fresh
             return@withContext fresh
+        }
+
+        fun getFromCache(rootAndFav: RootAndFav): TagsStorage {
+            return if (rootAndFav.isAllRoots())
+                AggregatedTagsStorage(storageByRoot.values)
+            else
+                storageByRoot[rootAndFav.root]!!
         }
 
         private fun verifyVersion(header: String) {

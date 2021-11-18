@@ -32,7 +32,7 @@ class ResourcesPresenter(
     lateinit var foldersRepo: FoldersRepo
 
     @Inject
-    lateinit var resourcesIndexFactory: ResourcesIndexFactory
+    lateinit var resourcesIndexRepo: ResourcesIndexRepo
 
     @Inject
     lateinit var userPreferences: UserPreferences
@@ -71,7 +71,7 @@ class ResourcesPresenter(
             Log.d(RESOURCES_SCREEN, "using roots $roots")
 
             val rootToIndex = roots
-                .map { it to resourcesIndexFactory.loadFromDatabase(it) }
+                .map { it to resourcesIndexRepo.loadFromDatabase(it) }
                 .toMap()
 
             val rootToStorage = roots
