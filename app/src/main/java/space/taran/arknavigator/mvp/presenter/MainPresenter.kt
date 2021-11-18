@@ -20,9 +20,11 @@ class MainPresenter: MvpPresenter<MainView>() {
         viewState.requestPerms()
     }
 
-    fun permsGranted() {
-        Log.d(MAIN, "creating Folders screen")
-        router.replaceScreen(Screens.FoldersScreen())
+    fun permsGranted(isActiveScreenExist: Boolean) {
+        if (!isActiveScreenExist) {
+            Log.d(MAIN, "creating Folders screen")
+            router.replaceScreen(Screens.FoldersScreen())
+        }
     }
 
     fun goToFoldersScreen() {

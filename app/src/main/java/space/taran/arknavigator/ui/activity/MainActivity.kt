@@ -15,19 +15,17 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.forEach
 import androidx.core.view.isVisible
-import space.taran.arknavigator.R
-import space.taran.arknavigator.mvp.presenter.MainPresenter
-import space.taran.arknavigator.mvp.view.MainView
-import space.taran.arknavigator.ui.fragments.BackButtonListener
 import moxy.MvpAppCompatActivity
 import moxy.ktx.moxyPresenter
-import moxy.presenter.InjectPresenter
-import moxy.presenter.ProvidePresenter
 import ru.terrakok.cicerone.NavigatorHolder
 import ru.terrakok.cicerone.android.support.SupportAppNavigator
 import space.taran.arknavigator.BuildConfig
+import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.ActivityMainBinding
+import space.taran.arknavigator.mvp.presenter.MainPresenter
+import space.taran.arknavigator.mvp.view.MainView
 import space.taran.arknavigator.ui.App
+import space.taran.arknavigator.ui.fragments.BackButtonListener
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.utils.MAIN
 import space.taran.arknavigator.utils.PERMISSIONS
@@ -90,7 +88,7 @@ class MainActivity : MvpAppCompatActivity(), MainView {
                     Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, packageUri)
                 startActivityForResult(intent, REQUEST_CODE_ALL_FILES_ACCESS)
             } else
-                presenter.permsGranted()
+                presenter.permsGranted(isActiveScreenExists())
         } else {
             val writePermission = ContextCompat.checkSelfPermission(
                 this,
@@ -105,7 +103,7 @@ class MainActivity : MvpAppCompatActivity(), MainView {
                 readPermission == PackageManager.PERMISSION_GRANTED
             ) {
                 Log.d(PERMISSIONS, "already granted")
-                presenter.permsGranted()
+                presenter.permsGranted(isActiveScreenExists())
             } else {
                 val permissions = arrayOf(
                     Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -134,7 +132,7 @@ class MainActivity : MvpAppCompatActivity(), MainView {
 
                 if (denied.isEmpty()) {
                     Log.d(PERMISSIONS, "all necessary permissions granted")
-                    presenter.permsGranted()
+                    presenter.permsGranted(isActiveScreenExists())
                 } else {
                     Log.e(PERMISSIONS, "denied $denied")
                     notifyUser("Permissions $denied denied")
@@ -193,7 +191,7 @@ class MainActivity : MvpAppCompatActivity(), MainView {
             }
             REQUEST_CODE_ALL_FILES_ACCESS -> {
                 if (Environment.isExternalStorageManager())
-                    presenter.permsGranted()
+                    presenter.permsGranted(isActiveScreenExists())
             }
             else -> Log.d(MAIN, "unknown activity result received")
         }
@@ -221,6 +219,12 @@ class MainActivity : MvpAppCompatActivity(), MainView {
             }
         }
         presenter.backClicked()
+    }
+
+    private fun isActiveScreenExists(): Boolean {
+        val fragmentsBackStackSize = supportFragmentManager.backStackEntryCount
+        Log.d(MAIN, "Fragments back stack size: $fragmentsBackStackSize")
+        return fragmentsBackStackSize > 0
     }
 
     companion object {
