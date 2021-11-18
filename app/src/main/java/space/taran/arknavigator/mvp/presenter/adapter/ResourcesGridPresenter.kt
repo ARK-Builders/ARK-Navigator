@@ -29,8 +29,8 @@ class ResourcesGridPresenter(
     @Inject
     lateinit var userPreferences: UserPreferences
 
-    private var resources = listOf<ResourceMeta>()
-    private var selection = listOf<ResourceMeta>()
+    private var resources = mutableListOf<ResourceMeta>()
+    private var selection = mutableListOf<ResourceMeta>()
 
     private lateinit var index: ResourcesIndex
     private lateinit var storage: TagsStorage
@@ -78,7 +78,7 @@ class ResourcesGridPresenter(
     }
 
     suspend fun updateSelection(selection: Set<ResourceId>) = withContext(Dispatchers.Default) {
-        this@ResourcesGridPresenter.selection = resources.filter { selection.contains(it.id) }
+        this@ResourcesGridPresenter.selection = resources.filter { selection.contains(it.id) }.toMutableList()
         withContext(Dispatchers.Main) {
             setProgressVisibility(false)
             viewState.updateAdapter()
@@ -86,7 +86,7 @@ class ResourcesGridPresenter(
     }
 
     suspend fun resetResources(resources: Set<ResourceMeta>) = withContext(Dispatchers.Default) {
-        this@ResourcesGridPresenter.resources = resources.toList()
+        this@ResourcesGridPresenter.resources = resources.toMutableList()
         sortAllResources()
         selection = this@ResourcesGridPresenter.resources
         withContext(Dispatchers.Main) {
@@ -120,17 +120,17 @@ class ResourcesGridPresenter(
                 .toMap()
                 .toSortedMap(unequalCompareBy(comparator))
                 .values
-                .toList()
+                .toMutableList()
         }
 
         if (sorting != Sorting.DEFAULT && !ascending) {
-            resources = resources.reversed()
+            resources = resources.reversed().toMutableList()
         }
     }
 
     private fun sortSelectionAndUpdateAdapter() {
         val selection = this.selection.toSet()
-        this.selection = resources.filter { selection.contains(it) }
+        this.selection = resources.filter { selection.contains(it) }.toMutableList()
         scope.launch(Dispatchers.Main) {
             setProgressVisibility(false)
             viewState.updateAdapter()
