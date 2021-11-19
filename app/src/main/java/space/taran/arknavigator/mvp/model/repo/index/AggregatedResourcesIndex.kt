@@ -7,6 +7,8 @@ class AggregatedResourcesIndex(
     private val shards: Collection<PlainResourcesIndex>)
     : ResourcesIndex {
 
+    var pendingRemovalIDs = mutableListOf<ResourceId>()
+
     override fun listResources(prefix: Path?): Set<ResourceMeta> =
         shards.flatMap { it.listResources(prefix) }
             .toSet()
@@ -18,7 +20,11 @@ class AggregatedResourcesIndex(
         tryShards { it.tryGetMeta(id) }
 
     override fun remove(id: ResourceId): Path =
-        tryShards { it.tryRemove(id) }
+        tryShards {
+            val path = it.tryRemove(id)
+            if (path != null) pendingRemovalIDs.add(id)
+            path
+        }
 
     private fun <R>tryShards(f: (shard: PlainResourcesIndex) -> R?): R {
         shards.iterator()

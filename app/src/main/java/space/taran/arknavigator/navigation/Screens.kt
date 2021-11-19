@@ -18,8 +18,8 @@ class Screens {
 
     class GalleryScreen(val index: ResourcesIndex,
                         val storage: TagsStorage,
-                        val selection: MutableList<ResourceMeta>,
+                        val selection: List<ResourceMeta>,
                         val position: Int): SupportAppScreen() {
-        override fun getFragment() = GalleryFragment(index, storage, selection, position)
+        override fun getFragment() = GalleryFragment(index, storage, selection.toMutableList(), position)
     }
 }

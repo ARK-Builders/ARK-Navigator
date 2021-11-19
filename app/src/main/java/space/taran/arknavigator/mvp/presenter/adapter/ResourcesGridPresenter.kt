@@ -29,8 +29,8 @@ class ResourcesGridPresenter(
     @Inject
     lateinit var userPreferences: UserPreferences
 
-    private var resources = mutableListOf<ResourceMeta>()
-    private var selection = mutableListOf<ResourceMeta>()
+    private var resources = listOf<ResourceMeta>()
+    private var selection = listOf<ResourceMeta>()
 
     private lateinit var index: ResourcesIndex
     private lateinit var storage: TagsStorage
@@ -78,7 +78,7 @@ class ResourcesGridPresenter(
     }
 
     suspend fun updateSelection(selection: Set<ResourceId>) = withContext(Dispatchers.Default) {
-        this@ResourcesGridPresenter.selection = resources.filter { selection.contains(it.id) }.toMutableList()
+        this@ResourcesGridPresenter.selection = resources.filter { selection.contains(it.id) }
         withContext(Dispatchers.Main) {
             setProgressVisibility(false)
             viewState.updateAdapter()
@@ -86,13 +86,19 @@ class ResourcesGridPresenter(
     }
 
     suspend fun resetResources(resources: Set<ResourceMeta>) = withContext(Dispatchers.Default) {
-        this@ResourcesGridPresenter.resources = resources.toMutableList()
+        this@ResourcesGridPresenter.resources = resources.toList()
         sortAllResources()
         selection = this@ResourcesGridPresenter.resources
         withContext(Dispatchers.Main) {
             setProgressVisibility(false)
             viewState.updateAdapter()
         }
+    }
+
+    fun removeResources(idToRemoveList: List<ResourceId>) {
+        if (idToRemoveList.isEmpty()) return
+        resources = resources.filter { !idToRemoveList.contains(it.id) }
+        selection = selection.filter { !idToRemoveList.contains(it.id) }
     }
 
     fun updateSorting(sorting: Sorting) {
@@ -120,17 +126,17 @@ class ResourcesGridPresenter(
                 .toMap()
                 .toSortedMap(unequalCompareBy(comparator))
                 .values
-                .toMutableList()
+                .toList()
         }
 
         if (sorting != Sorting.DEFAULT && !ascending) {
-            resources = resources.reversed().toMutableList()
+            resources = resources.reversed()
         }
     }
 
     private fun sortSelectionAndUpdateAdapter() {
         val selection = this.selection.toSet()
-        this.selection = resources.filter { selection.contains(it) }.toMutableList()
+        this.selection = resources.filter { selection.contains(it) }
         scope.launch(Dispatchers.Main) {
             setProgressVisibility(false)
             viewState.updateAdapter()

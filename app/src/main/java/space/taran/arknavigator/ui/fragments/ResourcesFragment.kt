@@ -7,6 +7,7 @@ import android.view.*
 import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.view.forEach
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.GridLayoutManager
@@ -49,10 +50,11 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
             App.instance.appComponent.inject(this)
         }
     }
-
     private lateinit var binding: FragmentResourcesBinding
     private var resourcesAdapter: ResourcesRVAdapter? = null
     private var sortByDialog: AlertDialog? = null
+
+    private var isLoading = false
 
     private val frameTop by lazy {
         val loc = IntArray(2)
@@ -128,6 +130,9 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
         super.onCreateOptionsMenu(menu, inflater)
         Log.d(RESOURCES_SCREEN, "inflating options menu in ResourcesFragment")
         inflater.inflate(R.menu.menu_tags_screen, menu)
+        menu.forEach {
+            it.isEnabled = !isLoading
+        }
     }
 
     override fun onResume() {
@@ -142,9 +147,11 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
     }
 
     override fun setProgressVisibility(isVisible: Boolean, withText: String) {
+        isLoading = isVisible
         binding.layoutProgress.apply {
             root.isVisible = isVisible
             (activity as MainActivity).setBottomNavigationEnabled(!isVisible)
+            requireActivity().invalidateOptionsMenu()
 
             if (withText.isNotEmpty()) {
                 progressText.setVisibilityAndLoadingStatus(View.VISIBLE)

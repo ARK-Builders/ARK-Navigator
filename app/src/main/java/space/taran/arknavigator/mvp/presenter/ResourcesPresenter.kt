@@ -116,16 +116,17 @@ class ResourcesPresenter(
 
     fun onViewResume() {
         tagsSelectorPresenter.calculateTagsAndSelection()
-        if (!tagsEnabled) {
-            presenterScope.launch {
-                resetResources(listResources(untaggedOnly = true))
-            }
+        if (this::storage.isInitialized && this::index.isInitialized) {
+            val aggregatedIndex = (index as? AggregatedResourcesIndex)?: return
+            gridPresenter.removeResources(aggregatedIndex.pendingRemovalIDs)
+            aggregatedIndex.pendingRemovalIDs.clear()
         }
     }
 
     fun onMenuTagsToggle(enabled: Boolean) {
         tagsEnabled = enabled
         viewState.setTagsEnabled(tagsEnabled)
+        viewState.setProgressVisibility(true, "Sorting tags")
 
         presenterScope.launch {
             if (tagsEnabled) {
