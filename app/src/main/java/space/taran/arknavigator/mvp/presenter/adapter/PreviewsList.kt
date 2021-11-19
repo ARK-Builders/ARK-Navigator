@@ -10,7 +10,7 @@ class PreviewsList(
     resources: List<ResourceMeta>,
     private val onItemClickListener: (PreviewItemView) -> Unit,
     private val onImageZoomListener: (Boolean) -> Unit,
-    private val onPlayButtonListener: (Int) -> Unit) {
+    private val onPlayButtonListener: () -> Unit) {
 
     private val previews: MutableList<Path?> = previews.toMutableList()
     private val placeholders: MutableList<Int> = placeholders.toMutableList()
@@ -41,6 +41,6 @@ class PreviewsList(
     }
 
     fun onPlayButtonClick(position: Int) {
-        onPlayButtonListener(position)
+        onPlayButtonListener()
     }
 }

@@ -9,26 +9,30 @@ import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
+import space.taran.arknavigator.mvp.model.repo.preview.PreviewAndThumbnail
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
 import space.taran.arknavigator.mvp.view.GalleryView
 import space.taran.arknavigator.mvp.view.item.PreviewItemView
-import space.taran.arknavigator.mvp.model.repo.preview.PreviewAndThumbnail
 import space.taran.arknavigator.utils.GALLERY_SCREEN
 import space.taran.arknavigator.utils.ImageUtils
-import space.taran.arknavigator.utils.Tags
+import space.taran.arknavigator.utils.Tag
 import space.taran.arknavigator.utils.extension
 import java.nio.file.Files
 import java.nio.file.Path
 import javax.inject.Inject
 
 class GalleryPresenter(
+    private val startAt: Int,
     private val index: ResourcesIndex,
     private val storage: TagsStorage,
     private val resources: MutableList<ResourceMeta>
 ) : MvpPresenter<GalleryView>() {
 
     private var isFullscreen = false
+    private var workaround = true
+    private var currentPos = startAt
+    private var currentResource = resources[startAt]
 
     @Inject
     lateinit var router: Router
@@ -56,31 +60,64 @@ class GalleryPresenter(
             ::onPreviewsItemZoom,
             ::onPlayButtonClick
         ))
+
+        displayPreview()
     }
 
-    fun deleteResource(resource: ResourceId) = presenterScope.launch(NonCancellable) {
-        Log.d(GALLERY_SCREEN, "deleting resource $resource")
+    fun onPageChanged(newPos: Int) {
+        if (resources.isEmpty())
+            return
+        if (startAt > 0 || !workaround) {
+            //weird bug causes this callback be called redundantly if startAt == 0
+            Log.d(GALLERY_SCREEN, "changing to preview at position $newPos")
+            currentPos = newPos
+            currentResource = resources[currentPos]
+            displayPreview()
+        }
+        workaround = false
+    }
 
-        storage.remove(resource)
-        val path = index.remove(resource)
-        Log.d(GALLERY_SCREEN, "path $path removed from index")
+    fun onTagsChanged(resource: ResourceId) {
+        val tags = storage.getTags(currentResource.id)
+        viewState.displayPreviewTags(currentResource.id, tags)
+    }
 
-        Files.delete(path)
+    fun onOpenFabClick() {
+        Log.d(GALLERY_SCREEN, "[open_resource] clicked at position $currentPos")
+        viewState.viewInExternalApp(index.getPath(currentResource.id))
+    }
+
+    fun onEditFabClick() {
+        Log.d(GALLERY_SCREEN, "[edit_resource] clicked at position $currentPos")
+        viewState.editResource(index.getPath(currentResource.id))
+    }
+
+    fun onRemoveFabClick() {
+        Log.d(GALLERY_SCREEN, "[remove_resource] clicked at position $currentPos")
+        deleteResource(currentResource.id)
+
+        resources.removeAt(currentPos)
+        if (resources.isEmpty()) onBackClick()
+
+        viewState.deleteResource(currentPos)
+    }
+
+    fun onShareFabClick() {
+        Log.d(GALLERY_SCREEN, "[share_resource] clicked at position $currentPos")
+        viewState.shareResource(index.getPath(currentResource.id))
+    }
+
+    fun onTagRemove(tag: Tag) = presenterScope.launch(NonCancellable) {
+        val id = currentResource.id
+        val tags = storage.getTags(id)
+        val newTags = tags - tag
+        viewState.displayPreviewTags(id, newTags)
+        Log.d(GALLERY_SCREEN, "tags $tags set to $currentResource")
+        storage.setTags(currentResource.id, newTags)
     }
 
     fun onEditTagsDialogBtnClick(position: Int) {
         viewState.showEditTagsDialog(position)
-    }
-
-    fun listTags(resource: ResourceId): Tags {
-        val tags = storage.getTags(resource)
-        Log.d(GALLERY_SCREEN, "resource $resource has tags $tags")
-        return tags
-    }
-
-    fun replaceTags(resource: ResourceId, tags: Tags) = presenterScope.launch(NonCancellable) {
-        Log.d(GALLERY_SCREEN, "tags $tags set to $resource")
-        storage.setTags(resource, tags)
     }
 
     fun onSystemUIVisibilityChange(isVisible: Boolean) {
@@ -90,6 +127,23 @@ class GalleryPresenter(
             return
         isFullscreen = newFullscreen
         viewState.setFullscreen(isFullscreen)
+    }
+
+    private fun deleteResource(resource: ResourceId) = presenterScope.launch(NonCancellable) {
+        Log.d(GALLERY_SCREEN, "deleting resource $resource")
+
+        storage.remove(resource)
+        val path = index.remove(resource)
+        Log.d(GALLERY_SCREEN, "path $path removed from index")
+
+        Files.delete(path)
+    }
+
+    private fun displayPreview() {
+        val resource = resources[currentPos]
+        val tags = storage.getTags(resource.id)
+        val filePath = index.getPath(resource.id)
+        viewState.setupPreview(currentPos, resource, tags, filePath.fileName.toString())
     }
 
     private fun onPreviewsItemZoom(zoomed: Boolean) {
@@ -109,11 +163,11 @@ class GalleryPresenter(
             itemView.resetZoom()
     }
 
-    private fun onPlayButtonClick(position: Int) {
-        viewState.viewInExternalApp(position)
+    private fun onPlayButtonClick() {
+        viewState.viewInExternalApp(index.getPath(currentResource.id))
     }
 
-    fun quit(): Boolean {
+    fun onBackClick(): Boolean {
         Log.d(GALLERY_SCREEN, "quitting from GalleryPresenter")
         router.exit()
         viewState.setFullscreen(false)
