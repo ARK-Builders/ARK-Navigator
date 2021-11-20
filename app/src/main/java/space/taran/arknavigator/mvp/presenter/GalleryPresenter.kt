@@ -6,10 +6,13 @@ import kotlinx.coroutines.launch
 import moxy.MvpPresenter
 import moxy.presenterScope
 import ru.terrakok.cicerone.Router
+import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
+import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
 import space.taran.arknavigator.mvp.model.repo.preview.PreviewAndThumbnail
+import space.taran.arknavigator.mvp.model.repo.tags.PlainTagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
 import space.taran.arknavigator.mvp.view.GalleryView
@@ -23,22 +26,42 @@ import java.nio.file.Path
 import javax.inject.Inject
 
 class GalleryPresenter(
-    private val startAt: Int,
-    private val index: ResourcesIndex,
-    private val storage: TagsStorage,
-    private val resources: MutableList<ResourceMeta>
+    private val rootAndFav: RootAndFav,
+    private val resourcesIds: List<ResourceId>,
+    private val startAt: Int
 ) : MvpPresenter<GalleryView>() {
 
     private var isFullscreen = false
     private var workaround = true
     private var currentPos = startAt
-    private var currentResource = resources[startAt]
+    private lateinit var currentResource: ResourceMeta
+
+    private lateinit var index: ResourcesIndex
+    private lateinit var storage: TagsStorage
+    private lateinit var resources: MutableList<ResourceMeta>
 
     @Inject
     lateinit var router: Router
 
+    @Inject
+    lateinit var indexRepo: ResourcesIndexRepo
+
     override fun onFirstViewAttach() {
         Log.d(GALLERY_SCREEN, "first view attached in GalleryPresenter")
+
+        // Now the index and storage can only be null if the app dies in the background.
+        // In this case, we have to go back and re-index the root on Resources screen.
+        index = indexRepo.getFromCache(rootAndFav) ?: let {
+            router.exit()
+            return
+        }
+        storage = PlainTagsStorage.getFromCache(rootAndFav) ?: let {
+            router.exit()
+            return
+        }
+        resources = resourcesIds.map { index.getMeta(it) }.toMutableList()
+        currentResource = resources[startAt]
+
 
         val previews = mutableListOf<Path?>()
         val placeholders = mutableListOf<Int>()
@@ -116,8 +139,8 @@ class GalleryPresenter(
         storage.setTags(currentResource.id, newTags)
     }
 
-    fun onEditTagsDialogBtnClick(position: Int) {
-        viewState.showEditTagsDialog(position)
+    fun onEditTagsDialogBtnClick() {
+        viewState.showEditTagsDialog(currentResource.id, index, storage)
     }
 
     fun onSystemUIVisibilityChange(isVisible: Boolean) {
@@ -143,7 +166,8 @@ class GalleryPresenter(
         val resource = resources[currentPos]
         val tags = storage.getTags(resource.id)
         val filePath = index.getPath(resource.id)
-        viewState.setupPreview(currentPos, resource, tags, filePath.fileName.toString())
+        viewState.setupPreview(currentPos, resource, filePath.fileName.toString())
+        viewState.displayPreviewTags(resource.id, tags)
     }
 
     private fun onPreviewsItemZoom(zoomed: Boolean) {

@@ -218,6 +218,7 @@ class PlainTagsStorage
                 for (resource in newResources) {
                     storage.register(resource)
                 }
+                storageByRoot[root] = storage
                 return@withContext storage
             }
 
@@ -227,11 +228,11 @@ class PlainTagsStorage
             return@withContext fresh
         }
 
-        fun getFromCache(rootAndFav: RootAndFav): TagsStorage {
-            return if (rootAndFav.isAllRoots())
-                AggregatedTagsStorage(storageByRoot.values)
-            else
-                storageByRoot[rootAndFav.root]!!
+        fun getFromCache(rootAndFav: RootAndFav): TagsStorage? {
+            return if (rootAndFav.isAllRoots()) {
+                if (storageByRoot.isNotEmpty()) AggregatedTagsStorage(storageByRoot.values) else null
+            } else
+                storageByRoot[rootAndFav.root]
         }
 
         private fun verifyVersion(header: String) {

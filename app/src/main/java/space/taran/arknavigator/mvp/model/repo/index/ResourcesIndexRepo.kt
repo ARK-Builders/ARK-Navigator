@@ -56,10 +56,10 @@ class ResourcesIndexRepo(
         return@withContext index
     }
 
-    fun getFromCache(rootAndFav: RootAndFav): ResourcesIndex {
-        return if (rootAndFav.isAllRoots())
-            AggregatedResourcesIndex(indexByRoot.values)
-        else
-            indexByRoot[rootAndFav.root]!!
+    fun getFromCache(rootAndFav: RootAndFav): ResourcesIndex? {
+        return if (rootAndFav.isAllRoots()) {
+            if (indexByRoot.values.isNotEmpty()) AggregatedResourcesIndex(indexByRoot.values) else null
+        } else
+            indexByRoot[rootAndFav.root]
     }
 }

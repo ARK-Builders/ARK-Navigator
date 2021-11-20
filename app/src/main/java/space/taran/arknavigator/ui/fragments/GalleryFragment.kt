@@ -16,6 +16,7 @@ import moxy.ktx.moxyPresenter
 import space.taran.arknavigator.BuildConfig
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.FragmentGalleryBinding
+import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceKind
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
@@ -36,17 +37,16 @@ import space.taran.arknavigator.utils.extensions.makeGone
 import space.taran.arknavigator.utils.extensions.makeVisible
 import java.nio.file.Path
 
-class GalleryFragment(
-    private val index: ResourcesIndex,
-    private val storage: TagsStorage,
-    private val resources: MutableList<ResourceMeta>,
-    private val startAt: Int
-) : MvpAppCompatFragment(), GalleryView, BackButtonListener, NotifiableView {
+class GalleryFragment: MvpAppCompatFragment(), GalleryView, BackButtonListener, NotifiableView {
 
     private lateinit var binding: FragmentGalleryBinding
 
     private val presenter by moxyPresenter {
-        GalleryPresenter(startAt, index, storage, resources).apply {
+        GalleryPresenter(
+            requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
+            requireArguments().getLongArray(RESOURCES_KEY)!!.toList(),
+            requireArguments().getInt(START_AT_KEY)
+        ).apply {
             Log.d(GALLERY_SCREEN, "creating GalleryPresenter")
             App.instance.appComponent.inject(this)
         }
@@ -72,7 +72,6 @@ class GalleryFragment(
     }
 
     override fun init(previews: PreviewsList) {
-        Log.d(GALLERY_SCREEN, "initializing GalleryFragment, position = $startAt")
         Log.d(GALLERY_SCREEN, "currentItem = ${binding.viewPager.currentItem}")
 
         (requireActivity() as MainActivity).setToolbarVisibility(true)
@@ -119,11 +118,10 @@ class GalleryFragment(
         }
     }
 
-    override fun setupPreview(pos: Int, resource: ResourceMeta, tags: Tags, filePath: String) {
+    override fun setupPreview(pos: Int, resource: ResourceMeta, filePath: String) {
         if (binding.viewPager.currentItem != pos)
             binding.viewPager.setCurrentItem(pos, false)
         setTitle(filePath)
-        displayPreviewTags(resource.id, tags)
         setupOpenEditFABs(resource.kind)
         ExtraLoader.load(
             resource,
@@ -183,10 +181,9 @@ class GalleryFragment(
         binding.tagsCg.addView(createEditChip())
     }
 
-    override fun showEditTagsDialog(position: Int) {
-        val resource = resources[position]
+    override fun showEditTagsDialog(resource: ResourceId, index: ResourcesIndex, storage: TagsStorage) {
         Log.d(GALLERY_SCREEN, "showing [edit-tags] dialog for resource $resource")
-        val dialog = EditTagsDialogFragment(resource.id, storage, index, presenter::onTagsChanged)
+        val dialog = EditTagsDialogFragment(resource, storage, index, presenter::onTagsChanged)
         dialog.show(childFragmentManager, dialog.TAG)
     }
 
@@ -227,7 +224,8 @@ class GalleryFragment(
     private fun openIntentChooser(
         resourcePath: Path,
         actionType: String,
-        detachProcess: Boolean) {
+        detachProcess: Boolean
+    ) {
 
         Log.i(GALLERY_SCREEN, "Opening resource in an external application")
         Log.i(GALLERY_SCREEN, "path: $resourcePath")
@@ -240,7 +238,8 @@ class GalleryFragment(
 
         val uri = FileProvider.getUriForFile(
             context,
-            BuildConfig.APPLICATION_ID + ".provider", file)
+            BuildConfig.APPLICATION_ID + ".provider", file
+        )
 
         val intent = Intent()
         intent.setDataAndType(uri, context.contentResolver.getType(uri))
@@ -249,7 +248,7 @@ class GalleryFragment(
 
         intent.action = actionType
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        val actionString = when(actionType) {
+        val actionString = when (actionType) {
             Intent.ACTION_VIEW -> "View the resource with:"
             Intent.ACTION_EDIT -> {
                 intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
@@ -290,9 +289,24 @@ class GalleryFragment(
                 setOnClickListener {
                     val position = binding.viewPager.currentItem
                     Log.d(GALLERY_SCREEN, "[edit_tags] clicked at position $position")
-                    presenter.onEditTagsDialogBtnClick(position)
+                    presenter.onEditTagsDialogBtnClick()
                 }
             }
         }
+    }
+
+    companion object {
+        private const val ROOT_AND_FAV_KEY = "rootAndFav"
+        private const val RESOURCES_KEY = "resources"
+        private const val START_AT_KEY = "startAt"
+
+        fun newInstance(rootAndFav: RootAndFav, resources: List<ResourceId>, startAt: Int) =
+            GalleryFragment().apply {
+                arguments = Bundle().apply {
+                    putParcelable(ROOT_AND_FAV_KEY, rootAndFav)
+                    putLongArray(RESOURCES_KEY, resources.toLongArray())
+                    putInt(START_AT_KEY, startAt)
+                }
+            }
     }
 }

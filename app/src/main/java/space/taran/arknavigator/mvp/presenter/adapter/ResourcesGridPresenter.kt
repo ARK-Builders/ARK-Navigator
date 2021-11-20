@@ -7,6 +7,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.mvp.model.UserPreferences
+import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
@@ -23,6 +24,7 @@ import javax.inject.Inject
 import kotlin.system.measureTimeMillis
 
 class ResourcesGridPresenter(
+    val rootAndFav: RootAndFav,
     val viewState: ResourcesView,
     val scope: CoroutineScope
 ) {
@@ -66,7 +68,7 @@ class ResourcesGridPresenter(
     }
 
     fun onItemClick(pos: Int) {
-        router.navigateTo(Screens.GalleryScreen(index, storage, selection, pos))
+        router.navigateTo(Screens.GalleryScreen(rootAndFav, resources.map { it.id }, pos))
     }
 
     suspend fun init(index: ResourcesIndex, storage: TagsStorage, router: Router) {
