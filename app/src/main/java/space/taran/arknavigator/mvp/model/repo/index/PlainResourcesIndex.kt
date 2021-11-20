@@ -1,8 +1,5 @@
 package space.taran.arknavigator.mvp.model.repo.index
 
-import android.util.Log
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import space.taran.arknavigator.mvp.model.dao.Resource
 import space.taran.arknavigator.mvp.model.dao.ResourceDao
 import space.taran.arknavigator.mvp.model.dao.ResourceExtra
@@ -13,6 +10,10 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.io.path.ExperimentalPathApi
+import kotlin.system.measureTimeMillis
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import android.util.Log
 
 internal data class Difference(
     val deleted: List<Path>,
@@ -87,7 +88,7 @@ class PlainResourcesIndex internal constructor (
     }
 
     internal suspend fun reindexRoot(diff: Difference) = withContext(Dispatchers.IO) {
-        val savedDeletedMetas = mutableMapOf<Path, ResourceMeta?>()
+        Log.d(RESOURCES_INDEX, "deleting ${diff.deleted.size} resources from RAM and previews")
         diff.deleted.forEach {
             val id = metaByPath[it]!!.id
             pathById.remove(id)
@@ -95,31 +96,37 @@ class PlainResourcesIndex internal constructor (
             PreviewAndThumbnail.forget(id)
         }
 
-        Log.d(RESOURCES_INDEX, "deleting ${savedDeletedMetas.size} pdf previews")
-
         val pathsToDelete = diff.deleted + diff.updated
 
-        Log.d(RESOURCES_INDEX, "removing ${pathsToDelete.size} paths")
+        Log.d(RESOURCES_INDEX, "deleting ${pathsToDelete.size} resources from Room DB")
         val chunks = pathsToDelete.chunked(512)
         Log.d(RESOURCES_INDEX, "splitting into ${chunks.size} chunks")
         chunks.forEach { paths ->
             dao.deletePaths(paths.map { it.toString() })
         }
 
+        val newResources = mutableMapOf<Path, ResourceMeta>()
         val toInsert = diff.updated + diff.added
-        toInsert.forEach { path ->
-            val meta = ResourceMeta.fromPath(path)
-            if (meta != null) {
-                metaByPath[path] = meta
-                pathById[meta.id] = path
+
+        val time1 = measureTimeMillis {
+            toInsert.forEach { path ->
+                val meta = ResourceMeta.fromPath(path)
+                if (meta != null) {
+                    newResources[path] = meta
+                    metaByPath[path] = meta
+                    pathById[meta.id] = path
+                }
             }
         }
+        Log.d(RESOURCES_INDEX, "new resources metadata retrieved in ${time1}ms")
 
-        Log.d(RESOURCES_INDEX, "re-scanning ${toInsert.size} resources")
-
-        //todo: streaming/iterating
-        val newResources = scanResources(toInsert)
+        Log.d(RESOURCES_INDEX, "persisting ${newResources.size} updated resources")
         persistResources(newResources)
+
+        val time2 = measureTimeMillis {
+            providePreviews()
+        }
+        Log.d(PREVIEWS, "previews provided in ${time2}ms")
     }
 
     internal suspend fun calculateDifference(): Difference = withContext(Dispatchers.IO) {
@@ -144,6 +151,16 @@ class PlainResourcesIndex internal constructor (
         Difference(absent, updated, added)
     }
 
+    internal suspend fun providePreviews() = withContext(Dispatchers.IO) {
+        Log.d(PREVIEWS, "providing previews/thumbnails for ${metaByPath.size} resources")
+
+        metaByPath.entries.toList()
+            .forEach {
+                PreviewAndThumbnail.generate(it.key, it.value)
+                //todo: handle exceptions to not fail the rest of previews generation
+            }
+    }
+
     internal suspend fun persistResources(resources: Map<Path, ResourceMeta>) = withContext(Dispatchers.IO) {
         Log.d(RESOURCES_INDEX, "persisting "
             + "${resources.size} resources from root $root")
@@ -153,7 +170,6 @@ class PlainResourcesIndex internal constructor (
 
         resources.entries.toList()
             .forEach {
-                PreviewAndThumbnail.generate(it.key, it.value)
                 roomResources.add(Resource.fromMeta(it.value, root, it.key))
                 roomExtra.addAll(ResourceExtra.fromMetaExtra(it.value.id, it.value.extra))
             }

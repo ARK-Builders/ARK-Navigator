@@ -27,8 +27,8 @@ const val TAGS_STORAGE: String = "tags-storage"
 
 const val ITEMS_CONTAINER: String = "item-container"
 
-const val CONCURRENT: String = "concurrent"
-
 const val DATABASE: String = "database"
 
 const val PREVIEWS: String = "previews"
+
+const val IMAGES: String = "images"

@@ -1,12 +1,14 @@
 package space.taran.arknavigator.mvp.model.repo.preview
 
 import android.graphics.Bitmap
+import android.util.Log
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.request.RequestOptions
 import space.taran.arknavigator.mvp.model.repo.extra.ImageMetaExtra
 import space.taran.arknavigator.mvp.model.repo.preview.generator.PdfPreviewGenerator
 import space.taran.arknavigator.ui.App
+import space.taran.arknavigator.utils.PREVIEWS
 import space.taran.arknavigator.utils.extension
 import java.nio.file.Files
 import java.nio.file.Path
@@ -23,9 +25,9 @@ object PreviewGenerators {
     )
 
     fun generate(path: Path, previewPath: Path, thumbnailPath: Path) {
-        val ext = extension(path)
+        if (ImageMetaExtra.isImage(path)) {
+            Log.d(PREVIEWS, "$path is an image, only generating a thumbnail for it")
 
-        if (ImageMetaExtra.ACCEPTED_EXTENSIONS.contains(ext)) {
             // images are special kind of a resource:
             // we don't need to store preview file for them,
             // we only need to downscale them into thumbnail
@@ -34,7 +36,7 @@ object PreviewGenerators {
             return
         }
 
-        generatorsByExt[ext]?.let { generator ->
+        generatorsByExt[extension(path)]?.let { generator ->
             val preview = generator(path)
             val thumbnail = resizePreviewToThumbnail(preview)
             storePreview(previewPath, preview)
