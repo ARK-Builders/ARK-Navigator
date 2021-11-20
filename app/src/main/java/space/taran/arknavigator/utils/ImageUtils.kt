@@ -1,6 +1,7 @@
 package space.taran.arknavigator.utils
 
 import android.graphics.drawable.Drawable
+import android.util.Log
 import android.widget.ImageView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
@@ -28,6 +29,7 @@ object ImageUtils {
     }
 
     fun loadZoomImageWithPlaceholder(image: Path?, placeHolder: Int, view: ImageView) {
+        Log.d(IMAGES, "loading image $image")
         view.setImageResource(placeHolder)
         view.autoDisposeScope.launch {
             withContext(Dispatchers.Main) {
@@ -51,6 +53,7 @@ object ImageUtils {
     }
 
     fun loadImageWithPlaceholder(image: Path?, placeHolder: Int, view: ImageView) {
+        Log.d(IMAGES, "loading image $image")
         view.setImageResource(placeHolder)
         view.autoDisposeScope.launch {
             withContext(Dispatchers.Main) {

@@ -5,7 +5,6 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.extra.ImageMetaExtra
 import space.taran.arknavigator.ui.App
-import space.taran.arknavigator.utils.GALLERY_SCREEN
 import space.taran.arknavigator.utils.PREVIEWS
 import space.taran.arknavigator.utils.extension
 import java.nio.file.Files
@@ -34,6 +33,10 @@ data class PreviewAndThumbnail(val preview: Path, val thumbnail: Path) {
         fun locate(path: Path, resource: ResourceMeta): PreviewAndThumbnail? {
             val thumbnail = thumbnailPath(resource.id)
             if (!Files.exists(thumbnail)) {
+                Log.w(PREVIEWS, "thumbnail was not found for resource $resource")
+                if (Files.exists(previewPath(resource.id))) {
+                    throw AssertionError("Preview exists but thumbnail doesn't")
+                }
                 //means that we couldn't generate anything for this kind of resource
                 return null
             }
@@ -62,19 +65,24 @@ data class PreviewAndThumbnail(val preview: Path, val thumbnail: Path) {
             val previewPath = previewPath(meta.id)
             val thumbnailPath = thumbnailPath(meta.id)
 
-            if (!previewExists(previewPath, thumbnailPath)) {
-                Log.d(PREVIEWS, "Generating preview for ${meta.id} ($path)")
+            if (!imagesExist(path, previewPath, thumbnailPath)) {
+                Log.d(PREVIEWS, "Generating preview/thumbnail for ${meta.id} ($path)")
                 PreviewGenerators.generate(path, previewPath, thumbnailPath)
             }
         }
 
-        private fun previewExists(previewPath: Path, thumbnailPath: Path): Boolean {
+        private fun imagesExist(path: Path, previewPath: Path, thumbnailPath: Path): Boolean {
             if (Files.exists(previewPath)) {
                 if (!Files.exists(thumbnailPath)) {
                     throw AssertionError("Thumbnails must always exist if corresponding preview exists")
                 }
                 return true
             }
+
+            if (ImageMetaExtra.isImage(path)) {
+                return Files.exists(thumbnailPath)
+            }
+
             return false
         }
     }

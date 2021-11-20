@@ -42,14 +42,14 @@ class ResourcesIndexRepo(
         val time1 = measureTimeMillis {
             files = listAllFiles(root)
         }
-        Log.d(RESOURCES_INDEX, "listed ${files.size} files, took $time1 milliseconds")
+        Log.d(RESOURCES_INDEX, "listed ${files.size} files in $time1 milliseconds")
 
         var metadata: Map<Path, ResourceMeta>
 
         val time2 = measureTimeMillis {
             metadata = scanResources(files)
         }
-        Log.d(RESOURCES_INDEX, "hashes calculation took $time2 milliseconds")
+        Log.d(RESOURCES_INDEX, "resources metadata retrieved in $time2 milliseconds")
 
         val index = PlainResourcesIndex(root, dao, metadata)
 
