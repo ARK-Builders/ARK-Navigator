@@ -95,6 +95,23 @@ class ResourcesGridPresenter(
         }
     }
 
+    suspend fun resetSelection() = withContext(Dispatchers.Default) {
+        selection = resources.toList()
+        withContext(Dispatchers.Main) {
+            setProgressVisibility(false)
+            viewState.notifyUser("${selection.size} resources selected")
+            viewState.updateAdapter()
+        }
+    }
+
+    suspend fun applyTaggedResources(taggedResources: Set<ResourceMeta>) = withContext(Dispatchers.Default) {
+        selection = resources.filter { taggedResources.contains(it) }
+        withContext(Dispatchers.Main) {
+            setProgressVisibility(false)
+            viewState.updateAdapter()
+        }
+    }
+
     fun removeResources(idToRemoveList: List<ResourceId>) {
         if (idToRemoveList.isEmpty()) return
         resources = resources.filter { !idToRemoveList.contains(it.id) }

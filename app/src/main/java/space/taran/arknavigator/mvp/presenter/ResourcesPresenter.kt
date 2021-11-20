@@ -130,10 +130,9 @@ class ResourcesPresenter(
 
         presenterScope.launch {
             if (tagsEnabled) {
-                gridPresenter.resetResources(listResources())
-                updateSelection(tagsSelectorPresenter.selection)
+                gridPresenter.resetSelection()
             } else {
-                resetResources(listResources(untaggedOnly = true))
+                applyTaggedResources(listResources(untaggedOnly = true))
             }
         }
 
@@ -179,6 +178,11 @@ class ResourcesPresenter(
             viewState.notifyUser("${selection.size} resources selected")
             gridPresenter.updateSelection(selection)
         }
+    }
+
+    private suspend fun applyTaggedResources(resources: Set<ResourceMeta>) {
+        viewState.notifyUser("${resources.size} resources selected")
+        gridPresenter.applyTaggedResources(resources)
     }
 
     private suspend fun resetResources(resources: Set<ResourceMeta>) {
