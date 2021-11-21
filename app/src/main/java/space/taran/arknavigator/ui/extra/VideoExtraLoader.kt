@@ -28,10 +28,10 @@ object VideoExtraLoader {
         val hours = minutes / 60
 
         fun toText(n: Long): String =
-            when {
-                n <= 0 -> ""
-                n < 10 -> "0$n"
-                else -> "$n"
+            if (n < 10) {
+                "0$n"
+            } else {
+                "$n"
             }
 
         val minAndSec = "${toText(minutes % 60)}:${toText(seconds % 60)}"
