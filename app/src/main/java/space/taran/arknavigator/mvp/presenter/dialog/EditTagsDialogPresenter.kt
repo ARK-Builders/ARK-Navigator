@@ -3,22 +3,39 @@ package space.taran.arknavigator.mvp.presenter.dialog
 import kotlinx.coroutines.launch
 import moxy.MvpPresenter
 import moxy.presenterScope
+import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
+import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
+import space.taran.arknavigator.mvp.model.repo.tags.PlainTagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.view.dialog.EditTagsDialogView
 import space.taran.arknavigator.utils.*
+import javax.inject.Inject
 
 class EditTagsDialogPresenter(
-    private val resourceId: ResourceId,
-    private val storage: TagsStorage,
-    private val index: ResourcesIndex,
-    private val onTagsChangedListener: (resource: ResourceId) -> Unit
+    private val rootAndFav: RootAndFav,
+    private val resourceId: ResourceId
 ): MvpPresenter<EditTagsDialogView>() {
 
     private var filter = ""
+    private lateinit var index: ResourcesIndex
+    private lateinit var storage: TagsStorage
+    lateinit var onTagsChangedListener: (resource: ResourceId) -> Unit
+
+    @Inject
+    lateinit var indexRepo: ResourcesIndexRepo
 
     override fun onFirstViewAttach() {
+        index = indexRepo.getFromCache(rootAndFav) ?: let {
+            viewState.dismissDialog()
+            return
+        }
+        storage = PlainTagsStorage.getFromCache(rootAndFav) ?: let {
+            viewState.dismissDialog()
+            return
+        }
+
         viewState.init()
         viewState.setResourceTags(listResourceTags())
         viewState.setQuickTags(listQuickTags())

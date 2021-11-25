@@ -27,7 +27,7 @@ interface GalleryView: MvpView {
     @StateStrategyType(SkipStrategy::class)
     fun shareResource(resourcePath: Path)
     @StateStrategyType(SkipStrategy::class)
-    fun showEditTagsDialog(resource: Long, index: ResourcesIndex, storage: TagsStorage)
+    fun showEditTagsDialog(resource: Long)
     @StateStrategyType(SkipStrategy::class)
     fun deleteResource(pos: Int)
 }

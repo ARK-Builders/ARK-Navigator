@@ -32,12 +32,15 @@ import space.taran.arknavigator.ui.adapter.PreviewsPager
 import space.taran.arknavigator.ui.extra.ExtraLoader
 import space.taran.arknavigator.ui.fragments.dialog.EditTagsDialogFragment
 import space.taran.arknavigator.ui.fragments.utils.Notifications
-import space.taran.arknavigator.utils.*
+import space.taran.arknavigator.utils.FullscreenHelper
+import space.taran.arknavigator.utils.GALLERY_SCREEN
+import space.taran.arknavigator.utils.Tags
+import space.taran.arknavigator.utils.extension
 import space.taran.arknavigator.utils.extensions.makeGone
 import space.taran.arknavigator.utils.extensions.makeVisible
 import java.nio.file.Path
 
-class GalleryFragment: MvpAppCompatFragment(), GalleryView, BackButtonListener, NotifiableView {
+class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener, NotifiableView {
 
     private lateinit var binding: FragmentGalleryBinding
 
@@ -69,6 +72,15 @@ class GalleryFragment: MvpAppCompatFragment(), GalleryView, BackButtonListener, 
         Log.d(GALLERY_SCREEN, "view created in GalleryFragment")
         super.onViewCreated(view, savedInstanceState)
         App.instance.appComponent.inject(this)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val fragment =
+            childFragmentManager.findFragmentByTag(EditTagsDialogFragment.TAG)
+        fragment?.let {
+            (it as EditTagsDialogFragment).onTagsChangedListener = presenter::onTagsChanged
+        }
     }
 
     override fun init(previews: PreviewsList) {
@@ -181,10 +193,16 @@ class GalleryFragment: MvpAppCompatFragment(), GalleryView, BackButtonListener, 
         binding.tagsCg.addView(createEditChip())
     }
 
-    override fun showEditTagsDialog(resource: ResourceId, index: ResourcesIndex, storage: TagsStorage) {
+    override fun showEditTagsDialog(
+        resource: ResourceId
+    ) {
         Log.d(GALLERY_SCREEN, "showing [edit-tags] dialog for resource $resource")
-        val dialog = EditTagsDialogFragment(resource, storage, index, presenter::onTagsChanged)
-        dialog.show(childFragmentManager, dialog.TAG)
+        val dialog = EditTagsDialogFragment.newInstance(
+            requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
+            resource
+        )
+        dialog.show(childFragmentManager, EditTagsDialogFragment.TAG)
+        dialog.onTagsChangedListener = presenter::onTagsChanged
     }
 
     override fun backClicked(): Boolean {

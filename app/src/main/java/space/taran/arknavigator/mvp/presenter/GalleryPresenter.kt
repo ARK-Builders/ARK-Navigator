@@ -140,7 +140,7 @@ class GalleryPresenter(
     }
 
     fun onEditTagsDialogBtnClick() {
-        viewState.showEditTagsDialog(currentResource.id, index, storage)
+        viewState.showEditTagsDialog(currentResource.id)
     }
 
     fun onSystemUIVisibilityChange(isVisible: Boolean) {
