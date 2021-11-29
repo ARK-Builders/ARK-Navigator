@@ -14,6 +14,9 @@ import kotlin.system.measureTimeMillis
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import android.util.Log
+import kotlinx.coroutines.async
+import kotlinx.coroutines.supervisorScope
+import java.lang.Exception
 
 internal data class Difference(
     val deleted: List<Path>,
@@ -154,11 +157,19 @@ class PlainResourcesIndex internal constructor (
     internal suspend fun providePreviews() = withContext(Dispatchers.IO) {
         Log.d(PREVIEWS, "providing previews/thumbnails for ${metaByPath.size} resources")
 
-        metaByPath.entries.toList()
-            .forEach {
-                PreviewAndThumbnail.generate(it.key, it.value)
-                //todo: handle exceptions to not fail the rest of previews generation
+        supervisorScope {
+            metaByPath.entries.map { (path: Path, meta: ResourceMeta) ->
+                async(Dispatchers.IO) {
+                    PreviewAndThumbnail.generate(path, meta)
+                } to path
+            }.forEach { (generateTask, path) ->
+                try {
+                    generateTask.await()
+                } catch (e: Exception) {
+                    Log.e(PREVIEWS, "Failed to generate preview/thumbnail for id ${metaByPath[path]?.id} ($path)")
+                }
             }
+        }
     }
 
     internal suspend fun persistResources(resources: Map<Path, ResourceMeta>) = withContext(Dispatchers.IO) {

@@ -8,10 +8,12 @@ import com.bumptech.glide.request.RequestOptions
 import space.taran.arknavigator.mvp.model.repo.extra.ImageMetaExtra
 import space.taran.arknavigator.mvp.model.repo.preview.generator.PdfPreviewGenerator
 import space.taran.arknavigator.ui.App
+import space.taran.arknavigator.utils.ImageUtils.glideExceptionListener
 import space.taran.arknavigator.utils.PREVIEWS
 import space.taran.arknavigator.utils.extension
 import java.nio.file.Files
 import java.nio.file.Path
+import kotlin.system.measureTimeMillis
 
 object PreviewGenerators {
 
@@ -31,17 +33,23 @@ object PreviewGenerators {
             // images are special kind of a resource:
             // we don't need to store preview file for them,
             // we only need to downscale them into thumbnail
-            val thumbnail = resizePreviewToThumbnail(path)
-            storeThumbnail(thumbnailPath, thumbnail)
+            val time1 = measureTimeMillis {
+                val thumbnail = resizePreviewToThumbnail(path)
+                storeThumbnail(thumbnailPath, thumbnail)
+            }
+            Log.d(PREVIEWS, "Thumbnail for image $path generated in $time1 ms")
             return
         }
 
         generatorsByExt[extension(path)]?.let { generator ->
-            val preview = generator(path)
-            val thumbnail = resizePreviewToThumbnail(preview)
-            storePreview(previewPath, preview)
-            storeThumbnail(thumbnailPath, thumbnail)
-        }
+            val time2 = measureTimeMillis {
+                val preview = generator(path)
+                val thumbnail = resizePreviewToThumbnail(preview)
+                storePreview(previewPath, preview)
+                storeThumbnail(thumbnailPath, thumbnail)
+            }
+            Log.d(PREVIEWS, "Preview and thumbnail generated for $path in $time2 ms")
+        } ?: Log.d(PREVIEWS, "No generators found for type .${extension(path)} ($path)")
     }
 
     private fun storePreview(path: Path, bitmap: Bitmap) =
@@ -79,6 +87,7 @@ object PreviewGenerators {
         builder
             .apply(RequestOptions().override(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT))
             .fitCenter()
+            .addListener(glideExceptionListener<Bitmap>())
             .submit()
             .get()
 }
