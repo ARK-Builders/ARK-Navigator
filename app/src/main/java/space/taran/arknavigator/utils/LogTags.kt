@@ -32,3 +32,5 @@ const val DATABASE: String = "database"
 const val PREVIEWS: String = "previews"
 
 const val IMAGES: String = "images"
+
+const val GLIDE: String = "glide"
