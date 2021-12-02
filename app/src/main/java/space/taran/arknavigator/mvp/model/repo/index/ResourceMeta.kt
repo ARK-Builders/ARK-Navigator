@@ -12,6 +12,8 @@ import java.nio.file.attribute.FileTime
 
 data class ResourceMeta(
     val id: ResourceId,
+    val name: String,
+    val extension: String,
     val modified: FileTime,
     val size: Long,
     val kind: ResourceKind?,
@@ -29,6 +31,8 @@ data class ResourceMeta(
 
             return ResourceMeta(
                 id = id,
+                name = path.fileName.toString(),
+                extension = extension(path),
                 modified = Files.getLastModifiedTime(path),
                 size = size,
                 kind = kind,
@@ -44,6 +48,8 @@ data class ResourceMeta(
 
             return ResourceMeta(
                 id = room.resource.id,
+                name = room.resource.name,
+                extension = room.resource.extension,
                 modified = FileTime.fromMillis(room.resource.modified),
                 size = room.resource.size,
                 kind = kindByCode(room.resource.kind),

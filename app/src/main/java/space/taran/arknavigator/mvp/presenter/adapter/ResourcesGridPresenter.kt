@@ -18,9 +18,9 @@ import space.taran.arknavigator.utils.RESOURCES_SCREEN
 import space.taran.arknavigator.utils.Sorting
 import space.taran.arknavigator.utils.reifySorting
 import space.taran.arknavigator.utils.unequalCompareBy
-import java.lang.AssertionError
 import java.nio.file.Files
 import javax.inject.Inject
+import kotlin.system.measureTimeMillis
 
 class ResourcesGridPresenter(
     val viewState: ResourcesView,
@@ -114,18 +114,21 @@ class ResourcesGridPresenter(
     }
 
     private fun sortAllResources() {
-        val comparator = reifySorting(sorting)
-        if (comparator != null) {
-            resources = resources.map { index.getPath(it.id) to it }
-                .toMap()
-                .toSortedMap(unequalCompareBy(comparator))
-                .values
-                .toList()
-        }
+        val sortTime = measureTimeMillis {
+            val comparator = reifySorting(sorting)
+            if (comparator != null) {
+                resources = resources.map { it to it }
+                    .toMap()
+                    .toSortedMap(unequalCompareBy(comparator))
+                    .values
+                    .toList()
+            }
 
-        if (sorting != Sorting.DEFAULT && !ascending) {
-            resources = resources.reversed()
+            if (sorting != Sorting.DEFAULT && !ascending) {
+                resources = resources.reversed()
+            }
         }
+        Log.d(RESOURCES_SCREEN, "sorting by $sorting of ${resources.size} resources took $sortTime milliseconds")
     }
 
     private fun sortSelectionAndUpdateAdapter() {

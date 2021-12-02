@@ -9,7 +9,7 @@ import androidx.room.RoomDatabase
         Resource::class,
         ResourceExtra::class
     ],
-    version = 13,
+    version = 14,
     exportSchema = false
 )
 abstract class Database : RoomDatabase() {
