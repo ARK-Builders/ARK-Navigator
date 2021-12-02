@@ -1,7 +1,7 @@
 package space.taran.arknavigator.utils
 
+import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.ui.App
-import java.lang.IllegalArgumentException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -70,12 +70,12 @@ fun extension(path: Path): String {
     return path.extension.lowercase()
 }
 
-fun reifySorting(sorting: Sorting): Comparator<Path>? =
+fun reifySorting(sorting: Sorting): Comparator<ResourceMeta>? =
     when (sorting) {
-        Sorting.NAME -> compareBy { it.fileName }
-        Sorting.SIZE -> compareBy { Files.size(it) }
-        Sorting.TYPE -> compareBy { it.fileName.extension }
-        Sorting.LAST_MODIFIED -> compareBy { Files.getLastModifiedTime(it) }
+        Sorting.NAME -> compareBy { it.name }
+        Sorting.SIZE -> compareBy { it.size }
+        Sorting.TYPE -> compareBy { it.extension }
+        Sorting.LAST_MODIFIED -> compareBy { it.modified }
         Sorting.DEFAULT -> null
     }
 

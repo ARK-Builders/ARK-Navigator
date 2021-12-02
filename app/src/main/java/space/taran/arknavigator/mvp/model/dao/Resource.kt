@@ -4,7 +4,8 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
-import space.taran.arknavigator.utils.*
+import space.taran.arknavigator.utils.Milliseconds
+import space.taran.arknavigator.utils.StringPath
 import java.nio.file.Path
 
 @Entity
@@ -13,6 +14,8 @@ data class Resource(
     val id: ResourceId,
     val root: StringPath,
     val path: StringPath,
+    val name: String,
+    val extension: String,
     val modified: Milliseconds,
     val size: Long,
     val kind: Int,
@@ -23,6 +26,8 @@ data class Resource(
                 id = meta.id,
                 root = root.toString(),
                 path = path.toString(),
+                name = meta.name,
+                extension = meta.extension,
                 modified = meta.modified.toMillis(),
                 size = meta.size,
                 kind = meta.kind?.ordinal ?: -1)
