@@ -149,9 +149,13 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
 
     override fun setFullscreen(fullscreen: Boolean) {
         val isControlsVisible = !fullscreen
-        (activity as MainActivity).setToolbarVisibility(isControlsVisible)
         binding.previewControls.isVisible = isControlsVisible
-        FullscreenHelper.setSystemUIVisibility(isControlsVisible, requireActivity().window)
+        (activity as MainActivity).setToolbarVisibility(isControlsVisible)
+        FullscreenHelper.setSystemUIVisibility(
+            isControlsVisible,
+            requireActivity().window,
+            (activity as MainActivity).hasNavigationBar()
+        )
     }
 
     override fun notifyUser(message: String, moreTime: Boolean) {
