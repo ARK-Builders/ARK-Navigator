@@ -20,8 +20,6 @@ import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceKind
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
-import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
-import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
 import space.taran.arknavigator.mvp.view.GalleryView
@@ -233,7 +231,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
                     editResourceFab.makeVisible()
                 }
                 null -> {
-                    //TODO
+                    openResourceFab.makeVisible()
                 }
             }
         }

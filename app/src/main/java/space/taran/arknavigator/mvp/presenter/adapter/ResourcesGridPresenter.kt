@@ -68,7 +68,7 @@ class ResourcesGridPresenter(
     }
 
     fun onItemClick(pos: Int) {
-        router.navigateTo(Screens.GalleryScreen(rootAndFav, resources.map { it.id }, pos))
+        router.navigateTo(Screens.GalleryScreen(rootAndFav, selection.map { it.id }, pos))
     }
 
     suspend fun init(index: ResourcesIndex, storage: TagsStorage, router: Router) {

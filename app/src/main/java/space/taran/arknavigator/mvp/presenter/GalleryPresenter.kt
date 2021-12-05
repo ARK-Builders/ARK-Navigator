@@ -93,9 +93,12 @@ class GalleryPresenter(
         if (startAt > 0 || !workaround) {
             //weird bug causes this callback be called redundantly if startAt == 0
             Log.d(GALLERY_SCREEN, "changing to preview at position $newPos")
-            currentPos = newPos
-            currentResource = resources[currentPos]
-            displayPreview()
+
+            if (currentPos != newPos) {
+                currentPos = newPos
+                currentResource = resources[currentPos]
+                displayPreview()
+            }
         }
         workaround = false
     }
@@ -120,9 +123,16 @@ class GalleryPresenter(
         deleteResource(currentResource.id)
 
         resources.removeAt(currentPos)
-        if (resources.isEmpty()) onBackClick()
+        if (resources.isEmpty()) {
+            onBackClick()
+            return
+        }
 
         viewState.deleteResource(currentPos)
+
+        if (resources.getOrNull(currentPos) == null)
+            currentPos -= 1
+        displayPreview()
     }
 
     fun onShareFabClick() {
