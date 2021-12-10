@@ -1,5 +1,6 @@
 package space.taran.arknavigator.ui.fragments
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -21,7 +22,6 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceKind
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
-import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
 import space.taran.arknavigator.mvp.view.GalleryView
 import space.taran.arknavigator.mvp.view.NotifiableView
 import space.taran.arknavigator.ui.App
@@ -60,7 +60,6 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
         binding = FragmentGalleryBinding.inflate(inflater, container, false)
         Log.d(GALLERY_SCREEN, "inflating layout for GalleryFragment")
         return binding.root
@@ -81,7 +80,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
         }
     }
 
-    override fun init(previews: PreviewsList) {
+    override fun init() {
         Log.d(GALLERY_SCREEN, "currentItem = ${binding.viewPager.currentItem}")
 
         (requireActivity() as MainActivity).setToolbarVisibility(true)
@@ -95,7 +94,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
             }
         }
 
-        pagerAdapter = PreviewsPager(previews)
+        pagerAdapter = PreviewsPager(presenter.previewsPresenter)
 
         binding.apply {
             viewPager.apply {
@@ -138,6 +137,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
             listOf(binding.primaryExtra, binding.secondaryExtra),
             verbose = true
         )
+        requireArguments().putInt(START_AT_KEY, pos)
     }
 
     override fun setPreviewsScrollingEnabled(enabled: Boolean) {
@@ -206,6 +206,28 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
     override fun backClicked(): Boolean {
         Log.d(GALLERY_SCREEN, "[back] clicked in GalleryFragment")
         return presenter.onBackClick()
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    override fun setProgressVisibility(isVisible: Boolean, withText: String) {
+        binding.layoutProgress.apply {
+            root.isVisible = isVisible
+
+            if (isVisible) {
+                root.setOnTouchListener { _, _ ->
+                    return@setOnTouchListener true
+                }
+            } else {
+                root.setOnTouchListener(null)
+            }
+
+            if (withText.isNotEmpty()) {
+                progressText.setVisibilityAndLoadingStatus(View.VISIBLE)
+                progressText.loadingText = withText
+            } else {
+                progressText.setVisibilityAndLoadingStatus(View.GONE)
+            }
+        }
     }
 
     private fun setTitle(title: String) {

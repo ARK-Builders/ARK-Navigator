@@ -59,8 +59,7 @@ class ResourcesIndexRepo(
     }
 
     suspend fun provide(rootAndFav: RootAndFav): ResourcesIndex = withContext(Dispatchers.IO) {
-        val allRoots = foldersRepo.query().succeeded.keys
-        val roots = if (rootAndFav.isAllRoots()) allRoots else listOf(rootAndFav.root!!)
+        val roots = resolveRootAndFav(rootAndFav)
         val indexShards = roots.map { root ->
             indexByRoot[root] ?: let {
                 val index = loadFromDatabase(root)
@@ -73,4 +72,18 @@ class ResourcesIndexRepo(
     }
 
     suspend fun provide(root: Path): ResourcesIndex = provide(RootAndFav(root.toString(), favString = null))
+
+    suspend fun isIndexed(rootAndFav: RootAndFav): Boolean {
+        val roots = resolveRootAndFav(rootAndFav)
+        roots.forEach { root ->
+            if (!indexByRoot.contains(root))
+                return false
+        }
+        return true
+    }
+
+    private suspend fun resolveRootAndFav(rootAndFav: RootAndFav): Collection<Path> {
+        val allRoots = foldersRepo.query().succeeded.keys
+        return if (rootAndFav.isAllRoots()) allRoots else listOf(rootAndFav.root!!)
+    }
 }

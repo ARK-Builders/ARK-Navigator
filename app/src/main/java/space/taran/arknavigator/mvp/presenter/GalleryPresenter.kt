@@ -14,7 +14,7 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
 import space.taran.arknavigator.mvp.model.repo.preview.PreviewAndThumbnail
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
-import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
+import space.taran.arknavigator.mvp.presenter.adapter.PreviewsPresenter
 import space.taran.arknavigator.mvp.view.GalleryView
 import space.taran.arknavigator.mvp.view.item.PreviewItemView
 import space.taran.arknavigator.utils.GALLERY_SCREEN
@@ -40,6 +40,8 @@ class GalleryPresenter(
     private lateinit var storage: TagsStorage
     private lateinit var resources: MutableList<ResourceMeta>
 
+    val previewsPresenter = PreviewsPresenter()
+
     @Inject
     lateinit var router: Router
 
@@ -51,8 +53,15 @@ class GalleryPresenter(
 
     override fun onFirstViewAttach() {
         Log.d(GALLERY_SCREEN, "first view attached in GalleryPresenter")
+        super.onFirstViewAttach()
 
         presenterScope.launch {
+            viewState.init()
+
+            if (!indexRepo.isIndexed(rootAndFav))
+                viewState.setProgressVisibility(true, "Indexing")
+
+
             index = indexRepo.provide(rootAndFav)
             storage = tagsStorageRepo.provide(rootAndFav)
             resources = resourcesIds.map { index.getMeta(it) }.toMutableList()
@@ -69,19 +78,16 @@ class GalleryPresenter(
                 placeholders.add(ImageUtils.iconForExtension(extension(path)))
             }
 
-            super.onFirstViewAttach()
-
-            viewState.init(
-                PreviewsList(
-                    previews,
-                    placeholders,
-                    resources,
-                    ::onPreviewsItemClick,
-                    ::onPreviewsItemZoom,
-                    ::onPlayButtonClick
-                )
+            previewsPresenter.init(
+                previews,
+                placeholders,
+                resources,
+                ::onPreviewsItemClick,
+                ::onPreviewsItemZoom,
+                ::onPlayButtonClick
             )
 
+            viewState.setProgressVisibility(false)
             displayPreview()
         }
     }

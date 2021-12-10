@@ -6,19 +6,17 @@ import moxy.viewstate.strategy.SkipStrategy
 import moxy.viewstate.strategy.StateStrategyType
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
-import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
-import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
-import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
 import space.taran.arknavigator.utils.Tags
 import java.nio.file.Path
 
 @StateStrategyType(AddToEndSingleStrategy::class)
 interface GalleryView: MvpView {
-    fun init(previews: PreviewsList)
+    fun init()
     fun setFullscreen(fullscreen: Boolean)
     fun setPreviewsScrollingEnabled(enabled: Boolean)
     fun setupPreview(pos: Int, resource: ResourceMeta, filePath: String)
     fun displayPreviewTags(resource: ResourceId, tags: Tags)
+    fun setProgressVisibility(isVisible: Boolean, withText: String = "")
 
     @StateStrategyType(SkipStrategy::class)
     fun viewInExternalApp(resourcePath: Path)

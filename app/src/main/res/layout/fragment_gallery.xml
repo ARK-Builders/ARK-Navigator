@@ -119,4 +119,9 @@
         </LinearLayout>
     </RelativeLayout>
 
+    <include
+        android:visibility="gone"
+        android:id="@+id/layoutProgress"
+        layout="@layout/layout_progress"/>
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

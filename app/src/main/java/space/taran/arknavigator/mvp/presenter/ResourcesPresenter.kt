@@ -8,10 +8,8 @@ import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.repo.FoldersRepo
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
-import space.taran.arknavigator.mvp.model.repo.index.ResourceId
-import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
-import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
-import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
+import space.taran.arknavigator.mvp.model.repo.index.*
+import space.taran.arknavigator.mvp.model.repo.tags.AggregatedTagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import space.taran.arknavigator.mvp.presenter.adapter.ResourcesGridPresenter
