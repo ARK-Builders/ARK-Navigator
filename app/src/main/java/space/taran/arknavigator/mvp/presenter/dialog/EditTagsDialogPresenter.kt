@@ -7,8 +7,8 @@ import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
-import space.taran.arknavigator.mvp.model.repo.tags.PlainTagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
+import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import space.taran.arknavigator.mvp.view.dialog.EditTagsDialogView
 import space.taran.arknavigator.utils.*
 import javax.inject.Inject
@@ -26,19 +26,18 @@ class EditTagsDialogPresenter(
     @Inject
     lateinit var indexRepo: ResourcesIndexRepo
 
-    override fun onFirstViewAttach() {
-        index = indexRepo.getFromCache(rootAndFav) ?: let {
-            viewState.dismissDialog()
-            return
-        }
-        storage = PlainTagsStorage.getFromCache(rootAndFav) ?: let {
-            viewState.dismissDialog()
-            return
-        }
+    @Inject
+    lateinit var tagsStorageRepo: TagsStorageRepo
 
-        viewState.init()
-        viewState.setResourceTags(listResourceTags())
-        viewState.setQuickTags(listQuickTags())
+    override fun onFirstViewAttach() {
+        presenterScope.launch {
+            index = indexRepo.provide(rootAndFav)
+            storage = tagsStorageRepo.provide(rootAndFav)
+
+            viewState.init()
+            viewState.setResourceTags(listResourceTags())
+            viewState.setQuickTags(listQuickTags())
+        }
     }
 
     fun onInputChanged(input: String) {

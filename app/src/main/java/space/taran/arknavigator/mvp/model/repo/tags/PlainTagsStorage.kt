@@ -3,9 +3,7 @@ package space.taran.arknavigator.mvp.model.repo.tags
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
-import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.utils.Constants.Companion.NO_TAGS
 import space.taran.arknavigator.utils.Converters.Companion.stringFromTags
 import space.taran.arknavigator.utils.Converters.Companion.tagsFromString
@@ -19,10 +17,10 @@ import java.nio.file.attribute.FileTime
 // The storage is being read from the FS both during application startup
 // and during application lifecycle since it can be changed from outside.
 // We also must persist all changes during application lifecycle into FS.
-class PlainTagsStorage
-    private constructor(
-        root: Path,
-        val resources: Collection<ResourceId>): TagsStorage {
+class PlainTagsStorage(
+    root: Path,
+    val resources: Collection<ResourceId>
+) : TagsStorage {
 
     private val storageFile: Path = root.resolve(STORAGE_FILENAME)
 
@@ -30,7 +28,7 @@ class PlainTagsStorage
 
     private lateinit var tagsById: MutableMap<ResourceId, Tags>
 
-    private suspend fun init() = withContext(Dispatchers.IO) {
+    suspend fun init() = withContext(Dispatchers.IO) {
         val result = resources.map { it to NO_TAGS }
             .toMap()
             .toMutableMap()
@@ -56,6 +54,21 @@ class PlainTagsStorage
         //we don't need to persist since we never store empty tag sets
     }
 
+    fun checkResources(indexedResources: Set<ResourceId>) {
+        val knownResources = tagsById.keys.toSet()
+
+        val lostResources = knownResources.subtract(indexedResources)
+        if (lostResources.isNotEmpty()) {
+            Log.d(TAGS_STORAGE, "lostResources: $lostResources")
+            throw AssertionError("Index lost resources")
+        }
+
+        val newResources = indexedResources.subtract(knownResources)
+        for (resource in newResources) {
+            register(resource)
+        }
+    }
+
     override fun contains(id: ResourceId): Boolean = tagsById.containsKey(id)
 
     // if this id isn't present in storage, then the call is wrong
@@ -64,7 +77,8 @@ class PlainTagsStorage
     override fun getTags(id: ResourceId): Tags = tagsById[id]!!
     //todo: check the file's modification date and pull external updates
 
-    override fun getTags(ids: Iterable<ResourceId>): Tags = ids.flatMap { id -> getTags(id) }.toSet()
+    override fun getTags(ids: Iterable<ResourceId>): Tags =
+        ids.flatMap { id -> getTags(id) }.toSet()
 
     override suspend fun setTags(id: ResourceId, tags: Tags) = withContext(Dispatchers.IO) {
         if (!tagsById.containsKey(id)) {
@@ -132,8 +146,10 @@ class PlainTagsStorage
                 val theirs = outside[sharedId]
                 val ours = tagsById[sharedId]
                 if (theirs != ours) {
-                    Log.d(TAGS_STORAGE, "resource $sharedId got new tags " +
-                        "from outside: ${theirs!! - ours}")
+                    Log.d(
+                        TAGS_STORAGE, "resource $sharedId got new tags " +
+                                "from outside: ${theirs!! - ours}"
+                    )
                     tagsById[sharedId] = theirs.union(ours!!)
                 }
             }
@@ -198,42 +214,6 @@ class PlainTagsStorage
         private const val STORAGE_VERSION_PREFIX = "version "
 
         const val KEY_VALUE_SEPARATOR = ':'
-
-        private val storageByRoot = mutableMapOf<Path, PlainTagsStorage>()
-
-        suspend fun provide(root: Path, index: ResourcesIndex): PlainTagsStorage = withContext(Dispatchers.IO) {
-            val resources = index.listAllIds()
-            val storage = storageByRoot[root]
-            if (storage != null) {
-                val knownResources = storage.tagsById.keys.toSet()
-                val indexedResources = resources.toSet()
-
-                val lostResources = knownResources.subtract(indexedResources)
-                if (lostResources.isNotEmpty()) {
-                    Log.d(TAGS_STORAGE, "lostResources: $lostResources")
-                    throw AssertionError("Index lost resources")
-                }
-
-                val newResources = indexedResources.subtract(knownResources)
-                for (resource in newResources) {
-                    storage.register(resource)
-                }
-                storageByRoot[root] = storage
-                return@withContext storage
-            }
-
-            val fresh = PlainTagsStorage(root, resources)
-            fresh.init()
-            storageByRoot[root] = fresh
-            return@withContext fresh
-        }
-
-        fun getFromCache(rootAndFav: RootAndFav): TagsStorage? {
-            return if (rootAndFav.isAllRoots()) {
-                if (storageByRoot.isNotEmpty()) AggregatedTagsStorage(storageByRoot.values) else null
-            } else
-                storageByRoot[rootAndFav.root]
-        }
 
         private fun verifyVersion(header: String) {
             if (!header.startsWith(STORAGE_VERSION_PREFIX)) {

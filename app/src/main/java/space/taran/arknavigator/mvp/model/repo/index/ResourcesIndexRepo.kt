@@ -4,6 +4,7 @@ import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import space.taran.arknavigator.mvp.model.dao.ResourceDao
+import space.taran.arknavigator.mvp.model.repo.FoldersRepo
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.model.repo.index.PlainResourcesIndex.Companion.listAllFiles
 import space.taran.arknavigator.mvp.model.repo.index.PlainResourcesIndex.Companion.loadResources
@@ -13,8 +14,9 @@ import java.nio.file.Path
 import kotlin.system.measureTimeMillis
 
 class ResourcesIndexRepo(
-    private val dao: ResourceDao)
-{
+    private val dao: ResourceDao,
+    private val foldersRepo: FoldersRepo
+) {
     private val indexByRoot = mutableMapOf<Path, PlainResourcesIndex>()
 
     suspend fun loadFromDatabase(root: Path): PlainResourcesIndex = withContext(Dispatchers.IO) {
@@ -56,10 +58,19 @@ class ResourcesIndexRepo(
         return@withContext index
     }
 
-    fun getFromCache(rootAndFav: RootAndFav): ResourcesIndex? {
-        return if (rootAndFav.isAllRoots()) {
-            if (indexByRoot.values.isNotEmpty()) AggregatedResourcesIndex(indexByRoot.values) else null
-        } else
-            indexByRoot[rootAndFav.root]
+    suspend fun provide(rootAndFav: RootAndFav): ResourcesIndex = withContext(Dispatchers.IO) {
+        val allRoots = foldersRepo.query().succeeded.keys
+        val roots = if (rootAndFav.isAllRoots()) allRoots else listOf(rootAndFav.root!!)
+        val indexShards = roots.map { root ->
+            indexByRoot[root] ?: let {
+                val index = loadFromDatabase(root)
+                indexByRoot[root] = index
+                index
+            }
+        }
+
+        return@withContext AggregatedResourcesIndex(indexShards)
     }
+
+    suspend fun provide(root: Path): ResourcesIndex = provide(RootAndFav(root.toString(), favString = null))
 }

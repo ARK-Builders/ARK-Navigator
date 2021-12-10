@@ -75,7 +75,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val fragment =
-            childFragmentManager.findFragmentByTag(EditTagsDialogFragment.TAG)
+            childFragmentManager.findFragmentByTag(EditTagsDialogFragment.FRAGMENT_TAG)
         fragment?.let {
             (it as EditTagsDialogFragment).onTagsChangedListener = presenter::onTagsChanged
         }
@@ -199,7 +199,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
             requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
             resource
         )
-        dialog.show(childFragmentManager, EditTagsDialogFragment.TAG)
+        dialog.show(childFragmentManager, EditTagsDialogFragment.FRAGMENT_TAG)
         dialog.onTagsChangedListener = presenter::onTagsChanged
     }
 

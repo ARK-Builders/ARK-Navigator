@@ -105,7 +105,7 @@ class EditTagsDialogFragment :
     override fun getTheme() = R.style.FullScreenDialog
 
     companion object {
-        const val TAG = "editTagsDialogTag"
+        const val FRAGMENT_TAG = "editTagsDialogTag"
         private const val ROOT_AND_FAV_KEY = "rootAndFav"
         private const val RESOURCE_KEY = "resource"
 

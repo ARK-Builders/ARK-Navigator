@@ -8,10 +8,12 @@ import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.repo.FoldersRepo
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
-import space.taran.arknavigator.mvp.model.repo.index.*
-import space.taran.arknavigator.mvp.model.repo.tags.AggregatedTagsStorage
-import space.taran.arknavigator.mvp.model.repo.tags.PlainTagsStorage
+import space.taran.arknavigator.mvp.model.repo.index.ResourceId
+import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
+import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
+import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
+import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import space.taran.arknavigator.mvp.presenter.adapter.ResourcesGridPresenter
 import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagsSelectorPresenter
 import space.taran.arknavigator.mvp.view.ResourcesView
@@ -33,6 +35,9 @@ class ResourcesPresenter(
 
     @Inject
     lateinit var resourcesIndexRepo: ResourcesIndexRepo
+
+    @Inject
+    lateinit var tagsStorageRepo: TagsStorageRepo
 
     @Inject
     lateinit var userPreferences: UserPreferences
@@ -75,15 +80,8 @@ class ResourcesPresenter(
                 .toMap()
 
             val rootToStorage = roots
-                .map { it to PlainTagsStorage.provide(it, rootToIndex[it]!!) }
+                .map { it to tagsStorageRepo.provide(it) }
                 .toMap()
-
-            roots.forEach { root ->
-                val storage = rootToStorage[root]!!
-                val indexed = rootToIndex[root]!!.listAllIds()
-
-                storage.cleanup(indexed)
-            }
 
             index = AggregatedResourcesIndex(rootToIndex.values)
             storage = AggregatedTagsStorage(rootToStorage.values)

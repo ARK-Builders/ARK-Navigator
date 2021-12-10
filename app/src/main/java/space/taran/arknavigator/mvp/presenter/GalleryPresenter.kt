@@ -12,8 +12,8 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
 import space.taran.arknavigator.mvp.model.repo.preview.PreviewAndThumbnail
-import space.taran.arknavigator.mvp.model.repo.tags.PlainTagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
+import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
 import space.taran.arknavigator.mvp.view.GalleryView
 import space.taran.arknavigator.mvp.view.item.PreviewItemView
@@ -46,45 +46,44 @@ class GalleryPresenter(
     @Inject
     lateinit var indexRepo: ResourcesIndexRepo
 
+    @Inject
+    lateinit var tagsStorageRepo: TagsStorageRepo
+
     override fun onFirstViewAttach() {
         Log.d(GALLERY_SCREEN, "first view attached in GalleryPresenter")
 
-        // Now the index and storage can only be null if the app dies in the background.
-        // In this case, we have to go back and re-index the root on Resources screen.
-        index = indexRepo.getFromCache(rootAndFav) ?: let {
-            router.exit()
-            return
+        presenterScope.launch {
+            index = indexRepo.provide(rootAndFav)
+            storage = tagsStorageRepo.provide(rootAndFav)
+            resources = resourcesIds.map { index.getMeta(it) }.toMutableList()
+            currentResource = resources[startAt]
+
+
+            val previews = mutableListOf<Path?>()
+            val placeholders = mutableListOf<Int>()
+
+            resources.forEach { meta ->
+                val path = index.getPath(meta.id)
+
+                previews.add(PreviewAndThumbnail.locate(path, meta)?.preview)
+                placeholders.add(ImageUtils.iconForExtension(extension(path)))
+            }
+
+            super.onFirstViewAttach()
+
+            viewState.init(
+                PreviewsList(
+                    previews,
+                    placeholders,
+                    resources,
+                    ::onPreviewsItemClick,
+                    ::onPreviewsItemZoom,
+                    ::onPlayButtonClick
+                )
+            )
+
+            displayPreview()
         }
-        storage = PlainTagsStorage.getFromCache(rootAndFav) ?: let {
-            router.exit()
-            return
-        }
-        resources = resourcesIds.map { index.getMeta(it) }.toMutableList()
-        currentResource = resources[startAt]
-
-
-        val previews = mutableListOf<Path?>()
-        val placeholders = mutableListOf<Int>()
-
-        resources.forEach { meta ->
-            val path = index.getPath(meta.id)
-
-            previews.add(PreviewAndThumbnail.locate(path, meta)?.preview)
-            placeholders.add(ImageUtils.iconForExtension(extension(path)))
-        }
-
-        super.onFirstViewAttach()
-
-        viewState.init(PreviewsList(
-            previews,
-            placeholders,
-            resources,
-            ::onPreviewsItemClick,
-            ::onPreviewsItemZoom,
-            ::onPlayButtonClick
-        ))
-
-        displayPreview()
     }
 
     fun onPageChanged(newPos: Int) {
