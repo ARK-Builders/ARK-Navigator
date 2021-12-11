@@ -21,7 +21,10 @@ class Screens {
         val resources: List<ResourceId>,
         val startAt: Int
     ) : SupportAppScreen() {
-        override fun getFragment() =
-            GalleryFragment.newInstance(rootAndFav, resources, startAt)
+        override fun getFragment() = GalleryFragment.newInstance(rootAndFav, resources, startAt)
+    }
+
+    class SettingsScreen: SupportAppScreen(){
+        override fun getFragment() = SettingsFragment.newInstance()
     }
 }

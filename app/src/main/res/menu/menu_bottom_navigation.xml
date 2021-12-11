@@ -13,4 +13,11 @@
         android:icon="@drawable/ic_menu_navigate"
         android:tint="?attr/colorControlNormal"
         android:title="Navigate data" />
+
+    <item
+        android:id="@+id/page_settings"
+        android:enabled="true"
+        android:icon="@drawable/ic_settings"
+        android:tint="?attr/colorControlNormal"
+        android:title="Settings" />
 </menu>

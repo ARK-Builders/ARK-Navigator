@@ -15,4 +15,14 @@
     <string name="item_favorite_type">[favorite]</string>
     <string name="item_root_type">[root]</string>
     <string name="resources_filter_hint">Filter</string>
+    <string name="ok">OK</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="what_are_crash_reports_">What are crash reports?</string>
+    <string name="what_is_image_replication_">What is images cache replication?</string>
+    <string name="what_is_index_replication_">What is index replication?</string>
+    <string name="explanation_of_this_feature">Explanation of this feature</string>
+    <string name="are_you_sure_">Are you sure?</string>
+    <string name="all_preferences_will_be_reset_to_default">All user preferences will be reset to default. Do you wish to proceed?</string>
+    <string name="crash_reports_explanation">We are constantly working to improve ARK Navigator. However, you may still encounter issues while using the app. If you choose "Send automatically", we will automatically get notified if you run into a fatal crash of the app, so we can fix the issue.</string>
 </resources>

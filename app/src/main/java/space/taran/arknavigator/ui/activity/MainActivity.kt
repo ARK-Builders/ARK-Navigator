@@ -71,6 +71,11 @@ class MainActivity : MvpAppCompatActivity(), MainView {
                     presenter.goToResourcesScreen()
                     true
                 }
+                R.id.page_settings -> {
+                    Log.d(MAIN, "switching to Settings screen")
+                    presenter.goToSettingsScreen()
+                    true
+                }
                 else -> {
                     Log.w(MAIN, "no handler found")
                     true

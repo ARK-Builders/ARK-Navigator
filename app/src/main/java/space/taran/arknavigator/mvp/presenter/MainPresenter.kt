@@ -1,13 +1,14 @@
 package space.taran.arknavigator.mvp.presenter
 
 import android.util.Log
-import javax.inject.Inject
 import moxy.MvpPresenter
+import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.view.MainView
 import space.taran.arknavigator.navigation.AppRouter
 import space.taran.arknavigator.navigation.Screens
 import space.taran.arknavigator.utils.MAIN
+import javax.inject.Inject
 
 class MainPresenter : MvpPresenter<MainView>() {
     @Inject
@@ -35,5 +36,15 @@ class MainPresenter : MvpPresenter<MainView>() {
     fun goToResourcesScreen() {
         Log.d(MAIN, "creating Resources screen")
         router.newRootScreen(Screens.ResourcesScreen(RootAndFav(null, null)))
+    }
+
+    fun goToSettingsScreen() {
+        Log.d(MAIN, "creating Settings screen")
+        router.newRootScreen(Screens.SettingsScreen())
+    }
+
+    fun backClicked() {
+        Log.d(MAIN, "[back] clicked in MainPresenter")
+        router.exit()
     }
 }

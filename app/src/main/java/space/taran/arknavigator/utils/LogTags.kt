@@ -17,6 +17,8 @@ const val GALLERY_SCREEN: String = "gallery-screen"
 
 const val FOLDERS_SCREEN: String = "folders-screen"
 
+const val SETTINGS_SCREEN: String = "settings-screen"
+
 const val FOLDER_PICKER: String = "folder-picker"
 
 const val FOLDERS_TREE: String = "folders-tree"

@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:overScrollMode="never">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:animateLayoutChanges="true"
+        android:orientation="vertical">
+
+        <TextView
+            style="@style/MarginTextStyle"
+            android:text="Settings"
+            android:textSize="26sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/RegularTextStyle"
+                android:layout_gravity="center_vertical"
+                android:text="Crash reports:"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/crashInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/ripple_simple_bg"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="4dp"
+                android:src="@drawable/ic_info" />
+
+        </LinearLayout>
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:overScrollMode="never"
+            android:scrollbars="none">
+
+            <RadioGroup
+                android:id="@+id/crashGroup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/crashSendAutomatically"
+                    style="@style/RadioButtonStyle"
+                    android:layout_marginStart="16dp"
+                    android:text="Send automatically" />
+
+                <RadioButton
+                    android:id="@+id/crashDontSend"
+                    style="@style/RadioButtonStyle"
+                    android:layout_marginStart="8dp"
+                    android:text="Do not send reports" />
+
+            </RadioGroup>
+
+        </HorizontalScrollView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/RegularTextStyle"
+                android:layout_gravity="center_vertical"
+                android:text="Images cache replication:"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/imgCacheInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/ripple_simple_bg"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="4dp"
+                android:src="@drawable/ic_info" />
+
+        </LinearLayout>
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:overScrollMode="never"
+            android:scrollbars="none">
+
+            <RadioGroup
+                android:id="@+id/imgReplicationGroup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/imgReplicationOn"
+                    style="@style/RadioButtonStyle"
+                    android:layout_marginStart="16dp"
+                    android:text="Enabled" />
+
+                <RadioButton
+                    android:id="@+id/imgReplicationOff"
+                    style="@style/RadioButtonStyle"
+                    android:layout_marginStart="8dp"
+                    android:text="Disabled" />
+
+            </RadioGroup>
+
+        </HorizontalScrollView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/RegularTextStyle"
+                android:layout_gravity="center_vertical"
+                android:text="Index replication:"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/indexReplicationInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/ripple_simple_bg"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="4dp"
+                android:src="@drawable/ic_info" />
+
+        </LinearLayout>
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:overScrollMode="never"
+            android:scrollbars="none">
+
+            <RadioGroup
+                android:id="@+id/indexReplicationGroup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/indexReplicationOn"
+                    style="@style/RadioButtonStyle"
+                    android:layout_marginStart="16dp"
+                    android:text="Enabled" />
+
+                <RadioButton
+                    android:id="@+id/indexReplicationOff"
+                    style="@style/RadioButtonStyle"
+                    android:layout_marginStart="8dp"
+                    android:text="Disabled" />
+
+            </RadioGroup>
+
+        </HorizontalScrollView>
+
+        <Button
+            android:id="@+id/resetPreferences"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:text="Reset preferences" />
+
+    </LinearLayout>
+
+</ScrollView>
