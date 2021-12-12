@@ -158,7 +158,6 @@ class GalleryPresenter(
         if (isFullscreen == newFullscreen)
             return
         isFullscreen = newFullscreen
-        viewState.setFullscreen(isFullscreen)
     }
 
     private fun deleteResource(resource: ResourceId) = presenterScope.launch(NonCancellable) {
@@ -203,7 +202,6 @@ class GalleryPresenter(
     fun onBackClick(): Boolean {
         Log.d(GALLERY_SCREEN, "quitting from GalleryPresenter")
         router.exit()
-        viewState.setFullscreen(false)
         return true
     }
 }

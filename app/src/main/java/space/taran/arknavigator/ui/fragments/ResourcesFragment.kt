@@ -23,6 +23,7 @@ import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.adapter.ResourcesRVAdapter
 import space.taran.arknavigator.ui.adapter.TagsSelectorAdapter
 import space.taran.arknavigator.ui.fragments.utils.Notifications
+import space.taran.arknavigator.utils.FullscreenHelper
 import space.taran.arknavigator.utils.RESOURCES_SCREEN
 import space.taran.arknavigator.utils.Sorting
 import space.taran.arknavigator.utils.extensions.changeEnabledStatus
@@ -88,6 +89,7 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView,
 
     override fun init() {
         Log.d(RESOURCES_SCREEN, "initializing ResourcesFragment")
+        FullscreenHelper.setStatusBarVisibility(true, requireActivity().window)
         (activity as MainActivity).setSelectedTab(1)
         (activity as MainActivity).setToolbarVisibility(true)
         (requireActivity() as MainActivity).setBottomNavigationVisibility(true)
