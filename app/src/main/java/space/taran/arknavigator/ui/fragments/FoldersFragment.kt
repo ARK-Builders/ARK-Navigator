@@ -25,6 +25,7 @@ import space.taran.arknavigator.ui.adapter.folderstree.FoldersTreeAdapter
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.utils.FOLDERS_SCREEN
 import space.taran.arknavigator.utils.FOLDER_PICKER
+import space.taran.arknavigator.utils.FullscreenHelper
 import java.nio.file.Path
 import javax.inject.Inject
 
@@ -52,6 +53,7 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
         savedInstanceState: Bundle?): View {
         Log.d(FOLDERS_SCREEN, "inflating layout for FoldersFragment")
         binding = FragmentFoldersBinding.inflate(inflater, container, false)
+        FullscreenHelper.setStatusBarVisibility(true, requireActivity().window)
         return binding.root
     }
 

@@ -77,7 +77,8 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
     override fun init() {
         Log.d(GALLERY_SCREEN, "currentItem = ${binding.viewPager.currentItem}")
 
-        (requireActivity() as MainActivity).setToolbarVisibility(true)
+        FullscreenHelper.setStatusBarVisibility(false, requireActivity().window)
+        (requireActivity() as MainActivity).setToolbarVisibility(false)
         (requireActivity() as MainActivity).setBottomNavigationVisibility(false)
 
         requireActivity().window.decorView.setOnSystemUiVisibilityChangeListener { visibility ->
@@ -150,12 +151,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
     override fun setFullscreen(fullscreen: Boolean) {
         val isControlsVisible = !fullscreen
         binding.previewControls.isVisible = isControlsVisible
-        (activity as MainActivity).setToolbarVisibility(isControlsVisible)
-        FullscreenHelper.setSystemUIVisibility(
-            isControlsVisible,
-            requireActivity().window,
-            (activity as MainActivity).hasNavigationBar()
-        )
+        FullscreenHelper.setStatusBarVisibility(false, requireActivity().window)
     }
 
     override fun notifyUser(message: String, moreTime: Boolean) {

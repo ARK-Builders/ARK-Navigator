@@ -178,14 +178,6 @@ class MainActivity : MvpAppCompatActivity(), MainView {
         }
     }
 
-    fun hasNavigationBar(): Boolean {
-        val rectangle = Rect()
-        val displayMetrics = DisplayMetrics()
-        window.decorView.getWindowVisibleDisplayFrame(rectangle)
-        windowManager.defaultDisplay.getRealMetrics(displayMetrics)
-        return displayMetrics.heightPixels != rectangle.top + rectangle.height()
-    }
-
     override fun notifyUser(message: String, moreTime: Boolean) {
         Notifications.notifyUser(this, message, moreTime)
     }
