@@ -6,12 +6,8 @@ import moxy.MvpPresenter
 import moxy.presenterScope
 import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.mvp.model.UserPreferences
-import space.taran.arknavigator.mvp.model.repo.index.ResourceId
-import space.taran.arknavigator.mvp.model.repo.*
-import space.taran.arknavigator.mvp.model.repo.index.AggregatedResourcesIndex
-import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
-import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
-import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexFactory
+import space.taran.arknavigator.mvp.model.repo.FoldersRepo
+import space.taran.arknavigator.mvp.model.repo.index.*
 import space.taran.arknavigator.mvp.model.repo.tags.AggregatedTagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.PlainTagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
@@ -48,7 +44,7 @@ class ResourcesPresenter(
     val gridPresenter = ResourcesGridPresenter(viewState, presenterScope).apply {
         App.instance.appComponent.inject(this)
     }
-    val tagsSelectorPresenter = TagsSelectorPresenter(viewState, prefix, ::onSelectionChange)
+    val tagsSelectorPresenter = TagsSelectorPresenter(presenterScope, viewState, prefix, ::onSelectionChange)
 
     override fun onFirstViewAttach() {
         Log.d(RESOURCES_SCREEN, "first view attached in ResourcesPresenter")
@@ -115,9 +111,9 @@ class ResourcesPresenter(
     }
 
     fun onViewResume() {
-        tagsSelectorPresenter.calculateTagsAndSelection()
-        if (!tagsEnabled) {
-            presenterScope.launch {
+        gridPresenter.resourcesUpdatingJob = presenterScope.launch {
+            tagsSelectorPresenter.calculateTagsAndSelection()
+            if (!tagsEnabled) {
                 resetResources(listResources(untaggedOnly = true))
             }
         }
@@ -156,8 +152,8 @@ class ResourcesPresenter(
         return true
     }
 
-    private fun onSelectionChange(selection: Set<ResourceId>) {
-        presenterScope.launch { updateSelection(selection) }
+    private suspend fun onSelectionChange(selection: Set<ResourceId>) {
+       updateSelection(selection)
     }
 
     private fun listResources(untaggedOnly: Boolean = false): Set<ResourceMeta> {

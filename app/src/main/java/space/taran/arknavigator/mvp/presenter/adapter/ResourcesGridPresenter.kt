@@ -1,10 +1,7 @@
 package space.taran.arknavigator.mvp.presenter.adapter
 
 import android.util.Log
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
@@ -36,6 +33,8 @@ class ResourcesGridPresenter(
     private lateinit var storage: TagsStorage
     private lateinit var router: Router
 
+    var resourcesUpdatingJob: Job? = null
+
     var sorting = Sorting.DEFAULT
         private set(value) {
             field = value
@@ -51,6 +50,10 @@ class ResourcesGridPresenter(
     fun getCount() = selection.size
 
     fun bindView(view: FileItemView) {
+        resourcesUpdatingJob?.let {
+            if (!it.isCompleted)
+                return 
+        }
         val resource = selection[view.position()]
         Log.d(RESOURCES_SCREEN, "binding view for resource ${resource.id}")
 
@@ -79,7 +82,8 @@ class ResourcesGridPresenter(
 
     suspend fun updateSelection(selection: Set<ResourceId>) = withContext(Dispatchers.Default) {
         this@ResourcesGridPresenter.selection = resources.filter { selection.contains(it.id) }
-        withContext(Dispatchers.Main) {
+        scope.launch(Dispatchers.Main) {
+            resourcesUpdatingJob?.join()
             setProgressVisibility(false)
             viewState.updateAdapter()
         }
@@ -89,7 +93,8 @@ class ResourcesGridPresenter(
         this@ResourcesGridPresenter.resources = resources.toList()
         sortAllResources()
         selection = this@ResourcesGridPresenter.resources
-        withContext(Dispatchers.Main) {
+        scope.launch(Dispatchers.Main) {
+            resourcesUpdatingJob?.join()
             setProgressVisibility(false)
             viewState.updateAdapter()
         }

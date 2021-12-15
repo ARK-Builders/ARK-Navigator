@@ -1,6 +1,8 @@
 package space.taran.arknavigator.mvp.presenter.adapter.tagsselector
 
 import android.util.Log
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
@@ -9,13 +11,14 @@ import space.taran.arknavigator.utils.Popularity
 import space.taran.arknavigator.utils.TAGS_SELECTOR
 import space.taran.arknavigator.utils.Tag
 import space.taran.arknavigator.utils.Tags
-import java.lang.AssertionError
 import java.nio.file.Path
+import kotlin.reflect.KSuspendFunction1
 
 class TagsSelectorPresenter(
+    private val scope: CoroutineScope,
     private val viewState: ResourcesView,
     private val prefix: Path?,
-    private val onSelectionChangeListener: (Set<ResourceId>) -> Unit
+    private val onSelectionChangeListener: KSuspendFunction1<Set<ResourceId>, Unit>
 ) {
     private var index: ResourcesIndex? = null
     private var storage: TagsStorage? = null
@@ -49,7 +52,7 @@ class TagsSelectorPresenter(
         this.storage = storage
     }
 
-    fun onTagClick(tag: Tag) {
+    fun onTagClick(tag: Tag) = scope.launch {
         when {
             excludedTags.contains(tag) -> {
                 actions.addLast(UncheckExcluded(tag))
@@ -67,7 +70,7 @@ class TagsSelectorPresenter(
         }
     }
 
-    fun onTagLongClick(tag: Tag) {
+    fun onTagLongClick(tag: Tag) = scope.launch {
         when {
             includedTags.contains(tag) -> {
                 actions.addLast(UncheckAndExclude(tag))
@@ -85,7 +88,7 @@ class TagsSelectorPresenter(
         }
     }
 
-    fun onClearClick() {
+    fun onClearClick() = scope.launch {
         actions.addLast(Clear(includedTags.toSet(), excludedTags.toSet()))
         includedTags.clear()
         excludedTags.clear()
@@ -113,7 +116,7 @@ class TagsSelectorPresenter(
         }
     }
 
-    fun calculateTagsAndSelection() {
+    suspend fun calculateTagsAndSelection() {
         Log.d(TAGS_SELECTOR, "calculating tags and selection")
         if (storage == null || index == null)
             return
@@ -201,7 +204,7 @@ class TagsSelectorPresenter(
 
         actions.removeLast()
 
-        calculateTagsAndSelection()
+        scope.launch { calculateTagsAndSelection() }
 
         return true
     }
@@ -248,7 +251,7 @@ class TagsSelectorPresenter(
         unavailableTagsForDisplay = unavailableTags
     }
 
-    private fun includeTag(tag: Tag) {
+    private suspend fun includeTag(tag: Tag) {
         Log.d(TAGS_SELECTOR, "including tag $tag")
 
         includedTags.add(tag)
@@ -257,7 +260,7 @@ class TagsSelectorPresenter(
         calculateTagsAndSelection()
     }
 
-    private fun excludeTag(tag: Tag) {
+    private suspend fun excludeTag(tag: Tag) {
         Log.d(TAGS_SELECTOR, "excluding tag $tag")
 
         excludedTags.add(tag)
@@ -266,7 +269,7 @@ class TagsSelectorPresenter(
         calculateTagsAndSelection()
     }
 
-    private fun uncheckTag(tag: Tag, needToCalculate: Boolean = true) {
+    private suspend fun uncheckTag(tag: Tag, needToCalculate: Boolean = true) {
         Log.d(TAGS_SELECTOR, "un-checking tag $tag")
 
         if (includedTags.contains(tag) && excludedTags.contains(tag)) {
