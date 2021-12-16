@@ -10,6 +10,7 @@ import android.os.Environment
 import android.provider.Settings
 import android.util.Log
 import android.view.View
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -21,8 +22,6 @@ import space.taran.arknavigator.mvp.view.MainView
 import space.taran.arknavigator.ui.fragments.BackButtonListener
 import moxy.MvpAppCompatActivity
 import moxy.ktx.moxyPresenter
-import moxy.presenter.InjectPresenter
-import moxy.presenter.ProvidePresenter
 import ru.terrakok.cicerone.NavigatorHolder
 import ru.terrakok.cicerone.android.support.SupportAppNavigator
 import space.taran.arknavigator.BuildConfig
@@ -39,6 +38,20 @@ class MainActivity : MvpAppCompatActivity(), MainView {
     lateinit var navigatorHolder: NavigatorHolder
 
     private lateinit var binding: ActivityMainBinding
+
+    @RequiresApi(Build.VERSION_CODES.R)
+    private val storagePermsLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (hasStoragePerms()) {
+            presenter.permsGranted()
+            Log.d(PERMISSIONS, "all necessary permissions granted")
+        }
+        else {
+            notifyUser("Storage permission denied")
+            Log.d(PERMISSIONS, "permission denied with resultCode: ${result.resultCode}")
+        }
+    }
 
     private val presenter by moxyPresenter {
         MainPresenter().apply {
@@ -61,6 +74,10 @@ class MainActivity : MvpAppCompatActivity(), MainView {
         Log.d(MAIN, "initializing")
         setSupportActionBar(binding.toolbar)
         binding.bottomNavigation.setOnItemSelectedListener { item ->
+            if (!hasStoragePerms()) {
+                notifyUser("Storage permissions needed!")
+                return@setOnItemSelectedListener false
+            }
             when (item.itemId) {
                 R.id.page_roots -> {
                     Log.d(MAIN, "switching to Folders screen")
@@ -83,29 +100,12 @@ class MainActivity : MvpAppCompatActivity(), MainView {
     }
 
     override fun requestPerms() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            if (!Environment.isExternalStorageManager()) {
+        if (!hasStoragePerms()){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
                 val packageUri = Uri.parse("package:" + BuildConfig.APPLICATION_ID)
                 val intent =
                     Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, packageUri)
-                startActivityForResult(intent, REQUEST_CODE_ALL_FILES_ACCESS)
-            } else
-                presenter.permsGranted()
-        } else {
-            val writePermission = ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            )
-            val readPermission = ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.READ_EXTERNAL_STORAGE
-            )
-
-            if (writePermission == PackageManager.PERMISSION_GRANTED &&
-                readPermission == PackageManager.PERMISSION_GRANTED
-            ) {
-                Log.d(PERMISSIONS, "already granted")
-                presenter.permsGranted()
+                storagePermsLauncher.launch(intent)
             } else {
                 val permissions = arrayOf(
                     Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -115,6 +115,9 @@ class MainActivity : MvpAppCompatActivity(), MainView {
                 Log.d(PERMISSIONS, "requesting $permissions")
                 ActivityCompat.requestPermissions(this, permissions, REQUEST_CODE_PERMISSIONS)
             }
+        } else {
+            Log.d(PERMISSIONS, "storage permissions already granted")
+            presenter.permsGranted()
         }
     }
 
@@ -181,24 +184,22 @@ class MainActivity : MvpAppCompatActivity(), MainView {
         Notifications.notifyUser(this, message, moreTime)
     }
 
-    @RequiresApi(Build.VERSION_CODES.R)
-    override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
-        when (requestCode) {
-            REQUEST_CODE_SD_CARD_URI -> {
-                Log.d(MAIN, "sdcard uri request resulted, code $resultCode, intent: $intent")
+    fun hasStoragePerms(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+            Environment.isExternalStorageManager()
+        else {
+            val writePermission = ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+            val readPermission = ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            )
 
-                val treeUri = intent!!.data!!
-                contentResolver.takePersistableUriPermission(treeUri,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-            }
-            REQUEST_CODE_ALL_FILES_ACCESS -> {
-                if (Environment.isExternalStorageManager())
-                    presenter.permsGranted()
-            }
-            else -> Log.d(MAIN, "unknown activity result received")
+            writePermission == PackageManager.PERMISSION_GRANTED &&
+                    readPermission == PackageManager.PERMISSION_GRANTED
         }
-
-        super.onActivityResult(requestCode, resultCode, intent)
     }
 
     override fun onResumeFragments() {

@@ -71,7 +71,9 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
 
 
         binding.fabAddRoots.setOnClickListener {
-            presenter.onAddRootBtnClick()
+            if ((requireActivity() as MainActivity).hasStoragePerms())
+                presenter.onAddRootBtnClick()
+            else notifyUser("Storage permissions needed!")
         }
     }
 
