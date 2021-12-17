@@ -26,6 +26,7 @@ fun listDevices(): List<Path> =
     App.instance.getExternalFilesDirs(null)
         .toList()
         .filterNotNull()
+        .filter { it.exists() }
         .map {
             it.toPath().toRealPath()
                 .takeWhile { part ->
