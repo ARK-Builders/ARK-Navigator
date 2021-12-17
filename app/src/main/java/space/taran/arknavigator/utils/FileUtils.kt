@@ -1,5 +1,6 @@
 package space.taran.arknavigator.utils
 
+import android.util.Log
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.ui.App
 import java.nio.file.Files
@@ -26,6 +27,15 @@ fun listDevices(): List<Path> =
     App.instance.getExternalFilesDirs(null)
         .toList()
         .filterNotNull()
+        .filter {
+            try {
+                it.toPath().toRealPath()
+            } catch (e: Exception) {
+                Log.d(FILES, "getExternalFilesDirs returned invalid path: $it")
+                return@filter false
+            }
+            return@filter true
+        }
         .map {
             it.toPath().toRealPath()
                 .takeWhile { part ->

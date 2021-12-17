@@ -32,3 +32,5 @@ const val CONCURRENT: String = "concurrent"
 const val DATABASE: String = "database"
 
 const val PREVIEWS: String = "previews"
+
+const val FILES: String = "files"
