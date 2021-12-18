@@ -30,6 +30,7 @@ import space.taran.arknavigator.ui.adapter.PreviewsPager
 import space.taran.arknavigator.ui.extra.ExtraLoader
 import space.taran.arknavigator.ui.fragments.dialog.EditTagsDialogFragment
 import space.taran.arknavigator.ui.fragments.utils.Notifications
+import space.taran.arknavigator.ui.view.DepthPageTransformer
 import space.taran.arknavigator.utils.FullscreenHelper
 import space.taran.arknavigator.utils.GALLERY_SCREEN
 import space.taran.arknavigator.utils.Tags
@@ -107,6 +108,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
                     }
                 })
             }
+            viewPager.setPageTransformer(DepthPageTransformer())
 
             removeResourceFab.setOnLongClickListener {
                 presenter.onRemoveFabClick()
@@ -125,6 +127,10 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
                 presenter.onEditFabClick()
             }
         }
+    }
+
+    override fun updatePagerAdapter() {
+        pagerAdapter.notifyDataSetChanged()
     }
 
     override fun setupPreview(pos: Int, resource: ResourceMeta, filePath: String) {

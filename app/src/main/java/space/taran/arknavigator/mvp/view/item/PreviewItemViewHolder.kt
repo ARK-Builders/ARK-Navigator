@@ -6,12 +6,12 @@ import com.ortiz.touchview.OnTouchImageViewListener
 import space.taran.arknavigator.databinding.ItemImageBinding
 import space.taran.arknavigator.mvp.model.repo.index.ResourceKind
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
-import space.taran.arknavigator.mvp.presenter.adapter.PreviewsPresenter
+import space.taran.arknavigator.mvp.presenter.adapter.PreviewsPagerPresenter
 import space.taran.arknavigator.utils.ImageUtils
 import space.taran.arknavigator.utils.extensions.makeVisibleAndSetOnClickListener
 import java.nio.file.Path
 
-class PreviewItemViewHolder(val binding: ItemImageBinding, val presenter: PreviewsPresenter) :
+class PreviewItemViewHolder(val binding: ItemImageBinding, val presenter: PreviewsPagerPresenter) :
     RecyclerView.ViewHolder(binding.root),
     PreviewItemView {
 

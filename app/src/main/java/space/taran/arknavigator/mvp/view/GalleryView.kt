@@ -12,6 +12,7 @@ import java.nio.file.Path
 @StateStrategyType(AddToEndSingleStrategy::class)
 interface GalleryView: MvpView {
     fun init()
+    fun updatePagerAdapter()
     fun setFullscreen(fullscreen: Boolean)
     fun setPreviewsScrollingEnabled(enabled: Boolean)
     fun setupPreview(pos: Int, resource: ResourceMeta, filePath: String)

@@ -14,7 +14,7 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
 import space.taran.arknavigator.mvp.model.repo.preview.PreviewAndThumbnail
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
-import space.taran.arknavigator.mvp.presenter.adapter.PreviewsPresenter
+import space.taran.arknavigator.mvp.presenter.adapter.PreviewsPagerPresenter
 import space.taran.arknavigator.mvp.view.GalleryView
 import space.taran.arknavigator.mvp.view.item.PreviewItemView
 import space.taran.arknavigator.utils.GALLERY_SCREEN
@@ -32,7 +32,6 @@ class GalleryPresenter(
 ) : MvpPresenter<GalleryView>() {
 
     private var isFullscreen = false
-    private var workaround = true
     private var currentPos = startAt
     private lateinit var currentResource: ResourceMeta
 
@@ -40,7 +39,7 @@ class GalleryPresenter(
     private lateinit var storage: TagsStorage
     private lateinit var resources: MutableList<ResourceMeta>
 
-    val previewsPresenter = PreviewsPresenter()
+    val previewsPresenter = PreviewsPagerPresenter(viewState)
 
     @Inject
     lateinit var router: Router
@@ -95,17 +94,12 @@ class GalleryPresenter(
     fun onPageChanged(newPos: Int) {
         if (resources.isEmpty())
             return
-        if (startAt > 0 || !workaround) {
-            //weird bug causes this callback be called redundantly if startAt == 0
-            Log.d(GALLERY_SCREEN, "changing to preview at position $newPos")
 
-            if (currentPos != newPos) {
-                currentPos = newPos
-                currentResource = resources[currentPos]
-                displayPreview()
-            }
+        if (currentPos != newPos) {
+            currentPos = newPos
+            currentResource = resources[currentPos]
+            displayPreview()
         }
-        workaround = false
     }
 
     fun onTagsChanged(resource: ResourceId) {
