@@ -8,11 +8,11 @@ import android.view.ViewGroup
 import androidx.core.view.GestureDetectorCompat
 import androidx.recyclerview.widget.RecyclerView
 import space.taran.arknavigator.databinding.ItemImageBinding
-import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
+import space.taran.arknavigator.mvp.presenter.adapter.PreviewsPagerPresenter
 import space.taran.arknavigator.mvp.view.item.PreviewItemViewHolder
 import space.taran.arknavigator.ui.App
 
-class PreviewsPager(val presenter: PreviewsList) : RecyclerView.Adapter<PreviewItemViewHolder>() {
+class PreviewsPager(val presenter: PreviewsPagerPresenter) : RecyclerView.Adapter<PreviewItemViewHolder>() {
 
     override fun getItemCount() = presenter.getCount()
 

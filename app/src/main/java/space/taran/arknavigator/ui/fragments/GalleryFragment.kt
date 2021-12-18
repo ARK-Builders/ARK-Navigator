@@ -1,11 +1,13 @@
 package space.taran.arknavigator.ui.fragments
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
-import android.view.*
-import android.webkit.MimeTypeMap
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
 import androidx.viewpager2.widget.ViewPager2
@@ -15,11 +17,11 @@ import moxy.ktx.moxyPresenter
 import space.taran.arknavigator.BuildConfig
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.FragmentGalleryBinding
-import space.taran.arknavigator.mvp.model.repo.*
-import space.taran.arknavigator.mvp.model.repo.index.*
-import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
+import space.taran.arknavigator.mvp.model.repo.RootAndFav
+import space.taran.arknavigator.mvp.model.repo.index.ResourceId
+import space.taran.arknavigator.mvp.model.repo.index.ResourceKind
+import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
-import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
 import space.taran.arknavigator.mvp.view.GalleryView
 import space.taran.arknavigator.mvp.view.NotifiableView
 import space.taran.arknavigator.ui.App
@@ -28,21 +30,25 @@ import space.taran.arknavigator.ui.adapter.PreviewsPager
 import space.taran.arknavigator.ui.extra.ExtraLoader
 import space.taran.arknavigator.ui.fragments.dialog.EditTagsDialogFragment
 import space.taran.arknavigator.ui.fragments.utils.Notifications
-import space.taran.arknavigator.utils.*
+import space.taran.arknavigator.ui.view.DepthPageTransformer
+import space.taran.arknavigator.utils.FullscreenHelper
+import space.taran.arknavigator.utils.GALLERY_SCREEN
+import space.taran.arknavigator.utils.Tags
+import space.taran.arknavigator.utils.extension
 import space.taran.arknavigator.utils.extensions.makeGone
-import space.taran.arknavigator.utils.extensions.makeVisibleAndSetOnClickListener
+import space.taran.arknavigator.utils.extensions.makeVisible
+import java.nio.file.Path
 
-class GalleryFragment(
-    private val index: ResourcesIndex,
-    private val storage: TagsStorage,
-    private val resources: MutableList<ResourceMeta>,
-    private val startAt: Int
-) : MvpAppCompatFragment(), GalleryView, BackButtonListener, NotifiableView {
+class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener, NotifiableView {
 
     private lateinit var binding: FragmentGalleryBinding
 
     private val presenter by moxyPresenter {
-        GalleryPresenter(index, storage, resources).apply {
+        GalleryPresenter(
+            requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
+            requireArguments().getLongArray(RESOURCES_KEY)!!.toList(),
+            requireArguments().getInt(START_AT_KEY)
+        ).apply {
             Log.d(GALLERY_SCREEN, "creating GalleryPresenter")
             App.instance.appComponent.inject(this)
         }
@@ -55,7 +61,6 @@ class GalleryFragment(
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
         binding = FragmentGalleryBinding.inflate(inflater, container, false)
         Log.d(GALLERY_SCREEN, "inflating layout for GalleryFragment")
         return binding.root
@@ -67,8 +72,7 @@ class GalleryFragment(
         App.instance.appComponent.inject(this)
     }
 
-    override fun init(previews: PreviewsList) {
-        Log.d(GALLERY_SCREEN, "initializing GalleryFragment, position = $startAt")
+    override fun init() {
         Log.d(GALLERY_SCREEN, "currentItem = ${binding.viewPager.currentItem}")
 
         (requireActivity() as MainActivity).setToolbarVisibility(true)
@@ -82,58 +86,63 @@ class GalleryFragment(
             }
         }
 
-        pagerAdapter = PreviewsPager(previews)
+        childFragmentManager.setFragmentResultListener(REQUEST_TAGS_CHANGED_KEY, this) { key, bundle ->
+            presenter.onTagsChanged()
+        }
+
+        pagerAdapter = PreviewsPager(presenter.previewsPresenter)
 
         binding.apply {
             viewPager.apply {
                 adapter = pagerAdapter
                 offscreenPageLimit = 2
-                setCurrentItem(startAt, false)
 
                 registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-                    private var workaround = true
-
                     override fun onPageSelected(position: Int) {
-                        if (this@GalleryFragment.resources.isEmpty()) {
-                            return
-                        }
-
-                        if (startAt > 0 || !workaround) {
-                            //weird bug causes this callback be called redundantly if startAt == 0
-                            Log.d(GALLERY_SCREEN, "changing to preview at position $position")
-                            setupOpenEditFABs()
-                            displayPreview(position)
-                        }
-                        workaround = false
+                        presenter.onPageChanged(position)
                     }
                 })
             }
-
-            displayPreview(startAt)
+            viewPager.setPageTransformer(DepthPageTransformer())
 
             removeResourceFab.setOnLongClickListener {
-                val position = viewPager.currentItem
-                Log.d(GALLERY_SCREEN, "[remove_resource] long-clicked at position $position")
-                deleteResource(position)
+                presenter.onRemoveFabClick()
                 true
             }
 
             shareResourceFab.setOnClickListener {
-                val position = viewPager.currentItem
-                Log.d(GALLERY_SCREEN, "[share_resource] clicked at position $position")
-                shareResource(position)
+                presenter.onShareFabClick()
             }
 
-            setupOpenEditFABs()
+            openResourceFab.setOnClickListener {
+                presenter.onOpenFabClick()
+            }
+
+            editResourceFab.setOnClickListener {
+                presenter.onEditFabClick()
+            }
         }
+    }
+
+    override fun updatePagerAdapter() {
+        pagerAdapter.notifyDataSetChanged()
+    }
+
+    override fun setupPreview(pos: Int, resource: ResourceMeta, filePath: String) {
+        if (binding.viewPager.currentItem != pos)
+            binding.viewPager.setCurrentItem(pos, false)
+        setTitle(filePath)
+        setupOpenEditFABs(resource.kind)
+        ExtraLoader.load(
+            resource,
+            listOf(binding.primaryExtra, binding.secondaryExtra),
+            verbose = true
+        )
+        requireArguments().putInt(START_AT_KEY, pos)
     }
 
     override fun setPreviewsScrollingEnabled(enabled: Boolean) {
         binding.viewPager.isUserInputEnabled = enabled
-    }
-
-    override fun viewInExternalApp(pos: Int) {
-        openIntentChooser(pos, Intent.ACTION_VIEW, true)
     }
 
     override fun setFullscreen(fullscreen: Boolean) {
@@ -143,99 +152,132 @@ class GalleryFragment(
         FullscreenHelper.setSystemUIVisibility(isControlsVisible, requireActivity().window)
     }
 
-    override fun setTitle(title: String) {
-        activity?.title = title
-    }
-
-    override fun backClicked(): Boolean {
-        Log.d(GALLERY_SCREEN, "[back] clicked in GalleryFragment")
-        return presenter.quit()
-    }
-
     override fun notifyUser(message: String, moreTime: Boolean) {
         Notifications.notifyUser(context, message, moreTime)
     }
 
-    private fun deleteResource(position: Int) {
-        pagerAdapter.removeItem(position)
-        val resource = resources.removeAt(position)
+    override fun editResource(resourcePath: Path) =
+        openIntentChooser(resourcePath, Intent.ACTION_EDIT, detachProcess = true)
 
-        presenter.deleteResource(resource.id)
+    override fun shareResource(resourcePath: Path) =
+        openIntentChooser(resourcePath, Intent.ACTION_SEND, detachProcess = false)
 
-        if (resources.isEmpty()) {
-            presenter.quit()
+    override fun viewInExternalApp(resourcePath: Path) {
+        openIntentChooser(resourcePath, Intent.ACTION_VIEW, true)
+    }
+
+    override fun deleteResource(pos: Int) {
+        pagerAdapter.removeItem(pos)
+    }
+
+    override fun displayPreviewTags(resource: ResourceId, tags: Tags) {
+        Log.d(GALLERY_SCREEN, "displaying tags of resource $resource for preview")
+
+        binding.tagsCg.removeAllViews()
+
+        tags.forEach { tag ->
+            val chip = Chip(context)
+            chip.text = tag
+
+            chip.setOnLongClickListener {
+                Log.d(GALLERY_SCREEN, "tag $tag on resource $resource long-clicked")
+                notifyUser("Tag \"$tag\" removed")
+                presenter.onTagRemove(tag)
+                true
+            }
+
+            binding.tagsCg.addView(chip)
+        }
+
+        binding.tagsCg.addView(createEditChip())
+    }
+
+    override fun showEditTagsDialog(
+        resource: ResourceId
+    ) {
+        Log.d(GALLERY_SCREEN, "showing [edit-tags] dialog for resource $resource")
+        val dialog = EditTagsDialogFragment.newInstance(
+            requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
+            resource
+        )
+        dialog.show(childFragmentManager, EditTagsDialogFragment.FRAGMENT_TAG)
+    }
+
+    override fun backClicked(): Boolean {
+        Log.d(GALLERY_SCREEN, "[back] clicked in GalleryFragment")
+        return presenter.onBackClick()
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    override fun setProgressVisibility(isVisible: Boolean, withText: String) {
+        binding.layoutProgress.apply {
+            root.isVisible = isVisible
+
+            if (isVisible) {
+                root.setOnTouchListener { _, _ ->
+                    return@setOnTouchListener true
+                }
+            } else {
+                root.setOnTouchListener(null)
+            }
+
+            if (withText.isNotEmpty()) {
+                progressText.setVisibilityAndLoadingStatus(View.VISIBLE)
+                progressText.loadingText = withText
+            } else {
+                progressText.setVisibilityAndLoadingStatus(View.GONE)
+            }
         }
     }
 
-    override fun showEditTagsDialog(position: Int) {
-        val resource = resources[position]
-        Log.d(GALLERY_SCREEN, "showing [edit-tags] dialog for resource $resource")
-        val dialog = EditTagsDialogFragment(resource.id, storage, index, ::onTagsChanged)
-        dialog.show(childFragmentManager, dialog.TAG)
+    private fun setTitle(title: String) {
+        (requireActivity() as MainActivity).setTitle(title)
     }
 
-    private fun setupOpenEditFABs() {
-        val position = binding.viewPager.currentItem
-
+    private fun setupOpenEditFABs(kind: ResourceKind?) {
         binding.apply {
-            openResourceFab.setOnClickListener(null)
-            editResourceFab.setOnClickListener(null)
-
-            when (resources[position].kind) {
+            when (kind) {
                 ResourceKind.VIDEO -> {
                     // "open" capabilities only
                     editResourceFab.makeGone()
-                    openResourceFab.makeVisibleAndSetOnClickListener {
-                        viewInExternalApp(position)
-                    }
+                    openResourceFab.makeVisible()
                 }
                 ResourceKind.DOCUMENT -> {
                     // both "open" and "edit" capabilities
-                    editResourceFab.makeVisibleAndSetOnClickListener {
-                        editResource(position)
-                    }
-
-                    openResourceFab.makeVisibleAndSetOnClickListener {
-                        viewInExternalApp(position)
-                    }
+                    editResourceFab.makeVisible()
+                    openResourceFab.makeVisible()
                 }
                 ResourceKind.IMAGE -> {
                     // "edit" capabilities only
                     openResourceFab.makeGone()
-                    editResourceFab.makeVisibleAndSetOnClickListener {
-                        editResource(position)
-                    }
+                    editResourceFab.makeVisible()
+                }
+                null -> {
+                    openResourceFab.makeVisible()
                 }
             }
         }
     }
 
-    private fun editResource(position: Int) =
-        openIntentChooser(position, Intent.ACTION_EDIT, detachProcess = true)
-
-    private fun shareResource(position: Int) =
-        openIntentChooser(position, Intent.ACTION_SEND, detachProcess = false)
-
     private fun openIntentChooser(
-        position: Int,
+        resourcePath: Path,
         actionType: String,
-        detachProcess: Boolean) {
+        detachProcess: Boolean
+    ) {
 
-        val resource = resources[position]
-        val path = index.getPath(resource.id)
         Log.i(GALLERY_SCREEN, "Opening resource in an external application")
-        Log.i(GALLERY_SCREEN, "id: ${resource.id}")
-        Log.i(GALLERY_SCREEN, "path: $path")
+        Log.i(GALLERY_SCREEN, "path: $resourcePath")
         Log.i(GALLERY_SCREEN, "action: $actionType")
 
-        val file = path.toFile()
-        val extension: String = extension(path)
+        val file = resourcePath.toFile()
+        val extension: String = extension(resourcePath)
 
         val context = requireContext()
 
         val uri = FileProvider.getUriForFile(
             context,
-            BuildConfig.APPLICATION_ID + ".provider", file)
+            BuildConfig.APPLICATION_ID + ".provider", file
+        )
 
         val intent = Intent()
         intent.setDataAndType(uri, context.contentResolver.getType(uri))
@@ -244,7 +286,7 @@ class GalleryFragment(
 
         intent.action = actionType
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        val actionString = when(actionType) {
+        val actionString = when (actionType) {
             Intent.ACTION_VIEW -> "View the resource with:"
             Intent.ACTION_EDIT -> {
                 intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
@@ -262,57 +304,6 @@ class GalleryFragment(
 
         val chooser = Intent.createChooser(intent, actionString)
         context.startActivity(chooser)
-    }
-
-
-    private fun onTagsChanged(resource: ResourceId) {
-        val tags = presenter.listTags(resource)
-        displayPreviewTags(resource, tags)
-    }
-
-    private fun displayPreview(position: Int) {
-        val resource = resources[position]
-        val tags = presenter.listTags(resource.id)
-        displayPreviewTags(resource.id, tags)
-        val filePath = index.getPath(resource.id)
-        setTitle(filePath.fileName.toString())
-
-        ExtraLoader.load(
-            resource,
-            listOf(binding.primaryExtra, binding.secondaryExtra),
-            verbose = true
-        )
-    }
-
-    private fun displayPreviewTags(resource: ResourceId, tags: Tags) {
-        Log.d(GALLERY_SCREEN, "displaying tags of resource $resource for preview")
-
-        binding.tagsCg.removeAllViews()
-
-        tags.forEach { tag ->
-            val chip = Chip(context)
-            chip.text = tag
-
-            chip.setOnLongClickListener {
-                Log.d(GALLERY_SCREEN, "tag $tag on resource $resource long-clicked")
-                removeTag(resource, tags, tag)
-                true
-            }
-
-            binding.tagsCg.addView(chip)
-        }
-
-        binding.tagsCg.addView(createEditChip())
-    }
-
-    private fun removeTag(resource: ResourceId, tags: Tags, tag: Tag) {
-        notifyUser("Tag \"$tag\" removed")
-        replaceTags(resource, tags - tag)
-    }
-
-    private fun replaceTags(resource: ResourceId, tags: Tags) {
-        presenter.replaceTags(resource, tags)
-        displayPreviewTags(resource, tags)
     }
 
     private fun getPXFromDP(dpValue: Float): Float {
@@ -336,9 +327,25 @@ class GalleryFragment(
                 setOnClickListener {
                     val position = binding.viewPager.currentItem
                     Log.d(GALLERY_SCREEN, "[edit_tags] clicked at position $position")
-                    presenter.onEditTagsDialogBtnClick(position)
+                    presenter.onEditTagsDialogBtnClick()
                 }
             }
         }
+    }
+
+    companion object {
+        private const val ROOT_AND_FAV_KEY = "rootAndFav"
+        private const val RESOURCES_KEY = "resources"
+        private const val START_AT_KEY = "startAt"
+        const val REQUEST_TAGS_CHANGED_KEY = "tagsChanged"
+
+        fun newInstance(rootAndFav: RootAndFav, resources: List<ResourceId>, startAt: Int) =
+            GalleryFragment().apply {
+                arguments = Bundle().apply {
+                    putParcelable(ROOT_AND_FAV_KEY, rootAndFav)
+                    putLongArray(RESOURCES_KEY, resources.toLongArray())
+                    putInt(START_AT_KEY, startAt)
+                }
+            }
     }
 }

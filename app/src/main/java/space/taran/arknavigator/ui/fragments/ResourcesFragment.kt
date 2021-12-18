@@ -15,6 +15,7 @@ import moxy.ktx.moxyPresenter
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.DialogSortBinding
 import space.taran.arknavigator.databinding.FragmentResourcesBinding
+import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.presenter.ResourcesPresenter
 import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.ui.App
@@ -28,7 +29,6 @@ import space.taran.arknavigator.utils.extensions.changeEnabledStatus
 import space.taran.arknavigator.utils.extensions.closeKeyboard
 import space.taran.arknavigator.utils.extensions.placeCursorToEnd
 import space.taran.arknavigator.utils.extensions.showKeyboard
-import java.nio.file.Path
 import kotlin.math.abs
 
 
@@ -40,11 +40,11 @@ import kotlin.math.abs
 //`path` is used for filtering resources' paths
 //       if it is `null`, then no filtering is performed
 //       (recommended instead of passing same value for `path` and `root)
-class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment(), ResourcesView,
+class ResourcesFragment : MvpAppCompatFragment(), ResourcesView,
     BackButtonListener {
 
     private val presenter by moxyPresenter {
-        ResourcesPresenter(root, path).apply {
+        ResourcesPresenter(requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav).apply {
             Log.d(RESOURCES_SCREEN, "creating ResourcesPresenter")
             App.instance.appComponent.inject(this)
         }
@@ -392,5 +392,12 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
         private const val DRAG_TRAVEL_TIME_THRESHOLD = 30      //milliseconds
         private const val DRAG_TRAVEL_DELTA_THRESHOLD = 0.1    //ratio
         private const val DRAG_TRAVEL_SPEED_THRESHOLD = 150    //percents per second
+        private const val ROOT_AND_FAV_KEY = "rootAndFav"
+
+        fun newInstance(rootAndFav: RootAndFav) = ResourcesFragment().apply {
+            arguments = Bundle().apply {
+                putParcelable(ROOT_AND_FAV_KEY, rootAndFav)
+            }
+        }
     }
 }

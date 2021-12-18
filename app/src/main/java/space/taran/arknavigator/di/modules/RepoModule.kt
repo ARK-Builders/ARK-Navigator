@@ -1,11 +1,12 @@
 package space.taran.arknavigator.di.modules
 
 import android.util.Log
-import space.taran.arknavigator.mvp.model.dao.Database
 import dagger.Module
 import dagger.Provides
+import space.taran.arknavigator.mvp.model.dao.Database
 import space.taran.arknavigator.mvp.model.repo.FoldersRepo
-import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexFactory
+import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
+import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import space.taran.arknavigator.utils.MAIN
 import javax.inject.Singleton
 
@@ -20,8 +21,17 @@ class RepoModule {
 
     @Singleton
     @Provides
-    fun resourcesIndexesRepo(database: Database): ResourcesIndexFactory {
+    fun resourcesIndexesRepo(database: Database, foldersRepo: FoldersRepo): ResourcesIndexRepo {
         Log.d(MAIN, "creating ResourcesIndexesRepo")
-        return ResourcesIndexFactory(database.resourceDao())
+        return ResourcesIndexRepo(database.resourceDao(), foldersRepo)
+    }
+
+    @Singleton
+    @Provides
+    fun tagsStorageRepo(
+        foldersRepo: FoldersRepo,
+        resourcesIndexRepo: ResourcesIndexRepo
+    ): TagsStorageRepo {
+        return TagsStorageRepo(foldersRepo, resourcesIndexRepo)
     }
 }

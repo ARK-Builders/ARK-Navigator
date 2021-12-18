@@ -6,15 +6,12 @@ import moxy.MvpPresenter
 import moxy.presenterScope
 import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.mvp.model.UserPreferences
-import space.taran.arknavigator.mvp.model.repo.index.ResourceId
-import space.taran.arknavigator.mvp.model.repo.*
-import space.taran.arknavigator.mvp.model.repo.index.AggregatedResourcesIndex
-import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
-import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
-import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexFactory
+import space.taran.arknavigator.mvp.model.repo.FoldersRepo
+import space.taran.arknavigator.mvp.model.repo.RootAndFav
+import space.taran.arknavigator.mvp.model.repo.index.*
 import space.taran.arknavigator.mvp.model.repo.tags.AggregatedTagsStorage
-import space.taran.arknavigator.mvp.model.repo.tags.PlainTagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
+import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import space.taran.arknavigator.mvp.presenter.adapter.ResourcesGridPresenter
 import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagsSelectorPresenter
 import space.taran.arknavigator.mvp.view.ResourcesView
@@ -25,8 +22,7 @@ import java.nio.file.Path
 import javax.inject.Inject
 
 class ResourcesPresenter(
-    val root: Path?,
-    private val prefix: Path?
+    private val rootAndFav: RootAndFav
 ) : MvpPresenter<ResourcesView>() {
 
     @Inject
@@ -36,7 +32,10 @@ class ResourcesPresenter(
     lateinit var foldersRepo: FoldersRepo
 
     @Inject
-    lateinit var resourcesIndexFactory: ResourcesIndexFactory
+    lateinit var resourcesIndexRepo: ResourcesIndexRepo
+
+    @Inject
+    lateinit var tagsStorageRepo: TagsStorageRepo
 
     @Inject
     lateinit var userPreferences: UserPreferences
@@ -45,10 +44,10 @@ class ResourcesPresenter(
     private lateinit var storage: TagsStorage
     var tagsEnabled: Boolean = true
 
-    val gridPresenter = ResourcesGridPresenter(viewState, presenterScope).apply {
+    val gridPresenter = ResourcesGridPresenter(rootAndFav, viewState, presenterScope).apply {
         App.instance.appComponent.inject(this)
     }
-    val tagsSelectorPresenter = TagsSelectorPresenter(viewState, prefix, ::onSelectionChange)
+    val tagsSelectorPresenter = TagsSelectorPresenter(viewState, rootAndFav.fav, ::onSelectionChange)
 
     override fun onFirstViewAttach() {
         Log.d(RESOURCES_SCREEN, "first view attached in ResourcesPresenter")
@@ -63,31 +62,24 @@ class ResourcesPresenter(
             Notifications.notifyIfFailedPaths(viewState, folders.failed)
 
             val all = folders.succeeded.keys
-            val roots: List<Path> = if (root != null) {
-                if (!all.contains(root)) {
+            val roots: List<Path> = if (rootAndFav.root != null) {
+                if (!all.contains(rootAndFav.root)) {
                     throw AssertionError("Requested root wasn't found in DB")
                 }
 
-                listOf(root)
+                listOf(rootAndFav.root!!)
             } else {
                 all.toList()
             }
             Log.d(RESOURCES_SCREEN, "using roots $roots")
 
             val rootToIndex = roots
-                .map { it to resourcesIndexFactory.loadFromDatabase(it) }
+                .map { it to resourcesIndexRepo.loadFromDatabase(it) }
                 .toMap()
 
             val rootToStorage = roots
-                .map { it to PlainTagsStorage.provide(it, rootToIndex[it]!!) }
+                .map { it to tagsStorageRepo.provide(it) }
                 .toMap()
-
-            roots.forEach { root ->
-                val storage = rootToStorage[root]!!
-                val indexed = rootToIndex[root]!!.listAllIds()
-
-                storage.cleanup(indexed)
-            }
 
             index = AggregatedResourcesIndex(rootToIndex.values)
             storage = AggregatedTagsStorage(rootToStorage.values)
@@ -101,7 +93,7 @@ class ResourcesPresenter(
             tagsSelectorPresenter.init(index, storage)
             tagsSelectorPresenter.calculateTagsAndSelection()
 
-            val path = (prefix ?: root)
+            val path = (rootAndFav.fav ?: rootAndFav.root)
             val title = if (path != null) "$path, " else ""
 
             viewState.setToolbarTitle("$title${roots.size} of roots chosen")
@@ -161,7 +153,7 @@ class ResourcesPresenter(
     }
 
     private fun listResources(untaggedOnly: Boolean = false): Set<ResourceMeta> {
-        val underPrefix = index.listResources(prefix)
+        val underPrefix = index.listResources(rootAndFav.fav)
 
         val result = if (untaggedOnly) {
             val untagged = storage.listUntaggedResources()

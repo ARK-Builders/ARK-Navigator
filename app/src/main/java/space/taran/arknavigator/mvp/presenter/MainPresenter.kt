@@ -1,12 +1,12 @@
 package space.taran.arknavigator.mvp.presenter
 
 import android.util.Log
-import space.taran.arknavigator.mvp.view.MainView
-import space.taran.arknavigator.navigation.Screens
 import moxy.MvpPresenter
 import ru.terrakok.cicerone.Router
+import space.taran.arknavigator.mvp.model.repo.RootAndFav
+import space.taran.arknavigator.mvp.view.MainView
+import space.taran.arknavigator.navigation.Screens
 import space.taran.arknavigator.utils.MAIN
-import space.taran.arknavigator.utils.PERMISSIONS
 import javax.inject.Inject
 
 class MainPresenter: MvpPresenter<MainView>() {
@@ -20,9 +20,11 @@ class MainPresenter: MvpPresenter<MainView>() {
         viewState.requestPerms()
     }
 
-    fun permsGranted() {
-        Log.d(MAIN, "creating Folders screen")
-        router.replaceScreen(Screens.FoldersScreen())
+    fun permsGranted(isActiveScreenExist: Boolean) {
+        if (!isActiveScreenExist) {
+            Log.d(MAIN, "creating Folders screen")
+            router.replaceScreen(Screens.FoldersScreen())
+        }
     }
 
     fun goToFoldersScreen() {
@@ -32,7 +34,7 @@ class MainPresenter: MvpPresenter<MainView>() {
 
     fun goToResourcesScreen() {
         Log.d(MAIN, "creating Resources screen")
-        router.newRootScreen(Screens.ResourcesScreen(null, null))
+        router.newRootScreen(Screens.ResourcesScreen(RootAndFav(null, null)))
     }
 
     fun backClicked() {
