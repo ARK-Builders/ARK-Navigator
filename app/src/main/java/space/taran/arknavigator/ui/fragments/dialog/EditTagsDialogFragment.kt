@@ -5,7 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import androidx.core.os.bundleOf
 import androidx.core.widget.doAfterTextChanged
+import androidx.fragment.app.setFragmentResult
 import com.google.android.material.chip.Chip
 import moxy.MvpAppCompatDialogFragment
 import moxy.ktx.moxyPresenter
@@ -16,6 +18,7 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.presenter.dialog.EditTagsDialogPresenter
 import space.taran.arknavigator.mvp.view.dialog.EditTagsDialogView
 import space.taran.arknavigator.ui.App
+import space.taran.arknavigator.ui.fragments.GalleryFragment
 import space.taran.arknavigator.utils.Tag
 import space.taran.arknavigator.utils.Tags
 import space.taran.arknavigator.utils.extensions.placeCursorToEnd
@@ -23,7 +26,6 @@ import space.taran.arknavigator.utils.extensions.placeCursorToEnd
 class EditTagsDialogFragment :
     MvpAppCompatDialogFragment(), EditTagsDialogView {
     private lateinit var binding: DialogEditTagsBinding
-    lateinit var onTagsChangedListener: (resource: ResourceId) -> Unit
 
     private val presenter by moxyPresenter {
         EditTagsDialogPresenter(
@@ -44,7 +46,6 @@ class EditTagsDialogFragment :
     }
 
     override fun init(): Unit = with(binding) {
-        presenter.onTagsChangedListener = onTagsChangedListener
         etNewTags.placeCursorToEnd()
         etNewTags.doAfterTextChanged { editable ->
             presenter.onInputChanged(editable.toString())
@@ -103,6 +104,10 @@ class EditTagsDialogFragment :
     }
 
     override fun getTheme() = R.style.FullScreenDialog
+
+    override fun notifyTagsChanged() {
+        setFragmentResult(GalleryFragment.REQUEST_TAGS_CHANGED_KEY, bundleOf())
+    }
 
     companion object {
         const val FRAGMENT_TAG = "editTagsDialogTag"

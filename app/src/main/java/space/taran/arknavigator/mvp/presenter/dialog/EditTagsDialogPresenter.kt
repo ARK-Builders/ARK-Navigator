@@ -21,7 +21,6 @@ class EditTagsDialogPresenter(
     private var filter = ""
     private lateinit var index: ResourcesIndex
     private lateinit var storage: TagsStorage
-    lateinit var onTagsChangedListener: (resource: ResourceId) -> Unit
 
     @Inject
     lateinit var indexRepo: ResourcesIndexRepo
@@ -74,7 +73,7 @@ class EditTagsDialogPresenter(
     private fun updateTags() {
         viewState.setResourceTags(listResourceTags())
         viewState.setQuickTags(listQuickTags())
-        onTagsChangedListener(resourceId)
+        viewState.notifyTagsChanged()
     }
 
     private fun listQuickTags(): List<Tag> {

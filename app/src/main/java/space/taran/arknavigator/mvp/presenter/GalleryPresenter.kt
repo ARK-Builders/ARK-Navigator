@@ -102,7 +102,7 @@ class GalleryPresenter(
         }
     }
 
-    fun onTagsChanged(resource: ResourceId) {
+    fun onTagsChanged() {
         val tags = storage.getTags(currentResource.id)
         viewState.displayPreviewTags(currentResource.id, tags)
     }

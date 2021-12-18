@@ -13,6 +13,7 @@ interface EditTagsDialogView: MvpView {
     fun setQuickTags(tags: List<Tag>)
     fun setResourceTags(tags: Tags)
     fun clearInput()
+    fun notifyTagsChanged()
     @StateStrategyType(SkipStrategy::class)
     fun dismissDialog()
 }

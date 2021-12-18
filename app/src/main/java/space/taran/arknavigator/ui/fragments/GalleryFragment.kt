@@ -72,15 +72,6 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
         App.instance.appComponent.inject(this)
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val fragment =
-            childFragmentManager.findFragmentByTag(EditTagsDialogFragment.FRAGMENT_TAG)
-        fragment?.let {
-            (it as EditTagsDialogFragment).onTagsChangedListener = presenter::onTagsChanged
-        }
-    }
-
     override fun init() {
         Log.d(GALLERY_SCREEN, "currentItem = ${binding.viewPager.currentItem}")
 
@@ -93,6 +84,10 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
             } else {
                 presenter.onSystemUIVisibilityChange(false)
             }
+        }
+
+        childFragmentManager.setFragmentResultListener(REQUEST_TAGS_CHANGED_KEY, this) { key, bundle ->
+            presenter.onTagsChanged()
         }
 
         pagerAdapter = PreviewsPager(presenter.previewsPresenter)
@@ -206,7 +201,6 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
             resource
         )
         dialog.show(childFragmentManager, EditTagsDialogFragment.FRAGMENT_TAG)
-        dialog.onTagsChangedListener = presenter::onTagsChanged
     }
 
     override fun backClicked(): Boolean {
@@ -343,6 +337,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
         private const val ROOT_AND_FAV_KEY = "rootAndFav"
         private const val RESOURCES_KEY = "resources"
         private const val START_AT_KEY = "startAt"
+        const val REQUEST_TAGS_CHANGED_KEY = "tagsChanged"
 
         fun newInstance(rootAndFav: RootAndFav, resources: List<ResourceId>, startAt: Int) =
             GalleryFragment().apply {
