@@ -55,19 +55,16 @@ class SettingsFragment : MvpAppCompatFragment(), SettingsView {
         App.instance.appComponent.inject(this)
 
         binding.apply {
-            crashGroup.setOnCheckedChangeListener { rg, checkedID ->
-                presenter.onCrashReportingClick(crashReportFromButton(checkedID))
-                rgButtonSelected(rg, checkedID)
+            crashReportSwitch.setOnCheckedChangeListener { compoundButton, b ->
+                presenter.onCrashReportingClick(b)
             }
 
-            imgReplicationGroup.setOnCheckedChangeListener { rg, checkedID ->
-                presenter.onImgCacheReplicationClick(imgReplicationFromButton(checkedID))
-                rgButtonSelected(rg, checkedID)
+            cacheReplicationSwitch.setOnCheckedChangeListener { compoundButton, b ->
+                presenter.onImgCacheReplicationClick(b)
             }
 
-            indexReplicationGroup.setOnCheckedChangeListener { rg, checkedID ->
-                presenter.onIndexReplicationClick(indexReplicationFromButton(checkedID))
-                rgButtonSelected(rg, checkedID)
+            indexReplicationSwitch.setOnCheckedChangeListener { compoundButton, b ->
+                presenter.onIndexReplicationClick(b)
             }
 
             crashInfo.setOnClickListener {
@@ -109,81 +106,32 @@ class SettingsFragment : MvpAppCompatFragment(), SettingsView {
 
     override fun init() {
         Log.d(SETTINGS_SCREEN, "initializing SettingsFragment")
-        (activity as MainActivity).setSelectedTab(2)
+        (activity as MainActivity).setSelectedTab(0)
         (activity as MainActivity).setToolbarVisibility(false)
         (requireActivity() as MainActivity).setBottomNavigationVisibility(true)
     }
 
-    override fun setCrashReportPreference(crashReport: CrashReport) {
-        binding.crashGroup.check(buttonFromCrashReport(crashReport))
+    override fun setCrashReportPreference(isCrashReportEnabled: Boolean) {
+        binding.crashReportSwitch.apply {
+            if (isChecked != isCrashReportEnabled) isChecked = isCrashReportEnabled
+        }
     }
 
-    override fun setImgCacheReplicationPref(imgReplicationPref: ImgCacheReplication) {
-        binding.imgReplicationGroup.check(buttonFromImgReplication(imgReplicationPref))
+    override fun setImgCacheReplicationPref(isImgReplicationEnabled: Boolean) {
+        binding.cacheReplicationSwitch.apply {
+            if (isChecked != isImgReplicationEnabled) isChecked = isImgReplicationEnabled
+        }
     }
 
-    override fun setIndexReplicationPref(indexReplication: IndexReplication) {
-        binding.indexReplicationGroup.check(buttonFromIndexReplication(indexReplication))
+    override fun setIndexReplicationPref(isIndexReplication: Boolean) {
+        binding.indexReplicationSwitch.apply {
+            if (isChecked != isIndexReplication) isChecked = isIndexReplication
+        }
     }
 
     override fun notifyUser(message: String, moreTime: Boolean) {
         Notifications.notifyUser(context, message, moreTime)
     }
-
-    private fun rgButtonSelected(rg: RadioGroup, checkedID: Int) {
-        rg.children.filterIsInstance(RadioButton::class.java).forEach { rb ->
-            if (rb.id != checkedID) rb.setTextColor(getColor(R.color.colorPrimary))
-            else rb.setTextColor(getColor(R.color.white))
-        }
-    }
-
-    private fun getColor(@ColorRes colorID: Int) =
-        ContextCompat.getColor(requireContext(), colorID)
-
-    private fun crashReportFromButton(buttonID: Int): CrashReport {
-        val reversed = crashReportToBtnMap.entries.associate { (k, v) -> v to k }
-        return reversed.getOrDefault(buttonID, CrashReport.NONE)
-    }
-
-    private fun buttonFromCrashReport(crashReport: CrashReport): Int {
-        return crashReportToBtnMap[crashReport]
-            ?: throw AssertionError("CrashReport must be of known type")
-    }
-
-    private fun imgReplicationFromButton(buttonID: Int): ImgCacheReplication {
-        val reversed = imgReplicationToBtnMap.entries.associate { (k, v) -> v to k }
-        return reversed.getOrDefault(buttonID, ImgCacheReplication.ENABLED)
-    }
-
-    private fun buttonFromImgReplication(imgReplication: ImgCacheReplication): Int {
-        return imgReplicationToBtnMap[imgReplication]
-            ?: throw AssertionError("ImgCacheReplication must be of known type")
-    }
-
-    private fun indexReplicationFromButton(buttonID: Int): IndexReplication {
-        val reversed = indexReplicationToBtnMap.entries.associate { (k, v) -> v to k }
-        return reversed.getOrDefault(buttonID, IndexReplication.ENABLED)
-    }
-
-    private fun buttonFromIndexReplication(indexReplication: IndexReplication): Int {
-        return indexReplicationToBtnMap[indexReplication]
-            ?: throw AssertionError("IndexReplication must be of known type")
-    }
-
-    private val crashReportToBtnMap = mapOf(
-        CrashReport.SEND_AUTOMATICALLY to R.id.crashSendAutomatically,
-        CrashReport.DONT_SEND to R.id.crashDontSend
-    )
-
-    private val imgReplicationToBtnMap = mapOf(
-        ImgCacheReplication.ENABLED to R.id.imgReplicationOn,
-        ImgCacheReplication.DISABLED to R.id.imgReplicationOff
-    )
-
-    private val indexReplicationToBtnMap = mapOf(
-        IndexReplication.ENABLED to R.id.indexReplicationOn,
-        IndexReplication.DISABLED to R.id.indexReplicationOff
-    )
 
     companion object {
         fun newInstance() =

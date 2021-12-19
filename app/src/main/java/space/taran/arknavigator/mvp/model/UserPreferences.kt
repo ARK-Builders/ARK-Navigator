@@ -33,9 +33,9 @@ class UserPreferences @Inject constructor(val context: Context) {
     suspend fun clearPreferences() {
         setSorting(Sorting.DEFAULT)
         setSortingAscending(true)
-        setCrashReportPref(CrashReport.NONE)
-        setImgCacheReplication(ImgCacheReplication.ENABLED)
-        setIndexReplication(IndexReplication.ENABLED)
+        setCrashReportEnabled(null)
+        setCacheReplicationEnabled(true)
+        setIndexReplicationEnabled(true)
     }
 
     suspend fun setSorting(sorting: Sorting) {
@@ -63,78 +63,38 @@ class UserPreferences @Inject constructor(val context: Context) {
         else Sorting.values()[intValue]
     }
 
-    suspend fun setCrashReportPref(pref: CrashReport) {
-
+    suspend fun setCrashReportEnabled(enabled: Boolean?) {
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.CRASH_REPORT_PREFERENCE] = pref.ordinal
+            preferences[PreferencesKeys.CRASH_REPORT_PREFERENCE] = enabled?: BuildConfig.DEBUG
         }
     }
 
-    suspend fun getCrashReportPref(): CrashReport {
-        val crashReportInt = dataStore.data.first()[PreferencesKeys.CRASH_REPORT_PREFERENCE] ?: 0
-        return crashReportFromInt(crashReportInt)
-    }
+    suspend fun isCrashReportEnabled(): Boolean =
+        dataStore.data.first()[PreferencesKeys.CRASH_REPORT_PREFERENCE]?: BuildConfig.DEBUG
 
-    suspend fun setImgCacheReplication(pref: ImgCacheReplication) {
+    suspend fun setCacheReplicationEnabled(enabled: Boolean) {
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.IMG_CACHE_REPLICATION_PREF] = pref.ordinal
+            preferences[PreferencesKeys.IMG_CACHE_REPLICATION_PREF] = enabled
         }
     }
 
-    suspend fun getImgCacheReplication(): ImgCacheReplication {
-        val imgCacheReplicationInt =
-            dataStore.data.first()[PreferencesKeys.IMG_CACHE_REPLICATION_PREF]
+    suspend fun isCacheReplicationEnabled(): Boolean =
+        dataStore.data.first()[PreferencesKeys.IMG_CACHE_REPLICATION_PREF] ?: true
 
-        return imgCacheReplicationFromInt(imgCacheReplicationInt)
-    }
-
-    suspend fun setIndexReplication(pref: IndexReplication) {
+    suspend fun setIndexReplicationEnabled(enabled: Boolean) {
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.INDEX_REPLICATION_PREF] = pref.ordinal
+            preferences[PreferencesKeys.INDEX_REPLICATION_PREF] = enabled
         }
     }
 
-    suspend fun getIndexReplication(): IndexReplication {
-        val indexReplicationInt =
-            dataStore.data.first()[PreferencesKeys.INDEX_REPLICATION_PREF]
-        return indexReplicationFromInt(indexReplicationInt)
-    }
+    suspend fun isIndexReplicationEnabled(): Boolean =
+        dataStore.data.first()[PreferencesKeys.INDEX_REPLICATION_PREF] ?: true
 
     private object PreferencesKeys {
         val SORTING_PREFERENCE = intPreferencesKey("sorting_preference")
         val SORTING_ORDER = booleanPreferencesKey("sorting_preference_is_ascending")
-        val CRASH_REPORT_PREFERENCE = intPreferencesKey("crash_report_preference")
-        val IMG_CACHE_REPLICATION_PREF = intPreferencesKey("img_cache_replication_preference")
-        val INDEX_REPLICATION_PREF = intPreferencesKey("index_replication_preference")
-    }
-
-    enum class CrashReport {
-        NONE, SEND_AUTOMATICALLY, DONT_SEND
-    }
-
-    enum class ImgCacheReplication {
-        ENABLED, DISABLED
-    }
-
-    enum class IndexReplication {
-        ENABLED, DISABLED
-    }
-
-    private fun crashReportFromInt(int: Int): CrashReport {
-        val prefOrdinal = CrashReport.values()[int]
-        return if (prefOrdinal == CrashReport.NONE) {
-            if (BuildConfig.DEBUG) CrashReport.SEND_AUTOMATICALLY
-            else CrashReport.DONT_SEND
-        } else prefOrdinal
-    }
-
-    private fun imgCacheReplicationFromInt(int: Int?): ImgCacheReplication {
-        return if (int != null) ImgCacheReplication.values()[int]
-        else ImgCacheReplication.ENABLED
-    }
-
-    private fun indexReplicationFromInt(int: Int?): IndexReplication {
-        return if (int != null) IndexReplication.values()[int]
-        else IndexReplication.ENABLED
+        val CRASH_REPORT_PREFERENCE = booleanPreferencesKey("crash_report_preference")
+        val IMG_CACHE_REPLICATION_PREF = booleanPreferencesKey("img_cache_replication_preference")
+        val INDEX_REPLICATION_PREF = booleanPreferencesKey("index_replication_preference")
     }
 }

@@ -36,6 +36,8 @@ import space.taran.arknavigator.utils.RESOURCES_SCREEN
 import space.taran.arknavigator.utils.extensions.closeKeyboard
 import space.taran.arknavigator.utils.extensions.placeCursorToEnd
 import space.taran.arknavigator.utils.extensions.showKeyboard
+import kotlin.math.abs
+
 
 // `root` is used for querying tags storage and resources index,
 //       if it is `null`, then resources from all roots are taken
@@ -96,7 +98,7 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         initResultListeners()
 
         FullscreenHelper.setStatusBarVisibility(true, requireActivity().window)
-        (activity as MainActivity).setSelectedTab(1)
+        (activity as MainActivity).setSelectedTab(2)
         (activity as MainActivity).setToolbarVisibility(true)
         (requireActivity() as MainActivity).setBottomNavigationVisibility(true)
         setHasOptionsMenu(true)

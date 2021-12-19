@@ -6,7 +6,6 @@ import moxy.MvpPresenter
 import moxy.presenterScope
 import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.mvp.model.UserPreferences
-import space.taran.arknavigator.mvp.model.UserPreferences.*
 import space.taran.arknavigator.mvp.view.SettingsView
 import space.taran.arknavigator.utils.SETTINGS_SCREEN
 import javax.inject.Inject
@@ -29,24 +28,24 @@ class SettingsPresenter : MvpPresenter<SettingsView>() {
         }
     }
 
-    fun onCrashReportingClick(crashReport: CrashReport) {
+    fun onCrashReportingClick(isCrashReportEnabled: Boolean) {
         presenterScope.launch {
-            Log.d(SETTINGS_SCREEN, "Saving crash report preference: $crashReport")
-            userPreferences.setCrashReportPref(crashReport)
+            Log.d(SETTINGS_SCREEN, "Saving crash report preference, is enabled: $isCrashReportEnabled")
+            userPreferences.setCrashReportEnabled(isCrashReportEnabled)
         }
     }
 
-    fun onImgCacheReplicationClick(imgCacheReplication: ImgCacheReplication) {
+    fun onImgCacheReplicationClick(cacheReplicationEnabled: Boolean) {
         presenterScope.launch {
-            Log.d(SETTINGS_SCREEN, "Saving imgCacheReplication preference: $imgCacheReplication")
-            userPreferences.setImgCacheReplication(imgCacheReplication)
+            Log.d(SETTINGS_SCREEN, "Saving imgCacheReplication preference, is enabled: $cacheReplicationEnabled")
+            userPreferences.setCacheReplicationEnabled(cacheReplicationEnabled)
         }
     }
 
-    fun onIndexReplicationClick(indexReplication: IndexReplication) {
+    fun onIndexReplicationClick(indexReplicationEnabled: Boolean) {
         presenterScope.launch {
-            Log.d(SETTINGS_SCREEN, "Saving indexReplication preference: $indexReplication")
-            userPreferences.setIndexReplication(indexReplication)
+            Log.d(SETTINGS_SCREEN, "Saving indexReplication preference, is enabled: $indexReplicationEnabled")
+            userPreferences.setIndexReplicationEnabled(indexReplicationEnabled)
         }
     }
 
@@ -64,11 +63,11 @@ class SettingsPresenter : MvpPresenter<SettingsView>() {
     }
 
     private suspend fun notifyCrashReportPref() =
-        viewState.setCrashReportPreference(userPreferences.getCrashReportPref())
+        viewState.setCrashReportPreference(userPreferences.isCrashReportEnabled())
 
     private suspend fun notifyImgCacheReplicationPref() =
-        viewState.setImgCacheReplicationPref(userPreferences.getImgCacheReplication())
+        viewState.setImgCacheReplicationPref(userPreferences.isCacheReplicationEnabled())
 
     private suspend fun notifyIndexReplicationPref() =
-        viewState.setIndexReplicationPref(userPreferences.getIndexReplication())
+        viewState.setIndexReplicationPref(userPreferences.isIndexReplicationEnabled())
 }
