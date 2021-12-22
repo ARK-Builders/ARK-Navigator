@@ -2,10 +2,10 @@ package space.taran.arknavigator.mvp.presenter.adapter.folderstree
 
 import android.util.Log
 import androidx.recyclerview.widget.DiffUtil
-import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.mvp.model.repo.Folders
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.view.FoldersView
+import space.taran.arknavigator.navigation.AppRouter
 import space.taran.arknavigator.navigation.Screens
 import space.taran.arknavigator.ui.adapter.folderstree.FolderNodeView
 import space.taran.arknavigator.utils.FOLDERS_TREE
@@ -17,7 +17,7 @@ class FoldersTreePresenter(
     val onAddFolderListener: (path: Path) -> Unit
 ) {
     @Inject
-    lateinit var router: Router
+    lateinit var router: AppRouter
 
     private var nodes = mutableListOf<FolderNode>()
     private var newNodes = mutableListOf<FolderNode>()

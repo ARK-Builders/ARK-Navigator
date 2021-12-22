@@ -4,7 +4,7 @@ import dagger.Module
 import dagger.Provides
 import ru.terrakok.cicerone.Cicerone
 import ru.terrakok.cicerone.NavigatorHolder
-import ru.terrakok.cicerone.Router
+import space.taran.arknavigator.navigation.AppRouter
 import javax.inject.Singleton
 
 @Module
@@ -12,17 +12,17 @@ class CiceroneModule {
 
     @Singleton
     @Provides
-    fun cicerone(): Cicerone<Router> {
-        return Cicerone.create()
+    fun cicerone(): Cicerone<AppRouter> {
+        return Cicerone.create(AppRouter())
     }
 
     @Provides
-    fun navigationHolder(cicerone: Cicerone<Router>): NavigatorHolder {
+    fun navigationHolder(cicerone: Cicerone<AppRouter>): NavigatorHolder {
         return cicerone.navigatorHolder
     }
 
     @Provides
-    fun router(cicerone: Cicerone<Router>): Router {
+    fun router(cicerone: Cicerone<AppRouter>): AppRouter {
         return cicerone.router
     }
 }

@@ -20,12 +20,12 @@ import androidx.core.view.isVisible
 import moxy.MvpAppCompatActivity
 import moxy.ktx.moxyPresenter
 import ru.terrakok.cicerone.NavigatorHolder
-import ru.terrakok.cicerone.android.support.SupportAppNavigator
 import space.taran.arknavigator.BuildConfig
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.ActivityMainBinding
 import space.taran.arknavigator.mvp.presenter.MainPresenter
 import space.taran.arknavigator.mvp.view.MainView
+import space.taran.arknavigator.navigation.AppNavigator
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.fragments.BackButtonListener
 import space.taran.arknavigator.ui.fragments.utils.Notifications
@@ -47,7 +47,7 @@ class MainActivity : MvpAppCompatActivity(), MainView {
         }
     }
 
-    private val navigator = SupportAppNavigator(this, R.id.container)
+    private val navigator = AppNavigator(this, R.id.container)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(MAIN, "creating")
