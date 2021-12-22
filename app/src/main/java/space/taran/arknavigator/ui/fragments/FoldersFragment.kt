@@ -12,27 +12,22 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
-import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.DialogRootsNewBinding
 import space.taran.arknavigator.databinding.FragmentFoldersBinding
 import space.taran.arknavigator.mvp.presenter.FoldersPresenter
-import space.taran.arknavigator.ui.adapter.FolderPicker
 import space.taran.arknavigator.mvp.view.FoldersView
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.activity.MainActivity
+import space.taran.arknavigator.ui.adapter.FolderPicker
 import space.taran.arknavigator.ui.adapter.folderstree.FoldersTreeAdapter
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.utils.FOLDERS_SCREEN
 import space.taran.arknavigator.utils.FOLDER_PICKER
 import space.taran.arknavigator.utils.FullscreenHelper
 import java.nio.file.Path
-import javax.inject.Inject
 
 class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
-    @Inject
-    lateinit var router: Router
-
     private var foldersTreeAdapter: FoldersTreeAdapter? = null
 
     private var folderPicker: FolderPicker? = null

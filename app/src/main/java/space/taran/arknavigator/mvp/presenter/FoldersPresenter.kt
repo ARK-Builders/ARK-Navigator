@@ -5,13 +5,13 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import moxy.MvpPresenter
 import moxy.presenterScope
-import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.R
 import space.taran.arknavigator.mvp.model.repo.FoldersRepo
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
 import space.taran.arknavigator.mvp.presenter.adapter.ItemClickHandler
 import space.taran.arknavigator.mvp.presenter.adapter.folderstree.FoldersTreePresenter
 import space.taran.arknavigator.mvp.view.FoldersView
+import space.taran.arknavigator.navigation.AppRouter
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.ui.resource.StringProvider
@@ -24,7 +24,7 @@ import javax.inject.Inject
 
 class FoldersPresenter : MvpPresenter<FoldersView>() {
     @Inject
-    lateinit var router: Router
+    lateinit var router: AppRouter
 
     @Inject
     lateinit var foldersRepo: FoldersRepo

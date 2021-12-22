@@ -4,7 +4,6 @@ import android.util.Log
 import kotlinx.coroutines.launch
 import moxy.MvpPresenter
 import moxy.presenterScope
-import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.repo.FoldersRepo
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
@@ -15,6 +14,7 @@ import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import space.taran.arknavigator.mvp.presenter.adapter.ResourcesGridPresenter
 import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagsSelectorPresenter
 import space.taran.arknavigator.mvp.view.ResourcesView
+import space.taran.arknavigator.navigation.AppRouter
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.utils.RESOURCES_SCREEN
@@ -26,7 +26,7 @@ class ResourcesPresenter(
 ) : MvpPresenter<ResourcesView>() {
 
     @Inject
-    lateinit var router: Router
+    lateinit var router: AppRouter
 
     @Inject
     lateinit var foldersRepo: FoldersRepo

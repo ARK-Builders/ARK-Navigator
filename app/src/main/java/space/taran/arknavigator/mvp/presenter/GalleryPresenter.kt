@@ -5,7 +5,6 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import moxy.MvpPresenter
 import moxy.presenterScope
-import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
@@ -17,6 +16,7 @@ import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsPagerPresenter
 import space.taran.arknavigator.mvp.view.GalleryView
 import space.taran.arknavigator.mvp.view.item.PreviewItemView
+import space.taran.arknavigator.navigation.AppRouter
 import space.taran.arknavigator.utils.GALLERY_SCREEN
 import space.taran.arknavigator.utils.ImageUtils
 import space.taran.arknavigator.utils.Tag
@@ -44,7 +44,7 @@ class GalleryPresenter(
     val previewsPresenter = PreviewsPagerPresenter(viewState)
 
     @Inject
-    lateinit var router: Router
+    lateinit var router: AppRouter
 
     @Inject
     lateinit var indexRepo: ResourcesIndexRepo
