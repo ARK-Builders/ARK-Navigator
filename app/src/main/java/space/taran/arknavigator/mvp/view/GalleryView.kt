@@ -29,4 +29,8 @@ interface GalleryView: MvpView {
     fun showEditTagsDialog(resource: Long)
     @StateStrategyType(SkipStrategy::class)
     fun deleteResource(pos: Int)
+    @StateStrategyType(SkipStrategy::class)
+    fun notifyResourcesChanged()
+    @StateStrategyType(SkipStrategy::class)
+    fun notifyTagsChanged()
 }
