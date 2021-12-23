@@ -9,6 +9,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
+import androidx.fragment.app.setFragmentResultListener
 import androidx.recyclerview.widget.GridLayoutManager
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
@@ -89,6 +90,9 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView,
 
     override fun init() {
         Log.d(RESOURCES_SCREEN, "initializing ResourcesFragment")
+
+        initResultListeners()
+
         FullscreenHelper.setStatusBarVisibility(true, requireActivity().window)
         (activity as MainActivity).setSelectedTab(1)
         (activity as MainActivity).setToolbarVisibility(true)
@@ -135,7 +139,6 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView,
     override fun onResume() {
         Log.d(RESOURCES_SCREEN, "resuming in ResourcesFragment")
         super.onResume()
-        presenter.onViewResume()
         updateDragHandlerBias()
     }
 
@@ -224,6 +227,15 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView,
 
     override fun backClicked(): Boolean {
         return presenter.onBackClick()
+    }
+
+    private fun initResultListeners() {
+        setFragmentResultListener(GalleryFragment.REQUEST_TAGS_CHANGED_KEY) { _, _ ->
+            presenter.tagsSelectorPresenter.calculateTagsAndSelection()
+        }
+        setFragmentResultListener(GalleryFragment.REQUEST_RESOURCES_CHANGED_KEY) { _, _ ->
+            presenter.onResourcesChanged()
+        }
     }
 
     private fun showSortByDialog(sorting: Sorting, ascending: Boolean) {

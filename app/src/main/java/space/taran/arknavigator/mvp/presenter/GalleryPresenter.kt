@@ -122,8 +122,9 @@ class GalleryPresenter(
     fun onRemoveFabClick() {
         Log.d(GALLERY_SCREEN, "[remove_resource] clicked at position $currentPos")
         deleteResource(currentResource.id)
-
         resources.removeAt(currentPos)
+        viewState.notifyResourcesChanged()
+
         if (resources.isEmpty()) {
             onBackClick()
             return
@@ -148,6 +149,7 @@ class GalleryPresenter(
         viewState.displayPreviewTags(id, newTags)
         Log.d(GALLERY_SCREEN, "tags $tags set to $currentResource")
         storage.setTags(currentResource.id, newTags)
+        viewState.notifyTagsChanged()
     }
 
     fun onEditTagsDialogBtnClick() {

@@ -20,7 +20,6 @@ import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.presenter.dialog.EditTagsDialogPresenter
 import space.taran.arknavigator.mvp.view.dialog.EditTagsDialogView
 import space.taran.arknavigator.ui.App
-import space.taran.arknavigator.ui.fragments.GalleryFragment
 import space.taran.arknavigator.utils.Tag
 import space.taran.arknavigator.utils.Tags
 import space.taran.arknavigator.utils.extensions.placeCursorToEnd
@@ -113,10 +112,11 @@ class EditTagsDialogFragment(
     override fun getTheme() = R.style.FullScreenDialog
 
     override fun notifyTagsChanged() {
-        setFragmentResult(GalleryFragment.REQUEST_TAGS_CHANGED_KEY, bundleOf())
+        setFragmentResult(REQUEST_TAGS_CHANGED_KEY, bundleOf())
     }
 
     companion object {
+        const val REQUEST_TAGS_CHANGED_KEY = "tagsChangedEditTags"
         const val FRAGMENT_TAG = "editTagsDialogTag"
         private const val ROOT_AND_FAV_KEY = "rootAndFav"
         private const val RESOURCE_KEY = "resource"

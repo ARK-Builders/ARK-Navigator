@@ -8,7 +8,9 @@ import android.util.TypedValue
 import android.view.*
 import android.view.View
 import androidx.core.content.FileProvider
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
+import androidx.fragment.app.setFragmentResult
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.chip.Chip
 import moxy.MvpAppCompatFragment
@@ -74,6 +76,8 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
     override fun init() {
         Log.d(GALLERY_SCREEN, "currentItem = ${binding.viewPager.currentItem}")
 
+        initResultListener()
+
         FullscreenHelper.setStatusBarVisibility(false, requireActivity().window)
         (requireActivity() as MainActivity).setToolbarVisibility(false)
         (requireActivity() as MainActivity).setBottomNavigationVisibility(false)
@@ -84,10 +88,6 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
             } else {
                 presenter.onSystemUIVisibilityChange(false)
             }
-        }
-
-        childFragmentManager.setFragmentResultListener(REQUEST_TAGS_CHANGED_KEY, this) { key, bundle ->
-            presenter.onTagsChanged()
         }
 
         pagerAdapter = PreviewsPager(presenter.previewsPresenter)
@@ -131,7 +131,6 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
     override fun setupPreview(pos: Int, resource: ResourceMeta, filePath: String) {
         if (binding.viewPager.currentItem != pos)
             binding.viewPager.setCurrentItem(pos, false)
-        setTitle(filePath)
         setupOpenEditFABs(resource.kind)
         ExtraLoader.load(
             resource,
@@ -167,6 +166,14 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
 
     override fun deleteResource(pos: Int) {
         pagerAdapter.removeItem(pos)
+    }
+
+    override fun notifyResourcesChanged() {
+        setFragmentResult(REQUEST_RESOURCES_CHANGED_KEY, bundleOf())
+    }
+
+    override fun notifyTagsChanged() {
+        setFragmentResult(REQUEST_TAGS_CHANGED_KEY, bundleOf())
     }
 
     override fun displayPreviewTags(resource: ResourceId, tags: Tags) {
@@ -231,8 +238,18 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
         }
     }
 
-    private fun setTitle(title: String) {
-        (requireActivity() as MainActivity).setTitle(title)
+    /**
+     * setFragmentResult notifies ResourcesFragment
+     * It is duplicated since the result can only be consumed once
+     */
+    private fun initResultListener() {
+        childFragmentManager.setFragmentResultListener(
+            EditTagsDialogFragment.REQUEST_TAGS_CHANGED_KEY,
+            this
+        ) { _, _ ->
+            setFragmentResult(REQUEST_TAGS_CHANGED_KEY, bundleOf())
+            presenter.onTagsChanged()
+        }
     }
 
     private fun setupOpenEditFABs(kind: ResourceKind?) {
@@ -338,7 +355,8 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
         private const val ROOT_AND_FAV_KEY = "rootAndFav"
         private const val RESOURCES_KEY = "resources"
         private const val START_AT_KEY = "startAt"
-        const val REQUEST_TAGS_CHANGED_KEY = "tagsChanged"
+        const val REQUEST_TAGS_CHANGED_KEY = "tagsChangedGallery"
+        const val REQUEST_RESOURCES_CHANGED_KEY = "resourcesChangedGallery"
 
         fun newInstance(rootAndFav: RootAndFav, resources: List<ResourceId>, startAt: Int) =
             GalleryFragment().apply {

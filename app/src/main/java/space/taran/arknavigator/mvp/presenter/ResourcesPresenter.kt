@@ -106,13 +106,10 @@ class ResourcesPresenter(
         super.onDestroy()
     }
 
-    fun onViewResume() {
+    fun onResourcesChanged() = presenterScope.launch {
+        if (tagsEnabled)
+            resetResources(listResources(untaggedOnly = !tagsEnabled))
         tagsSelectorPresenter.calculateTagsAndSelection()
-        if (!tagsEnabled) {
-            presenterScope.launch {
-                resetResources(listResources(untaggedOnly = true))
-            }
-        }
     }
 
     fun onMenuTagsToggle(enabled: Boolean) {

@@ -11,6 +11,9 @@ import ru.terrakok.cicerone.android.support.SupportAppScreen
 import ru.terrakok.cicerone.commands.*
 import java.util.*
 
+/**
+ * This is a copy of the SupportAppNavigator except for fragmentForwardAdd method
+ */
 class AppNavigator(
     private val activity: FragmentActivity,
     private val fragmentManager: FragmentManager,
