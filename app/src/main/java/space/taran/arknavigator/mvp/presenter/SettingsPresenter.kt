@@ -28,6 +28,12 @@ class SettingsPresenter : MvpPresenter<SettingsView>() {
         }
     }
 
+    fun onCreateView() {
+        presenterScope.launch {
+            notifyAllPreferences()
+        }
+    }
+
     fun onCrashReportingClick(isCrashReportEnabled: Boolean) {
         presenterScope.launch {
             Log.d(SETTINGS_SCREEN, "Saving crash report preference, is enabled: $isCrashReportEnabled")

@@ -5,23 +5,19 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.RadioButton
-import android.widget.RadioGroup
-import androidx.annotation.ColorRes
-import androidx.core.content.ContextCompat
-import androidx.core.view.children
+import androidx.annotation.StringRes
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.FragmentSettingsBinding
-import space.taran.arknavigator.mvp.model.UserPreferences.*
 import space.taran.arknavigator.mvp.presenter.SettingsPresenter
 import space.taran.arknavigator.mvp.view.SettingsView
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.activity.MainActivity
+import space.taran.arknavigator.ui.fragments.dialog.ConfirmationDialogFragment
+import space.taran.arknavigator.ui.fragments.dialog.InfoDialogFragment
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.utils.SETTINGS_SCREEN
-import space.taran.arknavigator.utils.showInfoDialog
 import java.lang.AssertionError
 
 class SettingsFragment : MvpAppCompatFragment(), SettingsView {
@@ -44,6 +40,7 @@ class SettingsFragment : MvpAppCompatFragment(), SettingsView {
 
         Log.d(SETTINGS_SCREEN, "inflating layout for SettingsFragment")
         binding = FragmentSettingsBinding.inflate(inflater, container, false)
+        presenter.onCreateView()
 
         return binding.root
     }
@@ -68,38 +65,25 @@ class SettingsFragment : MvpAppCompatFragment(), SettingsView {
             }
 
             crashInfo.setOnClickListener {
-                showInfoDialog(
-                    requireContext(),
-                    title = R.string.what_are_crash_reports_,
-                    descrText = R.string.crash_reports_explanation
-                )
+                showInfoDialog(R.string.what_are_crash_reports_, R.string.crash_reports_explanation)
             }
 
             imgCacheInfo.setOnClickListener {
-                showInfoDialog(
-                    requireContext(),
-                    title = R.string.what_is_image_replication_,
-                    descrText = R.string.explanation_of_this_feature
-                )
+                showInfoDialog(R.string.what_is_image_replication_, R.string.explanation_of_this_feature)
             }
 
             indexReplicationInfo.setOnClickListener {
-                showInfoDialog(
-                    requireContext(),
-                    title = R.string.what_is_index_replication_,
-                    descrText = R.string.explanation_of_this_feature
-                )
+                showInfoDialog(R.string.what_is_index_replication_, R.string.explanation_of_this_feature)
             }
 
             resetPreferences.setOnClickListener {
-                showInfoDialog(
-                    requireContext(),
-                    title = R.string.are_you_sure_,
-                    descrText = R.string.all_preferences_will_be_reset_to_default,
-                    posButtonText = R.string.yes,
-                    negButtonText = R.string.no,
-                    posButtonCallback = { presenter.onResetPreferencesClick() }
+                val dialog = ConfirmationDialogFragment.newInstance(
+                    getString(R.string.are_you_sure_),
+                    getString(R.string.all_preferences_will_be_reset_to_default),
+                    getString(R.string.yes),
+                    getString(R.string.no)
                 )
+                dialog.show(childFragmentManager, ConfirmationDialogFragment.CONFIRMATION_DIALOG_TAG)
             }
         }
     }
@@ -109,6 +93,29 @@ class SettingsFragment : MvpAppCompatFragment(), SettingsView {
         (activity as MainActivity).setSelectedTab(0)
         (activity as MainActivity).setToolbarVisibility(false)
         (requireActivity() as MainActivity).setBottomNavigationVisibility(true)
+
+        childFragmentManager.setFragmentResultListener(
+            ConfirmationDialogFragment.POSITIVE_KEY,
+            this
+        ) { _, _ ->
+            presenter.onResetPreferencesClick()
+        }
+    }
+
+    private fun showInfoDialog(
+        @StringRes titleRes: Int? = null,
+        @StringRes descriptionRes: Int? = null,
+        titleString: String? = null,
+        descriptionString: String? = null
+    ) {
+        val title = titleString ?: titleRes?.let { getString(it) }
+        ?: throw AssertionError("No value passed for title!")
+
+        val description = descriptionString ?: descriptionRes?.let { getString(it) }
+        ?: throw AssertionError("No value passed for description!")
+
+        val dialog = InfoDialogFragment.newInstance(title, description)
+        dialog.show(childFragmentManager, InfoDialogFragment.BASE_INFO_DIALOG_TAG)
     }
 
     override fun setCrashReportPreference(isCrashReportEnabled: Boolean) {
