@@ -5,13 +5,14 @@ import androidx.recyclerview.widget.RecyclerView
 import space.taran.arknavigator.mvp.presenter.adapter.ItemsReversiblePresenter
 import space.taran.arknavigator.utils.ITEMS_CONTAINER
 
-abstract class ItemsReversibleRVAdapter<Label,Item,View, Holder: RecyclerView.ViewHolder>(
-    private val presenter: ItemsReversiblePresenter<Label,Item,View>)
-    : RecyclerView.Adapter<Holder>() {
+abstract class ItemsReversibleRVAdapter<Label, Item, View, Holder : RecyclerView.ViewHolder>(
+    private val presenter: ItemsReversiblePresenter<Label, Item, View>
+) :
+    RecyclerView.Adapter<Holder>() {
 
     override fun getItemCount() = presenter.getCount()
 
-    //todo: isn't it violation of adapter contract?
+    // todo: isn't it violation of adapter contract?
     fun updateItems(label: Label, items: List<Item>) {
         Log.d(ITEMS_CONTAINER, "update requested")
         presenter.updateItems(label, items)

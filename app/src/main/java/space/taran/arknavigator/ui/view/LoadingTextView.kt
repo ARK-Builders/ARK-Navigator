@@ -30,7 +30,6 @@ class LoadingTextView(context: Context, attrs: AttributeSet?) : AppCompatTextVie
         this.visibility = visibility
         dotCount = 0
         isLoading = isVisible
-
     }
 
     private fun makeLoadingDots() {
@@ -42,8 +41,7 @@ class LoadingTextView(context: Context, attrs: AttributeSet?) : AppCompatTextVie
                 val textToDisplay = "$loadingText${".".repeat(dotCount)}"
                 this.text = textToDisplay
                 makeLoadingDots()
-            }
-            else isMakingDots = false
+            } else isMakingDots = false
         }, 500)
     }
 }

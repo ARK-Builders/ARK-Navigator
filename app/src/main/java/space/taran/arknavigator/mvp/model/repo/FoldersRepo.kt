@@ -7,10 +7,9 @@ import space.taran.arknavigator.mvp.model.dao.Favorite
 import space.taran.arknavigator.mvp.model.dao.FolderDao
 import space.taran.arknavigator.mvp.model.dao.Root
 import space.taran.arknavigator.utils.*
+import java.lang.AssertionError
 import java.nio.file.Path
 import java.nio.file.Paths
-
-import java.lang.AssertionError
 
 typealias Folders = Map<Path, List<Path>>
 
@@ -52,7 +51,8 @@ class FoldersRepo(private val dao: FolderDao) {
 
         return@withContext PartialResult(
             validPaths.toMap(),
-            missingPaths.toList())
+            missingPaths.toList()
+        )
     }
 
     suspend fun insertRoot(path: Path) = withContext(Dispatchers.IO) {

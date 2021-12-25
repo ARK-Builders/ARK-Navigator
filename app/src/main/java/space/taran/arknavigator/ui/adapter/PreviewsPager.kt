@@ -51,7 +51,6 @@ class PreviewsPager(val presenter: PreviewsList) : RecyclerView.Adapter<PreviewI
                 presenter.onItemClick(holder)
                 return true
             }
-
         }
         return GestureDetectorCompat(holder.itemView.context, listener)
     }

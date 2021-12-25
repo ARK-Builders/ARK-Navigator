@@ -1,9 +1,9 @@
 package space.taran.arknavigator.di.modules
 
 import android.util.Log
-import space.taran.arknavigator.mvp.model.dao.Database
 import dagger.Module
 import dagger.Provides
+import space.taran.arknavigator.mvp.model.dao.Database
 import space.taran.arknavigator.mvp.model.repo.FoldersRepo
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexFactory
 import space.taran.arknavigator.utils.MAIN

@@ -13,7 +13,7 @@ interface TagsStorage {
 
     fun groupTagsByResources(ids: Iterable<ResourceId>): Map<ResourceId, Tags> =
         ids.map { it to getTags(it) }
-           .toMap()
+            .toMap()
 
     suspend fun setTags(id: ResourceId, tags: Tags)
 
@@ -22,5 +22,4 @@ interface TagsStorage {
     suspend fun cleanup(existing: Collection<ResourceId>)
 
     suspend fun remove(id: ResourceId)
-
 }

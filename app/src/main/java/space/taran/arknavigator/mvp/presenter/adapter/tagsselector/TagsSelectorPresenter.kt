@@ -34,7 +34,7 @@ class TagsSelectorPresenter(
     var selection = setOf<ResourceId>()
         private set
 
-    //this data is used by TagsSelectorAdapter
+    // this data is used by TagsSelectorAdapter
     var includedAndExcludedTagsForDisplay = listOf<Tag>()
         private set
     var availableTagsForDisplay = listOf<Tag>()
@@ -122,7 +122,7 @@ class TagsSelectorPresenter(
         val tagsByResources = storage!!.groupTagsByResources(resources)
         val allTags = tagsByResources.values.flatten().toSet()
 
-        //some tags could have been removed from storage
+        // some tags could have been removed from storage
         excludedTags = excludedTags.intersect(allTags).toMutableSet()
         includedTags = includedTags.intersect(allTags).toMutableSet()
 
@@ -176,7 +176,7 @@ class TagsSelectorPresenter(
 
         val action = findLastActualAction() ?: return false
 
-        when(action) {
+        when (action) {
             is Include -> {
                 includedTags.remove(action.tag!!)
             }
@@ -227,7 +227,8 @@ class TagsSelectorPresenter(
         } ?: let {
             action as Clear
             if (action.excluded.intersect(allTags).isEmpty() &&
-                action.included.intersect(allTags).isEmpty())
+                action.included.intersect(allTags).isEmpty()
+            )
                 return false
         }
         return true

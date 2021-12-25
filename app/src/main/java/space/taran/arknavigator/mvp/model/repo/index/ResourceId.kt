@@ -15,11 +15,13 @@ typealias ResourceId = Long
 // same time as reading the file from internal storage.
 
 fun computeId(size: Long, file: Path): ResourceId {
-    Log.d(RESOURCES_INDEX,
-        "calculating hash of $file (size is ${size / MEGABYTE} megabytes)")
+    Log.d(
+        RESOURCES_INDEX,
+        "calculating hash of $file (size is ${size / MEGABYTE} megabytes)"
+    )
 
     val crc32 = CRC32()
-    //todo: synchronize access
+    // todo: synchronize access
 
     val source = Files.newInputStream(file)
     val buffer = ByteArray(BUFFER_CAPACITY)
@@ -37,7 +39,8 @@ fun computeId(size: Long, file: Path): ResourceId {
 
     Log.d(RESOURCES_INDEX, "$total bytes has been read")
     if (total != size) throw AssertionError(
-        "File wasn't read to the end")
+        "File wasn't read to the end"
+    )
 
     return crc32.value
 }

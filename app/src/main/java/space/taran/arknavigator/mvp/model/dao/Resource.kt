@@ -30,6 +30,7 @@ data class Resource(
                 extension = meta.extension,
                 modified = meta.modified.toMillis(),
                 size = meta.size,
-                kind = meta.kind?.ordinal ?: -1)
+                kind = meta.kind?.ordinal ?: -1
+            )
     }
 }

@@ -6,7 +6,7 @@ import moxy.viewstate.strategy.StateStrategyType
 import java.nio.file.Path
 
 @StateStrategyType(AddToEndSingleStrategy::class)
-interface FoldersView: MvpView, NotifiableView {
+interface FoldersView : MvpView, NotifiableView {
     fun init()
     fun setProgressVisibility(isVisible: Boolean, withText: String = "")
     fun openRootPickerDialog(paths: List<Path>)

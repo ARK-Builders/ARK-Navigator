@@ -5,9 +5,10 @@ import space.taran.arknavigator.utils.ITEMS_CONTAINER
 
 typealias ItemClickHandler<Item> = (Int, Item) -> Unit
 
-abstract class ItemsClickablePresenter<Item,View>(
-    private val handler: ItemClickHandler<Item>)
-    : ItemsPresenter<Item,View>() {
+abstract class ItemsClickablePresenter<Item, View>(
+    private val handler: ItemClickHandler<Item>
+) :
+    ItemsPresenter<Item, View>() {
 
     fun itemClicked(pos: Int) {
         Log.d(ITEMS_CONTAINER, "item $pos clicked")

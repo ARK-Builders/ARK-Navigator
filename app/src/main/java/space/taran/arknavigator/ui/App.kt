@@ -5,7 +5,7 @@ import space.taran.arknavigator.di.AppComponent
 import space.taran.arknavigator.di.DaggerAppComponent
 import space.taran.arknavigator.di.modules.AppModule
 
-class App: Application() {
+class App : Application() {
 
     companion object {
         lateinit var instance: App

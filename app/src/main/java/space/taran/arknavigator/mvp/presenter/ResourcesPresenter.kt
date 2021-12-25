@@ -6,9 +6,9 @@ import moxy.MvpPresenter
 import moxy.presenterScope
 import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.mvp.model.UserPreferences
-import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.*
 import space.taran.arknavigator.mvp.model.repo.index.AggregatedResourcesIndex
+import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexFactory

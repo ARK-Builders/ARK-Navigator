@@ -8,26 +8,26 @@ import kotlin.coroutines.Continuation
 import kotlin.coroutines.ContinuationInterceptor
 import kotlin.coroutines.CoroutineContext
 
-fun View.changeEnabledStatus(isEnabledStatus: Boolean){
+fun View.changeEnabledStatus(isEnabledStatus: Boolean) {
     isEnabled = isEnabledStatus
     isClickable = isEnabledStatus
     isFocusable = isEnabledStatus
 }
 
-fun View.makeGone(){
+fun View.makeGone() {
     visibility = View.GONE
 }
 
-fun View.makeVisible(){
+fun View.makeVisible() {
     visibility = View.VISIBLE
 }
 
-fun View.makeVisibleAndSetOnClickListener(action: () -> Unit){
-    setOnClickListener{ action() }
+fun View.makeVisibleAndSetOnClickListener(action: () -> Unit) {
+    setOnClickListener { action() }
     visibility = View.VISIBLE
 }
 
-fun TextView?.textOrGone(string: String?){
+fun TextView?.textOrGone(string: String?) {
     if (string.isNullOrEmpty()) this?.makeGone()
     else {
         this?.text = string
@@ -43,8 +43,8 @@ val View.autoDisposeScope: CoroutineScope
         }
         val newScope = CoroutineScope(
             SupervisorJob() +
-                    Dispatchers.Main +
-                    autoDisposeInterceptor()
+                Dispatchers.Main +
+                autoDisposeInterceptor()
         )
         setTag(R.id.view_tag, newScope)
         return newScope

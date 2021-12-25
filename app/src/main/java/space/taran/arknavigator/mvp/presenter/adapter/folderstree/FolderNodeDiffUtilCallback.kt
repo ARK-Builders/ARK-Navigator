@@ -5,7 +5,7 @@ import androidx.recyclerview.widget.DiffUtil
 class FolderNodeDiffUtilCallback(
     private val oldList: List<FolderNode>,
     private val newList: List<FolderNode>
-): DiffUtil.Callback() {
+) : DiffUtil.Callback() {
     override fun getOldListSize(): Int = oldList.size
 
     override fun getNewListSize(): Int = newList.size

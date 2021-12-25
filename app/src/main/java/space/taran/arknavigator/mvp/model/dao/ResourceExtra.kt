@@ -7,11 +7,16 @@ import androidx.room.PrimaryKey
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMetaExtra
 
-@Entity(foreignKeys = [ForeignKey(
-    entity = Resource::class,
-    parentColumns = arrayOf("id"),
-    childColumns = arrayOf("resource"),
-    onDelete = ForeignKey.CASCADE)])
+@Entity(
+    foreignKeys = [
+        ForeignKey(
+            entity = Resource::class,
+            parentColumns = arrayOf("id"),
+            childColumns = arrayOf("resource"),
+            onDelete = ForeignKey.CASCADE
+        )
+    ]
+)
 data class ResourceExtra(
     @ColumnInfo(index = true)
     val resource: ResourceId,
@@ -23,11 +28,12 @@ data class ResourceExtra(
 ) {
     companion object {
         fun fromMetaExtra(id: ResourceId, extra: ResourceMetaExtra?): List<ResourceExtra> =
-            extra?.data?.entries?.map { (tag,value) ->
+            extra?.data?.entries?.map { (tag, value) ->
                 ResourceExtra(
                     resource = id,
                     key = tag.ordinal,
-                    value = value)
+                    value = value
+                )
             } ?: emptyList()
     }
 }

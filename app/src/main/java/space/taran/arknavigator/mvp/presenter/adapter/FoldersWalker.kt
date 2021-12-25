@@ -5,9 +5,10 @@ import space.taran.arknavigator.utils.findLongestCommonPrefix
 import java.nio.file.Files
 import java.nio.file.Path
 
-class FoldersWalker(paths: List<Path>, onClick: ItemClickHandler<Path>)
-    : ItemsReversiblePresenter<Path, Path, FileItemView>(
-        findLongestCommonPrefix(paths), paths, onClick) {
+class FoldersWalker(paths: List<Path>, onClick: ItemClickHandler<Path>) :
+    ItemsReversiblePresenter<Path, Path, FileItemView>(
+        findLongestCommonPrefix(paths), paths, onClick
+    ) {
 
     override fun bindView(view: FileItemView) {
         val path = items()[view.position()]

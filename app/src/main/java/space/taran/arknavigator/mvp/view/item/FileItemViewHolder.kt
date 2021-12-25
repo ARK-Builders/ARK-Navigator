@@ -29,7 +29,7 @@ class FileItemViewHolder(private val binding: ItemFileGridBinding) :
         val thumbnail = PreviewAndThumbnail.locate(path, resource)?.thumbnail
 
         ImageUtils.loadImageWithPlaceholder(thumbnail, placeholder, binding.iv)
-        ExtraLoader.load(resource, listOf(binding.primaryExtra, binding.secondaryExtra),  verbose = false)
+        ExtraLoader.load(resource, listOf(binding.primaryExtra, binding.secondaryExtra), verbose = false)
     }
 
     override fun setText(title: String) = with(binding.root) {

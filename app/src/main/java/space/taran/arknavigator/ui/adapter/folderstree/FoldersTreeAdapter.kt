@@ -19,21 +19,23 @@ class FoldersTreeAdapter(val presenter: FoldersTreePresenter) :
             DeviceNode::class.hashCode() -> DeviceNodeViewHolder(
                 ItemViewFolderTreeDeviceBinding.inflate(
                     LayoutInflater.from(parent.context), parent, false
-                ), presenter
+                ),
+                presenter
             )
             RootNode::class.hashCode() -> RootNodeViewHolder(
                 ItemViewFolderTreeRootBinding.inflate(
                     LayoutInflater.from(parent.context), parent, false
-                ), presenter
+                ),
+                presenter
             )
             FavoriteNode::class.hashCode() -> FavoriteViewHolder(
                 ItemViewFolderTreeFavoriteBinding.inflate(
                     LayoutInflater.from(parent.context), parent, false
-                ), presenter
+                ),
+                presenter
             )
             else -> throw IllegalArgumentException("Illegal viewType: $viewType")
         }
-
 
     override fun onBindViewHolder(holder: FolderNodeView, position: Int) {
         presenter.onBind(holder)
@@ -47,4 +49,3 @@ class FoldersTreeAdapter(val presenter: FoldersTreePresenter) :
         presenter.result?.dispatchUpdatesTo(this)
     }
 }
-

@@ -17,7 +17,8 @@ data class ResourceMeta(
     val modified: FileTime,
     val size: Long,
     val kind: ResourceKind?,
-    val extra: ResourceMetaExtra?) {
+    val extra: ResourceMetaExtra?
+) {
 
     companion object {
         fun fromPath(path: Path): ResourceMeta? {
@@ -36,7 +37,8 @@ data class ResourceMeta(
                 modified = Files.getLastModifiedTime(path),
                 size = size,
                 kind = kind,
-                extra = ResourceMetaExtra.provide(kind, path))
+                extra = ResourceMetaExtra.provide(kind, path)
+            )
         }
 
         fun fromRoom(room: ResourceWithExtra): ResourceMeta {
@@ -53,7 +55,8 @@ data class ResourceMeta(
                 modified = FileTime.fromMillis(room.resource.modified),
                 size = room.resource.size,
                 kind = kindByCode(room.resource.kind),
-                extra = extra)
+                extra = extra
+            )
         }
 
         private fun kindByExt(extension: String): ResourceKind? {

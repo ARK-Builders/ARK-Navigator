@@ -3,10 +3,7 @@ package space.taran.arknavigator.mvp.model.repo.index
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import space.taran.arknavigator.mvp.model.dao.Resource
-import space.taran.arknavigator.mvp.model.dao.ResourceDao
-import space.taran.arknavigator.mvp.model.dao.ResourceExtra
-import space.taran.arknavigator.mvp.model.dao.ResourceWithExtra
+import space.taran.arknavigator.mvp.model.dao.*
 import space.taran.arknavigator.mvp.model.repo.preview.PreviewAndThumbnail
 import space.taran.arknavigator.utils.*
 import java.nio.file.Files
@@ -27,8 +24,9 @@ internal data class Difference(
 class PlainResourcesIndex internal constructor (
     private val root: Path,
     private val dao: ResourceDao,
-    resources: Map<Path, ResourceMeta>)
-    : ResourcesIndex {
+    resources: Map<Path, ResourceMeta>
+) :
+    ResourcesIndex {
 
     internal val metaByPath: MutableMap<Path, ResourceMeta> =
         resources.toMutableMap()
@@ -37,16 +35,17 @@ class PlainResourcesIndex internal constructor (
         resources.map { (path, meta) ->
             meta.id to path
         }
-        .toMap()
-        .toMutableMap()
+            .toMap()
+            .toMutableMap()
 
     override fun listResources(prefix: Path?): Set<ResourceMeta> {
+
         val metas = if (prefix != null) {
             metaByPath.filterKeys { it.startsWith(prefix) }
         } else {
             metaByPath
         }
-        .values
+            .values
 
         Log.d(RESOURCES_INDEX, "${metas.size} resources returned")
         return metas.toSet()
@@ -61,10 +60,10 @@ class PlainResourcesIndex internal constructor (
         return tryRemove(id)!!
     }
 
-    //should be only used in AggregatedResourcesIndex
+    // should be only used in AggregatedResourcesIndex
     fun tryGetPath(id: ResourceId): Path? = pathById[id]
 
-    //should be only used in AggregatedResourcesIndex
+    // should be only used in AggregatedResourcesIndex
     fun tryGetMeta(id: ResourceId): ResourceMeta? {
         val path = tryGetPath(id)
         if (path != null) {
@@ -73,7 +72,7 @@ class PlainResourcesIndex internal constructor (
         return null
     }
 
-    //should be only used in AggregatedResourcesIndex
+    // should be only used in AggregatedResourcesIndex
     fun tryRemove(id: ResourceId): Path? {
         val path = pathById.remove(id) ?: return null
 
@@ -117,7 +116,7 @@ class PlainResourcesIndex internal constructor (
 
         Log.d(RESOURCES_INDEX, "re-scanning ${toInsert.size} resources")
 
-        //todo: streaming/iterating
+        // todo: streaming/iterating
         val newResources = scanResources(toInsert)
         persistResources(newResources)
     }
@@ -138,15 +137,21 @@ class PlainResourcesIndex internal constructor (
             !metaByPath.containsKey(file)
         }
 
-        Log.d(RESOURCES_INDEX, "${absent.size} absent, " +
-                "${updated.size} updated, ${added.size} added")
+        Log.d(
+            RESOURCES_INDEX,
+            "${absent.size} absent, " +
+                "${updated.size} updated, ${added.size} added"
+        )
 
         Difference(absent, updated, added)
     }
 
     internal suspend fun persistResources(resources: Map<Path, ResourceMeta>) = withContext(Dispatchers.IO) {
-        Log.d(RESOURCES_INDEX, "persisting "
-            + "${resources.size} resources from root $root")
+        Log.d(
+            RESOURCES_INDEX,
+            "persisting " +
+                "${resources.size} resources from root $root"
+        )
 
         val roomResources = mutableListOf<Resource>()
         val roomExtra = mutableListOf<ResourceExtra>()
@@ -180,8 +185,10 @@ class PlainResourcesIndex internal constructor (
                 .groupBy { room -> room.resource.path }
                 .mapValues { (_, resources) ->
                     if (resources.size > 1) {
-                        throw IllegalStateException("Index must not have" +
-                                "several resources for the same path")
+                        throw IllegalStateException(
+                            "Index must not have" +
+                                "several resources for the same path"
+                        )
                     }
                     ResourceMeta.fromRoom(resources[0])
                 }

@@ -7,7 +7,7 @@ import moxy.viewstate.strategy.StateStrategyType
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsList
 
 @StateStrategyType(AddToEndSingleStrategy::class)
-interface GalleryView: MvpView {
+interface GalleryView : MvpView {
     fun init(previews: PreviewsList)
     @StateStrategyType(SkipStrategy::class)
     fun showEditTagsDialog(position: Int)

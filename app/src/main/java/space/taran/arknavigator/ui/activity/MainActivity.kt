@@ -15,19 +15,17 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.forEach
 import androidx.core.view.isVisible
-import space.taran.arknavigator.R
-import space.taran.arknavigator.mvp.presenter.MainPresenter
-import space.taran.arknavigator.mvp.view.MainView
-import space.taran.arknavigator.ui.fragments.BackButtonListener
 import moxy.MvpAppCompatActivity
 import moxy.ktx.moxyPresenter
-import moxy.presenter.InjectPresenter
-import moxy.presenter.ProvidePresenter
 import ru.terrakok.cicerone.NavigatorHolder
 import ru.terrakok.cicerone.android.support.SupportAppNavigator
 import space.taran.arknavigator.BuildConfig
+import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.ActivityMainBinding
+import space.taran.arknavigator.mvp.presenter.MainPresenter
+import space.taran.arknavigator.mvp.view.MainView
 import space.taran.arknavigator.ui.App
+import space.taran.arknavigator.ui.fragments.BackButtonListener
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.utils.MAIN
 import space.taran.arknavigator.utils.PERMISSIONS
@@ -121,7 +119,8 @@ class MainActivity : MvpAppCompatActivity(), MainView {
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
-        granted: IntArray) {
+        granted: IntArray
+    ) {
 
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
             Log.d(PERMISSIONS, "granted $granted")
@@ -188,8 +187,10 @@ class MainActivity : MvpAppCompatActivity(), MainView {
                 Log.d(MAIN, "sdcard uri request resulted, code $resultCode, intent: $intent")
 
                 val treeUri = intent!!.data!!
-                contentResolver.takePersistableUriPermission(treeUri,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                contentResolver.takePersistableUriPermission(
+                    treeUri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                )
             }
             REQUEST_CODE_ALL_FILES_ACCESS -> {
                 if (Environment.isExternalStorageManager())

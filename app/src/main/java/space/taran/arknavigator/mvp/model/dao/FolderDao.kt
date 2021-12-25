@@ -7,8 +7,10 @@ data class RootWithFavorites(
     val root: Root,
     @Relation(
         parentColumn = "path",
-        entityColumn = "root")
-    val favorites: List<Favorite>)
+        entityColumn = "root"
+    )
+    val favorites: List<Favorite>
+)
 
 @Dao
 interface FolderDao {

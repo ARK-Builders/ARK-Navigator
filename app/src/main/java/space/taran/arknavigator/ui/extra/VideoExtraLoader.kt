@@ -21,7 +21,7 @@ object VideoExtraLoader {
     }
 
     private fun durationTextCode(millis: Long): String {
-        //use `Duration.ofMillis(timeMillis).secondsPart()` in API 31
+        // use `Duration.ofMillis(timeMillis).secondsPart()` in API 31
 
         val seconds = millis / 1000
         val minutes = seconds / 60
@@ -43,15 +43,15 @@ object VideoExtraLoader {
 
     private fun qualityTextCode(width: Int, height: Int): String {
         return when (width to height) {
-            256  to 144  -> "144p"
-            426  to 240  -> "240p"
-            640  to 360  -> "360p"
-            854  to 480  -> "480p"
-            1280 to 720  -> "720p"
+            256 to 144 -> "144p"
+            426 to 240 -> "240p"
+            640 to 360 -> "360p"
+            854 to 480 -> "480p"
+            1280 to 720 -> "720p"
             1920 to 1080 -> "1080p"
             2560 to 1440 -> "1440p"
             3840 to 2160 -> "2160p"
-            else -> "${width}x${height}"
+            else -> "${width}x$height"
         }
     }
 }

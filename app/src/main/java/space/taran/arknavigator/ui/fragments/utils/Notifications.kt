@@ -16,8 +16,9 @@ object Notifications {
         if (failed.isNotEmpty()) {
             view.notifyUser(
                 message = "Failed to verify the following paths:\n" +
-                        failed.joinToString("\n"),
-                moreTime = true)
+                    failed.joinToString("\n"),
+                moreTime = true
+            )
         }
     }
 }

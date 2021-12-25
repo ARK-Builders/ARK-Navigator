@@ -8,8 +8,10 @@ data class ResourceWithExtra(
     val resource: Resource,
     @Relation(
         parentColumn = "id",
-        entityColumn = "resource")
-    val extras: List<ResourceExtra>)
+        entityColumn = "resource"
+    )
+    val extras: List<ResourceExtra>
+)
 
 @Dao
 interface ResourceDao {
@@ -24,5 +26,5 @@ interface ResourceDao {
 
     @Query("SELECT * FROM Resource where root = :root")
     suspend fun query(root: StringPath): List<ResourceWithExtra>
-    //todo: can be optimized with `root in (:roots)`
+    // todo: can be optimized with `root in (:roots)`
 }

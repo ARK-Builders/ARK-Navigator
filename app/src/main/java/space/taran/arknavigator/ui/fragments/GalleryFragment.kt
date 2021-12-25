@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
 import android.view.*
-import android.webkit.MimeTypeMap
 import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
 import androidx.viewpager2.widget.ViewPager2
@@ -99,7 +98,7 @@ class GalleryFragment(
                         }
 
                         if (startAt > 0 || !workaround) {
-                            //weird bug causes this callback be called redundantly if startAt == 0
+                            // weird bug causes this callback be called redundantly if startAt == 0
                             Log.d(GALLERY_SCREEN, "changing to preview at position $position")
                             setupOpenEditFABs()
                             displayPreview(position)
@@ -219,7 +218,8 @@ class GalleryFragment(
     private fun openIntentChooser(
         position: Int,
         actionType: String,
-        detachProcess: Boolean) {
+        detachProcess: Boolean
+    ) {
 
         val resource = resources[position]
         val path = index.getPath(resource.id)
@@ -235,7 +235,8 @@ class GalleryFragment(
 
         val uri = FileProvider.getUriForFile(
             context,
-            BuildConfig.APPLICATION_ID + ".provider", file)
+            BuildConfig.APPLICATION_ID + ".provider", file
+        )
 
         val intent = Intent()
         intent.setDataAndType(uri, context.contentResolver.getType(uri))
@@ -244,7 +245,7 @@ class GalleryFragment(
 
         intent.action = actionType
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        val actionString = when(actionType) {
+        val actionString = when (actionType) {
             Intent.ACTION_VIEW -> "View the resource with:"
             Intent.ACTION_EDIT -> {
                 intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
@@ -263,7 +264,6 @@ class GalleryFragment(
         val chooser = Intent.createChooser(intent, actionString)
         context.startActivity(chooser)
     }
-
 
     private fun onTagsChanged(resource: ResourceId) {
         val tags = presenter.listTags(resource)

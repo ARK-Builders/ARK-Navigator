@@ -2,7 +2,6 @@ package space.taran.arknavigator.ui.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.ItemFileGridBinding
 import space.taran.arknavigator.mvp.presenter.adapter.ItemsReversiblePresenter
 import space.taran.arknavigator.mvp.view.item.FileItemView
@@ -15,7 +14,8 @@ open class FilesReversibleRVAdapter<Label, Item>(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         FileItemViewHolder(
-            ItemFileGridBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+            ItemFileGridBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        )
             .also {
                 App.instance.appComponent.inject(it)
             }
@@ -27,5 +27,4 @@ open class FilesReversibleRVAdapter<Label, Item>(
             presenter.itemClicked(position)
         }
     }
-
 }

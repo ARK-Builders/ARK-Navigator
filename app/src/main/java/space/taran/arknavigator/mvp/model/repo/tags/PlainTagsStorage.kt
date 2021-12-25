@@ -20,9 +20,10 @@ import java.nio.file.attribute.FileTime
 // and during application lifecycle since it can be changed from outside.
 // We also must persist all changes during application lifecycle into FS.
 class PlainTagsStorage
-    private constructor(
-        root: Path,
-        val resources: Collection<ResourceId>): TagsStorage {
+private constructor(
+    root: Path,
+    val resources: Collection<ResourceId>
+) : TagsStorage {
 
     private val storageFile: Path = root.resolve(STORAGE_FILENAME)
 
@@ -38,8 +39,9 @@ class PlainTagsStorage
             lastModified = Files.getLastModifiedTime(storageFile)
 
             Log.d(
-                TAGS_STORAGE, "file $storageFile exists" +
-                        ", last modified at $lastModified"
+                TAGS_STORAGE,
+                "file $storageFile exists" +
+                    ", last modified at $lastModified"
             )
 
             result.putAll(readStorage())
@@ -50,10 +52,10 @@ class PlainTagsStorage
     }
 
     fun register(id: ResourceId) {
-        //this registration isn't really needed,
-        //but should help to prevent bugs, see `setTags`
+        // this registration isn't really needed,
+        // but should help to prevent bugs, see `setTags`
         tagsById[id] = setOf()
-        //we don't need to persist since we never store empty tag sets
+        // we don't need to persist since we never store empty tag sets
     }
 
     override fun contains(id: ResourceId): Boolean = tagsById.containsKey(id)
@@ -62,7 +64,7 @@ class PlainTagsStorage
     // because the caller always takes this id from ResourcesIndex
     // and the index and storage must be in sync
     override fun getTags(id: ResourceId): Tags = tagsById[id]!!
-    //todo: check the file's modification date and pull external updates
+    // todo: check the file's modification date and pull external updates
 
     override fun getTags(ids: Iterable<ResourceId>): Tags = ids.flatMap { id -> getTags(id) }.toSet()
 
@@ -106,20 +108,20 @@ class PlainTagsStorage
         val modified = if (exists) {
             Files.getLastModifiedTime(storageFile)
         } else {
-            //storage file could be deleted from outside and, right now,
-            //we deal with this case by just re-creating the file,
-            //because merging of removals is not implemented yet
+            // storage file could be deleted from outside and, right now,
+            // we deal with this case by just re-creating the file,
+            // because merging of removals is not implemented yet
             FileTime.fromMillis(0)
-            //that also means that we can't drop storage on other device
-            //while we have the app running on another one
-            //(assume external files synchronization)
+            // that also means that we can't drop storage on other device
+            // while we have the app running on another one
+            // (assume external files synchronization)
         }
 
         if (modified > lastModified) {
             Log.d(TAGS_STORAGE, "storage file was modified externally, merging")
-            //todo: for real merge we need to track our own changes locally
-            //without this, we need to stop all competing devices to remove a tag or a resource
-            //so far, just ensuring that we are not losing additions
+            // todo: for real merge we need to track our own changes locally
+            // without this, we need to stop all competing devices to remove a tag or a resource
+            // so far, just ensuring that we are not losing additions
 
             val outside = readStorage()
 
@@ -132,8 +134,11 @@ class PlainTagsStorage
                 val theirs = outside[sharedId]
                 val ours = tagsById[sharedId]
                 if (theirs != ours) {
-                    Log.d(TAGS_STORAGE, "resource $sharedId got new tags " +
-                        "from outside: ${theirs!! - ours}")
+                    Log.d(
+                        TAGS_STORAGE,
+                        "resource $sharedId got new tags " +
+                            "from outside: ${theirs!! - ours}"
+                    )
                     tagsById[sharedId] = theirs.union(ours!!)
                 }
             }
@@ -181,9 +186,11 @@ class PlainTagsStorage
         lines.add("$STORAGE_VERSION_PREFIX$STORAGE_VERSION")
 
         val entries = tagsById.filterValues { it.isNotEmpty() }
-        lines.addAll(entries.map { (id, tags) ->
-            "$id$KEY_VALUE_SEPARATOR ${stringFromTags(tags)}"
-        })
+        lines.addAll(
+            entries.map { (id, tags) ->
+                "$id$KEY_VALUE_SEPARATOR ${stringFromTags(tags)}"
+            }
+        )
 
         Files.write(storageFile, lines, StandardCharsets.UTF_8)
         lastModified = Files.getLastModifiedTime(storageFile)

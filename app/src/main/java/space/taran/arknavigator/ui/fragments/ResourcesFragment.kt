@@ -31,16 +31,17 @@ import space.taran.arknavigator.utils.extensions.showKeyboard
 import java.nio.file.Path
 import kotlin.math.abs
 
-
-//`root` is used for querying tags storage and resources index,
+// `root` is used for querying tags storage and resources index,
 //       if it is `null`, then resources from all roots are taken
 //                        and tags storage for every particular resource
 //                        is determined dynamically
 //
-//`path` is used for filtering resources' paths
+// `path` is used for filtering resources' paths
 //       if it is `null`, then no filtering is performed
 //       (recommended instead of passing same value for `path` and `root)
-class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment(), ResourcesView,
+class ResourcesFragment(val root: Path?, val path: Path?) :
+    MvpAppCompatFragment(),
+    ResourcesView,
     BackButtonListener {
 
     private val presenter by moxyPresenter {
@@ -61,7 +62,7 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
     }
     private val frameHeight by lazy { binding.root.height }
 
-    private var selectorHeight: Float = 0.3f //ratio
+    private var selectorHeight: Float = 0.3f // ratio
 
     private var selectorDragStartBias: Float = -1f
     private var selectorDragStartTime: Long = -1
@@ -260,7 +261,6 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
                 if (newSorting == Sorting.DEFAULT)
                     notifyUser(requireActivity().getString(R.string.as_is_sorting_selected))
 
-
                 presenter.gridPresenter.updateSorting(newSorting)
                 presenter.onSortDialogClose()
             }
@@ -317,7 +317,7 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
                 Log.d(RESOURCES_SCREEN, "draggable bar of tags selector was moved:")
                 Log.d(RESOURCES_SCREEN, "delta=${100f * travelDelta}%")
                 Log.d(RESOURCES_SCREEN, "time=${travelTime}ms")
-                Log.d(RESOURCES_SCREEN, "speed=${travelSpeed}%/sec")
+                Log.d(RESOURCES_SCREEN, "speed=$travelSpeed%/sec")
 
                 if (travelTime > DRAG_TRAVEL_TIME_THRESHOLD &&
                     abs(travelDelta) > DRAG_TRAVEL_DELTA_THRESHOLD &&
@@ -389,8 +389,8 @@ class ResourcesFragment(val root: Path?, val path: Path?) : MvpAppCompatFragment
     }
 
     companion object {
-        private const val DRAG_TRAVEL_TIME_THRESHOLD = 30      //milliseconds
-        private const val DRAG_TRAVEL_DELTA_THRESHOLD = 0.1    //ratio
-        private const val DRAG_TRAVEL_SPEED_THRESHOLD = 150    //percents per second
+        private const val DRAG_TRAVEL_TIME_THRESHOLD = 30 // milliseconds
+        private const val DRAG_TRAVEL_DELTA_THRESHOLD = 0.1 // ratio
+        private const val DRAG_TRAVEL_SPEED_THRESHOLD = 150 // percents per second
     }
 }

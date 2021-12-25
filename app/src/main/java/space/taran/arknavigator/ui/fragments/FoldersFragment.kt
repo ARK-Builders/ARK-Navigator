@@ -17,10 +17,10 @@ import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.DialogRootsNewBinding
 import space.taran.arknavigator.databinding.FragmentFoldersBinding
 import space.taran.arknavigator.mvp.presenter.FoldersPresenter
-import space.taran.arknavigator.ui.adapter.FolderPicker
 import space.taran.arknavigator.mvp.view.FoldersView
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.activity.MainActivity
+import space.taran.arknavigator.ui.adapter.FolderPicker
 import space.taran.arknavigator.ui.adapter.folderstree.FoldersTreeAdapter
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.utils.FOLDERS_SCREEN
@@ -28,7 +28,7 @@ import space.taran.arknavigator.utils.FOLDER_PICKER
 import java.nio.file.Path
 import javax.inject.Inject
 
-class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
+class FoldersFragment : MvpAppCompatFragment(), FoldersView, BackButtonListener {
     @Inject
     lateinit var router: Router
 
@@ -49,7 +49,8 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?): View {
+        savedInstanceState: Bundle?
+    ): View {
         Log.d(FOLDERS_SCREEN, "inflating layout for FoldersFragment")
         binding = FragmentFoldersBinding.inflate(inflater, container, false)
         return binding.root
@@ -69,7 +70,6 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
         binding.rvRoots.layoutManager = LinearLayoutManager(context)
         binding.rvRoots.adapter = foldersTreeAdapter
 
-
         binding.fabAddRoots.setOnClickListener {
             presenter.onAddRootBtnClick()
         }
@@ -83,8 +83,7 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
             if (withText.isNotEmpty()) {
                 progressText.setVisibilityAndLoadingStatus(View.VISIBLE)
                 progressText.loadingText = withText
-            }
-            else progressText.setVisibilityAndLoadingStatus(View.GONE)
+            } else progressText.setVisibilityAndLoadingStatus(View.GONE)
         }
     }
 
@@ -108,7 +107,8 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
         Log.d(FOLDERS_SCREEN, "initializing root picker")
 
         rootPickerBinding = DialogRootsNewBinding.inflate(
-            LayoutInflater.from(requireContext()))
+            LayoutInflater.from(requireContext())
+        )
 
         rootPickerBinding!!.rvRootsDialog.layoutManager = GridLayoutManager(context, 2)
         folderPicker = FolderPicker(paths, presenter.onRootPickerItemClick(), rootPickerBinding!!)
@@ -148,7 +148,8 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
         result.setOnKeyListener { _, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_BACK &&
                 event.action == KeyEvent.ACTION_UP &&
-                !event.isCanceled) {
+                !event.isCanceled
+            ) {
 
                 Log.d(FOLDER_PICKER, "[back] pressed")
                 if (folderPicker!!.backClicked() == null) {

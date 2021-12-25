@@ -95,7 +95,7 @@ class FoldersTreePresenter(
         oldNode?.let {
             if (it.isExpanded) {
                 node.isExpanded = true
-                tmpNodes.addAll(pos+1, node.children)
+                tmpNodes.addAll(pos + 1, node.children)
             }
         }
         node.children.forEach { children ->
@@ -113,7 +113,6 @@ class FoldersTreePresenter(
         Log.d(FOLDERS_TREE, "preparing FoldersTree to display")
         Log.d(FOLDERS_TREE, "devices = $devices")
         Log.d(FOLDERS_TREE, "folders = $folders")
-
 
         return folders.mapKeys { (root, _) ->
             val idx = devices.indexOfFirst { root.startsWith(it) }
@@ -161,5 +160,4 @@ class FoldersTreePresenter(
             }
             .toMutableList()
     }
-
 }

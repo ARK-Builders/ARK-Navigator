@@ -18,7 +18,7 @@ object ImageUtils {
     fun iconForExtension(ext: String): Int {
         val drawableID = App.instance.resources
             .getIdentifier(
-                "ic_file_${ext}",
+                "ic_file_$ext",
                 "drawable",
                 App.instance.packageName
             )

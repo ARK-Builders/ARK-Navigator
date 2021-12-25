@@ -22,7 +22,7 @@ class PreviewItemViewHolder(val binding: ItemImageBinding, val presenter: Previe
 
         ImageUtils.loadZoomImageWithPlaceholder(preview, placeholder, binding.ivImage)
 
-        if (resource.kind == ResourceKind.VIDEO){
+        if (resource.kind == ResourceKind.VIDEO) {
             binding.icPlay.makeVisibleAndSetOnClickListener {
                 presenter.onPlayButtonClick(pos)
             }
@@ -31,8 +31,9 @@ class PreviewItemViewHolder(val binding: ItemImageBinding, val presenter: Previe
         }
 
         if (resource.kind == ResourceKind.IMAGE ||
-            resource.kind == ResourceKind.DOCUMENT) {
-                enableZoom()
+            resource.kind == ResourceKind.DOCUMENT
+        ) {
+            enableZoom()
         }
     }
 

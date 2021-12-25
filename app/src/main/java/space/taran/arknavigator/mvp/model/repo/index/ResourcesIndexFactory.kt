@@ -4,16 +4,16 @@ import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import space.taran.arknavigator.mvp.model.dao.ResourceDao
-import space.taran.arknavigator.mvp.model.repo.index.PlainResourcesIndex.Companion.loadResources
 import space.taran.arknavigator.mvp.model.repo.index.PlainResourcesIndex.Companion.listAllFiles
+import space.taran.arknavigator.mvp.model.repo.index.PlainResourcesIndex.Companion.loadResources
 import space.taran.arknavigator.mvp.model.repo.index.PlainResourcesIndex.Companion.scanResources
 import space.taran.arknavigator.utils.RESOURCES_INDEX
 import java.nio.file.Path
 import kotlin.system.measureTimeMillis
 
 class ResourcesIndexFactory(
-    private val dao: ResourceDao)
-{
+    private val dao: ResourceDao
+) {
     suspend fun loadFromDatabase(root: Path): PlainResourcesIndex = withContext(Dispatchers.IO) {
         Log.d(RESOURCES_INDEX, "loading index for $root from the database")
 

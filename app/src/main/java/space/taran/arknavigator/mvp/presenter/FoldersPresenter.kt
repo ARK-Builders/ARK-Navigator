@@ -3,15 +3,15 @@ package space.taran.arknavigator.mvp.presenter
 import android.util.Log
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
-import space.taran.arknavigator.mvp.view.FoldersView
 import moxy.MvpPresenter
 import moxy.presenterScope
 import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.R
 import space.taran.arknavigator.mvp.model.repo.FoldersRepo
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexFactory
-import space.taran.arknavigator.mvp.presenter.adapter.folderstree.FoldersTreePresenter
 import space.taran.arknavigator.mvp.presenter.adapter.ItemClickHandler
+import space.taran.arknavigator.mvp.presenter.adapter.folderstree.FoldersTreePresenter
+import space.taran.arknavigator.mvp.view.FoldersView
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.ui.resource.StringProvider
@@ -166,7 +166,8 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
 
         viewState.notifyUser(
             message = "Indexing of huge folders can take minutes",
-            moreTime = true)
+            moreTime = true
+        )
 
         viewState.setProgressVisibility(true, "Indexing")
         resourcesIndexFactory.buildFromFilesystem(root)
@@ -202,7 +203,6 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
         Log.d(FOLDERS_SCREEN, "[back] clicked, path: $path")
         if (path != null) updateFolderAndButtonState(path)
     }
-
 
     fun onBackClick(): Boolean {
         Log.d(FOLDERS_SCREEN, "[back] clicked")

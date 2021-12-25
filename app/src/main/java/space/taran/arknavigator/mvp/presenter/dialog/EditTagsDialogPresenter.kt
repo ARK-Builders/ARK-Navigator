@@ -14,7 +14,7 @@ class EditTagsDialogPresenter(
     private val storage: TagsStorage,
     private val index: ResourcesIndex,
     private val onTagsChangedListener: (resource: ResourceId) -> Unit
-): MvpPresenter<EditTagsDialogView>() {
+) : MvpPresenter<EditTagsDialogView>() {
 
     private var filter = ""
 
@@ -47,7 +47,7 @@ class EditTagsDialogPresenter(
         updateTags()
     }
 
-    fun onQuickTagClick(tag: Tag) = presenterScope.launch  {
+    fun onQuickTagClick(tag: Tag) = presenterScope.launch {
         val newTags = listResourceTags() + tag
         storage.setTags(resourceId, newTags)
 
@@ -68,7 +68,8 @@ class EditTagsDialogPresenter(
         val popularity = Popularity.calculate(allTags)
         val result = (popularity.keys - listResourceTags())
             .filter {
-                tag -> tag.startsWith(filter, true)
+                tag ->
+                tag.startsWith(filter, true)
             }
 
         return result.sortedByDescending { popularity[it] }
