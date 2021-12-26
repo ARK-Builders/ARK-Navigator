@@ -56,7 +56,7 @@ class ResourcesPresenter(
         viewState.init()
         presenterScope.launch {
             viewState.setProgressVisibility(true, "Indexing")
-            val folders = foldersRepo.query()
+            val folders = foldersRepo.provideFolders()
             Log.d(RESOURCES_SCREEN, "folders retrieved: $folders")
 
             Notifications.notifyIfFailedPaths(viewState, folders.failed)

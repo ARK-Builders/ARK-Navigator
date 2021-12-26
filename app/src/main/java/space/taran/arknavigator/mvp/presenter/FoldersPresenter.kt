@@ -3,23 +3,21 @@ package space.taran.arknavigator.mvp.presenter
 import android.util.Log
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
-import space.taran.arknavigator.mvp.view.FoldersView
 import moxy.MvpPresenter
 import moxy.presenterScope
 import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.R
 import space.taran.arknavigator.mvp.model.repo.FoldersRepo
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
-import space.taran.arknavigator.mvp.presenter.adapter.folderstree.FoldersTreePresenter
 import space.taran.arknavigator.mvp.presenter.adapter.ItemClickHandler
+import space.taran.arknavigator.mvp.presenter.adapter.folderstree.FoldersTreePresenter
+import space.taran.arknavigator.mvp.view.FoldersView
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.ui.resource.StringProvider
 import space.taran.arknavigator.utils.FOLDERS_SCREEN
 import space.taran.arknavigator.utils.FOLDER_PICKER
 import space.taran.arknavigator.utils.listDevices
-import java.lang.AssertionError
-import java.lang.IllegalStateException
 import java.nio.file.Files
 import java.nio.file.Path
 import javax.inject.Inject
@@ -60,7 +58,7 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
         viewState.init()
         presenterScope.launch {
             viewState.setProgressVisibility(true, "Loading")
-            val folders = foldersRepo.query()
+            val folders = foldersRepo.provideFolders()
             Log.d(FOLDERS_SCREEN, "folders retrieved: $folders")
             devices = listDevices()
 
