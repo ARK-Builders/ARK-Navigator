@@ -16,7 +16,7 @@ import javax.inject.Inject
 class EditTagsDialogPresenter(
     private val rootAndFav: RootAndFav,
     private val resourceId: ResourceId
-): MvpPresenter<EditTagsDialogView>() {
+) : MvpPresenter<EditTagsDialogView>() {
 
     private var filter = ""
     private lateinit var index: ResourcesIndex
@@ -62,7 +62,7 @@ class EditTagsDialogPresenter(
         updateTags()
     }
 
-    fun onQuickTagClick(tag: Tag) = presenterScope.launch  {
+    fun onQuickTagClick(tag: Tag) = presenterScope.launch {
         val newTags = listResourceTags() + tag
         storage.setTags(resourceId, newTags)
 
@@ -82,8 +82,8 @@ class EditTagsDialogPresenter(
             .flatten()
         val popularity = Popularity.calculate(allTags)
         val result = (popularity.keys - listResourceTags())
-            .filter {
-                tag -> tag.startsWith(filter, true)
+            .filter { tag ->
+                tag.startsWith(filter, true)
             }
 
         return result.sortedByDescending { popularity[it] }
