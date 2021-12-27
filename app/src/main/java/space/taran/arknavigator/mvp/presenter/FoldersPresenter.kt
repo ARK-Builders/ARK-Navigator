@@ -201,9 +201,8 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
     }
 
 
-    fun onBackClick(): Boolean {
+    fun onBackClick() {
         Log.d(FOLDERS_SCREEN, "[back] clicked")
         router.exit()
-        return true
     }
 }
