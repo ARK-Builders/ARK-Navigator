@@ -31,7 +31,7 @@ class GalleryPresenter(
     private val startAt: Int
 ) : MvpPresenter<GalleryView>() {
 
-    private var isFullscreen = false
+    private var isControlsVisible = false
     private var currentPos = startAt
     private lateinit var currentResource: ResourceMeta
 
@@ -156,14 +156,6 @@ class GalleryPresenter(
         viewState.showEditTagsDialog(currentResource.id)
     }
 
-    fun onSystemUIVisibilityChange(isVisible: Boolean) {
-        val newFullscreen = !isVisible
-        // prevent loop
-        if (isFullscreen == newFullscreen)
-            return
-        isFullscreen = newFullscreen
-    }
-
     private fun deleteResource(resource: ResourceId) = presenterScope.launch(NonCancellable) {
         Log.d(GALLERY_SCREEN, "deleting resource $resource")
 
@@ -184,8 +176,8 @@ class GalleryPresenter(
 
     private fun onPreviewsItemZoom(zoomed: Boolean) {
         if (zoomed) {
-            isFullscreen = true
-            viewState.setFullscreen(isFullscreen)
+            isControlsVisible = false
+            viewState.setControlsVisibility(isControlsVisible)
             viewState.setPreviewsScrollingEnabled(false)
         } else
             viewState.setPreviewsScrollingEnabled(true)
@@ -193,9 +185,9 @@ class GalleryPresenter(
 
     private fun onPreviewsItemClick(itemView: PreviewItemView) {
         Log.d(GALLERY_SCREEN, "preview at ${itemView.pos} clicked, switching controls on/off")
-        isFullscreen = !isFullscreen
-        viewState.setFullscreen(isFullscreen)
-        if (!isFullscreen)
+        isControlsVisible = !isControlsVisible
+        viewState.setControlsVisibility(isControlsVisible)
+        if (!isControlsVisible)
             itemView.resetZoom()
     }
 
@@ -203,9 +195,9 @@ class GalleryPresenter(
         viewState.viewInExternalApp(index.getPath(currentResource.id))
     }
 
-    fun onBackClick(): Boolean {
+    fun onBackClick() {
         Log.d(GALLERY_SCREEN, "quitting from GalleryPresenter")
+        viewState.exitFullscreen()
         router.exit()
-        return true
     }
 }

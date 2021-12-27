@@ -36,9 +36,4 @@ class MainPresenter: MvpPresenter<MainView>() {
         Log.d(MAIN, "creating Resources screen")
         router.newRootScreen(Screens.ResourcesScreen(RootAndFav(null, null)))
     }
-
-    fun backClicked() {
-        Log.d(MAIN, "[back] clicked in MainPresenter")
-        router.exit()
-    }
 }

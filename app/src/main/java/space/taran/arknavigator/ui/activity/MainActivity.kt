@@ -25,7 +25,6 @@ import space.taran.arknavigator.mvp.presenter.MainPresenter
 import space.taran.arknavigator.mvp.view.MainView
 import space.taran.arknavigator.navigation.AppNavigator
 import space.taran.arknavigator.ui.App
-import space.taran.arknavigator.ui.fragments.BackButtonListener
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.utils.MAIN
 import space.taran.arknavigator.utils.PERMISSIONS
@@ -210,16 +209,6 @@ class MainActivity : MvpAppCompatActivity(), MainView {
         Log.d(MAIN, "pausing MainActivity")
         super.onPause()
         navigatorHolder.removeNavigator()
-    }
-
-    override fun onBackPressed() {
-        Log.d(MAIN, "back pressed in MainActivity")
-        supportFragmentManager.fragments.forEach {
-            if (it is BackButtonListener && it.backClicked()) {
-                return
-            }
-        }
-        presenter.backClicked()
     }
 
     private fun isActiveScreenExists(): Boolean {

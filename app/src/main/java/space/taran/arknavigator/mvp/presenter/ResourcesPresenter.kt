@@ -139,10 +139,9 @@ class ResourcesPresenter(
         viewState.closeSortDialog()
     }
 
-    fun onBackClick(): Boolean {
+    fun onBackClick() {
         if (!tagsSelectorPresenter.onBackClick())
             router.exit()
-        return true
     }
 
     private fun onSelectionChange(selection: Set<ResourceId>) {

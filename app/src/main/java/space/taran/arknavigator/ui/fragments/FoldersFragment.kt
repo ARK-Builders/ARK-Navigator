@@ -6,6 +6,7 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.GridLayoutManager
@@ -27,7 +28,7 @@ import space.taran.arknavigator.utils.FOLDER_PICKER
 import space.taran.arknavigator.utils.FullscreenHelper
 import java.nio.file.Path
 
-class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
+class FoldersFragment: MvpAppCompatFragment(), FoldersView {
     private var foldersTreeAdapter: FoldersTreeAdapter? = null
 
     private var folderPicker: FolderPicker? = null
@@ -66,6 +67,9 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
         binding.rvRoots.layoutManager = LinearLayoutManager(context)
         binding.rvRoots.adapter = foldersTreeAdapter
 
+        requireActivity().onBackPressedDispatcher.addCallback(this) {
+            presenter.onBackClick()
+        }
 
         binding.fabAddRoots.setOnClickListener {
             presenter.onAddRootBtnClick()
@@ -129,11 +133,6 @@ class FoldersFragment: MvpAppCompatFragment(), FoldersView, BackButtonListener {
 
     override fun notifyUser(message: String, moreTime: Boolean) {
         Notifications.notifyUser(context, message, moreTime)
-    }
-
-    override fun backClicked(): Boolean {
-        Log.d(FOLDERS_SCREEN, "[back] clicked in FoldersFragment")
-        return presenter.onBackClick()
     }
 
     private fun rootPickerAlertDialog(view: View): AlertDialog {

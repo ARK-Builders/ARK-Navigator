@@ -7,6 +7,7 @@ import android.util.Log
 import android.util.TypedValue
 import android.view.*
 import android.view.View
+import androidx.activity.addCallback
 import androidx.core.content.FileProvider
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
@@ -40,7 +41,7 @@ import space.taran.arknavigator.utils.extensions.makeGone
 import space.taran.arknavigator.utils.extensions.makeVisible
 import java.nio.file.Path
 
-class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener, NotifiableView {
+class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
 
     private lateinit var binding: FragmentGalleryBinding
 
@@ -82,12 +83,8 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
         (requireActivity() as MainActivity).setToolbarVisibility(false)
         (requireActivity() as MainActivity).setBottomNavigationVisibility(false)
 
-        requireActivity().window.decorView.setOnSystemUiVisibilityChangeListener { visibility ->
-            if (visibility and View.SYSTEM_UI_FLAG_FULLSCREEN == 0) {
-                presenter.onSystemUIVisibilityChange(true)
-            } else {
-                presenter.onSystemUIVisibilityChange(false)
-            }
+        requireActivity().onBackPressedDispatcher.addCallback(this) {
+            presenter.onBackClick()
         }
 
         pagerAdapter = PreviewsPager(presenter.previewsPresenter)
@@ -144,10 +141,8 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
         binding.viewPager.isUserInputEnabled = enabled
     }
 
-    override fun setFullscreen(fullscreen: Boolean) {
-        val isControlsVisible = !fullscreen
-        binding.previewControls.isVisible = isControlsVisible
-        FullscreenHelper.setStatusBarVisibility(false, requireActivity().window)
+    override fun setControlsVisibility(visible: Boolean) {
+        binding.previewControls.isVisible = visible
     }
 
     override fun notifyUser(message: String, moreTime: Boolean) {
@@ -211,11 +206,6 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
         dialog.show(childFragmentManager, EditTagsDialogFragment.FRAGMENT_TAG)
     }
 
-    override fun backClicked(): Boolean {
-        Log.d(GALLERY_SCREEN, "[back] clicked in GalleryFragment")
-        return presenter.onBackClick()
-    }
-
     @SuppressLint("ClickableViewAccessibility")
     override fun setProgressVisibility(isVisible: Boolean, withText: String) {
         binding.layoutProgress.apply {
@@ -236,6 +226,12 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
                 progressText.setVisibilityAndLoadingStatus(View.GONE)
             }
         }
+    }
+
+    override fun exitFullscreen() {
+        FullscreenHelper.setStatusBarVisibility(true, requireActivity().window)
+        (requireActivity() as MainActivity).setToolbarVisibility(true)
+        (requireActivity() as MainActivity).setBottomNavigationVisibility(true)
     }
 
     /**
