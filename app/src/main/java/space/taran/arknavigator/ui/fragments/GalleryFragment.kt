@@ -5,11 +5,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.view.*
-import android.webkit.MimeTypeMap
+import android.view.View
 import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
 import androidx.viewpager2.widget.ViewPager2
@@ -200,7 +197,9 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
         Log.d(GALLERY_SCREEN, "showing [edit-tags] dialog for resource $resource")
         val dialog = EditTagsDialogFragment.newInstance(
             requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
-            resource
+            resource,
+            presenter.index,
+            presenter.storage
         )
         dialog.show(childFragmentManager, EditTagsDialogFragment.FRAGMENT_TAG)
     }

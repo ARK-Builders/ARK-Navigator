@@ -35,8 +35,10 @@ class GalleryPresenter(
     private var currentPos = startAt
     private lateinit var currentResource: ResourceMeta
 
-    private lateinit var index: ResourcesIndex
-    private lateinit var storage: TagsStorage
+    lateinit var index: ResourcesIndex
+        private set
+    lateinit var storage: TagsStorage
+        private set
     private lateinit var resources: MutableList<ResourceMeta>
 
     val previewsPresenter = PreviewsPagerPresenter(viewState)

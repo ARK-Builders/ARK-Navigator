@@ -62,8 +62,9 @@ class ResourcesIndexRepo(
     }
 
     suspend fun provide(rootAndFav: RootAndFav): ResourcesIndex = withContext(Dispatchers.IO) {
+        val roots = foldersRepo.resolveRoots(rootAndFav)
+
         provideMutex.withLock {
-            val roots = foldersRepo.resolveRoots(rootAndFav)
             val indexShards = roots.map { root ->
                 indexByRoot[root] ?: let {
                     val index = loadFromDatabase(root)

@@ -17,15 +17,26 @@ typealias Folders = Map<Path, List<Path>>
 class FoldersRepo(private val dao: FolderDao) {
 
     private val provideMutex = Mutex()
-    private var foldersResult: PartialResult<Folders, List<Path>>? = null
+    private lateinit var folders: Folders
 
     suspend fun provideFolders(): PartialResult<Folders, List<Path>> = withContext(Dispatchers.IO) {
         provideMutex.withLock {
-            if (foldersResult == null) {
-                foldersResult = query()
+            val result = if (!::folders.isInitialized) {
+                val foldersResult = query()
+                if (foldersResult.failed.isNotEmpty())
+                    Log.w(FILES,
+                        "Failed to verify the following paths: \n ${
+                            foldersResult.failed.joinToString("\n")}")
+
+                folders = foldersResult.succeeded
+                Log.d(DATABASE, "folders loaded: $folders")
+
+                foldersResult
+            } else {
+                PartialResult(succeeded = folders, failed = listOf())
             }
 
-            return@withContext foldersResult!!
+            return@withContext result
         }
     }
 
@@ -72,32 +83,31 @@ class FoldersRepo(private val dao: FolderDao) {
 
         return@withContext PartialResult(
             validPaths.toMap(),
-            missingPaths.toList())
+            missingPaths.toList()
+        )
     }
 
     suspend fun insertRoot(root: Path) = withContext(Dispatchers.IO) {
         val entity = Root(root.toString())
         Log.d(DATABASE, "storing $entity")
-        foldersResult?.let {
-            val succeeded = it.succeeded.toMutableMap()
-            succeeded[root] = listOf()
 
-            foldersResult = it.copy(succeeded = succeeded)
-        }
+        val mutableFolders = folders.toMutableMap()
+        mutableFolders[root] = listOf()
+        folders = mutableFolders
+
         dao.insert(entity)
     }
 
     suspend fun insertFavorite(root: Path, favorite: Path) = withContext(Dispatchers.IO) {
         val entity = Favorite(root.toString(), favorite.toString())
         Log.d(DATABASE, "storing $entity")
-        foldersResult?.let {
-            val succeeded = it.succeeded.toMutableMap()
-            val favsByRoot = succeeded[root]?.toMutableList()
-            favsByRoot?.add(favorite)
-            succeeded[root] = favsByRoot ?: listOf(favorite)
 
-            foldersResult = it.copy(succeeded = succeeded)
-        }
+        val mutableFolders = folders.toMutableMap()
+        val favsByRoot = mutableFolders[root]?.toMutableList()
+        favsByRoot?.add(favorite)
+        mutableFolders[root] = favsByRoot ?: listOf(favorite)
+        folders = mutableFolders
+
         dao.insert(entity)
     }
 }

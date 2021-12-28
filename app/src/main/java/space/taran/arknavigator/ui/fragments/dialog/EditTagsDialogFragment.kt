@@ -15,6 +15,8 @@ import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.DialogEditTagsBinding
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
+import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
+import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.presenter.dialog.EditTagsDialogPresenter
 import space.taran.arknavigator.mvp.view.dialog.EditTagsDialogView
 import space.taran.arknavigator.ui.App
@@ -23,14 +25,19 @@ import space.taran.arknavigator.utils.Tag
 import space.taran.arknavigator.utils.Tags
 import space.taran.arknavigator.utils.extensions.placeCursorToEnd
 
-class EditTagsDialogFragment :
+class EditTagsDialogFragment(
+    private val index: ResourcesIndex? = null,
+    private val storage: TagsStorage? = null
+) :
     MvpAppCompatDialogFragment(), EditTagsDialogView {
     private lateinit var binding: DialogEditTagsBinding
 
     private val presenter by moxyPresenter {
         EditTagsDialogPresenter(
             requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
-            requireArguments().getLong(RESOURCE_KEY)
+            requireArguments().getLong(RESOURCE_KEY),
+            index,
+            storage
         ).apply {
             App.instance.appComponent.inject(this)
         }
@@ -114,8 +121,13 @@ class EditTagsDialogFragment :
         private const val ROOT_AND_FAV_KEY = "rootAndFav"
         private const val RESOURCE_KEY = "resource"
 
-        fun newInstance(rootAndFav: RootAndFav, resource: ResourceId) =
-            EditTagsDialogFragment().apply {
+        fun newInstance(
+            rootAndFav: RootAndFav,
+            resource: ResourceId,
+            index: ResourcesIndex,
+            storage: TagsStorage
+        ) =
+            EditTagsDialogFragment(index, storage).apply {
                 arguments = Bundle().apply {
                     putParcelable(ROOT_AND_FAV_KEY, rootAndFav)
                     putLong(RESOURCE_KEY, resource)
