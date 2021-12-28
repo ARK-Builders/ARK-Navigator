@@ -15,7 +15,9 @@ import javax.inject.Inject
 
 class EditTagsDialogPresenter(
     private val rootAndFav: RootAndFav,
-    private val resourceId: ResourceId
+    private val resourceId: ResourceId,
+    private val _index: ResourcesIndex?,
+    private val _storage: TagsStorage?
 ) : MvpPresenter<EditTagsDialogView>() {
 
     private var filter = ""
@@ -29,14 +31,23 @@ class EditTagsDialogPresenter(
     lateinit var tagsStorageRepo: TagsStorageRepo
 
     override fun onFirstViewAttach() {
-        presenterScope.launch {
-            index = indexRepo.provide(rootAndFav)
-            storage = tagsStorageRepo.provide(rootAndFav)
-
-            viewState.init()
-            viewState.setResourceTags(listResourceTags())
-            viewState.setQuickTags(listQuickTags())
+        if (_index != null && _storage != null) {
+            index = _index
+            storage = _storage
+            init()
+        } else {
+            presenterScope.launch {
+                index = indexRepo.provide(rootAndFav)
+                storage = tagsStorageRepo.provide(rootAndFav)
+                init()
+            }
         }
+    }
+
+    private fun init() {
+        viewState.init()
+        viewState.setQuickTags(listQuickTags())
+        viewState.setResourceTags(listResourceTags())
     }
 
     fun onInputChanged(input: String) {

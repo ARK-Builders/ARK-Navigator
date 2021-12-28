@@ -34,3 +34,5 @@ const val PREVIEWS: String = "previews"
 const val IMAGES: String = "images"
 
 const val GLIDE: String = "glide"
+
+const val FILES: String = "files"

@@ -59,7 +59,6 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
         presenterScope.launch {
             viewState.setProgressVisibility(true, "Loading")
             val folders = foldersRepo.provideFolders()
-            Log.d(FOLDERS_SCREEN, "folders retrieved: $folders")
             devices = listDevices()
 
             Notifications.notifyIfFailedPaths(viewState, folders.failed)

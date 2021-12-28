@@ -17,9 +17,9 @@ class TagsStorageRepo(
     private val storageByRoot = mutableMapOf<Path, PlainTagsStorage>()
 
     suspend fun provide(rootAndFav: RootAndFav): TagsStorage = withContext(Dispatchers.IO) {
-        provideMutex.withLock {
-            val roots = foldersRepo.resolveRoots(rootAndFav)
+        val roots = foldersRepo.resolveRoots(rootAndFav)
 
+        provideMutex.withLock {
             val storageShards = roots.map { root ->
                 val index = indexRepo.provide(root)
                 val resources = index.listAllIds()
