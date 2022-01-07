@@ -1,0 +1,15 @@
+name: Check code formatting
+
+on: [push]
+
+jobs:
+  ktlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: |
+          curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.42.1/ktlint && chmod a+x ktlint && sudo mv ktlint /usr/local/bin/
+      - name: Run ktlintCheck
+        run: |
+          ./gradlew ktlintCheck
+        continue-on-error: false
