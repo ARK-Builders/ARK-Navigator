@@ -1,7 +1,9 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlin-parcelize'
 
 
 android {
@@ -57,10 +59,10 @@ dependencies {
 
     implementation 'com.google.android.flexbox:flexbox:3.0.0'
 
-    implementation "com.github.moxy-community:moxy:2.1.2"
-    implementation "com.github.moxy-community:moxy-androidx:2.1.2"
-    implementation "com.github.moxy-community:moxy-ktx:2.1.2"
-    kapt "com.github.moxy-community:moxy-compiler:2.1.2"
+    implementation "com.github.moxy-community:moxy:2.2.2"
+    implementation "com.github.moxy-community:moxy-androidx:2.2.2"
+    implementation "com.github.moxy-community:moxy-ktx:2.2.2"
+    kapt "com.github.moxy-community:moxy-compiler:2.2.2"
 
     implementation 'com.github.MikeOrtiz:TouchImageView:3.1.1'
 
@@ -87,3 +89,16 @@ dependencies {
     androidTestImplementation "androidx.test:rules:1.4.0"
     androidTestImplementation "androidx.test.espresso:espresso-core:3.4.0"
 }
+
+task installGitHook(type: Copy) {
+    def suffix = "linux"
+    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+        suffix = "windows"
+    }
+    from new File(rootProject.rootDir, "app-scripts/pre-commit-$suffix")
+    into { new File(rootProject.rootDir, '.git/hooks') }
+    rename("pre-commit-$suffix", 'pre-commit')
+    fileMode 0775
+}
+
+tasks.getByPath(':app:preBuild').dependsOn installGitHook
