@@ -10,8 +10,11 @@ import android.view.View
 import androidx.activity.addCallback
 import androidx.core.content.FileProvider
 import androidx.core.os.bundleOf
+import androidx.core.view.doOnNextLayout
 import androidx.core.view.isVisible
 import androidx.fragment.app.setFragmentResult
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.SimpleItemAnimator
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.chip.Chip
 import moxy.MvpAppCompatFragment
@@ -93,6 +96,8 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
             viewPager.apply {
                 adapter = pagerAdapter
                 offscreenPageLimit = 2
+                ((getChildAt(0) as RecyclerView).itemAnimator as SimpleItemAnimator).removeDuration = 0
+                setPageTransformer(DepthPageTransformer())
 
                 registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                     override fun onPageSelected(position: Int) {
@@ -100,7 +105,6 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
                     }
                 })
             }
-            viewPager.setPageTransformer(DepthPageTransformer())
 
             removeResourceFab.setOnLongClickListener {
                 presenter.onRemoveFabClick()
@@ -160,7 +164,13 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
     }
 
     override fun deleteResource(pos: Int) {
-        pagerAdapter.removeItem(pos)
+        binding.viewPager.apply {
+            setPageTransformer(null)
+            pagerAdapter.removeItem(pos)
+            doOnNextLayout {
+                setPageTransformer(DepthPageTransformer())
+            }
+        }
     }
 
     override fun notifyResourcesChanged() {
