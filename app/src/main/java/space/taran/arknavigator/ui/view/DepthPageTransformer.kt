@@ -2,12 +2,11 @@ package space.taran.arknavigator.ui.view
 
 import android.view.View
 import androidx.viewpager2.widget.ViewPager2
-import kotlin.math.abs
-
 
 private const val MIN_SCALE = 0.75f
 
-class DepthPageTransformer : ViewPager2.PageTransformer {
+class DepthPageTransformer() : ViewPager2.PageTransformer {
+
     override fun transformPage(view: View, position: Float) {
         view.apply {
             val pageWidth = width
@@ -28,7 +27,7 @@ class DepthPageTransformer : ViewPager2.PageTransformer {
                     translationX = pageWidth * -position
                     translationZ = -1f
 
-                    val scaleFactor = (MIN_SCALE + (1 - MIN_SCALE) * (1 - abs(position)))
+                    val scaleFactor = (MIN_SCALE + (1 - MIN_SCALE) * (1 - Math.abs(position)))
                     scaleX = scaleFactor
                     scaleY = scaleFactor
                 }

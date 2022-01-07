@@ -231,10 +231,10 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
 
     private fun initResultListeners() {
         setFragmentResultListener(GalleryFragment.REQUEST_TAGS_CHANGED_KEY) { _, _ ->
-            presenter.tagsSelectorPresenter.calculateTagsAndSelection()
+            presenter.onResourcesOrTagsChanged()
         }
         setFragmentResultListener(GalleryFragment.REQUEST_RESOURCES_CHANGED_KEY) { _, _ ->
-            presenter.onResourcesChanged()
+            presenter.onResourcesOrTagsChanged()
         }
     }
 

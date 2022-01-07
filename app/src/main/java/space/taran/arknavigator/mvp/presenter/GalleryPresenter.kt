@@ -1,6 +1,7 @@
 package space.taran.arknavigator.mvp.presenter
 
 import android.util.Log
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import moxy.MvpPresenter
@@ -89,7 +90,9 @@ class GalleryPresenter(
             )
 
             viewState.setProgressVisibility(false)
-            displayPreview()
+
+            if (currentPos != 0)
+                displayPreview()
         }
     }
 
@@ -97,11 +100,9 @@ class GalleryPresenter(
         if (resources.isEmpty())
             return
 
-        if (currentPos != newPos) {
-            currentPos = newPos
-            currentResource = resources[currentPos]
-            displayPreview()
-        }
+        currentPos = newPos
+        currentResource = resources[currentPos]
+        displayPreview()
     }
 
     fun onTagsChanged() {
@@ -119,22 +120,17 @@ class GalleryPresenter(
         viewState.editResource(index.getPath(currentResource.id))
     }
 
-    fun onRemoveFabClick() {
+    fun onRemoveFabClick() = presenterScope.launch(NonCancellable) {
         Log.d(GALLERY_SCREEN, "[remove_resource] clicked at position $currentPos")
         deleteResource(currentResource.id)
         resources.removeAt(currentPos)
-        viewState.notifyResourcesChanged()
 
         if (resources.isEmpty()) {
             onBackClick()
-            return
+            return@launch
         }
 
         viewState.deleteResource(currentPos)
-
-        if (resources.getOrNull(currentPos) == null)
-            currentPos -= 1
-        displayPreview()
     }
 
     fun onShareFabClick() {
@@ -156,14 +152,17 @@ class GalleryPresenter(
         viewState.showEditTagsDialog(currentResource.id)
     }
 
-    private fun deleteResource(resource: ResourceId) = presenterScope.launch(NonCancellable) {
+    private suspend fun deleteResource(resource: ResourceId)  {
         Log.d(GALLERY_SCREEN, "deleting resource $resource")
 
         storage.remove(resource)
         val path = index.remove(resource)
         Log.d(GALLERY_SCREEN, "path $path removed from index")
+        viewState.notifyResourcesChanged()
 
-        Files.delete(path)
+        presenterScope.launch(NonCancellable + Dispatchers.IO) {
+            Files.delete(path)
+        }
     }
 
     private fun displayPreview() {

@@ -47,7 +47,8 @@ class ResourcesPresenter(
     val gridPresenter = ResourcesGridPresenter(rootAndFav, viewState, presenterScope).apply {
         App.instance.appComponent.inject(this)
     }
-    val tagsSelectorPresenter = TagsSelectorPresenter(viewState, rootAndFav.fav, ::onSelectionChange)
+    val tagsSelectorPresenter =
+        TagsSelectorPresenter(viewState, rootAndFav.fav, ::onSelectionChange)
 
     override fun onFirstViewAttach() {
         Log.d(RESOURCES_SCREEN, "first view attached in ResourcesPresenter")
@@ -89,7 +90,7 @@ class ResourcesPresenter(
             val resources = listResources()
             viewState.setProgressVisibility(true, "Sorting")
 
-            resetResources(resources)
+            resetResources(resources, false)
             tagsSelectorPresenter.init(index, storage)
             tagsSelectorPresenter.calculateTagsAndSelection()
 
@@ -106,9 +107,12 @@ class ResourcesPresenter(
         super.onDestroy()
     }
 
-    fun onResourcesChanged() = presenterScope.launch {
+    fun onResourcesOrTagsChanged() = presenterScope.launch {
         if (tagsEnabled)
-            resetResources(listResources(untaggedOnly = !tagsEnabled))
+            resetResources(listResources(), needToUpdateAdapter = false)
+        else
+            resetResources(listResources(untaggedOnly = true))
+
         tagsSelectorPresenter.calculateTagsAndSelection()
     }
 
@@ -118,7 +122,7 @@ class ResourcesPresenter(
 
         presenterScope.launch {
             if (tagsEnabled) {
-                gridPresenter.resetResources(listResources())
+                gridPresenter.resetResources(listResources(), false)
                 updateSelection(tagsSelectorPresenter.selection)
             } else {
                 resetResources(listResources(untaggedOnly = true))
@@ -145,7 +149,8 @@ class ResourcesPresenter(
     }
 
     private fun onSelectionChange(selection: Set<ResourceId>) {
-        presenterScope.launch { updateSelection(selection) }
+        if (tagsEnabled)
+            presenterScope.launch { updateSelection(selection) }
     }
 
     private fun listResources(untaggedOnly: Boolean = false): Set<ResourceMeta> {
@@ -161,17 +166,23 @@ class ResourcesPresenter(
         return result.toSet()
     }
 
-    private suspend fun updateSelection(selection: Set<ResourceId>) {
+    private suspend fun updateSelection(
+        selection: Set<ResourceId>,
+        needToUpdateAdapter: Boolean = true
+    ) {
         if (this.tagsEnabled) {
             viewState.notifyUser("${selection.size} resources selected")
-            gridPresenter.updateSelection(selection)
+            gridPresenter.updateSelection(selection, needToUpdateAdapter)
         }
     }
 
-    private suspend fun resetResources(resources: Set<ResourceMeta>) {
+    private suspend fun resetResources(
+        resources: Set<ResourceMeta>,
+        needToUpdateAdapter: Boolean = true
+    ) {
         if (!this.tagsEnabled) {
             viewState.notifyUser("${resources.size} resources selected")
         }
-        gridPresenter.resetResources(resources)
+        gridPresenter.resetResources(resources, needToUpdateAdapter)
     }
 }

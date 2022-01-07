@@ -9,7 +9,6 @@ import space.taran.arknavigator.utils.Popularity
 import space.taran.arknavigator.utils.TAGS_SELECTOR
 import space.taran.arknavigator.utils.Tag
 import space.taran.arknavigator.utils.Tags
-import java.lang.AssertionError
 import java.nio.file.Path
 
 class TagsSelectorPresenter(

@@ -68,7 +68,13 @@ class ResourcesGridPresenter(
     }
 
     fun onItemClick(pos: Int) {
-        router.navigateToFragmentUsingAdd(Screens.GalleryScreen(rootAndFav, selection.map { it.id }, pos))
+        router.navigateToFragmentUsingAdd(
+            Screens.GalleryScreen(
+                rootAndFav,
+                selection.map { it.id },
+                pos
+            )
+        )
     }
 
     suspend fun init(index: ResourcesIndex, storage: TagsStorage, router: AppRouter) {
@@ -79,23 +85,27 @@ class ResourcesGridPresenter(
         ascending = userPreferences.isSortingAscending()
     }
 
-    suspend fun updateSelection(selection: Set<ResourceId>) = withContext(Dispatchers.Default) {
-        this@ResourcesGridPresenter.selection = resources.filter { selection.contains(it.id) }
-        withContext(Dispatchers.Main) {
-            setProgressVisibility(false)
-            viewState.updateAdapter()
+    suspend fun updateSelection(selection: Set<ResourceId>, needToUpdateAdapter: Boolean = true) =
+        withContext(Dispatchers.Default) {
+            this@ResourcesGridPresenter.selection = resources.filter { selection.contains(it.id) }
+            withContext(Dispatchers.Main) {
+                setProgressVisibility(false)
+                if (needToUpdateAdapter)
+                    viewState.updateAdapter()
+            }
         }
-    }
 
-    suspend fun resetResources(resources: Set<ResourceMeta>) = withContext(Dispatchers.Default) {
-        this@ResourcesGridPresenter.resources = resources.toList()
-        sortAllResources()
-        selection = this@ResourcesGridPresenter.resources
-        withContext(Dispatchers.Main) {
-            setProgressVisibility(false)
-            viewState.updateAdapter()
+    suspend fun resetResources(resources: Set<ResourceMeta>, needToUpdateAdapter: Boolean = true) =
+        withContext(Dispatchers.Default) {
+            this@ResourcesGridPresenter.resources = resources.toList()
+            sortAllResources()
+            selection = this@ResourcesGridPresenter.resources
+            withContext(Dispatchers.Main) {
+                setProgressVisibility(false)
+                if (needToUpdateAdapter)
+                    viewState.updateAdapter()
+            }
         }
-    }
 
     fun updateSorting(sorting: Sorting) {
         scope.launch(Dispatchers.Default) {
@@ -130,7 +140,10 @@ class ResourcesGridPresenter(
                 resources = resources.reversed()
             }
         }
-        Log.d(RESOURCES_SCREEN, "sorting by $sorting of ${resources.size} resources took $sortTime milliseconds")
+        Log.d(
+            RESOURCES_SCREEN,
+            "sorting by $sorting of ${resources.size} resources took $sortTime milliseconds"
+        )
     }
 
     private fun sortSelectionAndUpdateAdapter() {
