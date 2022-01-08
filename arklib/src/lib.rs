@@ -5,6 +5,7 @@ mod utils {
     use std::io::{BufReader, BufRead};
     use crc32fast::Hasher;
     
+    #[allow(dead_code)]
     pub fn compute_id<PathRef: AsRef<Path>>(size: usize, file: &PathRef) -> u32 {
         const KILOBYTE: usize = 1024;
         const MEGABYTE: usize = 1024 * KILOBYTE;
