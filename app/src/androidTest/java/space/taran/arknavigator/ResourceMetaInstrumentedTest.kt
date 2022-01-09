@@ -5,7 +5,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
-import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta.Companion.computeId
+import space.taran.arknavigator.mvp.model.repo.index.computeId
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream

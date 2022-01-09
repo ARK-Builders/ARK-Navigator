@@ -23,17 +23,6 @@ data class ResourceMeta(
 
     companion object {
 
-        init {
-            System.loadLibrary("arkutils")
-        }
-
-        private external fun computeIdNative(size: Long, file: String): Long;
-
-        public fun computeId(size: Long, file: Path): Long {
-            val toString = file.toString();
-            return computeIdNative(size, file.toString());
-        }
-
         fun fromPath(path: Path): ResourceMeta? {
             val size = Files.size(path)
             if (size < 1) {
