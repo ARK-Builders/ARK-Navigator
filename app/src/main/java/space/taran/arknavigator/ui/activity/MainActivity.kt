@@ -3,13 +3,11 @@ package space.taran.arknavigator.ui.activity
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
-import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
 import androidx.annotation.RequiresApi

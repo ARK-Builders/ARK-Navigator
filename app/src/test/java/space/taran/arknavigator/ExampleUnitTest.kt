@@ -1,8 +1,7 @@
-package space.taran.arknavigator
-
 import org.junit.Test
 
 import org.junit.Assert.*
+import java.nio.file.FileSystems
 
 /**
  * Example local unit test, which will execute on the development machine (host).
