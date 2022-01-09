@@ -1,5 +1,10 @@
 package space.taran.arknavigator.mvp.model.repo.index
 
+import android.util.Log
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.supervisorScope
+import kotlinx.coroutines.withContext
 import space.taran.arknavigator.mvp.model.dao.Resource
 import space.taran.arknavigator.mvp.model.dao.ResourceDao
 import space.taran.arknavigator.mvp.model.dao.ResourceExtra
@@ -11,12 +16,6 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.system.measureTimeMillis
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import android.util.Log
-import kotlinx.coroutines.async
-import kotlinx.coroutines.supervisorScope
-import java.lang.Exception
 
 internal data class Difference(
     val deleted: List<Path>,
@@ -85,6 +84,11 @@ class PlainResourcesIndex internal constructor (
 
         if (id != idRemoved) {
             throw AssertionError("internal mappings are diverged")
+        }
+
+        val duplicatedResource = metaByPath.entries.find { entry -> entry.value.id == idRemoved }
+        duplicatedResource?.let { entry ->
+            pathById[entry.value.id] = entry.key
         }
 
         return path

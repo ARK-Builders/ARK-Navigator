@@ -1,11 +1,11 @@
 package space.taran.arknavigator.mvp.presenter
 
 import android.util.Log
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import moxy.MvpPresenter
 import moxy.presenterScope
-import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
@@ -17,6 +17,7 @@ import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsPagerPresenter
 import space.taran.arknavigator.mvp.view.GalleryView
 import space.taran.arknavigator.mvp.view.item.PreviewItemView
+import space.taran.arknavigator.navigation.AppRouter
 import space.taran.arknavigator.utils.GALLERY_SCREEN
 import space.taran.arknavigator.utils.ImageUtils
 import space.taran.arknavigator.utils.Tag
@@ -31,7 +32,7 @@ class GalleryPresenter(
     private val startAt: Int
 ) : MvpPresenter<GalleryView>() {
 
-    private var isFullscreen = false
+    private var isControlsVisible = false
     private var currentPos = startAt
     private lateinit var currentResource: ResourceMeta
 
@@ -44,7 +45,7 @@ class GalleryPresenter(
     val previewsPresenter = PreviewsPagerPresenter(viewState)
 
     @Inject
-    lateinit var router: Router
+    lateinit var router: AppRouter
 
     @Inject
     lateinit var indexRepo: ResourcesIndexRepo
@@ -89,7 +90,9 @@ class GalleryPresenter(
             )
 
             viewState.setProgressVisibility(false)
-            displayPreview()
+
+            if (currentPos != 0)
+                displayPreview()
         }
     }
 
@@ -97,11 +100,9 @@ class GalleryPresenter(
         if (resources.isEmpty())
             return
 
-        if (currentPos != newPos) {
-            currentPos = newPos
-            currentResource = resources[currentPos]
-            displayPreview()
-        }
+        currentPos = newPos
+        currentResource = resources[currentPos]
+        displayPreview()
     }
 
     fun onTagsChanged() {
@@ -119,21 +120,17 @@ class GalleryPresenter(
         viewState.editResource(index.getPath(currentResource.id))
     }
 
-    fun onRemoveFabClick() {
+    fun onRemoveFabClick() = presenterScope.launch(NonCancellable) {
         Log.d(GALLERY_SCREEN, "[remove_resource] clicked at position $currentPos")
         deleteResource(currentResource.id)
-
         resources.removeAt(currentPos)
+
         if (resources.isEmpty()) {
             onBackClick()
-            return
+            return@launch
         }
 
         viewState.deleteResource(currentPos)
-
-        if (resources.getOrNull(currentPos) == null)
-            currentPos -= 1
-        displayPreview()
     }
 
     fun onShareFabClick() {
@@ -148,28 +145,24 @@ class GalleryPresenter(
         viewState.displayPreviewTags(id, newTags)
         Log.d(GALLERY_SCREEN, "tags $tags set to $currentResource")
         storage.setTags(currentResource.id, newTags)
+        viewState.notifyTagsChanged()
     }
 
     fun onEditTagsDialogBtnClick() {
         viewState.showEditTagsDialog(currentResource.id)
     }
 
-    fun onSystemUIVisibilityChange(isVisible: Boolean) {
-        val newFullscreen = !isVisible
-        // prevent loop
-        if (isFullscreen == newFullscreen)
-            return
-        isFullscreen = newFullscreen
-    }
-
-    private fun deleteResource(resource: ResourceId) = presenterScope.launch(NonCancellable) {
+    private suspend fun deleteResource(resource: ResourceId)  {
         Log.d(GALLERY_SCREEN, "deleting resource $resource")
 
         storage.remove(resource)
         val path = index.remove(resource)
         Log.d(GALLERY_SCREEN, "path $path removed from index")
+        viewState.notifyResourcesChanged()
 
-        Files.delete(path)
+        presenterScope.launch(NonCancellable + Dispatchers.IO) {
+            Files.delete(path)
+        }
     }
 
     private fun displayPreview() {
@@ -182,8 +175,8 @@ class GalleryPresenter(
 
     private fun onPreviewsItemZoom(zoomed: Boolean) {
         if (zoomed) {
-            isFullscreen = true
-            viewState.setFullscreen(isFullscreen)
+            isControlsVisible = false
+            viewState.setControlsVisibility(isControlsVisible)
             viewState.setPreviewsScrollingEnabled(false)
         } else
             viewState.setPreviewsScrollingEnabled(true)
@@ -191,9 +184,9 @@ class GalleryPresenter(
 
     private fun onPreviewsItemClick(itemView: PreviewItemView) {
         Log.d(GALLERY_SCREEN, "preview at ${itemView.pos} clicked, switching controls on/off")
-        isFullscreen = !isFullscreen
-        viewState.setFullscreen(isFullscreen)
-        if (!isFullscreen)
+        isControlsVisible = !isControlsVisible
+        viewState.setControlsVisibility(isControlsVisible)
+        if (!isControlsVisible)
             itemView.resetZoom()
     }
 
@@ -201,9 +194,9 @@ class GalleryPresenter(
         viewState.viewInExternalApp(index.getPath(currentResource.id))
     }
 
-    fun onBackClick(): Boolean {
+    fun onBackClick() {
         Log.d(GALLERY_SCREEN, "quitting from GalleryPresenter")
+        viewState.exitFullscreen()
         router.exit()
-        return true
     }
 }

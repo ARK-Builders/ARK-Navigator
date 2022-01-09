@@ -18,14 +18,13 @@ import androidx.core.view.isVisible
 import moxy.MvpAppCompatActivity
 import moxy.ktx.moxyPresenter
 import ru.terrakok.cicerone.NavigatorHolder
-import ru.terrakok.cicerone.android.support.SupportAppNavigator
 import space.taran.arknavigator.BuildConfig
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.ActivityMainBinding
 import space.taran.arknavigator.mvp.presenter.MainPresenter
 import space.taran.arknavigator.mvp.view.MainView
+import space.taran.arknavigator.navigation.AppNavigator
 import space.taran.arknavigator.ui.App
-import space.taran.arknavigator.ui.fragments.BackButtonListener
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.utils.MAIN
 import space.taran.arknavigator.utils.PERMISSIONS
@@ -45,7 +44,7 @@ class MainActivity : MvpAppCompatActivity(), MainView {
         }
     }
 
-    private val navigator = SupportAppNavigator(this, R.id.container)
+    private val navigator = AppNavigator(this, R.id.container)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(MAIN, "creating")
@@ -210,16 +209,6 @@ class MainActivity : MvpAppCompatActivity(), MainView {
         Log.d(MAIN, "pausing MainActivity")
         super.onPause()
         navigatorHolder.removeNavigator()
-    }
-
-    override fun onBackPressed() {
-        Log.d(MAIN, "back pressed in MainActivity")
-        supportFragmentManager.fragments.forEach {
-            if (it is BackButtonListener && it.backClicked()) {
-                return
-            }
-        }
-        presenter.backClicked()
     }
 
     private fun isActiveScreenExists(): Boolean {

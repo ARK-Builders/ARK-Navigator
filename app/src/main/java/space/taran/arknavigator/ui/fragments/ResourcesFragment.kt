@@ -4,11 +4,13 @@ import android.os.Bundle
 import android.os.SystemClock
 import android.util.Log
 import android.view.*
+import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
+import androidx.fragment.app.setFragmentResultListener
 import androidx.recyclerview.widget.GridLayoutManager
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
@@ -41,8 +43,7 @@ import kotlin.math.abs
 //`path` is used for filtering resources' paths
 //       if it is `null`, then no filtering is performed
 //       (recommended instead of passing same value for `path` and `root)
-class ResourcesFragment : MvpAppCompatFragment(), ResourcesView,
-    BackButtonListener {
+class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
 
     private val presenter by moxyPresenter {
         ResourcesPresenter(requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav).apply {
@@ -89,6 +90,9 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView,
 
     override fun init() {
         Log.d(RESOURCES_SCREEN, "initializing ResourcesFragment")
+
+        initResultListeners()
+
         FullscreenHelper.setStatusBarVisibility(true, requireActivity().window)
         (activity as MainActivity).setSelectedTab(1)
         (activity as MainActivity).setToolbarVisibility(true)
@@ -107,6 +111,10 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView,
         binding.ivDragHandler.setOnTouchListener(::dragHandlerTouchListener)
         binding.etTagsFilter.doAfterTextChanged {
             presenter.tagsSelectorPresenter.onFilterChanged(it.toString())
+        }
+
+        requireActivity().onBackPressedDispatcher.addCallback(this) {
+            presenter.onBackClick()
         }
     }
 
@@ -135,7 +143,6 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView,
     override fun onResume() {
         Log.d(RESOURCES_SCREEN, "resuming in ResourcesFragment")
         super.onResume()
-        presenter.onViewResume()
         updateDragHandlerBias()
     }
 
@@ -162,7 +169,7 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView,
     }
 
     override fun notifyUser(message: String, moreTime: Boolean) {
-        Notifications.notifyUser(context, message, moreTime)
+        if (isFragmentVisible()) Notifications.notifyUser(context, message, moreTime)
     }
 
     override fun setTagsEnabled(enabled: Boolean) {
@@ -222,8 +229,13 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView,
         sortByDialog?.dismiss()
     }
 
-    override fun backClicked(): Boolean {
-        return presenter.onBackClick()
+    private fun initResultListeners() {
+        setFragmentResultListener(GalleryFragment.REQUEST_TAGS_CHANGED_KEY) { _, _ ->
+            presenter.onResourcesOrTagsChanged()
+        }
+        setFragmentResultListener(GalleryFragment.REQUEST_RESOURCES_CHANGED_KEY) { _, _ ->
+            presenter.onResourcesOrTagsChanged()
+        }
     }
 
     private fun showSortByDialog(sorting: Sorting, ascending: Boolean) {
@@ -377,6 +389,13 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView,
 
     private fun updateDragHandlerBias() {
         updateVerticalBias(binding.ivDragHandler)
+    }
+
+    /**
+     * ResourcesFragment can be overlapped by GalleryFragment
+     */
+    private fun isFragmentVisible(): Boolean {
+        return parentFragmentManager.fragments.find { f -> f is GalleryFragment } == null
     }
 
     private fun changeSortOrderEnabledStatus(

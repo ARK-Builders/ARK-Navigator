@@ -13,7 +13,8 @@ import java.nio.file.Path
 interface GalleryView: MvpView {
     fun init()
     fun updatePagerAdapter()
-    fun setFullscreen(fullscreen: Boolean)
+    fun setControlsVisibility(visible: Boolean)
+    fun exitFullscreen()
     fun setPreviewsScrollingEnabled(enabled: Boolean)
     fun setupPreview(pos: Int, resource: ResourceMeta, filePath: String)
     fun displayPreviewTags(resource: ResourceId, tags: Tags)
@@ -29,4 +30,8 @@ interface GalleryView: MvpView {
     fun showEditTagsDialog(resource: Long)
     @StateStrategyType(SkipStrategy::class)
     fun deleteResource(pos: Int)
+    @StateStrategyType(SkipStrategy::class)
+    fun notifyResourcesChanged()
+    @StateStrategyType(SkipStrategy::class)
+    fun notifyTagsChanged()
 }

@@ -7,8 +7,14 @@ import android.util.Log
 import android.util.TypedValue
 import android.view.*
 import android.view.View
+import androidx.activity.addCallback
 import androidx.core.content.FileProvider
+import androidx.core.os.bundleOf
+import androidx.core.view.doOnNextLayout
 import androidx.core.view.isVisible
+import androidx.fragment.app.setFragmentResult
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.SimpleItemAnimator
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.chip.Chip
 import moxy.MvpAppCompatFragment
@@ -38,7 +44,7 @@ import space.taran.arknavigator.utils.extensions.makeGone
 import space.taran.arknavigator.utils.extensions.makeVisible
 import java.nio.file.Path
 
-class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener, NotifiableView {
+class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
 
     private lateinit var binding: FragmentGalleryBinding
 
@@ -74,20 +80,14 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
     override fun init() {
         Log.d(GALLERY_SCREEN, "currentItem = ${binding.viewPager.currentItem}")
 
+        initResultListener()
+
         FullscreenHelper.setStatusBarVisibility(false, requireActivity().window)
         (requireActivity() as MainActivity).setToolbarVisibility(false)
         (requireActivity() as MainActivity).setBottomNavigationVisibility(false)
 
-        requireActivity().window.decorView.setOnSystemUiVisibilityChangeListener { visibility ->
-            if (visibility and View.SYSTEM_UI_FLAG_FULLSCREEN == 0) {
-                presenter.onSystemUIVisibilityChange(true)
-            } else {
-                presenter.onSystemUIVisibilityChange(false)
-            }
-        }
-
-        childFragmentManager.setFragmentResultListener(REQUEST_TAGS_CHANGED_KEY, this) { key, bundle ->
-            presenter.onTagsChanged()
+        requireActivity().onBackPressedDispatcher.addCallback(this) {
+            presenter.onBackClick()
         }
 
         pagerAdapter = PreviewsPager(presenter.previewsPresenter)
@@ -96,6 +96,8 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
             viewPager.apply {
                 adapter = pagerAdapter
                 offscreenPageLimit = 2
+                ((getChildAt(0) as RecyclerView).itemAnimator as SimpleItemAnimator).removeDuration = 0
+                setPageTransformer(DepthPageTransformer())
 
                 registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                     override fun onPageSelected(position: Int) {
@@ -103,7 +105,6 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
                     }
                 })
             }
-            viewPager.setPageTransformer(DepthPageTransformer())
 
             removeResourceFab.setOnLongClickListener {
                 presenter.onRemoveFabClick()
@@ -131,7 +132,6 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
     override fun setupPreview(pos: Int, resource: ResourceMeta, filePath: String) {
         if (binding.viewPager.currentItem != pos)
             binding.viewPager.setCurrentItem(pos, false)
-        setTitle(filePath)
         setupOpenEditFABs(resource.kind)
         ExtraLoader.load(
             resource,
@@ -145,10 +145,8 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
         binding.viewPager.isUserInputEnabled = enabled
     }
 
-    override fun setFullscreen(fullscreen: Boolean) {
-        val isControlsVisible = !fullscreen
-        binding.previewControls.isVisible = isControlsVisible
-        FullscreenHelper.setStatusBarVisibility(false, requireActivity().window)
+    override fun setControlsVisibility(visible: Boolean) {
+        binding.previewControls.isVisible = visible
     }
 
     override fun notifyUser(message: String, moreTime: Boolean) {
@@ -166,7 +164,21 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
     }
 
     override fun deleteResource(pos: Int) {
-        pagerAdapter.removeItem(pos)
+        binding.viewPager.apply {
+            setPageTransformer(null)
+            pagerAdapter.removeItem(pos)
+            doOnNextLayout {
+                setPageTransformer(DepthPageTransformer())
+            }
+        }
+    }
+
+    override fun notifyResourcesChanged() {
+        setFragmentResult(REQUEST_RESOURCES_CHANGED_KEY, bundleOf())
+    }
+
+    override fun notifyTagsChanged() {
+        setFragmentResult(REQUEST_TAGS_CHANGED_KEY, bundleOf())
     }
 
     override fun displayPreviewTags(resource: ResourceId, tags: Tags) {
@@ -204,11 +216,6 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
         dialog.show(childFragmentManager, EditTagsDialogFragment.FRAGMENT_TAG)
     }
 
-    override fun backClicked(): Boolean {
-        Log.d(GALLERY_SCREEN, "[back] clicked in GalleryFragment")
-        return presenter.onBackClick()
-    }
-
     @SuppressLint("ClickableViewAccessibility")
     override fun setProgressVisibility(isVisible: Boolean, withText: String) {
         binding.layoutProgress.apply {
@@ -231,8 +238,24 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
         }
     }
 
-    private fun setTitle(title: String) {
-        (requireActivity() as MainActivity).setTitle(title)
+    override fun exitFullscreen() {
+        FullscreenHelper.setStatusBarVisibility(true, requireActivity().window)
+        (requireActivity() as MainActivity).setToolbarVisibility(true)
+        (requireActivity() as MainActivity).setBottomNavigationVisibility(true)
+    }
+
+    /**
+     * setFragmentResult notifies ResourcesFragment
+     * It is duplicated since the result can only be consumed once
+     */
+    private fun initResultListener() {
+        childFragmentManager.setFragmentResultListener(
+            EditTagsDialogFragment.REQUEST_TAGS_CHANGED_KEY,
+            this
+        ) { _, _ ->
+            setFragmentResult(REQUEST_TAGS_CHANGED_KEY, bundleOf())
+            presenter.onTagsChanged()
+        }
     }
 
     private fun setupOpenEditFABs(kind: ResourceKind?) {
@@ -338,7 +361,8 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, BackButtonListener,
         private const val ROOT_AND_FAV_KEY = "rootAndFav"
         private const val RESOURCES_KEY = "resources"
         private const val START_AT_KEY = "startAt"
-        const val REQUEST_TAGS_CHANGED_KEY = "tagsChanged"
+        const val REQUEST_TAGS_CHANGED_KEY = "tagsChangedGallery"
+        const val REQUEST_RESOURCES_CHANGED_KEY = "resourcesChangedGallery"
 
         fun newInstance(rootAndFav: RootAndFav, resources: List<ResourceId>, startAt: Int) =
             GalleryFragment().apply {

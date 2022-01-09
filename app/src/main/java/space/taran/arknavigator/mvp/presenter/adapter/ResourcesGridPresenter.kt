@@ -5,7 +5,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
@@ -14,6 +13,7 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.mvp.view.item.FileItemView
+import space.taran.arknavigator.navigation.AppRouter
 import space.taran.arknavigator.navigation.Screens
 import space.taran.arknavigator.utils.RESOURCES_SCREEN
 import space.taran.arknavigator.utils.Sorting
@@ -36,7 +36,7 @@ class ResourcesGridPresenter(
 
     private lateinit var index: ResourcesIndex
     private lateinit var storage: TagsStorage
-    private lateinit var router: Router
+    private lateinit var router: AppRouter
 
     var sorting = Sorting.DEFAULT
         private set(value) {
@@ -68,10 +68,16 @@ class ResourcesGridPresenter(
     }
 
     fun onItemClick(pos: Int) {
-        router.navigateTo(Screens.GalleryScreen(rootAndFav, selection.map { it.id }, pos))
+        router.navigateToFragmentUsingAdd(
+            Screens.GalleryScreen(
+                rootAndFav,
+                selection.map { it.id },
+                pos
+            )
+        )
     }
 
-    suspend fun init(index: ResourcesIndex, storage: TagsStorage, router: Router) {
+    suspend fun init(index: ResourcesIndex, storage: TagsStorage, router: AppRouter) {
         this.index = index
         this.storage = storage
         this.router = router
@@ -79,23 +85,27 @@ class ResourcesGridPresenter(
         ascending = userPreferences.isSortingAscending()
     }
 
-    suspend fun updateSelection(selection: Set<ResourceId>) = withContext(Dispatchers.Default) {
-        this@ResourcesGridPresenter.selection = resources.filter { selection.contains(it.id) }
-        withContext(Dispatchers.Main) {
-            setProgressVisibility(false)
-            viewState.updateAdapter()
+    suspend fun updateSelection(selection: Set<ResourceId>, needToUpdateAdapter: Boolean = true) =
+        withContext(Dispatchers.Default) {
+            this@ResourcesGridPresenter.selection = resources.filter { selection.contains(it.id) }
+            withContext(Dispatchers.Main) {
+                setProgressVisibility(false)
+                if (needToUpdateAdapter)
+                    viewState.updateAdapter()
+            }
         }
-    }
 
-    suspend fun resetResources(resources: Set<ResourceMeta>) = withContext(Dispatchers.Default) {
-        this@ResourcesGridPresenter.resources = resources.toList()
-        sortAllResources()
-        selection = this@ResourcesGridPresenter.resources
-        withContext(Dispatchers.Main) {
-            setProgressVisibility(false)
-            viewState.updateAdapter()
+    suspend fun resetResources(resources: Set<ResourceMeta>, needToUpdateAdapter: Boolean = true) =
+        withContext(Dispatchers.Default) {
+            this@ResourcesGridPresenter.resources = resources.toList()
+            sortAllResources()
+            selection = this@ResourcesGridPresenter.resources
+            withContext(Dispatchers.Main) {
+                setProgressVisibility(false)
+                if (needToUpdateAdapter)
+                    viewState.updateAdapter()
+            }
         }
-    }
 
     fun updateSorting(sorting: Sorting) {
         scope.launch(Dispatchers.Default) {
@@ -130,7 +140,10 @@ class ResourcesGridPresenter(
                 resources = resources.reversed()
             }
         }
-        Log.d(RESOURCES_SCREEN, "sorting by $sorting of ${resources.size} resources took $sortTime milliseconds")
+        Log.d(
+            RESOURCES_SCREEN,
+            "sorting by $sorting of ${resources.size} resources took $sortTime milliseconds"
+        )
     }
 
     private fun sortSelectionAndUpdateAdapter() {
