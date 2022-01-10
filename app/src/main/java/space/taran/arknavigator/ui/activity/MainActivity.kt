@@ -56,6 +56,7 @@ class MainActivity : MvpAppCompatActivity(), MainView {
 
     override fun init() {
         Log.d(MAIN, "initializing")
+        System.loadLibrary("arkutils")
         setSupportActionBar(binding.toolbar)
         binding.bottomNavigation.setOnApplyWindowInsetsListener(null)
         binding.bottomNavigation.setOnItemSelectedListener { item ->

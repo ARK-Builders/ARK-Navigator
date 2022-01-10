@@ -20,6 +20,7 @@ data class ResourceMeta(
     val extra: ResourceMetaExtra?) {
 
     companion object {
+
         fun fromPath(path: Path): ResourceMeta? {
             val size = Files.size(path)
             if (size < 1) {
