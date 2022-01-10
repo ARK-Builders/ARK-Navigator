@@ -2,17 +2,22 @@ package space.taran.arknavigator
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.rule.ActivityTestRule
 import org.junit.Assert.*
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import space.taran.arknavigator.mvp.model.repo.index.computeId
+import space.taran.arknavigator.ui.activity.MainActivity
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
-import java.nio.file.FileSystems
+
 
 @RunWith(AndroidJUnit4::class)
 class ResourceMetaTest {
+    @get:Rule
+    val mainActivityRule = ActivityTestRule(MainActivity::class.java)
     @Test
     fun crc32_iscorrect() {
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
@@ -30,9 +35,6 @@ class ResourceMetaTest {
         } catch (e: Exception) {
             throw RuntimeException(e)
         }
-        assertEquals(computeId(
-            size = size,
-            file = f.toPath()
-        ), 0xe4c0951c);
+        assertEquals(computeId(size, f.toPath()),0xe4c0951c);
     }
 }

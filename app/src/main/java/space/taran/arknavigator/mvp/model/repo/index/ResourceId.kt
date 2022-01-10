@@ -17,8 +17,6 @@ typealias ResourceId = Long
 private external fun computeIdNative(size: Long, file: String): Long;
 
 fun computeId(size: Long, file: Path): ResourceId {
-    System.loadLibrary("arkutils")
-    System.loadLibrary("arkutils")
     return computeIdNative(size, file.toString());
 }
 

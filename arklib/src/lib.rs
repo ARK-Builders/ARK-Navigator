@@ -5,7 +5,7 @@ pub mod android {
     extern crate jni;
 
     use jni::JNIEnv;
-    use jni::objects::{JValue, JString, JClass};
+    use jni::objects::{JString, JClass};
     use jni::sys::{jlong};
     
     use std::fs;
@@ -19,7 +19,7 @@ pub mod android {
 
     #[no_mangle]
     pub unsafe extern fn Java_space_taran_arknavigator_mvp_model_repo_index_ResourceMeta_00024Companion_helloWorld(
-        env: JNIEnv,
+        _env: JNIEnv,
         _: JClass) {
 
         android_logger::init_once(
