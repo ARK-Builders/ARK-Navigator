@@ -19,5 +19,3 @@ private external fun computeIdNative(size: Long, file: String): Long;
 fun computeId(size: Long, file: Path): ResourceId {
     return computeIdNative(size, file.toString());
 }
-
-private const val BUFFER_CAPACITY = 512 * KILOBYTE

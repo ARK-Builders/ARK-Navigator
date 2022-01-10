@@ -19,8 +19,6 @@ data class ResourceMeta(
     val kind: ResourceKind?,
     val extra: ResourceMetaExtra?) {
 
-
-
     companion object {
 
         fun fromPath(path: Path): ResourceMeta? {

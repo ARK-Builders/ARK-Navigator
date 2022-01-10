@@ -18,16 +18,6 @@ pub mod android {
     use android_logger::Config;
 
     #[no_mangle]
-    pub unsafe extern fn Java_space_taran_arknavigator_mvp_model_repo_index_ResourceMeta_00024Companion_helloWorld(
-        _env: JNIEnv,
-        _: JClass) {
-
-        android_logger::init_once(
-            Config::default().with_min_level(Level::Trace));
-        trace!("this is a verbose {}", "message");
-    }
-
-    #[no_mangle]
     pub unsafe extern fn Java_space_taran_arknavigator_mvp_model_repo_index_ResourceIdKt_computeIdNative(
         env: JNIEnv,
         _: JClass,
