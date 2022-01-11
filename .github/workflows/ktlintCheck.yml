@@ -12,4 +12,10 @@ jobs:
       - name: Run ktlintCheck
         run: |
           ./gradlew ktlintCheck
-        continue-on-error: false
+        continue-on-error: true
+      - name: Print changed files
+        if: steps.run_ktlint_check.outcome != 'success'
+        uses: jitterbit/get-changed-files@v1
+      - name: Check for ktlint errors
+        if: steps.run_ktlint_check.outcome != 'success'
+        run: exit 1
