@@ -1,7 +1,6 @@
 package space.taran.arknavigator.di
 
 import dagger.Component
-import javax.inject.Singleton
 import space.taran.arknavigator.di.modules.AppModule
 import space.taran.arknavigator.di.modules.CiceroneModule
 import space.taran.arknavigator.di.modules.DatabaseModule
@@ -10,16 +9,17 @@ import space.taran.arknavigator.mvp.presenter.FoldersPresenter
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 import space.taran.arknavigator.mvp.presenter.MainPresenter
 import space.taran.arknavigator.mvp.presenter.ResourcesPresenter
-import space.taran.arknavigator.mvp.presenter.adapter.FoldersWalker
 import space.taran.arknavigator.mvp.presenter.adapter.ResourcesGridPresenter
 import space.taran.arknavigator.mvp.presenter.adapter.folderstree.FoldersTreePresenter
 import space.taran.arknavigator.mvp.presenter.dialog.EditTagsDialogPresenter
+import space.taran.arknavigator.mvp.presenter.dialog.FolderPickerDialogPresenter
 import space.taran.arknavigator.mvp.view.item.FileItemViewHolder
 import space.taran.arknavigator.mvp.view.item.PreviewItemViewHolder
 import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.fragments.FoldersFragment
 import space.taran.arknavigator.ui.fragments.GalleryFragment
 import space.taran.arknavigator.ui.fragments.ResourcesFragment
+import javax.inject.Singleton
 
 @Singleton
 @Component(
@@ -42,8 +42,8 @@ interface AppComponent {
     fun inject(galleryFragment: GalleryFragment)
     fun inject(resourcesGridPresenter: ResourcesGridPresenter)
     fun inject(foldersTreePresenter: FoldersTreePresenter)
-    fun inject(foldersWalker: FoldersWalker)
     fun inject(editTagsDialogPresenter: EditTagsDialogPresenter)
     fun inject(fileItemViewHolder: FileItemViewHolder)
     fun inject(previewItemViewHolder: PreviewItemViewHolder)
+    fun inject(folderPickerDialogPresenter: FolderPickerDialogPresenter)
 }
