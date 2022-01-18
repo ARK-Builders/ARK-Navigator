@@ -34,7 +34,8 @@ class GalleryPresenter(
 
     private var isControlsVisible = false
     private var currentPos = startAt
-    private lateinit var currentResource: ResourceMeta
+    private val currentResource: ResourceMeta
+        get() = resources[currentPos]
 
     lateinit var index: ResourcesIndex
         private set
@@ -67,7 +68,6 @@ class GalleryPresenter(
             index = indexRepo.provide(rootAndFav)
             storage = tagsStorageRepo.provide(rootAndFav)
             resources = resourcesIds.map { index.getMeta(it) }.toMutableList()
-            currentResource = resources[startAt]
 
 
             val previews = mutableListOf<Path?>()
@@ -101,7 +101,6 @@ class GalleryPresenter(
             return
 
         currentPos = newPos
-        currentResource = resources[currentPos]
         displayPreview()
     }
 
