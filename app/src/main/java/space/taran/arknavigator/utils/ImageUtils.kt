@@ -8,6 +8,7 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.BitmapImageViewTarget
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.Transition
@@ -20,6 +21,8 @@ import space.taran.arknavigator.utils.extensions.autoDisposeScope
 import java.nio.file.Path
 
 object ImageUtils {
+    private const val GALLERY_IMAGE_SIZE = 1000
+
     fun iconForExtension(ext: String): Int {
         val drawableID = App.instance.resources
             .getIdentifier(
@@ -34,23 +37,33 @@ object ImageUtils {
 
     fun loadZoomImageWithPlaceholder(image: Path?, placeHolder: Int, view: ImageView) {
         Log.d(IMAGES, "loading image $image")
-        view.setImageResource(placeHolder)
+
+        if (image == null) {
+            view.setImageResource(placeHolder)
+            return
+        }
+
         view.autoDisposeScope.launch {
             withContext(Dispatchers.Main) {
-                Glide.with(view.context)
-                    .load(image?.toFile())
-                    .placeholder(placeHolder)
+                Glide.with(view)
+                    .load(image.toFile())
+                    .override(GALLERY_IMAGE_SIZE)
                     .transition(DrawableTransitionOptions.withCrossFade())
                     .into(object : CustomTarget<Drawable>() {
                         override fun onResourceReady(
                             resource: Drawable,
                             transition: Transition<in Drawable?>?
                         ) {
-                            view.setImageDrawable(resource)
+                            transition?.let {
+                                val didSucceedTransition =
+                                    transition.transition(resource, BitmapImageViewTarget(view))
+                                if (!didSucceedTransition) view.setImageDrawable(resource)
+                            } ?: let {
+                                view.setImageDrawable(resource)
+                            }
                         }
 
-                        override fun onLoadCleared(placeholder: Drawable?) {
-                        }
+                        override fun onLoadCleared(placeholder: Drawable?) {}
                     })
             }
         }
@@ -69,14 +82,17 @@ object ImageUtils {
         }
     }
 
-    fun <T> glideExceptionListener() = object: RequestListener<T>{
+    fun <T> glideExceptionListener() = object : RequestListener<T> {
         override fun onLoadFailed(
             e: GlideException?,
             model: Any?,
             target: Target<T>?,
             isFirstResource: Boolean
         ): Boolean {
-            Log.d(GLIDE, "load failed with message: ${e?.message} for target of type: ${target?.javaClass?.canonicalName}")
+            Log.d(
+                GLIDE,
+                "load failed with message: ${e?.message} for target of type: ${target?.javaClass?.canonicalName}"
+            )
             return true
         }
 
@@ -85,6 +101,7 @@ object ImageUtils {
             model: Any?,
             target: Target<T>?,
             dataSource: DataSource?,
-            isFirstResource: Boolean) = false
+            isFirstResource: Boolean
+        ) = false
     }
 }
