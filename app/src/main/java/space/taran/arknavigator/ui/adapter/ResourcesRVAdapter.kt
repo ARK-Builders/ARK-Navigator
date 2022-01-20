@@ -3,7 +3,7 @@ package space.taran.arknavigator.ui.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import space.taran.arknavigator.R
+import com.bumptech.glide.Glide
 import space.taran.arknavigator.databinding.ItemFileGridBinding
 import space.taran.arknavigator.mvp.presenter.adapter.ResourcesGridPresenter
 import space.taran.arknavigator.mvp.view.item.FileItemViewHolder
@@ -26,5 +26,10 @@ class ResourcesRVAdapter(
         holder.itemView.setOnClickListener {
             presenter.onItemClick(position)
         }
+    }
+
+    override fun onViewRecycled(holder: FileItemViewHolder) {
+        super.onViewRecycled(holder)
+        Glide.with(holder.binding.iv).clear(holder.binding.iv)
     }
 }

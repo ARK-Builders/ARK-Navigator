@@ -7,6 +7,7 @@ import android.view.MotionEvent
 import android.view.ViewGroup
 import androidx.core.view.GestureDetectorCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import space.taran.arknavigator.databinding.ItemImageBinding
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsPagerPresenter
 import space.taran.arknavigator.mvp.view.item.PreviewItemViewHolder
@@ -39,6 +40,11 @@ class PreviewsPager(val presenter: PreviewsPagerPresenter) : RecyclerView.Adapte
     fun removeItem(position: Int) {
         presenter.remove(position)
         super.notifyItemRemoved(position)
+    }
+
+    override fun onViewRecycled(holder: PreviewItemViewHolder) {
+        super.onViewRecycled(holder)
+        Glide.with(holder.binding.ivImage).clear(holder.binding.ivImage)
     }
 
     private fun getGestureDetector(holder: PreviewItemViewHolder): GestureDetectorCompat {
