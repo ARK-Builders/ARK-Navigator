@@ -4,11 +4,13 @@ import android.graphics.drawable.Drawable
 import android.util.Log
 import android.widget.ImageView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.Priority
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.BitmapImageViewTarget
+import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.Transition
@@ -21,7 +23,7 @@ import space.taran.arknavigator.utils.extensions.autoDisposeScope
 import java.nio.file.Path
 
 object ImageUtils {
-    private const val GALLERY_IMAGE_SIZE = 1000
+    private const val GALLERY_MAX_IMAGE_SIZE = 2000
 
     fun iconForExtension(ext: String): Int {
         val drawableID = App.instance.resources
@@ -43,23 +45,29 @@ object ImageUtils {
             return
         }
 
+        view.setImageDrawable(null)
+        view.alpha = 0f
+
+        val requestOptions = RequestOptions()
+            .priority(Priority.IMMEDIATE)
+            .downsample(DownsampleStrategy.CENTER_INSIDE)
+            .override(GALLERY_MAX_IMAGE_SIZE)
+
         view.autoDisposeScope.launch {
             withContext(Dispatchers.Main) {
                 Glide.with(view)
                     .load(image.toFile())
-                    .override(GALLERY_IMAGE_SIZE)
-                    .transition(DrawableTransitionOptions.withCrossFade())
+                    .apply(requestOptions)
                     .into(object : CustomTarget<Drawable>() {
                         override fun onResourceReady(
                             resource: Drawable,
                             transition: Transition<in Drawable?>?
                         ) {
-                            transition?.let {
-                                val didSucceedTransition =
-                                    transition.transition(resource, BitmapImageViewTarget(view))
-                                if (!didSucceedTransition) view.setImageDrawable(resource)
-                            } ?: let {
-                                view.setImageDrawable(resource)
+                            view.setImageDrawable(resource)
+
+                            view.animate().apply {
+                                duration = 300
+                                alpha(1f)
                             }
                         }
 

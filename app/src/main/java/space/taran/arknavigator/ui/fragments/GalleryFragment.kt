@@ -95,7 +95,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
         binding.apply {
             viewPager.apply {
                 adapter = pagerAdapter
-                offscreenPageLimit = 2
+                offscreenPageLimit = 1
                 ((getChildAt(0) as RecyclerView).itemAnimator as SimpleItemAnimator).removeDuration = 0
                 setPageTransformer(DepthPageTransformer())
 
