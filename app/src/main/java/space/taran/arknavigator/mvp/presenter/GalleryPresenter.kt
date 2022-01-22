@@ -68,14 +68,9 @@ class GalleryPresenter(
                 index,
                 resources,
                 ::onPreviewsItemClick,
-                ::onPreviewsItemZoom,
                 ::onPlayButtonClick
             )
-
             viewState.setProgressVisibility(false)
-
-            if (currentPos != 0)
-                displayPreview()
         }
     }
 
@@ -155,15 +150,6 @@ class GalleryPresenter(
         viewState.displayPreviewTags(resource.id, tags)
     }
 
-    private fun onPreviewsItemZoom(zoomed: Boolean) {
-        if (zoomed) {
-            isControlsVisible = false
-            viewState.setControlsVisibility(isControlsVisible)
-            viewState.setPreviewsScrollingEnabled(false)
-        } else
-            viewState.setPreviewsScrollingEnabled(true)
-    }
-
     private fun onPreviewsItemClick(itemView: PreviewItemView) {
         Log.d(
             GALLERY_SCREEN,
@@ -171,8 +157,6 @@ class GalleryPresenter(
         )
         isControlsVisible = !isControlsVisible
         viewState.setControlsVisibility(isControlsVisible)
-        if (!isControlsVisible)
-            itemView.resetZoom()
     }
 
     private fun onPlayButtonClick() {

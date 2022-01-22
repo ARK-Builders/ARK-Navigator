@@ -37,11 +37,8 @@ class PreviewsPager(val presenter: PreviewsPagerPresenter) :
         holder.pos = position
         presenter.bindView(holder)
         val gestureDetector = getGestureDetector(holder)
-        holder.binding.ivImage.setOnTouchListener { view, motionEvent ->
-            if (motionEvent.action == MotionEvent.ACTION_UP)
-                view.performClick()
-            gestureDetector.onTouchEvent(motionEvent)
-            return@setOnTouchListener true
+        holder.binding.ivSubsampling.setOnTouchListener { view, motionEvent ->
+            return@setOnTouchListener gestureDetector.onTouchEvent(motionEvent)
         }
     }
 
@@ -50,13 +47,13 @@ class PreviewsPager(val presenter: PreviewsPagerPresenter) :
         super.notifyItemRemoved(position)
     }
 
-    private fun getGestureDetector(holder: PreviewItemViewHolder):
-        GestureDetectorCompat {
-        val listener = object : GestureDetector.SimpleOnGestureListener() {
-            override fun onDown(e: MotionEvent?): Boolean {
-                return true
-            }
+    override fun onViewRecycled(holder: PreviewItemViewHolder) {
+        super.onViewRecycled(holder)
+        holder.binding.ivSubsampling.recycle()
+    }
 
+    private fun getGestureDetector(holder: PreviewItemViewHolder): GestureDetectorCompat {
+        val listener = object : GestureDetector.SimpleOnGestureListener() {
             override fun onSingleTapConfirmed(e: MotionEvent?): Boolean {
                 presenter.onItemClick(holder)
                 return true

@@ -11,7 +11,6 @@ import space.taran.arknavigator.utils.extension
 class PreviewsPagerPresenter(val viewState: GalleryView) {
     private lateinit var index: ResourcesIndex
     private lateinit var onItemClickListener: (PreviewItemView) -> Unit
-    private lateinit var onImageZoomListener: (Boolean) -> Unit
     private lateinit var onPlayButtonListener: () -> Unit
     private var resources: MutableList<ResourceMeta> = mutableListOf()
 
@@ -19,13 +18,11 @@ class PreviewsPagerPresenter(val viewState: GalleryView) {
         index: ResourcesIndex,
         resources: List<ResourceMeta>,
         onItemClickListener: (PreviewItemView) -> Unit,
-        onImageZoomListener: (Boolean) -> Unit,
         onPlayButtonListener: () -> Unit
     ) {
         this.index = index
         this.resources = resources.toMutableList()
         this.onItemClickListener = onItemClickListener
-        this.onImageZoomListener = onImageZoomListener
         this.onPlayButtonListener = onPlayButtonListener
         viewState.updatePagerAdapter()
     }
@@ -43,10 +40,6 @@ class PreviewsPagerPresenter(val viewState: GalleryView) {
         val placeholder = ImageUtils.iconForExtension(extension(path))
 
         view.setSource(preview, placeholder, resource)
-    }
-
-    fun onImageZoom(zoomed: Boolean) {
-        onImageZoomListener(zoomed)
     }
 
     fun onItemClick(itemView: PreviewItemView) {

@@ -31,6 +31,7 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 import space.taran.arknavigator.mvp.view.GalleryView
 import space.taran.arknavigator.mvp.view.NotifiableView
+import space.taran.arknavigator.mvp.view.item.PreviewItemView
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.adapter.PreviewsPager
@@ -93,24 +94,9 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
 
         pagerAdapter = PreviewsPager(presenter.previewsPresenter)
 
+        initViewPager()
+
         binding.apply {
-            viewPager.apply {
-                adapter = pagerAdapter
-                offscreenPageLimit = 2
-                (
-                    (getChildAt(0) as RecyclerView)
-                        .itemAnimator as SimpleItemAnimator
-                    ).removeDuration = 0
-                setPageTransformer(DepthPageTransformer())
-
-                registerOnPageChangeCallback(object :
-                        ViewPager2.OnPageChangeCallback() {
-                        override fun onPageSelected(position: Int) {
-                            presenter.onPageChanged(position)
-                        }
-                    })
-            }
-
             removeResourceFab.setOnLongClickListener {
                 presenter.onRemoveFabClick()
                 true
@@ -132,19 +118,14 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
 
     override fun updatePagerAdapter() {
         pagerAdapter.notifyDataSetChanged()
+        binding.viewPager.setCurrentItem(requireArguments().getInt(START_AT_KEY), false)
     }
 
-    override fun setupPreview(
-        pos: Int,
-        resource: ResourceMeta,
-        filePath: String
-    ) {
-        if (binding.viewPager.currentItem != pos)
-            binding.viewPager.setCurrentItem(pos, false)
+    override fun setupPreview(pos: Int, resource: ResourceMeta, filePath: String) = with(binding) {
         setupOpenEditFABs(resource.kind)
         ExtraLoader.load(
             resource,
-            listOf(binding.primaryExtra, binding.secondaryExtra),
+            listOf(primaryExtra, secondaryExtra),
             verbose = true
         )
         requireArguments().putInt(START_AT_KEY, pos)
@@ -268,6 +249,26 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
         FullscreenHelper.setStatusBarVisibility(true, requireActivity().window)
         (requireActivity() as MainActivity).setToolbarVisibility(true)
         (requireActivity() as MainActivity).setBottomNavigationVisibility(true)
+    }
+
+    private fun initViewPager() = with(binding.viewPager) {
+        adapter = pagerAdapter
+        offscreenPageLimit = 2
+        ((getChildAt(0) as RecyclerView).itemAnimator as SimpleItemAnimator).removeDuration = 0
+        setPageTransformer(DepthPageTransformer())
+
+        registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                post {
+                    val holder = (getChildAt(0) as RecyclerView)
+                        .findViewHolderForAdapterPosition(position)
+                    holder?.let {
+                        (it as PreviewItemView).onItemSelected()
+                    }
+                }
+                presenter.onPageChanged(position)
+            }
+        })
     }
 
     /**
