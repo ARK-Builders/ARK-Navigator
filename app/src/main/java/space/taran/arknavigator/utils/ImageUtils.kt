@@ -1,6 +1,5 @@
 package space.taran.arknavigator.utils
 
-import android.graphics.drawable.Drawable
 import android.util.Log
 import android.widget.ImageView
 import com.bumptech.glide.Glide
@@ -8,10 +7,7 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.target.Target
-import com.bumptech.glide.request.transition.Transition
-import java.nio.file.Path
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -32,39 +28,7 @@ object ImageUtils {
         else R.drawable.ic_file
     }
 
-    fun loadZoomImageWithPlaceholder(
-        image: Path?,
-        placeHolder: Int,
-        view: ImageView
-    ) {
-        Log.d(IMAGES, "loading image $image")
-        view.setImageResource(placeHolder)
-        view.autoDisposeScope.launch {
-            withContext(Dispatchers.Main) {
-                Glide.with(view.context)
-                    .load(image?.toFile())
-                    .placeholder(placeHolder)
-                    .transition(DrawableTransitionOptions.withCrossFade())
-                    .into(object : CustomTarget<Drawable>() {
-                        override fun onResourceReady(
-                            resource: Drawable,
-                            transition: Transition<in Drawable?>?
-                        ) {
-                            view.setImageDrawable(resource)
-                        }
-
-                        override fun onLoadCleared(placeholder: Drawable?) {
-                        }
-                    })
-            }
-        }
-    }
-
-    fun loadImageWithPlaceholder(
-        image: Path?,
-        placeHolder: Int,
-        view: ImageView
-    ) {
+    fun loadImageWithPlaceholder(image: Path?, placeHolder: Int, view: ImageView) {
         Log.d(IMAGES, "loading image $image")
         view.autoDisposeScope.launch {
             withContext(Dispatchers.Main) {
@@ -86,9 +50,7 @@ object ImageUtils {
         ): Boolean {
             Log.d(
                 GLIDE,
-                "load failed with message: ${
-                e?.message} for target of type: ${
-                target?.javaClass?.canonicalName}"
+                "load failed with message: ${e?.message} for target of type: ${target?.javaClass?.canonicalName}"
             )
             return true
         }

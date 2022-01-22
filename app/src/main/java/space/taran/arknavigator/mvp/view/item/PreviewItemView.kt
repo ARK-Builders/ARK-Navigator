@@ -8,7 +8,5 @@ interface PreviewItemView {
 
     fun setSource(preview: Path?, placeholder: Int, resource: ResourceMeta)
 
-    fun enableZoom()
-
-    fun resetZoom()
+    fun onItemSelected()
 }
