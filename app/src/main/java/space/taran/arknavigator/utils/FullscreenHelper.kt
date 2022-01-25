@@ -1,7 +1,8 @@
 package space.taran.arknavigator.utils
 
 import android.os.Build
-import android.view.*
+import android.view.Window
+import android.view.WindowManager
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat

@@ -105,7 +105,12 @@ class TagsSelectorAdapter(
 
     private fun createClearChip() = Chip(chipGroup.context).apply {
         this.chipIcon = ContextCompat.getDrawable(context, R.drawable.ic_close)
-        this.chipIconTint = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.black))
+        this.chipIconTint = ColorStateList.valueOf(
+            ContextCompat.getColor(
+                context,
+                R.color.black
+            )
+        )
         this.textStartPadding = 0f
         this.textEndPadding = 0f
         this.setOnClickListener {

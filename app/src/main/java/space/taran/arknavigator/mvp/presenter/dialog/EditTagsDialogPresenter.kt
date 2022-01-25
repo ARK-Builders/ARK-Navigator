@@ -1,5 +1,6 @@
 package space.taran.arknavigator.mvp.presenter.dialog
 
+import javax.inject.Inject
 import kotlinx.coroutines.launch
 import moxy.MvpPresenter
 import moxy.presenterScope
@@ -10,8 +11,9 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import space.taran.arknavigator.mvp.view.dialog.EditTagsDialogView
-import space.taran.arknavigator.utils.*
-import javax.inject.Inject
+import space.taran.arknavigator.utils.Converters
+import space.taran.arknavigator.utils.Popularity
+import space.taran.arknavigator.utils.Tag
 
 class EditTagsDialogPresenter(
     private val rootAndFav: RootAndFav,

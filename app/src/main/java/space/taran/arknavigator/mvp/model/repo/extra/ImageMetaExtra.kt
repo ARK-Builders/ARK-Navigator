@@ -1,8 +1,8 @@
 package space.taran.arknavigator.mvp.model.repo.extra
 
+import java.nio.file.Path
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMetaExtra
 import space.taran.arknavigator.utils.extension
-import java.nio.file.Path
 
 object ImageMetaExtra {
     val ACCEPTED_EXTENSIONS: Set<String> =

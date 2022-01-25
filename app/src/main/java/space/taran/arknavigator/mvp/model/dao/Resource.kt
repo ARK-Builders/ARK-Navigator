@@ -2,11 +2,11 @@ package space.taran.arknavigator.mvp.model.dao
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.nio.file.Path
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.utils.Milliseconds
 import space.taran.arknavigator.utils.StringPath
-import java.nio.file.Path
 
 @Entity
 data class Resource(
@@ -30,6 +30,7 @@ data class Resource(
                 extension = meta.extension,
                 modified = meta.modified.toMillis(),
                 size = meta.size,
-                kind = meta.kind?.ordinal ?: -1)
+                kind = meta.kind?.ordinal ?: -1
+            )
     }
 }

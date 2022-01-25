@@ -11,8 +11,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
         android:layout_margin="8dp"
+        android:gravity="center"
         android:orientation="vertical">
 
         <FrameLayout
@@ -21,16 +21,16 @@
 
             <RelativeLayout
                 android:layout_width="60dp"
-                android:layout_gravity="center"
-                android:layout_height="60dp">
+                android:layout_height="60dp"
+                android:layout_gravity="center">
 
                 <ImageView
                     android:id="@+id/iv"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:layout_centerInParent="true"
-                    tools:src="@drawable/ic_file_pdf"
-                    android:src="@drawable/ic_baseline_folder" />
+                    android:src="@drawable/ic_baseline_folder"
+                    tools:src="@drawable/ic_file_pdf" />
 
                 <ImageView
                     android:id="@+id/iv_fav"
@@ -47,14 +47,14 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     android:layout_alignParentBottom="true"
-                    android:layout_marginBottom="4dp"
                     android:layout_marginEnd="4dp"
+                    android:layout_marginBottom="4dp"
                     android:background="@drawable/bg_rounded_black_transparent_small"
                     android:maxLines="1"
                     android:textColor="@color/white"
                     android:textSize="10sp"
-                    android:visibility="gone"
                     android:textStyle="bold"
+                    android:visibility="gone"
                     tools:text="00:25" />
 
                 <TextView
@@ -78,8 +78,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:gravity="center"
-            android:layout_marginTop="4dp" />
+            android:layout_marginTop="4dp"
+            android:gravity="center" />
 
     </LinearLayout>
 

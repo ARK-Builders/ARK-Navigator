@@ -1,19 +1,19 @@
 #!/bin/bash
-echo "*********************************************************"
-echo "Running git pre-commit hook, ktlintCheck in progress..."
-echo "*********************************************************"
 
-./gradlew ktlintCheck
+echo "Changed Kotlin source files:"
 
-status=$?
-
-if [ "$status" = 0 ] ; then
-    echo "Static analysis found no problems."
+if ! git diff --name-only --cached --relative | grep '\.kt[s"]\?$'
+then
+    echo "(no Kotlin code changed)"
+    echo
     exit 0
-else
-    echo "*********************************************************"
-    echo 1>&2 "ktlintCheck found violations it could not fix."
-    echo "Run ./gradlew ktlintFormat to fix formatting related issues..."
-    echo "*********************************************************"
+fi
+
+echo
+echo "Running ktlintCheck..."
+
+if ! ./gradlew ktlintCheck
+then
+    echo "Run ./gradlew ktlintFormat to attempt automatic fixure"
     exit 1
 fi

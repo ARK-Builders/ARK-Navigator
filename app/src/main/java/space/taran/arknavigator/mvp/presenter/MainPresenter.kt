@@ -1,15 +1,15 @@
 package space.taran.arknavigator.mvp.presenter
 
 import android.util.Log
+import javax.inject.Inject
 import moxy.MvpPresenter
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.view.MainView
 import space.taran.arknavigator.navigation.AppRouter
 import space.taran.arknavigator.navigation.Screens
 import space.taran.arknavigator.utils.MAIN
-import javax.inject.Inject
 
-class MainPresenter: MvpPresenter<MainView>() {
+class MainPresenter : MvpPresenter<MainView>() {
     @Inject
     lateinit var router: AppRouter
 

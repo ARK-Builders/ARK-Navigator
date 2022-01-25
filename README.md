@@ -1,7 +1,29 @@
 **ARK Navigator** ![example workflow](https://github.com/kirillt/ark-navigator/actions/workflows/build.yml/badge.svg)
 =================
 
-ARK Navigator - A Next-Generation Innovative Tag-Based File Browser
+_ARK Navigator_ is the next-generation file browser built on the idea of tags.
+
+If you never can find your files on your phone — this app is for you.
+
+Development APK
+---------------
+The app is in active development phase, but you can already try it out.
+
+Just visit GitHub Actions section of this repo and select the latest `main` build:\
+https://github.com/ARK-Builders/ARK-Navigator/actions
+
+
+Information for contributors
+----------------------------
+
+The projects embeds `ktlint` check in GitHub Actions workflow.\
+Before PR could be merged, you have to fix all code style errors.
+
+Please, install pre-commit Git hook by following command:
+```
+./gradlew installGitHook
+```
+This way `ktlint` check will be executed automatically before any `git commit`.
 
 
 What is ARK Navigator?

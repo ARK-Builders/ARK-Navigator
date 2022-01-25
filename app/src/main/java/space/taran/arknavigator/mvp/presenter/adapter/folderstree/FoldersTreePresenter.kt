@@ -2,6 +2,8 @@ package space.taran.arknavigator.mvp.presenter.adapter.folderstree
 
 import android.util.Log
 import androidx.recyclerview.widget.DiffUtil
+import java.nio.file.Path
+import javax.inject.Inject
 import space.taran.arknavigator.mvp.model.repo.Folders
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.view.FoldersView
@@ -9,8 +11,6 @@ import space.taran.arknavigator.navigation.AppRouter
 import space.taran.arknavigator.navigation.Screens
 import space.taran.arknavigator.ui.adapter.folderstree.FolderNodeView
 import space.taran.arknavigator.utils.FOLDERS_TREE
-import java.nio.file.Path
-import javax.inject.Inject
 
 class FoldersTreePresenter(
     val viewState: FoldersView,
@@ -44,8 +44,20 @@ class FoldersTreePresenter(
     fun onNavigateBtnClick(view: FolderNodeView) {
         when (val node = nodes[view.position()]) {
             is DeviceNode -> { }
-            is RootNode -> router.navigateTo(Screens.ResourcesScreen(RootAndFav(node.path.toString(), null)))
-            is FavoriteNode -> router.navigateTo(Screens.ResourcesScreen(RootAndFav(node.root.toString(), node.path.toString())))
+            is RootNode ->
+                router
+                    .navigateTo(
+                        Screens.ResourcesScreen(
+                            RootAndFav(node.path.toString(), null)
+                        )
+                    )
+            is FavoriteNode ->
+                router
+                    .navigateTo(
+                        Screens.ResourcesScreen(
+                            RootAndFav(node.root.toString(), node.path.toString())
+                        )
+                    )
         }
     }
 
@@ -95,7 +107,7 @@ class FoldersTreePresenter(
         oldNode?.let {
             if (it.isExpanded) {
                 node.isExpanded = true
-                tmpNodes.addAll(pos+1, node.children)
+                tmpNodes.addAll(pos + 1, node.children)
             }
         }
         node.children.forEach { children ->
@@ -104,16 +116,18 @@ class FoldersTreePresenter(
     }
 
     private fun calculateDiffAndNotifyAdapter() {
-        result = DiffUtil.calculateDiff(FolderNodeDiffUtilCallback(nodes, newNodes))
+        result = DiffUtil.calculateDiff(
+            FolderNodeDiffUtilCallback(nodes, newNodes)
+        )
         nodes = newNodes.toMutableList()
         viewState.updateFoldersTree()
     }
 
-    private fun buildNodes(devices: List<Path>, folders: Folders): MutableList<FolderNode> {
+    private fun buildNodes(devices: List<Path>, folders: Folders):
+        MutableList<FolderNode> {
         Log.d(FOLDERS_TREE, "preparing FoldersTree to display")
         Log.d(FOLDERS_TREE, "devices = $devices")
         Log.d(FOLDERS_TREE, "folders = $folders")
-
 
         return folders.mapKeys { (root, _) ->
             val idx = devices.indexOfFirst { root.startsWith(it) }
@@ -143,7 +157,8 @@ class FoldersTreePresenter(
 
                     Log.d(
                         FOLDERS_TREE,
-                        "root $root contains favorites ${favorites.map { it.path }}"
+                        "root $root contains favorites ${
+                        favorites.map { it.path }}"
                     )
                     RootNode(
                         device.relativize(root).toString(),
@@ -152,7 +167,11 @@ class FoldersTreePresenter(
                     )
                 }
 
-                Log.d(FOLDERS_TREE, "device $device contains roots ${roots.map { it.path }}")
+                Log.d(
+                    FOLDERS_TREE,
+                    "device $device contains roots ${
+                    roots.map { it.path }}"
+                )
                 DeviceNode(
                     device.getName(1).toString(),
                     device,
@@ -161,5 +180,4 @@ class FoldersTreePresenter(
             }
             .toMutableList()
     }
-
 }

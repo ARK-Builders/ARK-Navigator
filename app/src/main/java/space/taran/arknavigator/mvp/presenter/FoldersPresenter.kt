@@ -1,6 +1,9 @@
 package space.taran.arknavigator.mvp.presenter
 
 import android.util.Log
+import java.nio.file.Files
+import java.nio.file.Path
+import javax.inject.Inject
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import moxy.MvpPresenter
@@ -18,9 +21,6 @@ import space.taran.arknavigator.ui.resource.StringProvider
 import space.taran.arknavigator.utils.FOLDERS_SCREEN
 import space.taran.arknavigator.utils.FOLDER_PICKER
 import space.taran.arknavigator.utils.listDevices
-import java.nio.file.Files
-import java.nio.file.Path
-import javax.inject.Inject
 
 class FoldersPresenter : MvpPresenter<FoldersView>() {
     @Inject
@@ -35,7 +35,10 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
     @Inject
     lateinit var stringProvider: StringProvider
 
-    var foldersTreePresenter = FoldersTreePresenter(viewState, ::onFoldersTreeAddFavoriteBtnClick)
+    var foldersTreePresenter = FoldersTreePresenter(
+        viewState,
+        ::onFoldersTreeAddFavoriteBtnClick
+    )
         .apply {
             App.instance.appComponent.inject(this)
         }
@@ -88,7 +91,9 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
             updateFolderAndButtonState(path)
         } else {
             Log.d(FOLDER_PICKER, "but it is not a directory")
-            viewState.notifyUser(stringProvider.getString(R.string.folders_file_chosen_as_root))
+            viewState.notifyUser(
+                stringProvider.getString(R.string.folders_file_chosen_as_root)
+            )
         }
     }
 
@@ -97,7 +102,10 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
 
         if (rootPrefix != null) {
             if (rootPrefix == path) {
-                viewState.updateRootPickerDialogPickBtnState(isEnabled = false, isRoot = true)
+                viewState.updateRootPickerDialogPickBtnState(
+                    isEnabled = false,
+                    isRoot = true
+                )
                 rootNotFavorite = true
             } else {
                 var foundAsFavorite = false
@@ -106,11 +114,17 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
                         foundAsFavorite = true
                     }
                 }
-                viewState.updateRootPickerDialogPickBtnState(isEnabled = !foundAsFavorite, isRoot = false)
+                viewState.updateRootPickerDialogPickBtnState(
+                    isEnabled = !foundAsFavorite,
+                    isRoot = false
+                )
                 rootNotFavorite = false
             }
         } else {
-            viewState.updateRootPickerDialogPickBtnState(isEnabled = true, isRoot = true)
+            viewState.updateRootPickerDialogPickBtnState(
+                isEnabled = true,
+                isRoot = true
+            )
             rootNotFavorite = true
         }
     }
@@ -128,7 +142,11 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
             if (rootNotFavorite) {
                 // adding path as root
                 if (roots.contains(path)) {
-                    viewState.notifyUser(stringProvider.getString(R.string.folders_root_is_already_picked))
+                    viewState.notifyUser(
+                        stringProvider.getString(
+                            R.string.folders_root_is_already_picked
+                        )
+                    )
                 } else {
                     addRoot(path)
                     viewState.closeRootPickerDialog()
@@ -136,7 +154,11 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
             } else {
                 // adding path as favorite
                 if (getFavorites().contains(path)) {
-                    viewState.notifyUser(stringProvider.getString(R.string.folders_favorite_is_alreay_picked))
+                    viewState.notifyUser(
+                        stringProvider.getString(
+                            R.string.folders_favorite_is_alreay_picked
+                        )
+                    )
                 } else {
                     addFavorite(path)
                     viewState.closeRootPickerDialog()
@@ -144,62 +166,70 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
             }
         } else {
             Log.d(FOLDER_PICKER, "potentially huge directory")
-            viewState.notifyUser(stringProvider.getString(R.string.folders_device_chosen_as_root))
+            viewState.notifyUser(
+                stringProvider.getString(
+                    R.string.folders_device_chosen_as_root
+                )
+            )
         }
     }
 
-    private fun addRoot(root: Path) = presenterScope.launch(NonCancellable) {
-        viewState.setProgressVisibility(true, "Adding folder")
-        Log.d(FOLDERS_SCREEN, "root $root added in RootsPresenter")
-        val path = root.toRealPath()
+    private fun addRoot(root: Path) =
+        presenterScope.launch(NonCancellable) {
+            viewState.setProgressVisibility(true, "Adding folder")
+            Log.d(FOLDERS_SCREEN, "root $root added in RootsPresenter")
+            val path = root.toRealPath()
 
-        if (favoritesByRoot.containsKey(path)) {
-            throw AssertionError("Path must be checked in RootPicker")
+            if (favoritesByRoot.containsKey(path)) {
+                throw AssertionError("Path must be checked in RootPicker")
+            }
+
+            favoritesByRoot[path] = mutableListOf()
+
+            foldersRepo.insertRoot(path)
+
+            viewState.notifyUser(
+                message = "Indexing of huge folders can take minutes",
+                moreTime = true
+            )
+
+            viewState.setProgressVisibility(true, "Indexing")
+            resourcesIndexRepo.buildFromFilesystem(root)
+            viewState.setProgressVisibility(false)
+
+            foldersTreePresenter.updateNodes(devices, favoritesByRoot)
         }
-
-        favoritesByRoot[path] = mutableListOf()
-
-        foldersRepo.insertRoot(path)
-
-        viewState.notifyUser(
-            message = "Indexing of huge folders can take minutes",
-            moreTime = true)
-
-        viewState.setProgressVisibility(true, "Indexing")
-        resourcesIndexRepo.buildFromFilesystem(root)
-        viewState.setProgressVisibility(false)
-
-        foldersTreePresenter.updateNodes(devices, favoritesByRoot)
-    }
 
     private fun getFavorites(): Set<Path> = favoritesByRoot.values.flatten().toSet()
 
-    private fun addFavorite(favorite: Path) = presenterScope.launch(NonCancellable) {
-        viewState.setProgressVisibility(true, "Adding folder")
-        Log.d(FOLDERS_SCREEN, "favorite $favorite added in RootsPresenter")
-        val path = favorite.toRealPath()
+    private fun addFavorite(favorite: Path) =
+        presenterScope.launch(NonCancellable) {
+            viewState.setProgressVisibility(true, "Adding folder")
+            Log.d(FOLDERS_SCREEN, "favorite $favorite added in RootsPresenter")
+            val path = favorite.toRealPath()
 
-        val root = favoritesByRoot.keys.find { path.startsWith(it) }
-            ?: throw IllegalStateException("Can't add favorite if it's root is not added")
+            val root = favoritesByRoot.keys.find { path.startsWith(it) }
+                ?: throw IllegalStateException(
+                    "Can't add favorite if it's root is not added"
+                )
 
-        val relative = root.relativize(path)
-        if (favoritesByRoot[root]!!.contains(relative)) {
-            throw AssertionError("Path must be checked in RootPicker")
+            val relative = root.relativize(path)
+            if (favoritesByRoot[root]!!.contains(relative)) {
+                throw AssertionError("Path must be checked in RootPicker")
+            }
+
+            favoritesByRoot[root]!!.add(relative)
+
+            foldersRepo.insertFavorite(root, relative)
+
+            foldersTreePresenter.updateNodes(devices, favoritesByRoot)
+            viewState.setProgressVisibility(false)
         }
-
-        favoritesByRoot[root]!!.add(relative)
-
-        foldersRepo.insertFavorite(root, relative)
-
-        foldersTreePresenter.updateNodes(devices, favoritesByRoot)
-        viewState.setProgressVisibility(false)
-    }
 
     fun navigateBackClick(path: Path?) {
         Log.d(FOLDERS_SCREEN, "[back] clicked, path: $path")
         if (path != null) updateFolderAndButtonState(path)
     }
-
 
     fun onBackClick() {
         Log.d(FOLDERS_SCREEN, "[back] clicked")

@@ -7,4 +7,5 @@ import space.taran.arknavigator.utils.StringPath
 @Entity
 data class Root(
     @PrimaryKey(autoGenerate = false)
-    val path: StringPath)
+    val path: StringPath
+)

@@ -1,9 +1,9 @@
 package space.taran.arknavigator.mvp.presenter.adapter
 
+import java.nio.file.Path
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.view.GalleryView
 import space.taran.arknavigator.mvp.view.item.PreviewItemView
-import java.nio.file.Path
 
 class PreviewsPagerPresenter(val viewState: GalleryView) {
     private lateinit var onItemClickListener: (PreviewItemView) -> Unit

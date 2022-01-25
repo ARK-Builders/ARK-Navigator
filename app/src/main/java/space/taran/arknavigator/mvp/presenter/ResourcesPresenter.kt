@@ -1,13 +1,19 @@
 package space.taran.arknavigator.mvp.presenter
 
 import android.util.Log
+import java.nio.file.Path
+import javax.inject.Inject
 import kotlinx.coroutines.launch
 import moxy.MvpPresenter
 import moxy.presenterScope
 import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.repo.FoldersRepo
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
-import space.taran.arknavigator.mvp.model.repo.index.*
+import space.taran.arknavigator.mvp.model.repo.index.AggregatedResourcesIndex
+import space.taran.arknavigator.mvp.model.repo.index.ResourceId
+import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
+import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
+import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
 import space.taran.arknavigator.mvp.model.repo.tags.AggregatedTagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
@@ -18,8 +24,6 @@ import space.taran.arknavigator.navigation.AppRouter
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.utils.RESOURCES_SCREEN
-import java.nio.file.Path
-import javax.inject.Inject
 
 class ResourcesPresenter(
     private val rootAndFav: RootAndFav
@@ -44,9 +48,10 @@ class ResourcesPresenter(
     private lateinit var storage: TagsStorage
     var tagsEnabled: Boolean = true
 
-    val gridPresenter = ResourcesGridPresenter(rootAndFav, viewState, presenterScope).apply {
-        App.instance.appComponent.inject(this)
-    }
+    val gridPresenter = ResourcesGridPresenter(rootAndFav, viewState, presenterScope)
+        .apply {
+            App.instance.appComponent.inject(this)
+        }
     val tagsSelectorPresenter =
         TagsSelectorPresenter(viewState, rootAndFav.fav, ::onSelectionChange)
 

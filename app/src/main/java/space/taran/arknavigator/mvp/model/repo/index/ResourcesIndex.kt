@@ -4,7 +4,7 @@ import java.nio.file.Path
 
 interface ResourcesIndex {
 
-    //todo: with async indexing we must emit ids of not-indexed-yet resources too
+    // todo: with async indexing we must emit ids of not-indexed-yet resources too
 
     // we pass all known resource ids to a storage because
     // 1) any storage exists globally
@@ -24,5 +24,4 @@ interface ResourcesIndex {
     fun getMeta(id: ResourceId): ResourceMeta
 
     fun remove(id: ResourceId): Path
-
 }

@@ -2,10 +2,10 @@ package space.taran.arknavigator.mvp.model.repo.extra
 
 import android.media.MediaMetadataRetriever
 import android.net.Uri
+import java.nio.file.Path
 import space.taran.arknavigator.mvp.model.repo.index.MetaExtraTag
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMetaExtra
 import space.taran.arknavigator.ui.App
-import java.nio.file.Path
 
 object VideoMetaExtra {
     val ACCEPTED_EXTENSIONS: Set<String> =
