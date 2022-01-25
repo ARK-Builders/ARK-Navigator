@@ -1,0 +1,31 @@
+# EditorConfig helps developers define and maintain consistent
+# coding styles between different editors and IDEs
+# editorconfig.org
+
+root = true
+
+
+[*]
+
+indent_style = space
+indent_size = 4
+tab_width = 4
+
+disabled_rules=import-ordering
+
+no-unused-imports = true
+
+# https://stackoverflow.com/questions/147454/why-is-using-a-wild-card-with-a-java-import-statement-bad
+no-wildcard-import = true
+
+# https://softwareengineering.stackexchange.com/questions/604/is-the-80-character-limit-still-relevant-in-times-of-widescreen-monitors
+max_line_length = 85
+
+# We recommend you to keep these unchanged
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.md]
+trim_trailing_whitespace = false

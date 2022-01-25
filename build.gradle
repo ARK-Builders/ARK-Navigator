@@ -37,8 +37,4 @@ allprojects {
         //raw github dependencies
         maven { url 'https://jitpack.io' }
     }
-    ktlint {
-        android.set(true)
-        disabledRules.set(["no-wildcard-imports"])
-    }
 }

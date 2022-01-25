@@ -1,6 +1,9 @@
 package space.taran.arknavigator.mvp.presenter.adapter
 
 import android.util.Log
+import java.nio.file.Files
+import javax.inject.Inject
+import kotlin.system.measureTimeMillis
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -19,9 +22,6 @@ import space.taran.arknavigator.utils.RESOURCES_SCREEN
 import space.taran.arknavigator.utils.Sorting
 import space.taran.arknavigator.utils.reifySorting
 import space.taran.arknavigator.utils.unequalCompareBy
-import java.nio.file.Files
-import javax.inject.Inject
-import kotlin.system.measureTimeMillis
 
 class ResourcesGridPresenter(
     val rootAndFav: RootAndFav,
@@ -77,7 +77,11 @@ class ResourcesGridPresenter(
         )
     }
 
-    suspend fun init(index: ResourcesIndex, storage: TagsStorage, router: AppRouter) {
+    suspend fun init(
+        index: ResourcesIndex,
+        storage: TagsStorage,
+        router: AppRouter
+    ) {
         this.index = index
         this.storage = storage
         this.router = router
@@ -85,9 +89,14 @@ class ResourcesGridPresenter(
         ascending = userPreferences.isSortingAscending()
     }
 
-    suspend fun updateSelection(selection: Set<ResourceId>, needToUpdateAdapter: Boolean = true) =
+    suspend fun updateSelection(
+        selection: Set<ResourceId>,
+        needToUpdateAdapter: Boolean = true
+    ) =
         withContext(Dispatchers.Default) {
-            this@ResourcesGridPresenter.selection = resources.filter { selection.contains(it.id) }
+            this@ResourcesGridPresenter.selection = resources
+                .filter { selection.contains(it.id) }
+
             withContext(Dispatchers.Main) {
                 setProgressVisibility(false)
                 if (needToUpdateAdapter)
@@ -95,7 +104,10 @@ class ResourcesGridPresenter(
             }
         }
 
-    suspend fun resetResources(resources: Set<ResourceMeta>, needToUpdateAdapter: Boolean = true) =
+    suspend fun resetResources(
+        resources: Set<ResourceMeta>,
+        needToUpdateAdapter: Boolean = true
+    ) =
         withContext(Dispatchers.Default) {
             this@ResourcesGridPresenter.resources = resources.toList()
             sortAllResources()
@@ -142,7 +154,8 @@ class ResourcesGridPresenter(
         }
         Log.d(
             RESOURCES_SCREEN,
-            "sorting by $sorting of ${resources.size} resources took $sortTime milliseconds"
+            "sorting by $sorting of ${
+            resources.size} resources took $sortTime milliseconds"
         )
     }
 
@@ -155,7 +168,10 @@ class ResourcesGridPresenter(
         }
     }
 
-    private suspend fun setProgressVisibility(isVisible: Boolean, withText: String = "") =
+    private suspend fun setProgressVisibility(
+        isVisible: Boolean,
+        withText: String = ""
+    ) =
         withContext(Dispatchers.Main) {
             viewState.setProgressVisibility(isVisible, withText)
         }

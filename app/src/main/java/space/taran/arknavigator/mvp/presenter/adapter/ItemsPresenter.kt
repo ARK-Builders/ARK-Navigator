@@ -7,5 +7,4 @@ abstract class ItemsPresenter<Item, View> {
     abstract fun bindView(view: View)
 
     fun getCount() = items().size
-
 }

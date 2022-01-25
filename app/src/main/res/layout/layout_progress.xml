@@ -17,10 +17,10 @@
 
     <space.taran.arknavigator.ui.view.LoadingTextView
         android:id="@+id/progress_text"
-        android:layout_marginTop="8dp"
-        tools:text="Indexing..."
         style="@style/BoldWhiteText"
-        android:textSize="16sp"
         android:layout_below="@id/progress_indicator"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="8dp"
+        android:textSize="16sp"
+        tools:text="Indexing..." />
 </RelativeLayout>

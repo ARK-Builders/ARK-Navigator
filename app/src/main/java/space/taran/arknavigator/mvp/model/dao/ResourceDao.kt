@@ -1,6 +1,11 @@
 package space.taran.arknavigator.mvp.model.dao
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Embedded
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Relation
 import space.taran.arknavigator.utils.StringPath
 
 data class ResourceWithExtra(
@@ -8,8 +13,10 @@ data class ResourceWithExtra(
     val resource: Resource,
     @Relation(
         parentColumn = "id",
-        entityColumn = "resource")
-    val extras: List<ResourceExtra>)
+        entityColumn = "resource"
+    )
+    val extras: List<ResourceExtra>
+)
 
 @Dao
 interface ResourceDao {
@@ -24,5 +31,5 @@ interface ResourceDao {
 
     @Query("SELECT * FROM Resource where root = :root")
     suspend fun query(root: StringPath): List<ResourceWithExtra>
-    //todo: can be optimized with `root in (:roots)`
+    // todo: can be optimized with `root in (:roots)`
 }

@@ -12,19 +12,28 @@ import space.taran.arknavigator.mvp.presenter.adapter.PreviewsPagerPresenter
 import space.taran.arknavigator.mvp.view.item.PreviewItemViewHolder
 import space.taran.arknavigator.ui.App
 
-class PreviewsPager(val presenter: PreviewsPagerPresenter) : RecyclerView.Adapter<PreviewItemViewHolder>() {
+class PreviewsPager(val presenter: PreviewsPagerPresenter) :
+    RecyclerView.Adapter<PreviewItemViewHolder>() {
 
     override fun getItemCount() = presenter.getCount()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         PreviewItemViewHolder(
-            ItemImageBinding.inflate(LayoutInflater.from(parent.context), parent, false), presenter
+            ItemImageBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false
+            ),
+            presenter
         ).also {
             App.instance.appComponent.inject(it)
         }
 
     @SuppressLint("ClickableViewAccessibility")
-    override fun onBindViewHolder(holder: PreviewItemViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: PreviewItemViewHolder,
+        position: Int
+    ) {
         holder.pos = position
         presenter.bindView(holder)
         val gestureDetector = getGestureDetector(holder)
@@ -41,7 +50,8 @@ class PreviewsPager(val presenter: PreviewsPagerPresenter) : RecyclerView.Adapte
         super.notifyItemRemoved(position)
     }
 
-    private fun getGestureDetector(holder: PreviewItemViewHolder): GestureDetectorCompat {
+    private fun getGestureDetector(holder: PreviewItemViewHolder):
+        GestureDetectorCompat {
         val listener = object : GestureDetector.SimpleOnGestureListener() {
             override fun onDown(e: MotionEvent?): Boolean {
                 return true
@@ -51,7 +61,6 @@ class PreviewsPager(val presenter: PreviewsPagerPresenter) : RecyclerView.Adapte
                 presenter.onItemClick(holder)
                 return true
             }
-
         }
         return GestureDetectorCompat(holder.itemView.context, listener)
     }

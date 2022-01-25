@@ -6,7 +6,7 @@ import moxy.viewstate.strategy.StateStrategyType
 import space.taran.arknavigator.utils.Sorting
 
 @StateStrategyType(AddToEndSingleStrategy::class)
-interface ResourcesView: MvpView, NotifiableView {
+interface ResourcesView : MvpView, NotifiableView {
     fun init()
     fun updateAdapter()
     fun setProgressVisibility(isVisible: Boolean, withText: String = "")

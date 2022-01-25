@@ -1,12 +1,12 @@
 package space.taran.arknavigator.utils
 
-import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
-import space.taran.arknavigator.ui.App
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.io.path.extension
 import kotlin.io.path.listDirectoryEntries
+import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
+import space.taran.arknavigator.ui.App
 
 val ROOT_PATH: Path = Paths.get("/")
 
@@ -44,7 +44,9 @@ fun listChildren(folder: Path): Pair<List<Path>, List<Path>> = folder
 
 fun findLongestCommonPrefix(paths: List<Path>): Path {
     if (paths.isEmpty()) {
-        throw IllegalArgumentException("Can't search for common prefix among empty collection")
+        throw IllegalArgumentException(
+            "Can't search for common prefix among empty collection"
+        )
     }
 
     if (paths.size == 1) {

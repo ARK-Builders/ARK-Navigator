@@ -7,7 +7,8 @@ import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.view.isVisible
 
-class LoadingTextView(context: Context, attrs: AttributeSet?) : AppCompatTextView(context, attrs) {
+class LoadingTextView(context: Context, attrs: AttributeSet?) :
+    AppCompatTextView(context, attrs) {
 
     private var isLoading = false
     private var isMakingDots = false
@@ -30,7 +31,6 @@ class LoadingTextView(context: Context, attrs: AttributeSet?) : AppCompatTextVie
         this.visibility = visibility
         dotCount = 0
         isLoading = isVisible
-
     }
 
     private fun makeLoadingDots() {
@@ -42,8 +42,7 @@ class LoadingTextView(context: Context, attrs: AttributeSet?) : AppCompatTextVie
                 val textToDisplay = "$loadingText${".".repeat(dotCount)}"
                 this.text = textToDisplay
                 makeLoadingDots()
-            }
-            else isMakingDots = false
+            } else isMakingDots = false
         }, 500)
     }
 }

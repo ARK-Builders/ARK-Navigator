@@ -2,9 +2,6 @@ name: Build the app
 
 on: [push]
 
-env:
-  CARGO_TERM_COLOR: always
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -35,3 +32,6 @@ jobs:
       with:
         name: lint-results
         path: ./app/build/reports/lint-results.html
+
+    - name: Kotlin linter
+      run: ./gradlew ktlintCheck

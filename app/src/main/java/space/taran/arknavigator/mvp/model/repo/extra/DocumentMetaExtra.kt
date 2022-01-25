@@ -1,7 +1,7 @@
 package space.taran.arknavigator.mvp.model.repo.extra
 
-import space.taran.arknavigator.mvp.model.repo.index.ResourceMetaExtra
 import java.nio.file.Path
+import space.taran.arknavigator.mvp.model.repo.index.ResourceMetaExtra
 
 object DocumentMetaExtra {
     val ACCEPTED_EXTENSIONS: Set<String> =

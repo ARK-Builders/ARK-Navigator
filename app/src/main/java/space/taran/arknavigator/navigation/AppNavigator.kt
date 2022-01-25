@@ -6,10 +6,14 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
+import java.util.LinkedList
 import ru.terrakok.cicerone.Navigator
 import ru.terrakok.cicerone.android.support.SupportAppScreen
-import ru.terrakok.cicerone.commands.*
-import java.util.*
+import ru.terrakok.cicerone.commands.Back
+import ru.terrakok.cicerone.commands.BackTo
+import ru.terrakok.cicerone.commands.Command
+import ru.terrakok.cicerone.commands.Forward
+import ru.terrakok.cicerone.commands.Replace
 
 /**
  * This is a copy of the SupportAppNavigator except for fragmentForwardAdd method
@@ -30,7 +34,7 @@ class AppNavigator(
     override fun applyCommands(commands: Array<Command>) {
         fragmentManager.executePendingTransactions()
 
-        //copy stack before apply commands
+        // copy stack before apply commands
         copyStackToLocal()
         for (command in commands) {
             applyCommand(command)
@@ -227,7 +231,10 @@ class AppNavigator(
      * @param activityIntent activity intent
      * @return transition options
      */
-    protected fun createStartActivityOptions(command: Command?, activityIntent: Intent?): Bundle? {
+    protected fun createStartActivityOptions(
+        command: Command?,
+        activityIntent: Intent?
+    ): Bundle? {
         return null
     }
 
@@ -250,7 +257,10 @@ class AppNavigator(
      * @param screen         screen
      * @param activityIntent intent passed to start Activity for the `screenKey`
      */
-    protected fun unexistingActivity(screen: SupportAppScreen?, activityIntent: Intent?) {
+    protected fun unexistingActivity(
+        screen: SupportAppScreen?,
+        activityIntent: Intent?
+    ) {
         // Do nothing by default
     }
 

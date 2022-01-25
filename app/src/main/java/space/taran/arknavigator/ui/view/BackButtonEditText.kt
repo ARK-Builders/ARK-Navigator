@@ -15,8 +15,11 @@ class BackButtonEditText(context: Context, attrs: AttributeSet?) :
     }
 
     override fun onKeyPreIme(keyCode: Int, event: KeyEvent?): Boolean {
-        if (keyCode == KeyEvent.KEYCODE_BACK && event?.action != KeyEvent.ACTION_DOWN)
+        if (keyCode == KeyEvent.KEYCODE_BACK &&
+            event?.action != KeyEvent.ACTION_DOWN
+        ) {
             onBackPressedListener?.let { it() }
+        }
 
         return super.onKeyPreIme(keyCode, event)
     }

@@ -3,7 +3,13 @@ package space.taran.arknavigator.ui.fragments
 import android.os.Bundle
 import android.os.SystemClock
 import android.util.Log
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.MotionEvent
+import android.view.View
+import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -12,6 +18,7 @@ import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.setFragmentResultListener
 import androidx.recyclerview.widget.GridLayoutManager
+import kotlin.math.abs
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import space.taran.arknavigator.R
@@ -32,24 +39,23 @@ import space.taran.arknavigator.utils.extensions.changeEnabledStatus
 import space.taran.arknavigator.utils.extensions.closeKeyboard
 import space.taran.arknavigator.utils.extensions.placeCursorToEnd
 import space.taran.arknavigator.utils.extensions.showKeyboard
-import kotlin.math.abs
 
-
-//`root` is used for querying tags storage and resources index,
+// `root` is used for querying tags storage and resources index,
 //       if it is `null`, then resources from all roots are taken
 //                        and tags storage for every particular resource
 //                        is determined dynamically
 //
-//`path` is used for filtering resources' paths
+// `path` is used for filtering resources' paths
 //       if it is `null`, then no filtering is performed
 //       (recommended instead of passing same value for `path` and `root)
 class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
 
     private val presenter by moxyPresenter {
-        ResourcesPresenter(requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav).apply {
-            Log.d(RESOURCES_SCREEN, "creating ResourcesPresenter")
-            App.instance.appComponent.inject(this)
-        }
+        ResourcesPresenter(requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav)
+            .apply {
+                Log.d(RESOURCES_SCREEN, "creating ResourcesPresenter")
+                App.instance.appComponent.inject(this)
+            }
     }
 
     private lateinit var binding: FragmentResourcesBinding
@@ -63,7 +69,7 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
     }
     private val frameHeight by lazy { binding.root.height }
 
-    private var selectorHeight: Float = 0.3f //ratio
+    private var selectorHeight: Float = 0.3f // ratio
 
     private var selectorDragStartBias: Float = -1f
     private var selectorDragStartTime: Long = -1
@@ -169,7 +175,11 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
     }
 
     override fun notifyUser(message: String, moreTime: Boolean) {
-        if (isFragmentVisible()) Notifications.notifyUser(context, message, moreTime)
+        if (isFragmentVisible()) Notifications.notifyUser(
+            context,
+            message,
+            moreTime
+        )
     }
 
     override fun setTagsEnabled(enabled: Boolean) {
@@ -230,19 +240,26 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
     }
 
     private fun initResultListeners() {
-        setFragmentResultListener(GalleryFragment.REQUEST_TAGS_CHANGED_KEY) { _, _ ->
+        setFragmentResultListener(
+            GalleryFragment.REQUEST_TAGS_CHANGED_KEY
+        ) { _, _ ->
             presenter.onResourcesOrTagsChanged()
         }
-        setFragmentResultListener(GalleryFragment.REQUEST_RESOURCES_CHANGED_KEY) { _, _ ->
+
+        setFragmentResultListener(
+            GalleryFragment.REQUEST_RESOURCES_CHANGED_KEY
+        ) { _, _ ->
             presenter.onResourcesOrTagsChanged()
         }
     }
 
     private fun showSortByDialog(sorting: Sorting, ascending: Boolean) {
         Log.d(RESOURCES_SCREEN, "showing sort-by dialog in ResourcesFragment")
-        val dialogBinding = DialogSortBinding.inflate(LayoutInflater.from(requireContext()))
+        val dialogBinding =
+            DialogSortBinding.inflate(LayoutInflater.from(requireContext()))
 
-        val alertBuilder = AlertDialog.Builder(requireContext()).setView(dialogBinding.root)
+        val alertBuilder =
+            AlertDialog.Builder(requireContext()).setView(dialogBinding.root)
 
         changeSortOrderEnabledStatus(dialogBinding, true)
 
@@ -269,11 +286,17 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
 
                 val newSorting = sortingCategorySelected(checkedId)
 
-                Log.d(RESOURCES_SCREEN, "sorting criteria changed, sorting = $newSorting")
+                Log.d(
+                    RESOURCES_SCREEN,
+                    "sorting criteria changed, sorting = $newSorting"
+                )
 
-                if (newSorting == Sorting.DEFAULT)
-                    notifyUser(requireActivity().getString(R.string.as_is_sorting_selected))
-
+                if (newSorting == Sorting.DEFAULT) {
+                    notifyUser(
+                        requireActivity()
+                            .getString(R.string.as_is_sorting_selected)
+                    )
+                }
 
                 presenter.gridPresenter.updateSorting(newSorting)
                 presenter.onSortDialogClose()
@@ -286,7 +309,10 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
                     R.id.rb_descending -> newAscending = false
                 }
 
-                Log.d(RESOURCES_SCREEN, "sorting direction changed, ascending = $newAscending")
+                Log.d(
+                    RESOURCES_SCREEN,
+                    "sorting direction changed, ascending = $newAscending"
+                )
 
                 presenter.gridPresenter.updateAscending(newAscending)
 
@@ -314,24 +340,31 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         }
     }
 
-    private fun dragHandlerTouchListener(view: View, event: MotionEvent): Boolean {
+    private fun dragHandlerTouchListener(
+        view: View,
+        event: MotionEvent
+    ): Boolean {
         when (event.action and MotionEvent.ACTION_MASK) {
             MotionEvent.ACTION_DOWN -> {
-                val layoutParams =
-                    binding.ivDragHandler.layoutParams as ConstraintLayout.LayoutParams
+                val layoutParams = binding.ivDragHandler.layoutParams
+                    as ConstraintLayout.LayoutParams
                 selectorDragStartBias = layoutParams.verticalBias
                 selectorDragStartTime = SystemClock.uptimeMillis()
             }
             MotionEvent.ACTION_UP -> {
                 view.performClick()
 
-                val travelTime = SystemClock.uptimeMillis() - selectorDragStartTime
+                val travelTime =
+                    SystemClock.uptimeMillis() - selectorDragStartTime
                 val travelDelta = selectorDragStartBias - (1f - selectorHeight)
                 val travelSpeed = 100f * travelDelta / (travelTime / 1000f)
-                Log.d(RESOURCES_SCREEN, "draggable bar of tags selector was moved:")
+                Log.d(
+                    RESOURCES_SCREEN,
+                    "draggable bar of tags selector was moved:"
+                )
                 Log.d(RESOURCES_SCREEN, "delta=${100f * travelDelta}%")
                 Log.d(RESOURCES_SCREEN, "time=${travelTime}ms")
-                Log.d(RESOURCES_SCREEN, "speed=${travelSpeed}%/sec")
+                Log.d(RESOURCES_SCREEN, "speed=$travelSpeed%/sec")
 
                 if (travelTime > DRAG_TRAVEL_TIME_THRESHOLD &&
                     abs(travelDelta) > DRAG_TRAVEL_DELTA_THRESHOLD &&
@@ -395,7 +428,10 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
      * ResourcesFragment can be overlapped by GalleryFragment
      */
     private fun isFragmentVisible(): Boolean {
-        return parentFragmentManager.fragments.find { f -> f is GalleryFragment } == null
+        return parentFragmentManager.fragments.find {
+            f ->
+            f is GalleryFragment
+        } == null
     }
 
     private fun changeSortOrderEnabledStatus(
@@ -410,9 +446,10 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
     }
 
     companion object {
-        private const val DRAG_TRAVEL_TIME_THRESHOLD = 30      //milliseconds
-        private const val DRAG_TRAVEL_DELTA_THRESHOLD = 0.1    //ratio
-        private const val DRAG_TRAVEL_SPEED_THRESHOLD = 150    //percents per second
+        private const val DRAG_TRAVEL_TIME_THRESHOLD = 30 // milliseconds
+        private const val DRAG_TRAVEL_DELTA_THRESHOLD = 0.1 // ratio
+        private const val DRAG_TRAVEL_SPEED_THRESHOLD =
+            150 // percents per second
         private const val ROOT_AND_FAV_KEY = "rootAndFav"
 
         fun newInstance(rootAndFav: RootAndFav) = ResourcesFragment().apply {

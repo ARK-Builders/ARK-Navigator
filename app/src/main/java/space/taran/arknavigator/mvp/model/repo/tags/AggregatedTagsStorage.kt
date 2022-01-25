@@ -4,8 +4,9 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.utils.Tags
 
 class AggregatedTagsStorage(
-    private val shards: Collection<TagsStorage>)
-    : TagsStorage {
+    private val shards: Collection<TagsStorage>
+) :
+    TagsStorage {
 
     override fun contains(id: ResourceId): Boolean =
         shards.any { it.contains(id) }

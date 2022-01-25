@@ -8,7 +8,7 @@ import space.taran.arknavigator.utils.Tag
 import space.taran.arknavigator.utils.Tags
 
 @StateStrategyType(AddToEndSingleStrategy::class)
-interface EditTagsDialogView: MvpView {
+interface EditTagsDialogView : MvpView {
     fun init()
     fun setQuickTags(tags: List<Tag>)
     fun setResourceTags(tags: Tags)

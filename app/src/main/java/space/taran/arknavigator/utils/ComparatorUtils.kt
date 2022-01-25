@@ -5,13 +5,14 @@ package space.taran.arknavigator.utils
 fun <T> unequalCompareBy(comparator: Comparator<T>): Comparator<T> =
     Comparator { a, b ->
         if (a === b) {
-            return@Comparator 0;
+            return@Comparator 0
         }
 
         val result = comparator.compare(a, b)
         if (result == 0) {
             compareValues(
                 System.identityHashCode(a),
-                System.identityHashCode(b))
+                System.identityHashCode(b)
+            )
         } else result
     }

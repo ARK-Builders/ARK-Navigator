@@ -2,8 +2,8 @@ package space.taran.arknavigator.ui.fragments.utils
 
 import android.content.Context
 import android.widget.Toast
-import space.taran.arknavigator.mvp.view.NotifiableView
 import java.nio.file.Path
+import space.taran.arknavigator.mvp.view.NotifiableView
 
 object Notifications {
 
@@ -16,8 +16,9 @@ object Notifications {
         if (failed.isNotEmpty()) {
             view.notifyUser(
                 message = "Failed to verify the following paths:\n" +
-                        failed.joinToString("\n"),
-                moreTime = true)
+                    failed.joinToString("\n"),
+                moreTime = true
+            )
         }
     }
 }
