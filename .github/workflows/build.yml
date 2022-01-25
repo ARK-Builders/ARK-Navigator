@@ -17,6 +17,13 @@ jobs:
         java-version: '11'
         distribution: 'adopt'
 
+    - name: ktlint
+      uses: ScaCap/action-ktlint@master
+      with:
+        github_token: ${{ secrets.github_token }}
+        reporter: github-pr-review
+        filter_mode: nofilter #todo remove
+
     - name: Run unit tests
       run: ./gradlew testDebugUnitTest
 

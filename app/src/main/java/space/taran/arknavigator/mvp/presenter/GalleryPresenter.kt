@@ -1,6 +1,9 @@
 package space.taran.arknavigator.mvp.presenter
 
 import android.util.Log
+import java.nio.file.Files
+import java.nio.file.Path
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
@@ -22,9 +25,6 @@ import space.taran.arknavigator.utils.GALLERY_SCREEN
 import space.taran.arknavigator.utils.ImageUtils
 import space.taran.arknavigator.utils.Tag
 import space.taran.arknavigator.utils.extension
-import java.nio.file.Files
-import java.nio.file.Path
-import javax.inject.Inject
 
 class GalleryPresenter(
     private val rootAndFav: RootAndFav,
@@ -64,11 +64,9 @@ class GalleryPresenter(
             if (!indexRepo.isIndexed(rootAndFav))
                 viewState.setProgressVisibility(true, "Indexing")
 
-
             index = indexRepo.provide(rootAndFav)
             storage = tagsStorageRepo.provide(rootAndFav)
             resources = resourcesIds.map { index.getMeta(it) }.toMutableList()
-
 
             val previews = mutableListOf<Path?>()
             val placeholders = mutableListOf<Int>()
@@ -151,7 +149,7 @@ class GalleryPresenter(
         viewState.showEditTagsDialog(currentResource.id)
     }
 
-    private suspend fun deleteResource(resource: ResourceId)  {
+    private suspend fun deleteResource(resource: ResourceId) {
         Log.d(GALLERY_SCREEN, "deleting resource $resource")
 
         storage.remove(resource)
@@ -182,7 +180,10 @@ class GalleryPresenter(
     }
 
     private fun onPreviewsItemClick(itemView: PreviewItemView) {
-        Log.d(GALLERY_SCREEN, "preview at ${itemView.pos} clicked, switching controls on/off")
+        Log.d(
+            GALLERY_SCREEN,
+            "preview at ${itemView.pos} clicked, switching controls on/off"
+        )
         isControlsVisible = !isControlsVisible
         viewState.setControlsVisibility(isControlsVisible)
         if (!isControlsVisible)

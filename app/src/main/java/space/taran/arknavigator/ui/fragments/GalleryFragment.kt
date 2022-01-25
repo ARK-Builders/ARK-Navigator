@@ -5,8 +5,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
-import android.view.*
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.core.content.FileProvider
 import androidx.core.os.bundleOf
@@ -17,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.chip.Chip
+import java.nio.file.Path
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import space.taran.arknavigator.BuildConfig
@@ -42,7 +44,6 @@ import space.taran.arknavigator.utils.Tags
 import space.taran.arknavigator.utils.extension
 import space.taran.arknavigator.utils.extensions.makeGone
 import space.taran.arknavigator.utils.extensions.makeVisible
-import java.nio.file.Path
 
 class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
 
@@ -96,14 +97,18 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
             viewPager.apply {
                 adapter = pagerAdapter
                 offscreenPageLimit = 2
-                ((getChildAt(0) as RecyclerView).itemAnimator as SimpleItemAnimator).removeDuration = 0
+                (
+                    (getChildAt(0) as RecyclerView)
+                        .itemAnimator as SimpleItemAnimator
+                    ).removeDuration = 0
                 setPageTransformer(DepthPageTransformer())
 
-                registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-                    override fun onPageSelected(position: Int) {
-                        presenter.onPageChanged(position)
-                    }
-                })
+                registerOnPageChangeCallback(object :
+                        ViewPager2.OnPageChangeCallback() {
+                        override fun onPageSelected(position: Int) {
+                            presenter.onPageChanged(position)
+                        }
+                    })
             }
 
             removeResourceFab.setOnLongClickListener {
@@ -129,7 +134,11 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
         pagerAdapter.notifyDataSetChanged()
     }
 
-    override fun setupPreview(pos: Int, resource: ResourceMeta, filePath: String) {
+    override fun setupPreview(
+        pos: Int,
+        resource: ResourceMeta,
+        filePath: String
+    ) {
         if (binding.viewPager.currentItem != pos)
             binding.viewPager.setCurrentItem(pos, false)
         setupOpenEditFABs(resource.kind)
@@ -154,10 +163,18 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
     }
 
     override fun editResource(resourcePath: Path) =
-        openIntentChooser(resourcePath, Intent.ACTION_EDIT, detachProcess = true)
+        openIntentChooser(
+            resourcePath,
+            Intent.ACTION_EDIT,
+            detachProcess = true
+        )
 
     override fun shareResource(resourcePath: Path) =
-        openIntentChooser(resourcePath, Intent.ACTION_SEND, detachProcess = false)
+        openIntentChooser(
+            resourcePath,
+            Intent.ACTION_SEND,
+            detachProcess = false
+        )
 
     override fun viewInExternalApp(resourcePath: Path) {
         openIntentChooser(resourcePath, Intent.ACTION_VIEW, true)
@@ -182,7 +199,10 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
     }
 
     override fun displayPreviewTags(resource: ResourceId, tags: Tags) {
-        Log.d(GALLERY_SCREEN, "displaying tags of resource $resource for preview")
+        Log.d(
+            GALLERY_SCREEN,
+            "displaying tags of resource $resource for preview"
+        )
 
         binding.tagsCg.removeAllViews()
 
@@ -191,7 +211,10 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
             chip.text = tag
 
             chip.setOnLongClickListener {
-                Log.d(GALLERY_SCREEN, "tag $tag on resource $resource long-clicked")
+                Log.d(
+                    GALLERY_SCREEN,
+                    "tag $tag on resource $resource long-clicked"
+                )
                 notifyUser("Tag \"$tag\" removed")
                 presenter.onTagRemove(tag)
                 true
@@ -206,7 +229,10 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
     override fun showEditTagsDialog(
         resource: ResourceId
     ) {
-        Log.d(GALLERY_SCREEN, "showing [edit-tags] dialog for resource $resource")
+        Log.d(
+            GALLERY_SCREEN,
+            "showing [edit-tags] dialog for resource $resource"
+        )
         val dialog = EditTagsDialogFragment.newInstance(
             requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
             resource,
@@ -342,7 +368,8 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
         return Chip(context).also {
             it.apply {
                 setChipIconResource(R.drawable.ic_baseline_edit_24)
-                chipBackgroundColor = requireActivity().getColorStateList(R.color.colorPrimary)
+                chipBackgroundColor =
+                    requireActivity().getColorStateList(R.color.colorPrimary)
                 chipStartPadding = getPXFromDP(12f)
                 chipEndPadding = getPXFromDP(12f)
                 textStartPadding = 0f
@@ -350,7 +377,10 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
 
                 setOnClickListener {
                     val position = binding.viewPager.currentItem
-                    Log.d(GALLERY_SCREEN, "[edit_tags] clicked at position $position")
+                    Log.d(
+                        GALLERY_SCREEN,
+                        "[edit_tags] clicked at position $position"
+                    )
                     presenter.onEditTagsDialogBtnClick()
                 }
             }
@@ -364,7 +394,11 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
         const val REQUEST_TAGS_CHANGED_KEY = "tagsChangedGallery"
         const val REQUEST_RESOURCES_CHANGED_KEY = "resourcesChangedGallery"
 
-        fun newInstance(rootAndFav: RootAndFav, resources: List<ResourceId>, startAt: Int) =
+        fun newInstance(
+            rootAndFav: RootAndFav,
+            resources: List<ResourceId>,
+            startAt: Int
+        ) =
             GalleryFragment().apply {
                 arguments = Bundle().apply {
                     putParcelable(ROOT_AND_FAV_KEY, rootAndFav)

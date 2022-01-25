@@ -2,10 +2,10 @@ package space.taran.arknavigator.di.modules
 
 import dagger.Module
 import dagger.Provides
+import javax.inject.Singleton
 import ru.terrakok.cicerone.Cicerone
 import ru.terrakok.cicerone.NavigatorHolder
 import space.taran.arknavigator.navigation.AppRouter
-import javax.inject.Singleton
 
 @Module
 class CiceroneModule {

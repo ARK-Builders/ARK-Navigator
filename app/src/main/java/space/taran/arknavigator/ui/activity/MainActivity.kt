@@ -15,6 +15,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.forEach
 import androidx.core.view.isVisible
+import javax.inject.Inject
 import moxy.MvpAppCompatActivity
 import moxy.ktx.moxyPresenter
 import ru.terrakok.cicerone.NavigatorHolder
@@ -28,7 +29,6 @@ import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.utils.MAIN
 import space.taran.arknavigator.utils.PERMISSIONS
-import javax.inject.Inject
 
 class MainActivity : MvpAppCompatActivity(), MainView {
 
@@ -84,9 +84,13 @@ class MainActivity : MvpAppCompatActivity(), MainView {
     override fun requestPerms() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             if (!Environment.isExternalStorageManager()) {
-                val packageUri = Uri.parse("package:" + BuildConfig.APPLICATION_ID)
+                val packageUri =
+                    Uri.parse("package:" + BuildConfig.APPLICATION_ID)
                 val intent =
-                    Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, packageUri)
+                    Intent(
+                        Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
+                        packageUri
+                    )
                 startActivityForResult(intent, REQUEST_CODE_ALL_FILES_ACCESS)
             } else
                 presenter.permsGranted(isActiveScreenExists())
@@ -112,7 +116,11 @@ class MainActivity : MvpAppCompatActivity(), MainView {
                 )
 
                 Log.d(PERMISSIONS, "requesting $permissions")
-                ActivityCompat.requestPermissions(this, permissions, REQUEST_CODE_PERMISSIONS)
+                ActivityCompat.requestPermissions(
+                    this,
+                    permissions,
+                    REQUEST_CODE_PERMISSIONS
+                )
             }
         }
     }
@@ -120,7 +128,8 @@ class MainActivity : MvpAppCompatActivity(), MainView {
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
-        granted: IntArray) {
+        granted: IntArray
+    ) {
 
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
             Log.d(PERMISSIONS, "granted $granted")
@@ -128,7 +137,9 @@ class MainActivity : MvpAppCompatActivity(), MainView {
             if (granted.size == permissions.size) {
                 val denied = permissions
                     .zip(granted.toList())
-                    .filter { (_, result) -> result == PackageManager.PERMISSION_DENIED }
+                    .filter { (_, result) ->
+                        result == PackageManager.PERMISSION_DENIED
+                    }
                     .map { (permission, _) -> permission }
 
                 if (denied.isEmpty()) {
@@ -181,14 +192,24 @@ class MainActivity : MvpAppCompatActivity(), MainView {
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
-    override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        intent: Intent?
+    ) {
         when (requestCode) {
             REQUEST_CODE_SD_CARD_URI -> {
-                Log.d(MAIN, "sdcard uri request resulted, code $resultCode, intent: $intent")
+                Log.d(
+                    MAIN,
+                    "sdcard uri request resulted, code $resultCode, intent: $intent"
+                )
 
                 val treeUri = intent!!.data!!
-                contentResolver.takePersistableUriPermission(treeUri,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                contentResolver.takePersistableUriPermission(
+                    treeUri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                )
             }
             REQUEST_CODE_ALL_FILES_ACCESS -> {
                 if (Environment.isExternalStorageManager())

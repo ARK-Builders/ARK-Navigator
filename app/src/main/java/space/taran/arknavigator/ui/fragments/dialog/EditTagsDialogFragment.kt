@@ -83,7 +83,10 @@ class EditTagsDialogFragment(
             chip.setOnClickListener {
                 presenter.onResourceTagClick(tag)
             }
-            binding.layoutInput.addView(chip, binding.layoutInput.childCount - 1)
+            binding.layoutInput.addView(
+                chip,
+                binding.layoutInput.childCount - 1
+            )
         }
     }
 

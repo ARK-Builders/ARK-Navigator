@@ -4,8 +4,8 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.ParcelFileDescriptor
 import com.shockwave.pdfium.PdfiumCore
-import space.taran.arknavigator.ui.App
 import java.nio.file.Path
+import space.taran.arknavigator.ui.App
 
 object PdfPreviewGenerator {
     fun generate(source: Path): Bitmap {
@@ -15,7 +15,9 @@ object PdfPreviewGenerator {
 
         val pdfiumCore = PdfiumCore(finalContext)
         val fd: ParcelFileDescriptor? =
-            finalContext.contentResolver.openFileDescriptor(Uri.fromFile(source.toFile()), "r")
+            finalContext
+                .contentResolver
+                .openFileDescriptor(Uri.fromFile(source.toFile()), "r")
 
         val document = pdfiumCore.newDocument(fd)
         pdfiumCore.openPage(document, page)

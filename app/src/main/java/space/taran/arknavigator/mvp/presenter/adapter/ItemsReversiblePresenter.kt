@@ -1,13 +1,16 @@
 package space.taran.arknavigator.mvp.presenter.adapter
 
 import android.util.Log
+import java.lang.AssertionError
 import kotlinx.collections.immutable.persistentListOf
 import space.taran.arknavigator.utils.ITEMS_CONTAINER
-import java.lang.AssertionError
 
-abstract class ItemsReversiblePresenter<Label,Item,View>(
-    label: Label, items: List<Item>, handler: ItemClickHandler<Item>)
-        : ItemsClickablePresenter<Item,View>(handler) {
+abstract class ItemsReversiblePresenter<Label, Item, View>(
+    label: Label,
+    items: List<Item>,
+    handler: ItemClickHandler<Item>
+) :
+    ItemsClickablePresenter<Item, View>(handler) {
 
     private inner class Frame(val label: Label, val items: List<Item>)
 

@@ -5,15 +5,15 @@ import android.util.Log
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.request.RequestOptions
+import java.nio.file.Files
+import java.nio.file.Path
+import kotlin.system.measureTimeMillis
 import space.taran.arknavigator.mvp.model.repo.extra.ImageMetaExtra
 import space.taran.arknavigator.mvp.model.repo.preview.generator.PdfPreviewGenerator
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.utils.ImageUtils.glideExceptionListener
 import space.taran.arknavigator.utils.PREVIEWS
 import space.taran.arknavigator.utils.extension
-import java.nio.file.Files
-import java.nio.file.Path
-import kotlin.system.measureTimeMillis
 
 object PreviewGenerators {
 
@@ -48,8 +48,14 @@ object PreviewGenerators {
                 storePreview(previewPath, preview)
                 storeThumbnail(thumbnailPath, thumbnail)
             }
-            Log.d(PREVIEWS, "Preview and thumbnail generated for $path in $time2 ms")
-        } ?: Log.d(PREVIEWS, "No generators found for type .${extension(path)} ($path)")
+            Log.d(
+                PREVIEWS,
+                "Preview and thumbnail generated for $path in $time2 ms"
+            )
+        } ?: Log.d(
+            PREVIEWS,
+            "No generators found for type .${extension(path)} ($path)"
+        )
     }
 
     private fun storePreview(path: Path, bitmap: Bitmap) =

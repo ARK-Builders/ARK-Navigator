@@ -27,7 +27,8 @@ class DepthPageTransformer() : ViewPager2.PageTransformer {
                     translationX = pageWidth * -position
                     translationZ = -1f
 
-                    val scaleFactor = (MIN_SCALE + (1 - MIN_SCALE) * (1 - Math.abs(position)))
+                    val scaleFactor =
+                        (MIN_SCALE + (1 - MIN_SCALE) * (1 - Math.abs(position)))
                     scaleX = scaleFactor
                     scaleY = scaleFactor
                 }

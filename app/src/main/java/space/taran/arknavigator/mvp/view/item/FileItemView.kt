@@ -1,7 +1,7 @@
 package space.taran.arknavigator.mvp.view.item
 
-import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import java.nio.file.Path
+import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 
 interface FileItemView {
     fun position(): Int
