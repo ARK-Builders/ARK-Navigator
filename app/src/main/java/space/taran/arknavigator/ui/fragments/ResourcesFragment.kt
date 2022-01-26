@@ -76,11 +76,7 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
 
     private var tagsSelectorAdapter: TagsSelectorAdapter? = null
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
 
         Log.d(RESOURCES_SCREEN, "inflating layout for ResourcesFragment")
         binding = FragmentResourcesBinding.inflate(inflater, container, false)
