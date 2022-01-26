@@ -76,7 +76,11 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
 
     private var tagsSelectorAdapter: TagsSelectorAdapter? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
 
         Log.d(RESOURCES_SCREEN, "inflating layout for ResourcesFragment")
         binding = FragmentResourcesBinding.inflate(inflater, container, false)
@@ -195,12 +199,7 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         } else {
             val constraintSet = ConstraintSet()
             constraintSet.clone(binding.root)
-            constraintSet.connect(
-                binding.rvResources.id,
-                ConstraintSet.BOTTOM,
-                binding.root.id,
-                ConstraintSet.BOTTOM
-            )
+            constraintSet.connect(binding.rvResources.id, ConstraintSet.BOTTOM, binding.root.id, ConstraintSet.BOTTOM)
             constraintSet.applyTo(binding.root)
         }
     }
