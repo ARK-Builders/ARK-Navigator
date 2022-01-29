@@ -1,12 +1,10 @@
 package space.taran.arknavigator.ui.adapter
 
 import android.annotation.SuppressLint
-import android.view.GestureDetector
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.ViewGroup
-import androidx.core.view.GestureDetectorCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import space.taran.arknavigator.databinding.ItemImageBinding
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsPagerPresenter
 import space.taran.arknavigator.mvp.view.item.PreviewItemViewHolder
@@ -36,10 +34,6 @@ class PreviewsPager(val presenter: PreviewsPagerPresenter) :
     ) {
         holder.pos = position
         presenter.bindView(holder)
-        val gestureDetector = getGestureDetector(holder)
-        holder.binding.ivSubsampling.setOnTouchListener { view, motionEvent ->
-            return@setOnTouchListener gestureDetector.onTouchEvent(motionEvent)
-        }
     }
 
     fun removeItem(position: Int) {
@@ -49,16 +43,9 @@ class PreviewsPager(val presenter: PreviewsPagerPresenter) :
 
     override fun onViewRecycled(holder: PreviewItemViewHolder) {
         super.onViewRecycled(holder)
-        holder.binding.ivSubsampling.recycle()
-    }
-
-    private fun getGestureDetector(holder: PreviewItemViewHolder): GestureDetectorCompat {
-        val listener = object : GestureDetector.SimpleOnGestureListener() {
-            override fun onSingleTapConfirmed(e: MotionEvent?): Boolean {
-                presenter.onItemClick(holder)
-                return true
-            }
+        with(holder.binding) {
+            ivSubsampling.recycle()
+            Glide.with(ivZoom.context).clear(ivZoom)
         }
-        return GestureDetectorCompat(holder.itemView.context, listener)
     }
 }

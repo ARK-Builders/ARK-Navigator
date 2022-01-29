@@ -10,7 +10,7 @@ import space.taran.arknavigator.ui.extra.ExtraLoader
 import space.taran.arknavigator.utils.ImageUtils
 import space.taran.arknavigator.utils.extension
 
-class FileItemViewHolder(private val binding: ItemFileGridBinding) :
+class FileItemViewHolder(val binding: ItemFileGridBinding) :
     RecyclerView.ViewHolder(binding.root),
     FileItemView {
 

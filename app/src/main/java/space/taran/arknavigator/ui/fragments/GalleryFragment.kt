@@ -18,7 +18,6 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.chip.Chip
-import java.nio.file.Path
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import space.taran.arknavigator.BuildConfig
@@ -31,7 +30,6 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 import space.taran.arknavigator.mvp.view.GalleryView
 import space.taran.arknavigator.mvp.view.NotifiableView
-import space.taran.arknavigator.mvp.view.item.PreviewItemView
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.adapter.PreviewsPager
@@ -45,6 +43,7 @@ import space.taran.arknavigator.utils.Tags
 import space.taran.arknavigator.utils.extension
 import space.taran.arknavigator.utils.extensions.makeGone
 import space.taran.arknavigator.utils.extensions.makeVisible
+import java.nio.file.Path
 
 class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
 
@@ -118,18 +117,22 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
 
     override fun updatePagerAdapter() {
         pagerAdapter.notifyDataSetChanged()
-        binding.viewPager.setCurrentItem(requireArguments().getInt(START_AT_KEY), false)
+        binding.viewPager.setCurrentItem(
+            requireArguments().getInt(START_AT_KEY),
+            false
+        )
     }
 
-    override fun setupPreview(pos: Int, resource: ResourceMeta, filePath: String) = with(binding) {
-        setupOpenEditFABs(resource.kind)
-        ExtraLoader.load(
-            resource,
-            listOf(primaryExtra, secondaryExtra),
-            verbose = true
-        )
-        requireArguments().putInt(START_AT_KEY, pos)
-    }
+    override fun setupPreview(pos: Int, resource: ResourceMeta, filePath: String) =
+        with(binding) {
+            setupOpenEditFABs(resource.kind)
+            ExtraLoader.load(
+                resource,
+                listOf(primaryExtra, secondaryExtra),
+                verbose = true
+            )
+            requireArguments().putInt(START_AT_KEY, pos)
+        }
 
     override fun setPreviewsScrollingEnabled(enabled: Boolean) {
         binding.viewPager.isUserInputEnabled = enabled
@@ -254,18 +257,12 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
     private fun initViewPager() = with(binding.viewPager) {
         adapter = pagerAdapter
         offscreenPageLimit = 2
-        ((getChildAt(0) as RecyclerView).itemAnimator as SimpleItemAnimator).removeDuration = 0
+        val rv = (getChildAt(0) as RecyclerView)
+        (rv.itemAnimator as SimpleItemAnimator).removeDuration = 0
         setPageTransformer(DepthPageTransformer())
 
         registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
-                post {
-                    val holder = (getChildAt(0) as RecyclerView)
-                        .findViewHolderForAdapterPosition(position)
-                    holder?.let {
-                        (it as PreviewItemView).onItemSelected()
-                    }
-                }
                 presenter.onPageChanged(position)
             }
         })

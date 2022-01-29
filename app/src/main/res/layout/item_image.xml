@@ -8,22 +8,20 @@
     <com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
         android:id="@+id/iv_subsampling"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:src="@mipmap/ic_launcher" />
+        android:layout_height="match_parent" />
 
-    <ImageView
-        android:id="@+id/iv_placeholder"
+    <com.ortiz.touchview.TouchImageView
+        android:id="@+id/iv_zoom"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
+        android:layout_height="match_parent" />
 
     <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/progress"
-        android:alpha="0"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:indeterminate="true"/>
+        android:alpha="0"
+        android:indeterminate="true" />
 
     <include
         android:id="@+id/layout_progress"

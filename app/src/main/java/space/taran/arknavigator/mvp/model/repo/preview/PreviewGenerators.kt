@@ -4,21 +4,22 @@ import android.graphics.Bitmap
 import android.util.Log
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy
 import com.bumptech.glide.request.RequestOptions
-import java.nio.file.Files
-import java.nio.file.Path
-import kotlin.system.measureTimeMillis
 import space.taran.arknavigator.mvp.model.repo.extra.ImageMetaExtra
 import space.taran.arknavigator.mvp.model.repo.preview.generator.PdfPreviewGenerator
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.utils.ImageUtils.glideExceptionListener
 import space.taran.arknavigator.utils.PREVIEWS
 import space.taran.arknavigator.utils.extension
+import java.nio.file.Files
+import java.nio.file.Path
+import kotlin.system.measureTimeMillis
 
 object PreviewGenerators {
 
-    private const val THUMBNAIL_WIDTH = 72
-    private const val THUMBNAIL_HEIGHT = 128
+    private const val THUMBNAIL_SIZE = 128
     private const val COMPRESSION_QUALITY = 100
 
     // Use this map to declare new types of generators
@@ -62,10 +63,10 @@ object PreviewGenerators {
         storeImage(path, bitmap)
 
     private fun storeThumbnail(path: Path, bitmap: Bitmap) {
-        if (bitmap.width > THUMBNAIL_WIDTH) {
+        if (bitmap.width > THUMBNAIL_SIZE) {
             throw AssertionError("Bitmap must be downscaled")
         }
-        if (bitmap.height > THUMBNAIL_HEIGHT) {
+        if (bitmap.height > THUMBNAIL_SIZE) {
             throw AssertionError("Bitmap must be downscaled")
         }
 
@@ -91,8 +92,14 @@ object PreviewGenerators {
 
     private fun resizeToThumbnail(builder: RequestBuilder<Bitmap>): Bitmap =
         builder
-            .apply(RequestOptions().override(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT))
-            .fitCenter()
+            .apply(
+                RequestOptions()
+                    .downsample(DownsampleStrategy.CENTER_INSIDE)
+                    .override(THUMBNAIL_SIZE)
+                    .fitCenter()
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .skipMemoryCache(true)
+            )
             .addListener(glideExceptionListener<Bitmap>())
             .submit()
             .get()
