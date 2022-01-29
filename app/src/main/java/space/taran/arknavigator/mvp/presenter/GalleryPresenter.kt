@@ -1,9 +1,6 @@
 package space.taran.arknavigator.mvp.presenter
 
 import android.util.Log
-import java.nio.file.Files
-import java.nio.file.Path
-import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
@@ -14,7 +11,6 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
-import space.taran.arknavigator.mvp.model.repo.preview.PreviewAndThumbnail
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsPagerPresenter
@@ -22,9 +18,9 @@ import space.taran.arknavigator.mvp.view.GalleryView
 import space.taran.arknavigator.mvp.view.item.PreviewItemView
 import space.taran.arknavigator.navigation.AppRouter
 import space.taran.arknavigator.utils.GALLERY_SCREEN
-import space.taran.arknavigator.utils.ImageUtils
 import space.taran.arknavigator.utils.Tag
-import space.taran.arknavigator.utils.extension
+import java.nio.file.Files
+import javax.inject.Inject
 
 class GalleryPresenter(
     private val rootAndFav: RootAndFav,
@@ -68,19 +64,8 @@ class GalleryPresenter(
             storage = tagsStorageRepo.provide(rootAndFav)
             resources = resourcesIds.map { index.getMeta(it) }.toMutableList()
 
-            val previews = mutableListOf<Path?>()
-            val placeholders = mutableListOf<Int>()
-
-            resources.forEach { meta ->
-                val path = index.getPath(meta.id)
-
-                previews.add(PreviewAndThumbnail.locate(path, meta)?.preview)
-                placeholders.add(ImageUtils.iconForExtension(extension(path)))
-            }
-
             previewsPresenter.init(
-                previews,
-                placeholders,
+                index,
                 resources,
                 ::onPreviewsItemClick,
                 ::onPreviewsItemZoom,
