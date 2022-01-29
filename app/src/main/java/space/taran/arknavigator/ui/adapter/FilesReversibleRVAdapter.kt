@@ -2,6 +2,7 @@ package space.taran.arknavigator.ui.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import com.bumptech.glide.Glide
 import space.taran.arknavigator.databinding.ItemFileGridBinding
 import space.taran.arknavigator.mvp.presenter.adapter.ItemsReversiblePresenter
 import space.taran.arknavigator.mvp.view.item.FileItemView
@@ -31,6 +32,13 @@ open class FilesReversibleRVAdapter<Label, Item>(
 
         holder.itemView.setOnClickListener {
             presenter.itemClicked(position)
+        }
+    }
+
+    override fun onViewRecycled(holder: FileItemViewHolder) {
+        super.onViewRecycled(holder)
+        with(holder.binding) {
+            Glide.with(iv.context).clear(iv)
         }
     }
 }

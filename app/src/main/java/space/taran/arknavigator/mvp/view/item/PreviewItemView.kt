@@ -7,6 +7,4 @@ interface PreviewItemView {
     var pos: Int
 
     fun setSource(preview: Path?, placeholder: Int, resource: ResourceMeta)
-
-    fun onItemSelected()
 }
