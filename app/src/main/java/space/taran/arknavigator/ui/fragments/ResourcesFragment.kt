@@ -11,7 +11,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
-import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.isVisible
@@ -22,7 +21,6 @@ import kotlin.math.abs
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import space.taran.arknavigator.R
-import space.taran.arknavigator.databinding.DialogSortBinding
 import space.taran.arknavigator.databinding.FragmentResourcesBinding
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.presenter.ResourcesPresenter
@@ -31,11 +29,10 @@ import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.adapter.ResourcesRVAdapter
 import space.taran.arknavigator.ui.adapter.TagsSelectorAdapter
+import space.taran.arknavigator.ui.fragments.dialog.SortDialogFragment
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.utils.FullscreenHelper
 import space.taran.arknavigator.utils.RESOURCES_SCREEN
-import space.taran.arknavigator.utils.Sorting
-import space.taran.arknavigator.utils.extensions.changeEnabledStatus
 import space.taran.arknavigator.utils.extensions.closeKeyboard
 import space.taran.arknavigator.utils.extensions.placeCursorToEnd
 import space.taran.arknavigator.utils.extensions.showKeyboard
@@ -60,7 +57,6 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
 
     private lateinit var binding: FragmentResourcesBinding
     private var resourcesAdapter: ResourcesRVAdapter? = null
-    private var sortByDialog: AlertDialog? = null
 
     private val frameTop by lazy {
         val loc = IntArray(2)
@@ -127,7 +123,10 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         Log.d(RESOURCES_SCREEN, "options item selected in ResourcesFragment")
         when (item.itemId) {
-            R.id.menu_tags_sort_by -> presenter.onMenuSortDialogClick()
+            R.id.menu_tags_sort_by -> {
+                val dialog = SortDialogFragment.newInstance()
+                dialog.show(childFragmentManager, null)
+            }
             R.id.menu_tags_off -> presenter.onMenuTagsToggle(false)
             R.id.menu_tags_on -> presenter.onMenuTagsToggle(true)
         }
@@ -231,14 +230,6 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         tagsSelectorAdapter?.drawTags()
     }
 
-    override fun showSortDialog(sorting: Sorting, ascending: Boolean) {
-        showSortByDialog(sorting, ascending)
-    }
-
-    override fun closeSortDialog() {
-        sortByDialog?.dismiss()
-    }
-
     private fun initResultListeners() {
         setFragmentResultListener(
             GalleryFragment.REQUEST_TAGS_CHANGED_KEY
@@ -253,97 +244,7 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         }
     }
 
-    private fun showSortByDialog(sorting: Sorting, ascending: Boolean) {
-        Log.d(RESOURCES_SCREEN, "showing sort-by dialog in ResourcesFragment")
-        val dialogBinding =
-            DialogSortBinding.inflate(LayoutInflater.from(requireContext()))
-
-        val alertBuilder =
-            AlertDialog.Builder(requireContext()).setView(dialogBinding.root)
-
-        changeSortOrderEnabledStatus(dialogBinding, true)
-
-        dialogBinding.apply {
-            when (sorting) {
-                Sorting.DEFAULT -> rbDefault.isChecked = true
-                Sorting.NAME -> rbName.isChecked = true
-                Sorting.SIZE -> rbSize.isChecked = true
-                Sorting.LAST_MODIFIED -> rbLastModified.isChecked = true
-                Sorting.TYPE -> rbType.isChecked = true
-            }
-
-            if (sorting == Sorting.DEFAULT) {
-                changeSortOrderEnabledStatus(dialogBinding, false)
-            } else {
-                if (ascending) {
-                    rbAscending.isChecked = true
-                } else {
-                    rbDescending.isChecked = true
-                }
-            }
-
-            rgSorting.setOnCheckedChangeListener { _, checkedId ->
-
-                val newSorting = sortingCategorySelected(checkedId)
-
-                Log.d(
-                    RESOURCES_SCREEN,
-                    "sorting criteria changed, sorting = $newSorting"
-                )
-
-                if (newSorting == Sorting.DEFAULT) {
-                    notifyUser(
-                        requireActivity()
-                            .getString(R.string.as_is_sorting_selected)
-                    )
-                }
-
-                presenter.gridPresenter.updateSorting(newSorting)
-                presenter.onSortDialogClose()
-            }
-
-            rgSortingDirection.setOnCheckedChangeListener { _, checkedId ->
-                var newAscending = false
-                when (checkedId) {
-                    R.id.rb_ascending -> newAscending = true
-                    R.id.rb_descending -> newAscending = false
-                }
-
-                Log.d(
-                    RESOURCES_SCREEN,
-                    "sorting direction changed, ascending = $newAscending"
-                )
-
-                presenter.gridPresenter.updateAscending(newAscending)
-
-                presenter.onSortDialogClose()
-            }
-
-            alertBuilder.setOnDismissListener {
-                presenter.onSortDialogClose()
-            }
-
-            sortByDialog = alertBuilder.show()
-        }
-    }
-
-    private fun sortingCategorySelected(itemID: Int): Sorting {
-        return when (itemID) {
-            R.id.rb_default -> {
-                Sorting.DEFAULT
-            }
-            R.id.rb_name -> Sorting.NAME
-            R.id.rb_size -> Sorting.SIZE
-            R.id.rb_last_modified -> Sorting.LAST_MODIFIED
-            R.id.rb_type -> Sorting.TYPE
-            else -> Sorting.DEFAULT
-        }
-    }
-
-    private fun dragHandlerTouchListener(
-        view: View,
-        event: MotionEvent
-    ): Boolean {
+    private fun dragHandlerTouchListener(view: View, event: MotionEvent): Boolean {
         when (event.action and MotionEvent.ACTION_MASK) {
             MotionEvent.ACTION_DOWN -> {
                 val layoutParams = binding.ivDragHandler.layoutParams
@@ -432,17 +333,6 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
             f ->
             f is GalleryFragment
         } == null
-    }
-
-    private fun changeSortOrderEnabledStatus(
-        dialogBinding: DialogSortBinding,
-        isEnabledStatus: Boolean
-    ) {
-        val childCount = dialogBinding.rgSortingDirection.childCount
-        for (radioButton in 0 until childCount) {
-            dialogBinding.rgSortingDirection.getChildAt(radioButton)
-                .changeEnabledStatus(isEnabledStatus)
-        }
     }
 
     companion object {

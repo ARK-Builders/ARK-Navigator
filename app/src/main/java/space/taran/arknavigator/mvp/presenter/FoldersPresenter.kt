@@ -1,9 +1,6 @@
 package space.taran.arknavigator.mvp.presenter
 
 import android.util.Log
-import java.nio.file.Files
-import java.nio.file.Path
-import javax.inject.Inject
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import moxy.MvpPresenter
@@ -86,14 +83,20 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
         if (rootNotFavorite) {
             // adding path as root
             if (roots.contains(path)) {
-                viewState.notifyUser(stringProvider.getString(R.string.folders_root_is_already_picked))
+                viewState.notifyUser(
+                    stringProvider.getString(R.string.folders_root_is_already_picked)
+                )
             } else {
                 addRoot(path)
             }
         } else {
             // adding path as favorite
             if (getFavorites().contains(path)) {
-                viewState.notifyUser(stringProvider.getString(R.string.folders_favorite_is_alreay_picked))
+                viewState.notifyUser(
+                    stringProvider.getString(
+                        R.string.folders_favorite_is_alreay_picked
+                    )
+                )
             } else {
                 addFavorite(path)
             }
@@ -114,10 +117,10 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
 
             foldersRepo.insertRoot(path)
 
-        viewState.notifyUser(
-            message = "Indexing of huge folders can take minutes",
-            moreTime = true
-        )
+            viewState.notifyUser(
+                message = "Indexing of huge folders can take minutes",
+                moreTime = true
+            )
 
             viewState.setProgressVisibility(true, "Indexing")
             resourcesIndexRepo.buildFromFilesystem(root)

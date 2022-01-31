@@ -3,7 +3,6 @@ package space.taran.arknavigator.mvp.view
 import moxy.MvpView
 import moxy.viewstate.strategy.AddToEndSingleStrategy
 import moxy.viewstate.strategy.StateStrategyType
-import space.taran.arknavigator.utils.Sorting
 
 @StateStrategyType(AddToEndSingleStrategy::class)
 interface ResourcesView : MvpView, NotifiableView {
@@ -16,6 +15,4 @@ interface ResourcesView : MvpView, NotifiableView {
     fun setTagsFilterEnabled(enabled: Boolean)
     fun setTagsFilterText(filter: String)
     fun drawTags()
-    fun showSortDialog(sorting: Sorting, ascending: Boolean)
-    fun closeSortDialog()
 }

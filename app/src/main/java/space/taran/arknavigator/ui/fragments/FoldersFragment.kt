@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
-import java.nio.file.Path
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import space.taran.arknavigator.databinding.FragmentFoldersBinding
@@ -103,7 +102,9 @@ class FoldersFragment : MvpAppCompatFragment(), FoldersView {
         ) { _, bundle ->
             val path = bundle.getString(FolderPickerDialogFragment.RESULT_PATH_KEY)!!
             val rootNotFavorite =
-                bundle.getBoolean(FolderPickerDialogFragment.RESULT_ROOT_NOT_FAVORITE_KEY)
+                bundle.getBoolean(
+                    FolderPickerDialogFragment.RESULT_ROOT_NOT_FAVORITE_KEY
+                )
             presenter.onPickRootBtnClick(Path(path), rootNotFavorite)
         }
     }

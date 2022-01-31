@@ -19,7 +19,9 @@ import space.taran.arknavigator.ui.fragments.utils.Notifications
 import java.nio.file.Path
 import kotlin.io.path.Path
 
-class FolderPickerDialogFragment : MvpAppCompatDialogFragment(), FolderPickerDialogView {
+class FolderPickerDialogFragment :
+    MvpAppCompatDialogFragment(),
+    FolderPickerDialogView {
 
     private lateinit var binding: DialogRootsNewBinding
     private val presenter by moxyPresenter {
@@ -55,10 +57,13 @@ class FolderPickerDialogFragment : MvpAppCompatDialogFragment(), FolderPickerDia
     }
 
     override fun notifyPathPicked(path: Path, rootNotFavorite: Boolean) {
-        parentFragmentManager.setFragmentResult(REQUEST_PATH_PICKED_KEY, bundleOf().apply {
-            putString(RESULT_PATH_KEY, path.toString())
-            putBoolean(RESULT_ROOT_NOT_FAVORITE_KEY, rootNotFavorite)
-        })
+        parentFragmentManager.setFragmentResult(
+            REQUEST_PATH_PICKED_KEY,
+            bundleOf().apply {
+                putString(RESULT_PATH_KEY, path.toString())
+                putBoolean(RESULT_ROOT_NOT_FAVORITE_KEY, rootNotFavorite)
+            }
+        )
         dismiss()
     }
 
@@ -69,6 +74,14 @@ class FolderPickerDialogFragment : MvpAppCompatDialogFragment(), FolderPickerDia
                 else R.string.folders_pick_favorite
             )
         binding.btnRootsDialogPick.isEnabled = isEnabled
+    }
+
+    override fun notifyFileChosenAsRoot() {
+        Notifications.notifyUser(
+            requireContext(),
+            getString(R.string.folders_file_chosen_as_root),
+            false
+        )
     }
 
     override fun notifyDeviceChosenAsRoot() {
@@ -89,7 +102,9 @@ class FolderPickerDialogFragment : MvpAppCompatDialogFragment(), FolderPickerDia
 
     private fun initBackButtonListener() {
         requireDialog().setOnKeyListener { _, keyCode, keyEvent ->
-            if (keyCode == KeyEvent.KEYCODE_BACK && keyEvent.action == KeyEvent.ACTION_UP) {
+            if (keyCode == KeyEvent.KEYCODE_BACK &&
+                keyEvent.action == KeyEvent.ACTION_UP
+            ) {
                 if (!presenter.onBackClick())
                     dismiss()
             }
@@ -103,12 +118,13 @@ class FolderPickerDialogFragment : MvpAppCompatDialogFragment(), FolderPickerDia
         const val RESULT_PATH_KEY = "path"
         const val RESULT_ROOT_NOT_FAVORITE_KEY = "rootNotFavorite"
 
-
         fun newInstance(paths: List<Path>) = FolderPickerDialogFragment().apply {
             arguments = Bundle().apply {
-                putStringArray(INIT_PATHS_KEY, paths.map { it.toString() }.toTypedArray())
+                putStringArray(
+                    INIT_PATHS_KEY,
+                    paths.map { it.toString() }.toTypedArray()
+                )
             }
         }
     }
-
 }

@@ -6,6 +6,7 @@ import javax.inject.Inject
 import kotlin.system.measureTimeMillis
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import space.taran.arknavigator.mvp.model.UserPreferences
@@ -87,6 +88,19 @@ class ResourcesGridPresenter(
         this.router = router
         sorting = userPreferences.getSorting()
         ascending = userPreferences.isSortingAscending()
+
+        scope.launch(Dispatchers.IO) {
+            userPreferences.sortingFlow.collect {
+                if (sorting != it)
+                    updateSorting(it)
+            }
+        }
+        scope.launch(Dispatchers.IO) {
+            userPreferences.ascendingFlow.collect {
+                if (ascending != it)
+                    updateAscending(it)
+            }
+        }
     }
 
     suspend fun updateSelection(
@@ -119,7 +133,7 @@ class ResourcesGridPresenter(
             }
         }
 
-    fun updateSorting(sorting: Sorting) {
+    private fun updateSorting(sorting: Sorting) {
         scope.launch(Dispatchers.Default) {
             setProgressVisibility(true, "Sorting")
             this@ResourcesGridPresenter.sorting = sorting
@@ -128,7 +142,7 @@ class ResourcesGridPresenter(
         }
     }
 
-    fun updateAscending(ascending: Boolean) {
+    private fun updateAscending(ascending: Boolean) {
         scope.launch(Dispatchers.Default) {
             setProgressVisibility(true, "Sorting")
             this@ResourcesGridPresenter.ascending = ascending
