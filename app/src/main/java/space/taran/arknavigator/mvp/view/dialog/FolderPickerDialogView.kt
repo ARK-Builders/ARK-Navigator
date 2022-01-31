@@ -7,7 +7,7 @@ import moxy.viewstate.strategy.StateStrategyType
 import java.nio.file.Path
 
 @StateStrategyType(AddToEndSingleStrategy::class)
-interface FolderPickerDialogView: MvpView {
+interface FolderPickerDialogView : MvpView {
     fun init()
     fun updateFolders()
     fun setFolderName(folderName: String)
@@ -17,4 +17,6 @@ interface FolderPickerDialogView: MvpView {
     fun notifyDeviceChosenAsRoot()
     @StateStrategyType(SkipStrategy::class)
     fun notifyPathPicked(path: Path, rootNotFavorite: Boolean)
+    @StateStrategyType(SkipStrategy::class)
+    fun notifyFileChosenAsRoot()
 }

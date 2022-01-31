@@ -14,7 +14,7 @@ import javax.inject.Inject
 
 class FolderPickerDialogPresenter(
     private val paths: List<Path>
-): MvpPresenter<FolderPickerDialogView>() {
+) : MvpPresenter<FolderPickerDialogView>() {
 
     @Inject
     lateinit var foldersRepo: FoldersRepo
@@ -65,7 +65,10 @@ class FolderPickerDialogPresenter(
                     }
                 }
                 rootNotFavorite = false
-                viewState.setPickBtnState(isEnabled = !foundAsFavorite, rootNotFavorite)
+                viewState.setPickBtnState(
+                    isEnabled = !foundAsFavorite,
+                    rootNotFavorite
+                )
             }
         } else {
             rootNotFavorite = true

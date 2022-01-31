@@ -10,12 +10,17 @@ import space.taran.arknavigator.ui.App
 
 class FoldersRVAdapter(
     val presenter: FoldersGridPresenter
-): RecyclerView.Adapter<FileItemViewHolder>() {
+) : RecyclerView.Adapter<FileItemViewHolder>() {
     override fun getItemCount(): Int = presenter.getCount()
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = FileItemViewHolder(
-        ItemFileGridBinding.inflate(LayoutInflater.from(parent.context), parent, false))
-        .also {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
+        FileItemViewHolder(
+            ItemFileGridBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false
+            )
+        ).also {
             App.instance.appComponent.inject(it)
         }
 

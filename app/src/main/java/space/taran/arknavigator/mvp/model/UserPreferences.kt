@@ -5,18 +5,29 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import space.taran.arknavigator.utils.Sorting
+import javax.inject.Inject
 
 class UserPreferences @Inject constructor(val context: Context) {
     private val SHARED_PREFERENCES_KEY = "user_preferences"
 
     private val Context.preferencesDatastore by preferencesDataStore(
-        (SHARED_PREFERENCES_KEY)
+        SHARED_PREFERENCES_KEY
     )
 
     private val dataStore = context.preferencesDatastore
+
+    val sortingFlow: Flow<Sorting> = dataStore.data.map { preferences ->
+        convertIntToSorting(preferences[PreferencesKeys.SORTING_PREFERENCE])
+    }.distinctUntilChanged()
+
+    val ascendingFlow: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.SORTING_ORDER] ?: true
+    }.distinctUntilChanged()
 
     suspend fun setSorting(sorting: Sorting) {
         dataStore.edit { preferences ->

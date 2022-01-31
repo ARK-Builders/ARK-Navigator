@@ -6,7 +6,6 @@ import javax.inject.Inject
 import kotlinx.coroutines.launch
 import moxy.MvpPresenter
 import moxy.presenterScope
-import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.repo.FoldersRepo
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.model.repo.index.AggregatedResourcesIndex
@@ -40,9 +39,6 @@ class ResourcesPresenter(
 
     @Inject
     lateinit var tagsStorageRepo: TagsStorageRepo
-
-    @Inject
-    lateinit var userPreferences: UserPreferences
 
     private lateinit var index: ResourcesIndex
     private lateinit var storage: TagsStorage
@@ -138,14 +134,6 @@ class ResourcesPresenter(
         if (tagsEnabled && storage.getTags(ids).isEmpty()) {
             viewState.notifyUser("Tag something first")
         }
-    }
-
-    fun onMenuSortDialogClick() {
-        viewState.showSortDialog(gridPresenter.sorting, gridPresenter.ascending)
-    }
-
-    fun onSortDialogClose() {
-        viewState.closeSortDialog()
     }
 
     fun onBackClick() {
