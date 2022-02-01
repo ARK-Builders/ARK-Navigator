@@ -2,7 +2,6 @@ package space.taran.arknavigator.mvp.presenter
 
 import android.util.Log
 import moxy.MvpPresenter
-import ru.terrakok.cicerone.Router
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.view.MainView
 import space.taran.arknavigator.navigation.AppRouter

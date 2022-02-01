@@ -12,7 +12,7 @@ import androidx.fragment.app.setFragmentResult
 import space.taran.arknavigator.databinding.DialogInfoBinding
 import space.taran.arknavigator.utils.extensions.textOrGone
 
-class ConfirmationDialogFragment: DialogFragment() {
+class ConfirmationDialogFragment : DialogFragment() {
 
     private lateinit var binding: DialogInfoBinding
 
@@ -70,5 +70,4 @@ class ConfirmationDialogFragment: DialogFragment() {
             )
         }
     }
-
 }

@@ -146,6 +146,10 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
         Notifications.notifyUser(context, message, moreTime)
     }
 
+    override fun notifyUser(messageID: Int, moreTime: Boolean) {
+        Notifications.notifyUser(context, messageID, moreTime)
+    }
+
     override fun editResource(resourcePath: Path) =
         openIntentChooser(
             resourcePath,

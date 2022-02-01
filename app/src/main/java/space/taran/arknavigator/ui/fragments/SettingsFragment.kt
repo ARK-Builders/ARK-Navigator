@@ -18,7 +18,6 @@ import space.taran.arknavigator.ui.fragments.dialog.ConfirmationDialogFragment
 import space.taran.arknavigator.ui.fragments.dialog.InfoDialogFragment
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.utils.SETTINGS_SCREEN
-import java.lang.AssertionError
 
 class SettingsFragment : MvpAppCompatFragment(), SettingsView {
 
@@ -41,6 +40,7 @@ class SettingsFragment : MvpAppCompatFragment(), SettingsView {
         Log.d(SETTINGS_SCREEN, "inflating layout for SettingsFragment")
         binding = FragmentSettingsBinding.inflate(inflater, container, false)
         presenter.onCreateView()
+        toggleInactiveFeatures()
 
         return binding.root
     }
@@ -65,15 +65,24 @@ class SettingsFragment : MvpAppCompatFragment(), SettingsView {
             }
 
             crashInfo.setOnClickListener {
-                showInfoDialog(R.string.what_are_crash_reports_, R.string.crash_reports_explanation)
+                showInfoDialog(
+                    R.string.what_are_crash_reports_,
+                    R.string.crash_reports_explanation
+                )
             }
 
             imgCacheInfo.setOnClickListener {
-                showInfoDialog(R.string.what_is_image_replication_, R.string.explanation_of_this_feature)
+                showInfoDialog(
+                    R.string.what_is_image_replication_,
+                    R.string.explanation_of_this_feature
+                )
             }
 
             indexReplicationInfo.setOnClickListener {
-                showInfoDialog(R.string.what_is_index_replication_, R.string.explanation_of_this_feature)
+                showInfoDialog(
+                    R.string.what_is_index_replication_,
+                    R.string.explanation_of_this_feature
+                )
             }
 
             resetPreferences.setOnClickListener {
@@ -83,14 +92,17 @@ class SettingsFragment : MvpAppCompatFragment(), SettingsView {
                     getString(R.string.yes),
                     getString(R.string.no)
                 )
-                dialog.show(childFragmentManager, ConfirmationDialogFragment.CONFIRMATION_DIALOG_TAG)
+                dialog.show(
+                    childFragmentManager,
+                    ConfirmationDialogFragment.CONFIRMATION_DIALOG_TAG
+                )
             }
         }
     }
 
     override fun init() {
         Log.d(SETTINGS_SCREEN, "initializing SettingsFragment")
-        (activity as MainActivity).setSelectedTab(0)
+        (activity as MainActivity).setSelectedTab(R.id.page_settings)
         (activity as MainActivity).setToolbarVisibility(false)
         (requireActivity() as MainActivity).setBottomNavigationVisibility(true)
 
@@ -103,19 +115,22 @@ class SettingsFragment : MvpAppCompatFragment(), SettingsView {
     }
 
     private fun showInfoDialog(
-        @StringRes titleRes: Int? = null,
-        @StringRes descriptionRes: Int? = null,
-        titleString: String? = null,
-        descriptionString: String? = null
+        @StringRes titleRes: Int,
+        @StringRes descriptionRes: Int
     ) {
-        val title = titleString ?: titleRes?.let { getString(it) }
-        ?: throw AssertionError("No value passed for title!")
-
-        val description = descriptionString ?: descriptionRes?.let { getString(it) }
-        ?: throw AssertionError("No value passed for description!")
+        val title = getString(titleRes)
+        val description = getString(descriptionRes)
 
         val dialog = InfoDialogFragment.newInstance(title, description)
         dialog.show(childFragmentManager, InfoDialogFragment.BASE_INFO_DIALOG_TAG)
+    }
+
+    private fun toggleInactiveFeatures(isEnabled: Boolean = false) {
+        binding.apply {
+            crashReportSwitch.isEnabled = isEnabled
+            cacheReplicationSwitch.isEnabled = isEnabled
+            indexReplicationSwitch.isEnabled = isEnabled
+        }
     }
 
     override fun setCrashReportPreference(isCrashReportEnabled: Boolean) {
@@ -126,7 +141,8 @@ class SettingsFragment : MvpAppCompatFragment(), SettingsView {
 
     override fun setImgCacheReplicationPref(isImgReplicationEnabled: Boolean) {
         binding.cacheReplicationSwitch.apply {
-            if (isChecked != isImgReplicationEnabled) isChecked = isImgReplicationEnabled
+            if (isChecked != isImgReplicationEnabled) isChecked =
+                isImgReplicationEnabled
         }
     }
 
@@ -138,6 +154,10 @@ class SettingsFragment : MvpAppCompatFragment(), SettingsView {
 
     override fun notifyUser(message: String, moreTime: Boolean) {
         Notifications.notifyUser(context, message, moreTime)
+    }
+
+    override fun notifyUser(messageID: Int, moreTime: Boolean) {
+        Notifications.notifyUser(context, messageID, moreTime)
     }
 
     companion object {

@@ -36,8 +36,6 @@ import space.taran.arknavigator.utils.RESOURCES_SCREEN
 import space.taran.arknavigator.utils.extensions.closeKeyboard
 import space.taran.arknavigator.utils.extensions.placeCursorToEnd
 import space.taran.arknavigator.utils.extensions.showKeyboard
-import kotlin.math.abs
-
 
 // `root` is used for querying tags storage and resources index,
 //       if it is `null`, then resources from all roots are taken
@@ -98,7 +96,7 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         initResultListeners()
 
         FullscreenHelper.setStatusBarVisibility(true, requireActivity().window)
-        (activity as MainActivity).setSelectedTab(2)
+        (activity as MainActivity).setSelectedTab(R.id.page_tags)
         (activity as MainActivity).setToolbarVisibility(true)
         (requireActivity() as MainActivity).setBottomNavigationVisibility(true)
         setHasOptionsMenu(true)
@@ -181,6 +179,10 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
             message,
             moreTime
         )
+    }
+
+    override fun notifyUser(messageID: Int, moreTime: Boolean) {
+        Notifications.notifyUser(context, messageID, moreTime)
     }
 
     override fun setTagsEnabled(enabled: Boolean) {
@@ -331,8 +333,7 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
      * ResourcesFragment can be overlapped by GalleryFragment
      */
     private fun isFragmentVisible(): Boolean {
-        return parentFragmentManager.fragments.find {
-            f ->
+        return parentFragmentManager.fragments.find { f ->
             f is GalleryFragment
         } == null
     }

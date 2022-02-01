@@ -5,7 +5,7 @@ import moxy.viewstate.strategy.AddToEndSingleStrategy
 import moxy.viewstate.strategy.StateStrategyType
 
 @StateStrategyType(AddToEndSingleStrategy::class)
-interface SettingsView: MvpView, NotifiableView {
+interface SettingsView : MvpView, NotifiableView {
     fun init()
     fun setCrashReportPreference(isCrashReportEnabled: Boolean)
     fun setImgCacheReplicationPref(isImgReplicationEnabled: Boolean)
