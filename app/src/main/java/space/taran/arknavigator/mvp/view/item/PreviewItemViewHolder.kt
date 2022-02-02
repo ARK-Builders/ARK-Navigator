@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.ortiz.touchview.OnTouchImageViewListener
 import space.taran.arknavigator.databinding.ItemImageBinding
+import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceKind
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.presenter.adapter.PreviewsPagerPresenter
@@ -54,25 +55,26 @@ class PreviewItemViewHolder(
             icPlay.isVisible = false
         }
 
-        loadImage(preview, placeholder)
+        loadImage(resource.id, preview, placeholder)
     }
 
-    private fun loadImage(preview: Path?, placeholder: Int) = with(binding) {
-        resetHolder()
+    private fun loadImage(id: ResourceId, preview: Path?, placeholder: Int) =
+        with(binding) {
+            resetHolder()
 
-        if (preview == null) {
-            ivZoom.isZoomEnabled = false
-            ivZoom.setImageResource(placeholder)
-            ivZoom.animate().apply {
-                duration = APPEARANCE_DURATION
-                alpha(1f)
+            if (preview == null) {
+                ivZoom.isZoomEnabled = false
+                ivZoom.setImageResource(placeholder)
+                ivZoom.animate().apply {
+                    duration = APPEARANCE_DURATION
+                    alpha(1f)
+                }
+                return
             }
-            return
-        }
 
-        loadGlideZoomImage(preview, ivZoom)
-        loadSubsamplingImage(preview, ivSubsampling)
-    }
+            loadGlideZoomImage(id, preview, ivZoom)
+            loadSubsamplingImage(preview, ivSubsampling)
+        }
 
     private fun resetHolder() = with(binding) {
         progress.isVisible = true
