@@ -14,15 +14,19 @@ import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.Transition
+import com.bumptech.glide.signature.ObjectKey
 import com.davemorrissey.labs.subscaleview.ImageSource
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.ortiz.touchview.TouchImageView
 import space.taran.arknavigator.R
+import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.ui.App
 import java.nio.file.Path
 
 object ImageUtils {
     private const val MAX_GLIDE_SIZE = 1500
+    private const val PREVIEW_SIGNATURE = "preview"
+    private const val THUMBNAIL_SIGNATURE = "thumbnail"
     const val APPEARANCE_DURATION = 300L
 
     fun iconForExtension(ext: String): Int {
@@ -37,12 +41,13 @@ object ImageUtils {
         else R.drawable.ic_file
     }
 
-    fun loadGlideZoomImage(image: Path, view: TouchImageView) =
+    fun loadGlideZoomImage(resource: ResourceId, image: Path, view: TouchImageView) =
         Glide.with(view.context)
             .load(image.toFile())
             .apply(
                 RequestOptions()
                     .priority(Priority.IMMEDIATE)
+                    .signature(ObjectKey("$resource$PREVIEW_SIGNATURE"))
                     .downsample(DownsampleStrategy.CENTER_INSIDE)
                     .override(MAX_GLIDE_SIZE)
             )
@@ -66,12 +71,18 @@ object ImageUtils {
         view.setImage(ImageSource.uri(image.toString()))
     }
 
-    fun loadImageWithPlaceholder(image: Path?, placeHolder: Int, view: ImageView) {
+    fun loadThumbnailWithPlaceholder(
+        resource: ResourceId,
+        image: Path?,
+        placeHolder: Int,
+        view: ImageView
+    ) {
         Log.d(IMAGES, "loading image $image")
 
         Glide.with(view.context)
             .load(image?.toFile())
             .placeholder(placeHolder)
+            .signature(ObjectKey("$resource$THUMBNAIL_SIGNATURE"))
             .transition(DrawableTransitionOptions.withCrossFade())
             .into(view)
     }
@@ -86,8 +97,10 @@ object ImageUtils {
             Log.d(
                 GLIDE,
                 "load failed with message: ${
-                e?.message} for target of type: ${
-                target?.javaClass?.canonicalName}"
+                e?.message
+                } for target of type: ${
+                target?.javaClass?.canonicalName
+                }"
             )
             return true
         }
