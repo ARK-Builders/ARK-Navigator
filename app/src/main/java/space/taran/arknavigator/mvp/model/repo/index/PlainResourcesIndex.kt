@@ -1,11 +1,6 @@
 package space.taran.arknavigator.mvp.model.repo.index
 
 import android.util.Log
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
-import kotlin.io.path.ExperimentalPathApi
-import kotlin.system.measureTimeMillis
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.supervisorScope
@@ -18,6 +13,11 @@ import space.taran.arknavigator.mvp.model.repo.preview.PreviewAndThumbnail
 import space.taran.arknavigator.utils.PREVIEWS
 import space.taran.arknavigator.utils.RESOURCES_INDEX
 import space.taran.arknavigator.utils.listChildren
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
+import kotlin.io.path.ExperimentalPathApi
+import kotlin.system.measureTimeMillis
 
 internal data class Difference(
     val deleted: List<Path>,
@@ -187,6 +187,7 @@ class PlainResourcesIndex internal constructor (
                 "providing previews/thumbnails for ${
                 metaByPath.size} resources"
             )
+            PreviewAndThumbnail.initDirs()
 
             supervisorScope {
                 metaByPath.entries.map { (path: Path, meta: ResourceMeta) ->

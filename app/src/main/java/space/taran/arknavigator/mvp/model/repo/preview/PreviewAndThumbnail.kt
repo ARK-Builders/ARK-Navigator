@@ -1,15 +1,15 @@
 package space.taran.arknavigator.mvp.model.repo.preview
 
 import android.util.Log
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
 import space.taran.arknavigator.mvp.model.repo.extra.ImageMetaExtra
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.utils.PREVIEWS
 import space.taran.arknavigator.utils.extension
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 
 data class PreviewAndThumbnail(val preview: Path, val thumbnail: Path) {
 
@@ -25,7 +25,7 @@ data class PreviewAndThumbnail(val preview: Path, val thumbnail: Path) {
         private fun thumbnailPath(id: ResourceId): Path =
             THUMBNAILS_STORAGE.resolve(id.toString())
 
-        init {
+        fun initDirs() {
             Files.createDirectories(PREVIEWS_STORAGE)
             Files.createDirectories(THUMBNAILS_STORAGE)
         }
