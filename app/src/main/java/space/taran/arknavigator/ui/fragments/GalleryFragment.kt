@@ -337,6 +337,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
         val actionString = when (actionType) {
             Intent.ACTION_VIEW -> "View the resource with:"
             Intent.ACTION_EDIT -> {
+                intent.putExtra("SAVE_FOLDER_PATH", file.parent)
                 intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                 "Edit the resource with:"
             }
