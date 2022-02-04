@@ -10,6 +10,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
+import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.FragmentFoldersBinding
 import space.taran.arknavigator.mvp.presenter.FoldersPresenter
 import space.taran.arknavigator.mvp.view.FoldersView
@@ -93,6 +94,10 @@ class FoldersFragment : MvpAppCompatFragment(), FoldersView {
 
     override fun notifyUser(message: String, moreTime: Boolean) {
         Notifications.notifyUser(context, message, moreTime)
+    }
+
+    override fun notifyUser(messageID: Int, moreTime: Boolean) {
+        Notifications.notifyUser(context, messageID, moreTime)
     }
 
     private fun initResultListeners() {

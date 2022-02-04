@@ -24,9 +24,6 @@ class SettingsPresenter : MvpPresenter<SettingsView>() {
         super.onFirstViewAttach()
 
         viewState.init()
-        presenterScope.launch {
-            notifyAllPreferences()
-        }
     }
 
     fun onCreateView() {
@@ -35,13 +32,17 @@ class SettingsPresenter : MvpPresenter<SettingsView>() {
         }
     }
 
-    fun onCrashReportingClick(isCrashReportEnabled: Boolean) {
+    fun onCrashReportingClick(
+        isCrashReportEnabled: Boolean,
+        isButtonPressed: Boolean
+    ) {
         presenterScope.launch {
-            viewState.notifyUser(
-                if (isCrashReportEnabled)
-                    R.string.crash_reporting_enabled else
-                    R.string.crash_reporting_disabled
-            )
+            if (isButtonPressed)
+                viewState.notifyUser(
+                    if (isCrashReportEnabled)
+                        R.string.crash_reporting_enabled else
+                        R.string.crash_reporting_disabled
+                )
             Log.d(
                 SETTINGS_SCREEN,
                 "Saving crash report preference, is enabled: $isCrashReportEnabled"
@@ -50,13 +51,17 @@ class SettingsPresenter : MvpPresenter<SettingsView>() {
         }
     }
 
-    fun onImgCacheReplicationClick(cacheReplicationEnabled: Boolean) {
+    fun onImgCacheReplicationClick(
+        cacheReplicationEnabled: Boolean,
+        isButtonPressed: Boolean
+    ) {
         presenterScope.launch {
-            viewState.notifyUser(
-                if (cacheReplicationEnabled)
-                    R.string.images_cache_replication_enabled else
-                    R.string.images_cache_replication_disabled
-            )
+            if (isButtonPressed)
+                viewState.notifyUser(
+                    if (cacheReplicationEnabled)
+                        R.string.images_cache_replication_enabled else
+                        R.string.images_cache_replication_disabled
+                )
             Log.d(
                 SETTINGS_SCREEN,
                 "Saving imgCacheReplication preference, " +
@@ -66,13 +71,17 @@ class SettingsPresenter : MvpPresenter<SettingsView>() {
         }
     }
 
-    fun onIndexReplicationClick(indexReplicationEnabled: Boolean) {
+    fun onIndexReplicationClick(
+        indexReplicationEnabled: Boolean,
+        isButtonPressed: Boolean
+    ) {
         presenterScope.launch {
-            viewState.notifyUser(
-                if (indexReplicationEnabled)
-                    R.string.index_replication_enabled else
-                    R.string.index_replication_disabled
-            )
+            if (isButtonPressed)
+                viewState.notifyUser(
+                    if (indexReplicationEnabled)
+                        R.string.index_replication_enabled else
+                        R.string.index_replication_disabled
+                )
             Log.d(
                 SETTINGS_SCREEN,
                 "Saving indexReplication preference, " +

@@ -52,16 +52,25 @@ class SettingsFragment : MvpAppCompatFragment(), SettingsView {
         App.instance.appComponent.inject(this)
 
         binding.apply {
-            crashReportSwitch.setOnCheckedChangeListener { compoundButton, b ->
-                presenter.onCrashReportingClick(b)
+            crashReportSwitch.setOnUserCheckedChangeListener { v, b ->
+                presenter.onCrashReportingClick(
+                    b,
+                    v?.isPressed ?: false
+                )
             }
 
-            cacheReplicationSwitch.setOnCheckedChangeListener { compoundButton, b ->
-                presenter.onImgCacheReplicationClick(b)
+            cacheReplicationSwitch.setOnUserCheckedChangeListener { v, b ->
+                presenter.onImgCacheReplicationClick(
+                    b,
+                    v?.isPressed ?: false
+                )
             }
 
-            indexReplicationSwitch.setOnCheckedChangeListener { compoundButton, b ->
-                presenter.onIndexReplicationClick(b)
+            indexReplicationSwitch.setOnUserCheckedChangeListener { v, b ->
+                presenter.onIndexReplicationClick(
+                    b,
+                    v?.isPressed ?: false
+                )
             }
 
             crashInfo.setOnClickListener {
@@ -135,20 +144,22 @@ class SettingsFragment : MvpAppCompatFragment(), SettingsView {
 
     override fun setCrashReportPreference(isCrashReportEnabled: Boolean) {
         binding.crashReportSwitch.apply {
-            if (isChecked != isCrashReportEnabled) isChecked = isCrashReportEnabled
+            if (isChecked != isCrashReportEnabled)
+                toggleSwitchSilent(isCrashReportEnabled)
         }
     }
 
     override fun setImgCacheReplicationPref(isImgReplicationEnabled: Boolean) {
         binding.cacheReplicationSwitch.apply {
-            if (isChecked != isImgReplicationEnabled) isChecked =
-                isImgReplicationEnabled
+            if (isChecked != isImgReplicationEnabled)
+                toggleSwitchSilent(isImgReplicationEnabled)
         }
     }
 
     override fun setIndexReplicationPref(isIndexReplication: Boolean) {
         binding.indexReplicationSwitch.apply {
-            if (isChecked != isIndexReplication) isChecked = isIndexReplication
+            if (isChecked != isIndexReplication)
+                toggleSwitchSilent(isIndexReplication)
         }
     }
 

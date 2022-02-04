@@ -44,7 +44,7 @@
                 android:padding="4dp"
                 android:src="@drawable/ic_info" />
 
-            <com.google.android.material.switchmaterial.SwitchMaterial
+            <space.taran.arknavigator.ui.view.UserSwitchMaterial
                 android:id="@+id/crashReportSwitch"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
@@ -83,7 +83,7 @@
                 android:padding="4dp"
                 android:src="@drawable/ic_info" />
 
-            <com.google.android.material.switchmaterial.SwitchMaterial
+            <space.taran.arknavigator.ui.view.UserSwitchMaterial
                 android:id="@+id/cacheReplicationSwitch"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
@@ -122,7 +122,7 @@
                 android:padding="4dp"
                 android:src="@drawable/ic_info" />
 
-            <com.google.android.material.switchmaterial.SwitchMaterial
+            <space.taran.arknavigator.ui.view.UserSwitchMaterial
                 android:id="@+id/indexReplicationSwitch"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"

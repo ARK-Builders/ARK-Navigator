@@ -8,6 +8,8 @@ import space.taran.arknavigator.di.modules.RepoModule
 import space.taran.arknavigator.mvp.presenter.MainPresenter
 import space.taran.arknavigator.mvp.presenter.FoldersPresenter
 import space.taran.arknavigator.mvp.presenter.ResourcesPresenter
+import space.taran.arknavigator.mvp.presenter.GalleryPresenter
+import space.taran.arknavigator.mvp.presenter.SettingsPresenter
 import space.taran.arknavigator.mvp.presenter.adapter.ResourcesGridPresenter
 import space.taran.arknavigator.mvp.presenter.adapter.folderstree.FoldersTreePresenter
 import space.taran.arknavigator.mvp.presenter.dialog.EditTagsDialogPresenter
@@ -19,6 +21,7 @@ import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.fragments.FoldersFragment
 import space.taran.arknavigator.ui.fragments.GalleryFragment
 import space.taran.arknavigator.ui.fragments.ResourcesFragment
+import space.taran.arknavigator.ui.fragments.SettingsFragment
 import javax.inject.Singleton
 
 @Singleton
