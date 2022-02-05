@@ -90,7 +90,9 @@ enum class MetaExtraTag {
 data class ResourceMetaExtra(val data: Map<MetaExtraTag, Long>) {
     companion object {
         fun fromRoom(room: List<ResourceExtra>): ResourceMetaExtra {
-            val data = room.map { MetaExtraTag.values()[it.key] to it.value }.toMap()
+            val data = room.map {
+                MetaExtraTag.values()[it.ordinal] to it.value
+            }.toMap()
             return ResourceMetaExtra(data)
         }
         fun provide(kind: ResourceKind?, path: Path): ResourceMetaExtra? {

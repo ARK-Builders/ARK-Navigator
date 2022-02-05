@@ -9,7 +9,13 @@ object DocumentExtraLoader {
     fun load(extra: ResourceMetaExtra, pagesTV: TextView, verbose: Boolean) {
         val pages = extra.data[MetaExtraTag.PAGES]
         if (pages != null) {
-            val label = if (verbose) "$pages pages" else "$pages"
+            val label = when {
+                verbose -> {
+                    if (pages == 1L) "$pages page"
+                    else "$pages pages"
+                }
+                else -> "$pages"
+            }
             pagesTV.textOrGone(label)
         }
     }
