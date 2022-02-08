@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import space.taran.arknavigator.BuildConfig
 import space.taran.arknavigator.utils.Sorting
 import javax.inject.Inject
 
@@ -29,6 +30,14 @@ class UserPreferences @Inject constructor(val context: Context) {
         preferences[PreferencesKeys.SORTING_ORDER] ?: true
     }.distinctUntilChanged()
 
+    suspend fun clearPreferences() {
+        setSorting(Sorting.DEFAULT)
+        setSortingAscending(IS_SORTING_ASCENDING_DEFAULT)
+        setCrashReportEnabled(null)
+        setCacheReplicationEnabled(CACHE_REPLICATION_DEFAULT)
+        setIndexReplicationEnabled(INDEX_REPLICATION_DEFAULT)
+    }
+
     suspend fun setSorting(sorting: Sorting) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.SORTING_PREFERENCE] = sorting.ordinal
@@ -47,15 +56,58 @@ class UserPreferences @Inject constructor(val context: Context) {
     }
 
     suspend fun isSortingAscending(): Boolean =
-        dataStore.data.first()[PreferencesKeys.SORTING_ORDER] ?: true
+        dataStore.data.first()[
+            PreferencesKeys.SORTING_ORDER
+        ] ?: IS_SORTING_ASCENDING_DEFAULT
 
     private fun convertIntToSorting(intValue: Int?): Sorting {
         return if (intValue == null) Sorting.DEFAULT
         else Sorting.values()[intValue]
     }
 
+    suspend fun setCrashReportEnabled(enabled: Boolean?) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.CRASH_REPORT_PREFERENCE] =
+                enabled ?: BuildConfig.DEBUG
+        }
+    }
+
+    suspend fun isCrashReportEnabled(): Boolean =
+        dataStore.data.first()[PreferencesKeys.CRASH_REPORT_PREFERENCE]
+            ?: BuildConfig.DEBUG
+
+    suspend fun setCacheReplicationEnabled(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.IMG_CACHE_REPLICATION_PREF] = enabled
+        }
+    }
+
+    suspend fun isCacheReplicationEnabled(): Boolean =
+        dataStore.data.first()[PreferencesKeys.IMG_CACHE_REPLICATION_PREF]
+            ?: CACHE_REPLICATION_DEFAULT
+
+    suspend fun setIndexReplicationEnabled(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.INDEX_REPLICATION_PREF] = enabled
+        }
+    }
+
+    suspend fun isIndexReplicationEnabled(): Boolean =
+        dataStore.data.first()[PreferencesKeys.INDEX_REPLICATION_PREF]
+            ?: INDEX_REPLICATION_DEFAULT
+
     private object PreferencesKeys {
         val SORTING_PREFERENCE = intPreferencesKey("sorting_preference")
         val SORTING_ORDER = booleanPreferencesKey("sorting_preference_is_ascending")
+        val CRASH_REPORT_PREFERENCE =
+            booleanPreferencesKey("crash_report_preference")
+        val IMG_CACHE_REPLICATION_PREF =
+            booleanPreferencesKey("img_cache_replication_preference")
+        val INDEX_REPLICATION_PREF =
+            booleanPreferencesKey("index_replication_preference")
     }
 }
+
+const val IS_SORTING_ASCENDING_DEFAULT = true
+const val CACHE_REPLICATION_DEFAULT = false
+const val INDEX_REPLICATION_DEFAULT = false
