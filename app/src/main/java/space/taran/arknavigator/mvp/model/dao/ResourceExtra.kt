@@ -1,13 +1,13 @@
 package space.taran.arknavigator.mvp.model.dao
 
-import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
-import androidx.room.PrimaryKey
+import androidx.room.ColumnInfo
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMetaExtra
 
 @Entity(
+    primaryKeys = ["resource", "ordinal"],
     foreignKeys = [
         ForeignKey(
             entity = Resource::class,
@@ -21,8 +21,7 @@ data class ResourceExtra(
     @ColumnInfo(index = true)
     val resource: ResourceId,
 
-    @PrimaryKey(autoGenerate = false)
-    val key: Int,
+    val ordinal: Int,
 
     val value: Long
 ) {
@@ -32,7 +31,7 @@ data class ResourceExtra(
             extra?.data?.entries?.map { (tag, value) ->
                 ResourceExtra(
                     resource = id,
-                    key = tag.ordinal,
+                    ordinal = tag.ordinal,
                     value = value
                 )
             } ?: emptyList()
