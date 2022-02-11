@@ -94,7 +94,7 @@ class GalleryPresenter(
 
     fun onEditFabClick() {
         Log.d(GALLERY_SCREEN, "[edit_resource] clicked at position $currentPos")
-        viewState.editResource(index.getPath(currentResource.id))
+        viewState.selectImageEditor(index.getPath(currentResource.id))
     }
 
     fun onRemoveFabClick() = presenterScope.launch(NonCancellable) {
@@ -167,5 +167,9 @@ class GalleryPresenter(
         Log.d(GALLERY_SCREEN, "quitting from GalleryPresenter")
         viewState.exitFullscreen()
         router.exit()
+    }
+
+    fun onImageEditorSelected(componentName: String) {
+        viewState.editResource(componentName, index.getPath(currentResource.id))
     }
 }
