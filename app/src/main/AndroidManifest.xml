@@ -3,12 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="space.taran.arknavigator">
 
-    <!-- todo: are these permissions really necessary? -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" tools:ignore="ScopedStorage" />
 
-    <!-- todo: see "requestLegacyExternalStorage"-->
     <application
         android:name="space.taran.arknavigator.ui.App"
         android:allowBackup="true"
