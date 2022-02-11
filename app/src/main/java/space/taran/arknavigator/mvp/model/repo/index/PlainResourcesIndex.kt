@@ -29,7 +29,7 @@ internal data class Difference(
 // The index must read from the DAO only during application startup,
 // since DB doesn't change from outside. But we must persist all changes
 // during application lifecycle into the DAO for the case of any unexpected exit.
-class PlainResourcesIndex internal constructor (
+class PlainResourcesIndex internal constructor(
     private val root: Path,
     private val dao: ResourceDao,
     resources: Map<Path, ResourceMeta>
@@ -185,7 +185,8 @@ class PlainResourcesIndex internal constructor (
             Log.d(
                 PREVIEWS,
                 "providing previews/thumbnails for ${
-                metaByPath.size} resources"
+                metaByPath.size
+                } resources"
             )
             PreviewAndThumbnail.initDirs()
 
@@ -201,7 +202,8 @@ class PlainResourcesIndex internal constructor (
                         Log.e(
                             PREVIEWS,
                             "Failed to generate preview/thumbnail for id ${
-                            metaByPath[path]?.id} ($path)"
+                            metaByPath[path]?.id
+                            } ($path)"
                         )
                     }
                 }

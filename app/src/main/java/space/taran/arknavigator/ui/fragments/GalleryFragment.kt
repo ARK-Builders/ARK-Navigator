@@ -170,10 +170,14 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
         Notifications.notifyUser(context, message, moreTime)
     }
 
+    override fun notifyUser(messageID: Int, moreTime: Boolean) {
+        Notifications.notifyUser(context, messageID, moreTime)
+    }
+
     override fun selectImageEditor(resourcePath: Path) {
         val intent = getExternalAppIntent(resourcePath, Intent.ACTION_EDIT, false)
         val intentPick = Intent().apply {
-            action = Intent.ACTION_CHOOSER
+            action = Intent.ACTION_PICK_ACTIVITY
             putExtra(Intent.EXTRA_TITLE, "Edit the resource with:")
             putExtra(Intent.EXTRA_INTENT, intent)
         }
@@ -181,8 +185,14 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
     }
 
     override fun editResource(editor: String, resourcePath: Path) {
-        val intent = getExternalAppIntent(resourcePath, Intent.ACTION_EDIT, false)
+        val detachProcess = !editor.startsWith("space.taran.arkretouch")
+        val intent = getExternalAppIntent(
+            resourcePath,
+            Intent.ACTION_EDIT,
+            detachProcess
+        )
         intent.component = ComponentName.unflattenFromString(editor)
+        intent.putExtra("SAVE_FOLDER_PATH", resourcePath.toFile().parent)
         imageEditor.launch(intent)
     }
 

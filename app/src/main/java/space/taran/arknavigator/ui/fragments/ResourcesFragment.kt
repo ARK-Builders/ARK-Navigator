@@ -96,7 +96,7 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         initResultListeners()
 
         FullscreenHelper.setStatusBarVisibility(true, requireActivity().window)
-        (activity as MainActivity).setSelectedTab(1)
+        (activity as MainActivity).setSelectedTab(R.id.page_tags)
         (activity as MainActivity).setToolbarVisibility(true)
         (requireActivity() as MainActivity).setBottomNavigationVisibility(true)
         setHasOptionsMenu(true)
@@ -179,6 +179,10 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
             message,
             moreTime
         )
+    }
+
+    override fun notifyUser(messageID: Int, moreTime: Boolean) {
+        Notifications.notifyUser(context, messageID, moreTime)
     }
 
     override fun setTagsEnabled(enabled: Boolean) {
@@ -329,8 +333,7 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
      * ResourcesFragment can be overlapped by GalleryFragment
      */
     private fun isFragmentVisible(): Boolean {
-        return parentFragmentManager.fragments.find {
-            f ->
+        return parentFragmentManager.fragments.find { f ->
             f is GalleryFragment
         } == null
     }

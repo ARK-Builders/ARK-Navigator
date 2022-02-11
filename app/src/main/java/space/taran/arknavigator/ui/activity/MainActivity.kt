@@ -61,6 +61,11 @@ class MainActivity : MvpAppCompatActivity(), MainView {
         binding.bottomNavigation.setOnApplyWindowInsetsListener(null)
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
+                R.id.page_settings -> {
+                    Log.d(MAIN, "switching to Settings screen")
+                    presenter.goToSettingsScreen()
+                    true
+                }
                 R.id.page_roots -> {
                     Log.d(MAIN, "switching to Folders screen")
                     presenter.goToFoldersScreen()
@@ -176,9 +181,15 @@ class MainActivity : MvpAppCompatActivity(), MainView {
         }
     }
 
-    fun setSelectedTab(pos: Int) {
-        Log.d(MAIN, "tab $pos selected")
-        binding.bottomNavigation.menu.getItem(pos).isChecked = true
+    fun setSelectedTab(menuItemID: Int) {
+        binding.bottomNavigation.apply {
+            Log.d(
+                MAIN,
+                "tab with id $menuItemID selected," +
+                    "title: ${menu.findItem(menuItemID).title}"
+            )
+            menu.findItem(menuItemID).isChecked = true
+        }
     }
 
     fun setBottomNavigationEnabled(isEnabled: Boolean) {
@@ -189,6 +200,10 @@ class MainActivity : MvpAppCompatActivity(), MainView {
 
     override fun notifyUser(message: String, moreTime: Boolean) {
         Notifications.notifyUser(this, message, moreTime)
+    }
+
+    override fun notifyUser(messageID: Int, moreTime: Boolean) {
+        Notifications.notifyUser(this, messageID, moreTime)
     }
 
     @RequiresApi(Build.VERSION_CODES.R)

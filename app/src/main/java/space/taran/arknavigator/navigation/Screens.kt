@@ -6,6 +6,7 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.ui.fragments.FoldersFragment
 import space.taran.arknavigator.ui.fragments.GalleryFragment
 import space.taran.arknavigator.ui.fragments.ResourcesFragment
+import space.taran.arknavigator.ui.fragments.SettingsFragment
 
 class Screens {
     class FoldersScreen : SupportAppScreen() {
@@ -23,5 +24,9 @@ class Screens {
     ) : SupportAppScreen() {
         override fun getFragment() =
             GalleryFragment.newInstance(rootAndFav, resources, startAt)
+    }
+
+    class SettingsScreen : SupportAppScreen() {
+        override fun getFragment() = SettingsFragment.newInstance()
     }
 }
