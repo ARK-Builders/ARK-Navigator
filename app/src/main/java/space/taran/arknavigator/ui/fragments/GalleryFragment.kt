@@ -173,7 +173,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
     override fun selectImageEditor(resourcePath: Path) {
         val intent = getExternalAppIntent(resourcePath, Intent.ACTION_EDIT, false)
         val intentPick = Intent().apply {
-            action = Intent.ACTION_PICK_ACTIVITY
+            action = Intent.ACTION_CHOOSER
             putExtra(Intent.EXTRA_TITLE, "Edit the resource with:")
             putExtra(Intent.EXTRA_INTENT, intent)
         }
