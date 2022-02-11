@@ -1,6 +1,8 @@
 package space.taran.arknavigator.ui.fragments
 
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -9,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
 import androidx.core.os.bundleOf
 import androidx.core.view.doOnNextLayout
@@ -59,6 +62,26 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
             App.instance.appComponent.inject(this)
         }
     }
+
+    private val pickImageEditor =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            val componentName = it.data?.component?.flattenToString()
+            Log.d(GALLERY_SCREEN, "image editor: $componentName")
+            componentName?.let { presenter.onImageEditorSelected(componentName) }
+        }
+
+    private val imageEditor =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            it.data?.let { intent ->
+                Log.d(GALLERY_SCREEN, "Edit image result: $intent")
+                if (it.resultCode == Activity.RESULT_OK) {
+                    val originFileUri = intent.getStringExtra("RESULT_ORIGINAL_URI")
+                    val saveFileUri = intent.getStringExtra("RESULT_SAVE_URI")
+                    Log.d(GALLERY_SCREEN, "RESULT_ORIGINAL_URI: $originFileUri")
+                    Log.d(GALLERY_SCREEN, "RESULT_SAVE_URI: $saveFileUri")
+                }
+            }
+        }
 
     private lateinit var pagerAdapter: PreviewsPager
 
@@ -150,12 +173,27 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
         Notifications.notifyUser(context, messageID, moreTime)
     }
 
-    override fun editResource(resourcePath: Path) =
-        openIntentChooser(
+    override fun selectImageEditor(resourcePath: Path) {
+        val intent = getExternalAppIntent(resourcePath, Intent.ACTION_EDIT, false)
+        val intentPick = Intent().apply {
+            action = Intent.ACTION_PICK_ACTIVITY
+            putExtra(Intent.EXTRA_TITLE, "Edit the resource with:")
+            putExtra(Intent.EXTRA_INTENT, intent)
+        }
+        pickImageEditor.launch(intentPick)
+    }
+
+    override fun editResource(editor: String, resourcePath: Path) {
+        val detachProcess = !editor.startsWith("space.taran.arkretouch")
+        val intent = getExternalAppIntent(
             resourcePath,
             Intent.ACTION_EDIT,
-            detachProcess = true
+            detachProcess
         )
+        intent.component = ComponentName.unflattenFromString(editor)
+        intent.putExtra("SAVE_FOLDER_PATH", resourcePath.toFile().parent)
+        imageEditor.launch(intent)
+    }
 
     override fun shareResource(resourcePath: Path) =
         openIntentChooser(
@@ -316,47 +354,51 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
         actionType: String,
         detachProcess: Boolean
     ) {
-
         Log.i(GALLERY_SCREEN, "Opening resource in an external application")
         Log.i(GALLERY_SCREEN, "path: $resourcePath")
         Log.i(GALLERY_SCREEN, "action: $actionType")
 
-        val file = resourcePath.toFile()
-        val extension: String = extension(resourcePath)
-
-        val context = requireContext()
-
-        val uri = FileProvider.getUriForFile(
-            context,
-            BuildConfig.APPLICATION_ID + ".provider", file
-        )
-
-        val intent = Intent()
-        intent.setDataAndType(uri, context.contentResolver.getType(uri))
-        Log.d(GALLERY_SCREEN, "URI: ${intent.data}")
-        Log.d(GALLERY_SCREEN, "MIME: ${intent.type}")
-
-        intent.action = actionType
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        val actionString = when (actionType) {
+        val intent = getExternalAppIntent(resourcePath, actionType, detachProcess)
+        val title = when (actionType) {
             Intent.ACTION_VIEW -> "View the resource with:"
-            Intent.ACTION_EDIT -> {
-                intent.putExtra("SAVE_FOLDER_PATH", file.parent)
-                intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-                "Edit the resource with:"
-            }
-            Intent.ACTION_SEND -> {
-                intent.putExtra(Intent.EXTRA_STREAM, uri)
-                "Share the resource with:"
-            }
+            Intent.ACTION_EDIT -> "Edit the resource with:"
+            Intent.ACTION_SEND -> "Share the resource with:"
             else -> "Open the resource with:"
         }
-        if (detachProcess) {
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
+        startActivity(Intent.createChooser(intent, title))
+    }
 
-        val chooser = Intent.createChooser(intent, actionString)
-        context.startActivity(chooser)
+    private fun getExternalAppIntent(
+        resourcePath: Path,
+        actionType: String,
+        detachProcess: Boolean
+    ): Intent {
+        val file = resourcePath.toFile()
+        val extension: String = extension(resourcePath)
+        val uri = FileProvider.getUriForFile(
+            requireContext(),
+            BuildConfig.APPLICATION_ID + ".provider",
+            file
+        )
+        val intent = Intent().apply {
+            setDataAndType(uri, requireContext().contentResolver.getType(uri))
+            action = actionType
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            when (actionType) {
+                Intent.ACTION_EDIT -> {
+                    addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                }
+                Intent.ACTION_SEND -> {
+                    putExtra(Intent.EXTRA_STREAM, uri)
+                }
+            }
+            if (detachProcess) {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+        }
+        Log.d(GALLERY_SCREEN, "URI: ${intent.data}")
+        Log.d(GALLERY_SCREEN, "MIME: ${intent.type}")
+        return intent
     }
 
     private fun getPXFromDP(dpValue: Float): Float {

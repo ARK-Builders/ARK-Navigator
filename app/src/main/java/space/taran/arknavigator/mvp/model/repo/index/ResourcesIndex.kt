@@ -3,9 +3,6 @@ package space.taran.arknavigator.mvp.model.repo.index
 import java.nio.file.Path
 
 interface ResourcesIndex {
-
-    // todo: with async indexing we must emit ids of not-indexed-yet resources too
-
     // we pass all known resource ids to a storage because
     // 1) any storage exists globally
     // 2) we maintain only 1 storage per root

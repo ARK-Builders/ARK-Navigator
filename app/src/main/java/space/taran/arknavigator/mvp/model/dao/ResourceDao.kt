@@ -31,5 +31,4 @@ interface ResourceDao {
 
     @Query("SELECT * FROM Resource where root = :root")
     suspend fun query(root: StringPath): List<ResourceWithExtra>
-    // todo: can be optimized with `root in (:roots)`
 }
