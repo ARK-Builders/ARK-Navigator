@@ -31,4 +31,5 @@
     <string name="images_cache_replication_disabled">Images cache replication disabled!</string>
     <string name="index_replication_enabled">Index replication enabled!</string>
     <string name="index_replication_disabled">Index replication disabled!</string>
+    <string name="kind_tags_label">Show Kind Tags: </string>
 </resources>
