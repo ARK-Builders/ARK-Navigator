@@ -1,9 +1,14 @@
 package space.taran.arknavigator.mvp.presenter.adapter.tagsselector
 
 import android.util.Log
+import space.taran.arknavigator.mvp.model.repo.extra.DocumentMetaExtra
+import space.taran.arknavigator.mvp.model.repo.extra.ImageMetaExtra
+import space.taran.arknavigator.mvp.model.repo.extra.VideoMetaExtra
+import java.nio.file.Path
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
+import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.view.ResourcesView
@@ -26,6 +31,8 @@ class TagsSelectorPresenter(
     private var filter = ""
     var filterEnabled = false
         private set
+
+    var check = false
 
     var includedTags = mutableSetOf<Tag>()
         private set
@@ -122,14 +129,42 @@ class TagsSelectorPresenter(
             return
 
         val resources = index!!.listIds(prefix)
+
+        var myResources = mutableListOf<ResourceMeta>()
+        resources.map {
+            myResources.add(index!!.getMeta(it))
+        }
+
         val tagsByResources = storage!!.groupTagsByResources(resources)
-        val allTags = tagsByResources.values.flatten().toSet()
+
+        var tagsMap = mutableMapOf(1L to "".toSet() as Tags)
+        var checkTag = check
+
+        var resourceCounter = 0
+        tagsByResources.map {
+            var list = mutableListOf<Tag>()
+            it.value.map {
+                list.add(it)
+            }
+            if (checkTag) {
+                if (kindByExt(myResources[resourceCounter].extension) != null)
+                    list.add(
+                        "Kind: " + kindByExt(myResources[resourceCounter].extension)
+                    )
+            }
+            tagsMap.put(it.key, list.toSet() as Tags)
+            resourceCounter++
+        }
+        tagsMap.remove(1L)
+        tagsMap.toMap()
+
+        val allTags = tagsMap.values.flatten().toSet()
 
         // some tags could have been removed from storage
         excludedTags = excludedTags.intersect(allTags).toMutableSet()
         includedTags = includedTags.intersect(allTags).toMutableSet()
 
-        val selectionAndComplementWithTags = tagsByResources
+        val selectionAndComplementWithTags = tagsMap
             .toList()
             .groupBy { (_, tags) ->
                 tags.containsAll(includedTags) &&
@@ -307,5 +342,11 @@ class TagsSelectorPresenter(
 
         if (needToCalculate)
             calculateTagsAndSelection()
+    }
+
+    fun setToggle(boolean: Boolean) {
+        check = boolean
+        resetTags()
+        calculateTagsAndSelection()
     }
 }

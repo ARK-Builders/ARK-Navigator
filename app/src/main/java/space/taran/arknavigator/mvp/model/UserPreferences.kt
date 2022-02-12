@@ -69,6 +69,13 @@ class UserPreferences @Inject constructor(val context: Context) {
         }
     }
 
+    suspend fun setKindTagsEnabled(enabled: Boolean?) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SHOW_KIND_PREFERENCE] =
+                enabled ?: BuildConfig.DEBUG
+        }
+    }
+
     suspend fun isCrashReportEnabled(): Boolean =
         dataStore.data.first()[PreferencesKeys.CRASH_REPORT]
             ?: DefaultValues.CRASH_REPORT
@@ -93,6 +100,10 @@ class UserPreferences @Inject constructor(val context: Context) {
         dataStore.data.first()[PreferencesKeys.INDEX_REPLICATION]
             ?: DefaultValues.INDEX_REPLICATION
 
+    suspend fun isShowTagsEnabled(): Boolean =
+        dataStore.data.first()[
+            PreferencesKeys.SHOW_KIND_PREFERENCE
+        ] ?: SHOW_KIND_PREFERENCE
     suspend fun setRemovingLostResourcesTagsEnabled(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.REMOVING_LOST_RESOURCES_TAGS] = enabled
