@@ -91,6 +91,17 @@ class TagsSelectorAdapter(
         this.isCheckable = true
         this.isChecked = false
         this.setTextColor(Color.BLACK)
+        if (tag.contains("Kind:", ignoreCase = true)) {
+            this.chipBackgroundColor =
+                ColorStateList.valueOf(
+                    ContextCompat.getColor(context, R.color.blue)
+                )
+        } else {
+            this.chipBackgroundColor =
+                ColorStateList.valueOf(
+                    ContextCompat.getColor(context, R.color.grayTransparent)
+                )
+        }
         this.text = tag
 
         this.setOnClickListener {

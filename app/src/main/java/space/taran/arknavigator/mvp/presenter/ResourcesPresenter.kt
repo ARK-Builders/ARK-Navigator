@@ -4,6 +4,7 @@ import android.util.Log
 import kotlinx.coroutines.launch
 import moxy.MvpPresenter
 import moxy.presenterScope
+import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.repo.FoldersRepo
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.model.repo.index.AggregatedResourcesIndex
@@ -39,6 +40,9 @@ class ResourcesPresenter(
 
     @Inject
     lateinit var tagsStorageRepo: TagsStorageRepo
+
+    @Inject
+    lateinit var userPreferences: UserPreferences
 
     private lateinit var index: ResourcesIndex
     private lateinit var storage: TagsStorage
@@ -99,6 +103,7 @@ class ResourcesPresenter(
 
             resetResources(resources, false)
             tagsSelectorPresenter.init(index, storage)
+            tagsSelectorPresenter.setToggle(userPreferences.isShowTagsEnabled())
             tagsSelectorPresenter.calculateTagsAndSelection()
 
             val path = (rootAndFav.fav ?: rootAndFav.root)
@@ -119,7 +124,11 @@ class ResourcesPresenter(
             resetResources(listResources(), needToUpdateAdapter = false)
         else
             resetResources(listResources(untaggedOnly = true))
+        tagsSelectorPresenter.calculateTagsAndSelection()
+    }
 
+    fun onTagsChanged(showTagsEnabled: Boolean) = presenterScope.launch {
+        tagsSelectorPresenter.setToggle(showTagsEnabled)
         tagsSelectorPresenter.calculateTagsAndSelection()
     }
 
