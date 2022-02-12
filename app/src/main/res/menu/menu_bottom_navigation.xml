@@ -5,19 +5,19 @@
         android:enabled="true"
         android:icon="@drawable/ic_settings"
         android:tint="?attr/colorControlNormal"
-        android:title="Settings" />
+        android:title="@string/page_settings_title" />
 
     <item
         android:id="@+id/page_roots"
         android:enabled="true"
         android:icon="@drawable/ic_menu_explore"
         android:tint="?attr/colorControlNormal"
-        android:title="Manage folders" />
+        android:title="@string/page_roots_title" />
 
     <item
         android:id="@+id/page_tags"
         android:enabled="true"
         android:icon="@drawable/ic_menu_navigate"
         android:tint="?attr/colorControlNormal"
-        android:title="Navigate data" />
+        android:title="@string/page_tags_title" />
 </menu>

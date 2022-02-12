@@ -32,4 +32,10 @@
     <string name="index_replication_enabled">Index replication enabled!</string>
     <string name="index_replication_disabled">Index replication disabled!</string>
     <string name="kind_tags_label">Show Kind Tags: </string>
+    <string name="page_settings_title">Settings</string>
+    <string name="page_roots_title">Manage folders</string>
+    <string name="page_tags_title">Navigate data</string>
+    <string name="menu_tags_on_title">Tags on</string>
+    <string name="menu_tags_off_title">Tags off</string>
+    <string name="menu_tags_sort_by_title">Sort by</string>
 </resources>
