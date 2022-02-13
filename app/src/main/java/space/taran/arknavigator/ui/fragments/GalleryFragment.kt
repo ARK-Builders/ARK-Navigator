@@ -190,8 +190,11 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
             Intent.ACTION_EDIT,
             detachProcess
         )
-        intent.component = ComponentName.unflattenFromString(editor)
-        intent.putExtra("SAVE_FOLDER_PATH", resourcePath.toFile().parent)
+        intent.apply {
+            component = ComponentName.unflattenFromString(editor)
+            putExtra("SAVE_FOLDER_PATH", resourcePath.parent.toString())
+            putExtra("real_file_path_2", resourcePath.toString())
+        }
         imageEditor.launch(intent)
     }
 
