@@ -1,9 +1,6 @@
 package space.taran.arknavigator.mvp.presenter.adapter
 
 import android.util.Log
-import java.nio.file.Files
-import javax.inject.Inject
-import kotlin.system.measureTimeMillis
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
@@ -15,6 +12,7 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
+import space.taran.arknavigator.mvp.presenter.ResourcesPresenter
 import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.mvp.view.item.FileItemView
 import space.taran.arknavigator.navigation.AppRouter
@@ -23,11 +21,16 @@ import space.taran.arknavigator.utils.RESOURCES_SCREEN
 import space.taran.arknavigator.utils.Sorting
 import space.taran.arknavigator.utils.reifySorting
 import space.taran.arknavigator.utils.unequalCompareBy
+import java.nio.file.Files
+import javax.inject.Inject
+import kotlin.io.path.notExists
+import kotlin.system.measureTimeMillis
 
 class ResourcesGridPresenter(
     val rootAndFav: RootAndFav,
     val viewState: ResourcesView,
-    val scope: CoroutineScope
+    val scope: CoroutineScope,
+    val resourcesPresenter: ResourcesPresenter
 ) {
     @Inject
     lateinit var userPreferences: UserPreferences
@@ -65,10 +68,21 @@ class ResourcesGridPresenter(
             throw AssertionError("Resource can't be a directory")
         }
 
+        if (path.notExists())
+            scope.launch { resourcesPresenter.onRemovedResourceDetected() }
+
         view.setIconOrPreview(path, resource)
     }
 
-    fun onItemClick(pos: Int) {
+    fun onItemClick(pos: Int) = scope.launch {
+        if (selection.containsNotExistingResources(index)) {
+            val clickedResource = selection[pos]
+            resourcesPresenter.onRemovedResourceDetected()
+            // selection has been updated
+            if (!selection.contains(clickedResource))
+                return@launch
+        }
+
         router.navigateToFragmentUsingAdd(
             Screens.GalleryScreen(
                 rootAndFav,
@@ -104,8 +118,7 @@ class ResourcesGridPresenter(
     }
 
     suspend fun updateSelection(
-        selection: Set<ResourceId>,
-        needToUpdateAdapter: Boolean = true
+        selection: Set<ResourceId>
     ) =
         withContext(Dispatchers.Default) {
             this@ResourcesGridPresenter.selection = resources
@@ -113,8 +126,7 @@ class ResourcesGridPresenter(
 
             withContext(Dispatchers.Main) {
                 setProgressVisibility(false)
-                if (needToUpdateAdapter)
-                    viewState.updateAdapter()
+                viewState.updateAdapter()
             }
         }
 
@@ -169,7 +181,8 @@ class ResourcesGridPresenter(
         Log.d(
             RESOURCES_SCREEN,
             "sorting by $sorting of ${
-            resources.size} resources took $sortTime milliseconds"
+            resources.size
+            } resources took $sortTime milliseconds"
         )
     }
 
@@ -189,4 +202,14 @@ class ResourcesGridPresenter(
         withContext(Dispatchers.Main) {
             viewState.setProgressVisibility(isVisible, withText)
         }
+}
+
+private fun List<ResourceMeta>.containsNotExistingResources(index: ResourcesIndex):
+    Boolean {
+    forEach { meta ->
+        val path = index.getPath(meta.id)
+        if (path.notExists())
+            return true
+    }
+    return false
 }

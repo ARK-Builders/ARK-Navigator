@@ -17,9 +17,10 @@ import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.setFragmentResultListener
 import androidx.recyclerview.widget.GridLayoutManager
-import kotlin.math.abs
+import kotlinx.coroutines.launch
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
+import moxy.presenterScope
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.FragmentResourcesBinding
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
@@ -36,6 +37,7 @@ import space.taran.arknavigator.utils.RESOURCES_SCREEN
 import space.taran.arknavigator.utils.extensions.closeKeyboard
 import space.taran.arknavigator.utils.extensions.placeCursorToEnd
 import space.taran.arknavigator.utils.extensions.showKeyboard
+import kotlin.math.abs
 
 // `root` is used for querying tags storage and resources index,
 //       if it is `null`, then resources from all roots are taken
@@ -238,13 +240,21 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         setFragmentResultListener(
             GalleryFragment.REQUEST_TAGS_CHANGED_KEY
         ) { _, _ ->
-            presenter.onResourcesOrTagsChanged()
+            presenter.apply {
+                presenterScope.launch {
+                    onResourcesOrTagsChanged()
+                }
+            }
         }
 
         setFragmentResultListener(
             GalleryFragment.REQUEST_RESOURCES_CHANGED_KEY
         ) { _, _ ->
-            presenter.onResourcesOrTagsChanged()
+            presenter.apply {
+                presenterScope.launch {
+                    onResourcesOrTagsChanged()
+                }
+            }
         }
     }
 

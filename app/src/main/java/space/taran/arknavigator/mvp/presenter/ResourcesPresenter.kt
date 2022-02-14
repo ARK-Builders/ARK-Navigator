@@ -1,8 +1,6 @@
 package space.taran.arknavigator.mvp.presenter
 
 import android.util.Log
-import java.nio.file.Path
-import javax.inject.Inject
 import kotlinx.coroutines.launch
 import moxy.MvpPresenter
 import moxy.presenterScope
@@ -23,6 +21,8 @@ import space.taran.arknavigator.navigation.AppRouter
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.utils.RESOURCES_SCREEN
+import java.nio.file.Path
+import javax.inject.Inject
 
 class ResourcesPresenter(
     private val rootAndFav: RootAndFav
@@ -44,12 +44,18 @@ class ResourcesPresenter(
     private lateinit var storage: TagsStorage
     var tagsEnabled: Boolean = true
 
-    val gridPresenter = ResourcesGridPresenter(rootAndFav, viewState, presenterScope)
-        .apply {
-            App.instance.appComponent.inject(this)
-        }
+    val gridPresenter =
+        ResourcesGridPresenter(rootAndFav, viewState, presenterScope, this)
+            .apply {
+                App.instance.appComponent.inject(this)
+            }
     val tagsSelectorPresenter =
-        TagsSelectorPresenter(viewState, rootAndFav.fav, ::onSelectionChange)
+        TagsSelectorPresenter(
+            viewState,
+            rootAndFav.fav,
+            presenterScope,
+            ::onSelectionChange
+        )
 
     override fun onFirstViewAttach() {
         Log.d(RESOURCES_SCREEN, "first view attached in ResourcesPresenter")
@@ -108,7 +114,7 @@ class ResourcesPresenter(
         super.onDestroy()
     }
 
-    fun onResourcesOrTagsChanged() = presenterScope.launch {
+    suspend fun onResourcesOrTagsChanged() {
         if (tagsEnabled)
             resetResources(listResources(), needToUpdateAdapter = false)
         else
@@ -136,14 +142,26 @@ class ResourcesPresenter(
         }
     }
 
-    fun onBackClick() {
+    fun onBackClick() = presenterScope.launch {
         if (!tagsSelectorPresenter.onBackClick())
             router.exit()
     }
 
-    private fun onSelectionChange(selection: Set<ResourceId>) {
+    suspend fun onRemovedResourceDetected() {
+        viewState.setProgressVisibility(true, "Indexing")
+
+        index.reindex()
+        // update current tags storage
+        tagsStorageRepo.provide(rootAndFav)
+
+        viewState.setProgressVisibility(true, "Sorting")
+        onResourcesOrTagsChanged()
+        viewState.setProgressVisibility(false)
+    }
+
+    private suspend fun onSelectionChange(selection: Set<ResourceId>) {
         if (tagsEnabled)
-            presenterScope.launch { updateSelection(selection) }
+            updateSelection(selection)
     }
 
     private fun listResources(untaggedOnly: Boolean = false): Set<ResourceMeta> {
@@ -159,13 +177,10 @@ class ResourcesPresenter(
         return result.toSet()
     }
 
-    private suspend fun updateSelection(
-        selection: Set<ResourceId>,
-        needToUpdateAdapter: Boolean = true
-    ) {
+    private suspend fun updateSelection(selection: Set<ResourceId>) {
         if (this.tagsEnabled) {
             viewState.notifyUser("${selection.size} resources selected")
-            gridPresenter.updateSelection(selection, needToUpdateAdapter)
+            gridPresenter.updateSelection(selection)
         }
     }
 
