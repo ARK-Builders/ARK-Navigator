@@ -20,5 +20,7 @@ interface ResourcesIndex {
 
     fun getMeta(id: ResourceId): ResourceMeta
 
+    suspend fun reindex()
+
     fun remove(id: ResourceId): Path
 }

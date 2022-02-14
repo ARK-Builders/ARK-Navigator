@@ -1,8 +1,6 @@
 package space.taran.arknavigator.mvp.model.repo.index
 
 import android.util.Log
-import java.nio.file.Path
-import kotlin.system.measureTimeMillis
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -14,6 +12,8 @@ import space.taran.arknavigator.mvp.model.repo.index.PlainResourcesIndex.Compani
 import space.taran.arknavigator.mvp.model.repo.index.PlainResourcesIndex.Companion.loadResources
 import space.taran.arknavigator.mvp.model.repo.index.PlainResourcesIndex.Companion.scanResources
 import space.taran.arknavigator.utils.RESOURCES_INDEX
+import java.nio.file.Path
+import kotlin.system.measureTimeMillis
 
 class ResourcesIndexRepo(
     private val dao: ResourceDao,
@@ -39,7 +39,7 @@ class ResourcesIndexRepo(
             val index = PlainResourcesIndex(root, dao, loadResources(resources))
             Log.d(RESOURCES_INDEX, "index created")
 
-            index.reindexRoot(index.calculateDifference())
+            index.reindex()
             indexByRoot[root] = index
             return@withContext index
         }

@@ -1,10 +1,6 @@
 package space.taran.arknavigator.mvp.model.repo.tags
 
 import android.util.Log
-import java.nio.charset.StandardCharsets
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.attribute.FileTime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
@@ -13,6 +9,10 @@ import space.taran.arknavigator.utils.Converters.Companion.stringFromTags
 import space.taran.arknavigator.utils.Converters.Companion.tagsFromString
 import space.taran.arknavigator.utils.TAGS_STORAGE
 import space.taran.arknavigator.utils.Tags
+import java.nio.charset.StandardCharsets
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.attribute.FileTime
 
 // The storage is being read from the FS both during application startup
 // and during application lifecycle since it can be changed from outside.
@@ -59,10 +59,9 @@ class PlainTagsStorage(
         val knownResources = tagsById.keys.toSet()
 
         val lostResources = knownResources.subtract(indexedResources)
-        if (lostResources.isNotEmpty()) {
+        if (lostResources.isNotEmpty())
             Log.d(TAGS_STORAGE, "lostResources: $lostResources")
-            throw AssertionError("Index lost resources")
-        }
+        lostResources.forEach { resource -> tagsById.remove(resource) }
 
         val newResources = indexedResources.subtract(knownResources)
         for (resource in newResources) {
