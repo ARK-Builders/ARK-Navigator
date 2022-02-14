@@ -2,7 +2,6 @@ package space.taran.arknavigator.ui.fragments
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -62,13 +61,6 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
             App.instance.appComponent.inject(this)
         }
     }
-
-    private val pickImageEditor =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            val componentName = it.data?.component?.flattenToString()
-            Log.d(GALLERY_SCREEN, "image editor: $componentName")
-            componentName?.let { presenter.onImageEditorSelected(componentName) }
-        }
 
     private val imageEditor =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -173,25 +165,13 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
         Notifications.notifyUser(context, messageID, moreTime)
     }
 
-    override fun selectImageEditor(resourcePath: Path) {
-        val intent = getExternalAppIntent(resourcePath, Intent.ACTION_EDIT, false)
-        val intentPick = Intent().apply {
-            action = Intent.ACTION_PICK_ACTIVITY
-            putExtra(Intent.EXTRA_TITLE, "Edit the resource with:")
-            putExtra(Intent.EXTRA_INTENT, intent)
-        }
-        pickImageEditor.launch(intentPick)
-    }
-
-    override fun editResource(editor: String, resourcePath: Path) {
-        val detachProcess = !editor.startsWith("space.taran.arkretouch")
+    override fun editResource(resourcePath: Path) {
         val intent = getExternalAppIntent(
             resourcePath,
             Intent.ACTION_EDIT,
-            detachProcess
+            false /* don't detach to get the result */
         )
         intent.apply {
-            component = ComponentName.unflattenFromString(editor)
             putExtra("SAVE_FOLDER_PATH", resourcePath.parent.toString())
             putExtra("real_file_path_2", resourcePath.toString())
         }
