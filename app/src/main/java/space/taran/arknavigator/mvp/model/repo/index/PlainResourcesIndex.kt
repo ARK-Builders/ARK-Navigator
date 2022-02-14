@@ -67,6 +67,10 @@ class PlainResourcesIndex internal constructor(
         return tryRemove(id)!!
     }
 
+    override suspend fun reindex(): Unit = withContext(Dispatchers.IO) {
+        reindexRoot(calculateDifference())
+    }
+
     // should be only used in AggregatedResourcesIndex
     fun tryGetPath(id: ResourceId): Path? = pathById[id]
 

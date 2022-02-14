@@ -1,12 +1,10 @@
 package space.taran.arknavigator.mvp.model.repo.index
 
-import java.lang.AssertionError
 import java.nio.file.Path
 
 class AggregatedResourcesIndex(
     private val shards: Collection<PlainResourcesIndex>
-) :
-    ResourcesIndex {
+) : ResourcesIndex {
 
     override fun listResources(prefix: Path?): Set<ResourceMeta> =
         shards.flatMap { it.listResources(prefix) }
@@ -30,5 +28,9 @@ class AggregatedResourcesIndex(
                 }
             }
         throw AssertionError("At least one of shards must yield success")
+    }
+
+    override suspend fun reindex() {
+        shards.forEach { it.reindex() }
     }
 }
