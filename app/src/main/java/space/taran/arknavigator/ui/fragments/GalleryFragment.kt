@@ -71,6 +71,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
                     val saveFileUri = intent.getStringExtra("RESULT_SAVE_URI")
                     Log.d(GALLERY_SCREEN, "RESULT_ORIGINAL_URI: $originFileUri")
                     Log.d(GALLERY_SCREEN, "RESULT_SAVE_URI: $saveFileUri")
+                    pagerAdapter.notifyItemChanged(binding.viewPager.currentItem)
                 }
             }
         }
