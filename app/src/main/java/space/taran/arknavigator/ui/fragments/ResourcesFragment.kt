@@ -1,23 +1,19 @@
 package space.taran.arknavigator.ui.fragments
 
 import android.os.Bundle
-import android.os.SystemClock
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.setFragmentResultListener
 import androidx.recyclerview.widget.GridLayoutManager
-import kotlin.math.abs
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import space.taran.arknavigator.R
@@ -58,18 +54,6 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
     private lateinit var binding: FragmentResourcesBinding
     private var resourcesAdapter: ResourcesRVAdapter? = null
 
-    private val frameTop by lazy {
-        val loc = IntArray(2)
-        binding.root.getLocationOnScreen(loc)
-        loc[1]
-    }
-    private val frameHeight by lazy { binding.root.height }
-
-    private var selectorHeight: Float = 0.3f // ratio
-
-    private var selectorDragStartBias: Float = -1f
-    private var selectorDragStartTime: Long = -1
-
     private var tagsSelectorAdapter: TagsSelectorAdapter? = null
 
     override fun onCreateView(
@@ -105,12 +89,33 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         binding.rvResources.adapter = resourcesAdapter
         binding.rvResources.layoutManager = GridLayoutManager(context, 3)
 
+        val bottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheet)
+
+        val bottomSheetCallback =
+            object : BottomSheetBehavior.BottomSheetCallback() {
+
+                override fun onStateChanged(bottomSheet: View, newState: Int) {
+                    when (newState) {
+                        BottomSheetBehavior.STATE_EXPANDED ->
+                            presenter.tagsSelectorPresenter.onFilterToggle(true)
+                        else ->
+                            presenter.tagsSelectorPresenter.onFilterToggle(false)
+                    }
+                }
+
+                override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                }
+            }
+
+        // To add the callback:
+        bottomSheetBehavior.addBottomSheetCallback(bottomSheetCallback)
+
         tagsSelectorAdapter = TagsSelectorAdapter(
             binding.cgTagsChecked,
             binding.tagsCg,
             presenter.tagsSelectorPresenter
         )
-        binding.ivDragHandler.setOnTouchListener(::dragHandlerTouchListener)
+
         binding.etTagsFilter.doAfterTextChanged {
             presenter.tagsSelectorPresenter.onFilterChanged(it.toString())
         }
@@ -148,7 +153,6 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
     override fun onResume() {
         Log.d(RESOURCES_SCREEN, "resuming in ResourcesFragment")
         super.onResume()
-        updateDragHandlerBias()
     }
 
     override fun setToolbarTitle(title: String) {
@@ -189,27 +193,6 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         requireActivity().invalidateOptionsMenu()
         binding.layoutTags.isVisible = enabled
         binding.ivDragHandler.isVisible = enabled
-        if (enabled) {
-            val constraintSet = ConstraintSet()
-            constraintSet.clone(binding.root)
-            constraintSet.connect(
-                binding.rvResources.id,
-                ConstraintSet.BOTTOM,
-                binding.ivDragHandler.id,
-                ConstraintSet.TOP
-            )
-            constraintSet.applyTo(binding.root)
-        } else {
-            val constraintSet = ConstraintSet()
-            constraintSet.clone(binding.root)
-            constraintSet.connect(
-                binding.rvResources.id,
-                ConstraintSet.BOTTOM,
-                binding.root.id,
-                ConstraintSet.BOTTOM
-            )
-            constraintSet.applyTo(binding.root)
-        }
     }
 
     override fun setTagsSelectorHintEnabled(enabled: Boolean) {
@@ -248,87 +231,6 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         }
     }
 
-    private fun dragHandlerTouchListener(view: View, event: MotionEvent): Boolean {
-        when (event.action and MotionEvent.ACTION_MASK) {
-            MotionEvent.ACTION_DOWN -> {
-                val layoutParams = binding.ivDragHandler.layoutParams
-                    as ConstraintLayout.LayoutParams
-                selectorDragStartBias = layoutParams.verticalBias
-                selectorDragStartTime = SystemClock.uptimeMillis()
-            }
-            MotionEvent.ACTION_UP -> {
-                view.performClick()
-
-                val travelTime =
-                    SystemClock.uptimeMillis() - selectorDragStartTime
-                val travelDelta = selectorDragStartBias - (1f - selectorHeight)
-                val travelSpeed = 100f * travelDelta / (travelTime / 1000f)
-                Log.d(
-                    RESOURCES_SCREEN,
-                    "draggable bar of tags selector was moved:"
-                )
-                Log.d(RESOURCES_SCREEN, "delta=${100f * travelDelta}%")
-                Log.d(RESOURCES_SCREEN, "time=${travelTime}ms")
-                Log.d(RESOURCES_SCREEN, "speed=$travelSpeed%/sec")
-
-                if (travelTime > DRAG_TRAVEL_TIME_THRESHOLD &&
-                    abs(travelDelta) > DRAG_TRAVEL_DELTA_THRESHOLD &&
-                    abs(travelSpeed) > DRAG_TRAVEL_SPEED_THRESHOLD
-                ) {
-                    selectorHeight = if (travelDelta > 0f) {
-                        presenter.tagsSelectorPresenter.onFilterToggle(true)
-                        1f
-                    } else {
-                        presenter.tagsSelectorPresenter.onFilterToggle(false)
-                        0f
-                    }
-                    updateDragHandlerBias()
-                }
-            }
-            MotionEvent.ACTION_MOVE -> {
-                val distanceFromTop = event.rawY - frameTop
-                selectorHeight = if (distanceFromTop < 0f) {
-                    presenter.tagsSelectorPresenter.onFilterToggle(true)
-                    1f
-                } else if (distanceFromTop > frameHeight) {
-                    0f
-                } else {
-                    presenter.tagsSelectorPresenter.onFilterToggle(false)
-                    1f - distanceFromTop / frameHeight
-                }
-
-                val newBias = updateVerticalBias(view)
-
-                val historySize = event.historySize
-                if (historySize >= 2) {
-                    val oldest = event.getHistoricalY(historySize - 2)
-                    val old = event.getHistoricalY(historySize - 1)
-
-                    val turnedFromDownToUp = event.y < old && old > oldest
-                    val turnedFromUpToDown = event.y > old && old < oldest
-
-                    if (turnedFromDownToUp || turnedFromUpToDown) {
-                        selectorDragStartBias = newBias
-                        selectorDragStartTime = SystemClock.uptimeMillis()
-                    }
-                }
-            }
-        }
-        return true
-    }
-
-    private fun updateVerticalBias(view: View): Float {
-        val layoutParams = view.layoutParams as ConstraintLayout.LayoutParams
-        layoutParams.verticalBias = 1f - selectorHeight
-        view.layoutParams = layoutParams
-
-        return layoutParams.verticalBias
-    }
-
-    private fun updateDragHandlerBias() {
-        updateVerticalBias(binding.ivDragHandler)
-    }
-
     /**
      * ResourcesFragment can be overlapped by GalleryFragment
      */
@@ -339,10 +241,6 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
     }
 
     companion object {
-        private const val DRAG_TRAVEL_TIME_THRESHOLD = 30 // milliseconds
-        private const val DRAG_TRAVEL_DELTA_THRESHOLD = 0.1 // ratio
-        private const val DRAG_TRAVEL_SPEED_THRESHOLD =
-            150 // percents per second
         private const val ROOT_AND_FAV_KEY = "rootAndFav"
 
         fun newInstance(rootAndFav: RootAndFav) = ResourcesFragment().apply {
