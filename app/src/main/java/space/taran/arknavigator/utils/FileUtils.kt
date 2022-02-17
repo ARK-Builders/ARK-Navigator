@@ -75,7 +75,7 @@ fun extension(path: Path): String {
 
 fun reifySorting(sorting: Sorting): Comparator<ResourceMeta>? =
     when (sorting) {
-        Sorting.NAME -> compareBy { it.name }
+        Sorting.NAME -> compareBy(String.CASE_INSENSITIVE_ORDER) { it.name }
         Sorting.SIZE -> compareBy { it.size }
         Sorting.TYPE -> compareBy { it.extension }
         Sorting.LAST_MODIFIED -> compareBy { it.modified }
