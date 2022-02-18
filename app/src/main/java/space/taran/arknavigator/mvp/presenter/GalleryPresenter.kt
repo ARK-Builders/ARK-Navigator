@@ -1,6 +1,7 @@
 package space.taran.arknavigator.mvp.presenter
 
 import android.util.Log
+import androidx.recyclerview.widget.DiffUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
@@ -11,16 +12,20 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
+import space.taran.arknavigator.mvp.model.repo.preview.PreviewAndThumbnail
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
-import space.taran.arknavigator.mvp.presenter.adapter.PreviewsPagerPresenter
+import space.taran.arknavigator.mvp.presenter.adapter.ResourceMetaDiffUtilCallback
 import space.taran.arknavigator.mvp.view.GalleryView
 import space.taran.arknavigator.mvp.view.item.PreviewItemView
 import space.taran.arknavigator.navigation.AppRouter
 import space.taran.arknavigator.utils.GALLERY_SCREEN
+import space.taran.arknavigator.utils.ImageUtils
 import space.taran.arknavigator.utils.Tag
+import space.taran.arknavigator.utils.extension
 import java.nio.file.Files
 import javax.inject.Inject
+import kotlin.io.path.notExists
 
 class GalleryPresenter(
     private val rootAndFav: RootAndFav,
@@ -37,9 +42,10 @@ class GalleryPresenter(
         private set
     lateinit var storage: TagsStorage
         private set
-    private lateinit var resources: MutableList<ResourceMeta>
-
-    val previewsPresenter = PreviewsPagerPresenter(viewState)
+    var resources: MutableList<ResourceMeta> = mutableListOf()
+        private set
+    var diffResult: DiffUtil.DiffResult? = null
+        private set
 
     @Inject
     lateinit var router: AppRouter
@@ -64,12 +70,7 @@ class GalleryPresenter(
             storage = tagsStorageRepo.provide(rootAndFav)
             resources = resourcesIds.map { index.getMeta(it) }.toMutableList()
 
-            previewsPresenter.init(
-                index,
-                resources,
-                ::onPreviewsItemClick,
-                ::onPlayButtonClick
-            )
+            viewState.updatePagerAdapter()
             viewState.setProgressVisibility(false)
         }
     }
@@ -78,8 +79,21 @@ class GalleryPresenter(
         if (resources.isEmpty())
             return
 
+        val path = index.getPath(resources[newPos].id)
+        if (path.notExists())
+            onRemovedResourceDetected()
+
         currentPos = newPos
         displayPreview()
+    }
+
+    fun bindView(view: PreviewItemView) {
+        val resource = resources[view.pos]
+        val path = index.getPath(resource.id)
+        val preview = PreviewAndThumbnail.locate(path, resource)?.preview
+        val placeholder = ImageUtils.iconForExtension(extension(path))
+
+        view.setSource(preview, placeholder, resource)
     }
 
     fun onTagsChanged() {
@@ -150,7 +164,39 @@ class GalleryPresenter(
         viewState.displayPreviewTags(resource.id, tags)
     }
 
-    private fun onPreviewsItemClick(itemView: PreviewItemView) {
+    private fun onRemovedResourceDetected() = presenterScope.launch {
+        viewState.setProgressVisibility(true, "Indexing")
+
+        index.reindex()
+        // update current tags storage
+        tagsStorageRepo.provide(rootAndFav)
+        invalidateResources()
+        viewState.setProgressVisibility(false)
+        viewState.notifyResourcesChanged()
+    }
+
+    private fun invalidateResources() {
+        val indexedIds = index.listIds(rootAndFav.fav)
+        val newResources =
+            resources.filter { meta -> indexedIds.contains(meta.id) }.toMutableList()
+
+        if (newResources.isEmpty()) {
+            onBackClick()
+            return
+        }
+
+        diffResult = DiffUtil.calculateDiff(
+            ResourceMetaDiffUtilCallback(
+                resources,
+                newResources
+            )
+        )
+        resources = newResources
+
+        viewState.updatePagerAdapterWithDiff()
+    }
+
+    fun onPreviewsItemClick(itemView: PreviewItemView) {
         Log.d(
             GALLERY_SCREEN,
             "preview at ${itemView.pos} clicked, switching controls on/off"
@@ -159,7 +205,7 @@ class GalleryPresenter(
         viewState.setControlsVisibility(isControlsVisible)
     }
 
-    private fun onPlayButtonClick() {
+    fun onPlayButtonClick() {
         viewState.viewInExternalApp(index.getPath(currentResource.id))
     }
 

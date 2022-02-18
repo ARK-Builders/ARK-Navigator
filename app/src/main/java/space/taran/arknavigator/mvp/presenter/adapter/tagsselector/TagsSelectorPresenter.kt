@@ -181,14 +181,14 @@ class TagsSelectorPresenter(
 
         isClearBtnVisible = includedTags.isNotEmpty() || excludedTags.isNotEmpty()
 
-        onSelectionChangeListener(selection)
-
         if (allTags.isEmpty())
             viewState.setTagsSelectorHintEnabled(true)
         else
             viewState.setTagsSelectorHintEnabled(false)
 
         viewState.drawTags()
+
+        onSelectionChangeListener(selection)
     }
 
     suspend fun onBackClick(): Boolean {

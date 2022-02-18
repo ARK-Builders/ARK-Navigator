@@ -107,7 +107,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
             presenter.onBackClick()
         }
 
-        pagerAdapter = PreviewsPager(presenter.previewsPresenter)
+        pagerAdapter = PreviewsPager(presenter)
 
         initViewPager()
 
@@ -137,6 +137,10 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
             requireArguments().getInt(START_AT_KEY),
             false
         )
+    }
+
+    override fun updatePagerAdapterWithDiff() {
+        presenter.diffResult?.dispatchUpdatesTo(pagerAdapter)
     }
 
     override fun setupPreview(pos: Int, resource: ResourceMeta, filePath: String) =
@@ -193,7 +197,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
     override fun deleteResource(pos: Int) {
         binding.viewPager.apply {
             setPageTransformer(null)
-            pagerAdapter.removeItem(pos)
+            pagerAdapter.notifyItemRemoved(pos)
             doOnNextLayout {
                 setPageTransformer(DepthPageTransformer())
             }

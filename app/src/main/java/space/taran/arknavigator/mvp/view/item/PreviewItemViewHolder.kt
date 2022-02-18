@@ -12,7 +12,7 @@ import space.taran.arknavigator.databinding.ItemImageBinding
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceKind
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
-import space.taran.arknavigator.mvp.presenter.adapter.PreviewsPagerPresenter
+import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 import space.taran.arknavigator.utils.ImageUtils.APPEARANCE_DURATION
 import space.taran.arknavigator.utils.ImageUtils.loadGlideZoomImage
 import space.taran.arknavigator.utils.ImageUtils.loadSubsamplingImage
@@ -22,7 +22,7 @@ import java.nio.file.Path
 @SuppressLint("ClickableViewAccessibility")
 class PreviewItemViewHolder(
     val binding: ItemImageBinding,
-    val presenter: PreviewsPagerPresenter
+    val presenter: GalleryPresenter
 ) :
     RecyclerView.ViewHolder(binding.root), PreviewItemView {
 
@@ -49,7 +49,7 @@ class PreviewItemViewHolder(
 
         if (resource.kind == ResourceKind.VIDEO) {
             icPlay.makeVisibleAndSetOnClickListener {
-                presenter.onPlayButtonClick(pos)
+                presenter.onPlayButtonClick()
             }
         } else {
             icPlay.isVisible = false
@@ -120,7 +120,7 @@ class PreviewItemViewHolder(
     private fun getGestureDetector(): GestureDetectorCompat {
         val listener = object : GestureDetector.SimpleOnGestureListener() {
             override fun onSingleTapConfirmed(e: MotionEvent?): Boolean {
-                presenter.onItemClick(this@PreviewItemViewHolder)
+                presenter.onPreviewsItemClick(this@PreviewItemViewHolder)
                 return true
             }
         }

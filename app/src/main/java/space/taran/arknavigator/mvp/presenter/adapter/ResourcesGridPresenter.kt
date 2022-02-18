@@ -75,7 +75,11 @@ class ResourcesGridPresenter(
     }
 
     fun onItemClick(pos: Int) = scope.launch {
-        if (selection.containsNotExistingResources(index)) {
+        val containsNotExistingResource = selection.any { meta ->
+            index.getPath(meta.id).notExists()
+        }
+
+        if (containsNotExistingResource) {
             val clickedResource = selection[pos]
             resourcesPresenter.onRemovedResourceDetected()
             // selection has been updated
@@ -202,14 +206,4 @@ class ResourcesGridPresenter(
         withContext(Dispatchers.Main) {
             viewState.setProgressVisibility(isVisible, withText)
         }
-}
-
-private fun List<ResourceMeta>.containsNotExistingResources(index: ResourcesIndex):
-    Boolean {
-    forEach { meta ->
-        val path = index.getPath(meta.id)
-        if (path.notExists())
-            return true
-    }
-    return false
 }
