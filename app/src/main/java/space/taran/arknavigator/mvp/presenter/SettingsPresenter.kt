@@ -4,9 +4,9 @@ import android.util.Log
 import kotlinx.coroutines.launch
 import moxy.MvpPresenter
 import moxy.presenterScope
+import space.taran.arknavigator.R
 import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.view.SettingsView
-import space.taran.arknavigator.R
 import space.taran.arknavigator.navigation.AppRouter
 import space.taran.arknavigator.utils.SETTINGS_SCREEN
 import javax.inject.Inject
@@ -24,70 +24,72 @@ class SettingsPresenter : MvpPresenter<SettingsView>() {
         super.onFirstViewAttach()
 
         viewState.init()
-    }
-
-    fun onCreateView() {
         presenterScope.launch {
             notifyAllPreferences()
         }
     }
 
     fun onCrashReportingClick(
-        isCrashReportEnabled: Boolean,
-        isButtonPressed: Boolean
+        enabled: Boolean
     ) {
         presenterScope.launch {
-            if (isButtonPressed)
-                viewState.notifyUser(
-                    if (isCrashReportEnabled)
-                        R.string.crash_reporting_enabled else
-                        R.string.crash_reporting_disabled
-                )
+            viewState.notifyUser(
+                if (enabled)
+                    R.string.crash_reporting_enabled else
+                    R.string.crash_reporting_disabled
+            )
             Log.d(
                 SETTINGS_SCREEN,
-                "Saving crash report preference, is enabled: $isCrashReportEnabled"
+                "Saving crash report preference, is enabled: $enabled"
             )
-            userPreferences.setCrashReportEnabled(isCrashReportEnabled)
+            userPreferences.setCrashReportEnabled(enabled)
+            notifyCrashReportPref()
         }
     }
 
-    fun onImgCacheReplicationClick(
-        cacheReplicationEnabled: Boolean,
-        isButtonPressed: Boolean
-    ) {
+    fun onImgCacheReplicationClick(enabled: Boolean) {
         presenterScope.launch {
-            if (isButtonPressed)
-                viewState.notifyUser(
-                    if (cacheReplicationEnabled)
-                        R.string.images_cache_replication_enabled else
-                        R.string.images_cache_replication_disabled
-                )
+            viewState.notifyUser(
+                if (enabled)
+                    R.string.images_cache_replication_enabled else
+                    R.string.images_cache_replication_disabled
+            )
             Log.d(
                 SETTINGS_SCREEN,
                 "Saving imgCacheReplication preference, " +
-                    "is enabled: $cacheReplicationEnabled"
+                    "is enabled: $enabled"
             )
-            userPreferences.setCacheReplicationEnabled(cacheReplicationEnabled)
+            userPreferences.setCacheReplicationEnabled(enabled)
+            notifyImgCacheReplicationPref()
         }
     }
 
-    fun onIndexReplicationClick(
-        indexReplicationEnabled: Boolean,
-        isButtonPressed: Boolean
-    ) {
+    fun onIndexReplicationClick(enabled: Boolean) {
         presenterScope.launch {
-            if (isButtonPressed)
-                viewState.notifyUser(
-                    if (indexReplicationEnabled)
-                        R.string.index_replication_enabled else
-                        R.string.index_replication_disabled
-                )
+            viewState.notifyUser(
+                if (enabled)
+                    R.string.index_replication_enabled else
+                    R.string.index_replication_disabled
+            )
             Log.d(
                 SETTINGS_SCREEN,
                 "Saving indexReplication preference, " +
-                    "is enabled: $indexReplicationEnabled"
+                    "is enabled: $enabled"
             )
-            userPreferences.setIndexReplicationEnabled(indexReplicationEnabled)
+            userPreferences.setIndexReplicationEnabled(enabled)
+            notifyIndexReplicationPref()
+        }
+    }
+
+    fun onRemovingLostResourcesTagsClick(checked: Boolean) {
+        presenterScope.launch {
+            viewState.notifyUser(
+                if (checked)
+                    R.string.removing_tags_enabled else
+                    R.string.removing_tags_disabled
+            )
+            userPreferences.setRemovingLostResourcesTagsEnabled(checked)
+            notifyRemovingLostResourcesTags()
         }
     }
 
@@ -102,6 +104,7 @@ class SettingsPresenter : MvpPresenter<SettingsView>() {
         notifyCrashReportPref()
         notifyImgCacheReplicationPref()
         notifyIndexReplicationPref()
+        notifyRemovingLostResourcesTags()
     }
 
     private suspend fun notifyCrashReportPref() =
@@ -117,5 +120,10 @@ class SettingsPresenter : MvpPresenter<SettingsView>() {
     private suspend fun notifyIndexReplicationPref() =
         viewState.setIndexReplicationPref(
             userPreferences.isIndexReplicationEnabled()
+        )
+
+    private suspend fun notifyRemovingLostResourcesTags() =
+        viewState.setRemovingLostResourcesTags(
+            userPreferences.isRemovingLostResourcesTagsEnabled()
         )
 }
