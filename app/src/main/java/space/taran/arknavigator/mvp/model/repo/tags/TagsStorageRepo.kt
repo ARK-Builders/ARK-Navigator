@@ -1,17 +1,19 @@
 package space.taran.arknavigator.mvp.model.repo.tags
 
-import java.nio.file.Path
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.repo.FoldersRepo
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
+import java.nio.file.Path
 
 class TagsStorageRepo(
     private val foldersRepo: FoldersRepo,
-    private val indexRepo: ResourcesIndexRepo
+    private val indexRepo: ResourcesIndexRepo,
+    private val userPreferences: UserPreferences
 ) {
     private val provideMutex = Mutex()
     private val storageByRoot = mutableMapOf<Path, PlainTagsStorage>()
@@ -29,7 +31,8 @@ class TagsStorageRepo(
                         storage.checkResources(resources)
                         storage
                     } else {
-                        val fresh = PlainTagsStorage(root, resources)
+                        val fresh =
+                            PlainTagsStorage(root, resources, userPreferences)
                         fresh.init()
                         fresh.cleanup(resources)
                         storageByRoot[root] = fresh

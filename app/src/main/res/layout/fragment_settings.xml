@@ -12,7 +12,7 @@
 
         <TextView
             style="@style/MarginTextStyle"
-            android:text="Settings"
+            android:text="@string/settings"
             android:textSize="26sp"
             android:textStyle="bold" />
 
@@ -28,7 +28,7 @@
                 android:id="@+id/crashReportTV"
                 style="@style/RegularTextStyle"
                 android:layout_centerVertical="true"
-                android:text="Crash reports:"
+                android:text="@string/crash_reports"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -67,7 +67,7 @@
                 android:id="@+id/cacheReplicationTV"
                 style="@style/RegularTextStyle"
                 android:layout_centerVertical="true"
-                android:text="Images cache replication:"
+                android:text="@string/images_cache_replication"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -106,7 +106,7 @@
                 android:id="@+id/indexReplicationTV"
                 style="@style/RegularTextStyle"
                 android:layout_centerVertical="true"
-                android:text="Index replication:"
+                android:text="@string/index_replication"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -133,6 +133,45 @@
 
         </RelativeLayout>
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="16dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tv_removing_tags"
+                style="@style/RegularTextStyle"
+                android:layout_centerVertical="true"
+                android:text="@string/removing_lost_resources_tags"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/info_removing_tags"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toEndOf="@+id/tv_removing_tags"
+                android:background="@drawable/ripple_simple_bg"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="4dp"
+                android:src="@drawable/ic_info" />
+
+            <space.taran.arknavigator.ui.view.UserSwitchMaterial
+                android:id="@+id/switch_removing_tags"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentEnd="true"
+                android:layout_toStartOf="@+id/info_removing_tags"
+                android:minHeight="0dp"
+                android:padding="8dp" />
+
+        </RelativeLayout>
+
         <Button
             android:id="@+id/resetPreferences"
             android:layout_width="wrap_content"
@@ -141,7 +180,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
-            android:text="Reset preferences" />
+            android:text="@string/reset_preferences" />
 
     </LinearLayout>
 

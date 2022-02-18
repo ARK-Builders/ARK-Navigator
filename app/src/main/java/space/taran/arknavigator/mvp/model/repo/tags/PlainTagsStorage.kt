@@ -3,6 +3,7 @@ package space.taran.arknavigator.mvp.model.repo.tags
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.utils.Constants.Companion.NO_TAGS
 import space.taran.arknavigator.utils.Converters.Companion.stringFromTags
@@ -19,7 +20,8 @@ import java.nio.file.attribute.FileTime
 // We also must persist all changes during application lifecycle into FS.
 class PlainTagsStorage(
     root: Path,
-    val resources: Collection<ResourceId>
+    val resources: Collection<ResourceId>,
+    private val userPreferences: UserPreferences
 ) : TagsStorage {
 
     private val storageFile: Path = root.resolve(STORAGE_FILENAME)
@@ -55,13 +57,15 @@ class PlainTagsStorage(
         // we don't need to persist since we never store empty tag sets
     }
 
-    fun checkResources(indexedResources: Set<ResourceId>) {
+    suspend fun checkResources(indexedResources: Set<ResourceId>) {
         val knownResources = tagsById.keys.toSet()
 
         val lostResources = knownResources.subtract(indexedResources)
         if (lostResources.isNotEmpty())
             Log.d(TAGS_STORAGE, "lostResources: $lostResources")
-        lostResources.forEach { resource -> tagsById.remove(resource) }
+
+        if (userPreferences.isRemovingLostResourcesTagsEnabled())
+            lostResources.forEach { resource -> tagsById.remove(resource) }
 
         val newResources = indexedResources.subtract(knownResources)
         for (resource in newResources) {

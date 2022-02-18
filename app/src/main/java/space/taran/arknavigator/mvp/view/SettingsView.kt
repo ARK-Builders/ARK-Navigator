@@ -10,4 +10,5 @@ interface SettingsView : MvpView, NotifiableView {
     fun setCrashReportPreference(isCrashReportEnabled: Boolean)
     fun setImgCacheReplicationPref(isImgReplicationEnabled: Boolean)
     fun setIndexReplicationPref(isIndexReplication: Boolean)
+    fun setRemovingLostResourcesTags(enabled: Boolean)
 }

@@ -10,16 +10,12 @@ import space.taran.arknavigator.utils.SETTINGS_SCREEN
 class UserSwitchMaterial(
     context: Context,
     attrs: AttributeSet
-) :
-    SwitchMaterial(context, attrs) {
+) : SwitchMaterial(context, attrs) {
 
     private var checkedChangeListener: CustomCheckedChangeListener? = null
 
     fun setOnUserCheckedChangeListener(
-        callback: (
-            button: CompoundButton?,
-            isChecked: Boolean
-        ) -> Unit
+        callback: (isChecked: Boolean) -> Unit
     ) {
         Log.d(
             SETTINGS_SCREEN,
@@ -33,16 +29,18 @@ class UserSwitchMaterial(
     }
 
     fun toggleSwitchSilent(mIsChecked: Boolean) {
-        setOnCheckedChangeListener(null)
-        isChecked = mIsChecked
-        setOnCheckedChangeListener(checkedChangeListener)
+        if (isChecked != mIsChecked) {
+            isChecked = mIsChecked
+            jumpDrawablesToCurrentState()
+        }
     }
 
     private class CustomCheckedChangeListener(
-        var callback: (button: CompoundButton?, isChecked: Boolean) -> Unit
+        var callback: (isChecked: Boolean) -> Unit
     ) : OnCheckedChangeListener {
-        override fun onCheckedChanged(button: CompoundButton?, isChecked: Boolean) {
-            callback(button, isChecked)
+        override fun onCheckedChanged(button: CompoundButton, isChecked: Boolean) {
+            if (button.isPressed)
+                callback(isChecked)
         }
     }
 }
