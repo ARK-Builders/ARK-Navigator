@@ -1,6 +1,5 @@
 package space.taran.arknavigator.mvp.view
 
-import java.nio.file.Path
 import moxy.MvpView
 import moxy.viewstate.strategy.AddToEndSingleStrategy
 import moxy.viewstate.strategy.SkipStrategy
@@ -8,11 +7,13 @@ import moxy.viewstate.strategy.StateStrategyType
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.utils.Tags
+import java.nio.file.Path
 
 @StateStrategyType(AddToEndSingleStrategy::class)
 interface GalleryView : MvpView {
     fun init()
     fun updatePagerAdapter()
+    fun updatePagerAdapterWithDiff()
     fun setControlsVisibility(visible: Boolean)
     fun exitFullscreen()
     fun setPreviewsScrollingEnabled(enabled: Boolean)

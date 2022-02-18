@@ -6,14 +6,14 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import space.taran.arknavigator.databinding.ItemImageBinding
-import space.taran.arknavigator.mvp.presenter.adapter.PreviewsPagerPresenter
+import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 import space.taran.arknavigator.mvp.view.item.PreviewItemViewHolder
 import space.taran.arknavigator.ui.App
 
-class PreviewsPager(val presenter: PreviewsPagerPresenter) :
+class PreviewsPager(val presenter: GalleryPresenter) :
     RecyclerView.Adapter<PreviewItemViewHolder>() {
 
-    override fun getItemCount() = presenter.getCount()
+    override fun getItemCount() = presenter.resources.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         PreviewItemViewHolder(
@@ -34,11 +34,6 @@ class PreviewsPager(val presenter: PreviewsPagerPresenter) :
     ) {
         holder.pos = position
         presenter.bindView(holder)
-    }
-
-    fun removeItem(position: Int) {
-        presenter.remove(position)
-        super.notifyItemRemoved(position)
     }
 
     override fun onViewRecycled(holder: PreviewItemViewHolder) {
