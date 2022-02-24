@@ -42,20 +42,23 @@ class FoldersTreePresenter(
     }
 
     fun onNavigateBtnClick(view: FolderNodeView) {
+
         when (val node = nodes[view.position()]) {
             is DeviceNode -> { }
             is RootNode ->
                 router
                     .navigateTo(
                         Screens.ResourcesScreen(
-                            RootAndFav(node.path.toString(), null)
+                            RootAndFav(node.path.toString(), null),
+                            ""
                         )
                     )
             is FavoriteNode ->
                 router
                     .navigateTo(
                         Screens.ResourcesScreen(
-                            RootAndFav(node.root.toString(), node.path.toString())
+                            RootAndFav(node.root.toString(), node.path.toString()),
+                            ""
                         )
                     )
         }

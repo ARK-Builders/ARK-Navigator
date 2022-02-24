@@ -7,6 +7,7 @@ import space.taran.arknavigator.mvp.view.MainView
 import space.taran.arknavigator.navigation.AppRouter
 import space.taran.arknavigator.navigation.Screens
 import space.taran.arknavigator.utils.MAIN
+import space.taran.arknavigator.utils.Tag
 import javax.inject.Inject
 
 class MainPresenter : MvpPresenter<MainView>() {
@@ -33,8 +34,9 @@ class MainPresenter : MvpPresenter<MainView>() {
     }
 
     fun goToResourcesScreen() {
+        val tag: Tag = ""
         Log.d(MAIN, "creating Resources screen")
-        router.newRootScreen(Screens.ResourcesScreen(RootAndFav(null, null)))
+        router.newRootScreen(Screens.ResourcesScreen(RootAndFav(null, null), tag))
     }
 
     fun goToSettingsScreen() {

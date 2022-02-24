@@ -2,6 +2,7 @@ package space.taran.arknavigator.ui.adapter
 
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.util.Log
 import androidx.core.content.ContextCompat
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
@@ -12,7 +13,8 @@ import space.taran.arknavigator.utils.Tag
 class TagsSelectorAdapter(
     private val checkedChipGroup: ChipGroup,
     private val chipGroup: ChipGroup,
-    private val presenter: TagsSelectorPresenter
+    private val presenter: TagsSelectorPresenter,
+    private var newtag: Tag
 ) {
     private val clearChip = createClearChip()
     private val chipsByTags = mutableMapOf<Tag, Chip>()
@@ -25,10 +27,19 @@ class TagsSelectorAdapter(
         drawAvailableTags()
         drawClearBtn()
         drawUnavailableTags()
+
+        Log.d("TagSelectorAdpater", "newTag ->" + newtag)
+        presenter.availableTagsForDisplay.forEach { tag ->
+            if (tag.equals(newtag)) {
+                Log.d("TagSelectorAdpater", "both are equal")
+
+                presenter.onTagClick(tag)
+                newtag = ""
+            }
+        }
     }
 
     private fun createChips() {
-        chipsByTags.clear()
         presenter.includedTags.forEach { tag ->
             val chip = createDefaultChip(tag)
             chip.setTextColor(Color.BLUE)
@@ -86,25 +97,16 @@ class TagsSelectorAdapter(
     }
 
     private fun createDefaultChip(tag: Tag) = Chip(chipGroup.context).apply {
+        Log.d("sendedTag", tag)
         this.isClickable = true
         this.isLongClickable = true
         this.isCheckable = true
         this.isChecked = false
         this.setTextColor(Color.BLACK)
-        if (tag.contains("Kind:", ignoreCase = true)) {
-            this.chipBackgroundColor =
-                ColorStateList.valueOf(
-                    ContextCompat.getColor(context, R.color.blue)
-                )
-        } else {
-            this.chipBackgroundColor =
-                ColorStateList.valueOf(
-                    ContextCompat.getColor(context, R.color.grayTransparent)
-                )
-        }
         this.text = tag
 
         this.setOnClickListener {
+            Log.d("I am Click ", tag)
             presenter.onTagClick(tag)
         }
 

@@ -69,13 +69,6 @@ class UserPreferences @Inject constructor(val context: Context) {
         }
     }
 
-    suspend fun setKindTagsEnabled(enabled: Boolean?) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.SHOW_KIND_PREFERENCE] =
-                enabled ?: BuildConfig.DEBUG
-        }
-    }
-
     suspend fun isCrashReportEnabled(): Boolean =
         dataStore.data.first()[PreferencesKeys.CRASH_REPORT]
             ?: DefaultValues.CRASH_REPORT
