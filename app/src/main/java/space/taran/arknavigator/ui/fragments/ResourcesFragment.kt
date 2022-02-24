@@ -16,15 +16,13 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.setFragmentResultListener
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
-import kotlinx.coroutines.launch
+import kotlin.math.abs
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import moxy.presenterScope
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.FragmentResourcesBinding
-import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.presenter.ResourcesPresenter
 import space.taran.arknavigator.mvp.view.ResourcesView
@@ -36,11 +34,10 @@ import space.taran.arknavigator.ui.fragments.dialog.SortDialogFragment
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.utils.FullscreenHelper
 import space.taran.arknavigator.utils.RESOURCES_SCREEN
+import space.taran.arknavigator.utils.Tag
 import space.taran.arknavigator.utils.extensions.closeKeyboard
 import space.taran.arknavigator.utils.extensions.placeCursorToEnd
 import space.taran.arknavigator.utils.extensions.showKeyboard
-import javax.inject.Inject
-import kotlin.math.abs
 
 // `root` is used for querying tags storage and resources index,
 //       if it is `null`, then resources from all roots are taken
@@ -52,9 +49,6 @@ import kotlin.math.abs
 //       (recommended instead of passing same value for `path` and `root)
 class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
 
-    @Inject
-    lateinit var userPreferences: UserPreferences
-
     private val presenter by moxyPresenter {
         ResourcesPresenter(requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav)
             .apply {
@@ -65,7 +59,7 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
 
     private lateinit var binding: FragmentResourcesBinding
     private var resourcesAdapter: ResourcesRVAdapter? = null
-
+    var newtag: Tag = ""
     private val frameTop by lazy {
         val loc = IntArray(2)
         binding.root.getLocationOnScreen(loc)
@@ -96,17 +90,6 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         super.onViewCreated(view, savedInstanceState)
 
         App.instance.appComponent.inject(this)
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            binding.showKindsSwitch.isChecked = userPreferences.isShowTagsEnabled()
-        }
-
-        binding.showKindsSwitch.setOnCheckedChangeListener { buttonView, isChecked ->
-            viewLifecycleOwner.lifecycleScope.launch {
-                userPreferences.setKindTagsEnabled(isChecked)
-                presenter.onTagsChanged(userPreferences.isShowTagsEnabled())
-            }
-        }
     }
 
     override fun init() {
@@ -123,12 +106,16 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         resourcesAdapter = ResourcesRVAdapter(presenter.gridPresenter)
         binding.rvResources.adapter = resourcesAdapter
         binding.rvResources.layoutManager = GridLayoutManager(context, 3)
-
-        tagsSelectorAdapter = TagsSelectorAdapter(
-            binding.cgTagsChecked,
-            binding.tagsCg,
-            presenter.tagsSelectorPresenter
-        )
+        if (newtag.equals("")) {
+            tagsSelectorAdapter = TagsSelectorAdapter(
+                binding.cgTagsChecked,
+                binding.tagsCg,
+                presenter.tagsSelectorPresenter,
+                ""
+            )
+        } else {
+            seletedChipTag()
+        }
         binding.ivDragHandler.setOnTouchListener(::dragHandlerTouchListener)
         binding.etTagsFilter.doAfterTextChanged {
             presenter.tagsSelectorPresenter.onFilterChanged(it.toString())
@@ -136,6 +123,18 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
 
         requireActivity().onBackPressedDispatcher.addCallback(this) {
             presenter.onBackClick()
+        }
+    }
+
+    private fun seletedChipTag() {
+        if (!newtag.equals("")) {
+            Log.d("SelectedTag", "Tag " + newtag)
+            tagsSelectorAdapter = TagsSelectorAdapter(
+                binding.cgTagsChecked,
+                binding.tagsCg,
+                presenter.tagsSelectorPresenter,
+                newtag
+            )
         }
     }
 
@@ -372,9 +371,13 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
             150 // percents per second
         private const val ROOT_AND_FAV_KEY = "rootAndFav"
 
-        fun newInstance(rootAndFav: RootAndFav) = ResourcesFragment().apply {
+        fun newInstance(
+            rootAndFav: RootAndFav,
+            tagg: Tag
+        ) = ResourcesFragment().apply {
             arguments = Bundle().apply {
                 putParcelable(ROOT_AND_FAV_KEY, rootAndFav)
+                newtag = tagg
             }
         }
     }

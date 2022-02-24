@@ -5,18 +5,18 @@
     <item
         android:id="@+id/menu_tags_on"
         android:icon="@drawable/ic_cloud_on"
-        android:title="@string/menu_tags_on_title"
+        android:title="Tags on"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/menu_tags_off"
         android:icon="@drawable/ic_cloud_off"
-        android:title="@string/menu_tags_off_title"
+        android:title="Tags off"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/menu_tags_sort_by"
         android:icon="@drawable/ic_sort"
-        android:title="@string/menu_tags_sort_by_title"
+        android:title="Sort by"
         app:showAsAction="always" />
 </menu>

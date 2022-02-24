@@ -7,14 +7,19 @@ import space.taran.arknavigator.ui.fragments.FoldersFragment
 import space.taran.arknavigator.ui.fragments.GalleryFragment
 import space.taran.arknavigator.ui.fragments.ResourcesFragment
 import space.taran.arknavigator.ui.fragments.SettingsFragment
+import space.taran.arknavigator.utils.Tag
 
 class Screens {
+
     class FoldersScreen : SupportAppScreen() {
         override fun getFragment() = FoldersFragment()
     }
 
-    class ResourcesScreen(val rootAndFav: RootAndFav) : SupportAppScreen() {
-        override fun getFragment() = ResourcesFragment.newInstance(rootAndFav)
+    class ResourcesScreen(
+        val rootAndFav: RootAndFav,
+        val tag: Tag
+    ) : SupportAppScreen() {
+        override fun getFragment() = ResourcesFragment.newInstance(rootAndFav, tag)
     }
 
     class GalleryScreen(

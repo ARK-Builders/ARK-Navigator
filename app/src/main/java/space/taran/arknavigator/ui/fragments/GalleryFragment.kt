@@ -32,6 +32,8 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 import space.taran.arknavigator.mvp.view.GalleryView
 import space.taran.arknavigator.mvp.view.NotifiableView
+import space.taran.arknavigator.navigation.AppRouter
+import space.taran.arknavigator.navigation.Screens
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.adapter.PreviewsPager
@@ -46,6 +48,7 @@ import space.taran.arknavigator.utils.extension
 import space.taran.arknavigator.utils.extensions.makeGone
 import space.taran.arknavigator.utils.extensions.makeVisible
 import java.nio.file.Path
+import javax.inject.Inject
 
 class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
 
@@ -61,6 +64,9 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
             App.instance.appComponent.inject(this)
         }
     }
+
+    @Inject
+    lateinit var router: AppRouter
 
     private val imageEditor =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -233,7 +239,17 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
                 presenter.onTagRemove(tag)
                 true
             }
-
+            chip.setOnClickListener {
+                Log.d(
+                    GALLERY_SCREEN,
+                    "tag $tag on resource $resource long-clicked"
+                )
+                router.navigateTo(
+                    Screens.ResourcesScreen(
+                        RootAndFav(null, null), tag
+                    )
+                )
+            }
             binding.tagsCg.addView(chip)
         }
 
