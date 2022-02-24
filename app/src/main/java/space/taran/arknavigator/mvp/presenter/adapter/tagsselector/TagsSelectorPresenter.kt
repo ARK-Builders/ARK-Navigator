@@ -8,6 +8,7 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.view.ResourcesView
+import space.taran.arknavigator.ui.fragments.GalleryFragment.Companion.KIND_TAGS_PREFIX_KEY
 import space.taran.arknavigator.utils.Popularity
 import space.taran.arknavigator.utils.TAGS_SELECTOR
 import space.taran.arknavigator.utils.Tag
@@ -21,18 +22,13 @@ class TagsSelectorPresenter(
     private val scope: CoroutineScope,
     private val onSelectionChangeListener: KSuspendFunction1<Set<ResourceId>, Unit>
 ) {
-
     private var index: ResourcesIndex? = null
     private var storage: TagsStorage? = null
     private val actions = ArrayDeque<TagsSelectorAction>()
     private var filter = ""
     var filterEnabled = false
 
-        public set
-
-    var myTags = mutableSetOf<Tag>()
-
-        private set
+    var showKindTags = false
 
     var includedTags = mutableSetOf<Tag>()
         private set
@@ -129,13 +125,23 @@ class TagsSelectorPresenter(
             return
 
         val resources = index!!.listIds(prefix)
-        val tagsByResources = storage!!.groupTagsByResources(resources)
+        var tagsByResources = storage!!.groupTagsByResources(resources)
+        if (showKindTags) {
+            tagsByResources = tagsByResources.map { (id, tags) ->
+                var listOfTags = tags.filter { it.isNotEmpty() }
+                if (index!!.getMeta(id).kind != null) {
+                    val kindTag =
+                        KIND_TAGS_PREFIX_KEY + index!!.getMeta(id).kind.toString()
+                    listOfTags = listOfTags + kindTag
+                }
+                id to listOfTags.toSet()
+            }.toMap()
+        }
         val allTags = tagsByResources.values.flatten().toSet()
 
         // some tags could have been removed from storage
         excludedTags = excludedTags.intersect(allTags).toMutableSet()
         includedTags = includedTags.intersect(allTags).toMutableSet()
-        myTags = includedTags.intersect(allTags).toMutableSet()
 
         val selectionAndComplementWithTags = tagsByResources
             .toList()
@@ -315,5 +321,11 @@ class TagsSelectorPresenter(
 
         if (needToCalculate)
             calculateTagsAndSelection()
+    }
+
+    fun setKindTagsSwitchState(kindTagsSwitchState: Boolean) {
+        showKindTags = kindTagsSwitchState
+        resetTags()
+        calculateTagsAndSelection()
     }
 }

@@ -2,6 +2,7 @@ package space.taran.arknavigator.ui.fragments
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -67,6 +68,13 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
 
     @Inject
     lateinit var router: AppRouter
+
+    private val pickImageEditor =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            val componentName = it.data?.component?.flattenToString()
+            Log.d(GALLERY_SCREEN, "image editor: $componentName")
+            componentName?.let { presenter.onImageEditorSelected(componentName) }
+        }
 
     private val imageEditor =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -176,16 +184,25 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
         Notifications.notifyUser(context, messageID, moreTime)
     }
 
-    override fun editResource(resourcePath: Path) {
+    override fun selectImageEditor(resourcePath: Path) {
+        val intent = getExternalAppIntent(resourcePath, Intent.ACTION_EDIT, false)
+        val intentPick = Intent().apply {
+            action = Intent.ACTION_PICK_ACTIVITY
+            putExtra(Intent.EXTRA_TITLE, "Edit the resource with:")
+            putExtra(Intent.EXTRA_INTENT, intent)
+        }
+        pickImageEditor.launch(intentPick)
+    }
+
+    override fun editResource(editor: String, resourcePath: Path) {
+        val detachProcess = !editor.startsWith("space.taran.arkretouch")
         val intent = getExternalAppIntent(
             resourcePath,
             Intent.ACTION_EDIT,
-            false /* don't detach to get the result */
+            detachProcess
         )
-        intent.apply {
-            putExtra("SAVE_FOLDER_PATH", resourcePath.parent.toString())
-            putExtra("real_file_path_2", resourcePath.toString())
-        }
+        intent.component = ComponentName.unflattenFromString(editor)
+        intent.putExtra("SAVE_FOLDER_PATH", resourcePath.toFile().parent)
         imageEditor.launch(intent)
     }
 
@@ -242,10 +259,10 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
             chip.setOnClickListener {
                 Log.d(
                     GALLERY_SCREEN,
-                    "tag $tag on resource $resource long-clicked"
+                    "tag $tag on resource $resource clicked"
                 )
                 router.navigateTo(
-                    Screens.ResourcesScreen(
+                    Screens.ResourcesScreenWithSelectedTag(
                         RootAndFav(null, null), tag
                     )
                 )
@@ -442,6 +459,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
         private const val START_AT_KEY = "startAt"
         const val REQUEST_TAGS_CHANGED_KEY = "tagsChangedGallery"
         const val REQUEST_RESOURCES_CHANGED_KEY = "resourcesChangedGallery"
+        const val KIND_TAGS_PREFIX_KEY = "Kind: "
 
         fun newInstance(
             rootAndFav: RootAndFav,
