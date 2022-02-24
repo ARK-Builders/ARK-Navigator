@@ -7,6 +7,7 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import space.taran.arknavigator.R
 import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagsSelectorPresenter
+import space.taran.arknavigator.utils.KIND
 import space.taran.arknavigator.utils.Tag
 
 class TagsSelectorAdapter(
@@ -91,7 +92,7 @@ class TagsSelectorAdapter(
         this.isCheckable = true
         this.isChecked = false
         this.setTextColor(Color.BLACK)
-        if (tag.contains("Kind:", ignoreCase = true)) {
+        if (tag.contains(KIND, ignoreCase = true)) {
             this.chipBackgroundColor =
                 ColorStateList.valueOf(
                     ContextCompat.getColor(context, R.color.blue)

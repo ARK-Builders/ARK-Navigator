@@ -38,3 +38,5 @@ const val IMAGES: String = "images"
 const val GLIDE: String = "glide"
 
 const val FILES: String = "files"
+
+const val KIND: String = "Kind: "

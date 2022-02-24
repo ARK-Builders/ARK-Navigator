@@ -6,7 +6,6 @@ import space.taran.arknavigator.mvp.model.repo.extra.ImageMetaExtra
 import space.taran.arknavigator.mvp.model.repo.extra.VideoMetaExtra
 import java.nio.file.Path
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
-import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.view.ResourcesView
@@ -14,6 +13,7 @@ import space.taran.arknavigator.utils.Popularity
 import space.taran.arknavigator.utils.TAGS_SELECTOR
 import space.taran.arknavigator.utils.Tag
 import space.taran.arknavigator.utils.Tags
+import space.taran.arknavigator.utils.KIND
 
 class TagsSelectorPresenter(
     private val viewState: ResourcesView,
@@ -27,7 +27,7 @@ class TagsSelectorPresenter(
     var filterEnabled = false
         private set
 
-    var check = false
+    var showKindTags = false
 
     var includedTags = mutableSetOf<Tag>()
         private set
@@ -133,42 +133,16 @@ class TagsSelectorPresenter(
             return
 
         val resources = index!!.listIds(prefix)
+        var tagsByResources = storage!!.groupTagsByResources(resources)
+        tagsByResources = getVirtualTags(tagsByResources)
 
-        var myResources = mutableListOf<ResourceMeta>()
-        resources.map {
-            myResources.add(index!!.getMeta(it))
-        }
-
-        val tagsByResources = storage!!.groupTagsByResources(resources)
-
-        var tagsMap = mutableMapOf(1L to "".toSet() as Tags)
-        var checkTag = check
-
-        var resourceCounter = 0
-        tagsByResources.map {
-            var list = mutableListOf<Tag>()
-            it.value.map {
-                list.add(it)
-            }
-            if (checkTag) {
-                if (kindByExt(myResources[resourceCounter].extension) != null)
-                    list.add(
-                        "Kind: " + kindByExt(myResources[resourceCounter].extension)
-                    )
-            }
-            tagsMap.put(it.key, list.toSet() as Tags)
-            resourceCounter++
-        }
-        tagsMap.remove(1L)
-        tagsMap.toMap()
-
-        val allTags = tagsMap.values.flatten().toSet()
+        val allTags = tagsByResources.values.flatten().toSet()
 
         // some tags could have been removed from storage
         excludedTags = excludedTags.intersect(allTags).toMutableSet()
         includedTags = includedTags.intersect(allTags).toMutableSet()
 
-        val selectionAndComplementWithTags = tagsMap
+        val selectionAndComplementWithTags = tagsByResources
             .toList()
             .groupBy { (_, tags) ->
                 tags.containsAll(includedTags) &&
@@ -228,6 +202,22 @@ class TagsSelectorPresenter(
             viewState.setTagsSelectorHintEnabled(false)
 
         viewState.drawTags()
+    }
+
+    private fun getVirtualTags(
+        tagsByResources: Map<ResourceId, Tags>
+    ): Map<ResourceId, Tags> {
+        var modifiedTagsByResources = tagsByResources
+        if (showKindTags) {
+            modifiedTagsByResources = modifiedTagsByResources.map { (id, tags) ->
+                val listOfTags = tags.toMutableList()
+                if (kindByExt(index!!.getMeta(id).extension) != null) {
+                    listOfTags.add(KIND + kindByExt(index!!.getMeta(id).extension))
+                }
+                id to listOfTags.toSet()
+            }.toMap()
+        }
+        return modifiedTagsByResources
     }
 
     fun onBackClick(): Boolean {
@@ -348,8 +338,8 @@ class TagsSelectorPresenter(
             calculateTagsAndSelection()
     }
 
-    fun setToggle(boolean: Boolean) {
-        check = boolean
+    fun setKindTagsSwitchState(kindTagsSwitchState: Boolean) {
+        showKindTags = kindTagsSwitchState
         resetTags()
         calculateTagsAndSelection()
     }

@@ -73,7 +73,7 @@ class ResourcesPresenter(
                     throw AssertionError("Requested root wasn't found in DB")
                 }
 
-                listOf(rootAndFav.root!!)
+                listOf(rootAndFav.root)
             } else {
                 all.toList()
             }
@@ -97,7 +97,9 @@ class ResourcesPresenter(
 
             resetResources(resources, false)
             tagsSelectorPresenter.init(index, storage)
-            tagsSelectorPresenter.setToggle(userPreferences.isShowTagsEnabled())
+            tagsSelectorPresenter.setKindTagsSwitchState(
+                userPreferences.isShowTagsEnabled()
+            )
             tagsSelectorPresenter.calculateTagsAndSelection()
 
             val path = (rootAndFav.fav ?: rootAndFav.root)
@@ -122,7 +124,7 @@ class ResourcesPresenter(
     }
 
     fun onTagsChanged(showTagsEnabled: Boolean) = presenterScope.launch {
-        tagsSelectorPresenter.setToggle(showTagsEnabled)
+        tagsSelectorPresenter.setKindTagsSwitchState(showTagsEnabled)
         tagsSelectorPresenter.calculateTagsAndSelection()
     }
 
