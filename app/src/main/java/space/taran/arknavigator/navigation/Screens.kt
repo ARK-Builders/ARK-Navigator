@@ -10,7 +10,6 @@ import space.taran.arknavigator.ui.fragments.SettingsFragment
 import space.taran.arknavigator.utils.Tag
 
 class Screens {
-
     class FoldersScreen : SupportAppScreen() {
         override fun getFragment() = FoldersFragment()
     }

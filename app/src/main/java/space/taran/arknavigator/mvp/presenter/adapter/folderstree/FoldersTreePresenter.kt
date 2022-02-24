@@ -42,7 +42,6 @@ class FoldersTreePresenter(
     }
 
     fun onNavigateBtnClick(view: FolderNodeView) {
-
         when (val node = nodes[view.position()]) {
             is DeviceNode -> { }
             is RootNode ->
