@@ -72,13 +72,6 @@ class UserPreferences @Inject constructor(val context: Context) {
         }
     }
 
-    suspend fun setKindTagsEnabled(enabled: Boolean?) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.SHOW_KIND_PREFERENCE] =
-                enabled ?: BuildConfig.DEBUG
-        }
-    }
-
     suspend fun isCrashReportEnabled(): Boolean =
         dataStore.data.first()[PreferencesKeys.CRASH_REPORT_PREFERENCE]
             ?: BuildConfig.DEBUG
@@ -103,18 +96,11 @@ class UserPreferences @Inject constructor(val context: Context) {
         dataStore.data.first()[PreferencesKeys.INDEX_REPLICATION_PREF]
             ?: INDEX_REPLICATION_DEFAULT
 
-    suspend fun isShowTagsEnabled(): Boolean =
-        dataStore.data.first()[
-            PreferencesKeys.SHOW_KIND_PREFERENCE
-        ] ?: SHOW_KIND_PREFERENCE
-
     private object PreferencesKeys {
         val SORTING_PREFERENCE = intPreferencesKey("sorting_preference")
         val SORTING_ORDER = booleanPreferencesKey("sorting_preference_is_ascending")
         val CRASH_REPORT_PREFERENCE =
             booleanPreferencesKey("crash_report_preference")
-        val SHOW_KIND_PREFERENCE =
-            booleanPreferencesKey("show_kind_preference")
         val IMG_CACHE_REPLICATION_PREF =
             booleanPreferencesKey("img_cache_replication_preference")
         val INDEX_REPLICATION_PREF =
@@ -125,4 +111,3 @@ class UserPreferences @Inject constructor(val context: Context) {
 const val IS_SORTING_ASCENDING_DEFAULT = true
 const val CACHE_REPLICATION_DEFAULT = false
 const val INDEX_REPLICATION_DEFAULT = false
-const val SHOW_KIND_PREFERENCE = false
