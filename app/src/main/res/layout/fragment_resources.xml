@@ -51,39 +51,70 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
-
-                <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/cg_tags_checked"
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="10dp"
-                    android:visibility="gone" />
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:orientation="horizontal">
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/layout_input"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    <TextView
+                        android:id="@+id/tv_kind_tags_label"
+                        style="@style/RegularTextStyle"
+                        android:layout_centerVertical="true"
+                        android:text="@string/kind_tags_label"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/showKindsSwitch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_alignParentEnd="true"
+                        android:minHeight="0dp"
+                        android:padding="8dp" />
+
+                </RelativeLayout>
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginEnd="10dp"
-                    android:hint="@string/resources_filter_hint"
-                    android:visibility="gone"
-                    app:startIconDrawable="@drawable/ic_baseline_search_24">
+                    android:orientation="vertical">
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/et_tags_filter"
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/cg_tags_checked"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:imeOptions="flagNoExtractUi" />
+                        android:padding="10dp"
+                        android:visibility="gone" />
 
-                </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/layout_input"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginEnd="10dp"
+                        android:hint="@string/resources_filter_hint"
+                        android:visibility="gone"
+                        app:startIconDrawable="@drawable/ic_baseline_search_24">
 
-                <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/tags_cg"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="10dp"
-                    android:visibility="visible" />
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/et_tags_filter"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:imeOptions="flagNoExtractUi" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/tags_cg"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:visibility="visible" />
+                </LinearLayout>
             </LinearLayout>
 
         </ScrollView>
