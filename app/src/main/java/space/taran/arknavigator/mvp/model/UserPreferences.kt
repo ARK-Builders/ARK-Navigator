@@ -103,7 +103,7 @@ class UserPreferences @Inject constructor(val context: Context) {
         dataStore.data.first()[PreferencesKeys.INDEX_REPLICATION_PREF]
             ?: INDEX_REPLICATION_DEFAULT
 
-    suspend fun isShowTagsEnabled(): Boolean =
+    suspend fun IsKindTagsEnabled(): Boolean =
         dataStore.data.first()[
             PreferencesKeys.SHOW_KIND_PREFERENCE
         ] ?: SHOW_KIND_PREFERENCE

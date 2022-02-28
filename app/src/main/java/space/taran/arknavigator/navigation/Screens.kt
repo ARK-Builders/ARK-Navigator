@@ -14,11 +14,17 @@ class Screens {
         override fun getFragment() = FoldersFragment()
     }
 
-    class ResourcesScreen(
+    class ResourcesScreen(val rootAndFav: RootAndFav) : SupportAppScreen() {
+        override fun getFragment() = ResourcesFragment.newInstance(rootAndFav)
+    }
+
+    class ResourcesScreenWithSelectedTag(
         val rootAndFav: RootAndFav,
         val tag: Tag
     ) : SupportAppScreen() {
-        override fun getFragment() = ResourcesFragment.newInstance(rootAndFav, tag)
+        override fun getFragment() = ResourcesFragment.newInstanceWithSelectedTag(
+            rootAndFav, tag
+        )
     }
 
     class GalleryScreen(

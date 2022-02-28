@@ -1,19 +1,16 @@
 package space.taran.arknavigator.mvp.presenter.adapter.tagsselector
 
 import android.util.Log
-import space.taran.arknavigator.mvp.model.repo.extra.DocumentMetaExtra
-import space.taran.arknavigator.mvp.model.repo.extra.ImageMetaExtra
-import space.taran.arknavigator.mvp.model.repo.extra.VideoMetaExtra
 import java.nio.file.Path
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.view.ResourcesView
+import space.taran.arknavigator.ui.fragments.GalleryFragment.Companion.KIND_TAGS_PREFIX_KEY
 import space.taran.arknavigator.utils.Popularity
 import space.taran.arknavigator.utils.TAGS_SELECTOR
 import space.taran.arknavigator.utils.Tag
 import space.taran.arknavigator.utils.Tags
-import space.taran.arknavigator.utils.KIND
 
 class TagsSelectorPresenter(
     private val viewState: ResourcesView,
@@ -117,15 +114,6 @@ class TagsSelectorPresenter(
         }
     }
 
-    private fun kindByExt(extension: String): String? {
-        return when (extension) {
-            in ImageMetaExtra.ACCEPTED_EXTENSIONS -> "IMAGE"
-            in VideoMetaExtra.ACCEPTED_EXTENSIONS -> "VIDEO"
-            in DocumentMetaExtra.ACCEPTED_EXTENSIONS -> "DOCUMENT"
-            else -> null
-        }
-    }
-
     fun calculateTagsAndSelection() {
         Log.d(TAGS_SELECTOR, "calculating tags and selection")
         if (storage == null || index == null)
@@ -133,8 +121,17 @@ class TagsSelectorPresenter(
 
         val resources = index!!.listIds(prefix)
         var tagsByResources = storage!!.groupTagsByResources(resources)
-        tagsByResources = getVirtualTags(tagsByResources)
-
+        if (showKindTags) {
+            tagsByResources = tagsByResources.map { (id, tags) ->
+                var listOfTags = tags.filter { it.isNotEmpty() }
+                if (index!!.getMeta(id).kind != null) {
+                    val kindTag =
+                        KIND_TAGS_PREFIX_KEY + index!!.getMeta(id).kind.toString()
+                    listOfTags = listOfTags + kindTag
+                }
+                id to listOfTags.toSet()
+            }.toMap()
+        }
         val allTags = tagsByResources.values.flatten().toSet()
 
         // some tags could have been removed from storage
@@ -201,22 +198,6 @@ class TagsSelectorPresenter(
             viewState.setTagsSelectorHintEnabled(false)
 
         viewState.drawTags()
-    }
-
-    private fun getVirtualTags(
-        tagsByResources: Map<ResourceId, Tags>
-    ): Map<ResourceId, Tags> {
-        var modifiedTagsByResources = tagsByResources
-        if (showKindTags) {
-            modifiedTagsByResources = modifiedTagsByResources.map { (id, tags) ->
-                val listOfTags = tags.toMutableList()
-                if (kindByExt(index!!.getMeta(id).extension) != null) {
-                    listOfTags.add(KIND + kindByExt(index!!.getMeta(id).extension))
-                }
-                id to listOfTags.toSet()
-            }.toMap()
-        }
-        return modifiedTagsByResources
     }
 
     fun onBackClick(): Boolean {

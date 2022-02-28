@@ -48,16 +48,14 @@ class FoldersTreePresenter(
                 router
                     .navigateTo(
                         Screens.ResourcesScreen(
-                            RootAndFav(node.path.toString(), null),
-                            ""
+                            RootAndFav(node.path.toString(), null)
                         )
                     )
             is FavoriteNode ->
                 router
                     .navigateTo(
                         Screens.ResourcesScreen(
-                            RootAndFav(node.root.toString(), node.path.toString()),
-                            ""
+                            RootAndFav(node.root.toString(), node.path.toString())
                         )
                     )
         }

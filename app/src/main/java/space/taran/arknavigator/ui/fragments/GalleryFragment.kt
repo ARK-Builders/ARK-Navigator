@@ -255,10 +255,10 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
             chip.setOnClickListener {
                 Log.d(
                     GALLERY_SCREEN,
-                    "tag $tag on resource $resource long-clicked"
+                    "tag $tag on resource $resource clicked"
                 )
                 router.navigateTo(
-                    Screens.ResourcesScreen(
+                    Screens.ResourcesScreenWithSelectedTag(
                         RootAndFav(null, null), tag
                     )
                 )
@@ -455,6 +455,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
         private const val START_AT_KEY = "startAt"
         const val REQUEST_TAGS_CHANGED_KEY = "tagsChangedGallery"
         const val REQUEST_RESOURCES_CHANGED_KEY = "resourcesChangedGallery"
+        const val KIND_TAGS_PREFIX_KEY = "Kind: "
 
         fun newInstance(
             rootAndFav: RootAndFav,

@@ -98,7 +98,7 @@ class ResourcesPresenter(
             resetResources(resources, false)
             tagsSelectorPresenter.init(index, storage)
             tagsSelectorPresenter.setKindTagsSwitchState(
-                userPreferences.isShowTagsEnabled()
+                userPreferences.IsKindTagsEnabled()
             )
             tagsSelectorPresenter.calculateTagsAndSelection()
 
@@ -123,8 +123,8 @@ class ResourcesPresenter(
         tagsSelectorPresenter.calculateTagsAndSelection()
     }
 
-    fun onTagsChanged(showTagsEnabled: Boolean) = presenterScope.launch {
-        tagsSelectorPresenter.setKindTagsSwitchState(showTagsEnabled)
+    fun onTagsChanged(showKindTagsEnabled: Boolean) = presenterScope.launch {
+        tagsSelectorPresenter.setKindTagsSwitchState(showKindTagsEnabled)
         tagsSelectorPresenter.calculateTagsAndSelection()
     }
 

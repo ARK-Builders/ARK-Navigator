@@ -99,13 +99,13 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         App.instance.appComponent.inject(this)
 
         viewLifecycleOwner.lifecycleScope.launch {
-            binding.showKindsSwitch.isChecked = userPreferences.isShowTagsEnabled()
+            binding.showKindsSwitch.isChecked = userPreferences.IsKindTagsEnabled()
         }
 
         binding.showKindsSwitch.setOnCheckedChangeListener { buttonView, isChecked ->
             viewLifecycleOwner.lifecycleScope.launch {
                 userPreferences.setKindTagsEnabled(isChecked)
-                presenter.onTagsChanged(userPreferences.isShowTagsEnabled())
+                presenter.onTagsChanged(userPreferences.IsKindTagsEnabled())
             }
         }
     }
@@ -124,16 +124,12 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         resourcesAdapter = ResourcesRVAdapter(presenter.gridPresenter)
         binding.rvResources.adapter = resourcesAdapter
         binding.rvResources.layoutManager = GridLayoutManager(context, 3)
-        if (selectedTag.equals("")) {
-            tagsSelectorAdapter = TagsSelectorAdapter(
-                binding.cgTagsChecked,
-                binding.tagsCg,
-                presenter.tagsSelectorPresenter,
-                ""
-            )
-        } else {
-            selectedChipTag()
-        }
+        tagsSelectorAdapter = TagsSelectorAdapter(
+            binding.cgTagsChecked,
+            binding.tagsCg,
+            presenter.tagsSelectorPresenter,
+            selectedTag!!
+        )
         binding.ivDragHandler.setOnTouchListener(::dragHandlerTouchListener)
         binding.etTagsFilter.doAfterTextChanged {
             presenter.tagsSelectorPresenter.onFilterChanged(it.toString())
@@ -141,17 +137,6 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
 
         requireActivity().onBackPressedDispatcher.addCallback(this) {
             presenter.onBackClick()
-        }
-    }
-
-    private fun selectedChipTag() {
-        if (!selectedTag.equals("")) {
-            tagsSelectorAdapter = TagsSelectorAdapter(
-                binding.cgTagsChecked,
-                binding.tagsCg,
-                presenter.tagsSelectorPresenter,
-                selectedTag
-            )
         }
     }
 
@@ -381,6 +366,13 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         private const val ROOT_AND_FAV_KEY = "rootAndFav"
 
         fun newInstance(
+            rootAndFav: RootAndFav
+        ) = ResourcesFragment().apply {
+            arguments = Bundle().apply {
+                putParcelable(ROOT_AND_FAV_KEY, rootAndFav)
+            }
+        }
+        fun newInstanceWithSelectedTag(
             rootAndFav: RootAndFav,
             tag: Tag
         ) = ResourcesFragment().apply {
