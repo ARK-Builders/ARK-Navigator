@@ -22,6 +22,10 @@ interface GalleryView : MvpView {
     fun setProgressVisibility(isVisible: Boolean, withText: String = "")
 
     @StateStrategyType(SkipStrategy::class)
+    fun openLink(link: String)
+    @StateStrategyType(SkipStrategy::class)
+    fun shareLink(link: String)
+    @StateStrategyType(SkipStrategy::class)
     fun viewInExternalApp(resourcePath: Path)
     @StateStrategyType(SkipStrategy::class)
     fun selectImageEditor(resourcePath: Path)

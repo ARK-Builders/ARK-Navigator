@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ComponentName
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
@@ -208,6 +209,21 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
             detachProcess = false
         )
 
+    override fun openLink(link: String) {
+        val intent = Intent(Intent.ACTION_VIEW)
+        val uri = Uri.parse(link)
+        intent.data = uri
+        startActivity(Intent.createChooser(intent, "View the link with:"))
+    }
+
+    override fun shareLink(link: String) {
+        val intent = Intent(Intent.ACTION_SEND)
+        val uri = Uri.parse(link)
+        intent.putExtra(Intent.EXTRA_TEXT, uri)
+        intent.type = "text/plain"
+        startActivity(Intent.createChooser(intent, "Share the link with:"))
+    }
+
     override fun viewInExternalApp(resourcePath: Path) {
         openIntentChooser(resourcePath, Intent.ACTION_VIEW, true)
     }
@@ -334,10 +350,11 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
 
     private fun setupOpenEditFABs(kind: ResourceKind?) {
         binding.apply {
+            openResourceFab.makeGone()
+            editResourceFab.makeGone()
             when (kind) {
                 ResourceKind.VIDEO -> {
                     // "open" capabilities only
-                    editResourceFab.makeGone()
                     openResourceFab.makeVisible()
                 }
                 ResourceKind.DOCUMENT -> {
@@ -347,8 +364,10 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
                 }
                 ResourceKind.IMAGE -> {
                     // "edit" capabilities only
-                    openResourceFab.makeGone()
                     editResourceFab.makeVisible()
+                }
+                ResourceKind.LINK -> {
+                    openResourceFab.makeVisible()
                 }
                 null -> {
                     openResourceFab.makeVisible()
