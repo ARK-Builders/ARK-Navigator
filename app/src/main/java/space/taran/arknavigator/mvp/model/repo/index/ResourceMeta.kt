@@ -4,6 +4,7 @@ import space.taran.arknavigator.mvp.model.dao.ResourceExtra
 import space.taran.arknavigator.mvp.model.dao.ResourceWithExtra
 import space.taran.arknavigator.mvp.model.repo.extra.DocumentMetaExtra
 import space.taran.arknavigator.mvp.model.repo.extra.ImageMetaExtra
+import space.taran.arknavigator.mvp.model.repo.extra.LinkMetaExtra
 import space.taran.arknavigator.mvp.model.repo.extra.VideoMetaExtra
 import space.taran.arknavigator.utils.extension
 import java.nio.file.Files
@@ -65,6 +66,7 @@ data class ResourceMeta(
                 in ImageMetaExtra.ACCEPTED_EXTENSIONS -> ResourceKind.IMAGE
                 in VideoMetaExtra.ACCEPTED_EXTENSIONS -> ResourceKind.VIDEO
                 in DocumentMetaExtra.ACCEPTED_EXTENSIONS -> ResourceKind.DOCUMENT
+                in LinkMetaExtra.ACCEPTED_EXTENSIONS -> ResourceKind.LINK
                 else -> null
             }
         }
@@ -80,11 +82,11 @@ data class ResourceMeta(
 }
 
 enum class ResourceKind {
-    IMAGE, VIDEO, DOCUMENT
+    IMAGE, VIDEO, DOCUMENT, LINK
 }
 
 enum class MetaExtraTag {
-    DURATION, WIDTH, HEIGHT, PAGES
+    DURATION, WIDTH, HEIGHT, PAGES, TITLE, DESCRIPTION, URL
 }
 
 data class ResourceMetaExtra(val data: Map<MetaExtraTag, String>) {
@@ -100,6 +102,7 @@ data class ResourceMetaExtra(val data: Map<MetaExtraTag, String>) {
                 ResourceKind.IMAGE -> ImageMetaExtra.extract(path)
                 ResourceKind.VIDEO -> VideoMetaExtra.extract(path)
                 ResourceKind.DOCUMENT -> DocumentMetaExtra.extract(path)
+                ResourceKind.LINK -> LinkMetaExtra.extract(path)
                 null -> null
             }
         }

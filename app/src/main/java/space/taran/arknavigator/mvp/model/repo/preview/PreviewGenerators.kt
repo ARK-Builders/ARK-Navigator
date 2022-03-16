@@ -8,6 +8,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy
 import com.bumptech.glide.request.RequestOptions
 import space.taran.arknavigator.mvp.model.repo.extra.ImageMetaExtra
+import space.taran.arknavigator.mvp.model.repo.preview.generator.LinkPreviewGenerator
 import space.taran.arknavigator.mvp.model.repo.preview.generator.PdfPreviewGenerator
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.utils.ImageUtils.glideExceptionListener
@@ -24,7 +25,8 @@ object PreviewGenerators {
 
     // Use this map to declare new types of generators
     private var generatorsByExt: Map<String, (Path) -> Bitmap> = mapOf(
-        "pdf" to { path: Path -> PdfPreviewGenerator.generate(path) }
+        "pdf" to { path: Path -> PdfPreviewGenerator.generate(path) },
+        "link" to { path: Path -> LinkPreviewGenerator.generate(path) },
     )
 
     fun generate(path: Path, previewPath: Path, thumbnailPath: Path) {

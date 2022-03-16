@@ -4,8 +4,8 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.ParcelFileDescriptor
 import com.shockwave.pdfium.PdfiumCore
-import java.nio.file.Path
 import space.taran.arknavigator.ui.App
+import java.nio.file.Path
 
 object PdfPreviewGenerator {
     fun generate(source: Path): Bitmap {

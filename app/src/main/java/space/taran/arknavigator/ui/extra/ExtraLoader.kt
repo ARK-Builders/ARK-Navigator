@@ -22,6 +22,11 @@ object ExtraLoader {
                 extraTVs[0],
                 verbose
             )
+            ResourceKind.LINK -> LinkExtraLoader.load(
+                meta,
+                extraTVs[1],
+                verbose
+            )
             else -> {}
         }
     }
