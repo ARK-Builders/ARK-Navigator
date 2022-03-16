@@ -23,20 +23,20 @@ object VideoExtraLoader {
             )
         }
 
-        val duration = extra.data[MetaExtraTag.DURATION]
+        val duration = extra.data[MetaExtraTag.DURATION]?.toInt()
         if (duration != null) {
             durationTV.textOrGone(durationTextCode(duration))
         }
     }
 
-    private fun durationTextCode(millis: Long): String {
+    private fun durationTextCode(millis: Int): String {
         // use `Duration.ofMillis(timeMillis).secondsPart()` in API 31
 
         val seconds = millis / 1000
         val minutes = seconds / 60
         val hours = minutes / 60
 
-        fun toText(n: Long): String =
+        fun toText(n: Int): String =
             if (n < 10) {
                 "0$n"
             } else {

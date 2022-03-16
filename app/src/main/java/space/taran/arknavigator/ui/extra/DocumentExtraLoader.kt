@@ -7,11 +7,11 @@ import space.taran.arknavigator.utils.extensions.textOrGone
 
 object DocumentExtraLoader {
     fun load(extra: ResourceMetaExtra, pagesTV: TextView, verbose: Boolean) {
-        val pages = extra.data[MetaExtraTag.PAGES]
+        val pages = extra.data[MetaExtraTag.PAGES]?.toInt()
         if (pages != null) {
             val label = when {
                 verbose -> {
-                    if (pages == 1L) "$pages page"
+                    if (pages == 1) "$pages page"
                     else "$pages pages"
                 }
                 else -> "$pages"
