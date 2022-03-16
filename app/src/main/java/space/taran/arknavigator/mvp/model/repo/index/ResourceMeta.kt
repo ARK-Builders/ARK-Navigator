@@ -87,7 +87,7 @@ enum class MetaExtraTag {
     DURATION, WIDTH, HEIGHT, PAGES
 }
 
-data class ResourceMetaExtra(val data: Map<MetaExtraTag, Long>) {
+data class ResourceMetaExtra(val data: Map<MetaExtraTag, String>) {
     companion object {
         fun fromRoom(room: List<ResourceExtra>): ResourceMetaExtra {
             val data = room.map {

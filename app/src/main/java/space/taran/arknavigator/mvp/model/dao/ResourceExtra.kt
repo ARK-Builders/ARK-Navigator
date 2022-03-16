@@ -1,8 +1,8 @@
 package space.taran.arknavigator.mvp.model.dao
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
-import androidx.room.ColumnInfo
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMetaExtra
 
@@ -23,7 +23,7 @@ data class ResourceExtra(
 
     val ordinal: Int,
 
-    val value: Long
+    val value: String
 ) {
     companion object {
         fun fromMetaExtra(id: ResourceId, extra: ResourceMetaExtra?):
