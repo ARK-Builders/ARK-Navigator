@@ -2,6 +2,19 @@ package space.taran.arknavigator.mvp.model.repo.index
 
 import java.nio.file.Path
 
+/**
+ * [AggregatedResourceIndex] is useful for "aggregated" navigation mode — a mode in
+ * which we navigate through multiple indexed folders (roots). For a single-root
+ * navigation [PlainResourceIndex] can be used, and both [AggregatedResourceIndex]
+ * and [PlainResourceIndex] should be transparently interchangeable, meaning that
+ * both implementations support the same methods and they should not be used
+ * otherwise as by [ResourceIndex] interface. Any component using [ResourceIndex]
+ * should function in the same fashion independent on implementation of the index,
+ * and only capability to look into multiple roots is gained by passing
+ * [AggregatedResourceIndex] into the component.
+ *
+ * @param shards A collection of individual [PlainResourcesIndex] to be aggregated.
+ */
 class AggregatedResourcesIndex(
     private val shards: Collection<PlainResourcesIndex>
 ) : ResourcesIndex {
