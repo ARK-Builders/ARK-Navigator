@@ -2,11 +2,11 @@ package space.taran.arknavigator.mvp.model.dao
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import java.nio.file.Path
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.utils.Milliseconds
 import space.taran.arknavigator.utils.StringPath
+import java.nio.file.Path
 
 @Entity
 data class Resource(
@@ -18,7 +18,7 @@ data class Resource(
     val extension: String,
     val modified: Milliseconds,
     val size: Long,
-    val kind: Int,
+    val kind: Int?,
 ) {
     companion object {
         fun fromMeta(meta: ResourceMeta, root: Path, path: Path): Resource =
@@ -30,7 +30,7 @@ data class Resource(
                 extension = meta.extension,
                 modified = meta.modified.toMillis(),
                 size = meta.size,
-                kind = meta.kind?.ordinal ?: -1
+                kind = meta.kind?.code?.ordinal
             )
     }
 }
