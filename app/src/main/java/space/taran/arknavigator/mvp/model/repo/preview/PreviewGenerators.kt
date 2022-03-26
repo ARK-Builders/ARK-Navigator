@@ -7,7 +7,7 @@ import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy
 import com.bumptech.glide.request.RequestOptions
-import space.taran.arknavigator.mvp.model.repo.extra.ImageMetaExtra
+import space.taran.arknavigator.mvp.model.repo.kind.ImageKindFactory
 import space.taran.arknavigator.mvp.model.repo.preview.generator.LinkPreviewGenerator
 import space.taran.arknavigator.mvp.model.repo.preview.generator.PdfPreviewGenerator
 import space.taran.arknavigator.ui.App
@@ -30,7 +30,7 @@ object PreviewGenerators {
     )
 
     fun generate(path: Path, previewPath: Path, thumbnailPath: Path) {
-        if (ImageMetaExtra.isImage(path)) {
+        if (ImageKindFactory.isBelong(path)) {
             Log.d(PREVIEWS, "$path is an image, only generating a thumbnail for it")
 
             // images are special kind of a resource:

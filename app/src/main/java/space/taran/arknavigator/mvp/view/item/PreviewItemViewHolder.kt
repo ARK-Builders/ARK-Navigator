@@ -10,7 +10,7 @@ import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.ortiz.touchview.OnTouchImageViewListener
 import space.taran.arknavigator.databinding.ItemImageBinding
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
-import space.taran.arknavigator.mvp.model.repo.index.ResourceKind
+import space.taran.arknavigator.mvp.model.repo.kind.ResourceKind
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 import space.taran.arknavigator.utils.ImageUtils.APPEARANCE_DURATION
@@ -47,7 +47,7 @@ class PreviewItemViewHolder(
     ) = with(binding) {
         layoutProgress.root.isVisible = false
 
-        if (resource.kind == ResourceKind.VIDEO) {
+        if (resource.kind is ResourceKind.Video) {
             icPlay.makeVisibleAndSetOnClickListener {
                 presenter.onPlayButtonClick()
             }

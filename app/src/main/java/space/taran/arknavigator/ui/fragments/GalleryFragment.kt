@@ -29,7 +29,7 @@ import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.FragmentGalleryBinding
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
-import space.taran.arknavigator.mvp.model.repo.index.ResourceKind
+import space.taran.arknavigator.mvp.model.repo.kind.ResourceKind
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 import space.taran.arknavigator.mvp.view.GalleryView
@@ -353,20 +353,20 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
             openResourceFab.makeGone()
             editResourceFab.makeGone()
             when (kind) {
-                ResourceKind.VIDEO -> {
+                is ResourceKind.Video -> {
                     // "open" capabilities only
                     openResourceFab.makeVisible()
                 }
-                ResourceKind.DOCUMENT -> {
+                is ResourceKind.Document -> {
                     // both "open" and "edit" capabilities
                     editResourceFab.makeVisible()
                     openResourceFab.makeVisible()
                 }
-                ResourceKind.IMAGE -> {
+                is ResourceKind.Image -> {
                     // "edit" capabilities only
                     editResourceFab.makeVisible()
                 }
-                ResourceKind.LINK -> {
+                is ResourceKind.Link -> {
                     openResourceFab.makeVisible()
                 }
                 null -> {

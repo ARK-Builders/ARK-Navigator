@@ -1,18 +1,17 @@
 package space.taran.arknavigator.ui.extra
 
 import android.widget.TextView
-import space.taran.arknavigator.mvp.model.repo.index.MetaExtraTag
-import space.taran.arknavigator.mvp.model.repo.index.ResourceMetaExtra
+import space.taran.arknavigator.mvp.model.repo.kind.ResourceKind
 import space.taran.arknavigator.utils.extensions.textOrGone
 
 object VideoExtraLoader {
     fun load(
-        extra: ResourceMetaExtra,
+        video: ResourceKind.Video,
         resolutionTV: TextView,
         durationTV: TextView
     ) {
-        val width = extra.data[MetaExtraTag.WIDTH]
-        val height = extra.data[MetaExtraTag.HEIGHT]
+        val width = video.width
+        val height = video.height
 
         if (width != null && height != null) {
             resolutionTV.textOrGone(
@@ -23,20 +22,20 @@ object VideoExtraLoader {
             )
         }
 
-        val duration = extra.data[MetaExtraTag.DURATION]?.toInt()
+        val duration = video.duration
         if (duration != null) {
             durationTV.textOrGone(durationTextCode(duration))
         }
     }
 
-    private fun durationTextCode(millis: Int): String {
+    private fun durationTextCode(millis: Long): String {
         // use `Duration.ofMillis(timeMillis).secondsPart()` in API 31
 
         val seconds = millis / 1000
         val minutes = seconds / 60
         val hours = minutes / 60
 
-        fun toText(n: Int): String =
+        fun toText(n: Long): String =
             if (n < 10) {
                 "0$n"
             } else {

@@ -51,4 +51,5 @@
     <string name="menu_tags_on_title">Tags on</string>
     <string name="menu_tags_off_title">Tags off</string>
     <string name="menu_tags_sort_by_title">Sort by</string>
+    <string name="kind_link">Link</string>
 </resources>

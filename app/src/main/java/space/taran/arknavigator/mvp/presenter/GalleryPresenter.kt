@@ -8,12 +8,11 @@ import kotlinx.coroutines.launch
 import moxy.MvpPresenter
 import moxy.presenterScope
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
-import space.taran.arknavigator.mvp.model.repo.index.MetaExtraTag
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
-import space.taran.arknavigator.mvp.model.repo.index.ResourceKind
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
+import space.taran.arknavigator.mvp.model.repo.kind.ResourceKind
 import space.taran.arknavigator.mvp.model.repo.preview.PreviewAndThumbnail
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
@@ -22,8 +21,8 @@ import space.taran.arknavigator.mvp.view.GalleryView
 import space.taran.arknavigator.mvp.view.item.PreviewItemView
 import space.taran.arknavigator.navigation.AppRouter
 import space.taran.arknavigator.navigation.Screens
-import space.taran.arknavigator.utils.LogTags.GALLERY_SCREEN
 import space.taran.arknavigator.utils.ImageUtils
+import space.taran.arknavigator.utils.LogTags.GALLERY_SCREEN
 import space.taran.arknavigator.utils.Tag
 import space.taran.arknavigator.utils.extension
 import java.nio.file.Files
@@ -106,8 +105,9 @@ class GalleryPresenter(
 
     fun onOpenFabClick() {
         Log.d(GALLERY_SCREEN, "[open_resource] clicked at position $currentPos")
-        if (currentResource.kind == ResourceKind.LINK) {
-            val url = currentResource.extra?.data?.get(MetaExtraTag.URL) ?: return
+        val kind = currentResource.kind
+        if (kind is ResourceKind.Link) {
+            val url = kind.url ?: return
             viewState.openLink(url)
             return
         }
@@ -117,8 +117,9 @@ class GalleryPresenter(
 
     fun onShareFabClick() {
         Log.d(GALLERY_SCREEN, "[share_resource] clicked at position $currentPos")
-        if (currentResource.kind == ResourceKind.LINK) {
-            val url = currentResource.extra?.data?.get(MetaExtraTag.URL) ?: return
+        val kind = currentResource.kind
+        if (kind is ResourceKind.Link) {
+            val url = kind.url ?: return
             viewState.shareLink(url)
             return
         }
@@ -142,11 +143,6 @@ class GalleryPresenter(
         }
 
         viewState.deleteResource(currentPos)
-    }
-
-    fun onShareFabClick() {
-        Log.d(GALLERY_SCREEN, "[share_resource] clicked at position $currentPos")
-        viewState.shareResource(index.getPath(currentResource.id))
     }
 
     fun onTagClick(tag: Tag) {

@@ -9,6 +9,7 @@ import space.taran.arknavigator.mvp.model.dao.Resource
 import space.taran.arknavigator.mvp.model.dao.ResourceDao
 import space.taran.arknavigator.mvp.model.dao.ResourceExtra
 import space.taran.arknavigator.mvp.model.dao.ResourceWithExtra
+import space.taran.arknavigator.mvp.model.repo.kind.GeneralKindFactory
 import space.taran.arknavigator.mvp.model.repo.preview.PreviewAndThumbnail
 import space.taran.arknavigator.utils.LogTags.PREVIEWS
 import space.taran.arknavigator.utils.LogTags.RESOURCES_INDEX
@@ -229,7 +230,7 @@ class PlainResourcesIndex internal constructor(
                 .forEach {
                     roomResources.add(Resource.fromMeta(it.value, root, it.key))
                     roomExtra.addAll(
-                        ResourceExtra.fromMetaExtra(it.value.id, it.value.extra)
+                        GeneralKindFactory.toRoom(it.value.id, it.value.kind)
                     )
                 }
 
