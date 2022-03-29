@@ -43,7 +43,7 @@ You can be as creative as you want with the tagging system. For example, you cou
 How does it work?
 -----------------
 
-In short, the app works this way - Bookmark the relevant folders, add tags to the items, filter the items using the added tags.
+In short, the app works this way - Bookmark the relevant folders, view contents of folder, add tags to the items and filter the items using the added tags.
 
 **Bookmark folders:** To bookmark a folder, press the plus (+) button located on the right side of the app, navigate to the folder you wish to bookmark, and press the “Add root” button. Folders added this way will be listed in the “Manage Folders'' view as Root folders. Subfolders in the root folders can be bookmarked/favorited again for easier access. To do that, open “Manage Folders”, press the plus (+) button next to the relevant root folder, navigate to a subfolder, and press the “Favorite” button. Subfolders favorited like this are listed when you expand the Root folders.
 
@@ -57,4 +57,4 @@ In short, the app works this way - Bookmark the relevant folders, add tags to th
 What to expect going forward?
 -----------------------------
 
-This app is under development right now, with more and more features being added gradually. After the initial phase of development, the ARK Navigator should work with all kinds of files, allowing you to preview the files and manipulate them. 
+This app is under development right now, with more and more features being added gradually. After the initial phase of development, the ARK Navigator should work with all kinds of files, allowing you to preview the files and manipulate them. In the future as well, you should expect advanced bookmarking that would allow you save a link to an online media resource such as Youtube, SoundCloud or Spotify. 
