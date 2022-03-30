@@ -1,15 +1,13 @@
 package space.taran.arknavigator.mvp.presenter.adapter.tagsselector
 
-import space.taran.arknavigator.utils.Tag
+sealed class TagsSelectorAction(val item: TagItem?)
 
-sealed class TagsSelectorAction(val tag: Tag?)
+class Include(item: TagItem) : TagsSelectorAction(item)
+class Exclude(item: TagItem?) : TagsSelectorAction(item)
 
-class Include(tag: Tag) : TagsSelectorAction(tag)
-class Exclude(tag: Tag) : TagsSelectorAction(tag)
+class UncheckIncluded(item: TagItem?) : TagsSelectorAction(item)
+class UncheckExcluded(item: TagItem?) : TagsSelectorAction(item)
+class UncheckAndExclude(item: TagItem?) : TagsSelectorAction(item)
 
-class UncheckIncluded(tag: Tag) : TagsSelectorAction(tag)
-class UncheckExcluded(tag: Tag) : TagsSelectorAction(tag)
-class UncheckAndExclude(tag: Tag) : TagsSelectorAction(tag)
-
-class Clear(val included: Set<Tag>, val excluded: Set<Tag>) :
+class Clear(val included: Set<TagItem>, val excluded: Set<TagItem>) :
     TagsSelectorAction(null)

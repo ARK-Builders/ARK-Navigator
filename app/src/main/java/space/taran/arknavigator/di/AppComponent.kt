@@ -5,13 +5,14 @@ import space.taran.arknavigator.di.modules.AppModule
 import space.taran.arknavigator.di.modules.CiceroneModule
 import space.taran.arknavigator.di.modules.DatabaseModule
 import space.taran.arknavigator.di.modules.RepoModule
-import space.taran.arknavigator.mvp.presenter.MainPresenter
 import space.taran.arknavigator.mvp.presenter.FoldersPresenter
-import space.taran.arknavigator.mvp.presenter.ResourcesPresenter
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
+import space.taran.arknavigator.mvp.presenter.MainPresenter
+import space.taran.arknavigator.mvp.presenter.ResourcesPresenter
 import space.taran.arknavigator.mvp.presenter.SettingsPresenter
 import space.taran.arknavigator.mvp.presenter.adapter.ResourcesGridPresenter
 import space.taran.arknavigator.mvp.presenter.adapter.folderstree.FoldersTreePresenter
+import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagsSelectorPresenter
 import space.taran.arknavigator.mvp.presenter.dialog.EditTagsDialogPresenter
 import space.taran.arknavigator.mvp.presenter.dialog.FolderPickerDialogPresenter
 import space.taran.arknavigator.mvp.presenter.dialog.SortDialogPresenter
@@ -52,4 +53,5 @@ interface AppComponent {
     fun inject(previewItemViewHolder: PreviewItemViewHolder)
     fun inject(folderPickerDialogPresenter: FolderPickerDialogPresenter)
     fun inject(sortDialogPresenter: SortDialogPresenter)
+    fun inject(tagsSelectorPresenter: TagsSelectorPresenter)
 }

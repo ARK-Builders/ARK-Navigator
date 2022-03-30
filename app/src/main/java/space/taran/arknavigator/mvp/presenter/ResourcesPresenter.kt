@@ -59,7 +59,9 @@ class ResourcesPresenter(
             rootAndFav.fav,
             presenterScope,
             ::onSelectionChange
-        )
+        ).apply {
+            App.instance.appComponent.inject(this)
+        }
 
     override fun onFirstViewAttach() {
         Log.d(RESOURCES_SCREEN, "first view attached in ResourcesPresenter")

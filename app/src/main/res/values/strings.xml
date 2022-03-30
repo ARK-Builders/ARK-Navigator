@@ -33,7 +33,6 @@
     <string name="images_cache_replication_disabled">Images cache replication disabled!</string>
     <string name="index_replication_enabled">Index replication enabled!</string>
     <string name="index_replication_disabled">Index replication disabled!</string>
-    <string name="kind_tags_label">Show Kind Tags: </string>
     <string name="removing_tags_enabled">Removing lost resources tags enabled!</string>
     <string name="removing_tags_disabled">Removing lost resources tags disabled!</string>
     <string name="settings">Settings</string>
@@ -42,6 +41,10 @@
     <string name="index_replication">Index replication:</string>
     <string name="removing_lost_resources_tags">Removing lost resources tags:</string>
     <string name="reset_preferences">Reset preferences</string>
+    <string name="kind_tags_label">Show Kind Tags: </string>
+    <string name="kind_image">Image</string>
+    <string name="kind_video">Video</string>
+    <string name="kind_document">Document</string>
     <string name="page_settings_title">Settings</string>
     <string name="page_roots_title">Manage folders</string>
     <string name="page_tags_title">Navigate data</string>
