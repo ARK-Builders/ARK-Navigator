@@ -22,11 +22,13 @@ import space.taran.arknavigator.navigation.AppRouter
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.utils.RESOURCES_SCREEN
+import space.taran.arknavigator.utils.Tag
 import java.nio.file.Path
 import javax.inject.Inject
 
 class ResourcesPresenter(
-    private val rootAndFav: RootAndFav
+    private val rootAndFav: RootAndFav,
+    private val externallySelectedTag: Tag? = null
 ) : MvpPresenter<ResourcesView>() {
 
     @Inject
@@ -108,6 +110,9 @@ class ResourcesPresenter(
             tagsSelectorPresenter.setKindTagsSwitchState(
                 userPreferences.IsKindTagsEnabled()
             )
+            externallySelectedTag?.let {
+                tagsSelectorPresenter.onTagExternallySelect(it)
+            }
             tagsSelectorPresenter.calculateTagsAndSelection()
 
             val path = (rootAndFav.fav ?: rootAndFav.root)
