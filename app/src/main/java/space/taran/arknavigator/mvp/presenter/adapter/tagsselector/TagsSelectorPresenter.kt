@@ -4,6 +4,7 @@ import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import space.taran.arknavigator.R
+import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceKind
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
@@ -30,6 +31,9 @@ class TagsSelectorPresenter(
 ) {
     @Inject
     lateinit var stringProvider: StringProvider
+
+    @Inject
+    lateinit var userPreferences: UserPreferences
 
     private var index: ResourcesIndex? = null
     private var storage: TagsStorage? = null
@@ -65,12 +69,13 @@ class TagsSelectorPresenter(
         private set
     var unavailableTagsForDisplay = listOf<TagItem>()
         private set
-    var isClearBtnVisible = false
+    var isClearBtnEnabled = false
         private set
 
-    fun init(index: ResourcesIndex, storage: TagsStorage) {
+    fun init(index: ResourcesIndex, storage: TagsStorage, kindTagsEnabled: Boolean) {
         this.index = index
         this.storage = storage
+        showKindTags = kindTagsEnabled
     }
 
     fun onTagItemClick(item: TagItem) = scope.launch {
@@ -204,7 +209,7 @@ class TagsSelectorPresenter(
         Log.d(TAGS_SELECTOR, "tags available: $availableTagsForDisplay")
         Log.d(TAGS_SELECTOR, "tags unavailable: $unavailableTagsForDisplay")
 
-        isClearBtnVisible = includedTagItems.isNotEmpty() ||
+        isClearBtnEnabled = includedTagItems.isNotEmpty() ||
             excludedTagItems.isNotEmpty()
 
         if (allItemsTags.isEmpty())
@@ -376,9 +381,10 @@ class TagsSelectorPresenter(
         }.toMap()
     }
 
-    fun setKindTagsSwitchState(kindTagsSwitchState: Boolean) = scope.launch {
-        showKindTags = kindTagsSwitchState
-        resetTags()
+    fun onKindTagsToggle(kindTagsEnabled: Boolean) = scope.launch {
+        showKindTags = kindTagsEnabled
+        viewState.setKindTagsEnabled(showKindTags)
+        userPreferences.setKindTagsEnabled(kindTagsEnabled)
         calculateTagsAndSelection()
     }
 }
