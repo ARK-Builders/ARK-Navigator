@@ -19,6 +19,7 @@ import space.taran.arknavigator.mvp.presenter.adapter.ResourceMetaDiffUtilCallba
 import space.taran.arknavigator.mvp.view.GalleryView
 import space.taran.arknavigator.mvp.view.item.PreviewItemView
 import space.taran.arknavigator.navigation.AppRouter
+import space.taran.arknavigator.navigation.Screens
 import space.taran.arknavigator.utils.GALLERY_SCREEN
 import space.taran.arknavigator.utils.ImageUtils
 import space.taran.arknavigator.utils.Tag
@@ -127,6 +128,14 @@ class GalleryPresenter(
     fun onShareFabClick() {
         Log.d(GALLERY_SCREEN, "[share_resource] clicked at position $currentPos")
         viewState.shareResource(index.getPath(currentResource.id))
+    }
+
+    fun onTagClick(tag: Tag) {
+        router.navigateTo(
+            Screens.ResourcesScreenWithSelectedTag(
+                rootAndFav, tag
+            )
+        )
     }
 
     fun onTagRemove(tag: Tag) = presenterScope.launch(NonCancellable) {

@@ -57,16 +57,18 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
     lateinit var userPreferences: UserPreferences
 
     private val presenter by moxyPresenter {
-        ResourcesPresenter(requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav)
-            .apply {
-                Log.d(RESOURCES_SCREEN, "creating ResourcesPresenter")
-                App.instance.appComponent.inject(this)
-            }
+        ResourcesPresenter(
+            requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
+            requireArguments().getString(SELECTED_TAG_KEY)
+        ).apply {
+            Log.d(RESOURCES_SCREEN, "creating ResourcesPresenter")
+            App.instance.appComponent.inject(this)
+        }
     }
 
     private lateinit var binding: FragmentResourcesBinding
     private var resourcesAdapter: ResourcesRVAdapter? = null
-    var selectedTag: Tag = ""
+
     private val frameTop by lazy {
         val loc = IntArray(2)
         binding.root.getLocationOnScreen(loc)
@@ -371,6 +373,7 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         private const val DRAG_TRAVEL_SPEED_THRESHOLD =
             150 // percents per second
         private const val ROOT_AND_FAV_KEY = "rootAndFav"
+        private const val SELECTED_TAG_KEY = "selectedTag"
 
         fun newInstance(
             rootAndFav: RootAndFav
@@ -379,13 +382,14 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
                 putParcelable(ROOT_AND_FAV_KEY, rootAndFav)
             }
         }
+
         fun newInstanceWithSelectedTag(
             rootAndFav: RootAndFav,
             tag: Tag
         ) = ResourcesFragment().apply {
             arguments = Bundle().apply {
                 putParcelable(ROOT_AND_FAV_KEY, rootAndFav)
-                selectedTag = tag
+                putString(SELECTED_TAG_KEY, tag)
             }
         }
     }

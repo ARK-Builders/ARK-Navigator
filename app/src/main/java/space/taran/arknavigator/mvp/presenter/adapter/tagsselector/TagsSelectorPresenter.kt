@@ -109,6 +109,10 @@ class TagsSelectorPresenter(
         }
     }
 
+    fun onTagExternallySelect(tag: Tag) = scope.launch {
+        includeTag(TagItem.DefaultTagItem(tag))
+    }
+
     fun onClearClick() = scope.launch {
         actions.addLast(Clear(includedTagItems.toSet(), excludedTagItems.toSet()))
         includedTagItems.clear()
