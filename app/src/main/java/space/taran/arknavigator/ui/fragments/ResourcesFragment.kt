@@ -18,7 +18,6 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
-import kotlin.math.abs
 import kotlinx.coroutines.launch
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
@@ -128,8 +127,7 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         tagsSelectorAdapter = TagsSelectorAdapter(
             binding.cgTagsChecked,
             binding.tagsCg,
-            presenter.tagsSelectorPresenter,
-            selectedTag!!
+            presenter.tagsSelectorPresenter
         )
         binding.ivDragHandler.setOnTouchListener(::dragHandlerTouchListener)
         binding.etTagsFilter.doAfterTextChanged {

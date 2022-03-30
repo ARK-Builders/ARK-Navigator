@@ -69,10 +69,14 @@ class UserPreferences @Inject constructor(val context: Context) {
         }
     }
 
-    suspend fun setKindTagsEnabled(enabled: Boolean?) {
+    suspend fun IsKindTagsEnabled(): Boolean =
+        dataStore.data.first()[
+            PreferencesKeys.SHOW_KIND
+        ] ?: DefaultValues.SHOW_KIND
+
+    suspend fun setKindTagsEnabled(enabled: Boolean) {
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.SHOW_KIND_PREFERENCE] =
-                enabled ?: BuildConfig.DEBUG
+            preferences[PreferencesKeys.SHOW_KIND] = enabled
         }
     }
 
@@ -100,10 +104,6 @@ class UserPreferences @Inject constructor(val context: Context) {
         dataStore.data.first()[PreferencesKeys.INDEX_REPLICATION]
             ?: DefaultValues.INDEX_REPLICATION
 
-    suspend fun IsKindTagsEnabled(): Boolean =
-        dataStore.data.first()[
-            PreferencesKeys.SHOW_KIND_PREFERENCE
-        ] ?: SHOW_KIND_PREFERENCE
     suspend fun setRemovingLostResourcesTagsEnabled(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.REMOVING_LOST_RESOURCES_TAGS] = enabled
@@ -130,6 +130,7 @@ class UserPreferences @Inject constructor(val context: Context) {
             booleanPreferencesKey("index_replication")
         val REMOVING_LOST_RESOURCES_TAGS =
             booleanPreferencesKey("removing_lost_resources_tags")
+        val SHOW_KIND = booleanPreferencesKey("show_kind_preference")
     }
 
     private object DefaultValues {
@@ -139,5 +140,6 @@ class UserPreferences @Inject constructor(val context: Context) {
         val IMG_CACHE_REPLICATION = false
         val INDEX_REPLICATION = false
         val REMOVING_LOST_RESOURCES_TAGS = false
+        val SHOW_KIND = false
     }
 }

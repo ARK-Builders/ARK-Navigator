@@ -1,20 +1,26 @@
 package space.taran.arknavigator.mvp.presenter.adapter.tagsselector
 
 import android.util.Log
-import java.nio.file.Path
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import space.taran.arknavigator.R
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
+import space.taran.arknavigator.mvp.model.repo.index.ResourceKind
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.view.ResourcesView
-import space.taran.arknavigator.ui.fragments.GalleryFragment.Companion.KIND_TAGS_PREFIX_KEY
+import space.taran.arknavigator.ui.resource.StringProvider
 import space.taran.arknavigator.utils.Popularity
 import space.taran.arknavigator.utils.TAGS_SELECTOR
 import space.taran.arknavigator.utils.Tag
-import space.taran.arknavigator.utils.Tags
 import java.nio.file.Path
+import javax.inject.Inject
 import kotlin.reflect.KSuspendFunction1
+
+sealed class TagItem {
+    data class DefaultTagItem(val tag: Tag) : TagItem()
+    data class KindTagItem(val kind: ResourceKind) : TagItem()
+}
 
 class TagsSelectorPresenter(
     private val viewState: ResourcesView,
@@ -22,30 +28,42 @@ class TagsSelectorPresenter(
     private val scope: CoroutineScope,
     private val onSelectionChangeListener: KSuspendFunction1<Set<ResourceId>, Unit>
 ) {
+    @Inject
+    lateinit var stringProvider: StringProvider
+
     private var index: ResourcesIndex? = null
     private var storage: TagsStorage? = null
     private val actions = ArrayDeque<TagsSelectorAction>()
     private var filter = ""
+    private val kindToString: Map<ResourceKind, String> by lazy {
+        mapOf(
+            ResourceKind.IMAGE to stringProvider.getString(R.string.kind_image),
+            ResourceKind.DOCUMENT
+                to stringProvider.getString(R.string.kind_document),
+            ResourceKind.VIDEO to stringProvider.getString(R.string.kind_video)
+        )
+    }
+
     var filterEnabled = false
 
     var showKindTags = false
 
-    var includedTags = mutableSetOf<Tag>()
+    var includedTagItems = mutableSetOf<TagItem>()
         private set
-    var excludedTags = mutableSetOf<Tag>()
+    var excludedTagItems = mutableSetOf<TagItem>()
         private set
-    private var availableTags = listOf<Tag>()
-    private var unavailableTags = listOf<Tag>()
+    private var availableTagItems = listOf<TagItem>()
+    private var unavailableTagItems = listOf<TagItem>()
 
     var selection = setOf<ResourceId>()
         private set
 
     // this data is used by TagsSelectorAdapter
-    var includedAndExcludedTagsForDisplay = listOf<Tag>()
+    var includedAndExcludedTagsForDisplay = listOf<TagItem>()
         private set
-    var availableTagsForDisplay = listOf<Tag>()
+    var availableTagsForDisplay = listOf<TagItem>()
         private set
-    var unavailableTagsForDisplay = listOf<Tag>()
+    var unavailableTagsForDisplay = listOf<TagItem>()
         private set
     var isClearBtnVisible = false
         private set
@@ -55,46 +73,46 @@ class TagsSelectorPresenter(
         this.storage = storage
     }
 
-    fun onTagClick(tag: Tag) = scope.launch {
+    fun onTagItemClick(item: TagItem) = scope.launch {
         when {
-            excludedTags.contains(tag) -> {
-                actions.addLast(UncheckExcluded(tag))
-                uncheckTag(tag)
+            excludedTagItems.contains(item) -> {
+                actions.addLast(UncheckExcluded(item))
+                uncheckTag(item)
             }
-            includedTags.contains(tag) -> {
-                actions.addLast(UncheckIncluded(tag))
-                uncheckTag(tag)
+            includedTagItems.contains(item) -> {
+                actions.addLast(UncheckIncluded(item))
+                uncheckTag(item)
             }
             else -> {
-                actions.addLast(Include(tag))
+                actions.addLast(Include(item))
                 if (filterEnabled) resetFilter()
-                includeTag(tag)
+                includeTag(item)
             }
         }
     }
 
-    fun onTagLongClick(tag: Tag) = scope.launch {
+    fun onTagItemLongClick(item: TagItem) = scope.launch {
         when {
-            includedTags.contains(tag) -> {
-                actions.addLast(UncheckAndExclude(tag))
-                excludeTag(tag)
+            includedTagItems.contains(item) -> {
+                actions.addLast(UncheckAndExclude(item))
+                excludeTag(item)
             }
-            !excludedTags.contains(tag) -> {
-                actions.addLast(Exclude(tag))
+            !excludedTagItems.contains(item) -> {
+                actions.addLast(Exclude(item))
                 if (filterEnabled) resetFilter()
-                excludeTag(tag)
+                excludeTag(item)
             }
             else -> {
-                actions.addLast(UncheckExcluded(tag))
-                uncheckTag(tag)
+                actions.addLast(UncheckExcluded(item))
+                uncheckTag(item)
             }
         }
     }
 
     fun onClearClick() = scope.launch {
-        actions.addLast(Clear(includedTags.toSet(), excludedTags.toSet()))
-        includedTags.clear()
-        excludedTags.clear()
+        actions.addLast(Clear(includedTagItems.toSet(), excludedTagItems.toSet()))
+        includedTagItems.clear()
+        excludedTagItems.clear()
         calculateTagsAndSelection()
     }
 
@@ -124,30 +142,18 @@ class TagsSelectorPresenter(
         if (storage == null || index == null)
             return
 
-        val resources = index!!.listIds(prefix)
-        var tagsByResources = storage!!.groupTagsByResources(resources)
-        if (showKindTags) {
-            tagsByResources = tagsByResources.map { (id, tags) ->
-                var listOfTags = tags.filter { it.isNotEmpty() }
-                if (index!!.getMeta(id).kind != null) {
-                    val kindTag =
-                        KIND_TAGS_PREFIX_KEY + index!!.getMeta(id).kind.toString()
-                    listOfTags = listOfTags + kindTag
-                }
-                id to listOfTags.toSet()
-            }.toMap()
-        }
-        val allTags = tagsByResources.values.flatten().toSet()
+        val tagItemsByResources = provideTagItemsByResources()
+        val allItemsTags = tagItemsByResources.values.flatten().toSet()
 
         // some tags could have been removed from storage
-        excludedTags = excludedTags.intersect(allTags).toMutableSet()
-        includedTags = includedTags.intersect(allTags).toMutableSet()
+        excludedTagItems = excludedTagItems.intersect(allItemsTags).toMutableSet()
+        includedTagItems = includedTagItems.intersect(allItemsTags).toMutableSet()
 
-        val selectionAndComplementWithTags = tagsByResources
+        val selectionAndComplementWithTags = tagItemsByResources
             .toList()
             .groupBy { (_, tags) ->
-                tags.containsAll(includedTags) &&
-                    !excludedTags.any { tags.contains(it) }
+                tags.containsAll(includedTagItems) &&
+                    !excludedTagItems.any { tags.contains(it) }
             }
 
         val selectionWithTags = (
@@ -161,11 +167,11 @@ class TagsSelectorPresenter(
         val tagsOfSelectedResources = selectionWithTags.values.flatten()
         val tagsOfUnselectedResources = complementWithTags.values.flatten()
 
-        availableTags = (
-            tagsOfSelectedResources.toSet() - includedTags - excludedTags
+        availableTagItems = (
+            tagsOfSelectedResources.toSet() - includedTagItems - excludedTagItems
             ).toList()
-        unavailableTags = (
-            allTags - availableTags - includedTags - excludedTags
+        unavailableTagItems = (
+            allItemsTags - availableTagItems - includedTagItems - excludedTagItems
             ).toList()
 
         val tagsOfSelectedResPopularity = Popularity
@@ -174,28 +180,30 @@ class TagsSelectorPresenter(
         val tagsOfUnselectedResPopularity = Popularity
             .calculate(tagsOfUnselectedResources)
 
-        val tagsPopularity = Popularity.calculate(tagsByResources.values.flatten())
-        availableTags = availableTags.sortedByDescending {
+        val tagsPopularity = Popularity
+            .calculate(tagItemsByResources.values.flatten())
+        availableTagItems = availableTagItems.sortedByDescending {
             tagsOfSelectedResPopularity[it]
         }
-        unavailableTags = unavailableTags.sortedByDescending {
+        unavailableTagItems = unavailableTagItems.sortedByDescending {
             tagsOfUnselectedResPopularity[it]
         }
 
-        includedAndExcludedTagsForDisplay = (includedTags + excludedTags)
+        includedAndExcludedTagsForDisplay = (includedTagItems + excludedTagItems)
             .sortedByDescending { tagsPopularity[it] }
 
         if (filterEnabled) filterTags()
         else resetTags()
 
-        Log.d(TAGS_SELECTOR, "tags included: $includedTags")
-        Log.d(TAGS_SELECTOR, "tags excluded: $excludedTags")
+        Log.d(TAGS_SELECTOR, "tags included: $includedTagItems")
+        Log.d(TAGS_SELECTOR, "tags excluded: $excludedTagItems")
         Log.d(TAGS_SELECTOR, "tags available: $availableTagsForDisplay")
         Log.d(TAGS_SELECTOR, "tags unavailable: $unavailableTagsForDisplay")
 
-        isClearBtnVisible = includedTags.isNotEmpty() || excludedTags.isNotEmpty()
+        isClearBtnVisible = includedTagItems.isNotEmpty() ||
+            excludedTagItems.isNotEmpty()
 
-        if (allTags.isEmpty())
+        if (allItemsTags.isEmpty())
             viewState.setTagsSelectorHintEnabled(true)
         else
             viewState.setTagsSelectorHintEnabled(false)
@@ -213,24 +221,24 @@ class TagsSelectorPresenter(
 
         when (action) {
             is Include -> {
-                includedTags.remove(action.tag!!)
+                includedTagItems.remove(action.item)
             }
             is Exclude -> {
-                excludedTags.remove(action.tag!!)
+                excludedTagItems.remove(action.item)
             }
             is UncheckIncluded -> {
-                includedTags.add(action.tag!!)
+                includedTagItems.add(action.item!!)
             }
             is UncheckExcluded -> {
-                excludedTags.add(action.tag!!)
+                excludedTagItems.add(action.item!!)
             }
             is UncheckAndExclude -> {
-                excludedTags.remove(action.tag!!)
-                includedTags.add(action.tag)
+                excludedTagItems.remove(action.item)
+                includedTagItems.add(action.item!!)
             }
             is Clear -> {
-                includedTags = action.included.toMutableSet()
-                excludedTags = action.excluded.toMutableSet()
+                includedTagItems = action.included.toMutableSet()
+                excludedTagItems = action.excluded.toMutableSet()
             }
         }
 
@@ -242,11 +250,11 @@ class TagsSelectorPresenter(
     }
 
     private fun findLastActualAction(): TagsSelectorAction? {
-        val allTags = storage!!.getTags(index!!.listIds(prefix))
+        val tagItems = provideTagItemsByResources().values.flatten().toSet()
 
         while (actions.lastOrNull() != null) {
             val lastAction = actions.last()
-            if (isActionActual(lastAction, allTags)) {
+            if (isActionActual(lastAction, tagItems)) {
                 return lastAction
             } else
                 actions.removeLast()
@@ -255,17 +263,20 @@ class TagsSelectorPresenter(
         return null
     }
 
-    private fun isActionActual(action: TagsSelectorAction, allTags: Tags): Boolean {
-        action.tag?.let { tag ->
-            if (!allTags.contains(tag))
-                return false
-        } ?: let {
-            action as Clear
-            if (action.excluded.intersect(allTags).isEmpty() &&
-                action.included.intersect(allTags).isEmpty()
-            )
-                return false
+    private fun isActionActual(
+        action: TagsSelectorAction,
+        allTagItems: Set<TagItem>
+    ): Boolean {
+        if (action is Clear &&
+            action.excluded.intersect(allTagItems).isEmpty() &&
+            action.included.intersect(allTagItems).isEmpty()
+        ) {
+            return false
         }
+
+        if (!allTagItems.contains(action.item))
+            return false
+
         return true
     }
 
@@ -275,55 +286,93 @@ class TagsSelectorPresenter(
     }
 
     private fun filterTags() {
-        availableTagsForDisplay = availableTags
-            .filter { it.startsWith(filter, false) }
+        availableTagsForDisplay = availableTagItems
+            .filter {
+                when (it) {
+                    is TagItem.DefaultTagItem -> {
+                        it.tag.startsWith(filter, false)
+                    }
+                    is TagItem.KindTagItem -> {
+                        kindToString[it.kind]!!.startsWith(filter, false)
+                    }
+                }
+            }
 
-        unavailableTagsForDisplay = unavailableTags
-            .filter { it.startsWith(filter, false) }
+        unavailableTagsForDisplay = unavailableTagItems
+            .filter {
+                when (it) {
+                    is TagItem.DefaultTagItem -> {
+                        it.tag.startsWith(filter, false)
+                    }
+                    is TagItem.KindTagItem -> {
+                        kindToString[it.kind]!!.startsWith(filter, false)
+                    }
+                }
+            }
     }
 
     private fun resetTags() {
-        availableTagsForDisplay = availableTags
-        unavailableTagsForDisplay = unavailableTags
+        availableTagsForDisplay = availableTagItems
+        unavailableTagsForDisplay = unavailableTagItems
     }
 
-    private suspend fun includeTag(tag: Tag) {
-        Log.d(TAGS_SELECTOR, "including tag $tag")
+    private suspend fun includeTag(item: TagItem) {
+        Log.d(TAGS_SELECTOR, "including tag $item")
 
-        includedTags.add(tag)
-        excludedTags.remove(tag)
+        includedTagItems.add(item)
+        excludedTagItems.remove(item)
 
         calculateTagsAndSelection()
     }
 
-    private suspend fun excludeTag(tag: Tag) {
-        Log.d(TAGS_SELECTOR, "excluding tag $tag")
+    private suspend fun excludeTag(item: TagItem) {
+        Log.d(TAGS_SELECTOR, "excluding tag $item")
 
-        excludedTags.add(tag)
-        includedTags.remove(tag)
+        excludedTagItems.add(item)
+        includedTagItems.remove(item)
 
         calculateTagsAndSelection()
     }
 
-    private suspend fun uncheckTag(tag: Tag, needToCalculate: Boolean = true) {
-        Log.d(TAGS_SELECTOR, "un-checking tag $tag")
+    private suspend fun uncheckTag(item: TagItem, needToCalculate: Boolean = true) {
+        Log.d(TAGS_SELECTOR, "un-checking tag $item")
 
-        if (includedTags.contains(tag) && excludedTags.contains(tag)) {
+        if (includedTagItems.contains(item) && excludedTagItems.contains(item)) {
             throw AssertionError("The tag is both included and excluded")
         }
-        if (!includedTags.contains(tag) && !excludedTags.contains(tag)) {
+        if (!includedTagItems.contains(item) && !excludedTagItems.contains(item)) {
             throw AssertionError("The tag is neither included nor excluded")
         }
 
-        if (!includedTags.remove(tag)) {
-            excludedTags.remove(tag)
+        if (!includedTagItems.remove(item)) {
+            excludedTagItems.remove(item)
         }
 
         if (needToCalculate)
             calculateTagsAndSelection()
     }
 
-    fun setKindTagsSwitchState(kindTagsSwitchState: Boolean) {
+    private fun provideTagItemsByResources(): Map<ResourceId, Set<TagItem>> {
+        val resources = index!!.listIds(prefix)
+        val tagItemsByResources: Map<ResourceId, Set<TagItem>> =
+            storage!!.groupTagsByResources(resources).map {
+                it.key to it.value.map { tag -> TagItem.DefaultTagItem(tag) }.toSet()
+            }.toMap()
+
+        if (!showKindTags) return tagItemsByResources
+
+        return tagItemsByResources.map { (id, tags) ->
+            var listOfTags = tags
+            val kind = index!!.getMeta(id).kind
+            if (kind != null) {
+                listOfTags =
+                    listOfTags + TagItem.KindTagItem(kind)
+            }
+            id to listOfTags
+        }.toMap()
+    }
+
+    fun setKindTagsSwitchState(kindTagsSwitchState: Boolean) = scope.launch {
         showKindTags = kindTagsSwitchState
         resetTags()
         calculateTagsAndSelection()

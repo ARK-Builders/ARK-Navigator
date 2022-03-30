@@ -1,14 +1,14 @@
 package space.taran.arknavigator.mvp.model.repo.index
 
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.attribute.FileTime
 import space.taran.arknavigator.mvp.model.dao.ResourceExtra
 import space.taran.arknavigator.mvp.model.dao.ResourceWithExtra
 import space.taran.arknavigator.mvp.model.repo.extra.DocumentMetaExtra
 import space.taran.arknavigator.mvp.model.repo.extra.ImageMetaExtra
 import space.taran.arknavigator.mvp.model.repo.extra.VideoMetaExtra
 import space.taran.arknavigator.utils.extension
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.attribute.FileTime
 
 data class ResourceMeta(
     val id: ResourceId,

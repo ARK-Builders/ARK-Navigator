@@ -6,46 +6,44 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import space.taran.arknavigator.R
+import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagItem
 import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagsSelectorPresenter
-import space.taran.arknavigator.ui.fragments.GalleryFragment.Companion.KIND_TAGS_PREFIX_KEY
-import space.taran.arknavigator.utils.Tag
 
 class TagsSelectorAdapter(
     private val checkedChipGroup: ChipGroup,
     private val chipGroup: ChipGroup,
-    private val presenter: TagsSelectorPresenter,
-    private var selectedTag: Tag
+    private val presenter: TagsSelectorPresenter
 ) {
     private val clearChip = createClearChip()
-    private val chipsByTags = mutableMapOf<Tag, Chip>()
+    private val chipsByTagItems = mutableMapOf<TagItem, Chip>()
 
     fun drawTags() {
         chipGroup.removeAllViews()
         checkedChipGroup.removeAllViews()
         createChips()
         drawIncludedAndExcludedTags()
+        drawAvailableTags()
         drawClearBtn()
         drawUnavailableTags()
-        drawAvailableTags()
     }
 
     private fun createChips() {
-        chipsByTags.clear()
-        presenter.includedTags.forEach { tag ->
+        chipsByTagItems.clear()
+        presenter.includedTagItems.forEach { tag ->
             val chip = createDefaultChip(tag)
             chip.setTextColor(Color.BLUE)
             chip.isChecked = true
-            chipsByTags[tag] = chip
+            chipsByTagItems[tag] = chip
         }
-        presenter.excludedTags.forEach { tag ->
+        presenter.excludedTagItems.forEach { tag ->
             val chip = createDefaultChip(tag)
             chip.setTextColor(Color.RED)
             chip.isLongClickable = false
-            chipsByTags[tag] = chip
+            chipsByTagItems[tag] = chip
         }
         presenter.availableTagsForDisplay.forEach { tag ->
             val chip = createDefaultChip(tag)
-            chipsByTags[tag] = chip
+            chipsByTagItems[tag] = chip
         }
         presenter.unavailableTagsForDisplay.forEach { tag ->
             val chip = createDefaultChip(tag)
@@ -53,33 +51,28 @@ class TagsSelectorAdapter(
             chip.isLongClickable = false
             chip.isClickable = false
             chip.isCheckable = false
-            chipsByTags[tag] = chip
+            chipsByTagItems[tag] = chip
         }
     }
 
     private fun drawIncludedAndExcludedTags() {
         presenter.includedAndExcludedTagsForDisplay.forEach { tag ->
             if (presenter.filterEnabled)
-                checkedChipGroup.addView(chipsByTags[tag])
+                checkedChipGroup.addView(chipsByTagItems[tag])
             else
-                chipGroup.addView(chipsByTags[tag])
+                chipGroup.addView(chipsByTagItems[tag])
         }
     }
 
     private fun drawAvailableTags() {
         presenter.availableTagsForDisplay.forEach { tag ->
-            chipGroup.addView(chipsByTags[tag])
-        }
-        val tag = selectedTag
-        if (selectedTag != "") {
-            selectedTag = ""
-            presenter.onTagClick(tag)
+            chipGroup.addView(chipsByTagItems[tag])
         }
     }
 
     private fun drawUnavailableTags() {
         presenter.unavailableTagsForDisplay.forEach { tag ->
-            chipGroup.addView(chipsByTags[tag])
+            chipGroup.addView(chipsByTagItems[tag])
         }
     }
 
@@ -92,31 +85,35 @@ class TagsSelectorAdapter(
         }
     }
 
-    private fun createDefaultChip(tag: Tag) = Chip(chipGroup.context).apply {
+    private fun createDefaultChip(item: TagItem) = Chip(chipGroup.context).apply {
         this.isClickable = true
         this.isLongClickable = true
         this.isCheckable = true
         this.isChecked = false
         this.setTextColor(Color.BLACK)
-        if (tag.contains(KIND_TAGS_PREFIX_KEY, ignoreCase = true)) {
-            this.chipBackgroundColor =
-                ColorStateList.valueOf(
-                    ContextCompat.getColor(context, R.color.blue)
-                )
-        } else {
-            this.chipBackgroundColor =
-                ColorStateList.valueOf(
-                    ContextCompat.getColor(context, R.color.grayTransparent)
-                )
+        when (item) {
+            is TagItem.DefaultTagItem -> {
+                chipBackgroundColor =
+                    ColorStateList.valueOf(
+                        ContextCompat.getColor(context, R.color.grayTransparent)
+                    )
+                text = item.tag
+            }
+            is TagItem.KindTagItem -> {
+                chipBackgroundColor =
+                    ColorStateList.valueOf(
+                        ContextCompat.getColor(context, R.color.blue)
+                    )
+                text = item.kind.name
+            }
         }
-        this.text = tag
 
         this.setOnClickListener {
-            presenter.onTagClick(tag)
+            presenter.onTagItemClick(item)
         }
 
         this.setOnLongClickListener {
-            presenter.onTagLongClick(tag)
+            presenter.onTagItemLongClick(item)
             true
         }
     }
