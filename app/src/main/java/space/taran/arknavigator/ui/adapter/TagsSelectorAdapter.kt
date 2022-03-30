@@ -1,29 +1,40 @@
 package space.taran.arknavigator.ui.adapter
 
+import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
 import androidx.core.content.ContextCompat
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import space.taran.arknavigator.R
+import space.taran.arknavigator.mvp.model.repo.index.ResourceKind
 import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagItem
 import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagsSelectorPresenter
 
 class TagsSelectorAdapter(
+    private val context: Context,
     private val checkedChipGroup: ChipGroup,
     private val chipGroup: ChipGroup,
+    private val clearChip: Chip,
     private val presenter: TagsSelectorPresenter
 ) {
-    private val clearChip = createClearChip()
     private val chipsByTagItems = mutableMapOf<TagItem, Chip>()
+    private val kindToString: Map<ResourceKind, String> by lazy {
+        mapOf(
+            ResourceKind.IMAGE to context.getString(R.string.kind_image),
+            ResourceKind.DOCUMENT
+                to context.getString(R.string.kind_document),
+            ResourceKind.VIDEO to context.getString(R.string.kind_video)
+        )
+    }
 
     fun drawTags() {
+        drawClearChip()
         chipGroup.removeAllViews()
         checkedChipGroup.removeAllViews()
         createChips()
         drawIncludedAndExcludedTags()
         drawAvailableTags()
-        drawClearBtn()
         drawUnavailableTags()
     }
 
@@ -76,12 +87,17 @@ class TagsSelectorAdapter(
         }
     }
 
-    private fun drawClearBtn() {
-        if (presenter.isClearBtnVisible) {
-            if (presenter.filterEnabled)
-                checkedChipGroup.addView(clearChip)
-            else
-                chipGroup.addView(clearChip)
+    private fun drawClearChip() = clearChip.apply {
+        if (presenter.isClearBtnEnabled) {
+            isEnabled = true
+            chipIconTint = ColorStateList.valueOf(
+                ContextCompat.getColor(context, R.color.black)
+            )
+        } else {
+            isEnabled = false
+            chipIconTint = ColorStateList.valueOf(
+                ContextCompat.getColor(context, R.color.grayTransparent)
+            )
         }
     }
 
@@ -104,7 +120,7 @@ class TagsSelectorAdapter(
                     ColorStateList.valueOf(
                         ContextCompat.getColor(context, R.color.blue)
                     )
-                text = item.kind.name
+                text = kindToString[item.kind]
             }
         }
 
@@ -115,21 +131,6 @@ class TagsSelectorAdapter(
         this.setOnLongClickListener {
             presenter.onTagItemLongClick(item)
             true
-        }
-    }
-
-    private fun createClearChip() = Chip(chipGroup.context).apply {
-        this.chipIcon = ContextCompat.getDrawable(context, R.drawable.ic_close)
-        this.chipIconTint = ColorStateList.valueOf(
-            ContextCompat.getColor(
-                context,
-                R.color.black
-            )
-        )
-        this.textStartPadding = 0f
-        this.textEndPadding = 0f
-        this.setOnClickListener {
-            presenter.onClearClick()
         }
     }
 }

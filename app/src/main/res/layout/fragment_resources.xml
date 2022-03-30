@@ -11,27 +11,76 @@
         android:layout_height="0dp"
         android:clipToPadding="false"
         android:padding="10dp"
-        app:layout_constraintBottom_toTopOf="@+id/iv_drag_handler"
+        app:layout_constraintBottom_toTopOf="@+id/layout_drag_handler"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageView
-        android:id="@+id/iv_drag_handler"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_drag_handler"
         android:layout_width="match_parent"
-        android:layout_height="20dp"
-        android:background="@color/platinumGray"
-        android:src="@drawable/ic_drag_handle"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_rounded_top_24dp"
+        android:clipToPadding="false"
+        android:elevation="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/black" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <space.taran.arknavigator.ui.view.UserSwitchMaterial
+            android:id="@+id/switch_kind"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="@id/iv_drag_handler"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Kind"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/switch_kind"
+            app:layout_constraintHorizontal_bias="0.9"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <ImageView
+            android:id="@+id/iv_drag_handler"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@drawable/ic_drag_handle"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/gray" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/btn_clear"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            app:chipIcon="@drawable/ic_close"
+            app:chipIconTint="@color/black"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/iv_drag_handler"
+            app:layout_constraintTop_toTopOf="parent"
+            app:textEndPadding="0dp"
+            app:textStartPadding="0dp" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
         android:id="@+id/layout_tags"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="@color/white"
+        android:clipToPadding="false"
+        android:elevation="16dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/iv_drag_handler">
+        app:layout_constraintTop_toBottomOf="@+id/layout_drag_handler">
 
         <TextView
             android:id="@+id/tv_tags_selector_hint"
@@ -51,70 +100,39 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
-                <RelativeLayout
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/cg_tags_checked"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="16dp"
-                    android:orientation="horizontal">
+                    android:padding="10dp"
+                    android:visibility="gone" />
 
-                    <TextView
-                        android:id="@+id/tv_kind_tags_label"
-                        style="@style/RegularTextStyle"
-                        android:layout_centerVertical="true"
-                        android:text="@string/kind_tags_label"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
-
-                    <androidx.appcompat.widget.SwitchCompat
-                        android:id="@+id/showKindsSwitch"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_alignParentEnd="true"
-                        android:minHeight="0dp"
-                        android:padding="8dp" />
-
-                </RelativeLayout>
-
-                <LinearLayout
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/layout_input"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:hint="@string/resources_filter_hint"
+                    android:visibility="gone"
+                    app:startIconDrawable="@drawable/ic_baseline_search_24">
 
-                    <com.google.android.material.chip.ChipGroup
-                        android:id="@+id/cg_tags_checked"
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_tags_filter"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:padding="10dp"
-                        android:visibility="gone" />
+                        android:imeOptions="flagNoExtractUi" />
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/layout_input"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginEnd="10dp"
-                        android:hint="@string/resources_filter_hint"
-                        android:visibility="gone"
-                        app:startIconDrawable="@drawable/ic_baseline_search_24">
+                </com.google.android.material.textfield.TextInputLayout>
 
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/et_tags_filter"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:imeOptions="flagNoExtractUi" />
-
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <com.google.android.material.chip.ChipGroup
-                        android:id="@+id/tags_cg"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:padding="10dp"
-                        android:visibility="visible" />
-                </LinearLayout>
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/tags_cg"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    android:visibility="visible" />
             </LinearLayout>
 
         </ScrollView>

@@ -106,10 +106,9 @@ class ResourcesPresenter(
             viewState.setProgressVisibility(true, "Sorting")
 
             resetResources(resources, false)
-            tagsSelectorPresenter.init(index, storage)
-            tagsSelectorPresenter.setKindTagsSwitchState(
-                userPreferences.IsKindTagsEnabled()
-            )
+            val kindTagsEnabled = userPreferences.IsKindTagsEnabled()
+            tagsSelectorPresenter.init(index, storage, kindTagsEnabled)
+            viewState.setKindTagsEnabled(kindTagsEnabled)
             externallySelectedTag?.let {
                 tagsSelectorPresenter.onTagExternallySelect(it)
             }
@@ -133,11 +132,6 @@ class ResourcesPresenter(
             resetResources(listResources(), needToUpdateAdapter = false)
         else
             resetResources(listResources(untaggedOnly = true))
-        tagsSelectorPresenter.calculateTagsAndSelection()
-    }
-
-    fun onTagsChanged(showKindTagsEnabled: Boolean) = presenterScope.launch {
-        tagsSelectorPresenter.setKindTagsSwitchState(showKindTagsEnabled)
         tagsSelectorPresenter.calculateTagsAndSelection()
     }
 
