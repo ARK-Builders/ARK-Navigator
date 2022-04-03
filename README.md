@@ -16,14 +16,7 @@ https://github.com/ARK-Builders/ARK-Navigator/actions
 Information for contributors
 ----------------------------
 
-The projects embeds `ktlint` check in GitHub Actions workflow.\
-Before PR could be merged, you have to fix all code style errors.
-
-Please, install pre-commit Git hook by following command:
-```
-./gradlew installGitHook
-```
-This way `ktlint` check will be executed automatically before any `git commit`.
+All information for contributors can be found at [CONTRIBUTING.md](https://github.com/ARK-Builders/ARK-Navigator/blob/main/CONTRIBUTING.md)
 
 
 What is ARK Navigator?
