@@ -9,8 +9,7 @@ Development APK
 ---------------
 The app is in active development phase, but you can already try it out.
 
-Just visit GitHub Actions section of this repo and select the latest `main` build:\
-https://github.com/ARK-Builders/ARK-Navigator/actions
+Just visit [GitHub Actions](https://github.com/ARK-Builders/ARK-Navigator/actions) section of this repo and select the latest `main` build:\
 
 
 Information for contributors
@@ -37,6 +36,8 @@ How does it work?
 -----------------
 
 In short, the app works this way - Bookmark the relevant folders, view contents of folder, add tags to the items and filter the items using the added tags.
+It's also worth mentioning that one of key features of our app is the "aggregated mode". That's what happening when you just press "navigate data" button in the bottom bar. It takes resources from all folders and presents the single resource space to the user, allowing the user to navigate this space using power of tags. Although we are still working on performance and UX of course, so selecting individual folders is faster sometimes.
+
 
 **Bookmark folders:** To bookmark a folder, press the plus (+) button located on the right side of the app, navigate to the folder you wish to bookmark, and press the “Add root” button. Folders added this way will be listed in the “Manage Folders'' view as Root folders. Subfolders in the root folders can be bookmarked/favorited again for easier access. To do that, open “Manage Folders”, press the plus (+) button next to the relevant root folder, navigate to a subfolder, and press the “Favorite” button. Subfolders favorited like this are listed when you expand the Root folders.
 
