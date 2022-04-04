@@ -19,7 +19,10 @@ Please, install pre-commit Git hook by following command:
 
 This enables ktlint check to be executed automatically before any git commit. 
 
-Please also fix all merge conflicts.
+Please also fix all merge conflicts 🛠
 
+We also care a lot about our software quality, that's why we are conducting code reviews before merging.
+
+Right now, the team isn't that big, so please be patient 🙂
 
 
