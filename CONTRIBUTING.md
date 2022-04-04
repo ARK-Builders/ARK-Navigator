@@ -5,7 +5,7 @@
 
 To get started, you can start off here [issues](https://github.com/ARK-Builders/ARK-Navigator/issues) with those tagged "good first issue" 
 
-The projects embeds ktlint. You can check it out in GitHub Actions workflow.
+The projects embeds ktlint. You can check it out in [GitHub Actions workflow.](https://github.com/ARK-Builders/ARK-Navigator/actions)
 
 ## Creating a Pull Request / Pull Request Rules
 
