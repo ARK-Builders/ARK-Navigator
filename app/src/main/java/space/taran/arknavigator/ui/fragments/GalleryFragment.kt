@@ -40,8 +40,9 @@ import space.taran.arknavigator.ui.extra.ExtraLoader
 import space.taran.arknavigator.ui.fragments.dialog.EditTagsDialogFragment
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.ui.view.DepthPageTransformer
+import space.taran.arknavigator.utils.FamilyApps
 import space.taran.arknavigator.utils.FullscreenHelper
-import space.taran.arknavigator.utils.GALLERY_SCREEN
+import space.taran.arknavigator.utils.LogTags.GALLERY_SCREEN
 import space.taran.arknavigator.utils.Tags
 import space.taran.arknavigator.utils.extension
 import space.taran.arknavigator.utils.extensions.makeGone
@@ -189,7 +190,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
     }
 
     override fun editResource(editor: String, resourcePath: Path) {
-        val detachProcess = !editor.startsWith("space.taran.arkretouch")
+        val detachProcess = !editor.startsWith(FamilyApps.RETOUCH)
         val intent = getExternalAppIntent(
             resourcePath,
             Intent.ACTION_EDIT,

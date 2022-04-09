@@ -19,7 +19,7 @@ import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.adapter.folderstree.FoldersTreeAdapter
 import space.taran.arknavigator.ui.fragments.dialog.FolderPickerDialogFragment
 import space.taran.arknavigator.ui.fragments.utils.Notifications
-import space.taran.arknavigator.utils.FOLDERS_SCREEN
+import space.taran.arknavigator.utils.LogTags.FOLDERS_SCREEN
 import space.taran.arknavigator.utils.FullscreenHelper
 import java.nio.file.Path
 import kotlin.io.path.Path

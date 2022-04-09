@@ -108,7 +108,7 @@ class TagsSelectorAdapter(
         this.isChecked = false
         this.setTextColor(Color.BLACK)
         when (item) {
-            is TagItem.DefaultTagItem -> {
+            is TagItem.PlainTagItem -> {
                 chipBackgroundColor =
                     ColorStateList.valueOf(
                         ContextCompat.getColor(context, R.color.grayTransparent)

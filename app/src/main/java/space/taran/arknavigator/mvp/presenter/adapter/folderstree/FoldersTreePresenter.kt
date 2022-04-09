@@ -10,7 +10,7 @@ import space.taran.arknavigator.mvp.view.FoldersView
 import space.taran.arknavigator.navigation.AppRouter
 import space.taran.arknavigator.navigation.Screens
 import space.taran.arknavigator.ui.adapter.folderstree.FolderNodeView
-import space.taran.arknavigator.utils.FOLDERS_TREE
+import space.taran.arknavigator.utils.LogTags.FOLDERS_TREE
 
 class FoldersTreePresenter(
     val viewState: FoldersView,

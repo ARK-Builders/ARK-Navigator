@@ -6,7 +6,7 @@ import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.view.MainView
 import space.taran.arknavigator.navigation.AppRouter
 import space.taran.arknavigator.navigation.Screens
-import space.taran.arknavigator.utils.MAIN
+import space.taran.arknavigator.utils.LogTags.MAIN
 import javax.inject.Inject
 
 class MainPresenter : MvpPresenter<MainView>() {

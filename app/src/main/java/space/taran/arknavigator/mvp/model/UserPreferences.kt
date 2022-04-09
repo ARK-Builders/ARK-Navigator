@@ -69,14 +69,14 @@ class UserPreferences @Inject constructor(val context: Context) {
         }
     }
 
-    suspend fun IsKindTagsEnabled(): Boolean =
+    suspend fun isKindTagsEnabled(): Boolean =
         dataStore.data.first()[
-            PreferencesKeys.SHOW_KIND
+            PreferencesKeys.SHOW_KINDS
         ] ?: DefaultValues.SHOW_KIND
 
     suspend fun setKindTagsEnabled(enabled: Boolean) {
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.SHOW_KIND] = enabled
+            preferences[PreferencesKeys.SHOW_KINDS] = enabled
         }
     }
 
@@ -130,7 +130,7 @@ class UserPreferences @Inject constructor(val context: Context) {
             booleanPreferencesKey("index_replication")
         val REMOVING_LOST_RESOURCES_TAGS =
             booleanPreferencesKey("removing_lost_resources_tags")
-        val SHOW_KIND = booleanPreferencesKey("show_kind_preference")
+        val SHOW_KINDS = booleanPreferencesKey("show_kind_preference")
     }
 
     private object DefaultValues {

@@ -8,7 +8,7 @@ import space.taran.arknavigator.R
 import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.view.SettingsView
 import space.taran.arknavigator.navigation.AppRouter
-import space.taran.arknavigator.utils.SETTINGS_SCREEN
+import space.taran.arknavigator.utils.LogTags.SETTINGS_SCREEN
 import javax.inject.Inject
 
 class SettingsPresenter : MvpPresenter<SettingsView>() {

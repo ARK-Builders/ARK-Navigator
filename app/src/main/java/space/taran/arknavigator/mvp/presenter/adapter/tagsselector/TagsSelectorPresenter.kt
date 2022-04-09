@@ -12,14 +12,14 @@ import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.ui.resource.StringProvider
 import space.taran.arknavigator.utils.Popularity
-import space.taran.arknavigator.utils.TAGS_SELECTOR
+import space.taran.arknavigator.utils.LogTags.TAGS_SELECTOR
 import space.taran.arknavigator.utils.Tag
 import java.nio.file.Path
 import javax.inject.Inject
 import kotlin.reflect.KSuspendFunction1
 
 sealed class TagItem {
-    data class DefaultTagItem(val tag: Tag) : TagItem()
+    data class PlainTagItem(val tag: Tag) : TagItem()
     data class KindTagItem(val kind: ResourceKind) : TagItem()
 }
 
@@ -115,7 +115,7 @@ class TagsSelectorPresenter(
     }
 
     fun onTagExternallySelect(tag: Tag) = scope.launch {
-        includeTag(TagItem.DefaultTagItem(tag))
+        includeTag(TagItem.PlainTagItem(tag))
     }
 
     fun onClearClick() = scope.launch {
@@ -177,10 +177,15 @@ class TagsSelectorPresenter(
         val tagsOfUnselectedResources = complementWithTags.values.flatten()
 
         availableTagItems = (
-            tagsOfSelectedResources.toSet() - includedTagItems - excludedTagItems
+            tagsOfSelectedResources.toSet() -
+                includedTagItems -
+                excludedTagItems
             ).toList()
         unavailableTagItems = (
-            allItemsTags - availableTagItems - includedTagItems - excludedTagItems
+            allItemsTags -
+                availableTagItems.toSet() -
+                includedTagItems -
+                excludedTagItems
             ).toList()
 
         val tagsOfSelectedResPopularity = Popularity
@@ -298,7 +303,7 @@ class TagsSelectorPresenter(
         availableTagsForDisplay = availableTagItems
             .filter {
                 when (it) {
-                    is TagItem.DefaultTagItem -> {
+                    is TagItem.PlainTagItem -> {
                         it.tag.startsWith(filter, false)
                     }
                     is TagItem.KindTagItem -> {
@@ -310,7 +315,7 @@ class TagsSelectorPresenter(
         unavailableTagsForDisplay = unavailableTagItems
             .filter {
                 when (it) {
-                    is TagItem.DefaultTagItem -> {
+                    is TagItem.PlainTagItem -> {
                         it.tag.startsWith(filter, false)
                     }
                     is TagItem.KindTagItem -> {
@@ -365,7 +370,7 @@ class TagsSelectorPresenter(
         val resources = index!!.listIds(prefix)
         val tagItemsByResources: Map<ResourceId, Set<TagItem>> =
             storage!!.groupTagsByResources(resources).map {
-                it.key to it.value.map { tag -> TagItem.DefaultTagItem(tag) }.toSet()
+                it.key to it.value.map { tag -> TagItem.PlainTagItem(tag) }.toSet()
             }.toMap()
 
         if (!showKindTags) return tagItemsByResources

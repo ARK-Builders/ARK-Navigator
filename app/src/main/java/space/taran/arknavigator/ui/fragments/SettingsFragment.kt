@@ -17,7 +17,7 @@ import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.fragments.dialog.ConfirmationDialogFragment
 import space.taran.arknavigator.ui.fragments.dialog.InfoDialogFragment
 import space.taran.arknavigator.ui.fragments.utils.Notifications
-import space.taran.arknavigator.utils.SETTINGS_SCREEN
+import space.taran.arknavigator.utils.LogTags.SETTINGS_SCREEN
 
 class SettingsFragment : MvpAppCompatFragment(), SettingsView {
 

@@ -27,8 +27,8 @@ import space.taran.arknavigator.mvp.view.MainView
 import space.taran.arknavigator.navigation.AppNavigator
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.fragments.utils.Notifications
-import space.taran.arknavigator.utils.MAIN
-import space.taran.arknavigator.utils.PERMISSIONS
+import space.taran.arknavigator.utils.LogTags.MAIN
+import space.taran.arknavigator.utils.LogTags.PERMISSIONS
 
 class MainActivity : MvpAppCompatActivity(), MainView {
 

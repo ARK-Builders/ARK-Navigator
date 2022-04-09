@@ -6,7 +6,7 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourceMetaExtra
 import android.graphics.pdf.PdfRenderer
 import android.util.Log
 import space.taran.arknavigator.mvp.model.repo.index.MetaExtraTag
-import space.taran.arknavigator.utils.RESOURCES_INDEX
+import space.taran.arknavigator.utils.LogTags.RESOURCES_INDEX
 import space.taran.arknavigator.utils.extension
 import java.io.FileNotFoundException
 

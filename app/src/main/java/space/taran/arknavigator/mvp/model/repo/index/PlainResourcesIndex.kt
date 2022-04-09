@@ -10,8 +10,8 @@ import space.taran.arknavigator.mvp.model.dao.ResourceDao
 import space.taran.arknavigator.mvp.model.dao.ResourceExtra
 import space.taran.arknavigator.mvp.model.dao.ResourceWithExtra
 import space.taran.arknavigator.mvp.model.repo.preview.PreviewAndThumbnail
-import space.taran.arknavigator.utils.PREVIEWS
-import space.taran.arknavigator.utils.RESOURCES_INDEX
+import space.taran.arknavigator.utils.LogTags.PREVIEWS
+import space.taran.arknavigator.utils.LogTags.RESOURCES_INDEX
 import space.taran.arknavigator.utils.listChildren
 import java.nio.file.Files
 import java.nio.file.Path
