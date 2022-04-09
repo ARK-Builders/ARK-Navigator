@@ -8,7 +8,7 @@ import javax.inject.Singleton
 import space.taran.arknavigator.mvp.model.dao.Database
 import space.taran.arknavigator.mvp.model.dao.Database.Companion.DB_NAME
 import space.taran.arknavigator.ui.App
-import space.taran.arknavigator.utils.MODULES
+import space.taran.arknavigator.utils.LogTags.MODULES
 
 @Module
 class DatabaseModule {

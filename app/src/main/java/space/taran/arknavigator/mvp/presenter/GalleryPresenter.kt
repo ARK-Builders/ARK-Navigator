@@ -20,7 +20,7 @@ import space.taran.arknavigator.mvp.view.GalleryView
 import space.taran.arknavigator.mvp.view.item.PreviewItemView
 import space.taran.arknavigator.navigation.AppRouter
 import space.taran.arknavigator.navigation.Screens
-import space.taran.arknavigator.utils.GALLERY_SCREEN
+import space.taran.arknavigator.utils.LogTags.GALLERY_SCREEN
 import space.taran.arknavigator.utils.ImageUtils
 import space.taran.arknavigator.utils.Tag
 import space.taran.arknavigator.utils.extension

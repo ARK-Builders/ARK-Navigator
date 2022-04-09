@@ -5,7 +5,7 @@ import space.taran.arknavigator.mvp.model.repo.extra.ImageMetaExtra
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.ui.App
-import space.taran.arknavigator.utils.PREVIEWS
+import space.taran.arknavigator.utils.LogTags.PREVIEWS
 import space.taran.arknavigator.utils.extension
 import java.nio.file.Files
 import java.nio.file.Path

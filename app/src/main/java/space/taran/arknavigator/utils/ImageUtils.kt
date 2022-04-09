@@ -21,6 +21,8 @@ import com.ortiz.touchview.TouchImageView
 import space.taran.arknavigator.R
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.ui.App
+import space.taran.arknavigator.utils.LogTags.GLIDE
+import space.taran.arknavigator.utils.LogTags.IMAGES
 import java.nio.file.Path
 
 object ImageUtils {

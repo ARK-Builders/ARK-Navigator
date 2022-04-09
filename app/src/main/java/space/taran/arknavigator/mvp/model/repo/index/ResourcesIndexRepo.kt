@@ -11,7 +11,7 @@ import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.model.repo.index.PlainResourcesIndex.Companion.listAllFiles
 import space.taran.arknavigator.mvp.model.repo.index.PlainResourcesIndex.Companion.loadResources
 import space.taran.arknavigator.mvp.model.repo.index.PlainResourcesIndex.Companion.scanResources
-import space.taran.arknavigator.utils.RESOURCES_INDEX
+import space.taran.arknavigator.utils.LogTags.RESOURCES_INDEX
 import java.nio.file.Path
 import kotlin.system.measureTimeMillis
 

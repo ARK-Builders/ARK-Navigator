@@ -8,7 +8,7 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.utils.Constants.Companion.NO_TAGS
 import space.taran.arknavigator.utils.Converters.Companion.stringFromTags
 import space.taran.arknavigator.utils.Converters.Companion.tagsFromString
-import space.taran.arknavigator.utils.TAGS_STORAGE
+import space.taran.arknavigator.utils.LogTags.TAGS_STORAGE
 import space.taran.arknavigator.utils.Tags
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files

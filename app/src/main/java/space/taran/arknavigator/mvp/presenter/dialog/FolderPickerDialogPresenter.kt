@@ -7,7 +7,7 @@ import moxy.presenterScope
 import space.taran.arknavigator.mvp.model.repo.FoldersRepo
 import space.taran.arknavigator.mvp.presenter.adapter.FoldersGridPresenter
 import space.taran.arknavigator.mvp.view.dialog.FolderPickerDialogView
-import space.taran.arknavigator.utils.FOLDER_PICKER
+import space.taran.arknavigator.utils.LogTags.FOLDER_PICKER
 import space.taran.arknavigator.utils.listDevices
 import java.nio.file.Path
 import javax.inject.Inject

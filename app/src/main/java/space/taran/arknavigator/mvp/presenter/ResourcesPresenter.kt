@@ -21,7 +21,7 @@ import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.navigation.AppRouter
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.fragments.utils.Notifications
-import space.taran.arknavigator.utils.RESOURCES_SCREEN
+import space.taran.arknavigator.utils.LogTags.RESOURCES_SCREEN
 import space.taran.arknavigator.utils.Tag
 import java.nio.file.Path
 import javax.inject.Inject
@@ -106,7 +106,7 @@ class ResourcesPresenter(
             viewState.setProgressVisibility(true, "Sorting")
 
             resetResources(resources, false)
-            val kindTagsEnabled = userPreferences.IsKindTagsEnabled()
+            val kindTagsEnabled = userPreferences.isKindTagsEnabled()
             tagsSelectorPresenter.init(index, storage, kindTagsEnabled)
             viewState.setKindTagsEnabled(kindTagsEnabled)
             externallySelectedTag?.let {

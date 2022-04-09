@@ -5,7 +5,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.widget.CompoundButton
 import com.google.android.material.switchmaterial.SwitchMaterial
-import space.taran.arknavigator.utils.SETTINGS_SCREEN
+import space.taran.arknavigator.utils.LogTags.SETTINGS_SCREEN
 
 class UserSwitchMaterial(
     context: Context,

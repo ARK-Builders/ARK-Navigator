@@ -14,7 +14,7 @@ import space.taran.arknavigator.navigation.AppRouter
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.ui.resource.StringProvider
-import space.taran.arknavigator.utils.FOLDERS_SCREEN
+import space.taran.arknavigator.utils.LogTags.FOLDERS_SCREEN
 import space.taran.arknavigator.utils.listDevices
 import java.nio.file.Path
 import javax.inject.Inject

@@ -10,8 +10,8 @@ import kotlinx.coroutines.withContext
 import space.taran.arknavigator.mvp.model.dao.Favorite
 import space.taran.arknavigator.mvp.model.dao.FolderDao
 import space.taran.arknavigator.mvp.model.dao.Root
-import space.taran.arknavigator.utils.DATABASE
-import space.taran.arknavigator.utils.FILES
+import space.taran.arknavigator.utils.LogTags.DATABASE
+import space.taran.arknavigator.utils.LogTags.FILES
 import space.taran.arknavigator.utils.PartialResult
 import space.taran.arknavigator.utils.fail
 import space.taran.arknavigator.utils.folderExists
