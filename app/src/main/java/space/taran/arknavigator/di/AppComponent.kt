@@ -19,6 +19,7 @@ import space.taran.arknavigator.mvp.presenter.dialog.SortDialogPresenter
 import space.taran.arknavigator.mvp.view.item.FileItemViewHolder
 import space.taran.arknavigator.mvp.view.item.PreviewItemViewHolder
 import space.taran.arknavigator.ui.activity.MainActivity
+import space.taran.arknavigator.ui.adapter.TagsSelectorAdapter
 import space.taran.arknavigator.ui.fragments.FoldersFragment
 import space.taran.arknavigator.ui.fragments.GalleryFragment
 import space.taran.arknavigator.ui.fragments.ResourcesFragment
@@ -54,4 +55,5 @@ interface AppComponent {
     fun inject(folderPickerDialogPresenter: FolderPickerDialogPresenter)
     fun inject(sortDialogPresenter: SortDialogPresenter)
     fun inject(tagsSelectorPresenter: TagsSelectorPresenter)
+    fun inject(tagsSelectorAdapter: TagsSelectorAdapter)
 }

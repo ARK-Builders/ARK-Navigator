@@ -1,32 +1,26 @@
 package space.taran.arknavigator.ui.adapter
 
-import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
 import androidx.core.content.ContextCompat
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import space.taran.arknavigator.R
-import space.taran.arknavigator.mvp.model.repo.index.ResourceKind
 import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagItem
 import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagsSelectorPresenter
+import space.taran.arknavigator.ui.resource.StringProvider
+import javax.inject.Inject
 
 class TagsSelectorAdapter(
-    private val context: Context,
     private val checkedChipGroup: ChipGroup,
     private val chipGroup: ChipGroup,
     private val clearChip: Chip,
     private val presenter: TagsSelectorPresenter
 ) {
+    @Inject
+    lateinit var stringProvider: StringProvider
+
     private val chipsByTagItems = mutableMapOf<TagItem, Chip>()
-    private val kindToString: Map<ResourceKind, String> by lazy {
-        mapOf(
-            ResourceKind.IMAGE to context.getString(R.string.kind_image),
-            ResourceKind.DOCUMENT
-                to context.getString(R.string.kind_document),
-            ResourceKind.VIDEO to context.getString(R.string.kind_video)
-        )
-    }
 
     fun drawTags() {
         drawClearChip()
@@ -120,7 +114,7 @@ class TagsSelectorAdapter(
                     ColorStateList.valueOf(
                         ContextCompat.getColor(context, R.color.blue)
                     )
-                text = kindToString[item.kind]
+                text = stringProvider.kindToString(item.kind)
             }
         }
 
