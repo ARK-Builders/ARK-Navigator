@@ -3,7 +3,6 @@ package space.taran.arknavigator.mvp.presenter.adapter.tagsselector
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import space.taran.arknavigator.R
 import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceKind
@@ -11,8 +10,8 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.ui.resource.StringProvider
-import space.taran.arknavigator.utils.Popularity
 import space.taran.arknavigator.utils.LogTags.TAGS_SELECTOR
+import space.taran.arknavigator.utils.Popularity
 import space.taran.arknavigator.utils.Tag
 import java.nio.file.Path
 import javax.inject.Inject
@@ -39,14 +38,6 @@ class TagsSelectorPresenter(
     private var storage: TagsStorage? = null
     private val actions = ArrayDeque<TagsSelectorAction>()
     private var filter = ""
-    private val kindToString: Map<ResourceKind, String> by lazy {
-        mapOf(
-            ResourceKind.IMAGE to stringProvider.getString(R.string.kind_image),
-            ResourceKind.DOCUMENT
-                to stringProvider.getString(R.string.kind_document),
-            ResourceKind.VIDEO to stringProvider.getString(R.string.kind_video)
-        )
-    }
 
     var filterEnabled = false
 
@@ -280,18 +271,14 @@ class TagsSelectorPresenter(
     private fun isActionActual(
         action: TagsSelectorAction,
         allTagItems: Set<TagItem>
-    ): Boolean {
-        if (action is Clear &&
-            action.excluded.intersect(allTagItems).isEmpty() &&
-            action.included.intersect(allTagItems).isEmpty()
-        ) {
-            return false
+    ): Boolean = when (action) {
+        is Clear -> {
+            action.excluded.intersect(allTagItems).isNotEmpty() ||
+                action.included.intersect(allTagItems).isNotEmpty()
         }
-
-        if (!allTagItems.contains(action.item))
-            return false
-
-        return true
+        else -> {
+            allTagItems.contains(action.item)
+        }
     }
 
     private fun resetFilter() {
@@ -301,28 +288,19 @@ class TagsSelectorPresenter(
 
     private fun filterTags() {
         availableTagsForDisplay = availableTagItems
-            .filter {
-                when (it) {
-                    is TagItem.PlainTagItem -> {
-                        it.tag.startsWith(filter, false)
-                    }
-                    is TagItem.KindTagItem -> {
-                        kindToString[it.kind]!!.startsWith(filter, false)
-                    }
-                }
-            }
+            .filter(::filterTagItem)
 
         unavailableTagsForDisplay = unavailableTagItems
-            .filter {
-                when (it) {
-                    is TagItem.PlainTagItem -> {
-                        it.tag.startsWith(filter, false)
-                    }
-                    is TagItem.KindTagItem -> {
-                        kindToString[it.kind]!!.startsWith(filter, false)
-                    }
-                }
-            }
+            .filter(::filterTagItem)
+    }
+
+    private fun filterTagItem(item: TagItem) = when (item) {
+        is TagItem.PlainTagItem -> {
+            item.tag.startsWith(filter, false)
+        }
+        is TagItem.KindTagItem -> {
+            stringProvider.kindToString(item.kind).startsWith(filter, false)
+        }
     }
 
     private fun resetTags() {
