@@ -11,12 +11,12 @@
         android:name="space.taran.arknavigator.ui.App"
         android:allowBackup="true"
         android:largeHeap="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="${appIcon}"
         android:requestLegacyExternalStorage="true"
-        android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:label="${appLabel}"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        tools:replace="android:label">
         <activity
             android:name="space.taran.arknavigator.ui.activity.MainActivity"
             android:exported="true"
@@ -36,5 +36,4 @@
                 android:resource="@xml/provider_paths" />
         </provider>
     </application>
-
 </manifest>
