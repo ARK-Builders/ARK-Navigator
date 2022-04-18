@@ -10,7 +10,7 @@ object LinkKindFactory : ResourceKindFactory<ResourceKind.Link> {
     private val klaxon = Klaxon()
 
     override val acceptedExtensions = setOf("link")
-    override val acceptedKindCode = KindCode.Link
+    override val acceptedKindCode = KindCode.LINK
 
     override fun fromPath(path: Path): ResourceKind.Link {
         val zip = ZipFile(path.toFile())
