@@ -5,8 +5,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
-import space.taran.arknavigator.mvp.model.repo.kind.ResourceKind
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
+import space.taran.arknavigator.mvp.model.repo.kind.KindCode
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.ui.resource.StringProvider
@@ -19,7 +19,7 @@ import kotlin.reflect.KSuspendFunction1
 
 sealed class TagItem {
     data class PlainTagItem(val tag: Tag) : TagItem()
-    data class KindTagItem(val kind: ResourceKind) : TagItem()
+    data class KindTagItem(val kind: KindCode) : TagItem()
 }
 
 class TagsSelectorPresenter(
@@ -358,7 +358,7 @@ class TagsSelectorPresenter(
             val kind = index!!.getMeta(id).kind
             if (kind != null) {
                 listOfTags =
-                    listOfTags + TagItem.KindTagItem(kind)
+                    listOfTags + TagItem.KindTagItem(kind.code)
             }
             id to listOfTags
         }.toMap()
