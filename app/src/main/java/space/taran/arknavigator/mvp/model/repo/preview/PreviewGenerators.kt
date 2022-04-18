@@ -24,13 +24,13 @@ object PreviewGenerators {
     private const val COMPRESSION_QUALITY = 100
 
     // Use this map to declare new types of generators
-    private var generatorsByExt: Map<String, (Path) -> Bitmap> = mapOf(
+    private val generatorsByExt: Map<String, (Path) -> Bitmap> = mapOf(
         "pdf" to { path: Path -> PdfPreviewGenerator.generate(path) },
         "link" to { path: Path -> LinkPreviewGenerator.generate(path) },
     )
 
     fun generate(path: Path, previewPath: Path, thumbnailPath: Path) {
-        if (ImageKindFactory.isBelong(path)) {
+        if (ImageKindFactory.isValid(path)) {
             Log.d(PREVIEWS, "$path is an image, only generating a thumbnail for it")
 
             // images are special kind of a resource:

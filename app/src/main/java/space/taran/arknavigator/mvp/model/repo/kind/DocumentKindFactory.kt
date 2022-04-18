@@ -12,7 +12,7 @@ import java.nio.file.Path
 object DocumentKindFactory : ResourceKindFactory<ResourceKind.Document> {
     override val acceptedExtensions: Set<String> =
         setOf("pdf", "txt", "doc", "docx", "odt", "ods", "md")
-    override val acceptedKindCode = KindCode.Document
+    override val acceptedKindCode = KindCode.DOCUMENT
 
     override fun fromPath(path: Path): ResourceKind.Document {
         if (extension(path) != "pdf") return ResourceKind.Document()

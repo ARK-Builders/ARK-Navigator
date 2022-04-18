@@ -11,9 +11,9 @@ class StringProvider(private val context: Context) {
     }
 
     fun kindToString(kind: KindCode) = when (kind) {
-        KindCode.Image -> context.getString(R.string.kind_image)
-        KindCode.Video -> context.getString(R.string.kind_video)
-        KindCode.Document -> context.getString(R.string.kind_document)
-        KindCode.Link -> context.getString(R.string.kind_link)
+        KindCode.IMAGE -> context.getString(R.string.kind_image)
+        KindCode.VIDEO -> context.getString(R.string.kind_video)
+        KindCode.DOCUMENT -> context.getString(R.string.kind_document)
+        KindCode.LINK -> context.getString(R.string.kind_link)
     }
 }

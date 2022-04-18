@@ -42,7 +42,7 @@ data class PreviewAndThumbnail(val preview: Path, val thumbnail: Path) {
                 return null
             }
 
-            if (ImageKindFactory.isBelong(path)) {
+            if (ImageKindFactory.isValid(path)) {
                 return PreviewAndThumbnail(
                     preview = path, // using the resource itself as its preview
                     thumbnail = thumbnail
@@ -92,7 +92,7 @@ data class PreviewAndThumbnail(val preview: Path, val thumbnail: Path) {
                 return true
             }
 
-            if (ImageKindFactory.isBelong(path)) {
+            if (ImageKindFactory.isValid(path)) {
                 return Files.exists(thumbnailPath)
             }
 

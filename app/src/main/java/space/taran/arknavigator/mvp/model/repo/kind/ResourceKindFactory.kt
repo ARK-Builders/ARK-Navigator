@@ -8,8 +8,8 @@ import java.nio.file.Path
 interface ResourceKindFactory<T : ResourceKind> {
     val acceptedExtensions: Set<String>
     val acceptedKindCode: KindCode
-    fun isBelong(path: Path) = acceptedExtensions.contains(extension(path))
-    fun isBelong(kindCode: Int) = acceptedKindCode.ordinal == kindCode
+    fun isValid(path: Path) = acceptedExtensions.contains(extension(path))
+    fun isValid(kindCode: Int) = acceptedKindCode.ordinal == kindCode
 
     fun fromPath(path: Path): T
     fun fromRoom(extras: Map<MetaExtraTag, String>): T
@@ -27,7 +27,7 @@ object GeneralKindFactory {
 
     fun fromPath(path: Path): ResourceKind? =
         factories.find { factory ->
-            factory.isBelong(path)
+            factory.isValid(path)
         }?.fromPath(path)
 
     fun fromRoom(
@@ -41,7 +41,7 @@ object GeneralKindFactory {
         }.toMap()
 
         return factories.find { factory ->
-            factory.isBelong(kindCode)
+            factory.isValid(kindCode)
         }?.fromRoom(data) ?: error("Factory not found")
     }
 
@@ -49,7 +49,7 @@ object GeneralKindFactory {
         kind ?: return emptyList()
 
         val factory = factories.find { factory ->
-            factory.isBelong(kind.code.ordinal)
+            factory.isValid(kind.code.ordinal)
         } ?: error("Factory not found")
 
         return (factory as ResourceKindFactory<ResourceKind>)
