@@ -220,11 +220,6 @@ class TagsSelectorPresenter(
         isClearBtnEnabled = includedTagItems.isNotEmpty() ||
             excludedTagItems.isNotEmpty()
 
-        if (allItemsTags.isEmpty())
-            viewState.setTagsSelectorHintEnabled(true)
-        else
-            viewState.setTagsSelectorHintEnabled(false)
-
         viewState.drawTags()
 
         calculateFocusModeSelectionIfNeeded(tagItemsByResources)

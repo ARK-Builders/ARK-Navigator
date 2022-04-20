@@ -110,6 +110,7 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         binding.rvResources.adapter = resourcesAdapter
         binding.rvResources.layoutManager = GridLayoutManager(context, 3)
         tagsSelectorAdapter = TagsSelectorAdapter(
+            binding,
             binding.cgTagsChecked,
             binding.tagsCg,
             binding.btnClear,
@@ -208,10 +209,6 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
 
     override fun updateMenu() {
         requireActivity().invalidateOptionsMenu()
-    }
-
-    override fun setTagsSelectorHintEnabled(enabled: Boolean) {
-        binding.tvTagsSelectorHint.isVisible = enabled
     }
 
     override fun setTagsFilterEnabled(enabled: Boolean) {
