@@ -22,6 +22,10 @@ sealed class TagItem {
     data class KindTagItem(val kind: KindCode) : TagItem()
 }
 
+enum class QueryMode {
+    NORMAL, FOCUS
+}
+
 class TagsSelectorPresenter(
     private val viewState: ResourcesView,
     private val prefix: Path?,
@@ -39,10 +43,12 @@ class TagsSelectorPresenter(
     private val actions = ArrayDeque<TagsSelectorAction>()
     private var filter = ""
 
+    var queryMode = QueryMode.NORMAL
+        private set
     var filterEnabled = false
-
+        private set
     var showKindTags = false
-
+        private set
     var includedTagItems = mutableSetOf<TagItem>()
         private set
     var excludedTagItems = mutableSetOf<TagItem>()
@@ -120,6 +126,12 @@ class TagsSelectorPresenter(
         this.filter = filter
         filterTags()
         viewState.drawTags()
+    }
+
+    fun onQueryModeChanged(mode: QueryMode) = scope.launch {
+        this@TagsSelectorPresenter.queryMode = mode
+        viewState.updateMenu()
+        calculateTagsAndSelection()
     }
 
     fun onFilterToggle(enabled: Boolean) {
@@ -215,6 +227,7 @@ class TagsSelectorPresenter(
 
         viewState.drawTags()
 
+        calculateFocusModeSelectionIfNeeded(tagItemsByResources)
         onSelectionChangeListener(selection)
     }
 
@@ -252,6 +265,17 @@ class TagsSelectorPresenter(
         calculateTagsAndSelection()
 
         return true
+    }
+
+    private fun calculateFocusModeSelectionIfNeeded(
+        tagItemsByResources: Map<ResourceId, Set<TagItem>>
+    ) {
+        if (queryMode != QueryMode.FOCUS)
+            return
+
+        selection = selection.filter { id ->
+            tagItemsByResources[id] == includedTagItems
+        }.toSet()
     }
 
     private fun findLastActualAction(): TagsSelectorAction? {

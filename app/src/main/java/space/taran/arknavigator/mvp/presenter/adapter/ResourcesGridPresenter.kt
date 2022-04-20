@@ -123,31 +123,26 @@ class ResourcesGridPresenter(
 
     suspend fun updateSelection(
         selection: Set<ResourceId>
-    ) =
-        withContext(Dispatchers.Default) {
-            this@ResourcesGridPresenter.selection = resources
-                .filter { selection.contains(it.id) }
+    ) = withContext(Dispatchers.Default) {
+        this@ResourcesGridPresenter.selection = resources
+            .filter { selection.contains(it.id) }
 
-            withContext(Dispatchers.Main) {
-                setProgressVisibility(false)
-                viewState.updateAdapter()
-            }
+        withContext(Dispatchers.Main) {
+            setProgressVisibility(false)
+            viewState.updateAdapter()
         }
+    }
 
     suspend fun resetResources(
-        resources: Set<ResourceMeta>,
-        needToUpdateAdapter: Boolean = true
-    ) =
-        withContext(Dispatchers.Default) {
-            this@ResourcesGridPresenter.resources = resources.toList()
-            sortAllResources()
-            selection = this@ResourcesGridPresenter.resources
-            withContext(Dispatchers.Main) {
-                setProgressVisibility(false)
-                if (needToUpdateAdapter)
-                    viewState.updateAdapter()
-            }
+        resources: Set<ResourceMeta>
+    ) = withContext(Dispatchers.Default) {
+        this@ResourcesGridPresenter.resources = resources.toList()
+        sortAllResources()
+        selection = this@ResourcesGridPresenter.resources
+        withContext(Dispatchers.Main) {
+            setProgressVisibility(false)
         }
+    }
 
     private fun updateSorting(sorting: Sorting) {
         scope.launch(Dispatchers.Default) {

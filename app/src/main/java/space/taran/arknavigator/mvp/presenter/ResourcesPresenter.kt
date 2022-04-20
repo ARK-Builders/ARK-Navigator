@@ -9,7 +9,6 @@ import space.taran.arknavigator.mvp.model.repo.FoldersRepo
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.model.repo.index.AggregatedResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
-import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
 import space.taran.arknavigator.mvp.model.repo.tags.AggregatedTagsStorage
@@ -48,7 +47,6 @@ class ResourcesPresenter(
 
     private lateinit var index: ResourcesIndex
     private lateinit var storage: TagsStorage
-    var tagsEnabled: Boolean = true
 
     val gridPresenter =
         ResourcesGridPresenter(rootAndFav, viewState, presenterScope, this)
@@ -102,10 +100,10 @@ class ResourcesPresenter(
 
             gridPresenter.init(index, storage, router)
 
-            val resources = listResources()
+            val resources = index.listResources(rootAndFav.fav)
             viewState.setProgressVisibility(true, "Sorting")
 
-            resetResources(resources, false)
+            gridPresenter.resetResources(resources)
             val kindTagsEnabled = userPreferences.isKindTagsEnabled()
             tagsSelectorPresenter.init(index, storage, kindTagsEnabled)
             viewState.setKindTagsEnabled(kindTagsEnabled)
@@ -128,30 +126,8 @@ class ResourcesPresenter(
     }
 
     suspend fun onResourcesOrTagsChanged() {
-        if (tagsEnabled)
-            resetResources(listResources(), needToUpdateAdapter = false)
-        else
-            resetResources(listResources(untaggedOnly = true))
+        gridPresenter.resetResources(index.listResources(rootAndFav.fav))
         tagsSelectorPresenter.calculateTagsAndSelection()
-    }
-
-    fun onMenuTagsToggle(enabled: Boolean) {
-        tagsEnabled = enabled
-        viewState.setTagsEnabled(tagsEnabled)
-
-        presenterScope.launch {
-            if (tagsEnabled) {
-                gridPresenter.resetResources(listResources(), false)
-                updateSelection(tagsSelectorPresenter.selection)
-            } else {
-                resetResources(listResources(untaggedOnly = true))
-            }
-        }
-
-        val ids = listResources().map { it.id }
-        if (tagsEnabled && storage.getTags(ids).isEmpty()) {
-            viewState.notifyUser("Tag something first")
-        }
     }
 
     fun onBackClick() = presenterScope.launch {
@@ -172,37 +148,11 @@ class ResourcesPresenter(
     }
 
     private suspend fun onSelectionChange(selection: Set<ResourceId>) {
-        if (tagsEnabled)
-            updateSelection(selection)
-    }
-
-    private fun listResources(untaggedOnly: Boolean = false): Set<ResourceMeta> {
-        val underPrefix = index.listResources(rootAndFav.fav)
-
-        val result = if (untaggedOnly) {
-            val untagged = storage.listUntaggedResources()
-            underPrefix.filter { untagged.contains(it.id) }
-        } else {
-            underPrefix
-        }
-
-        return result.toSet()
+        updateSelection(selection)
     }
 
     private suspend fun updateSelection(selection: Set<ResourceId>) {
-        if (this.tagsEnabled) {
-            viewState.notifyUser("${selection.size} resources selected")
-            gridPresenter.updateSelection(selection)
-        }
-    }
-
-    private suspend fun resetResources(
-        resources: Set<ResourceMeta>,
-        needToUpdateAdapter: Boolean = true
-    ) {
-        if (!this.tagsEnabled) {
-            viewState.notifyUser("${resources.size} resources selected")
-        }
-        gridPresenter.resetResources(resources, needToUpdateAdapter)
+        viewState.notifyUser("${selection.size} resources selected")
+        gridPresenter.updateSelection(selection)
     }
 }
