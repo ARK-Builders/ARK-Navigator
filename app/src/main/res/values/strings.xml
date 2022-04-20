@@ -48,8 +48,8 @@
     <string name="page_settings_title">Settings</string>
     <string name="page_roots_title">Manage folders</string>
     <string name="page_tags_title">Navigate data</string>
-    <string name="menu_tags_on_title">Tags on</string>
-    <string name="menu_tags_off_title">Tags off</string>
+    <string name="normal_mode">Normal mode</string>
+    <string name="focus_mode">Focus mode</string>
     <string name="menu_tags_sort_by_title">Sort by</string>
     <string name="kind_link">Link</string>
     <string name="scan_completed">Scan completed</string>

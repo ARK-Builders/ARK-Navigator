@@ -3,15 +3,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/menu_tags_on"
+        android:id="@+id/menu_normal_mode"
         android:icon="@drawable/ic_cloud_on"
-        android:title="@string/menu_tags_on_title"
+        android:title="@string/normal_mode"
         app:showAsAction="always" />
 
     <item
-        android:id="@+id/menu_tags_off"
-        android:icon="@drawable/ic_cloud_off"
-        android:title="@string/menu_tags_off_title"
+        android:id="@+id/menu_focus_mode"
+        android:icon="@drawable/ic_target"
+        android:title="@string/focus_mode"
         app:showAsAction="always" />
 
     <item

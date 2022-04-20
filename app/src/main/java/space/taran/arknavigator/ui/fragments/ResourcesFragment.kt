@@ -12,7 +12,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.setFragmentResultListener
@@ -25,6 +24,7 @@ import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.FragmentResourcesBinding
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.presenter.ResourcesPresenter
+import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.QueryMode
 import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.activity.MainActivity
@@ -140,16 +140,20 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
                 val dialog = SortDialogFragment.newInstance()
                 dialog.show(childFragmentManager, null)
             }
-            R.id.menu_tags_off -> presenter.onMenuTagsToggle(false)
-            R.id.menu_tags_on -> presenter.onMenuTagsToggle(true)
+            R.id.menu_focus_mode ->
+                presenter.tagsSelectorPresenter.onQueryModeChanged(QueryMode.FOCUS)
+            R.id.menu_normal_mode ->
+                presenter.tagsSelectorPresenter.onQueryModeChanged(QueryMode.NORMAL)
         }
         return true
     }
 
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
-        menu.findItem(R.id.menu_tags_on).isVisible = !presenter.tagsEnabled
-        menu.findItem(R.id.menu_tags_off).isVisible = presenter.tagsEnabled
+        menu.findItem(R.id.menu_normal_mode).isVisible =
+            presenter.tagsSelectorPresenter.queryMode != QueryMode.NORMAL
+        menu.findItem(R.id.menu_focus_mode).isVisible =
+            presenter.tagsSelectorPresenter.queryMode != QueryMode.FOCUS
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -202,31 +206,8 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         Notifications.notifyUser(context, messageID, moreTime)
     }
 
-    override fun setTagsEnabled(enabled: Boolean) {
+    override fun updateMenu() {
         requireActivity().invalidateOptionsMenu()
-        binding.layoutTags.isVisible = enabled
-        binding.layoutDragHandler.isVisible = enabled
-        if (enabled) {
-            val constraintSet = ConstraintSet()
-            constraintSet.clone(binding.root)
-            constraintSet.connect(
-                binding.rvResources.id,
-                ConstraintSet.BOTTOM,
-                binding.layoutDragHandler.id,
-                ConstraintSet.TOP
-            )
-            constraintSet.applyTo(binding.root)
-        } else {
-            val constraintSet = ConstraintSet()
-            constraintSet.clone(binding.root)
-            constraintSet.connect(
-                binding.rvResources.id,
-                ConstraintSet.BOTTOM,
-                binding.root.id,
-                ConstraintSet.BOTTOM
-            )
-            constraintSet.applyTo(binding.root)
-        }
     }
 
     override fun setTagsSelectorHintEnabled(enabled: Boolean) {

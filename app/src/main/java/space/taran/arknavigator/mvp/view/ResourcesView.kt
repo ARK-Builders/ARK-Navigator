@@ -11,7 +11,7 @@ interface ResourcesView : MvpView, NotifiableView {
     fun setProgressVisibility(isVisible: Boolean, withText: String = "")
     fun setToolbarTitle(title: String)
     fun setKindTagsEnabled(enabled: Boolean)
-    fun setTagsEnabled(enabled: Boolean)
+    fun updateMenu()
     fun setTagsSelectorHintEnabled(enabled: Boolean)
     fun setTagsFilterEnabled(enabled: Boolean)
     fun setTagsFilterText(filter: String)
