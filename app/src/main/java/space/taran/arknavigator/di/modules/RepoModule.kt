@@ -17,7 +17,7 @@ class RepoModule {
     @Provides
     fun foldersRepo(database: Database): FoldersRepo {
         Log.d(MAIN, "creating FoldersRepo")
-        return FoldersRepo(database.folderDao())
+        return FoldersRepo(database.rootDao())
     }
 
     @Singleton

@@ -5,15 +5,14 @@ import androidx.room.RoomDatabase
 @androidx.room.Database(
     entities = [
         Root::class,
-        Favorite::class,
         Resource::class,
         ResourceExtra::class
     ],
-    version = 16,
+    version = 17,
     exportSchema = false
 )
 abstract class Database : RoomDatabase() {
-    abstract fun folderDao(): FolderDao
+    abstract fun rootDao(): RootDao
     abstract fun resourceDao(): ResourceDao
 
     companion object {
