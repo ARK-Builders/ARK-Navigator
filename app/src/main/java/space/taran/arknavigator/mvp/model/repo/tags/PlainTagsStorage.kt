@@ -4,6 +4,8 @@ import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import space.taran.arknavigator.mvp.model.UserPreferences
+import space.taran.arknavigator.mvp.model.arkFolder
+import space.taran.arknavigator.mvp.model.arkTagsStorage
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.utils.Constants.Companion.NO_TAGS
 import space.taran.arknavigator.utils.Converters.Companion.stringFromTags
@@ -24,7 +26,7 @@ class PlainTagsStorage(
     private val userPreferences: UserPreferences
 ) : TagsStorage {
 
-    private val storageFile: Path = root.resolve(STORAGE_FILENAME)
+    private val storageFile: Path = root.arkFolder().arkTagsStorage()
 
     private var lastModified: FileTime = FileTime.fromMillis(0L)
 
@@ -225,8 +227,6 @@ class PlainTagsStorage(
         }
 
     companion object {
-        const val STORAGE_FILENAME = ".ark-tags"
-
         private const val STORAGE_VERSION = 2
         private const val STORAGE_VERSION_PREFIX = "version "
 

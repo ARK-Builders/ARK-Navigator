@@ -1,26 +1,32 @@
 package space.taran.arknavigator.mvp.model.repo
 
 import android.util.Log
-import java.nio.file.Path
-import java.nio.file.Paths
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import space.taran.arknavigator.mvp.model.dao.Favorite
-import space.taran.arknavigator.mvp.model.dao.FolderDao
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromStream
+import space.taran.arknavigator.mvp.model.arkFavorites
+import space.taran.arknavigator.mvp.model.arkFolder
 import space.taran.arknavigator.mvp.model.dao.Root
+import space.taran.arknavigator.mvp.model.dao.RootDao
 import space.taran.arknavigator.utils.LogTags.DATABASE
 import space.taran.arknavigator.utils.LogTags.FILES
 import space.taran.arknavigator.utils.PartialResult
-import space.taran.arknavigator.utils.fail
 import space.taran.arknavigator.utils.folderExists
-import space.taran.arknavigator.utils.ok
+import java.nio.file.Path
+import kotlin.io.path.Path
+import kotlin.io.path.inputStream
+import kotlin.io.path.writeText
 
 typealias Folders = Map<Path, List<Path>>
 
-class FoldersRepo(private val dao: FolderDao) {
-
+class FoldersRepo(
+    private val dao: RootDao,
+) {
     private val provideMutex = Mutex()
     private lateinit var folders: Folders
 
@@ -33,7 +39,8 @@ class FoldersRepo(private val dao: FolderDao) {
                         Log.w(
                             FILES,
                             "Failed to verify the following paths: \n ${
-                            foldersResult.failed.joinToString("\n")}"
+                            foldersResult.failed.joinToString("\n")
+                            }"
                         )
 
                     folders = foldersResult.succeeded
@@ -59,36 +66,28 @@ class FoldersRepo(private val dao: FolderDao) {
         withContext(Dispatchers.IO) {
             val missingPaths = mutableListOf<Path>()
 
-            val rootsWithFavorites = dao.query()
+            val roots = dao.query()
 
-            val validPaths = rootsWithFavorites
-                .flatMap {
-                    Log.d(DATABASE, "retrieved $it")
+            val favoritesByRoot = roots.map { root ->
+                val favorites = readFavorites(Path(root.path))
+                root to favorites
+            }
 
-                    val root = Paths.get(it.root.path)
+            val validPaths = favoritesByRoot.mapNotNull { pair ->
+                Log.d(DATABASE, "retrieved $pair")
+                val root = Path(pair.first.path)
+                val favoritesRelatives = pair.second
 
-                    if (!folderExists(root)) {
-                        missingPaths.add(root)
-                        fail()
-                    } else {
-                        val favorites = it.favorites.flatMap { favorite ->
-                            if (favorite.root != it.root.path) {
-                                throw AssertionError("Foreign key violation")
-                            }
-
-                            val folder = root.resolve(favorite.relative)
-
-                            if (!folderExists(folder)) {
-                                missingPaths.add(folder)
-                                fail()
-                            } else {
-                                ok(Paths.get(favorite.relative))
-                            }
-                        }
-
-                        ok(root to favorites)
-                    }
+                if (!folderExists(root)) {
+                    missingPaths.add(root)
+                    return@mapNotNull null
                 }
+
+                val (valid, missing) = checkFavorites(root, favoritesRelatives)
+                missingPaths.addAll(missing)
+
+                root to valid
+            }
 
             return@withContext PartialResult(
                 validPaths.toMap(),
@@ -108,17 +107,60 @@ class FoldersRepo(private val dao: FolderDao) {
             dao.insert(entity)
         }
 
-    suspend fun insertFavorite(root: Path, favorite: Path) =
+    suspend fun insertFavorite(root: Path, favoriteRelative: Path) =
         withContext(Dispatchers.IO) {
-            val entity = Favorite(root.toString(), favorite.toString())
-            Log.d(DATABASE, "storing $entity")
-
             val mutableFolders = folders.toMutableMap()
             val favsByRoot = mutableFolders[root]?.toMutableList()
-            favsByRoot?.add(favorite)
-            mutableFolders[root] = favsByRoot ?: listOf(favorite)
+            favsByRoot?.add(favoriteRelative)
+            mutableFolders[root] = favsByRoot ?: listOf(favoriteRelative)
             folders = mutableFolders
 
-            dao.insert(entity)
+            val favoritesRelatives = readFavorites(root).toMutableSet()
+            favoritesRelatives.add(favoriteRelative)
+            writeFavorites(root, favoritesRelatives)
         }
+
+    private fun checkFavorites(
+        root: Path,
+        favoritesRelatives: List<Path>
+    ): PartialResult<List<Path>, List<Path>> {
+        val missingPaths = mutableListOf<Path>()
+
+        val validFavoritesRelatives = favoritesRelatives.filter {
+            val favorite = root.resolve(it)
+            val valid = folderExists(favorite)
+            if (!valid) missingPaths.add(it)
+            valid
+        }
+
+        return PartialResult(validFavoritesRelatives, missingPaths)
+    }
+
+    private fun readFavorites(root: Path): List<Path> {
+        val favoritesFile = root.arkFolder().arkFavorites()
+
+        return try {
+            val jsonFavorites =
+                Json.decodeFromStream<JsonFavorites>(favoritesFile.inputStream())
+            jsonFavorites.favorites.map { Path(it) }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    private fun writeFavorites(root: Path, favoritesRelatives: Set<Path>) {
+        val favoritesFile = root.arkFolder().arkFavorites()
+
+        val jsonFavorites = JsonFavorites(
+            favoritesRelatives
+                .map { it.toString() }
+                .toSet()
+        )
+
+        val content = Json.encodeToString(jsonFavorites)
+        favoritesFile.writeText(content)
+    }
 }
+
+@Serializable
+private data class JsonFavorites(val favorites: Set<String>)
