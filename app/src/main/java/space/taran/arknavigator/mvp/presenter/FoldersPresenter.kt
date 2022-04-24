@@ -42,14 +42,6 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
 
     private lateinit var devices: List<Path>
 
-    private var favoritesByRoot: MutableMap<Path, MutableList<Path>> = mutableMapOf()
-        set(value) {
-            field = value
-            roots = value.keys
-        }
-
-    private lateinit var roots: Set<Path>
-
     override fun onFirstViewAttach() {
         Log.d(FOLDERS_SCREEN, "first view attached in RootsPresenter")
         super.onFirstViewAttach()
@@ -57,16 +49,12 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
         viewState.init()
         presenterScope.launch {
             viewState.setProgressVisibility(true, "Loading")
-            val folders = foldersRepo.provideFolders()
+            val folders = foldersRepo.provideFoldersWithMissing()
             devices = listDevices()
 
             Notifications.notifyIfFailedPaths(viewState, folders.failed)
 
-            favoritesByRoot = folders.succeeded
-                .mapValues { (_, favorites) -> favorites.toMutableList() }
-                .toMutableMap()
-
-            foldersTreePresenter.updateNodes(devices, favoritesByRoot)
+            foldersTreePresenter.updateNodes(devices, folders.succeeded)
             viewState.setProgressVisibility(false)
         }
     }
@@ -79,41 +67,44 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
         viewState.openRootPickerDialog(devices)
     }
 
-    fun onPickRootBtnClick(path: Path, rootNotFavorite: Boolean) {
-        if (rootNotFavorite) {
-            // adding path as root
-            if (roots.contains(path)) {
-                viewState.notifyUser(
-                    stringProvider.getString(R.string.folders_root_is_already_picked)
-                )
-            } else {
-                addRoot(path)
-            }
-        } else {
-            // adding path as favorite
-            if (getFavorites().contains(path)) {
-                viewState.notifyUser(
-                    stringProvider.getString(
-                        R.string.folders_favorite_is_alreay_picked
+    fun onPickRootBtnClick(path: Path, rootNotFavorite: Boolean) =
+        presenterScope.launch(NonCancellable) {
+            val folders = foldersRepo.provideFolders()
+
+            if (rootNotFavorite) {
+                // adding path as root
+                if (folders.keys.contains(path)) {
+                    viewState.notifyUser(
+                        stringProvider
+                            .getString(R.string.folders_root_is_already_picked)
                     )
-                )
+                } else {
+                    addRoot(path)
+                }
             } else {
-                addFavorite(path)
+                // adding path as favorite
+                if (folders.values.flatten().contains(path)) {
+                    viewState.notifyUser(
+                        stringProvider.getString(
+                            R.string.folders_favorite_is_alreay_picked
+                        )
+                    )
+                } else {
+                    addFavorite(path)
+                }
             }
         }
-    }
 
     private fun addRoot(root: Path) =
         presenterScope.launch(NonCancellable) {
             viewState.setProgressVisibility(true, "Adding folder")
             Log.d(FOLDERS_SCREEN, "root $root added in RootsPresenter")
             val path = root.toRealPath()
+            val folders = foldersRepo.provideFolders()
 
-            if (favoritesByRoot.containsKey(path)) {
+            if (folders.containsKey(path)) {
                 throw AssertionError("Path must be checked in RootPicker")
             }
-
-            favoritesByRoot[path] = mutableListOf()
 
             foldersRepo.insertRoot(path)
 
@@ -126,32 +117,29 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
             resourcesIndexRepo.buildFromFilesystem(root)
             viewState.setProgressVisibility(false)
 
-            foldersTreePresenter.updateNodes(devices, favoritesByRoot)
+            foldersTreePresenter.updateNodes(devices, foldersRepo.provideFolders())
         }
-
-    private fun getFavorites(): Set<Path> = favoritesByRoot.values.flatten().toSet()
 
     private fun addFavorite(favorite: Path) =
         presenterScope.launch(NonCancellable) {
             viewState.setProgressVisibility(true, "Adding folder")
             Log.d(FOLDERS_SCREEN, "favorite $favorite added in RootsPresenter")
             val path = favorite.toRealPath()
+            val folders = foldersRepo.provideFolders()
 
-            val root = favoritesByRoot.keys.find { path.startsWith(it) }
+            val root = folders.keys.find { path.startsWith(it) }
                 ?: throw IllegalStateException(
                     "Can't add favorite if it's root is not added"
                 )
 
             val relative = root.relativize(path)
-            if (favoritesByRoot[root]!!.contains(relative)) {
+            if (folders.values.flatten().contains(relative)) {
                 throw AssertionError("Path must be checked in RootPicker")
             }
 
-            favoritesByRoot[root]!!.add(relative)
-
             foldersRepo.insertFavorite(root, relative)
 
-            foldersTreePresenter.updateNodes(devices, favoritesByRoot)
+            foldersTreePresenter.updateNodes(devices, foldersRepo.provideFolders())
             viewState.setProgressVisibility(false)
         }
 

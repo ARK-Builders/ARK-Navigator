@@ -31,7 +31,7 @@ class FolderPickerDialogPresenter(
         presenterScope.launch {
             devices = listDevices()
             viewState.init()
-            val folders = foldersRepo.provideFolders().succeeded
+            val folders = foldersRepo.provideFoldersWithMissing().succeeded
             roots = folders.keys
             favorites = folders.values.flatten()
             gridPresenter.init(paths)
