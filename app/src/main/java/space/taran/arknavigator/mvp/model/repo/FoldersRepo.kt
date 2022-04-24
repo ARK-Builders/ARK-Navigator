@@ -30,7 +30,7 @@ class FoldersRepo(
     private val provideMutex = Mutex()
     private lateinit var folders: Folders
 
-    suspend fun provideFolders(): PartialResult<Folders, List<Path>> =
+    suspend fun provideFoldersWithMissing(): PartialResult<Folders, List<Path>> =
         withContext(Dispatchers.IO) {
             provideMutex.withLock {
                 val result = if (!::folders.isInitialized) {
@@ -55,11 +55,14 @@ class FoldersRepo(
             }
         }
 
+    suspend fun provideFolders(): Folders =
+        provideFoldersWithMissing().succeeded
+
     suspend fun resolveRoots(rootAndFav: RootAndFav): List<Path> {
         return if (!rootAndFav.isAllRoots())
             listOf(rootAndFav.root!!)
         else
-            provideFolders().succeeded.keys.toList()
+            provideFolders().keys.toList()
     }
 
     private suspend fun query(): PartialResult<Folders, List<Path>> =
@@ -101,7 +104,7 @@ class FoldersRepo(
             Log.d(DATABASE, "storing $entity")
 
             val mutableFolders = folders.toMutableMap()
-            mutableFolders[root] = listOf()
+            mutableFolders[root] = readFavorites(root)
             folders = mutableFolders
 
             dao.insert(entity)
