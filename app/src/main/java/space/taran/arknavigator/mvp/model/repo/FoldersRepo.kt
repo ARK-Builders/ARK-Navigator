@@ -19,7 +19,9 @@ import space.taran.arknavigator.utils.PartialResult
 import space.taran.arknavigator.utils.folderExists
 import java.nio.file.Path
 import kotlin.io.path.Path
+import kotlin.io.path.createDirectories
 import kotlin.io.path.inputStream
+import kotlin.io.path.notExists
 import kotlin.io.path.writeText
 
 typealias Folders = Map<Path, List<Path>>
@@ -69,43 +71,41 @@ class FoldersRepo(
         withContext(Dispatchers.IO) {
             val missingPaths = mutableListOf<Path>()
 
-            val roots = dao.query()
-
-            val favoritesByRoot = roots.map { root ->
-                val favorites = readFavorites(Path(root.path))
-                root to favorites
-            }
-
-            val validPaths = favoritesByRoot.mapNotNull { pair ->
-                Log.d(DATABASE, "retrieved $pair")
-                val root = Path(pair.first.path)
-                val favoritesRelatives = pair.second
-
+            val roots = dao.query().mapNotNull {
+                val root = Path(it.path)
                 if (!folderExists(root)) {
                     missingPaths.add(root)
                     return@mapNotNull null
                 }
+                val arkFolder = root.arkFolder()
+                if (!folderExists(arkFolder)) {
+                    missingPaths.add(arkFolder)
+                    return@mapNotNull null
+                }
+                root
+            }
 
+            val favoritesByRoot = roots.map { root ->
+                val favoritesRelatives = readFavorites(root)
                 val (valid, missing) = checkFavorites(root, favoritesRelatives)
                 missingPaths.addAll(missing)
-
                 root to valid
             }
 
             return@withContext PartialResult(
-                validPaths.toMap(),
+                favoritesByRoot.toMap(),
                 missingPaths.toList()
             )
         }
 
     suspend fun insertRoot(root: Path) =
         withContext(Dispatchers.IO) {
+            root.arkFolder().createDirectories()
+
             val entity = Root(root.toString())
             Log.d(DATABASE, "storing $entity")
 
-            val mutableFolders = folders.toMutableMap()
-            mutableFolders[root] = readFavorites(root)
-            folders = mutableFolders
+            folders = folders + mapOf(root to readFavorites(root))
 
             dao.insert(entity)
         }
@@ -140,7 +140,9 @@ class FoldersRepo(
     }
 
     private fun readFavorites(root: Path): List<Path> {
-        val favoritesFile = root.arkFolder().arkFavorites()
+        val arkFolder = root.arkFolder()
+        if (arkFolder.notExists()) error("Ark folder must exist")
+        val favoritesFile = arkFolder.arkFavorites()
 
         return try {
             val jsonFavorites =
@@ -152,7 +154,9 @@ class FoldersRepo(
     }
 
     private fun writeFavorites(root: Path, favoritesRelatives: Set<Path>) {
-        val favoritesFile = root.arkFolder().arkFavorites()
+        val arkFolder = root.arkFolder()
+        if (arkFolder.notExists()) error("Ark folder must exist")
+        val favoritesFile = arkFolder.arkFavorites()
 
         val jsonFavorites = JsonFavorites(
             favoritesRelatives
