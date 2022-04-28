@@ -200,8 +200,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
 
     override fun shareLink(link: String) {
         val intent = Intent(Intent.ACTION_SEND)
-        val uri = Uri.parse(link)
-        intent.putExtra(Intent.EXTRA_TEXT, uri)
+        intent.putExtra(Intent.EXTRA_TEXT, link)
         intent.type = "text/plain"
         startActivity(Intent.createChooser(intent, "Share the link with:"))
     }
