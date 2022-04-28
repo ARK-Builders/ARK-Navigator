@@ -1,4 +1,4 @@
-# **ARK Navigator** ![example workflow](https://github.com/kirillt/ark-navigator/actions/workflows/build.yml/badge.svg)
+# **ARK Navigator** ![example workflow](https://github.com/ARK-Builders/ARK-Navigator/actions/workflows/build.yml/badge.svg)
 
 _ARK Navigator_ is the next-generation file browser built on the idea of tags.
 
