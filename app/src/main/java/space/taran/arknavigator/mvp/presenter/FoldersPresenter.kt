@@ -133,7 +133,7 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
                 )
 
             val relative = root.relativize(path)
-            if (folders.values.flatten().contains(relative)) {
+            if (folders[root]!!.contains(relative)) {
                 throw AssertionError("Path must be checked in RootPicker")
             }
 

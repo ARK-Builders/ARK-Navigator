@@ -1,13 +1,14 @@
 package space.taran.arknavigator.mvp.model.repo.kind
 
-import com.beust.klaxon.Klaxon
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromStream
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import java.nio.file.Path
 import java.util.zip.ZipFile
 
 object LinkKindFactory : ResourceKindFactory<ResourceKind.Link> {
     private const val JSON_FILE = "link.json"
-    private val klaxon = Klaxon()
 
     override val acceptedExtensions = setOf("link")
     override val acceptedKindCode = KindCode.LINK
@@ -20,8 +21,7 @@ object LinkKindFactory : ResourceKindFactory<ResourceKind.Link> {
             .find { entry -> entry.name == JSON_FILE }
             ?: return ResourceKind.Link()
 
-        val link = klaxon.parse<JsonLink>(zip.getInputStream(jsonEntry))
-            ?: return ResourceKind.Link()
+        val link = Json.decodeFromStream<JsonLink>(zip.getInputStream(jsonEntry))
 
         return ResourceKind.Link(link.title, link.desc, link.url)
     }
@@ -43,4 +43,5 @@ object LinkKindFactory : ResourceKindFactory<ResourceKind.Link> {
     )
 }
 
+@Serializable
 private data class JsonLink(val url: String, val title: String, val desc: String)
