@@ -44,6 +44,16 @@
         <item name="android:windowIsFloating">false</item>
     </style>
 
+    <style name="RoundBottomSheetDialogTheme"
+        parent="Theme.MaterialComponents.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/RoundBottomSheetModal</item>
+        <item name="android:windowIsFloating">false</item>
+    </style>
+
+    <style name="RoundBottomSheetModal" parent="Widget.Design.BottomSheet.Modal">
+        <item name="android:background">@drawable/bg_rounded_top_24dp</item>
+    </style>
+
     <style name="RadioButtonStyle" parent="Theme.AppCompat.Light">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>

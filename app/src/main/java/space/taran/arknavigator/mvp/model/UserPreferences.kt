@@ -114,6 +114,15 @@ class UserPreferences @Inject constructor(val context: Context) {
         dataStore.data.first()[PreferencesKeys.REMOVING_LOST_RESOURCES_TAGS]
             ?: DefaultValues.REMOVING_LOST_RESOURCES_TAGS
 
+    suspend fun isFirstOpen(): Boolean =
+        dataStore.data.first()[PreferencesKeys.IS_FIRST_OPEN]
+            ?: let {
+                dataStore.edit { pref ->
+                    pref[PreferencesKeys.IS_FIRST_OPEN] = false
+                }
+                DefaultValues.IS_FIRST_OPEN
+            }
+
     private fun convertIntToSorting(intValue: Int?): Sorting {
         return if (intValue == null) Sorting.DEFAULT
         else Sorting.values()[intValue]
@@ -131,6 +140,7 @@ class UserPreferences @Inject constructor(val context: Context) {
         val REMOVING_LOST_RESOURCES_TAGS =
             booleanPreferencesKey("removing_lost_resources_tags")
         val SHOW_KINDS = booleanPreferencesKey("show_kind_preference")
+        val IS_FIRST_OPEN = booleanPreferencesKey("is_first_open")
     }
 
     private object DefaultValues {
@@ -141,5 +151,6 @@ class UserPreferences @Inject constructor(val context: Context) {
         val INDEX_REPLICATION = false
         val REMOVING_LOST_RESOURCES_TAGS = false
         val SHOW_KIND = false
+        val IS_FIRST_OPEN = true
     }
 }

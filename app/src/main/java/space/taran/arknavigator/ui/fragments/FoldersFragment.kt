@@ -18,9 +18,10 @@ import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.adapter.folderstree.FoldersTreeAdapter
 import space.taran.arknavigator.ui.fragments.dialog.FolderPickerDialogFragment
+import space.taran.arknavigator.ui.fragments.dialog.RootsScanDialogFragment
 import space.taran.arknavigator.ui.fragments.utils.Notifications
-import space.taran.arknavigator.utils.LogTags.FOLDERS_SCREEN
 import space.taran.arknavigator.utils.FullscreenHelper
+import space.taran.arknavigator.utils.LogTags.FOLDERS_SCREEN
 import java.nio.file.Path
 import kotlin.io.path.Path
 
@@ -87,10 +88,12 @@ class FoldersFragment : MvpAppCompatFragment(), FoldersView {
         foldersTreeAdapter?.dispatchUpdates()
     }
 
-    override fun openRootPickerDialog(paths: List<Path>) {
-        val dialog = FolderPickerDialogFragment.newInstance(paths)
-        dialog.show(childFragmentManager, null)
-    }
+    override fun openRootPickerDialog(paths: List<Path>) =
+        FolderPickerDialogFragment.newInstance(paths)
+            .show(childFragmentManager, null)
+
+    override fun openRootsScanDialog() =
+        RootsScanDialogFragment.newInstance().show(childFragmentManager, null)
 
     override fun notifyUser(message: String, moreTime: Boolean) {
         Notifications.notifyUser(context, message, moreTime)
@@ -111,6 +114,19 @@ class FoldersFragment : MvpAppCompatFragment(), FoldersView {
                     FolderPickerDialogFragment.RESULT_ROOT_NOT_FAVORITE_KEY
                 )
             presenter.onPickRootBtnClick(Path(path), rootNotFavorite)
+        }
+
+        childFragmentManager.setFragmentResultListener(
+            RootsScanDialogFragment.REQUEST_KEY_ROOTS_FOUND,
+            this
+        ) { _, bundle ->
+            val roots =
+                bundle.getStringArray(RootsScanDialogFragment.RESULT_KEY_ROOTS)
+                    ?.map {
+                        Path(it)
+                    } ?: return@setFragmentResultListener
+
+            presenter.onRootsFound(roots)
         }
     }
 }
