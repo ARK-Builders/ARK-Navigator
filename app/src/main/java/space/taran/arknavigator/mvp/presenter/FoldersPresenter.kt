@@ -6,6 +6,7 @@ import kotlinx.coroutines.launch
 import moxy.MvpPresenter
 import moxy.presenterScope
 import space.taran.arknavigator.R
+import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.repo.FoldersRepo
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
 import space.taran.arknavigator.mvp.presenter.adapter.folderstree.FoldersTreePresenter
@@ -32,6 +33,9 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
     @Inject
     lateinit var stringProvider: StringProvider
 
+    @Inject
+    lateinit var userPreferences: UserPreferences
+
     var foldersTreePresenter = FoldersTreePresenter(
         viewState,
         ::onFoldersTreeAddFavoriteBtnClick
@@ -56,6 +60,10 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
 
             foldersTreePresenter.updateNodes(devices, folders.succeeded)
             viewState.setProgressVisibility(false)
+
+            if (userPreferences.isFirstOpen() && folders.succeeded.keys.isEmpty()) {
+                viewState.openRootsScanDialog()
+            }
         }
     }
 
@@ -95,30 +103,42 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
             }
         }
 
-    private fun addRoot(root: Path) =
-        presenterScope.launch(NonCancellable) {
-            viewState.setProgressVisibility(true, "Adding folder")
-            Log.d(FOLDERS_SCREEN, "root $root added in RootsPresenter")
-            val path = root.toRealPath()
-            val folders = foldersRepo.provideFolders()
-
-            if (folders.containsKey(path)) {
-                throw AssertionError("Path must be checked in RootPicker")
-            }
-
-            foldersRepo.insertRoot(path)
-
-            viewState.notifyUser(
-                message = "Indexing of huge folders can take minutes",
-                moreTime = true
+    fun onRootsFound(roots: List<Path>) = presenterScope.launch(NonCancellable) {
+        roots.forEachIndexed { index, root ->
+            viewState.setProgressVisibility(
+                true,
+                "Indexing ${index + 1}/${roots.size}"
             )
-
-            viewState.setProgressVisibility(true, "Indexing")
+            foldersRepo.insertRoot(root)
             resourcesIndexRepo.buildFromFilesystem(root)
-            viewState.setProgressVisibility(false)
-
-            foldersTreePresenter.updateNodes(devices, foldersRepo.provideFolders())
         }
+        viewState.setProgressVisibility(false)
+        foldersTreePresenter.updateNodes(devices, foldersRepo.provideFolders())
+    }
+
+    private suspend fun addRoot(root: Path) {
+        viewState.setProgressVisibility(true, "Adding folder")
+        Log.d(FOLDERS_SCREEN, "root $root added in RootsPresenter")
+        val path = root.toRealPath()
+        val folders = foldersRepo.provideFolders()
+
+        if (folders.containsKey(path)) {
+            throw AssertionError("Path must be checked in RootPicker")
+        }
+
+        foldersRepo.insertRoot(path)
+
+        viewState.notifyUser(
+            message = "Indexing of huge folders can take minutes",
+            moreTime = true
+        )
+
+        viewState.setProgressVisibility(true, "Indexing")
+        resourcesIndexRepo.buildFromFilesystem(root)
+        viewState.setProgressVisibility(false)
+
+        foldersTreePresenter.updateNodes(devices, foldersRepo.provideFolders())
+    }
 
     private fun addFavorite(favorite: Path) =
         presenterScope.launch(NonCancellable) {

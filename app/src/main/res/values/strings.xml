@@ -52,4 +52,13 @@
     <string name="menu_tags_off_title">Tags off</string>
     <string name="menu_tags_sort_by_title">Sort by</string>
     <string name="kind_link">Link</string>
+    <string name="scan_completed">Scan completed</string>
+    <string name="scan">Scan</string>
+    <string name="skip">Skip</string>
+    <string name="root_scanning">Root scanning</string>
+    <string name="root_scanning_description">App will scan the entire file system to find previously created roots</string>
+    <string name="root_scanning_found">Found %1$d roots</string>
+    <string name="scanning">Scanning</string>
+    <string name="skipping_folder">Skipping %1$s</string>
+    <string name="enough">Enough</string>
 </resources>

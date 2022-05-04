@@ -1,10 +1,10 @@
 package space.taran.arknavigator.mvp.view
 
-import java.nio.file.Path
 import moxy.MvpView
 import moxy.viewstate.strategy.AddToEndSingleStrategy
 import moxy.viewstate.strategy.SkipStrategy
 import moxy.viewstate.strategy.StateStrategyType
+import java.nio.file.Path
 
 @StateStrategyType(AddToEndSingleStrategy::class)
 interface FoldersView : MvpView, NotifiableView {
@@ -14,4 +14,7 @@ interface FoldersView : MvpView, NotifiableView {
 
     @StateStrategyType(SkipStrategy::class)
     fun openRootPickerDialog(paths: List<Path>)
+
+    @StateStrategyType(SkipStrategy::class)
+    fun openRootsScanDialog()
 }
