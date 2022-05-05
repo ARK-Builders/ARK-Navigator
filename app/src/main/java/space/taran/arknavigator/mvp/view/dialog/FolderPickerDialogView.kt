@@ -14,9 +14,9 @@ interface FolderPickerDialogView : MvpView {
     fun setPickBtnState(isEnabled: Boolean, isRootNotFavorite: Boolean)
 
     @StateStrategyType(SkipStrategy::class)
-    fun notifyDeviceChosenAsRoot()
+    fun toastDeviceChosenAsRoot()
     @StateStrategyType(SkipStrategy::class)
     fun notifyPathPicked(path: Path, rootNotFavorite: Boolean)
     @StateStrategyType(SkipStrategy::class)
-    fun notifyFileChosenAsRoot()
+    fun toastFileChosenAsRoot()
 }

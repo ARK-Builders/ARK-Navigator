@@ -43,7 +43,7 @@ class FolderPickerDialogPresenter(
             viewState.notifyPathPicked(currentFolder, rootNotFavorite)
         } else {
             Log.d(FOLDER_PICKER, "potentially huge directory")
-            viewState.notifyDeviceChosenAsRoot()
+            viewState.toastDeviceChosenAsRoot()
         }
     }
 

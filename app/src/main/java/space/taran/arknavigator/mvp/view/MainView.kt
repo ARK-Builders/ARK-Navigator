@@ -6,7 +6,7 @@ import moxy.viewstate.strategy.SkipStrategy
 import moxy.viewstate.strategy.StateStrategyType
 
 @StateStrategyType(AddToEndSingleStrategy::class)
-interface MainView : MvpView, NotifiableView {
+interface MainView : MvpView {
     fun init()
 
     @StateStrategyType(SkipStrategy::class)

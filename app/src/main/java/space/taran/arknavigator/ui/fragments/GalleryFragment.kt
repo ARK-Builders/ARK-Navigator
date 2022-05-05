@@ -32,13 +32,12 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.kind.ResourceKind
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 import space.taran.arknavigator.mvp.view.GalleryView
-import space.taran.arknavigator.mvp.view.NotifiableView
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.adapter.PreviewsPager
 import space.taran.arknavigator.ui.extra.ExtraLoader
 import space.taran.arknavigator.ui.fragments.dialog.EditTagsDialogFragment
-import space.taran.arknavigator.ui.fragments.utils.Notifications
+import space.taran.arknavigator.ui.fragments.utils.toast
 import space.taran.arknavigator.ui.view.DepthPageTransformer
 import space.taran.arknavigator.utils.FullscreenHelper
 import space.taran.arknavigator.utils.LogTags.GALLERY_SCREEN
@@ -48,7 +47,7 @@ import space.taran.arknavigator.utils.extensions.makeGone
 import space.taran.arknavigator.utils.extensions.makeVisible
 import java.nio.file.Path
 
-class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
+class GalleryFragment : MvpAppCompatFragment(), GalleryView {
 
     private lateinit var binding: FragmentGalleryBinding
 
@@ -163,14 +162,6 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
         binding.previewControls.isVisible = visible
     }
 
-    override fun notifyUser(message: String, moreTime: Boolean) {
-        Notifications.notifyUser(context, message, moreTime)
-    }
-
-    override fun notifyUser(messageID: Int, moreTime: Boolean) {
-        Notifications.notifyUser(context, messageID, moreTime)
-    }
-
     override fun editResource(resourcePath: Path) {
         val intent = getExternalAppIntent(
             resourcePath,
@@ -244,7 +235,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView, NotifiableView {
                     GALLERY_SCREEN,
                     "tag $tag on resource $resource long-clicked"
                 )
-                notifyUser("Tag \"$tag\" removed")
+                toast(R.string.toast_tag_removed, tag)
                 presenter.onTagRemove(tag)
                 true
             }

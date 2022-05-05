@@ -19,7 +19,8 @@ import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.adapter.folderstree.FoldersTreeAdapter
 import space.taran.arknavigator.ui.fragments.dialog.FolderPickerDialogFragment
 import space.taran.arknavigator.ui.fragments.dialog.RootsScanDialogFragment
-import space.taran.arknavigator.ui.fragments.utils.Notifications
+import space.taran.arknavigator.ui.fragments.utils.toast
+import space.taran.arknavigator.ui.fragments.utils.toastFailedPaths
 import space.taran.arknavigator.utils.FullscreenHelper
 import space.taran.arknavigator.utils.LogTags.FOLDERS_SCREEN
 import java.nio.file.Path
@@ -92,16 +93,20 @@ class FoldersFragment : MvpAppCompatFragment(), FoldersView {
         FolderPickerDialogFragment.newInstance(paths)
             .show(childFragmentManager, null)
 
+    override fun toastFailedPath(failedPaths: List<Path>) =
+        toastFailedPaths(failedPaths)
+
     override fun openRootsScanDialog() =
         RootsScanDialogFragment.newInstance().show(childFragmentManager, null)
 
-    override fun notifyUser(message: String, moreTime: Boolean) {
-        Notifications.notifyUser(context, message, moreTime)
-    }
+    override fun toastRootIsAlreadyPicked() =
+        toast(R.string.folders_root_is_already_picked)
 
-    override fun notifyUser(messageID: Int, moreTime: Boolean) {
-        Notifications.notifyUser(context, messageID, moreTime)
-    }
+    override fun toastFavoriteIsAlreadyPicked() =
+        toast(R.string.folders_favorite_is_alreay_picked)
+
+    override fun toastIndexingCanTakeMinutes() =
+        toast(R.string.toast_indexing_can_take_minutes)
 
     private fun initResultListeners() {
         childFragmentManager.setFragmentResultListener(

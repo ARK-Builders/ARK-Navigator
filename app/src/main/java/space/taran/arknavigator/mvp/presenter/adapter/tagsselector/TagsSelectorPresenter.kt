@@ -222,8 +222,15 @@ class TagsSelectorPresenter(
 
         viewState.drawTags()
 
-        calculateFocusModeSelectionIfNeeded(tagItemsByResources)
-        onSelectionChangeListener(selection)
+        when (queryMode) {
+            QueryMode.NORMAL -> {
+                viewState.toastResourcesSelected(selection.size)
+                onSelectionChangeListener(selection)
+            }
+            QueryMode.FOCUS -> calculateFocusModeSelectionIfNeeded(
+                tagItemsByResources
+            )
+        }
     }
 
     suspend fun onBackClick(): Boolean {
@@ -262,15 +269,21 @@ class TagsSelectorPresenter(
         return true
     }
 
-    private fun calculateFocusModeSelectionIfNeeded(
+    private suspend fun calculateFocusModeSelectionIfNeeded(
         tagItemsByResources: Map<ResourceId, Set<TagItem>>
     ) {
-        if (queryMode != QueryMode.FOCUS)
-            return
-
+        val normalModeSelectionSize = selection.size
         selection = selection.filter { id ->
             tagItemsByResources[id] == includedTagItems
         }.toSet()
+        val hidden = normalModeSelectionSize - selection.size
+
+        viewState.toastResourcesSelectedFocusMode(
+            selection.size,
+            hidden
+        )
+
+        onSelectionChangeListener(selection)
     }
 
     private fun findLastActualAction(): TagsSelectorAction? {

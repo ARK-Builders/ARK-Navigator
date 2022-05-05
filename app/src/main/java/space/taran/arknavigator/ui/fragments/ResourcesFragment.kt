@@ -31,13 +31,15 @@ import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.adapter.ResourcesRVAdapter
 import space.taran.arknavigator.ui.adapter.TagsSelectorAdapter
 import space.taran.arknavigator.ui.fragments.dialog.SortDialogFragment
-import space.taran.arknavigator.ui.fragments.utils.Notifications
+import space.taran.arknavigator.ui.fragments.utils.toast
+import space.taran.arknavigator.ui.fragments.utils.toastFailedPaths
 import space.taran.arknavigator.utils.FullscreenHelper
 import space.taran.arknavigator.utils.LogTags.RESOURCES_SCREEN
 import space.taran.arknavigator.utils.Tag
 import space.taran.arknavigator.utils.extensions.closeKeyboard
 import space.taran.arknavigator.utils.extensions.placeCursorToEnd
 import space.taran.arknavigator.utils.extensions.showKeyboard
+import java.nio.file.Path
 import kotlin.math.abs
 
 // `root` is used for querying tags storage and resources index,
@@ -195,18 +197,6 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         resourcesAdapter?.notifyDataSetChanged()
     }
 
-    override fun notifyUser(message: String, moreTime: Boolean) {
-        if (isFragmentVisible()) Notifications.notifyUser(
-            context,
-            message,
-            moreTime
-        )
-    }
-
-    override fun notifyUser(messageID: Int, moreTime: Boolean) {
-        Notifications.notifyUser(context, messageID, moreTime)
-    }
-
     override fun updateMenu() {
         requireActivity().invalidateOptionsMenu()
     }
@@ -228,6 +218,23 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
     override fun drawTags() {
         tagsSelectorAdapter?.drawTags()
     }
+
+    override fun toastResourcesSelected(selected: Int) {
+        if (isFragmentVisible())
+            toast(R.string.toast_resources_selected, selected)
+    }
+
+    override fun toastResourcesSelectedFocusMode(selected: Int, hidden: Int) {
+        if (isFragmentVisible())
+            toast(
+                R.string.toast_resources_selected_focus_mode,
+                selected,
+                hidden
+            )
+    }
+
+    override fun toastPathsFailed(failedPaths: List<Path>) =
+        toastFailedPaths(failedPaths)
 
     private fun initResultListeners() {
         setFragmentResultListener(

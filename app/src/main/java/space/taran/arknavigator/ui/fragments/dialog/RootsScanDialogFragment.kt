@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.setFragmentResult
 import moxy.MvpBottomSheetDialogFragment
 import moxy.ktx.moxyPresenter
@@ -12,6 +11,7 @@ import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.DialogRootsScanBinding
 import space.taran.arknavigator.mvp.presenter.dialog.RootsScanDialogPresenter
 import space.taran.arknavigator.mvp.view.dialog.RootsScanView
+import space.taran.arknavigator.ui.fragments.utils.toast
 import java.nio.file.Path
 
 class RootsScanDialogFragment : MvpBottomSheetDialogFragment(), RootsScanView {
@@ -71,11 +71,7 @@ class RootsScanDialogFragment : MvpBottomSheetDialogFragment(), RootsScanView {
     }
 
     override fun toastFolderSkip(folder: Path) =
-        Toast.makeText(
-            requireContext(),
-            getString(R.string.skipping_folder, folder.toString()),
-            Toast.LENGTH_SHORT
-        ).show()
+        toast(R.string.skipping_folder, folder.toString())
 
     override fun closeDialog() = dismiss()
 
