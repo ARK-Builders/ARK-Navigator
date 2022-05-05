@@ -12,7 +12,7 @@ import space.taran.arknavigator.databinding.DialogSortBinding
 import space.taran.arknavigator.mvp.presenter.dialog.SortDialogPresenter
 import space.taran.arknavigator.mvp.view.dialog.SortDialogView
 import space.taran.arknavigator.ui.App
-import space.taran.arknavigator.ui.fragments.utils.Notifications
+import space.taran.arknavigator.ui.fragments.utils.toast
 import space.taran.arknavigator.utils.LogTags.RESOURCES_SCREEN
 import space.taran.arknavigator.utils.Sorting
 import space.taran.arknavigator.utils.extensions.changeEnabledStatus
@@ -64,10 +64,8 @@ class SortDialogFragment : MvpAppCompatDialogFragment(), SortDialogView {
             )
 
             if (newSorting == Sorting.DEFAULT) {
-                Notifications.notifyUser(
-                    requireContext(),
-                    getString(R.string.as_is_sorting_selected),
-                    false
+                toast(
+                    R.string.as_is_sorting_selected
                 )
             }
 

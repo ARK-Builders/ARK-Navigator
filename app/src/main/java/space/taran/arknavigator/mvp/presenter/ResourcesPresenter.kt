@@ -19,7 +19,6 @@ import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagsSelectorP
 import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.navigation.AppRouter
 import space.taran.arknavigator.ui.App
-import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.utils.LogTags.RESOURCES_SCREEN
 import space.taran.arknavigator.utils.Tag
 import java.nio.file.Path
@@ -73,7 +72,7 @@ class ResourcesPresenter(
             val folders = foldersRepo.provideFoldersWithMissing()
             Log.d(RESOURCES_SCREEN, "folders retrieved: $folders")
 
-            Notifications.notifyIfFailedPaths(viewState, folders.failed)
+            viewState.toastPathsFailed(folders.failed)
 
             val all = folders.succeeded.keys
             val roots: List<Path> = if (rootAndFav.root != null) {
@@ -148,11 +147,6 @@ class ResourcesPresenter(
     }
 
     private suspend fun onSelectionChange(selection: Set<ResourceId>) {
-        updateSelection(selection)
-    }
-
-    private suspend fun updateSelection(selection: Set<ResourceId>) {
-        viewState.notifyUser("${selection.size} resources selected")
         gridPresenter.updateSelection(selection)
     }
 }

@@ -4,7 +4,6 @@ import android.util.Log
 import kotlinx.coroutines.launch
 import moxy.MvpPresenter
 import moxy.presenterScope
-import space.taran.arknavigator.R
 import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.view.SettingsView
 import space.taran.arknavigator.navigation.AppRouter
@@ -33,11 +32,7 @@ class SettingsPresenter : MvpPresenter<SettingsView>() {
         enabled: Boolean
     ) {
         presenterScope.launch {
-            viewState.notifyUser(
-                if (enabled)
-                    R.string.crash_reporting_enabled else
-                    R.string.crash_reporting_disabled
-            )
+            viewState.toastCrashReportingEnabled(enabled)
             Log.d(
                 SETTINGS_SCREEN,
                 "Saving crash report preference, is enabled: $enabled"
@@ -49,11 +44,7 @@ class SettingsPresenter : MvpPresenter<SettingsView>() {
 
     fun onImgCacheReplicationClick(enabled: Boolean) {
         presenterScope.launch {
-            viewState.notifyUser(
-                if (enabled)
-                    R.string.images_cache_replication_enabled else
-                    R.string.images_cache_replication_disabled
-            )
+            viewState.toastImageCacheReplicationEnabled(enabled)
             Log.d(
                 SETTINGS_SCREEN,
                 "Saving imgCacheReplication preference, " +
@@ -66,11 +57,7 @@ class SettingsPresenter : MvpPresenter<SettingsView>() {
 
     fun onIndexReplicationClick(enabled: Boolean) {
         presenterScope.launch {
-            viewState.notifyUser(
-                if (enabled)
-                    R.string.index_replication_enabled else
-                    R.string.index_replication_disabled
-            )
+            viewState.toastIndexReplicationEnabled(enabled)
             Log.d(
                 SETTINGS_SCREEN,
                 "Saving indexReplication preference, " +
@@ -83,11 +70,7 @@ class SettingsPresenter : MvpPresenter<SettingsView>() {
 
     fun onRemovingLostResourcesTagsClick(checked: Boolean) {
         presenterScope.launch {
-            viewState.notifyUser(
-                if (checked)
-                    R.string.removing_tags_enabled else
-                    R.string.removing_tags_disabled
-            )
+            viewState.toastRemovingTagsEnabled(checked)
             userPreferences.setRemovingLostResourcesTagsEnabled(checked)
             notifyRemovingLostResourcesTags()
         }

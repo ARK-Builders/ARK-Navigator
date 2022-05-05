@@ -42,7 +42,7 @@ class FoldersGridPresenter(
     fun onItemClick(pos: Int) {
         val folder = frames.last().files[pos]
         if (!folder.isDirectory()) {
-            viewState.notifyFileChosenAsRoot()
+            viewState.toastFileChosenAsRoot()
             return
         }
 

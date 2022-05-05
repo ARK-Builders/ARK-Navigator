@@ -15,7 +15,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.forEach
 import androidx.core.view.isVisible
-import javax.inject.Inject
 import moxy.MvpAppCompatActivity
 import moxy.ktx.moxyPresenter
 import ru.terrakok.cicerone.NavigatorHolder
@@ -26,9 +25,9 @@ import space.taran.arknavigator.mvp.presenter.MainPresenter
 import space.taran.arknavigator.mvp.view.MainView
 import space.taran.arknavigator.navigation.AppNavigator
 import space.taran.arknavigator.ui.App
-import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.utils.LogTags.MAIN
 import space.taran.arknavigator.utils.LogTags.PERMISSIONS
+import javax.inject.Inject
 
 class MainActivity : MvpAppCompatActivity(), MainView {
 
@@ -152,7 +151,6 @@ class MainActivity : MvpAppCompatActivity(), MainView {
                     presenter.permsGranted(isActiveScreenExists())
                 } else {
                     Log.e(PERMISSIONS, "denied $denied")
-                    notifyUser("Permissions $denied denied")
                 }
             } else {
                 Log.e(PERMISSIONS, "less permissions granted than expected")
@@ -196,14 +194,6 @@ class MainActivity : MvpAppCompatActivity(), MainView {
         binding.bottomNavigation.menu.forEach { item ->
             item.isEnabled = isEnabled
         }
-    }
-
-    override fun notifyUser(message: String, moreTime: Boolean) {
-        Notifications.notifyUser(this, message, moreTime)
-    }
-
-    override fun notifyUser(messageID: Int, moreTime: Boolean) {
-        Notifications.notifyUser(this, messageID, moreTime)
     }
 
     @RequiresApi(Build.VERSION_CODES.R)

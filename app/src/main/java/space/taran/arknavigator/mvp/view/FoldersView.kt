@@ -7,7 +7,7 @@ import moxy.viewstate.strategy.StateStrategyType
 import java.nio.file.Path
 
 @StateStrategyType(AddToEndSingleStrategy::class)
-interface FoldersView : MvpView, NotifiableView {
+interface FoldersView : MvpView {
     fun init()
     fun setProgressVisibility(isVisible: Boolean, withText: String = "")
     fun updateFoldersTree()
@@ -17,4 +17,12 @@ interface FoldersView : MvpView, NotifiableView {
 
     @StateStrategyType(SkipStrategy::class)
     fun openRootsScanDialog()
+    @StateStrategyType(SkipStrategy::class)
+    fun toastFailedPath(failedPaths: List<Path>)
+    @StateStrategyType(SkipStrategy::class)
+    fun toastRootIsAlreadyPicked()
+    @StateStrategyType(SkipStrategy::class)
+    fun toastFavoriteIsAlreadyPicked()
+    @StateStrategyType(SkipStrategy::class)
+    fun toastIndexingCanTakeMinutes()
 }
