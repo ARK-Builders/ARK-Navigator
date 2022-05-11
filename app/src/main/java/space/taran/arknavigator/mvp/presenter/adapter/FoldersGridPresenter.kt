@@ -34,7 +34,13 @@ class FoldersGridPresenter(
 
     fun init(paths: List<Path>) {
         val folder = findLongestCommonPrefix(paths)
-        frames.addLast(Frame(folder, paths))
+
+        val (directories, files) = listChildren(folder)
+        val children = mutableListOf<Path>()
+        children.addAll(directories.sorted())
+        children.addAll(files.sorted())
+
+        frames.addLast(Frame(folder, children))
         viewState.updateFolders()
         onFolderChanged(folder)
     }
