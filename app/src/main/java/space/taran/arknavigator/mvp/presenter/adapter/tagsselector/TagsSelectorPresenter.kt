@@ -15,7 +15,6 @@ import space.taran.arknavigator.utils.Popularity
 import space.taran.arknavigator.utils.Tag
 import java.nio.file.Path
 import javax.inject.Inject
-import kotlin.reflect.KSuspendFunction1
 
 sealed class TagItem {
     data class PlainTagItem(val tag: Tag) : TagItem()
@@ -30,7 +29,7 @@ class TagsSelectorPresenter(
     private val viewState: ResourcesView,
     private val prefix: Path?,
     private val scope: CoroutineScope,
-    private val onSelectionChangeListener: KSuspendFunction1<Set<ResourceId>, Unit>
+    private val onSelectionChangeListener: suspend (Set<ResourceId>) -> Unit
 ) {
     @Inject
     lateinit var stringProvider: StringProvider
@@ -38,9 +37,10 @@ class TagsSelectorPresenter(
     @Inject
     lateinit var userPreferences: UserPreferences
 
+    val actionsHistory = ArrayDeque<TagsSelectorAction>()
+
     private var index: ResourcesIndex? = null
     private var storage: TagsStorage? = null
-    private val actions = ArrayDeque<TagsSelectorAction>()
     private var filter = ""
 
     var queryMode = QueryMode.NORMAL
@@ -78,15 +78,15 @@ class TagsSelectorPresenter(
     fun onTagItemClick(item: TagItem) = scope.launch {
         when {
             excludedTagItems.contains(item) -> {
-                actions.addLast(UncheckExcluded(item))
+                actionsHistory.addLast(TagsSelectorAction.UncheckExcluded(item))
                 uncheckTag(item)
             }
             includedTagItems.contains(item) -> {
-                actions.addLast(UncheckIncluded(item))
+                actionsHistory.addLast(TagsSelectorAction.UncheckIncluded(item))
                 uncheckTag(item)
             }
             else -> {
-                actions.addLast(Include(item))
+                actionsHistory.addLast(TagsSelectorAction.Include(item))
                 if (filterEnabled) resetFilter()
                 includeTag(item)
             }
@@ -96,16 +96,16 @@ class TagsSelectorPresenter(
     fun onTagItemLongClick(item: TagItem) = scope.launch {
         when {
             includedTagItems.contains(item) -> {
-                actions.addLast(UncheckAndExclude(item))
+                actionsHistory.addLast(TagsSelectorAction.UncheckAndExclude(item))
                 excludeTag(item)
             }
             !excludedTagItems.contains(item) -> {
-                actions.addLast(Exclude(item))
+                actionsHistory.addLast(TagsSelectorAction.Exclude(item))
                 if (filterEnabled) resetFilter()
                 excludeTag(item)
             }
             else -> {
-                actions.addLast(UncheckExcluded(item))
+                actionsHistory.addLast(TagsSelectorAction.UncheckExcluded(item))
                 uncheckTag(item)
             }
         }
@@ -116,7 +116,12 @@ class TagsSelectorPresenter(
     }
 
     fun onClearClick() = scope.launch {
-        actions.addLast(Clear(includedTagItems.toSet(), excludedTagItems.toSet()))
+        actionsHistory.addLast(
+            TagsSelectorAction.Clear(
+                includedTagItems.toSet(),
+                excludedTagItems.toSet()
+            )
+        )
         includedTagItems.clear()
         excludedTagItems.clear()
         calculateTagsAndSelection()
@@ -234,35 +239,35 @@ class TagsSelectorPresenter(
     }
 
     suspend fun onBackClick(): Boolean {
-        if (actions.isEmpty())
+        if (actionsHistory.isEmpty())
             return false
 
         val action = findLastActualAction() ?: return false
 
         when (action) {
-            is Include -> {
+            is TagsSelectorAction.Include -> {
                 includedTagItems.remove(action.item)
             }
-            is Exclude -> {
+            is TagsSelectorAction.Exclude -> {
                 excludedTagItems.remove(action.item)
             }
-            is UncheckIncluded -> {
-                includedTagItems.add(action.item!!)
+            is TagsSelectorAction.UncheckIncluded -> {
+                includedTagItems.add(action.item)
             }
-            is UncheckExcluded -> {
-                excludedTagItems.add(action.item!!)
+            is TagsSelectorAction.UncheckExcluded -> {
+                excludedTagItems.add(action.item)
             }
-            is UncheckAndExclude -> {
+            is TagsSelectorAction.UncheckAndExclude -> {
                 excludedTagItems.remove(action.item)
-                includedTagItems.add(action.item!!)
+                includedTagItems.add(action.item)
             }
-            is Clear -> {
+            is TagsSelectorAction.Clear -> {
                 includedTagItems = action.included.toMutableSet()
                 excludedTagItems = action.excluded.toMutableSet()
             }
         }
 
-        actions.removeLast()
+        actionsHistory.removeLast()
 
         calculateTagsAndSelection()
 
@@ -289,27 +294,29 @@ class TagsSelectorPresenter(
     private fun findLastActualAction(): TagsSelectorAction? {
         val tagItems = provideTagItemsByResources().values.flatten().toSet()
 
-        while (actions.lastOrNull() != null) {
-            val lastAction = actions.last()
+        while (actionsHistory.lastOrNull() != null) {
+            val lastAction = actionsHistory.last()
             if (isActionActual(lastAction, tagItems)) {
                 return lastAction
             } else
-                actions.removeLast()
+                actionsHistory.removeLast()
         }
 
         return null
     }
 
     private fun isActionActual(
-        action: TagsSelectorAction,
+        actions: TagsSelectorAction,
         allTagItems: Set<TagItem>
-    ): Boolean = when (action) {
-        is Clear -> {
-            action.excluded.intersect(allTagItems).isNotEmpty() ||
-                action.included.intersect(allTagItems).isNotEmpty()
-        }
-        else -> {
-            allTagItems.contains(action.item)
+    ): Boolean = when (actions) {
+        is TagsSelectorAction.Exclude -> allTagItems.contains(actions.item)
+        is TagsSelectorAction.Include -> allTagItems.contains(actions.item)
+        is TagsSelectorAction.UncheckAndExclude -> allTagItems.contains(actions.item)
+        is TagsSelectorAction.UncheckExcluded -> allTagItems.contains(actions.item)
+        is TagsSelectorAction.UncheckIncluded -> allTagItems.contains(actions.item)
+        is TagsSelectorAction.Clear -> {
+            actions.excluded.intersect(allTagItems).isNotEmpty() ||
+                actions.included.intersect(allTagItems).isNotEmpty()
         }
     }
 
