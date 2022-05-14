@@ -4,7 +4,8 @@ import android.util.Log
 import kotlinx.coroutines.launch
 import moxy.MvpPresenter
 import moxy.presenterScope
-import space.taran.arknavigator.mvp.model.UserPreferences
+import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
+import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.view.SettingsView
 import space.taran.arknavigator.navigation.AppRouter
 import space.taran.arknavigator.utils.LogTags.SETTINGS_SCREEN
@@ -16,7 +17,7 @@ class SettingsPresenter : MvpPresenter<SettingsView>() {
     lateinit var router: AppRouter
 
     @Inject
-    lateinit var userPreferences: UserPreferences
+    lateinit var preferences: Preferences
 
     override fun onFirstViewAttach() {
         Log.d(SETTINGS_SCREEN, "first view attached in SettingsPresenter")
@@ -37,7 +38,7 @@ class SettingsPresenter : MvpPresenter<SettingsView>() {
                 SETTINGS_SCREEN,
                 "Saving crash report preference, is enabled: $enabled"
             )
-            userPreferences.setCrashReportEnabled(enabled)
+            preferences.set(PreferenceKey.CrashReport, enabled)
             notifyCrashReportPref()
         }
     }
@@ -50,7 +51,7 @@ class SettingsPresenter : MvpPresenter<SettingsView>() {
                 "Saving imgCacheReplication preference, " +
                     "is enabled: $enabled"
             )
-            userPreferences.setCacheReplicationEnabled(enabled)
+            preferences.set(PreferenceKey.ImgCacheReplication, enabled)
             notifyImgCacheReplicationPref()
         }
     }
@@ -63,7 +64,7 @@ class SettingsPresenter : MvpPresenter<SettingsView>() {
                 "Saving indexReplication preference, " +
                     "is enabled: $enabled"
             )
-            userPreferences.setIndexReplicationEnabled(enabled)
+            preferences.set(PreferenceKey.IndexReplication, enabled)
             notifyIndexReplicationPref()
         }
     }
@@ -71,14 +72,14 @@ class SettingsPresenter : MvpPresenter<SettingsView>() {
     fun onRemovingLostResourcesTagsClick(checked: Boolean) {
         presenterScope.launch {
             viewState.toastRemovingTagsEnabled(checked)
-            userPreferences.setRemovingLostResourcesTagsEnabled(checked)
+            preferences.set(PreferenceKey.RemovingLostResourcesTags, checked)
             notifyRemovingLostResourcesTags()
         }
     }
 
     fun onResetPreferencesClick() {
         presenterScope.launch {
-            userPreferences.clearPreferences()
+            preferences.clearPreferences()
             notifyAllPreferences()
         }
     }
@@ -92,21 +93,21 @@ class SettingsPresenter : MvpPresenter<SettingsView>() {
 
     private suspend fun notifyCrashReportPref() =
         viewState.setCrashReportPreference(
-            userPreferences.isCrashReportEnabled()
+            preferences.get(PreferenceKey.CrashReport)
         )
 
     private suspend fun notifyImgCacheReplicationPref() =
         viewState.setImgCacheReplicationPref(
-            userPreferences.isCacheReplicationEnabled()
+            preferences.get(PreferenceKey.ImgCacheReplication)
         )
 
     private suspend fun notifyIndexReplicationPref() =
         viewState.setIndexReplicationPref(
-            userPreferences.isIndexReplicationEnabled()
+            preferences.get(PreferenceKey.IndexReplication)
         )
 
     private suspend fun notifyRemovingLostResourcesTags() =
         viewState.setRemovingLostResourcesTags(
-            userPreferences.isRemovingLostResourcesTagsEnabled()
+            preferences.get(PreferenceKey.RemovingLostResourcesTags)
         )
 }
