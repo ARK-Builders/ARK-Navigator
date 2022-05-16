@@ -4,16 +4,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.repo.FoldersRepo
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
+import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import java.nio.file.Path
 
 class TagsStorageRepo(
     private val foldersRepo: FoldersRepo,
     private val indexRepo: ResourcesIndexRepo,
-    private val userPreferences: UserPreferences
+    private val preferences: Preferences
 ) {
     private val provideMutex = Mutex()
     private val storageByRoot = mutableMapOf<Path, PlainTagsStorage>()
@@ -32,7 +32,7 @@ class TagsStorageRepo(
                         storage
                     } else {
                         val fresh =
-                            PlainTagsStorage(root, resources, userPreferences)
+                            PlainTagsStorage(root, resources, preferences)
                         fresh.init()
                         fresh.cleanup(resources)
                         storageByRoot[root] = fresh

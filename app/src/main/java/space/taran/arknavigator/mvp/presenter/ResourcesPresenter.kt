@@ -4,13 +4,14 @@ import android.util.Log
 import kotlinx.coroutines.launch
 import moxy.MvpPresenter
 import moxy.presenterScope
-import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.repo.FoldersRepo
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.model.repo.index.AggregatedResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
+import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
+import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.tags.AggregatedTagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
@@ -42,7 +43,7 @@ class ResourcesPresenter(
     lateinit var tagsStorageRepo: TagsStorageRepo
 
     @Inject
-    lateinit var userPreferences: UserPreferences
+    lateinit var preferences: Preferences
 
     private lateinit var index: ResourcesIndex
     private lateinit var storage: TagsStorage
@@ -103,7 +104,7 @@ class ResourcesPresenter(
             viewState.setProgressVisibility(true, "Sorting")
 
             gridPresenter.resetResources(resources)
-            val kindTagsEnabled = userPreferences.isKindTagsEnabled()
+            val kindTagsEnabled = preferences.get(PreferenceKey.ShowKinds)
             tagsSelectorPresenter.init(index, storage, kindTagsEnabled)
             viewState.setKindTagsEnabled(kindTagsEnabled)
             externallySelectedTag?.let {

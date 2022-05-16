@@ -5,9 +5,10 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import moxy.MvpPresenter
 import moxy.presenterScope
-import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.repo.FoldersRepo
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
+import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
+import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.presenter.adapter.folderstree.FoldersTreePresenter
 import space.taran.arknavigator.mvp.view.FoldersView
 import space.taran.arknavigator.navigation.AppRouter
@@ -32,7 +33,7 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
     lateinit var stringProvider: StringProvider
 
     @Inject
-    lateinit var userPreferences: UserPreferences
+    lateinit var preferences: Preferences
 
     var foldersTreePresenter = FoldersTreePresenter(
         viewState,
@@ -59,7 +60,10 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
             foldersTreePresenter.updateNodes(devices, folders.succeeded)
             viewState.setProgressVisibility(false)
 
-            if (userPreferences.isFirstOpen() && folders.succeeded.keys.isEmpty()) {
+            if (!preferences.get(PreferenceKey.WasRootsScanShown) &&
+                folders.succeeded.keys.isEmpty()
+            ) {
+                preferences.set(PreferenceKey.WasRootsScanShown, true)
                 viewState.openRootsScanDialog()
             }
         }

@@ -1,12 +1,12 @@
 package space.taran.arknavigator.utils
 
+import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
+import space.taran.arknavigator.ui.App
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.io.path.extension
 import kotlin.io.path.listDirectoryEntries
-import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
-import space.taran.arknavigator.ui.App
 
 val ROOT_PATH: Path = Paths.get("/")
 
@@ -17,6 +17,11 @@ typealias StringPath = String
 
 enum class Sorting {
     DEFAULT, NAME, SIZE, LAST_MODIFIED, TYPE
+}
+
+fun convertIntToSorting(intValue: Int?): Sorting {
+    return if (intValue == null) Sorting.DEFAULT
+    else Sorting.values()[intValue]
 }
 
 fun folderExists(path: Path): Boolean =

@@ -3,10 +3,11 @@ package space.taran.arknavigator.mvp.presenter.adapter.tagsselector
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.kind.KindCode
+import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
+import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.ui.resource.StringProvider
@@ -36,7 +37,7 @@ class TagsSelectorPresenter(
     lateinit var stringProvider: StringProvider
 
     @Inject
-    lateinit var userPreferences: UserPreferences
+    lateinit var preferences: Preferences
 
     private var index: ResourcesIndex? = null
     private var storage: TagsStorage? = null
@@ -399,7 +400,7 @@ class TagsSelectorPresenter(
     fun onKindTagsToggle(kindTagsEnabled: Boolean) = scope.launch {
         showKindTags = kindTagsEnabled
         viewState.setKindTagsEnabled(showKindTags)
-        userPreferences.setKindTagsEnabled(kindTagsEnabled)
+        preferences.set(PreferenceKey.ShowKinds, kindTagsEnabled)
         calculateTagsAndSelection()
     }
 }

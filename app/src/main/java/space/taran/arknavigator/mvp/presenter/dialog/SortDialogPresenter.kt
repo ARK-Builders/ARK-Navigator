@@ -3,30 +3,31 @@ package space.taran.arknavigator.mvp.presenter.dialog
 import kotlinx.coroutines.launch
 import moxy.MvpPresenter
 import moxy.presenterScope
-import space.taran.arknavigator.mvp.model.UserPreferences
+import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
+import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.view.dialog.SortDialogView
 import space.taran.arknavigator.utils.Sorting
 import javax.inject.Inject
 
 class SortDialogPresenter : MvpPresenter<SortDialogView>() {
     @Inject
-    lateinit var userPreferences: UserPreferences
+    lateinit var preferences: Preferences
 
     override fun onFirstViewAttach() {
         presenterScope.launch {
-            val sorting = userPreferences.getSorting()
-            val ascending = userPreferences.isSortingAscending()
+            val sorting = Sorting.values()[preferences.get(PreferenceKey.Sorting)]
+            val ascending = preferences.get(PreferenceKey.IsSortingAscending)
             viewState.init(sorting, ascending)
         }
     }
 
     fun onSortingSelected(sorting: Sorting) = presenterScope.launch {
-        userPreferences.setSorting(sorting)
+        preferences.set(PreferenceKey.Sorting, sorting.ordinal)
         viewState.closeDialog()
     }
 
     fun onAscendingSelected(ascending: Boolean) = presenterScope.launch {
-        userPreferences.setSortingAscending(ascending)
+        preferences.set(PreferenceKey.IsSortingAscending, ascending)
         viewState.closeDialog()
     }
 }

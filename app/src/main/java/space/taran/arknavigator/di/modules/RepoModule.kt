@@ -3,10 +3,10 @@ package space.taran.arknavigator.di.modules
 import android.util.Log
 import dagger.Module
 import dagger.Provides
-import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.dao.Database
 import space.taran.arknavigator.mvp.model.repo.FoldersRepo
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
+import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import space.taran.arknavigator.utils.LogTags.MAIN
 import javax.inject.Singleton
@@ -35,8 +35,8 @@ class RepoModule {
     fun tagsStorageRepo(
         foldersRepo: FoldersRepo,
         resourcesIndexRepo: ResourcesIndexRepo,
-        userPreferences: UserPreferences
+        preferences: Preferences
     ): TagsStorageRepo {
-        return TagsStorageRepo(foldersRepo, resourcesIndexRepo, userPreferences)
+        return TagsStorageRepo(foldersRepo, resourcesIndexRepo, preferences)
     }
 }
