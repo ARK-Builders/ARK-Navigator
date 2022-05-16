@@ -4,12 +4,18 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
 import androidx.core.os.bundleOf
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.setFragmentResult
+import androidx.lifecycle.lifecycleScope
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.chip.Chip
-import moxy.MvpAppCompatDialogFragment
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import moxy.MvpBottomSheetDialogFragment
 import moxy.ktx.moxyPresenter
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.DialogEditTagsBinding
@@ -22,15 +28,14 @@ import space.taran.arknavigator.mvp.view.dialog.EditTagsDialogView
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.utils.Tag
 import space.taran.arknavigator.utils.Tags
+import space.taran.arknavigator.utils.extensions.closeKeyboard
 import space.taran.arknavigator.utils.extensions.placeCursorToEnd
 
 class EditTagsDialogFragment(
     private val index: ResourcesIndex? = null,
     private val storage: TagsStorage? = null
-) :
-    MvpAppCompatDialogFragment(), EditTagsDialogView {
+) : MvpBottomSheetDialogFragment(), EditTagsDialogView {
     private lateinit var binding: DialogEditTagsBinding
-
     private val presenter by moxyPresenter {
         EditTagsDialogPresenter(
             requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
@@ -53,6 +58,7 @@ class EditTagsDialogFragment(
 
     override fun init(): Unit = with(binding) {
         etNewTags.placeCursorToEnd()
+        setupFullHeight()
         etNewTags.doAfterTextChanged { editable ->
             presenter.onInputChanged(editable.toString())
         }
@@ -65,10 +71,6 @@ class EditTagsDialogFragment(
         }
 
         etNewTags.setOnBackPressedListener {
-            dismissDialog()
-        }
-
-        binding.layoutOutside.setOnClickListener {
             dismissDialog()
         }
     }
@@ -109,13 +111,36 @@ class EditTagsDialogFragment(
     }
 
     override fun dismissDialog() {
-        dismiss()
+        lifecycleScope.launch {
+            binding.etNewTags.closeKeyboard()
+            delay(60)
+            dismiss()
+        }
     }
 
-    override fun getTheme() = R.style.FullScreenDialog
+    override fun getTheme() = R.style.EditTagsDialogTheme
 
     override fun notifyTagsChanged() {
         setFragmentResult(REQUEST_TAGS_CHANGED_KEY, bundleOf())
+    }
+
+    // workaround to customize behavior when clicking outside
+    private fun setupFullHeight() {
+        val bottomSheetDialog = dialog as BottomSheetDialog
+        val bottomSheet = bottomSheetDialog.findViewById<View>(
+            com.google.android.material.R.id.design_bottom_sheet
+        )
+
+        val behavior = BottomSheetBehavior.from(bottomSheet!!)
+        val layoutParams = bottomSheet.layoutParams
+        layoutParams.height = WindowManager.LayoutParams.MATCH_PARENT
+        bottomSheet.layoutParams = layoutParams
+        behavior.state = BottomSheetBehavior.STATE_EXPANDED
+        behavior.isDraggable = false
+
+        binding.root.setOnClickListener {
+            dismissDialog()
+        }
     }
 
     companion object {
