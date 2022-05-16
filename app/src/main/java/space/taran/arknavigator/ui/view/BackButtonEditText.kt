@@ -8,9 +8,9 @@ import com.google.android.material.textfield.TextInputEditText
 class BackButtonEditText(context: Context, attrs: AttributeSet?) :
     TextInputEditText(context, attrs) {
 
-    private var onBackPressedListener: (() -> Unit)? = null
+    private var onBackPressedListener: (() -> Boolean)? = null
 
-    fun setOnBackPressedListener(onBackPressedListener: () -> Unit) {
+    fun setOnBackPressedListener(onBackPressedListener: () -> Boolean) {
         this.onBackPressedListener = onBackPressedListener
     }
 
@@ -18,7 +18,9 @@ class BackButtonEditText(context: Context, attrs: AttributeSet?) :
         if (keyCode == KeyEvent.KEYCODE_BACK &&
             event?.action != KeyEvent.ACTION_DOWN
         ) {
-            onBackPressedListener?.let { it() }
+            onBackPressedListener?.let {
+                return it()
+            }
         }
 
         return super.onKeyPreIme(keyCode, event)

@@ -26,7 +26,6 @@ import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.presenter.dialog.EditTagsDialogPresenter
 import space.taran.arknavigator.mvp.view.dialog.EditTagsDialogView
 import space.taran.arknavigator.ui.App
-import space.taran.arknavigator.utils.Tag
 import space.taran.arknavigator.utils.Tags
 import space.taran.arknavigator.utils.extensions.closeKeyboard
 import space.taran.arknavigator.utils.extensions.placeCursorToEnd
@@ -65,13 +64,15 @@ class EditTagsDialogFragment(
         etNewTags.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 presenter.onInputDone(etNewTags.text.toString())
-                    .invokeOnCompletion { dismissDialog() }
             }
             true
         }
 
         etNewTags.setOnBackPressedListener {
-            dismissDialog()
+            if (!presenter.onBackClick())
+                dismissDialog()
+
+            return@setOnBackPressedListener true
         }
     }
 
@@ -92,7 +93,7 @@ class EditTagsDialogFragment(
         }
     }
 
-    override fun setQuickTags(tags: List<Tag>) {
+    override fun setQuickTags(tags: Tags) {
         binding.cgQuick.removeAllViews()
 
         tags.forEach { tag ->
