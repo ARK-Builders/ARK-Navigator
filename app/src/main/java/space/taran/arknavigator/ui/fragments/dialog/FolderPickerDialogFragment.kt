@@ -82,6 +82,14 @@ class FolderPickerDialogFragment :
     override fun toastDeviceChosenAsRoot() =
         toast(R.string.folders_device_chosen_as_root)
 
+    override fun showToast(msg: String) {
+        Toast.makeText(
+            requireContext(),
+            msg,
+            Toast.LENGTH_SHORT
+        ).show()
+    }
+
     override fun setFolderName(folderName: String) {
         binding.tvRootsDialogPath.text = folderName
     }
