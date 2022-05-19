@@ -1,12 +1,12 @@
 package space.taran.arknavigator.mvp.presenter.adapter
 
+import java.nio.file.Files
+import java.nio.file.Path
+import kotlin.io.path.isDirectory
 import space.taran.arknavigator.mvp.view.dialog.FolderPickerDialogView
 import space.taran.arknavigator.mvp.view.item.FileItemView
 import space.taran.arknavigator.utils.findLongestCommonPrefix
 import space.taran.arknavigator.utils.listChildren
-import java.nio.file.Files
-import java.nio.file.Path
-import kotlin.io.path.isDirectory
 
 private class Frame(val folder: Path, val files: List<Path>)
 
@@ -34,13 +34,15 @@ class FoldersGridPresenter(
 
     fun init(paths: List<Path>) {
         val folder = findLongestCommonPrefix(paths)
-
-        val (directories, files) = listChildren(folder)
-        val children = mutableListOf<Path>()
-        children.addAll(directories.sorted())
-        children.addAll(files.sorted())
-
-        frames.addLast(Frame(folder, children))
+        if (paths.size > 1) {
+            frames.addLast(Frame(folder, paths))
+        } else {
+            val (directories, files) = listChildren(folder)
+            val children = mutableListOf<Path>()
+            children.addAll(directories.sorted())
+            children.addAll(files.sorted())
+            frames.addLast(Frame(folder, children))
+        }
         viewState.updateFolders()
         onFolderChanged(folder)
     }
@@ -52,15 +54,18 @@ class FoldersGridPresenter(
             return
         }
 
-        val (directories, files) = listChildren(frames.last().files[pos])
+        try {
+            val (directories, files) = listChildren(frames.last().files[pos])
+            val children = mutableListOf<Path>()
+            children.addAll(directories.sorted())
+            children.addAll(files.sorted())
 
-        val children = mutableListOf<Path>()
-        children.addAll(directories.sorted())
-        children.addAll(files.sorted())
-
-        frames.addLast(Frame(folder, children))
-        onFolderChanged(currentFolder())
-        viewState.updateFolders()
+            frames.addLast(Frame(folder, children))
+            onFolderChanged(currentFolder())
+            viewState.updateFolders()
+        } catch (e: java.nio.file.AccessDeniedException) {
+            viewState.showToast("Access denied.")
+        }
     }
 
     fun onBackClick(): Boolean {
