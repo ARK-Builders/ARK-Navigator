@@ -90,14 +90,6 @@ class FolderPickerDialogFragment :
         ).show()
     }
 
-    override fun notifyDeviceChosenAsRoot() {
-        Notifications.notifyUser(
-            requireContext(),
-            getString(R.string.folders_device_chosen_as_root),
-            false
-        )
-    }
-
     override fun setFolderName(folderName: String) {
         binding.tvRootsDialogPath.text = folderName
     }
