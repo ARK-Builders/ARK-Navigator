@@ -16,7 +16,7 @@ import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.fragments.dialog.ConfirmationDialogFragment
 import space.taran.arknavigator.ui.fragments.dialog.InfoDialogFragment
-import space.taran.arknavigator.ui.fragments.utils.Notifications
+import space.taran.arknavigator.ui.fragments.utils.toast
 import space.taran.arknavigator.utils.LogTags.SETTINGS_SCREEN
 
 class SettingsFragment : MvpAppCompatFragment(), SettingsView {
@@ -140,13 +140,29 @@ class SettingsFragment : MvpAppCompatFragment(), SettingsView {
     override fun setRemovingLostResourcesTags(enabled: Boolean) =
         binding.switchRemovingTags.toggleSwitchSilent(enabled)
 
-    override fun notifyUser(message: String, moreTime: Boolean) {
-        Notifications.notifyUser(context, message, moreTime)
-    }
+    override fun toastCrashReportingEnabled(enabled: Boolean) =
+        toast(
+            if (enabled) R.string.crash_reporting_enabled
+            else R.string.crash_reporting_disabled
+        )
 
-    override fun notifyUser(messageID: Int, moreTime: Boolean) {
-        Notifications.notifyUser(context, messageID, moreTime)
-    }
+    override fun toastImageCacheReplicationEnabled(enabled: Boolean) =
+        toast(
+            if (enabled) R.string.images_cache_replication_enabled
+            else R.string.images_cache_replication_disabled
+        )
+
+    override fun toastIndexReplicationEnabled(enabled: Boolean) =
+        toast(
+            if (enabled) R.string.index_replication_enabled
+            else R.string.index_replication_disabled
+        )
+
+    override fun toastRemovingTagsEnabled(enabled: Boolean) =
+        toast(
+            if (enabled) R.string.removing_tags_enabled
+            else R.string.removing_tags_disabled
+        )
 
     companion object {
         fun newInstance() =

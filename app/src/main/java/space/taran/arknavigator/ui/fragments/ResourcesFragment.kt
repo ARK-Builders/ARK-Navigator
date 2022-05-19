@@ -12,7 +12,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.setFragmentResultListener
@@ -25,19 +24,22 @@ import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.FragmentResourcesBinding
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.presenter.ResourcesPresenter
+import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.QueryMode
 import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.adapter.ResourcesRVAdapter
 import space.taran.arknavigator.ui.adapter.TagsSelectorAdapter
 import space.taran.arknavigator.ui.fragments.dialog.SortDialogFragment
-import space.taran.arknavigator.ui.fragments.utils.Notifications
+import space.taran.arknavigator.ui.fragments.utils.toast
+import space.taran.arknavigator.ui.fragments.utils.toastFailedPaths
 import space.taran.arknavigator.utils.FullscreenHelper
 import space.taran.arknavigator.utils.LogTags.RESOURCES_SCREEN
 import space.taran.arknavigator.utils.Tag
 import space.taran.arknavigator.utils.extensions.closeKeyboard
 import space.taran.arknavigator.utils.extensions.placeCursorToEnd
 import space.taran.arknavigator.utils.extensions.showKeyboard
+import java.nio.file.Path
 import kotlin.math.abs
 
 // `root` is used for querying tags storage and resources index,
@@ -110,6 +112,7 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         binding.rvResources.adapter = resourcesAdapter
         binding.rvResources.layoutManager = GridLayoutManager(context, 3)
         tagsSelectorAdapter = TagsSelectorAdapter(
+            binding,
             binding.cgTagsChecked,
             binding.tagsCg,
             binding.btnClear,
@@ -140,16 +143,20 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
                 val dialog = SortDialogFragment.newInstance()
                 dialog.show(childFragmentManager, null)
             }
-            R.id.menu_tags_off -> presenter.onMenuTagsToggle(false)
-            R.id.menu_tags_on -> presenter.onMenuTagsToggle(true)
+            R.id.menu_focus_mode ->
+                presenter.tagsSelectorPresenter.onQueryModeChanged(QueryMode.FOCUS)
+            R.id.menu_normal_mode ->
+                presenter.tagsSelectorPresenter.onQueryModeChanged(QueryMode.NORMAL)
         }
         return true
     }
 
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
-        menu.findItem(R.id.menu_tags_on).isVisible = !presenter.tagsEnabled
-        menu.findItem(R.id.menu_tags_off).isVisible = presenter.tagsEnabled
+        menu.findItem(R.id.menu_normal_mode).isVisible =
+            presenter.tagsSelectorPresenter.queryMode != QueryMode.NORMAL
+        menu.findItem(R.id.menu_focus_mode).isVisible =
+            presenter.tagsSelectorPresenter.queryMode != QueryMode.FOCUS
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -190,47 +197,8 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         resourcesAdapter?.notifyDataSetChanged()
     }
 
-    override fun notifyUser(message: String, moreTime: Boolean) {
-        if (isFragmentVisible()) Notifications.notifyUser(
-            context,
-            message,
-            moreTime
-        )
-    }
-
-    override fun notifyUser(messageID: Int, moreTime: Boolean) {
-        Notifications.notifyUser(context, messageID, moreTime)
-    }
-
-    override fun setTagsEnabled(enabled: Boolean) {
+    override fun updateMenu() {
         requireActivity().invalidateOptionsMenu()
-        binding.layoutTags.isVisible = enabled
-        binding.layoutDragHandler.isVisible = enabled
-        if (enabled) {
-            val constraintSet = ConstraintSet()
-            constraintSet.clone(binding.root)
-            constraintSet.connect(
-                binding.rvResources.id,
-                ConstraintSet.BOTTOM,
-                binding.layoutDragHandler.id,
-                ConstraintSet.TOP
-            )
-            constraintSet.applyTo(binding.root)
-        } else {
-            val constraintSet = ConstraintSet()
-            constraintSet.clone(binding.root)
-            constraintSet.connect(
-                binding.rvResources.id,
-                ConstraintSet.BOTTOM,
-                binding.root.id,
-                ConstraintSet.BOTTOM
-            )
-            constraintSet.applyTo(binding.root)
-        }
-    }
-
-    override fun setTagsSelectorHintEnabled(enabled: Boolean) {
-        binding.tvTagsSelectorHint.isVisible = enabled
     }
 
     override fun setTagsFilterEnabled(enabled: Boolean) {
@@ -250,6 +218,23 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
     override fun drawTags() {
         tagsSelectorAdapter?.drawTags()
     }
+
+    override fun toastResourcesSelected(selected: Int) {
+        if (isFragmentVisible())
+            toast(R.string.toast_resources_selected, selected)
+    }
+
+    override fun toastResourcesSelectedFocusMode(selected: Int, hidden: Int) {
+        if (isFragmentVisible())
+            toast(
+                R.string.toast_resources_selected_focus_mode,
+                selected,
+                hidden
+            )
+    }
+
+    override fun toastPathsFailed(failedPaths: List<Path>) =
+        toastFailedPaths(failedPaths)
 
     private fun initResultListeners() {
         setFragmentResultListener(

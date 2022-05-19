@@ -3,10 +3,11 @@ package space.taran.arknavigator.mvp.model.repo.tags
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.arkFolder
 import space.taran.arknavigator.mvp.model.arkTagsStorage
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
+import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
+import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.utils.Constants.Companion.NO_TAGS
 import space.taran.arknavigator.utils.Converters.Companion.stringFromTags
 import space.taran.arknavigator.utils.Converters.Companion.tagsFromString
@@ -23,7 +24,7 @@ import java.nio.file.attribute.FileTime
 class PlainTagsStorage(
     root: Path,
     val resources: Collection<ResourceId>,
-    private val userPreferences: UserPreferences
+    private val preferences: Preferences
 ) : TagsStorage {
 
     private val storageFile: Path = root.arkFolder().arkTagsStorage()
@@ -66,7 +67,7 @@ class PlainTagsStorage(
         if (lostResources.isNotEmpty())
             Log.d(TAGS_STORAGE, "lostResources: $lostResources")
 
-        if (userPreferences.isRemovingLostResourcesTagsEnabled())
+        if (preferences.get(PreferenceKey.RemovingLostResourcesTags))
             lostResources.forEach { resource -> tagsById.remove(resource) }
 
         val newResources = indexedResources.subtract(knownResources)

@@ -16,7 +16,7 @@ import space.taran.arknavigator.mvp.presenter.dialog.FolderPickerDialogPresenter
 import space.taran.arknavigator.mvp.view.dialog.FolderPickerDialogView
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.adapter.FoldersRVAdapter
-import space.taran.arknavigator.ui.fragments.utils.Notifications
+import space.taran.arknavigator.ui.fragments.utils.toast
 import java.nio.file.Path
 import kotlin.io.path.Path
 
@@ -77,14 +77,11 @@ class FolderPickerDialogFragment :
         binding.btnRootsDialogPick.isEnabled = isEnabled
     }
 
-    override fun notifyFileChosenAsRoot() {
-        Notifications.notifyUser(
-            requireContext(),
-            getString(R.string.folders_file_chosen_as_root),
-            false
-        )
-    }
+    override fun toastFileChosenAsRoot() =
+        toast(R.string.folders_file_chosen_as_root)
 
+    override fun toastDeviceChosenAsRoot() =
+        toast(R.string.folders_device_chosen_as_root)
     override fun showToast(msg: String) {
         Toast.makeText(
             requireContext(),

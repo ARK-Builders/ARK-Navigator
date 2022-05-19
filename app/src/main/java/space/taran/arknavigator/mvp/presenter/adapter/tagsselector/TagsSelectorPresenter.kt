@@ -3,10 +3,11 @@ package space.taran.arknavigator.mvp.presenter.adapter.tagsselector
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.kind.KindCode
+import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
+import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.ui.resource.StringProvider
@@ -22,6 +23,10 @@ sealed class TagItem {
     data class KindTagItem(val kind: KindCode) : TagItem()
 }
 
+enum class QueryMode {
+    NORMAL, FOCUS
+}
+
 class TagsSelectorPresenter(
     private val viewState: ResourcesView,
     private val prefix: Path?,
@@ -32,17 +37,19 @@ class TagsSelectorPresenter(
     lateinit var stringProvider: StringProvider
 
     @Inject
-    lateinit var userPreferences: UserPreferences
+    lateinit var preferences: Preferences
 
     private var index: ResourcesIndex? = null
     private var storage: TagsStorage? = null
     private val actions = ArrayDeque<TagsSelectorAction>()
     private var filter = ""
 
+    var queryMode = QueryMode.NORMAL
+        private set
     var filterEnabled = false
-
+        private set
     var showKindTags = false
-
+        private set
     var includedTagItems = mutableSetOf<TagItem>()
         private set
     var excludedTagItems = mutableSetOf<TagItem>()
@@ -120,6 +127,12 @@ class TagsSelectorPresenter(
         this.filter = filter
         filterTags()
         viewState.drawTags()
+    }
+
+    fun onQueryModeChanged(mode: QueryMode) = scope.launch {
+        this@TagsSelectorPresenter.queryMode = mode
+        viewState.updateMenu()
+        calculateTagsAndSelection()
     }
 
     fun onFilterToggle(enabled: Boolean) {
@@ -208,14 +221,17 @@ class TagsSelectorPresenter(
         isClearBtnEnabled = includedTagItems.isNotEmpty() ||
             excludedTagItems.isNotEmpty()
 
-        if (allItemsTags.isEmpty())
-            viewState.setTagsSelectorHintEnabled(true)
-        else
-            viewState.setTagsSelectorHintEnabled(false)
-
         viewState.drawTags()
 
-        onSelectionChangeListener(selection)
+        when (queryMode) {
+            QueryMode.NORMAL -> {
+                viewState.toastResourcesSelected(selection.size)
+                onSelectionChangeListener(selection)
+            }
+            QueryMode.FOCUS -> calculateFocusModeSelectionIfNeeded(
+                tagItemsByResources
+            )
+        }
     }
 
     suspend fun onBackClick(): Boolean {
@@ -252,6 +268,23 @@ class TagsSelectorPresenter(
         calculateTagsAndSelection()
 
         return true
+    }
+
+    private suspend fun calculateFocusModeSelectionIfNeeded(
+        tagItemsByResources: Map<ResourceId, Set<TagItem>>
+    ) {
+        val normalModeSelectionSize = selection.size
+        selection = selection.filter { id ->
+            tagItemsByResources[id] == includedTagItems
+        }.toSet()
+        val hidden = normalModeSelectionSize - selection.size
+
+        viewState.toastResourcesSelectedFocusMode(
+            selection.size,
+            hidden
+        )
+
+        onSelectionChangeListener(selection)
     }
 
     private fun findLastActualAction(): TagsSelectorAction? {
@@ -367,7 +400,7 @@ class TagsSelectorPresenter(
     fun onKindTagsToggle(kindTagsEnabled: Boolean) = scope.launch {
         showKindTags = kindTagsEnabled
         viewState.setKindTagsEnabled(showKindTags)
-        userPreferences.setKindTagsEnabled(kindTagsEnabled)
+        preferences.set(PreferenceKey.ShowKinds, kindTagsEnabled)
         calculateTagsAndSelection()
     }
 }

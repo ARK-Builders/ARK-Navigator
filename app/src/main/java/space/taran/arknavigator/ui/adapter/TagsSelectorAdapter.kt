@@ -3,15 +3,18 @@ package space.taran.arknavigator.ui.adapter
 import android.content.res.ColorStateList
 import android.graphics.Color
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import space.taran.arknavigator.R
+import space.taran.arknavigator.databinding.FragmentResourcesBinding
 import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagItem
 import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagsSelectorPresenter
 import space.taran.arknavigator.ui.resource.StringProvider
 import javax.inject.Inject
 
 class TagsSelectorAdapter(
+    private val binding: FragmentResourcesBinding,
     private val checkedChipGroup: ChipGroup,
     private val chipGroup: ChipGroup,
     private val clearChip: Chip,
@@ -26,10 +29,24 @@ class TagsSelectorAdapter(
         drawClearChip()
         chipGroup.removeAllViews()
         checkedChipGroup.removeAllViews()
+
+        if (checkTagsEmpty()) {
+            binding.tvTagsSelectorHint.isVisible = true
+            return
+        } else
+            binding.tvTagsSelectorHint.isVisible = false
+
         createChips()
         drawIncludedAndExcludedTags()
         drawAvailableTags()
         drawUnavailableTags()
+    }
+
+    private fun checkTagsEmpty(): Boolean = with(presenter) {
+        return@with includedTagItems.isEmpty() &&
+            excludedTagItems.isEmpty() &&
+            availableTagsForDisplay.isEmpty() &&
+            unavailableTagsForDisplay.isEmpty()
     }
 
     private fun createChips() {

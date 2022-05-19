@@ -6,11 +6,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
+import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
+import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.presenter.ResourcesPresenter
 import space.taran.arknavigator.mvp.view.ResourcesView
@@ -33,7 +34,7 @@ class ResourcesGridPresenter(
     val resourcesPresenter: ResourcesPresenter
 ) {
     @Inject
-    lateinit var userPreferences: UserPreferences
+    lateinit var preferences: Preferences
 
     private var resources = listOf<ResourceMeta>()
     private var selection = listOf<ResourceMeta>()
@@ -43,16 +44,9 @@ class ResourcesGridPresenter(
     private lateinit var router: AppRouter
 
     var sorting = Sorting.DEFAULT
-        private set(value) {
-            field = value
-            scope.launch { userPreferences.setSorting(value) }
-        }
-
+        private set
     var ascending: Boolean = true
-        private set(value) {
-            field = value
-            scope.launch { userPreferences.setSortingAscending(value) }
-        }
+        private set
 
     fun getCount() = selection.size
 
@@ -104,17 +98,18 @@ class ResourcesGridPresenter(
         this.index = index
         this.storage = storage
         this.router = router
-        sorting = userPreferences.getSorting()
-        ascending = userPreferences.isSortingAscending()
+        sorting = Sorting.values()[preferences.get(PreferenceKey.Sorting)]
+        ascending = preferences.get(PreferenceKey.IsSortingAscending)
 
         scope.launch(Dispatchers.IO) {
-            userPreferences.sortingFlow.collect {
-                if (sorting != it)
-                    updateSorting(it)
+            preferences.flow(PreferenceKey.Sorting).collect { intSorting ->
+                val newSorting = Sorting.values()[intSorting]
+                if (sorting != newSorting)
+                    updateSorting(newSorting)
             }
         }
         scope.launch(Dispatchers.IO) {
-            userPreferences.ascendingFlow.collect {
+            preferences.flow(PreferenceKey.IsSortingAscending).collect {
                 if (ascending != it)
                     updateAscending(it)
             }
@@ -123,31 +118,26 @@ class ResourcesGridPresenter(
 
     suspend fun updateSelection(
         selection: Set<ResourceId>
-    ) =
-        withContext(Dispatchers.Default) {
-            this@ResourcesGridPresenter.selection = resources
-                .filter { selection.contains(it.id) }
+    ) = withContext(Dispatchers.Default) {
+        this@ResourcesGridPresenter.selection = resources
+            .filter { selection.contains(it.id) }
 
-            withContext(Dispatchers.Main) {
-                setProgressVisibility(false)
-                viewState.updateAdapter()
-            }
+        withContext(Dispatchers.Main) {
+            setProgressVisibility(false)
+            viewState.updateAdapter()
         }
+    }
 
     suspend fun resetResources(
-        resources: Set<ResourceMeta>,
-        needToUpdateAdapter: Boolean = true
-    ) =
-        withContext(Dispatchers.Default) {
-            this@ResourcesGridPresenter.resources = resources.toList()
-            sortAllResources()
-            selection = this@ResourcesGridPresenter.resources
-            withContext(Dispatchers.Main) {
-                setProgressVisibility(false)
-                if (needToUpdateAdapter)
-                    viewState.updateAdapter()
-            }
+        resources: Set<ResourceMeta>
+    ) = withContext(Dispatchers.Default) {
+        this@ResourcesGridPresenter.resources = resources.toList()
+        sortAllResources()
+        selection = this@ResourcesGridPresenter.resources
+        withContext(Dispatchers.Main) {
+            setProgressVisibility(false)
         }
+    }
 
     private fun updateSorting(sorting: Sorting) {
         scope.launch(Dispatchers.Default) {

@@ -5,15 +5,14 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import moxy.MvpPresenter
 import moxy.presenterScope
-import space.taran.arknavigator.R
-import space.taran.arknavigator.mvp.model.UserPreferences
 import space.taran.arknavigator.mvp.model.repo.FoldersRepo
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
+import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
+import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.presenter.adapter.folderstree.FoldersTreePresenter
 import space.taran.arknavigator.mvp.view.FoldersView
 import space.taran.arknavigator.navigation.AppRouter
 import space.taran.arknavigator.ui.App
-import space.taran.arknavigator.ui.fragments.utils.Notifications
 import space.taran.arknavigator.ui.resource.StringProvider
 import space.taran.arknavigator.utils.LogTags.FOLDERS_SCREEN
 import space.taran.arknavigator.utils.listDevices
@@ -34,7 +33,7 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
     lateinit var stringProvider: StringProvider
 
     @Inject
-    lateinit var userPreferences: UserPreferences
+    lateinit var preferences: Preferences
 
     var foldersTreePresenter = FoldersTreePresenter(
         viewState,
@@ -56,12 +55,15 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
             val folders = foldersRepo.provideFoldersWithMissing()
             devices = listDevices()
 
-            Notifications.notifyIfFailedPaths(viewState, folders.failed)
+            viewState.toastFailedPath(folders.failed)
 
             foldersTreePresenter.updateNodes(devices, folders.succeeded)
             viewState.setProgressVisibility(false)
 
-            if (userPreferences.isFirstOpen() && folders.succeeded.keys.isEmpty()) {
+            if (!preferences.get(PreferenceKey.WasRootsScanShown) &&
+                folders.succeeded.keys.isEmpty()
+            ) {
+                preferences.set(PreferenceKey.WasRootsScanShown, true)
                 viewState.openRootsScanDialog()
             }
         }
@@ -82,21 +84,14 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
             if (rootNotFavorite) {
                 // adding path as root
                 if (folders.keys.contains(path)) {
-                    viewState.notifyUser(
-                        stringProvider
-                            .getString(R.string.folders_root_is_already_picked)
-                    )
+                    viewState.toastRootIsAlreadyPicked()
                 } else {
                     addRoot(path)
                 }
             } else {
                 // adding path as favorite
                 if (folders.values.flatten().contains(path)) {
-                    viewState.notifyUser(
-                        stringProvider.getString(
-                            R.string.folders_favorite_is_alreay_picked
-                        )
-                    )
+                    viewState.toastFavoriteIsAlreadyPicked()
                 } else {
                     addFavorite(path)
                 }
@@ -128,10 +123,7 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
 
         foldersRepo.insertRoot(path)
 
-        viewState.notifyUser(
-            message = "Indexing of huge folders can take minutes",
-            moreTime = true
-        )
+        viewState.toastIndexingCanTakeMinutes()
 
         viewState.setProgressVisibility(true, "Indexing")
         resourcesIndexRepo.buildFromFilesystem(root)
