@@ -1,6 +1,7 @@
 package space.taran.arknavigator.ui.fragments.dialog
 
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,12 +10,9 @@ import android.view.inputmethod.EditorInfo
 import androidx.core.os.bundleOf
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.setFragmentResult
-import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.chip.Chip
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import moxy.MvpBottomSheetDialogFragment
 import moxy.ktx.moxyPresenter
 import space.taran.arknavigator.R
@@ -46,6 +44,8 @@ class EditTagsDialogFragment(
         }
     }
 
+    private var isDialogDismissed = false
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -56,28 +56,40 @@ class EditTagsDialogFragment(
     }
 
     override fun init(): Unit = with(binding) {
-        etNewTags.placeCursorToEnd()
         setupFullHeight()
         etNewTags.doAfterTextChanged { editable ->
             presenter.onInputChanged(editable.toString())
         }
         etNewTags.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
-                presenter.onInputDone(etNewTags.text.toString())
+                presenter.onInputDone()
             }
             true
         }
 
-        etNewTags.setOnBackPressedListener {
-            if (!presenter.onBackClick())
-                dismissDialog()
+        etNewTags.setOnKeyListener { _, keyCode, event ->
+            if (keyCode == KeyEvent.KEYCODE_DEL)
+                presenter.onBackspacePressed()
 
-            return@setOnBackPressedListener true
+            return@setOnKeyListener false
+        }
+        btnAdd.setOnClickListener {
+            presenter.onAddBtnClick()
+        }
+        layoutOutside.setOnClickListener {
+            presenter.onInputDone()
+        }
+        // Workaround to wait until the keyboard closes
+        // otherwise there will be a weird dialog closing animation
+        root.viewTreeObserver.addOnGlobalLayoutListener {
+            if (isDialogDismissed)
+                dismiss()
         }
     }
 
     override fun setResourceTags(tags: Tags) {
-        binding.layoutInput.removeViews(1, binding.layoutInput.childCount - 2)
+        binding.layoutInput
+            .removeViews(1, binding.layoutInput.childCount - 4)
 
         tags.forEach { tag ->
             val chip = Chip(requireContext())
@@ -88,7 +100,7 @@ class EditTagsDialogFragment(
             }
             binding.layoutInput.addView(
                 chip,
-                binding.layoutInput.childCount - 1
+                binding.layoutInput.childCount - 3
             )
         }
     }
@@ -107,15 +119,24 @@ class EditTagsDialogFragment(
         }
     }
 
-    override fun clearInput() {
-        binding.etNewTags.setText("")
+    override fun setInput(input: String) {
+        if (binding.etNewTags.text.toString() != input)
+            binding.etNewTags.setText(input)
     }
 
     override fun dismissDialog() {
-        lifecycleScope.launch {
-            binding.etNewTags.closeKeyboard()
-            delay(60)
-            dismiss()
+        isDialogDismissed = true
+        binding.etNewTags.closeKeyboard()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        binding.etNewTags.placeCursorToEnd()
+        binding.etNewTags.onBackPressedListener = {
+            if (!presenter.onBackClick())
+                dismissDialog()
+
+            true
         }
     }
 
@@ -138,10 +159,6 @@ class EditTagsDialogFragment(
         bottomSheet.layoutParams = layoutParams
         behavior.state = BottomSheetBehavior.STATE_EXPANDED
         behavior.isDraggable = false
-
-        binding.root.setOnClickListener {
-            dismissDialog()
-        }
     }
 
     companion object {

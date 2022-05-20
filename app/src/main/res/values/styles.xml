@@ -43,7 +43,7 @@
         <item name="android:windowIsFloating">false</item>
         <item name="bottomSheetStyle">@style/EditTagsBottomSheetModal</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:windowSoftInputMode">adjustResize</item>
+        <item name="android:windowSoftInputMode">adjustResize|stateAlwaysVisible</item>
     </style>
 
     <style name="EditTagsBottomSheetModal" parent="Widget.Design.BottomSheet.Modal">

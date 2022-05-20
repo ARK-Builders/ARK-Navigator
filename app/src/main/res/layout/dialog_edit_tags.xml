@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <FrameLayout
+        android:id="@+id/layout_outside"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_content"
@@ -76,17 +83,31 @@
                 android:text="Resource tags:"
                 android:textSize="16sp" />
 
-            <space.taran.arknavigator.ui.view.BackButtonEditText
+            <com.google.android.material.chip.Chip
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:visibility="invisible"/>
+
+            <space.taran.arknavigator.ui.view.KeyListenEditText
                 android:id="@+id/et_new_tags"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@null"
                 android:imeOptions="actionDone|flagNoExtractUi"
                 android:inputType="text"
-                app:layout_flexGrow="1" />
+                app:layout_minWidth="10dp" />
+
+            <ImageView
+                android:id="@+id/btn_add"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:padding="4dp"
+                android:src="@drawable/ic_baseline_add"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:tint="@color/colorPrimary" />
 
         </com.google.android.flexbox.FlexboxLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-</FrameLayout>
+</LinearLayout>

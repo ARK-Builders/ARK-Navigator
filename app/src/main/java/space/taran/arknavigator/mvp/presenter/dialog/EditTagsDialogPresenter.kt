@@ -1,5 +1,8 @@
 package space.taran.arknavigator.mvp.presenter.dialog
 
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import moxy.MvpPresenter
 import moxy.presenterScope
@@ -10,7 +13,6 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import space.taran.arknavigator.mvp.view.dialog.EditTagsDialogView
-import space.taran.arknavigator.utils.Converters
 import space.taran.arknavigator.utils.Popularity
 import space.taran.arknavigator.utils.Tag
 import javax.inject.Inject
@@ -36,10 +38,18 @@ class EditTagsDialogPresenter(
     @Inject
     lateinit var tagsStorageRepo: TagsStorageRepo
 
-    private var filter = ""
+    private var input = ""
+        set(value) {
+            field = value
+            viewState.setInput(field)
+        }
     private val actionsHistory = ArrayDeque<EditTagsAction>()
     private val resourceTags = mutableSetOf<Tag>()
     private val quickTags = mutableSetOf<Tag>()
+
+    private var wasTextRemovedRecently = false
+    private var wasTagRemovedRecently = false
+    private var textRemovedRecentlyJob: Job? = null
 
     override fun onFirstViewAttach() {
         if (_index != null && _storage != null) {
@@ -63,24 +73,45 @@ class EditTagsDialogPresenter(
         viewState.setResourceTags(resourceTags)
     }
 
-    fun onInputChanged(input: String) {
-        filter = input.split(',').last().trim()
+    fun onInputChanged(newInput: String) {
+        if (newInput.isNotEmpty() && input.length > newInput.length) {
+            wasTextRemovedRecently = true
+            textRemovedRecentlyTimer()
+        }
+
+        if (TAG_SEPARATORS.any { newInput.endsWith(it) }) {
+            if (newInput.length > 1) {
+                val tag = newInput.substring(0, newInput.lastIndex - 1)
+                addTag(tag)
+            }
+            input = ""
+            return
+        }
+
+        input = newInput
         viewState.setQuickTags(filterQuickTags())
     }
 
-    fun onResourceTagClick(tag: Tag) {
-        resourceTags -= tag
-        actionsHistory.addLast(EditTagsAction.RemoveTag(tag))
-
-        updateTags()
+    fun onAddBtnClick() {
+        if (input.isEmpty()) return
+        addTag(input)
+        input = ""
     }
 
-    fun onQuickTagClick(tag: Tag) {
-        resourceTags += tag
-        actionsHistory.addLast(EditTagsAction.AddTag(tag))
+    fun onResourceTagClick(tag: Tag) = removeTag(tag)
 
-        viewState.clearInput()
-        updateTags()
+    fun onQuickTagClick(tag: Tag) {
+        input = ""
+        addTag(tag)
+    }
+
+    fun onBackspacePressed() {
+        if (!wasTextRemovedRecently && !wasTagRemovedRecently) {
+            val lastTag = resourceTags.lastOrNull() ?: return
+            removeTag(lastTag)
+            wasTagRemovedRecently = true
+            tagWasRemovedRecentlyTimer()
+        }
     }
 
     fun onBackClick(): Boolean {
@@ -96,13 +127,27 @@ class EditTagsDialogPresenter(
         return true
     }
 
-    fun onInputDone(input: String) = presenterScope.launch {
-        val inputTags = Converters.tagsFromString(input)
-        val newTags = resourceTags + inputTags
-
-        storage.setTags(resourceId, newTags)
+    fun onInputDone() = presenterScope.launch {
+        if (input.isNotEmpty()) {
+            resourceTags += input
+        }
+        storage.setTags(resourceId, resourceTags)
         viewState.notifyTagsChanged()
         viewState.dismissDialog()
+    }
+
+    private fun addTag(tag: Tag) {
+        resourceTags += tag
+        actionsHistory.addLast(EditTagsAction.AddTag(tag))
+
+        updateTags()
+    }
+
+    private fun removeTag(tag: Tag) {
+        resourceTags -= tag
+        actionsHistory.addLast(EditTagsAction.RemoveTag(tag))
+
+        updateTags()
     }
 
     private fun updateTags() {
@@ -110,10 +155,24 @@ class EditTagsDialogPresenter(
         viewState.setQuickTags(filterQuickTags())
     }
 
+    private fun textRemovedRecentlyTimer() {
+        textRemovedRecentlyJob?.cancel()
+        textRemovedRecentlyJob = presenterScope.launch {
+            delay(BACKSPACE_GAP_BETWEEN_TEXT_AND_TAG)
+            ensureActive()
+            wasTextRemovedRecently = false
+        }
+    }
+
+    private fun tagWasRemovedRecentlyTimer() = presenterScope.launch {
+        delay(BACKSPACE_GAP_BETWEEN_TAGS)
+        wasTagRemovedRecently = false
+    }
+
     private fun filterQuickTags(): Set<Tag> =
         (quickTags - resourceTags)
             .filter { tag ->
-                tag.startsWith(filter, true)
+                tag.startsWith(input, true)
             }.toSet()
 
     private fun listQuickTags(): Set<Tag> {
@@ -128,4 +187,10 @@ class EditTagsDialogPresenter(
     }
 
     private fun listResourceTags() = storage.getTags(resourceId).toMutableSet()
+
+    companion object {
+        private val TAG_SEPARATORS = listOf(",")
+        private const val BACKSPACE_GAP_BETWEEN_TEXT_AND_TAG = 1000L // ms
+        private const val BACKSPACE_GAP_BETWEEN_TAGS = 500L // ms
+    }
 }
