@@ -132,7 +132,6 @@ class EditTagsDialogPresenter(
             resourceTags += input
         }
         storage.setTags(resourceId, resourceTags)
-        viewState.notifyTagsChanged()
         viewState.dismissDialog()
     }
 

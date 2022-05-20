@@ -1,19 +1,19 @@
 package space.taran.arknavigator.ui.fragments.dialog
 
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
+import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.os.bundleOf
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.setFragmentResult
-import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.chip.Chip
-import moxy.MvpBottomSheetDialogFragment
+import moxy.MvpAppCompatDialogFragment
 import moxy.ktx.moxyPresenter
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.DialogEditTagsBinding
@@ -25,13 +25,12 @@ import space.taran.arknavigator.mvp.presenter.dialog.EditTagsDialogPresenter
 import space.taran.arknavigator.mvp.view.dialog.EditTagsDialogView
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.utils.Tags
-import space.taran.arknavigator.utils.extensions.closeKeyboard
 import space.taran.arknavigator.utils.extensions.placeCursorToEnd
 
 class EditTagsDialogFragment(
     private val index: ResourcesIndex? = null,
     private val storage: TagsStorage? = null
-) : MvpBottomSheetDialogFragment(), EditTagsDialogView {
+) : MvpAppCompatDialogFragment(), EditTagsDialogView {
     private lateinit var binding: DialogEditTagsBinding
     private val presenter by moxyPresenter {
         EditTagsDialogPresenter(
@@ -43,8 +42,6 @@ class EditTagsDialogFragment(
             App.instance.appComponent.inject(this)
         }
     }
-
-    private var isDialogDismissed = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -66,7 +63,6 @@ class EditTagsDialogFragment(
             }
             true
         }
-
         etNewTags.setOnKeyListener { _, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_DEL)
                 presenter.onBackspacePressed()
@@ -79,11 +75,11 @@ class EditTagsDialogFragment(
         layoutOutside.setOnClickListener {
             presenter.onInputDone()
         }
-        // Workaround to wait until the keyboard closes
-        // otherwise there will be a weird dialog closing animation
         root.viewTreeObserver.addOnGlobalLayoutListener {
-            if (isDialogDismissed)
-                dismiss()
+            if (root.currentState == R.id.start) {
+                root.setTransitionDuration(OPEN_DURATION)
+                root.transitionToEnd()
+            }
         }
     }
 
@@ -125,8 +121,17 @@ class EditTagsDialogFragment(
     }
 
     override fun dismissDialog() {
-        isDialogDismissed = true
-        binding.etNewTags.closeKeyboard()
+        binding.root.setTransitionListener(object : RelaxedTransitionListener {
+            override fun onTransitionCompleted(
+                motionLayout: MotionLayout?,
+                currentId: Int
+            ) {
+                notifyTagsChanged()
+                dismiss()
+            }
+        })
+        binding.root.setTransitionDuration(CLOSE_DURATION)
+        binding.root.transitionToStart()
     }
 
     override fun onResume() {
@@ -142,23 +147,17 @@ class EditTagsDialogFragment(
 
     override fun getTheme() = R.style.EditTagsDialogTheme
 
-    override fun notifyTagsChanged() {
+    private fun notifyTagsChanged() {
         setFragmentResult(REQUEST_TAGS_CHANGED_KEY, bundleOf())
     }
 
     // workaround to customize behavior when clicking outside
     private fun setupFullHeight() {
-        val bottomSheetDialog = dialog as BottomSheetDialog
-        val bottomSheet = bottomSheetDialog.findViewById<View>(
-            com.google.android.material.R.id.design_bottom_sheet
+        dialog!!.window!!.setLayout(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
         )
-
-        val behavior = BottomSheetBehavior.from(bottomSheet!!)
-        val layoutParams = bottomSheet.layoutParams
-        layoutParams.height = WindowManager.LayoutParams.MATCH_PARENT
-        bottomSheet.layoutParams = layoutParams
-        behavior.state = BottomSheetBehavior.STATE_EXPANDED
-        behavior.isDraggable = false
+        dialog!!.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
     }
 
     companion object {
@@ -166,6 +165,8 @@ class EditTagsDialogFragment(
         const val FRAGMENT_TAG = "editTagsDialogTag"
         private const val ROOT_AND_FAV_KEY = "rootAndFav"
         private const val RESOURCE_KEY = "resource"
+        private const val OPEN_DURATION = 400
+        private const val CLOSE_DURATION = 200
 
         fun newInstance(
             rootAndFav: RootAndFav,
@@ -179,5 +180,30 @@ class EditTagsDialogFragment(
                     putLong(RESOURCE_KEY, resource)
                 }
             }
+    }
+}
+
+private interface RelaxedTransitionListener : MotionLayout.TransitionListener {
+    override fun onTransitionChange(
+        motionLayout: MotionLayout?,
+        startId: Int,
+        endId: Int,
+        progress: Float
+    ) {
+    }
+
+    override fun onTransitionStarted(
+        motionLayout: MotionLayout?,
+        startId: Int,
+        endId: Int
+    ) {
+    }
+
+    override fun onTransitionTrigger(
+        motionLayout: MotionLayout?,
+        triggerId: Int,
+        positive: Boolean,
+        progress: Float
+    ) {
     }
 }

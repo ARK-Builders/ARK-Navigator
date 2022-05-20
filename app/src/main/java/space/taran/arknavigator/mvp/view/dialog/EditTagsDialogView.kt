@@ -13,7 +13,5 @@ interface EditTagsDialogView : MvpView {
     fun setResourceTags(tags: Tags)
     fun setInput(input: String)
     @StateStrategyType(SkipStrategy::class)
-    fun notifyTagsChanged()
-    @StateStrategyType(SkipStrategy::class)
     fun dismissDialog()
 }

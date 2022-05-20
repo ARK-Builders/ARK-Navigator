@@ -39,15 +39,12 @@
     </style>
 
     <style name="EditTagsDialogTheme"
-        parent="Theme.MaterialComponents.Light.BottomSheetDialog">
+        parent="Theme.MaterialComponents.Light.Dialog">
         <item name="android:windowIsFloating">false</item>
-        <item name="bottomSheetStyle">@style/EditTagsBottomSheetModal</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:windowSoftInputMode">adjustResize|stateAlwaysVisible</item>
-    </style>
-
-    <style name="EditTagsBottomSheetModal" parent="Widget.Design.BottomSheet.Modal">
-        <item name="android:background">@android:color/transparent</item>
     </style>
 
     <style name="RoundBottomSheetDialogTheme"

@@ -1,32 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.motion.widget.MotionLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    app:layoutDescription="@xml/edit_tags_motion_scene"
     android:orientation="vertical">
 
     <FrameLayout
         android:id="@+id/layout_outside"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"/>
+        app:layout_constraintBottom_toTopOf="@id/layout_content"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:id="@+id/layout_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/white"
-        android:layout_gravity="bottom">
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <HorizontalScrollView
             android:id="@+id/horizontalScrollView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:scrollbars="none"
-            app:layout_constraintBottom_toTopOf="@+id/layout_input"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            android:scrollbars="none">
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -56,9 +55,7 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="2dp"
-            android:background="@android:color/darker_gray"
-            app:layout_constraintBottom_toTopOf="@+id/layout_input"
-            app:layout_constraintTop_toBottomOf="@+id/horizontalScrollView" />
+            android:background="@android:color/darker_gray" />
 
         <com.google.android.flexbox.FlexboxLayout
             android:id="@+id/layout_input"
@@ -72,9 +69,6 @@
             app:alignItems="center"
             app:dividerDrawable="@drawable/tags_divider"
             app:flexWrap="wrap"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/horizontalScrollView"
-            app:layout_constraintVertical_bias="1"
             app:showDivider="middle">
 
             <TextView
@@ -108,6 +102,6 @@
 
         </com.google.android.flexbox.FlexboxLayout>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
 
-</LinearLayout>
+</androidx.constraintlayout.motion.widget.MotionLayout>
