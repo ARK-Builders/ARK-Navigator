@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.os.bundleOf
+import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.setFragmentResult
 import com.google.android.material.chip.Chip
@@ -116,6 +117,7 @@ class EditTagsDialogFragment(
     }
 
     override fun setInput(input: String) {
+        binding.btnAdd.isVisible = input.isNotEmpty()
         if (binding.etNewTags.text.toString() != input)
             binding.etNewTags.setText(input)
     }

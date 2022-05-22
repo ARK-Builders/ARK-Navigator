@@ -74,14 +74,14 @@ class EditTagsDialogPresenter(
     }
 
     fun onInputChanged(newInput: String) {
-        if (newInput.isNotEmpty() && input.length > newInput.length) {
+        if (input.length > newInput.length) {
             wasTextRemovedRecently = true
             textRemovedRecentlyTimer()
         }
 
         if (TAG_SEPARATORS.any { newInput.endsWith(it) }) {
             if (newInput.length > 1) {
-                val tag = newInput.substring(0, newInput.lastIndex - 1)
+                val tag = newInput.substring(0, newInput.lastIndex)
                 addTag(tag)
             }
             input = ""
@@ -106,12 +106,13 @@ class EditTagsDialogPresenter(
     }
 
     fun onBackspacePressed() {
-        if (!wasTextRemovedRecently && !wasTagRemovedRecently) {
-            val lastTag = resourceTags.lastOrNull() ?: return
-            removeTag(lastTag)
-            wasTagRemovedRecently = true
-            tagWasRemovedRecentlyTimer()
-        }
+        if (input.isNotEmpty() || wasTextRemovedRecently || wasTagRemovedRecently)
+            return
+
+        val lastTag = resourceTags.lastOrNull() ?: return
+        removeTag(lastTag)
+        wasTagRemovedRecently = true
+        tagWasRemovedRecentlyTimer()
     }
 
     fun onBackClick(): Boolean {
