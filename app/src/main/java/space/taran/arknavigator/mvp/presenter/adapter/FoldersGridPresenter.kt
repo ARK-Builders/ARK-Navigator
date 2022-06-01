@@ -8,7 +8,7 @@ import space.taran.arknavigator.mvp.view.item.FileItemView
 import space.taran.arknavigator.utils.findLongestCommonPrefix
 import space.taran.arknavigator.utils.listChildren
 
-private class Frame(val folder: Path, val files: List<Path>)
+private class Frame(val folder: Path, val children: List<Path>)
 
 class FoldersGridPresenter(
     val viewState: FolderPickerDialogView,
@@ -18,10 +18,10 @@ class FoldersGridPresenter(
 
     fun currentFolder() = frames.last().folder
 
-    fun getCount() = frames.lastOrNull()?.files?.size ?: 0
+    fun getCount() = frames.lastOrNull()?.children?.size ?: 0
 
     fun bindView(view: FileItemView) {
-        val path = frames.last().files[view.position()]
+        val path = frames.last().children[view.position()]
 
         view.setText(path.fileName.toString())
 
@@ -38,9 +38,7 @@ class FoldersGridPresenter(
             frames.addLast(Frame(folder, paths))
         } else {
             val (directories, files) = listChildren(folder)
-            val children = mutableListOf<Path>()
-            children.addAll(directories.sorted())
-            children.addAll(files.sorted())
+            val children = directories.sorted() + files.sorted()
             frames.addLast(Frame(folder, children))
         }
         viewState.updateFolders()
@@ -48,18 +46,15 @@ class FoldersGridPresenter(
     }
 
     fun onItemClick(pos: Int) {
-        val folder = frames.last().files[pos]
+        val folder = frames.last().children[pos]
         if (!folder.isDirectory()) {
             viewState.toastFileChosenAsRoot()
             return
         }
 
         try {
-            val (directories, files) = listChildren(frames.last().files[pos])
-            val children = mutableListOf<Path>()
-            children.addAll(directories.sorted())
-            children.addAll(files.sorted())
-
+            val (directories, files) = listChildren(folder)
+            val children = directories.sorted() + files.sorted()
             frames.addLast(Frame(folder, children))
             onFolderChanged(currentFolder())
             viewState.updateFolders()
