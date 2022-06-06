@@ -66,4 +66,5 @@
     <string name="scanning">Scanning</string>
     <string name="skipping_folder">Skipping %1$s</string>
     <string name="enough">Enough</string>
+    <string name="access_denied">Access denied</string>
 </resources>
