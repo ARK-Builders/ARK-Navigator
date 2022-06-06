@@ -26,6 +26,7 @@ import moxy.ktx.moxyPresenter
 import space.taran.arknavigator.BuildConfig
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.FragmentGalleryBinding
+import space.taran.arknavigator.databinding.PopupGalleryTagMenuBinding
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
@@ -37,10 +38,11 @@ import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.adapter.PreviewsPager
 import space.taran.arknavigator.ui.extra.ExtraLoader
 import space.taran.arknavigator.ui.fragments.dialog.EditTagsDialogFragment
-import space.taran.arknavigator.ui.fragments.utils.toast
+import space.taran.arknavigator.ui.view.DefaultPopup
 import space.taran.arknavigator.ui.view.DepthPageTransformer
 import space.taran.arknavigator.utils.FullscreenHelper
 import space.taran.arknavigator.utils.LogTags.GALLERY_SCREEN
+import space.taran.arknavigator.utils.Tag
 import space.taran.arknavigator.utils.Tags
 import space.taran.arknavigator.utils.extension
 import space.taran.arknavigator.utils.extensions.makeGone
@@ -230,17 +232,8 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
             val chip = Chip(context)
             chip.text = tag
 
-            chip.setOnLongClickListener {
-                Log.d(
-                    GALLERY_SCREEN,
-                    "tag $tag on resource $resource long-clicked"
-                )
-                toast(R.string.toast_tag_removed, tag)
-                presenter.onTagRemove(tag)
-                true
-            }
             chip.setOnClickListener {
-                presenter.onTagClick(tag)
+                showTagMenuPopup(tag, chip)
             }
             binding.tagsCg.addView(chip)
         }
@@ -304,6 +297,23 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
                 presenter.onPageChanged(position)
             }
         })
+    }
+
+    private fun showTagMenuPopup(tag: Tag, tagView: View) {
+        val menuBinding = PopupGalleryTagMenuBinding
+            .inflate(requireActivity().layoutInflater)
+        val popup = DefaultPopup(menuBinding, R.style.BottomFadeScaleAnimation)
+        menuBinding.apply {
+            btnNewSelection.setOnClickListener {
+                presenter.onTagSelected(tag)
+                popup.popupWindow.dismiss()
+            }
+            btnRemoveTag.setOnClickListener {
+                presenter.onTagRemove(tag)
+                popup.popupWindow.dismiss()
+            }
+        }
+        popup.showAbove(tagView)
     }
 
     /**

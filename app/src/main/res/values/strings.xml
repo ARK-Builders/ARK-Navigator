@@ -67,4 +67,6 @@
     <string name="skipping_folder">Skipping %1$s</string>
     <string name="enough">Enough</string>
     <string name="access_denied">Access denied</string>
+    <string name="select">Select</string>
+    <string name="remove">Remove</string>
 </resources>
