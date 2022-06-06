@@ -5,7 +5,6 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.recyclerview.widget.GridLayoutManager
 import moxy.MvpAppCompatDialogFragment
@@ -83,13 +82,8 @@ class FolderPickerDialogFragment :
     override fun toastDeviceChosenAsRoot() =
         toast(R.string.folders_device_chosen_as_root)
 
-    override fun showToast(msg: String) {
-        Toast.makeText(
-            requireContext(),
-            msg,
-            Toast.LENGTH_SHORT
-        ).show()
-    }
+    override fun toastAccessDenied() =
+        toast(R.string.access_denied)
 
     override fun setFolderName(folderName: String) {
         binding.tvRootsDialogPath.text = folderName
