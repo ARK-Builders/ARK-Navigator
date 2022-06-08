@@ -2,6 +2,7 @@ package space.taran.arknavigator.ui.fragments
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -10,6 +11,7 @@ import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
@@ -21,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.chip.Chip
+import java.nio.file.Path
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import space.taran.arknavigator.BuildConfig
@@ -45,7 +48,6 @@ import space.taran.arknavigator.utils.Tags
 import space.taran.arknavigator.utils.extension
 import space.taran.arknavigator.utils.extensions.makeGone
 import space.taran.arknavigator.utils.extensions.makeVisible
-import java.nio.file.Path
 
 class GalleryFragment : MvpAppCompatFragment(), GalleryView {
 
@@ -172,7 +174,14 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
             putExtra("SAVE_FOLDER_PATH", resourcePath.parent.toString())
             putExtra("real_file_path_2", resourcePath.toString())
         }
-        imageEditor.launch(intent)
+        try {
+            imageEditor.launch(intent)
+        } catch (e: ActivityNotFoundException) {
+            Toast.makeText(
+                requireContext(), getString(R.string.no_app_found_to_open_this_file),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
     }
 
     override fun shareResource(resourcePath: Path) =
