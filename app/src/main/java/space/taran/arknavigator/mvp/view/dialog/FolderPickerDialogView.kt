@@ -19,4 +19,6 @@ interface FolderPickerDialogView : MvpView {
     fun notifyPathPicked(path: Path, rootNotFavorite: Boolean)
     @StateStrategyType(SkipStrategy::class)
     fun toastFileChosenAsRoot()
+    @StateStrategyType(SkipStrategy::class)
+    fun toastAccessDenied()
 }

@@ -66,5 +66,6 @@
     <string name="scanning">Scanning</string>
     <string name="skipping_folder">Skipping %1$s</string>
     <string name="enough">Enough</string>
+    <string name="access_denied">Access denied</string>
     <string name="no_app_found_to_open_this_file">No app found to open this file.</string>
 </resources>
