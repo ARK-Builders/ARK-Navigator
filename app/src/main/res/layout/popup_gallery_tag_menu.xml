@@ -12,9 +12,10 @@
         style="@style/Widget.MaterialComponents.Button.TextButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/select"
+        android:text="@string/navigate"
         android:textAllCaps="false"
         android:textSize="12sp"
+        android:textAlignment="textStart"
         app:icon="@drawable/ic_arrow_right"
         app:iconPadding="10dp"
         app:iconSize="16dp" />
@@ -24,9 +25,10 @@
         style="@style/Widget.MaterialComponents.Button.TextButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/remove"
+        android:text="@string/untag"
         android:textAllCaps="false"
         android:textSize="12sp"
+        android:textAlignment="textStart"
         app:icon="@drawable/ic_delete"
         app:iconPadding="10dp"
         app:iconSize="16dp" />

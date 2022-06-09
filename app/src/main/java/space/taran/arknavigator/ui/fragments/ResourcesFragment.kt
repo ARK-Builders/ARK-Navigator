@@ -112,10 +112,8 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         binding.rvResources.adapter = resourcesAdapter
         binding.rvResources.layoutManager = GridLayoutManager(context, 3)
         tagsSelectorAdapter = TagsSelectorAdapter(
+            this,
             binding,
-            binding.cgTagsChecked,
-            binding.tagsCg,
-            binding.btnClear,
             presenter.tagsSelectorPresenter
         ).also {
             App.instance.appComponent.inject(it)

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_rounded_8_stroke"
+    android:padding="8dp">
+
+    <TextView
+        android:id="@+id/btn_invert"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/invert"
+        android:textColor="@color/colorPrimary"
+        android:background="?android:attr/selectableItemBackgroundBorderless"/>
+
+</LinearLayout>
