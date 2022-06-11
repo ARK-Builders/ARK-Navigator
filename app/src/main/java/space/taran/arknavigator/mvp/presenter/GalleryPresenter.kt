@@ -94,8 +94,10 @@ class GalleryPresenter(
         val path = index.getPath(resource.id)
         val preview = PreviewAndThumbnail.locate(path, resource)?.preview
         val placeholder = ImageUtils.iconForExtension(extension(path))
-
-        view.setSource(preview, placeholder, resource)
+        if (extension(path) == "txt") {
+            view.setSource(path, placeholder, resource)
+        } else
+            view.setSource(preview, placeholder, resource)
     }
 
     fun onTagsChanged() {

@@ -15,6 +15,18 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/txt_file_content_preview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:paddingHorizontal="15dp"
+        android:paddingVertical="75dp"
+        android:textSize="16sp"
+        android:textIsSelectable="true"
+        android:scrollbars="vertical"
+        android:visibility="gone" />
+
     <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/progress"
         android:layout_width="wrap_content"

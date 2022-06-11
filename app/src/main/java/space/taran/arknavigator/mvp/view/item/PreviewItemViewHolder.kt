@@ -8,23 +8,26 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.ortiz.touchview.OnTouchImageViewListener
+import java.io.FileNotFoundException
+import java.io.FileReader
+import java.io.IOException
+import java.nio.file.Path
 import space.taran.arknavigator.databinding.ItemImageBinding
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
-import space.taran.arknavigator.mvp.model.repo.kind.ResourceKind
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
+import space.taran.arknavigator.mvp.model.repo.kind.ResourceKind
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 import space.taran.arknavigator.utils.ImageUtils.APPEARANCE_DURATION
 import space.taran.arknavigator.utils.ImageUtils.loadGlideZoomImage
 import space.taran.arknavigator.utils.ImageUtils.loadSubsamplingImage
 import space.taran.arknavigator.utils.extensions.makeVisibleAndSetOnClickListener
-import java.nio.file.Path
 
 @SuppressLint("ClickableViewAccessibility")
 class PreviewItemViewHolder(
     val binding: ItemImageBinding,
-    val presenter: GalleryPresenter
-) :
-    RecyclerView.ViewHolder(binding.root), PreviewItemView {
+    val presenter: GalleryPresenter,
+    val viewType: Int
+) : RecyclerView.ViewHolder(binding.root), PreviewItemView {
 
     init {
         val gestureDetector = getGestureDetector()
@@ -54,8 +57,30 @@ class PreviewItemViewHolder(
         } else {
             icPlay.isVisible = false
         }
+        if (viewType == 0) {
+            loadText(preview)
+        } else {
+            loadImage(resource.id, preview, placeholder)
+        }
+    }
 
-        loadImage(resource.id, preview, placeholder)
+    private fun loadText(preview: Path?) {
+        try {
+            val txtFileContent = FileReader(preview?.toFile()).readText()
+            with(binding) {
+                if (txtFileContent.isNotEmpty()) {
+                    txtFileContentPreview.isVisible = true
+                    ivZoom.isVisible = false
+                    txtFileContentPreview.postDelayed({
+                        txtFileContentPreview.text = txtFileContent
+                    }, 150)
+                }
+            }
+        } catch (i: IOException) {
+            i.printStackTrace()
+        } catch (f: FileNotFoundException) {
+            f.printStackTrace()
+        }
     }
 
     private fun loadImage(id: ResourceId, preview: Path?, placeholder: Int) =

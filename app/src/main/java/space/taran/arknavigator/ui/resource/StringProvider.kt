@@ -15,5 +15,6 @@ class StringProvider(private val context: Context) {
         KindCode.VIDEO -> context.getString(R.string.kind_video)
         KindCode.DOCUMENT -> context.getString(R.string.kind_document)
         KindCode.LINK -> context.getString(R.string.kind_link)
+        KindCode.PLAINTEXT -> context.getString(R.string.kind_plain_text)
     }
 }
