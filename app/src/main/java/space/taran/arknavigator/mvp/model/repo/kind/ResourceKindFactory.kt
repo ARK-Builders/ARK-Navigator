@@ -23,6 +23,7 @@ object GeneralKindFactory {
             VideoKindFactory,
             DocumentKindFactory,
             LinkKindFactory,
+            PlainTextKindFactory
         )
 
     fun fromPath(path: Path): ResourceKind? =

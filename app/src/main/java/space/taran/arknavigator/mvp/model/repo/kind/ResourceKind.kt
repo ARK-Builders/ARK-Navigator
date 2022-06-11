@@ -16,11 +16,13 @@ sealed class ResourceKind(val code: KindCode) {
         val description: String? = null,
         val url: String? = null
     ) : ResourceKind(KindCode.LINK)
+
+    class PlainText : ResourceKind(KindCode.PLAINTEXT)
 }
 
 // These enums are only used to store different kind in one table in Room
 enum class KindCode {
-    IMAGE, VIDEO, DOCUMENT, LINK
+    IMAGE, VIDEO, DOCUMENT, LINK, PLAINTEXT
 }
 
 enum class MetaExtraTag {

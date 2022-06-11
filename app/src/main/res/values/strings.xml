@@ -52,6 +52,7 @@
     <string name="focus_mode">Focus mode</string>
     <string name="menu_tags_sort_by_title">Sort by</string>
     <string name="kind_link">Link</string>
+    <string name="kind_plain_text">PlainText</string>
     <string name="toast_tag_removed">Tag \"%1$s\" removed</string>
     <string name="toast_resources_selected">%1$d resources selected</string>
     <string name="toast_resources_selected_focus_mode">%1$d resources selected\n(%2$d hidden by focus mode)</string>

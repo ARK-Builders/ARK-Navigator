@@ -22,10 +22,14 @@ class PreviewsPager(val presenter: GalleryPresenter) :
                 parent,
                 false
             ),
-            presenter
+            presenter, viewType
         ).also {
             App.instance.appComponent.inject(it)
         }
+
+    override fun getItemViewType(position: Int): Int {
+        return if (presenter.resources.get(position).extension == "txt") 0 else 1
+    }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onBindViewHolder(

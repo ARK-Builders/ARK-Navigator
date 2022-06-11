@@ -17,6 +17,7 @@ import space.taran.arknavigator.utils.extension
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.system.measureTimeMillis
+import space.taran.arknavigator.mvp.model.repo.preview.generator.TxtPreviewGenerator
 
 object PreviewGenerators {
 
@@ -27,6 +28,7 @@ object PreviewGenerators {
     private val generatorsByExt: Map<String, (Path) -> Bitmap> = mapOf(
         "pdf" to { path: Path -> PdfPreviewGenerator.generate(path) },
         "link" to { path: Path -> LinkPreviewGenerator.generate(path) },
+        "txt" to { path: Path -> TxtPreviewGenerator.generate(path) },
     )
 
     fun generate(path: Path, previewPath: Path, thumbnailPath: Path) {
@@ -43,12 +45,16 @@ object PreviewGenerators {
             Log.d(PREVIEWS, "Thumbnail for image $path generated in $time1 ms")
             return
         }
-
-        generatorsByExt[extension(path)]?.let { generator ->
+        val ext = extension(path)
+        generatorsByExt[ext]?.let { generator ->
             val time2 = measureTimeMillis {
-                val preview = generator(path)
-                val thumbnail = resizePreviewToThumbnail(preview)
-                storePreview(previewPath, preview)
+                val thumbnail = if (ext == "txt") {
+                    resizePreviewToThumbnail(generator(path))
+                } else {
+                    val preview = generator(path)
+                    storePreview(previewPath, preview)
+                    resizePreviewToThumbnail(preview)
+                }
                 storeThumbnail(thumbnailPath, thumbnail)
             }
             Log.d(
