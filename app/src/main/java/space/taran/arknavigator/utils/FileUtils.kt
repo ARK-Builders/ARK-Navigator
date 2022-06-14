@@ -1,5 +1,6 @@
 package space.taran.arknavigator.utils
 
+import org.apache.tika.Tika
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.ui.App
 import java.nio.file.Files
@@ -89,3 +90,7 @@ fun reifySorting(sorting: Sorting): Comparator<ResourceMeta>? =
 
 const val KILOBYTE = 1024
 const val MEGABYTE = 1024 * KILOBYTE
+
+fun getMimeTypeUsingTika(path: Path): String? {
+    return Tika().detect(Files.newInputStream(path,), "image")
+}

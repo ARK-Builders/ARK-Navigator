@@ -13,34 +13,32 @@ import space.taran.arknavigator.ui.App
 
 object TxtPreviewGenerator {
     // it is padding in preview image
-    val padding = 10f * App.instance.resources.displayMetrics.density
-    fun generate(source: Path): Bitmap {
+    val padding = 2f * App.instance.resources.displayMetrics.density
+    fun generate(source: Path, thumbnail_size: Int): Bitmap {
         val fr = FileReader(source.toFile())
         val textPaint = TextPaint()
         textPaint.isAntiAlias = true
-        textPaint.textSize =
-            10 * App.instance.resources.displayMetrics.density
+        textPaint.textSize = 5f
         textPaint.color = -0x1000000
 
         val numberOfLines = fr.readLines()
         val text = if (numberOfLines.size > 10)
             numberOfLines.subList(0, 10).joinToString("\n")
         else numberOfLines.subList(0, numberOfLines.size).joinToString("\n")
-        val width = (220 * App.instance.resources.displayMetrics.density).toInt()
         val staticLayout = StaticLayout.Builder.obtain(
             text,
             0,
             text.length,
             textPaint,
-            width
+            // right is padding in preview image
+            thumbnail_size - (padding.toInt())
         ).setAlignment(Layout.Alignment.ALIGN_NORMAL)
             .setLineSpacing(5f, 0.9f)
             .setIncludePad(true)
             .build()
         val bitmap = Bitmap.createBitmap(
-            // right is padding in preview image
-            staticLayout.width + padding.toInt() + 20,
-            (295 * App.instance.resources.displayMetrics.density).toInt(),
+            thumbnail_size,
+            160,
             Bitmap.Config.ARGB_8888
         )
 

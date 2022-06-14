@@ -6,12 +6,18 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import space.taran.arknavigator.databinding.ItemImageBinding
+import space.taran.arknavigator.mvp.model.repo.kind.PlainTextKindFactory
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 import space.taran.arknavigator.mvp.view.item.PreviewItemViewHolder
 import space.taran.arknavigator.ui.App
 
 class PreviewsPager(val presenter: GalleryPresenter) :
     RecyclerView.Adapter<PreviewItemViewHolder>() {
+
+    companion object {
+        const val TXT_TYPE = 0
+        const val NON_TXT_TYPE = 1
+    }
 
     override fun getItemCount() = presenter.resources.size
 
@@ -28,7 +34,9 @@ class PreviewsPager(val presenter: GalleryPresenter) :
         }
 
     override fun getItemViewType(position: Int): Int {
-        return if (presenter.resources.get(position).extension == "txt") 0 else 1
+        val path = presenter.index.getPath(presenter.resources[position].id)
+        return if (PlainTextKindFactory.isValid(path = path)) TXT_TYPE
+        else NON_TXT_TYPE
     }
 
     @SuppressLint("ClickableViewAccessibility")
