@@ -8,25 +8,26 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.ortiz.touchview.OnTouchImageViewListener
-import java.io.FileNotFoundException
-import java.io.FileReader
-import java.io.IOException
-import java.nio.file.Path
 import space.taran.arknavigator.databinding.ItemImageBinding
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.kind.ResourceKind
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
+import space.taran.arknavigator.ui.adapter.PreviewsPager.Companion.TXT_TYPE
 import space.taran.arknavigator.utils.ImageUtils.APPEARANCE_DURATION
 import space.taran.arknavigator.utils.ImageUtils.loadGlideZoomImage
 import space.taran.arknavigator.utils.ImageUtils.loadSubsamplingImage
 import space.taran.arknavigator.utils.extensions.makeVisibleAndSetOnClickListener
+import java.io.FileNotFoundException
+import java.io.FileReader
+import java.io.IOException
+import java.nio.file.Path
 
 @SuppressLint("ClickableViewAccessibility")
 class PreviewItemViewHolder(
     val binding: ItemImageBinding,
     val presenter: GalleryPresenter,
-    val viewType: Int
+    private val viewType: Int
 ) : RecyclerView.ViewHolder(binding.root), PreviewItemView {
 
     init {
@@ -57,7 +58,7 @@ class PreviewItemViewHolder(
         } else {
             icPlay.isVisible = false
         }
-        if (viewType == 0) {
+        if (viewType == TXT_TYPE) {
             loadText(preview)
         } else {
             loadImage(resource.id, preview, placeholder)

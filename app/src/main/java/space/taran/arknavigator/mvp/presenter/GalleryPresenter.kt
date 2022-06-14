@@ -12,6 +12,7 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
+import space.taran.arknavigator.mvp.model.repo.kind.PlainTextKindFactory
 import space.taran.arknavigator.mvp.model.repo.kind.ResourceKind
 import space.taran.arknavigator.mvp.model.repo.preview.PreviewAndThumbnail
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
@@ -94,7 +95,7 @@ class GalleryPresenter(
         val path = index.getPath(resource.id)
         val preview = PreviewAndThumbnail.locate(path, resource)?.preview
         val placeholder = ImageUtils.iconForExtension(extension(path))
-        if (extension(path) == "txt") {
+        if (PlainTextKindFactory.isValid(path = path)) {
             view.setSource(path, placeholder, resource)
         } else
             view.setSource(preview, placeholder, resource)

@@ -12,6 +12,8 @@ object LinkKindFactory : ResourceKindFactory<ResourceKind.Link> {
 
     override val acceptedExtensions = setOf("link")
     override val acceptedKindCode = KindCode.LINK
+    override val acceptedMimeTypes: Set<String>
+        get() = setOf()
 
     override fun fromPath(path: Path): ResourceKind.Link {
         val zip = ZipFile(path.toFile())
