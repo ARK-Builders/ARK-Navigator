@@ -1,17 +1,23 @@
 package space.taran.arknavigator.mvp.model.repo.kind
 
+import java.nio.file.Path
 import space.taran.arknavigator.mvp.model.dao.ResourceExtra
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.utils.extension
 import space.taran.arknavigator.utils.getMimeTypeUsingTika
-import java.nio.file.Path
 
 interface ResourceKindFactory<T : ResourceKind> {
     val acceptedExtensions: Set<String>
     val acceptedMimeTypes: Set<String>
     val acceptedKindCode: KindCode
-    fun isValid(path: Path) = acceptedExtensions.contains(extension(path)) ||
-        acceptedMimeTypes.contains(getMimeTypeUsingTika(path))
+    fun isValid(path: Path): Boolean {
+        val ext = extension(path)
+        return if (ext.isNotBlank()) {
+            acceptedExtensions.contains(ext)
+        } else
+            acceptedMimeTypes.contains(getMimeTypeUsingTika(path))
+    }
+
     fun isValid(kindCode: Int) = acceptedKindCode.ordinal == kindCode
 
     fun fromPath(path: Path): T

@@ -335,11 +335,11 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
             openResourceFab.makeGone()
             editResourceFab.makeGone()
             when (kind) {
-                is ResourceKind.Video -> {
+                is ResourceKind.Video, is ResourceKind.Link, null -> {
                     // "open" capabilities only
                     openResourceFab.makeVisible()
                 }
-                is ResourceKind.Document -> {
+                is ResourceKind.Document, is ResourceKind.PlainText -> {
                     // both "open" and "edit" capabilities
                     editResourceFab.makeVisible()
                     openResourceFab.makeVisible()
@@ -347,12 +347,6 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
                 is ResourceKind.Image -> {
                     // "edit" capabilities only
                     editResourceFab.makeVisible()
-                }
-                is ResourceKind.Link -> {
-                    openResourceFab.makeVisible()
-                }
-                null -> {
-                    openResourceFab.makeVisible()
                 }
             }
         }
