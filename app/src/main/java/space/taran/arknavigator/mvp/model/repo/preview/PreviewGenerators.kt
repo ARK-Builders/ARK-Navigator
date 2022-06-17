@@ -29,8 +29,7 @@ object PreviewGenerators {
     // Use this map to declare new types of generators
     private val generatorsByExt: Map<String, (Path) -> Bitmap> = mapOf(
         "pdf" to { path: Path -> PdfPreviewGenerator.generate(path) },
-        "link" to { path: Path -> LinkPreviewGenerator.generate(path) },
-        "txt" to { path: Path -> TxtPreviewGenerator.generate(path, THUMBNAIL_SIZE) }
+        "link" to { path: Path -> LinkPreviewGenerator.generate(path) }
     )
 
     fun generate(path: Path, previewPath: Path, thumbnailPath: Path) {
@@ -46,6 +45,18 @@ object PreviewGenerators {
             }
             Log.d(PREVIEWS, "Thumbnail for image $path generated in $time1 ms")
             return
+        } else if (PlainTextKindFactory.isValid(path)) {
+            val time2 = measureTimeMillis {
+                val thumbnail = resizePreviewToThumbnail(
+                    TxtPreviewGenerator.generate(path, THUMBNAIL_SIZE)
+                )
+                storeThumbnail(thumbnailPath, thumbnail)
+            }
+            Log.d(
+                PREVIEWS,
+                "Preview and thumbnail generated for $path in $time2 ms"
+            )
+            return
         }
 
         val ext = extension(path)
@@ -60,7 +71,6 @@ object PreviewGenerators {
                 PREVIEWS,
                 "Preview and thumbnail generated for $path in $time2 ms"
             )
-            return
         } ?: Log.d(
             PREVIEWS,
             "No generators found for type .${extension(path)} ($path)"
@@ -68,22 +78,9 @@ object PreviewGenerators {
         // This section called when the code will failed to generate preview for
         // pdf, link, txt extension.This code will match with existing factories'
         // acceptedExtensions as well as acceptedMimeTypes (if ext is blank).
-        if (PlainTextKindFactory.isValid(path)) {
-            generatorsByExt["txt"]?.let { generator ->
-                val time2 = measureTimeMillis {
-                    val thumbnail = resizePreviewToThumbnail(generator(path))
-                    storeThumbnail(thumbnailPath, thumbnail)
-                }
-                Log.d(
-                    PREVIEWS,
-                    "Preview and thumbnail generated for $path in $time2 ms"
-                )
-            } ?: Log.d(
-                PREVIEWS,
-                "No generators found for type .${extension(path)} ($path)"
-            )
-            return
-        } else if (getMimeTypeUsingTika(path = path) == "application/pdf") {
+        if (
+            ext.isBlank() && getMimeTypeUsingTika(path = path) == "application/pdf"
+        ) {
             generatorsByExt["pdf"]?.let { generator ->
                 val time2 = measureTimeMillis {
                     val preview = generator(path)

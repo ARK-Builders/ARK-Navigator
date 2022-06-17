@@ -92,5 +92,5 @@ const val KILOBYTE = 1024
 const val MEGABYTE = 1024 * KILOBYTE
 
 fun getMimeTypeUsingTika(path: Path): String? {
-    return Tika().detect(Files.newInputStream(path,), "image")
+    return Tika().detect(Files.newInputStream(path))
 }
