@@ -78,29 +78,19 @@ object PreviewGenerators {
         // This section called when the code will failed to generate preview for
         // pdf, link, txt extension.This code will match with existing factories'
         // acceptedExtensions as well as acceptedMimeTypes (if ext is blank).
+        val mimeType = getMimeTypeUsingTika(path = path)
         if (
-            ext.isBlank() && getMimeTypeUsingTika(path = path) == "application/pdf"
+            ext.isBlank() && mimeType == "application/pdf"
         ) {
-            generatorsByExt["pdf"]?.let { generator ->
-                val time2 = measureTimeMillis {
-                    val preview = generator(path)
-                    storePreview(previewPath, preview)
-                    val thumbnail = resizePreviewToThumbnail(preview)
-                    storeThumbnail(thumbnailPath, thumbnail)
-                }
-                Log.d(
-                    PREVIEWS,
-                    "Preview and thumbnail generated for $path in $time2 ms"
-                )
-            } ?: Log.d(
-                PREVIEWS,
-                "No generators found for type .${extension(path)} ($path)"
-            )
+            val preview = PdfPreviewGenerator.generate(path)
+            storePreview(previewPath, preview)
+            val thumbnail = resizePreviewToThumbnail(preview)
+            storeThumbnail(thumbnailPath, thumbnail)
             return
         }
         Log.d(
             PREVIEWS,
-            "GetFileTypeUsingTika ${getMimeTypeUsingTika(path = path)}"
+            "GetFileTypeUsingTika $mimeType"
         )
     }
 
