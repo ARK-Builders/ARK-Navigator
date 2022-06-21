@@ -2,27 +2,31 @@ package space.taran.arknavigator.ui.adapter
 
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import com.google.android.material.chip.Chip
-import com.google.android.material.chip.ChipGroup
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.FragmentResourcesBinding
+import space.taran.arknavigator.databinding.PopupResourcesTagMenuBinding
 import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagItem
 import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagsSelectorPresenter
 import space.taran.arknavigator.ui.resource.StringProvider
+import space.taran.arknavigator.ui.view.DefaultPopup
 import javax.inject.Inject
 
 class TagsSelectorAdapter(
+    private val fragment: Fragment,
     private val binding: FragmentResourcesBinding,
-    private val checkedChipGroup: ChipGroup,
-    private val chipGroup: ChipGroup,
-    private val clearChip: Chip,
     private val presenter: TagsSelectorPresenter
 ) {
     @Inject
     lateinit var stringProvider: StringProvider
 
+    private val checkedChipGroup = binding.cgTagsChecked
+    private val chipGroup = binding.tagsCg
+    private val clearChip = binding.btnClear
     private val chipsByTagItems = mutableMapOf<TagItem, Chip>()
 
     fun drawTags() {
@@ -113,11 +117,11 @@ class TagsSelectorAdapter(
     }
 
     private fun createDefaultChip(item: TagItem) = Chip(chipGroup.context).apply {
-        this.isClickable = true
-        this.isLongClickable = true
-        this.isCheckable = true
-        this.isChecked = false
-        this.setTextColor(Color.BLACK)
+        isClickable = true
+        isLongClickable = true
+        isCheckable = true
+        isChecked = false
+        setTextColor(Color.BLACK)
         when (item) {
             is TagItem.PlainTagItem -> {
                 chipBackgroundColor =
@@ -135,13 +139,26 @@ class TagsSelectorAdapter(
             }
         }
 
-        this.setOnClickListener {
+        setOnClickListener {
             presenter.onTagItemClick(item)
         }
 
-        this.setOnLongClickListener {
-            presenter.onTagItemLongClick(item)
+        setOnLongClickListener {
+            showTagMenuPopup(item, it)
             true
         }
+    }
+
+    private fun showTagMenuPopup(tag: TagItem, tagView: View) {
+        val menuBinding = PopupResourcesTagMenuBinding
+            .inflate(fragment.requireActivity().layoutInflater)
+        val popup = DefaultPopup(menuBinding, R.style.BottomFadeScaleAnimation)
+        menuBinding.apply {
+            btnInvert.setOnClickListener {
+                presenter.onTagItemLongClick(tag)
+                popup.popupWindow.dismiss()
+            }
+        }
+        popup.showAbove(tagView)
     }
 }

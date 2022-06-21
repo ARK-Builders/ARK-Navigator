@@ -145,7 +145,7 @@ class GalleryPresenter(
         viewState.deleteResource(currentPos)
     }
 
-    fun onTagClick(tag: Tag) {
+    fun onTagSelected(tag: Tag) {
         router.navigateTo(
             Screens.ResourcesScreenWithSelectedTag(
                 rootAndFav, tag

@@ -69,4 +69,7 @@
     <string name="enough">Enough</string>
     <string name="access_denied">Access denied</string>
     <string name="no_app_found_to_open_this_file">No app found to open this file.</string>
+    <string name="navigate">Navigate</string>
+    <string name="untag">Untag</string>
+    <string name="invert">Invert</string>
 </resources>

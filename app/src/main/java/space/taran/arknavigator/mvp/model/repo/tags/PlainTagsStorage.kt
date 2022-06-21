@@ -2,6 +2,8 @@ package space.taran.arknavigator.mvp.model.repo.tags
 
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import space.taran.arknavigator.mvp.model.arkFolder
 import space.taran.arknavigator.mvp.model.arkTagsStorage
@@ -88,7 +90,7 @@ class PlainTagsStorage(
         ids.flatMap { id -> getTags(id) }.toSet()
 
     override suspend fun setTags(id: ResourceId, tags: Tags) =
-        withContext(Dispatchers.IO) {
+        withContext(Dispatchers.IO + NonCancellable) {
             if (!tagsById.containsKey(id)) {
                 throw AssertionError("Storage isn't aware about this resource id")
             }
@@ -101,7 +103,8 @@ class PlainTagsStorage(
             Log.d(TAGS_STORAGE, "new tags for resource $id: $tags")
             tagsById[id] = tags
 
-            persist()
+            launch { persist() }
+            return@withContext
         }
 
     override fun listUntaggedResources(): Set<ResourceId> =
