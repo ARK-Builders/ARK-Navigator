@@ -14,7 +14,8 @@ interface Preferences {
             PreferenceKey.CrashReport,
             PreferenceKey.ImgCacheReplication,
             PreferenceKey.IndexReplication,
-            PreferenceKey.RemovingLostResourcesTags
+            PreferenceKey.RemovingLostResourcesTags,
+            PreferenceKey.BackupEnabled
         )
 
         preferencesToReset.forEach {
@@ -32,4 +33,5 @@ sealed class PreferenceKey<out T>(val defaultValue: T) {
     object RemovingLostResourcesTags : PreferenceKey<Boolean>(false)
     object ShowKinds : PreferenceKey<Boolean>(false)
     object WasRootsScanShown : PreferenceKey<Boolean>(false)
+    object BackupEnabled : PreferenceKey<Boolean>(true)
 }

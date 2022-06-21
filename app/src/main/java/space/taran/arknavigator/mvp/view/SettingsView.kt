@@ -12,6 +12,7 @@ interface SettingsView : MvpView {
     fun setImgCacheReplicationPref(isImgReplicationEnabled: Boolean)
     fun setIndexReplicationPref(isIndexReplication: Boolean)
     fun setRemovingLostResourcesTags(enabled: Boolean)
+    fun setBackup(enabled: Boolean)
 
     @StateStrategyType(SkipStrategy::class)
     fun toastCrashReportingEnabled(enabled: Boolean)
@@ -21,4 +22,6 @@ interface SettingsView : MvpView {
     fun toastIndexReplicationEnabled(enabled: Boolean)
     @StateStrategyType(SkipStrategy::class)
     fun toastRemovingTagsEnabled(enabled: Boolean)
+    @StateStrategyType(SkipStrategy::class)
+    fun toastBackup(enabled: Boolean)
 }
