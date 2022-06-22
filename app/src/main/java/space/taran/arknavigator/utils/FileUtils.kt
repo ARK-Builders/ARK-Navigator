@@ -2,6 +2,7 @@ package space.taran.arknavigator.utils
 
 import org.apache.tika.Tika
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
+import space.taran.arknavigator.mvp.presenter.adapter.ResourceItem
 import space.taran.arknavigator.ui.App
 import java.nio.file.Files
 import java.nio.file.Path
@@ -79,12 +80,12 @@ fun extension(path: Path): String {
     return path.extension.lowercase()
 }
 
-fun reifySorting(sorting: Sorting): Comparator<ResourceMeta>? =
+fun reifySorting(sorting: Sorting): Comparator<ResourceItem>? =
     when (sorting) {
-        Sorting.NAME -> compareBy(String.CASE_INSENSITIVE_ORDER) { it.name }
-        Sorting.SIZE -> compareBy { it.size }
-        Sorting.TYPE -> compareBy { it.extension }
-        Sorting.LAST_MODIFIED -> compareBy { it.modified }
+        Sorting.NAME -> compareBy(String.CASE_INSENSITIVE_ORDER) { it.meta.name }
+        Sorting.SIZE -> compareBy { it.meta.size }
+        Sorting.TYPE -> compareBy { it.meta.extension }
+        Sorting.LAST_MODIFIED -> compareBy { it.meta.modified }
         Sorting.DEFAULT -> null
     }
 

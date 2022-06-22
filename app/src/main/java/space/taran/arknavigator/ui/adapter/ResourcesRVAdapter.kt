@@ -11,6 +11,8 @@ import space.taran.arknavigator.ui.App
 class ResourcesRVAdapter(
     private val presenter: ResourcesGridPresenter
 ) : RecyclerView.Adapter<FileItemViewHolder>() {
+    private var viewHolders = mutableListOf<FileItemViewHolder>()
+
     override fun getItemCount() = presenter.getCount()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
@@ -20,16 +22,35 @@ class ResourcesRVAdapter(
                 parent,
                 false
             )
-        )
-            .also {
-                App.instance.appComponent.inject(it)
-            }
+        ).also {
+            App.instance.appComponent.inject(it)
+        }
 
     override fun onBindViewHolder(holder: FileItemViewHolder, position: Int) {
         presenter.bindView(holder)
 
-        holder.itemView.setOnClickListener {
-            presenter.onItemClick(position)
+        holder.binding.root.setOnClickListener {
+            if (presenter.selectingEnabled) {
+                presenter.onItemSelectChanged(holder)
+            } else
+                presenter.onItemClick(position)
         }
+        holder.binding.root.setOnLongClickListener {
+            if (!presenter.selectingEnabled) {
+                presenter.onSelectingChanged(true)
+                holder.binding.root.performClick()
+            }
+            return@setOnLongClickListener true
+        }
+        viewHolders.add(holder)
+    }
+
+    override fun onViewRecycled(holder: FileItemViewHolder) {
+        super.onViewRecycled(holder)
+        viewHolders.remove(holder)
+    }
+
+    fun onSelectingChanged(enabled: Boolean) {
+        viewHolders.forEach { it.onSelectingChanged(enabled) }
     }
 }

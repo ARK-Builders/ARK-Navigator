@@ -24,4 +24,6 @@ interface ResourcesView : MvpView {
     fun toastResourcesSelectedFocusMode(selected: Int, hidden: Int)
     @StateStrategyType(SkipStrategy::class)
     fun toastPathsFailed(failedPaths: List<Path>)
+    @StateStrategyType(SkipStrategy::class)
+    fun onSelectingChanged(enabled: Boolean)
 }

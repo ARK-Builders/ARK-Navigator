@@ -234,6 +234,10 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
     override fun toastPathsFailed(failedPaths: List<Path>) =
         toastFailedPaths(failedPaths)
 
+    override fun onSelectingChanged(enabled: Boolean) {
+        resourcesAdapter?.onSelectingChanged(enabled)
+    }
+
     private fun initResultListeners() {
         setFragmentResultListener(
             GalleryFragment.REQUEST_TAGS_CHANGED_KEY
