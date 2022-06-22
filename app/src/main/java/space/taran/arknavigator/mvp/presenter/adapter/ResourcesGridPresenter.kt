@@ -27,6 +27,8 @@ import javax.inject.Inject
 import kotlin.io.path.notExists
 import kotlin.system.measureTimeMillis
 
+class ResourceItem(val meta: ResourceMeta, var isSelected: Boolean = false)
+
 class ResourcesGridPresenter(
     val rootAndFav: RootAndFav,
     val viewState: ResourcesView,
@@ -36,8 +38,8 @@ class ResourcesGridPresenter(
     @Inject
     lateinit var preferences: Preferences
 
-    private var resources = listOf<ResourceMeta>()
-    private var selection = listOf<ResourceMeta>()
+    private var resources = listOf<ResourceItem>()
+    private var selection = listOf<ResourceItem>()
 
     private lateinit var index: ResourcesIndex
     private lateinit var storage: TagsStorage
@@ -47,16 +49,18 @@ class ResourcesGridPresenter(
         private set
     var ascending: Boolean = true
         private set
+    var selectingEnabled: Boolean = false
 
     fun getCount() = selection.size
 
     fun bindView(view: FileItemView) {
         val resource = selection[view.position()]
-        Log.d(RESOURCES_SCREEN, "binding view for resource ${resource.id}")
+        Log.d(RESOURCES_SCREEN, "binding view for resource ${resource.meta.id}")
 
-        val path = index.getPath(resource.id)
+        val path = index.getPath(resource.meta.id)
 
         view.setText(path.fileName.toString())
+        view.setSelectedOnBind(selectingEnabled, resource.isSelected)
 
         if (Files.isDirectory(path)) {
             throw AssertionError("Resource can't be a directory")
@@ -65,12 +69,12 @@ class ResourcesGridPresenter(
         if (path.notExists())
             scope.launch { resourcesPresenter.onRemovedResourceDetected() }
 
-        view.setIconOrPreview(path, resource)
+        view.setIconOrPreview(path, resource.meta)
     }
 
     fun onItemClick(pos: Int) = scope.launch {
-        val containsNotExistingResource = selection.any { meta ->
-            index.getPath(meta.id).notExists()
+        val containsNotExistingResource = selection.any { item ->
+            index.getPath(item.meta.id).notExists()
         }
 
         if (containsNotExistingResource) {
@@ -84,10 +88,23 @@ class ResourcesGridPresenter(
         router.navigateToFragmentUsingAdd(
             Screens.GalleryScreen(
                 rootAndFav,
-                selection.map { it.id },
+                selection.map { it.meta.id },
                 pos
             )
         )
+    }
+
+    fun onSelectingChanged(enabled: Boolean) {
+        selectingEnabled = enabled
+        if (!selectingEnabled)
+            resources.forEach { it.isSelected = false }
+        viewState.onSelectingChanged(enabled)
+    }
+
+    fun onItemSelectChanged(itemView: FileItemView) {
+        val item = selection[itemView.position()]
+        item.isSelected = !item.isSelected
+        itemView.setSelected(item.isSelected)
     }
 
     suspend fun init(
@@ -120,7 +137,7 @@ class ResourcesGridPresenter(
         selection: Set<ResourceId>
     ) = withContext(Dispatchers.Default) {
         this@ResourcesGridPresenter.selection = resources
-            .filter { selection.contains(it.id) }
+            .filter { selection.contains(it.meta.id) }
 
         withContext(Dispatchers.Main) {
             setProgressVisibility(false)
@@ -131,7 +148,7 @@ class ResourcesGridPresenter(
     suspend fun resetResources(
         resources: Set<ResourceMeta>
     ) = withContext(Dispatchers.Default) {
-        this@ResourcesGridPresenter.resources = resources.toList()
+        this@ResourcesGridPresenter.resources = mapNewResources(resources)
         sortAllResources()
         selection = this@ResourcesGridPresenter.resources
         withContext(Dispatchers.Main) {
@@ -154,6 +171,21 @@ class ResourcesGridPresenter(
             this@ResourcesGridPresenter.ascending = ascending
             sortAllResources()
             sortSelectionAndUpdateAdapter()
+        }
+    }
+
+    private fun mapNewResources(
+        newResources: Set<ResourceMeta>
+    ): List<ResourceItem> {
+        if (!selectingEnabled)
+            return newResources.map { ResourceItem(it) }
+
+        return newResources.map { meta ->
+            val selected = resources
+                .find { item -> item.meta == meta }
+                ?.isSelected ?: false
+
+            ResourceItem(meta, selected)
         }
     }
 
