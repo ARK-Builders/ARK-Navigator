@@ -1,36 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.motion.widget.MotionLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    app:layoutDescription="@xml/edit_tags_motion_scene">
 
     <FrameLayout
         android:id="@+id/layout_outside"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/layout_content"
+        app:layout_constraintBottom_toTopOf="@id/layout_content"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:id="@+id/layout_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?android:colorBackground"
+        android:background="@color/white"
         android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1">
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <HorizontalScrollView
             android:id="@+id/horizontalScrollView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintBottom_toTopOf="@+id/layout_input"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            android:scrollbars="none">
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -60,9 +55,7 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="2dp"
-            android:background="@android:color/darker_gray"
-            app:layout_constraintBottom_toTopOf="@+id/layout_input"
-            app:layout_constraintTop_toBottomOf="@+id/horizontalScrollView" />
+            android:background="@android:color/darker_gray" />
 
         <com.google.android.flexbox.FlexboxLayout
             android:id="@+id/layout_input"
@@ -76,9 +69,6 @@
             app:alignItems="center"
             app:dividerDrawable="@drawable/tags_divider"
             app:flexWrap="wrap"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/horizontalScrollView"
-            app:layout_constraintVertical_bias="1"
             app:showDivider="middle">
 
             <TextView
@@ -87,19 +77,32 @@
                 android:text="Resource tags:"
                 android:textSize="16sp" />
 
-            <space.taran.arknavigator.ui.view.BackButtonEditText
+            <com.google.android.material.chip.Chip
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:visibility="invisible" />
+
+            <space.taran.arknavigator.ui.view.KeyListenEditText
                 android:id="@+id/et_new_tags"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@null"
                 android:imeOptions="actionDone|flagNoExtractUi"
                 android:inputType="text"
-                app:layout_flexGrow="1" />
+                app:layout_minWidth="10dp" />
+
+            <ImageView
+                android:id="@+id/btn_add"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="4dp"
+                android:src="@drawable/ic_baseline_add"
+                android:visibility="gone"
+                app:tint="@color/colorPrimary" />
 
         </com.google.android.flexbox.FlexboxLayout>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
-
-
+</androidx.constraintlayout.motion.widget.MotionLayout>
