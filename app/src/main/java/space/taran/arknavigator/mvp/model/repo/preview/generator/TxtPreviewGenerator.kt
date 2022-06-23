@@ -7,14 +7,23 @@ import android.graphics.Paint
 import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
+import space.taran.arknavigator.ui.App
 import java.io.FileReader
 import java.nio.file.Path
-import space.taran.arknavigator.ui.App
 
-object TxtPreviewGenerator {
+object TxtPreviewGenerator : PreviewGenerator() {
+    override val acceptedExtensions = setOf("txt")
+    override val acceptedMimeTypes = setOf("text/plain")
+
+    override fun generate(path: Path, previewPath: Path, thumbnailPath: Path) {
+        val thumbnail = generateThumbnail(path)
+        storeThumbnail(thumbnailPath, thumbnail)
+    }
+
     // it is padding in preview image
-    val padding = 2f * App.instance.resources.displayMetrics.density
-    fun generate(source: Path, thumbnail_size: Int): Bitmap {
+    private val padding = 2f * App.instance.resources.displayMetrics.density
+
+    private fun generateThumbnail(source: Path): Bitmap {
         val fr = FileReader(source.toFile())
         val textPaint = TextPaint()
         textPaint.isAntiAlias = true
@@ -31,14 +40,14 @@ object TxtPreviewGenerator {
             text.length,
             textPaint,
             // right is padding in preview image
-            thumbnail_size - (padding.toInt())
+            THUMBNAIL_SIZE - (padding.toInt())
         ).setAlignment(Layout.Alignment.ALIGN_NORMAL)
             .setLineSpacing(5f, 0.9f)
             .setIncludePad(true)
             .build()
         val bitmap = Bitmap.createBitmap(
-            thumbnail_size,
-            160,
+            THUMBNAIL_SIZE,
+            THUMBNAIL_SIZE,
             Bitmap.Config.ARGB_8888
         )
 
