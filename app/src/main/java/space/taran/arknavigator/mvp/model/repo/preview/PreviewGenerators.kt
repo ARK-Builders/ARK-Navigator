@@ -28,8 +28,11 @@ object PreviewGenerators {
 
     // Use this map to declare new types of generators
     private val generatorsByExt: Map<String, (Path) -> Bitmap> = mapOf(
-        "pdf" to { path: Path -> PdfPreviewGenerator.generate(path) },
-        "link" to { path: Path -> LinkPreviewGenerator.generate(path) }
+        "link" to { path: Path -> LinkPreviewGenerator.generate(path) },
+        "pdf" to { path: Path -> PdfPreviewGenerator.generate(path) }
+    )
+    private val generatorsByMimeType: Map<String, (Path) -> Bitmap> = mapOf(
+        "application/pdf" to { path: Path -> PdfPreviewGenerator.generate(path) }
     )
 
     fun generate(path: Path, previewPath: Path, thumbnailPath: Path) {
@@ -59,9 +62,8 @@ object PreviewGenerators {
             return
         }
 
-        val ext = extension(path)
-        generatorsByExt[ext]?.let { generator ->
-            val time2 = measureTimeMillis {
+        getGenerator(path)?.let { generator ->
+            val time3 = measureTimeMillis {
                 val preview = generator(path)
                 storePreview(previewPath, preview)
                 val thumbnail = resizePreviewToThumbnail(preview)
@@ -69,29 +71,23 @@ object PreviewGenerators {
             }
             Log.d(
                 PREVIEWS,
-                "Preview and thumbnail generated for $path in $time2 ms"
+                "Preview and thumbnail generated for $path in $time3 ms"
             )
         } ?: Log.d(
             PREVIEWS,
-            "No generators found for type .${extension(path)} ($path)"
+            "No generators found for type .${extension(path)} ($path)," +
+                " mimetype: ${getMimeTypeUsingTika(path = path)}"
         )
-        // This section called when the code will failed to generate preview for
-        // pdf, link, txt extension.This code will match with existing factories'
-        // acceptedExtensions as well as acceptedMimeTypes (if ext is blank).
-        val mimeType = getMimeTypeUsingTika(path = path)
-        if (
-            ext.isBlank() && mimeType == "application/pdf"
-        ) {
-            val preview = PdfPreviewGenerator.generate(path)
-            storePreview(previewPath, preview)
-            val thumbnail = resizePreviewToThumbnail(preview)
-            storeThumbnail(thumbnailPath, thumbnail)
-            return
+    }
+
+    private fun getGenerator(path: Path): ((Path) -> Bitmap)? {
+        val ext = extension(path)
+        return if (ext.isNotBlank()) {
+            generatorsByExt[ext]
+        } else {
+            val mimeType = getMimeTypeUsingTika(path = path)
+            generatorsByMimeType[mimeType]
         }
-        Log.d(
-            PREVIEWS,
-            "GetFileTypeUsingTika $mimeType"
-        )
     }
 
     private fun storePreview(path: Path, bitmap: Bitmap) =
