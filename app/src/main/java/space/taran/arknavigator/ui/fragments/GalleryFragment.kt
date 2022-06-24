@@ -99,6 +99,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
     override fun init() {
         Log.d(GALLERY_SCREEN, "currentItem = ${binding.viewPager.currentItem}")
 
+        animatePagerAppearance()
         initResultListener()
 
         FullscreenHelper.setStatusBarVisibility(false, requireActivity().window)
@@ -327,6 +328,13 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
         ) { _, _ ->
             setFragmentResult(REQUEST_TAGS_CHANGED_KEY, bundleOf())
             presenter.onTagsChanged()
+        }
+    }
+
+    private fun animatePagerAppearance() {
+        binding.viewPager.animate().apply {
+            duration = 500L
+            alpha(1f)
         }
     }
 

@@ -16,7 +16,6 @@ import space.taran.arknavigator.mvp.model.repo.kind.ResourceKind
 import space.taran.arknavigator.mvp.model.repo.preview.PreviewAndThumbnail
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 import space.taran.arknavigator.utils.ImageUtils
-import space.taran.arknavigator.utils.ImageUtils.APPEARANCE_DURATION
 import space.taran.arknavigator.utils.ImageUtils.loadGlideZoomImage
 import space.taran.arknavigator.utils.ImageUtils.loadSubsamplingImage
 import space.taran.arknavigator.utils.extension
@@ -59,10 +58,8 @@ class PreviewItemViewHolder(
     }
 
     override fun reset() = with(binding) {
-        progress.isVisible = true
-        progress.alpha = 0f
+        progress.isVisible = false
         ivZoom.isVisible = true
-        ivZoom.alpha = 0f
         ivZoom.isZoomEnabled = true
     }
 
@@ -76,10 +73,6 @@ class PreviewItemViewHolder(
             if (preview == null) {
                 ivZoom.isZoomEnabled = false
                 ivZoom.setImageResource(placeholder)
-                ivZoom.animate().apply {
-                    duration = APPEARANCE_DURATION
-                    alpha(1f)
-                }
                 return
             }
 
@@ -91,7 +84,7 @@ class PreviewItemViewHolder(
         ivZoom.setOnTouchImageViewListener(object : OnTouchImageViewListener {
             override fun onMove() {
                 if (ivZoom.isZoomed) {
-                    progress.alpha = 1f
+                    progress.isVisible = true
                     ivZoom.isZoomEnabled = false
                     ivZoom.resetZoom()
                 }
@@ -103,16 +96,9 @@ class PreviewItemViewHolder(
         ivSubsampling.setOnImageEventListener(
             object : SubsamplingScaleImageView.OnImageEventListener {
                 override fun onReady() {
-                    ivSubsampling.alpha = 0f
+                    ivZoom.isVisible = false
                     progress.isVisible = false
-                    ivSubsampling.animate().apply {
-                        duration = 300
-                        alpha(1f)
-                        withEndAction {
-                            ivZoom.isVisible = false
-                            ivZoom.setImageDrawable(null)
-                        }
-                    }
+                    ivZoom.setImageDrawable(null)
                 }
 
                 override fun onImageLoadError(e: Exception?) {}

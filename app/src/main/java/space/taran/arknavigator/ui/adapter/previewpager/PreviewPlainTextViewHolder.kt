@@ -24,15 +24,10 @@ class PreviewPlainTextViewHolder(
 
     override fun setContent(text: String) = with(binding) {
         tvContent.text = text
-        tvContent.animate().apply {
-            duration = 300
-            alpha(1f)
-        }
-        return@with
     }
 
     override fun reset() = with(binding) {
-        tvContent.alpha = 0f
+        tvContent.text = ""
     }
 
     private fun getGestureDetector(): GestureDetectorCompat {

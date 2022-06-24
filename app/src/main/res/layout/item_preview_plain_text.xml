@@ -12,7 +12,6 @@
         android:paddingVertical="75dp"
         android:textSize="16sp"
         android:textIsSelectable="true"
-        android:scrollbars="vertical"
-        android:alpha="0" />
+        android:scrollbars="vertical" />
 
 </FrameLayout>
