@@ -1,4 +1,4 @@
-package space.taran.arknavigator.mvp.view.item
+package space.taran.arknavigator.ui.adapter.previewpager
 
 import android.annotation.SuppressLint
 import android.view.GestureDetector
@@ -6,28 +6,27 @@ import android.view.MotionEvent
 import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.ortiz.touchview.OnTouchImageViewListener
 import space.taran.arknavigator.databinding.ItemImageBinding
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.kind.ResourceKind
+import space.taran.arknavigator.mvp.model.repo.preview.PreviewAndThumbnail
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
-import space.taran.arknavigator.ui.adapter.PreviewsPager.Companion.TXT_TYPE
+import space.taran.arknavigator.utils.ImageUtils
 import space.taran.arknavigator.utils.ImageUtils.APPEARANCE_DURATION
 import space.taran.arknavigator.utils.ImageUtils.loadGlideZoomImage
 import space.taran.arknavigator.utils.ImageUtils.loadSubsamplingImage
+import space.taran.arknavigator.utils.extension
 import space.taran.arknavigator.utils.extensions.makeVisibleAndSetOnClickListener
-import java.io.FileNotFoundException
-import java.io.FileReader
-import java.io.IOException
 import java.nio.file.Path
 
 @SuppressLint("ClickableViewAccessibility")
 class PreviewItemViewHolder(
-    val binding: ItemImageBinding,
-    val presenter: GalleryPresenter,
-    private val viewType: Int
+    private val binding: ItemImageBinding,
+    private val presenter: GalleryPresenter,
 ) : RecyclerView.ViewHolder(binding.root), PreviewItemView {
 
     init {
@@ -44,50 +43,36 @@ class PreviewItemViewHolder(
 
     override var pos = -1
 
-    override fun setSource(
-        preview: Path?,
-        placeholder: Int,
-        resource: ResourceMeta
-    ) = with(binding) {
-        layoutProgress.root.isVisible = false
+    override fun setSource(source: Path, meta: ResourceMeta) = with(binding) {
+        val preview = PreviewAndThumbnail.locate(source, meta)?.preview
+        val placeholder = ImageUtils.iconForExtension(extension(source))
 
-        if (resource.kind is ResourceKind.Video) {
+        if (meta.kind is ResourceKind.Video) {
             icPlay.makeVisibleAndSetOnClickListener {
                 presenter.onPlayButtonClick()
             }
         } else {
             icPlay.isVisible = false
         }
-        if (viewType == TXT_TYPE) {
-            loadText(preview)
-        } else {
-            loadImage(resource.id, preview, placeholder)
-        }
+
+        loadImage(meta.id, preview, placeholder)
     }
 
-    private fun loadText(preview: Path?) {
-        try {
-            val txtFileContent = FileReader(preview?.toFile()).readText()
-            with(binding) {
-                if (txtFileContent.isNotEmpty()) {
-                    txtFileContentPreview.isVisible = true
-                    ivZoom.isVisible = false
-                    txtFileContentPreview.postDelayed({
-                        txtFileContentPreview.text = txtFileContent
-                    }, 150)
-                }
-            }
-        } catch (i: IOException) {
-            i.printStackTrace()
-        } catch (f: FileNotFoundException) {
-            f.printStackTrace()
-        }
+    override fun reset() = with(binding) {
+        progress.isVisible = true
+        progress.alpha = 0f
+        ivZoom.isVisible = true
+        ivZoom.alpha = 0f
+        ivZoom.isZoomEnabled = true
+    }
+
+    fun onRecycled() = with(binding) {
+        ivSubsampling.recycle()
+        Glide.with(ivZoom.context).clear(ivZoom)
     }
 
     private fun loadImage(id: ResourceId, preview: Path?, placeholder: Int) =
         with(binding) {
-            resetHolder()
-
             if (preview == null) {
                 ivZoom.isZoomEnabled = false
                 ivZoom.setImageResource(placeholder)
@@ -102,14 +87,6 @@ class PreviewItemViewHolder(
             loadSubsamplingImage(preview, ivSubsampling)
         }
 
-    private fun resetHolder() = with(binding) {
-        progress.isVisible = true
-        progress.alpha = 0f
-        ivZoom.isVisible = true
-        ivZoom.alpha = 0f
-        ivZoom.isZoomEnabled = true
-    }
-
     private fun setZoomImageEventListener() = with(binding) {
         ivZoom.setOnTouchImageViewListener(object : OnTouchImageViewListener {
             override fun onMove() {
@@ -123,12 +100,19 @@ class PreviewItemViewHolder(
     }
 
     private fun setSubsamplingEventListener() = with(binding) {
-        ivSubsampling.setOnImageEventListener(object :
-                SubsamplingScaleImageView.OnImageEventListener {
+        ivSubsampling.setOnImageEventListener(
+            object : SubsamplingScaleImageView.OnImageEventListener {
                 override fun onReady() {
-                    ivZoom.isVisible = false
+                    ivSubsampling.alpha = 0f
                     progress.isVisible = false
-                    ivZoom.setImageDrawable(null)
+                    ivSubsampling.animate().apply {
+                        duration = 300
+                        alpha(1f)
+                        withEndAction {
+                            ivZoom.isVisible = false
+                            ivZoom.setImageDrawable(null)
+                        }
+                    }
                 }
 
                 override fun onImageLoadError(e: Exception?) {}
@@ -146,7 +130,7 @@ class PreviewItemViewHolder(
     private fun getGestureDetector(): GestureDetectorCompat {
         val listener = object : GestureDetector.SimpleOnGestureListener() {
             override fun onSingleTapConfirmed(e: MotionEvent?): Boolean {
-                presenter.onPreviewsItemClick(this@PreviewItemViewHolder)
+                presenter.onPreviewsItemClick()
                 return true
             }
         }
