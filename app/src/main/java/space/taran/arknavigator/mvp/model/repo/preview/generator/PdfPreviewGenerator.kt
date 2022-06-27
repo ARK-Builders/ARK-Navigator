@@ -7,8 +7,18 @@ import com.shockwave.pdfium.PdfiumCore
 import space.taran.arknavigator.ui.App
 import java.nio.file.Path
 
-object PdfPreviewGenerator {
-    fun generate(source: Path): Bitmap {
+object PdfPreviewGenerator : PreviewGenerator() {
+    override val acceptedExtensions = setOf("pdf")
+    override val acceptedMimeTypes = setOf("application/pdf")
+
+    override fun generate(path: Path, previewPath: Path, thumbnailPath: Path) {
+        val preview = generatePreview(path)
+        storePreview(previewPath, preview)
+        val thumbnail = resizePreviewToThumbnail(preview)
+        storeThumbnail(thumbnailPath, thumbnail)
+    }
+
+    fun generatePreview(source: Path): Bitmap {
         val page = 0
 
         val finalContext = App.instance

@@ -17,7 +17,7 @@ import space.taran.arknavigator.mvp.presenter.dialog.EditTagsDialogPresenter
 import space.taran.arknavigator.mvp.presenter.dialog.FolderPickerDialogPresenter
 import space.taran.arknavigator.mvp.presenter.dialog.SortDialogPresenter
 import space.taran.arknavigator.mvp.view.item.FileItemViewHolder
-import space.taran.arknavigator.mvp.view.item.PreviewItemViewHolder
+import space.taran.arknavigator.ui.adapter.previewpager.PreviewItemViewHolder
 import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.adapter.TagsSelectorAdapter
 import space.taran.arknavigator.ui.fragments.FoldersFragment

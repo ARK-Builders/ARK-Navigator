@@ -5,6 +5,7 @@ import androidx.recyclerview.widget.DiffUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import moxy.MvpPresenter
 import moxy.presenterScope
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
@@ -12,23 +13,26 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
-import space.taran.arknavigator.mvp.model.repo.kind.PlainTextKindFactory
 import space.taran.arknavigator.mvp.model.repo.kind.ResourceKind
-import space.taran.arknavigator.mvp.model.repo.preview.PreviewAndThumbnail
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import space.taran.arknavigator.mvp.presenter.adapter.ResourceMetaDiffUtilCallback
 import space.taran.arknavigator.mvp.view.GalleryView
-import space.taran.arknavigator.mvp.view.item.PreviewItemView
 import space.taran.arknavigator.navigation.AppRouter
 import space.taran.arknavigator.navigation.Screens
-import space.taran.arknavigator.utils.ImageUtils
+import space.taran.arknavigator.ui.adapter.previewpager.PreviewItemView
+import space.taran.arknavigator.ui.adapter.previewpager.PreviewPlainTextItemView
 import space.taran.arknavigator.utils.LogTags.GALLERY_SCREEN
 import space.taran.arknavigator.utils.Tag
-import space.taran.arknavigator.utils.extension
+import java.io.FileReader
 import java.nio.file.Files
+import java.nio.file.Path
 import javax.inject.Inject
 import kotlin.io.path.notExists
+
+enum class GalleryItemType {
+    PLAINTEXT, OTHER
+}
 
 class GalleryPresenter(
     private val rootAndFav: RootAndFav,
@@ -90,15 +94,26 @@ class GalleryPresenter(
         displayPreview()
     }
 
+    fun detectItemType(pos: Int) = when (resources[pos].kind) {
+        is ResourceKind.PlainText -> GalleryItemType.PLAINTEXT
+        else -> GalleryItemType.OTHER
+    }
+
     fun bindView(view: PreviewItemView) {
-        val resource = resources[view.pos]
-        val path = index.getPath(resource.id)
-        val preview = PreviewAndThumbnail.locate(path, resource)?.preview
-        val placeholder = ImageUtils.iconForExtension(extension(path))
-        if (PlainTextKindFactory.isValid(path = path)) {
-            view.setSource(path, placeholder, resource)
-        } else
-            view.setSource(preview, placeholder, resource)
+        view.reset()
+        val meta = resources[view.pos]
+        val path = index.getPath(meta.id)
+        view.setSource(path, meta)
+    }
+
+    fun bindPlainTextView(view: PreviewPlainTextItemView) = presenterScope.launch {
+        view.reset()
+        val meta = resources[view.pos]
+        val path = index.getPath(meta.id)
+        val contentResult = readText(path)
+        contentResult.onSuccess {
+            view.setContent(it)
+        }
     }
 
     fun onTagsChanged() {
@@ -223,11 +238,7 @@ class GalleryPresenter(
         viewState.updatePagerAdapterWithDiff()
     }
 
-    fun onPreviewsItemClick(itemView: PreviewItemView) {
-        Log.d(
-            GALLERY_SCREEN,
-            "preview at ${itemView.pos} clicked, switching controls on/off"
-        )
+    fun onPreviewsItemClick() {
         isControlsVisible = !isControlsVisible
         viewState.setControlsVisibility(isControlsVisible)
     }
@@ -241,4 +252,14 @@ class GalleryPresenter(
         viewState.exitFullscreen()
         router.exit()
     }
+
+    private suspend fun readText(source: Path): Result<String> =
+        withContext(Dispatchers.IO) {
+            try {
+                val content = FileReader(source.toFile()).readText()
+                Result.success(content)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
 }

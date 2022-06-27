@@ -73,7 +73,7 @@ data class PreviewAndThumbnail(val preview: Path, val thumbnail: Path) {
                     PREVIEWS,
                     "Generating preview/thumbnail for ${meta.id} ($path)"
                 )
-                PreviewGenerators.generate(path, previewPath, thumbnailPath)
+                GeneralPreviewGenerator.generate(path, previewPath, thumbnailPath)
             }
         }
 

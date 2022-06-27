@@ -35,7 +35,7 @@ import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 import space.taran.arknavigator.mvp.view.GalleryView
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.activity.MainActivity
-import space.taran.arknavigator.ui.adapter.PreviewsPager
+import space.taran.arknavigator.ui.adapter.previewpager.PreviewsPager
 import space.taran.arknavigator.ui.extra.ExtraLoader
 import space.taran.arknavigator.ui.fragments.dialog.EditTagsDialogFragment
 import space.taran.arknavigator.ui.view.DefaultPopup
@@ -99,6 +99,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
     override fun init() {
         Log.d(GALLERY_SCREEN, "currentItem = ${binding.viewPager.currentItem}")
 
+        animatePagerAppearance()
         initResultListener()
 
         FullscreenHelper.setStatusBarVisibility(false, requireActivity().window)
@@ -327,6 +328,13 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
         ) { _, _ ->
             setFragmentResult(REQUEST_TAGS_CHANGED_KEY, bundleOf())
             presenter.onTagsChanged()
+        }
+    }
+
+    private fun animatePagerAppearance() {
+        binding.viewPager.animate().apply {
+            duration = 500L
+            alpha(1f)
         }
     }
 
