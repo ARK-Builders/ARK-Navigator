@@ -5,6 +5,11 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: Development
+    env:
+      ACRA_LOGIN: ${{ secrets.ACRARIUM_BASIC_AUTH_LOGIN }}
+      ACRA_PASS: ${{ secrets.ACRARIUM_BASIC_AUTH_PASSWORD }}
+      ACRA_URI: ${{ secrets.ACRARIUM_URI }}
     steps:
     - uses: actions/checkout@v2
 
@@ -17,29 +22,8 @@ jobs:
     - name: Run unit tests
       run: ./gradlew testDebugUnitTest
 
-    - name: Build Debug APK
-      run: ./gradlew assembleDebug
-
     - name: Build Release APK
       run: ./gradlew assembleRelease
-
-    - name: Upload Debug arm64-v8a APK
-      uses: actions/upload-artifact@v2
-      with:
-        name: debug-arm64-v8a-apk
-        path: ./app/build/outputs/apk/debug/app-arm64-v8a-debug.apk
-
-    - name: Upload Debug armeabi-v7a APK
-      uses: actions/upload-artifact@v2
-      with:
-          name: debug-armeabi-v7a-apk
-          path: ./app/build/outputs/apk/debug/app-armeabi-v7a-debug.apk
-
-    - name: Upload Debug universal APK
-      uses: actions/upload-artifact@v2
-      with:
-          name: debug-universal-apk
-          path: ./app/build/outputs/apk/debug/app-universal-debug.apk
 
     - name: Upload Release arm64-v8a APK
       uses: actions/upload-artifact@v2

@@ -1,6 +1,7 @@
 package space.taran.arknavigator.mvp.model.repo.preferences
 
 import kotlinx.coroutines.flow.Flow
+import space.taran.arknavigator.BuildConfig
 
 interface Preferences {
     suspend fun <T> get(key: PreferenceKey<T>): T
@@ -27,7 +28,7 @@ interface Preferences {
 sealed class PreferenceKey<out T>(val defaultValue: T) {
     object Sorting : PreferenceKey<Int>(0)
     object IsSortingAscending : PreferenceKey<Boolean>(true)
-    object CrashReport : PreferenceKey<Boolean>(false)
+    object CrashReport : PreferenceKey<Boolean>(BuildConfig.DEBUG)
     object ImgCacheReplication : PreferenceKey<Boolean>(false)
     object IndexReplication : PreferenceKey<Boolean>(false)
     object RemovingLostResourcesTags : PreferenceKey<Boolean>(false)
