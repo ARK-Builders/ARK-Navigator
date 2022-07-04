@@ -28,6 +28,12 @@ android {
         targetSdkVersion 31
         versionCode 1
         versionName "1.0"
+        def login = System.getenv("ACRA_LOGIN") ?: ""
+        def password = System.getenv("ACRA_PASS") ?: ""
+        def uri = System.getenv("ACRA_URI") ?: ""
+        buildConfigField "String", "ACRA_LOGIN", "\"$login\""
+        buildConfigField "String", "ACRA_PASS", "\"$password\""
+        buildConfigField "String", "ACRA_URI", "\"$uri\""
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -122,6 +128,9 @@ dependencies {
     implementation "androidx.datastore:datastore-preferences:1.0.0"
 
     implementation "com.github.barteksc:pdfium-android:1.9.0"
+
+    implementation "ch.acra:acra-http:5.9.3"
+    implementation "ch.acra:acra-dialog:5.9.3"
 
     testImplementation "org.junit.jupiter:junit-jupiter-api:5.8.2"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.8.2"

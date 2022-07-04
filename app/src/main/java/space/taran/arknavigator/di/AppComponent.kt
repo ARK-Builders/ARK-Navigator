@@ -6,6 +6,7 @@ import space.taran.arknavigator.di.modules.CiceroneModule
 import space.taran.arknavigator.di.modules.DatabaseModule
 import space.taran.arknavigator.di.modules.RepoModule
 import space.taran.arknavigator.mvp.model.backup.StorageBackup
+import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.presenter.FoldersPresenter
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 import space.taran.arknavigator.mvp.presenter.MainPresenter
@@ -39,6 +40,7 @@ import javax.inject.Singleton
 
 interface AppComponent {
     fun arkBackup(): StorageBackup
+    fun preferences(): Preferences
 
     fun inject(mainActivity: MainActivity)
     fun inject(mainPresenter: MainPresenter)
