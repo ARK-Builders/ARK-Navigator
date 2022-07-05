@@ -3,19 +3,23 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="space.taran.arknavigator">
 
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" tools:ignore="ScopedStorage" />
+    <uses-permission
+        android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" />
 
     <application
         android:name="space.taran.arknavigator.ui.App"
         android:allowBackup="true"
-        android:largeHeap="true"
         android:icon="${appIcon}"
-        android:requestLegacyExternalStorage="true"
         android:label="${appLabel}"
+        android:largeHeap="true"
+        android:requestLegacyExternalStorage="true"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true"
         tools:replace="android:label">
         <activity
             android:name="space.taran.arknavigator.ui.activity.MainActivity"

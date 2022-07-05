@@ -23,6 +23,7 @@
     <string name="what_is_image_replication_">What is images cache replication?</string>
     <string name="what_is_index_replication_">What is index replication?</string>
     <string name="what_is_removing_tags">What is removing lost resources tags?</string>
+    <string name="what_is_backup">What is backup?</string>
     <string name="explanation_of_this_feature">Explanation of this feature</string>
     <string name="are_you_sure_">Are you sure?</string>
     <string name="all_preferences_will_be_reset_to_default">All user preferences will be reset to default. Do you wish to proceed?</string>
@@ -35,9 +36,12 @@
     <string name="index_replication_disabled">Index replication disabled!</string>
     <string name="removing_tags_enabled">Removing lost resources tags enabled!</string>
     <string name="removing_tags_disabled">Removing lost resources tags disabled!</string>
+    <string name="backup_enabled">Backup enabled!</string>
+    <string name="backup_disabled">Backup disabled!</string>
     <string name="settings">Settings</string>
     <string name="crash_reports">Crash reports:</string>
     <string name="images_cache_replication">Images cache replication:</string>
+    <string name="backup">Backup:</string>
     <string name="index_replication">Index replication:</string>
     <string name="removing_lost_resources_tags">Removing lost resources tags:</string>
     <string name="reset_preferences">Reset preferences</string>
@@ -72,4 +76,8 @@
     <string name="navigate">Navigate</string>
     <string name="untag">Untag</string>
     <string name="invert">Invert</string>
+    <string name="crash_dialog_description">Sorry, the application crashed. Please send a report to the developers.</string>
+    <string name="crash_dialog_title">Crash</string>
+    <string name="crash_dialog_comment">You can add a comment here:</string>
+
 </resources>

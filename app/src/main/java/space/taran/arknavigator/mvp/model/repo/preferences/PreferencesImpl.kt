@@ -55,6 +55,8 @@ class PreferencesImpl @Inject constructor(val context: Context) : ArkPreferences
                 booleanPreferencesKey("show_kind_preference")
             PreferenceKey.WasRootsScanShown ->
                 booleanPreferencesKey("was_roots_scan_shown")
+            PreferenceKey.BackupEnabled ->
+                booleanPreferencesKey("backup")
         }
 
         return result as Preferences.Key<T>
