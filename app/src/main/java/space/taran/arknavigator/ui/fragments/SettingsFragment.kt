@@ -75,6 +75,10 @@ class SettingsFragment : MvpAppCompatFragment(), SettingsView {
             presenter.onRemovingLostResourcesTagsClick(it)
         }
 
+        switchBackup.setOnUserCheckedChangeListener {
+            presenter.onBackupClick(it)
+        }
+
         crashInfo.setOnClickListener {
             showInfoDialog(
                 R.string.what_are_crash_reports_,
@@ -99,6 +103,13 @@ class SettingsFragment : MvpAppCompatFragment(), SettingsView {
         infoRemovingTags.setOnClickListener {
             showInfoDialog(
                 R.string.what_is_removing_tags,
+                R.string.explanation_of_this_feature
+            )
+        }
+
+        infoBackup.setOnClickListener {
+            showInfoDialog(
+                R.string.what_is_backup,
                 R.string.explanation_of_this_feature
             )
         }
@@ -140,6 +151,9 @@ class SettingsFragment : MvpAppCompatFragment(), SettingsView {
     override fun setRemovingLostResourcesTags(enabled: Boolean) =
         binding.switchRemovingTags.toggleSwitchSilent(enabled)
 
+    override fun setBackup(enabled: Boolean) =
+        binding.switchBackup.toggleSwitchSilent(enabled)
+
     override fun toastCrashReportingEnabled(enabled: Boolean) =
         toast(
             if (enabled) R.string.crash_reporting_enabled
@@ -162,6 +176,12 @@ class SettingsFragment : MvpAppCompatFragment(), SettingsView {
         toast(
             if (enabled) R.string.removing_tags_enabled
             else R.string.removing_tags_disabled
+        )
+
+    override fun toastBackup(enabled: Boolean) =
+        toast(
+            if (enabled) R.string.backup_enabled
+            else R.string.backup_disabled
         )
 
     companion object {

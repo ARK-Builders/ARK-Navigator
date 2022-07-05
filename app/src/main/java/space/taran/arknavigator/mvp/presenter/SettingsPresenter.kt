@@ -77,6 +77,12 @@ class SettingsPresenter : MvpPresenter<SettingsView>() {
         }
     }
 
+    fun onBackupClick(checked: Boolean) = presenterScope.launch {
+        viewState.toastBackup(checked)
+        preferences.set(PreferenceKey.BackupEnabled, checked)
+        notifyBackupPref()
+    }
+
     fun onResetPreferencesClick() {
         presenterScope.launch {
             preferences.clearPreferences()
@@ -89,6 +95,7 @@ class SettingsPresenter : MvpPresenter<SettingsView>() {
         notifyImgCacheReplicationPref()
         notifyIndexReplicationPref()
         notifyRemovingLostResourcesTags()
+        notifyBackupPref()
     }
 
     private suspend fun notifyCrashReportPref() =
@@ -110,4 +117,8 @@ class SettingsPresenter : MvpPresenter<SettingsView>() {
         viewState.setRemovingLostResourcesTags(
             preferences.get(PreferenceKey.RemovingLostResourcesTags)
         )
+
+    private suspend fun notifyBackupPref() = viewState.setBackup(
+        preferences.get(PreferenceKey.BackupEnabled)
+    )
 }
