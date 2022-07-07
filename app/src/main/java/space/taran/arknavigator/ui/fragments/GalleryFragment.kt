@@ -226,6 +226,10 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
         setFragmentResult(REQUEST_RESOURCES_CHANGED_KEY, bundleOf())
     }
 
+    override fun notifyResourcesOrderChanged() {
+        setFragmentResult(REQUEST_RESOURCES_ORDER_CHANGED_KEY, bundleOf())
+    }
+
     override fun notifyTagsChanged() {
         setFragmentResult(REQUEST_TAGS_CHANGED_KEY, bundleOf())
     }
@@ -458,6 +462,8 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
         private const val START_AT_KEY = "startAt"
         const val REQUEST_TAGS_CHANGED_KEY = "tagsChangedGallery"
         const val REQUEST_RESOURCES_CHANGED_KEY = "resourcesChangedGallery"
+        const val REQUEST_RESOURCES_ORDER_CHANGED_KEY =
+            "resourcesOrderChangedGallery"
 
         fun newInstance(
             rootAndFav: RootAndFav,

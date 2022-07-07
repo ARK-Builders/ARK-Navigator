@@ -2,6 +2,8 @@ package space.taran.arknavigator.mvp.presenter
 
 import android.util.Log
 import androidx.recyclerview.widget.DiffUtil
+import kotlin.io.path.getLastModifiedTime
+import kotlin.io.path.notExists
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
@@ -28,7 +30,7 @@ import java.io.FileReader
 import java.nio.file.Files
 import java.nio.file.Path
 import javax.inject.Inject
-import kotlin.io.path.notExists
+import space.taran.arknavigator.mvp.model.repo.preview.PreviewAndThumbnail
 
 enum class GalleryItemType {
     PLAINTEXT, OTHER
@@ -103,7 +105,14 @@ class GalleryPresenter(
         view.reset()
         val meta = resources[view.pos]
         val path = index.getPath(meta.id)
-        view.setSource(path, meta)
+        if (meta.modified != path.getLastModifiedTime()) {
+            presenterScope.launch {
+                val newResourceMeta = reindexResource(pos = view.pos, oldMeta = meta)
+                view.setSource(path, newResourceMeta)
+            }
+        } else {
+            view.setSource(path, meta)
+        }
     }
 
     fun bindPlainTextView(view: PreviewPlainTextItemView) = presenterScope.launch {
@@ -261,4 +270,47 @@ class GalleryPresenter(
                 Result.failure(e)
             }
         }
+
+    private suspend fun reindexResource(pos: Int, oldMeta: ResourceMeta):
+        ResourceMeta {
+        val path = index.getPath(oldMeta.id)
+        ResourceMeta.fromPath(path)?.let { newMeta ->
+            if (oldMeta.id != newMeta.id) {
+                val tags = storage.getTags(oldMeta.id)
+                index.updateResource(oldMeta.id, path, newMeta)
+                // update current tags storage
+                tagsStorageRepo.provide(rootAndFav)
+                storage.remove(oldMeta.id)
+                storage.setTags(newMeta.id, tags)
+                PreviewAndThumbnail.forget(oldMeta.id)
+                withContext(presenterScope.coroutineContext + Dispatchers.IO) {
+                    PreviewAndThumbnail.generate(path, newMeta)
+                }
+                resources[pos] = newMeta
+                // refresh cached data using DB
+                indexRepo.loadFromDatabase(rootAndFav.root!!)
+                index = indexRepo.provide(rootAndFav)
+                storage = tagsStorageRepo.provide(rootAndFav)
+                val indexedIds = index.listIds(rootAndFav.fav)
+                val newResources = indexedIds.map {
+                    index.getMeta(it)
+                }.toMutableList()
+                currentPos = newResources.indexOf(
+                    newResources.find { it.id == newMeta.id }
+                )
+                diffResult = DiffUtil.calculateDiff(
+                    ResourceMetaDiffUtilCallback(
+                        resources,
+                        newResources
+                    )
+                )
+                resources = newResources
+                // finish
+                viewState.notifyResourcesOrderChanged()
+                viewState.updatePagerAdapterWithDiff()
+                return newMeta
+            }
+        }
+        return oldMeta
+    }
 }
