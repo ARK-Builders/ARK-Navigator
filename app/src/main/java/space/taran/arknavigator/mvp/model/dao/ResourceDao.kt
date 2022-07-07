@@ -6,6 +6,8 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Relation
+import space.taran.arknavigator.mvp.model.repo.index.ResourceId
+import space.taran.arknavigator.utils.Milliseconds
 import space.taran.arknavigator.utils.StringPath
 
 data class ResourceWithExtra(
@@ -31,4 +33,18 @@ interface ResourceDao {
 
     @Query("SELECT * FROM Resource where root = :root")
     suspend fun query(root: StringPath): List<ResourceWithExtra>
+
+    @Query("UPDATE ResourceExtra set resource =:newId where resource=:oldId ")
+    suspend fun updateExtras(oldId: ResourceId, newId: ResourceId)
+
+    @Query(
+        "UPDATE Resource set id =:newId, modified =:modified, size=:size " +
+            "where id=:oldId"
+    )
+    suspend fun updateResource(
+        oldId: ResourceId,
+        newId: ResourceId,
+        modified: Milliseconds,
+        size: Long
+    )
 }

@@ -240,6 +240,21 @@ class PlainResourcesIndex internal constructor(
             Log.d(RESOURCES_INDEX, "${resources.size} resources persisted")
         }
 
+    override suspend fun updateResource(
+        oldId: ResourceId,
+        path: Path,
+        newResource: ResourceMeta
+    ) {
+        metaByPath[path] = newResource
+        pathById.remove(oldId)
+        pathById[newResource.id] = path
+        dao.updateResource(
+            oldId, newResource.id, newResource.modified.toMillis(),
+            newResource.size
+        )
+        dao.updateExtras(oldId, newResource.id)
+    }
+
     companion object {
 
         internal suspend fun scanResources(files: List<Path>):

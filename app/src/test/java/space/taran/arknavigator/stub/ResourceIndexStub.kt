@@ -24,4 +24,6 @@ class ResourceIndexStub : ResourcesIndex {
         metas.remove(id)
         return Path("")
     }
+
+    override suspend fun updateResource(oldId: ResourceId, path: Path, newResource: ResourceMeta) {}
 }

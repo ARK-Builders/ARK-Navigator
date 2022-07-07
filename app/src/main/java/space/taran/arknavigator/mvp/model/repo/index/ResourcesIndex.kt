@@ -23,4 +23,10 @@ interface ResourcesIndex {
     suspend fun reindex()
 
     fun remove(id: ResourceId): Path
+
+    suspend fun updateResource(
+        oldId: ResourceId,
+        path: Path,
+        newResource: ResourceMeta
+    )
 }
