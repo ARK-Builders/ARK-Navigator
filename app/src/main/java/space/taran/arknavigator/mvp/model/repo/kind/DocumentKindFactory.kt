@@ -11,7 +11,9 @@ import java.nio.file.Path
 
 object DocumentKindFactory : ResourceKindFactory<ResourceKind.Document> {
     override val acceptedExtensions: Set<String> =
-        setOf("pdf", "txt", "doc", "docx", "odt", "ods", "md")
+        setOf("pdf", "doc", "docx", "odt", "ods", "md")
+    override val acceptedMimeTypes: Set<String>
+        get() = setOf("application/pdf")
     override val acceptedKindCode = KindCode.DOCUMENT
 
     override fun fromPath(path: Path): ResourceKind.Document {

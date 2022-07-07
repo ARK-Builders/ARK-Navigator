@@ -6,6 +6,8 @@ import java.nio.file.Path
 object ImageKindFactory : ResourceKindFactory<ResourceKind.Image> {
     override val acceptedExtensions: Set<String> =
         setOf("jpg", "jpeg", "png", "svg", "gif")
+    override val acceptedMimeTypes: Set<String>
+        get() = setOf("image/jpeg", "image/jpg", "image/png", "image/gif")
     override val acceptedKindCode = KindCode.IMAGE
 
     override fun fromPath(path: Path) = ResourceKind.Image()

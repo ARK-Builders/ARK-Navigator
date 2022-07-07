@@ -35,7 +35,7 @@ import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 import space.taran.arknavigator.mvp.view.GalleryView
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.activity.MainActivity
-import space.taran.arknavigator.ui.adapter.PreviewsPager
+import space.taran.arknavigator.ui.adapter.previewpager.PreviewsPager
 import space.taran.arknavigator.ui.extra.ExtraLoader
 import space.taran.arknavigator.ui.fragments.dialog.EditTagsDialogFragment
 import space.taran.arknavigator.ui.view.DefaultPopup
@@ -99,6 +99,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
     override fun init() {
         Log.d(GALLERY_SCREEN, "currentItem = ${binding.viewPager.currentItem}")
 
+        animatePagerAppearance()
         initResultListener()
 
         FullscreenHelper.setStatusBarVisibility(false, requireActivity().window)
@@ -330,16 +331,23 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
         }
     }
 
+    private fun animatePagerAppearance() {
+        binding.viewPager.animate().apply {
+            duration = 500L
+            alpha(1f)
+        }
+    }
+
     private fun setupOpenEditFABs(kind: ResourceKind?) {
         binding.apply {
             openResourceFab.makeGone()
             editResourceFab.makeGone()
             when (kind) {
-                is ResourceKind.Video -> {
+                is ResourceKind.Video, is ResourceKind.Link, null -> {
                     // "open" capabilities only
                     openResourceFab.makeVisible()
                 }
-                is ResourceKind.Document -> {
+                is ResourceKind.Document, is ResourceKind.PlainText -> {
                     // both "open" and "edit" capabilities
                     editResourceFab.makeVisible()
                     openResourceFab.makeVisible()
@@ -347,12 +355,6 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
                 is ResourceKind.Image -> {
                     // "edit" capabilities only
                     editResourceFab.makeVisible()
-                }
-                is ResourceKind.Link -> {
-                    openResourceFab.makeVisible()
-                }
-                null -> {
-                    openResourceFab.makeVisible()
                 }
             }
         }
