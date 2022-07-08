@@ -28,6 +28,7 @@ import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.utils.LogTags.MAIN
 import space.taran.arknavigator.utils.LogTags.PERMISSIONS
 import javax.inject.Inject
+import space.taran.arklib.initialRustLogger
 
 class MainActivity : MvpAppCompatActivity(), MainView {
 
@@ -56,6 +57,8 @@ class MainActivity : MvpAppCompatActivity(), MainView {
     override fun init() {
         Log.d(MAIN, "initializing")
         System.loadLibrary("arklib")
+        // Initialize Rust Logger
+        initialRustLogger()
         setSupportActionBar(binding.toolbar)
         binding.bottomNavigation.setOnApplyWindowInsetsListener(null)
         binding.bottomNavigation.setOnItemSelectedListener { item ->

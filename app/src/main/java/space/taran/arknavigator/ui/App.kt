@@ -15,7 +15,6 @@ import space.taran.arknavigator.di.AppComponent
 import space.taran.arknavigator.di.DaggerAppComponent
 import space.taran.arknavigator.di.modules.AppModule
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
-
 class App : Application() {
 
     companion object {
