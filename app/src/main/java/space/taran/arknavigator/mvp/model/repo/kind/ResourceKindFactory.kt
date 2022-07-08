@@ -3,12 +3,15 @@ package space.taran.arknavigator.mvp.model.repo.kind
 import space.taran.arknavigator.mvp.model.dao.ResourceExtra
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.utils.extension
+import space.taran.arknavigator.utils.getMimeTypeUsingTika
 import java.nio.file.Path
 
 interface ResourceKindFactory<T : ResourceKind> {
     val acceptedExtensions: Set<String>
+    val acceptedMimeTypes: Set<String>
     val acceptedKindCode: KindCode
     fun isValid(path: Path) = acceptedExtensions.contains(extension(path))
+    fun isValid(mimeType: String) = acceptedMimeTypes.contains(mimeType)
     fun isValid(kindCode: Int) = acceptedKindCode.ordinal == kindCode
 
     fun fromPath(path: Path): T
@@ -23,13 +26,12 @@ object GeneralKindFactory {
             VideoKindFactory,
             DocumentKindFactory,
             LinkKindFactory,
+            PlainTextKindFactory,
             ArchiveKindFactory
         )
 
     fun fromPath(path: Path): ResourceKind? =
-        factories.find { factory ->
-            factory.isValid(path)
-        }?.fromPath(path)
+        findFactory(path)?.fromPath(path)
 
     fun fromRoom(
         kindCode: Int?,
@@ -37,9 +39,9 @@ object GeneralKindFactory {
     ): ResourceKind? {
         kindCode ?: return null
 
-        val data = extras.map {
+        val data = extras.associate {
             MetaExtraTag.values()[it.ordinal] to it.value
-        }.toMap()
+        }
 
         return factories.find { factory ->
             factory.isValid(kindCode)
@@ -60,5 +62,16 @@ object GeneralKindFactory {
             }.map { entry ->
                 ResourceExtra(id, entry.key.ordinal, entry.value!!)
             }
+    }
+
+    private fun findFactory(path: Path): ResourceKindFactory<ResourceKind>? {
+        var factory = factories.find { it.isValid(path) }
+        if (factory != null) return (factory as ResourceKindFactory<ResourceKind>)
+
+        if (extension(path).isNotEmpty()) return null
+        val mimeType = getMimeTypeUsingTika(path) ?: return null
+        factory = factories.find { it.isValid(mimeType) }
+
+        return (factory as ResourceKindFactory<ResourceKind>)
     }
 }

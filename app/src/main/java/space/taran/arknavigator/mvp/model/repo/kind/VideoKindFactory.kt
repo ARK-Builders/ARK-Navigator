@@ -9,6 +9,8 @@ import java.nio.file.Path
 object VideoKindFactory : ResourceKindFactory<ResourceKind.Video> {
     override val acceptedExtensions: Set<String> =
         setOf("mp4", "avi", "mkv", "mov", "wmv", "flv", "webm", "ts", "mpg")
+    override val acceptedMimeTypes: Set<String>
+        get() = setOf()
     override val acceptedKindCode = KindCode.VIDEO
 
     override fun fromPath(path: Path): ResourceKind.Video {
