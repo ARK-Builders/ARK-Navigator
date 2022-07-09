@@ -10,7 +10,6 @@ import space.taran.arklib.PreviewQuality
 import java.io.FileInputStream
 import java.nio.file.Path
 
-
 object PdfPreviewGenerator : PreviewGenerator() {
     override val acceptedExtensions = setOf("pdf")
     override val acceptedMimeTypes = setOf("application/pdf")
