@@ -5,7 +5,11 @@ import android.net.Uri
 import android.os.ParcelFileDescriptor
 import com.shockwave.pdfium.PdfiumCore
 import space.taran.arknavigator.ui.App
+import space.taran.arklib.pdfPreviewGenerate
+import space.taran.arklib.PreviewQuality
+import java.io.FileInputStream
 import java.nio.file.Path
+
 
 object PdfPreviewGenerator : PreviewGenerator() {
     override val acceptedExtensions = setOf("pdf")
@@ -28,16 +32,9 @@ object PdfPreviewGenerator : PreviewGenerator() {
             finalContext
                 .contentResolver
                 .openFileDescriptor(Uri.fromFile(source.toFile()), "r")
+        val stream = FileInputStream(fd?.fileDescriptor).readBytes()
 
-        val document = pdfiumCore.newDocument(fd)
-        pdfiumCore.openPage(document, page)
-
-        val width = pdfiumCore.getPageWidthPoint(document, page)
-        val height = pdfiumCore.getPageHeightPoint(document, page)
-        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-
-        pdfiumCore.renderPageBitmap(document, bitmap, page, 0, 0, width, height)
-        pdfiumCore.closeDocument(document)
+        val bitmap = pdfPreviewGenerate(stream, PreviewQuality.HIGH)
 
         return bitmap
     }
