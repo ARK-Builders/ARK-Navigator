@@ -3,7 +3,6 @@ package space.taran.arknavigator.mvp.model.repo.preview.generator
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.ParcelFileDescriptor
-import com.shockwave.pdfium.PdfiumCore
 import space.taran.arknavigator.ui.App
 import space.taran.arklib.pdfPreviewGenerate
 import space.taran.arklib.PreviewQuality
@@ -26,7 +25,6 @@ object PdfPreviewGenerator : PreviewGenerator() {
 
         val finalContext = App.instance
 
-        val pdfiumCore = PdfiumCore(finalContext)
         val fd: ParcelFileDescriptor? =
             finalContext
                 .contentResolver
