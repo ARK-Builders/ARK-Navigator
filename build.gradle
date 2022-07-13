@@ -13,6 +13,7 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jlleitschuh.gradle:ktlint-gradle:10.2.0"
         classpath "de.mannodermaus.gradle.plugins:android-junit5:1.8.2.0"
+        classpath "io.github.0ffz:gpr-for-gradle:1.2.1"
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -25,7 +26,7 @@ plugins {
 
 allprojects {
     apply plugin: "org.jlleitschuh.gradle.ktlint"
-
+    apply plugin: "io.github.0ffz.github-packages"
     repositories {
         google()
         jcenter()
@@ -33,8 +34,7 @@ allprojects {
 
         maven { url "https://plugins.gradle.org/m2/" }
         gradlePluginPortal()
-
-        //raw github dependencies
         maven { url 'https://jitpack.io' }
+        maven githubPackage.invoke("ARK-Builders/arklib-android")
     }
 }

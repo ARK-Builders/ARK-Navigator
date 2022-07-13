@@ -82,8 +82,7 @@ android {
 }
 
 dependencies {
-    implementation files('../libs/arklib.aar')
-
+    implementation 'space.taran:arklib:0.1.0-SNAPSHOT-027435cc9c'
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7"
