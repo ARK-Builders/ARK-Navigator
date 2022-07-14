@@ -52,7 +52,7 @@ object VideoPreviewGenerator : PreviewGenerator() {
                         val tempBitmap: Bitmap? = mediaMetadataRetriever
                             .getFrameAtTime(
                                 4000000,
-                                FFmpegMediaMetadataRetriever.OPTION_CLOSEST_SYNC
+                                MediaMetadataRetriever.OPTION_CLOSEST_SYNC
                             )
                         if (tempBitmap != null) {
                             bitmap = tempBitmap
