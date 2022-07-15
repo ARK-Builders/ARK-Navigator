@@ -1,19 +1,19 @@
 package space.taran.arknavigator.mvp.model.repo.kind
 
-import wseemann.media.FFmpegMediaMetadataRetriever
 import android.net.Uri
 import android.util.Log
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.ui.App
+import space.taran.arknavigator.utils.LogTags
+import wseemann.media.FFmpegMediaMetadataRetriever
 import java.nio.file.Path
 import kotlin.io.path.name
-import space.taran.arknavigator.utils.LogTags
 
 object VideoKindFactory : ResourceKindFactory<ResourceKind.Video> {
     override val acceptedExtensions: Set<String> =
         setOf("mp4", "avi", "mkv", "mov", "wmv", "flv", "webm", "ts", "mpg")
-    override val acceptedMimeTypes: Set<String>
-        get() = setOf()
+    override val acceptedMimeTypes: Set<String> =
+        setOf("video/mp4")
     override val acceptedKindCode = KindCode.VIDEO
 
     override fun fromPath(path: Path): ResourceKind.Video {

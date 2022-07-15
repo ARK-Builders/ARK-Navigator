@@ -72,6 +72,6 @@ object GeneralKindFactory {
         val mimeType = getMimeTypeUsingTika(path) ?: return null
         factory = factories.find { it.isValid(mimeType) }
 
-        return (factory as ResourceKindFactory<ResourceKind>)
+        return (factory as ResourceKindFactory<ResourceKind>?)
     }
 }
