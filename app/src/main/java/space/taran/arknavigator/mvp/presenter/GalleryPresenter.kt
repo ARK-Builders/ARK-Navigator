@@ -154,12 +154,11 @@ class GalleryPresenter(
         Log.d(GALLERY_SCREEN, "[remove_resource] clicked at position $currentPos")
         deleteResource(currentResource.id)
         resources.removeAt(currentPos)
-        onTagsChanged()
         if (resources.isEmpty()) {
             onBackClick()
             return@launch
         }
-
+        onTagsChanged()
         viewState.deleteResource(currentPos)
     }
 
