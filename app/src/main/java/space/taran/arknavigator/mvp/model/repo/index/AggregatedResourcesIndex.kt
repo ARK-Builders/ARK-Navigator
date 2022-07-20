@@ -53,7 +53,8 @@ class AggregatedResourcesIndex(
         newResource: ResourceMeta
     ) {
         shards.forEach {
-            it.updateResource(oldId, path, newResource)
+            if (it.contains(oldId))
+                it.updateResource(oldId, path, newResource)
         }
     }
 }
