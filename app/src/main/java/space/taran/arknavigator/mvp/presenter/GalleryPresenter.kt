@@ -2,8 +2,6 @@ package space.taran.arknavigator.mvp.presenter
 
 import android.util.Log
 import androidx.recyclerview.widget.DiffUtil
-import kotlin.io.path.getLastModifiedTime
-import kotlin.io.path.notExists
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
@@ -16,6 +14,7 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
 import space.taran.arknavigator.mvp.model.repo.kind.ResourceKind
+import space.taran.arknavigator.mvp.model.repo.preview.PreviewAndThumbnail
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import space.taran.arknavigator.mvp.presenter.adapter.ResourceMetaDiffUtilCallback
@@ -30,7 +29,8 @@ import java.io.FileReader
 import java.nio.file.Files
 import java.nio.file.Path
 import javax.inject.Inject
-import space.taran.arknavigator.mvp.model.repo.preview.PreviewAndThumbnail
+import kotlin.io.path.getLastModifiedTime
+import kotlin.io.path.notExists
 
 enum class GalleryItemType {
     PLAINTEXT, OTHER
@@ -88,12 +88,14 @@ class GalleryPresenter(
         if (resources.isEmpty())
             return
 
-        val path = index.getPath(resources[newPos].id)
-        if (path.notExists())
-            onRemovedResourceDetected()
+        checkResourceChanges(newPos)
 
         currentPos = newPos
         displayPreview()
+    }
+
+    fun onResume() {
+        checkResourceChanges(currentPos)
     }
 
     fun detectItemType(pos: Int) = when (resources[pos].kind) {
@@ -105,14 +107,7 @@ class GalleryPresenter(
         view.reset()
         val meta = resources[view.pos]
         val path = index.getPath(meta.id)
-        if (meta.modified != path.getLastModifiedTime()) {
-            presenterScope.launch {
-                val newResourceMeta = reindexResource(pos = view.pos, oldMeta = meta)
-                view.setSource(path, newResourceMeta)
-            }
-        } else {
-            view.setSource(path, meta)
-        }
+        view.setSource(path, meta)
     }
 
     fun bindPlainTextView(view: PreviewPlainTextItemView) = presenterScope.launch {
@@ -193,6 +188,20 @@ class GalleryPresenter(
         viewState.showEditTagsDialog(currentResource.id)
     }
 
+    private fun checkResourceChanges(
+        pos: Int
+    ) = presenterScope.launch(Dispatchers.IO) {
+        if (resources.isEmpty()) return@launch
+        val meta = resources[pos]
+        val path = index.getPath(meta.id)
+        if (path.notExists()) {
+            onRemovedResourceDetected()
+            return@launch
+        }
+        if (path.getLastModifiedTime() != meta.modified)
+            onEditedResourceDetected(path, meta)
+    }
+
     private suspend fun deleteResource(resource: ResourceId) {
         Log.d(GALLERY_SCREEN, "deleting resource $resource")
 
@@ -214,7 +223,7 @@ class GalleryPresenter(
         viewState.displayPreviewTags(resource.id, tags)
     }
 
-    private fun onRemovedResourceDetected() = presenterScope.launch {
+    private suspend fun onRemovedResourceDetected() = withContext(Dispatchers.Main) {
         viewState.setProgressVisibility(true, "Indexing")
 
         index.reindex()
@@ -223,6 +232,25 @@ class GalleryPresenter(
         invalidateResources()
         viewState.setProgressVisibility(false)
         viewState.notifyResourcesChanged()
+    }
+
+    private suspend fun onEditedResourceDetected(
+        path: Path,
+        oldMeta: ResourceMeta
+    ) = withContext(Dispatchers.IO) {
+        val newMeta = ResourceMeta.fromPath(path) ?: return@withContext
+        PreviewAndThumbnail.generate(path, newMeta)
+
+        val indexToReplace = resources.indexOf(oldMeta)
+        resources[indexToReplace] = newMeta
+
+        index.updateResource(oldMeta.id, path, newMeta)
+        tagsStorageRepo.provide(rootAndFav)
+
+        withContext(Dispatchers.Main) {
+            viewState.notifyCurrentItemChanged()
+            viewState.notifyResourcesChanged()
+        }
     }
 
     private fun invalidateResources() {
@@ -270,47 +298,4 @@ class GalleryPresenter(
                 Result.failure(e)
             }
         }
-
-    private suspend fun reindexResource(pos: Int, oldMeta: ResourceMeta):
-        ResourceMeta {
-        val path = index.getPath(oldMeta.id)
-        ResourceMeta.fromPath(path)?.let { newMeta ->
-            if (oldMeta.id != newMeta.id) {
-                val tags = storage.getTags(oldMeta.id)
-                index.updateResource(oldMeta.id, path, newMeta)
-                // update current tags storage
-                tagsStorageRepo.provide(rootAndFav)
-                storage.remove(oldMeta.id)
-                storage.setTags(newMeta.id, tags)
-                PreviewAndThumbnail.forget(oldMeta.id)
-                withContext(presenterScope.coroutineContext + Dispatchers.IO) {
-                    PreviewAndThumbnail.generate(path, newMeta)
-                }
-                resources[pos] = newMeta
-                // refresh cached data using DB
-                indexRepo.loadFromDatabase(rootAndFav.root!!)
-                index = indexRepo.provide(rootAndFav)
-                storage = tagsStorageRepo.provide(rootAndFav)
-                val indexedIds = index.listIds(rootAndFav.fav)
-                val newResources = indexedIds.map {
-                    index.getMeta(it)
-                }.toMutableList()
-                currentPos = newResources.indexOf(
-                    newResources.find { it.id == newMeta.id }
-                )
-                diffResult = DiffUtil.calculateDiff(
-                    ResourceMetaDiffUtilCallback(
-                        resources,
-                        newResources
-                    )
-                )
-                resources = newResources
-                // finish
-                viewState.notifyResourcesOrderChanged()
-                viewState.updatePagerAdapterWithDiff()
-                return newMeta
-            }
-        }
-        return oldMeta
-    }
 }

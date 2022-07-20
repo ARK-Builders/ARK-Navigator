@@ -59,6 +59,8 @@ class PlainResourcesIndex internal constructor(
         return metas.toSet()
     }
 
+    fun contains(id: ResourceId) = pathById.containsKey(id)
+
     override fun getPath(id: ResourceId): Path = tryGetPath(id)!!
 
     override fun getMeta(id: ResourceId): ResourceMeta = tryGetMeta(id)!!

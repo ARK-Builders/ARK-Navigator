@@ -1,7 +1,6 @@
 package space.taran.arknavigator.ui.fragments
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
@@ -13,7 +12,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.addCallback
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
 import androidx.core.os.bundleOf
 import androidx.core.view.doOnNextLayout
@@ -23,7 +21,6 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.chip.Chip
-import java.nio.file.Path
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import space.taran.arknavigator.BuildConfig
@@ -50,6 +47,7 @@ import space.taran.arknavigator.utils.Tags
 import space.taran.arknavigator.utils.extension
 import space.taran.arknavigator.utils.extensions.makeGone
 import space.taran.arknavigator.utils.extensions.makeVisible
+import java.nio.file.Path
 
 class GalleryFragment : MvpAppCompatFragment(), GalleryView {
 
@@ -65,20 +63,6 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
             App.instance.appComponent.inject(this)
         }
     }
-
-    private val imageEditor =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            it.data?.let { intent ->
-                Log.d(GALLERY_SCREEN, "Edit image result: $intent")
-                if (it.resultCode == Activity.RESULT_OK) {
-                    val originFileUri = intent.getStringExtra("RESULT_ORIGINAL_URI")
-                    val saveFileUri = intent.getStringExtra("RESULT_SAVE_URI")
-                    Log.d(GALLERY_SCREEN, "RESULT_ORIGINAL_URI: $originFileUri")
-                    Log.d(GALLERY_SCREEN, "RESULT_SAVE_URI: $saveFileUri")
-                    pagerAdapter.notifyItemChanged(binding.viewPager.currentItem)
-                }
-            }
-        }
 
     private lateinit var pagerAdapter: PreviewsPager
 
@@ -178,7 +162,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
             putExtra("real_file_path_2", resourcePath.toString())
         }
         try {
-            imageEditor.launch(intent)
+            requireContext().startActivity(intent)
         } catch (e: ActivityNotFoundException) {
             Toast.makeText(
                 requireContext(), getString(R.string.no_app_found_to_open_this_file),
@@ -224,10 +208,6 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
 
     override fun notifyResourcesChanged() {
         setFragmentResult(REQUEST_RESOURCES_CHANGED_KEY, bundleOf())
-    }
-
-    override fun notifyResourcesOrderChanged() {
-        setFragmentResult(REQUEST_RESOURCES_ORDER_CHANGED_KEY, bundleOf())
     }
 
     override fun notifyTagsChanged() {
@@ -297,6 +277,15 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
         FullscreenHelper.setStatusBarVisibility(true, requireActivity().window)
         (requireActivity() as MainActivity).setToolbarVisibility(true)
         (requireActivity() as MainActivity).setBottomNavigationVisibility(true)
+    }
+
+    override fun notifyCurrentItemChanged() {
+        pagerAdapter.notifyItemChanged(binding.viewPager.currentItem)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        presenter.onResume()
     }
 
     private fun initViewPager() = with(binding.viewPager) {
@@ -462,8 +451,6 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
         private const val START_AT_KEY = "startAt"
         const val REQUEST_TAGS_CHANGED_KEY = "tagsChangedGallery"
         const val REQUEST_RESOURCES_CHANGED_KEY = "resourcesChangedGallery"
-        const val REQUEST_RESOURCES_ORDER_CHANGED_KEY =
-            "resourcesOrderChangedGallery"
 
         fun newInstance(
             rootAndFav: RootAndFav,

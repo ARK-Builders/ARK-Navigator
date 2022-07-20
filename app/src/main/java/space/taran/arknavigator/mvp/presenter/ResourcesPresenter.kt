@@ -130,26 +130,6 @@ class ResourcesPresenter(
         tagsSelectorPresenter.calculateTagsAndSelection()
     }
 
-    suspend fun onResourcesOrderChanged() {
-        val root = listOf(rootAndFav.root!!)
-        val rootToIndex = root.associateWith {
-            resourcesIndexRepo.loadFromDatabase(it)
-        }
-
-        val rootToStorage = root.associateWith {
-            tagsStorageRepo.provide(it)
-        }
-
-        index = AggregatedResourcesIndex(rootToIndex.values)
-        storage = AggregatedTagsStorage(rootToStorage.values)
-        gridPresenter.init(index, storage, router)
-        gridPresenter.resetResources(index.listResources(rootAndFav.fav))
-        val kindTagsEnabled = preferences.get(PreferenceKey.ShowKinds)
-        tagsSelectorPresenter.init(index, storage, kindTagsEnabled)
-        rootAndFav.root.let { resourcesIndexRepo.loadFromDatabase(it) }
-        tagsSelectorPresenter.calculateTagsAndSelection()
-    }
-
     fun onBackClick() = presenterScope.launch {
         if (!tagsSelectorPresenter.onBackClick())
             router.exit()

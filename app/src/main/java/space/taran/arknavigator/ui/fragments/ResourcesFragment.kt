@@ -254,16 +254,6 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
                 }
             }
         }
-
-        setFragmentResultListener(
-            GalleryFragment.REQUEST_RESOURCES_ORDER_CHANGED_KEY
-        ) { _, _ ->
-            presenter.apply {
-                presenterScope.launch {
-                    onResourcesOrderChanged()
-                }
-            }
-        }
     }
 
     private fun dragHandlerTouchListener(view: View, event: MotionEvent): Boolean {
