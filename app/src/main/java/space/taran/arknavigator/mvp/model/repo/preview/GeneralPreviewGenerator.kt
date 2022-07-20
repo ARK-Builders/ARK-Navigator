@@ -11,6 +11,7 @@ import space.taran.arknavigator.utils.extension
 import space.taran.arknavigator.utils.getMimeTypeUsingTika
 import java.nio.file.Path
 import kotlin.system.measureTimeMillis
+import space.taran.arknavigator.mvp.model.repo.preview.generator.VideoPreviewGenerator
 
 object GeneralPreviewGenerator {
 
@@ -20,6 +21,7 @@ object GeneralPreviewGenerator {
         LinkPreviewGenerator,
         PdfPreviewGenerator,
         TxtPreviewGenerator,
+        VideoPreviewGenerator
     )
 
     fun generate(path: Path, previewPath: Path, thumbnailPath: Path) {

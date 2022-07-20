@@ -103,7 +103,7 @@ class FoldersFragment : MvpAppCompatFragment(), FoldersView {
         toast(R.string.folders_root_is_already_picked)
 
     override fun toastFavoriteIsAlreadyPicked() =
-        toast(R.string.folders_favorite_is_alreay_picked)
+        toast(R.string.folders_favorite_is_already_picked)
 
     override fun toastIndexingCanTakeMinutes() =
         toast(R.string.toast_indexing_can_take_minutes)

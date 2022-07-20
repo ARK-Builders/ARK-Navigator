@@ -20,7 +20,7 @@ object PdfPreviewGenerator : PreviewGenerator() {
         storeThumbnail(thumbnailPath, thumbnail)
     }
 
-    fun generatePreview(source: Path): Bitmap {
+    private fun generatePreview(source: Path): Bitmap {
         val page = 0
 
         val finalContext = App.instance

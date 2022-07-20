@@ -4,7 +4,7 @@
     <string name="as_is_sorting_selected">This option will be applied during next resources selection</string>
     <string name="resources_tags_selector_hint">Label some resources with tags to enable tags selector</string>
     <string name="folders_device_chosen_as_root">Huge directories can cause long waiting times</string>
-    <string name="folders_favorite_is_alreay_picked">This folder is already among your favorites</string>
+    <string name="folders_favorite_is_already_picked">This folder is already among your favorites</string>
     <string name="folders_root_is_already_picked">This folder is already picked as root</string>
     <string name="folders_file_chosen_as_root">Can\'t go inside a file</string>
     <string name="folders_pick_favorite">FAVORITE</string>
@@ -57,6 +57,7 @@
     <string name="menu_tags_sort_by_title">Sort by</string>
     <string name="kind_link">Link</string>
     <string name="kind_plain_text">PlainText</string>
+    <string name="kind_archive">Archive</string>
     <string name="toast_tag_removed">Tag \"%1$s\" removed</string>
     <string name="toast_resources_selected">%1$d resources selected</string>
     <string name="toast_resources_selected_focus_mode">%1$d resources selected\n(%2$d hidden by focus mode)</string>
@@ -72,6 +73,7 @@
     <string name="skipping_folder">Skipping %1$s</string>
     <string name="enough">Enough</string>
     <string name="access_denied">Access denied</string>
+    <string name="no_app_found_to_open_this_file">No app found to open this file.</string>
     <string name="navigate">Navigate</string>
     <string name="untag">Untag</string>
     <string name="invert">Invert</string>

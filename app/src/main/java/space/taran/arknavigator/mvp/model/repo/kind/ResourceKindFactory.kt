@@ -26,7 +26,8 @@ object GeneralKindFactory {
             VideoKindFactory,
             DocumentKindFactory,
             LinkKindFactory,
-            PlainTextKindFactory
+            PlainTextKindFactory,
+            ArchiveKindFactory
         )
 
     fun fromPath(path: Path): ResourceKind? =
@@ -71,6 +72,6 @@ object GeneralKindFactory {
         val mimeType = getMimeTypeUsingTika(path) ?: return null
         factory = factories.find { it.isValid(mimeType) }
 
-        return (factory as ResourceKindFactory<ResourceKind>)
+        return (factory as ResourceKindFactory<ResourceKind>?)
     }
 }
