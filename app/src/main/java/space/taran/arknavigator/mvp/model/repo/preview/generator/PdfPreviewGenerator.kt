@@ -17,6 +17,6 @@ object PdfPreviewGenerator : PreviewGenerator() {
     }
 
     private fun generatePreview(source: Path): Bitmap {
-        return pdfPreviewGenerate(source.toString(), PreviewQuality.HIGH)
+        return pdfPreviewGenerate(source.toString(), PreviewQuality.MEDIUM)
     }
 }
