@@ -1,5 +1,6 @@
 package space.taran.arknavigator.mvp.view.item
 
+import android.animation.ValueAnimator
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import space.taran.arknavigator.R
@@ -12,9 +13,9 @@ import space.taran.arknavigator.utils.dpToPx
 import space.taran.arknavigator.utils.extension
 import java.nio.file.Path
 
-class FileItemViewHolder(val binding: ItemFileGridBinding) :
-    RecyclerView.ViewHolder(binding.root),
-    FileItemView {
+class FileItemViewHolder(
+    val binding: ItemFileGridBinding
+) : RecyclerView.ViewHolder(binding.root), FileItemView {
 
     override fun position(): Int = this.layoutPosition
 
@@ -26,7 +27,7 @@ class FileItemViewHolder(val binding: ItemFileGridBinding) :
         binding.iv.setImageResource(placeholder)
     }
 
-    override fun setSelectedOnBind(
+    override fun reset(
         isSelectingEnabled: Boolean,
         isItemSelected: Boolean
     ) = with(binding) {
@@ -34,18 +35,23 @@ class FileItemViewHolder(val binding: ItemFileGridBinding) :
         cbSelected.isChecked = isItemSelected
         val elevation = if (isSelectingEnabled && isItemSelected)
             SELECTED_ELEVATION else DEFAULT_ELEVATION
-        root.z = this.root.context.dpToPx(elevation)
+        root.elevation = this.root.context.dpToPx(elevation)
     }
 
     override fun setSelected(isItemSelected: Boolean) =
         with(binding) {
             cbSelected.isChecked = isItemSelected
-            val elevation =
+            val startElevation =
+                if (isItemSelected) DEFAULT_ELEVATION else SELECTED_ELEVATION
+            val endElevation =
                 if (isItemSelected) SELECTED_ELEVATION else DEFAULT_ELEVATION
-            root.animate().apply {
-                duration = ANIM_DURATION
-                z(root.context.dpToPx(elevation))
+            val animator = ValueAnimator.ofFloat(startElevation, endElevation)
+            animator.duration = ANIM_DURATION
+            animator.addUpdateListener {
+                val value = it.animatedValue as Float
+                root.elevation = root.context.dpToPx(value)
             }
+            animator.start()
             return@with
         }
 
@@ -71,12 +77,17 @@ class FileItemViewHolder(val binding: ItemFileGridBinding) :
     }
 
     fun onSelectingChanged(enabled: Boolean) {
-        animateCheckboxVisibility(enabled)
-        if (!enabled)
-            binding.root.animate().apply {
-                duration = ANIM_DURATION
-                z(binding.root.context.dpToPx(DEFAULT_ELEVATION))
+        if (!enabled && binding.cbSelected.isChecked) {
+            val animator =
+                ValueAnimator.ofFloat(SELECTED_ELEVATION, DEFAULT_ELEVATION)
+            animator.duration = ANIM_DURATION
+            animator.addUpdateListener {
+                val value = it.animatedValue as Float
+                binding.root.elevation = binding.root.context.dpToPx(value)
             }
+            animator.start()
+        }
+        animateCheckboxVisibility(enabled)
     }
 
     private fun animateCheckboxVisibility(isVisible: Boolean) = with(binding) {

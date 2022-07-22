@@ -113,7 +113,7 @@ class ResourcesPresenter(
             tagsSelectorPresenter.calculateTagsAndSelection()
 
             val path = (rootAndFav.fav ?: rootAndFav.root)
-            val title = if (path != null) "$path, " else ""
+            val title = if (path != null) "${path.last()}, " else ""
 
             viewState.setToolbarTitle("$title${roots.size} of roots chosen")
             viewState.setProgressVisibility(false)

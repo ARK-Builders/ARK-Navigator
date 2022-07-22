@@ -80,5 +80,7 @@
     <string name="crash_dialog_description">Sorry, the application crashed. Please send a report to the developers.</string>
     <string name="crash_dialog_title">Crash</string>
     <string name="crash_dialog_comment">You can add a comment here:</string>
+    <string name="remove">Remove</string>
+    <string name="move_to">Move to</string>
 
 </resources>

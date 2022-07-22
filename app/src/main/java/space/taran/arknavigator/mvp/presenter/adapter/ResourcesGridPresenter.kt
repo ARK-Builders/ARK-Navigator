@@ -55,12 +55,12 @@ class ResourcesGridPresenter(
 
     fun bindView(view: FileItemView) {
         val resource = selection[view.position()]
-        Log.d(RESOURCES_SCREEN, "binding view for resource ${resource.meta.id}")
+        Log.d(RESOURCES_SCREEN, "binding view for resource ${resource.meta.name}")
 
         val path = index.getPath(resource.meta.id)
 
+        view.reset(selectingEnabled, resource.isSelected)
         view.setText(path.fileName.toString())
-        view.setSelectedOnBind(selectingEnabled, resource.isSelected)
 
         if (Files.isDirectory(path)) {
             throw AssertionError("Resource can't be a directory")
@@ -99,12 +99,21 @@ class ResourcesGridPresenter(
         if (!selectingEnabled)
             resources.forEach { it.isSelected = false }
         viewState.onSelectingChanged(enabled)
+        viewState.setSelectingEnabled(enabled)
+        viewState.setSelectingCount(
+            resources.filter { it.isSelected }.size,
+            resources.size
+        )
     }
 
     fun onItemSelectChanged(itemView: FileItemView) {
         val item = selection[itemView.position()]
         item.isSelected = !item.isSelected
         itemView.setSelected(item.isSelected)
+        viewState.setSelectingCount(
+            resources.filter { it.isSelected }.size,
+            resources.size
+        )
     }
 
     suspend fun init(

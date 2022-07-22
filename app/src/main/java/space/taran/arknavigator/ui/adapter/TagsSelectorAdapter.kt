@@ -152,7 +152,12 @@ class TagsSelectorAdapter(
     private fun showTagMenuPopup(tag: TagItem, tagView: View) {
         val menuBinding = PopupResourcesTagMenuBinding
             .inflate(fragment.requireActivity().layoutInflater)
-        val popup = DefaultPopup(menuBinding, R.style.BottomFadeScaleAnimation)
+        val popup = DefaultPopup(
+            menuBinding,
+            R.style.FadeAnimation,
+            R.drawable.bg_rounded_8,
+            24f
+        )
         menuBinding.apply {
             btnInvert.setOnClickListener {
                 presenter.onTagItemLongClick(tag)

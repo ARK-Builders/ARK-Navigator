@@ -1,7 +1,6 @@
 package space.taran.arknavigator.utils
 
 import org.apache.tika.Tika
-import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.presenter.adapter.ResourceItem
 import space.taran.arknavigator.ui.App
 import java.nio.file.Files
