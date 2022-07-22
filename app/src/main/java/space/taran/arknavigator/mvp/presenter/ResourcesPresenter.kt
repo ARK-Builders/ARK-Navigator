@@ -1,7 +1,10 @@
 package space.taran.arknavigator.mvp.presenter
 
 import android.util.Log
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import moxy.MvpPresenter
 import moxy.presenterScope
 import space.taran.arknavigator.mvp.model.repo.FoldersRepo
@@ -24,6 +27,9 @@ import space.taran.arknavigator.utils.LogTags.RESOURCES_SCREEN
 import space.taran.arknavigator.utils.Tag
 import java.nio.file.Path
 import javax.inject.Inject
+import kotlin.io.path.copyTo
+import kotlin.io.path.deleteIfExists
+import kotlin.io.path.name
 
 class ResourcesPresenter(
     private val rootAndFav: RootAndFav,
@@ -120,9 +126,67 @@ class ResourcesPresenter(
         }
     }
 
-    override fun onDestroy() {
-        Log.d(RESOURCES_SCREEN, "destroying ResourcesPresenter")
-        super.onDestroy()
+    fun onMoveSelectedResourcesClicked(
+        directoryToMove: Path
+    ) = presenterScope.launch(Dispatchers.IO) {
+        withContext(Dispatchers.Main) {
+            viewState.setProgressVisibility(true, "Moving")
+        }
+        val resourcesToMove = gridPresenter.resources.filter { it.isSelected }
+        val results = resourcesToMove.map { item ->
+            async {
+                val path = index.getPath(item.meta.id)
+                val newPath = directoryToMove.resolve(path.name)
+                path.copyTo(newPath)
+                if (path != newPath)
+                    path.deleteIfExists()
+            }
+        }
+        results.forEach { it.await() }
+        index.reindex()
+        tagsStorageRepo.provide(rootAndFav)
+        withContext(Dispatchers.Main) {
+            onResourcesOrTagsChanged()
+            gridPresenter.onSelectingChanged(false)
+            viewState.setProgressVisibility(false)
+        }
+    }
+
+    fun onCopySelectedResourcesClicked(
+        directoryToCopy: Path
+    ) = presenterScope.launch(Dispatchers.IO) {
+        val resourcesToCopy = gridPresenter.resources.filter { it.isSelected }
+        resourcesToCopy.forEach { item ->
+            launch {
+                val path = index.getPath(item.meta.id)
+                val newPath = directoryToCopy.resolve(path.name)
+                path.copyTo(newPath)
+            }
+        }
+        withContext(Dispatchers.Main) {
+            gridPresenter.onSelectingChanged(false)
+        }
+    }
+
+    fun onRemoveSelectedResourcesClicked() = presenterScope.launch(Dispatchers.IO) {
+        withContext(Dispatchers.Main) {
+            viewState.setProgressVisibility(true, "Removing")
+        }
+        val resourcesToRemove = gridPresenter.resources.filter { it.isSelected }
+        val results = resourcesToRemove.map { item ->
+            async {
+                val path = index.getPath(item.meta.id)
+                path.deleteIfExists()
+            }
+        }
+        results.forEach { it.await() }
+        index.reindex()
+        tagsStorageRepo.provide(rootAndFav)
+        withContext(Dispatchers.Main) {
+            onResourcesOrTagsChanged()
+            gridPresenter.onSelectingChanged(false)
+            viewState.setProgressVisibility(false)
+        }
     }
 
     suspend fun onResourcesOrTagsChanged() {

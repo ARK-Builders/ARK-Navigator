@@ -11,6 +11,11 @@
         android:text="@string/move_to" />
 
     <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_copy"
+        style="@style/PopupTextButtonMedium"
+        android:text="@string/copy_to" />
+
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_remove"
         style="@style/PopupTextButtonMedium"
         android:text="@string/remove" />
