@@ -9,7 +9,6 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
 import android.util.Log
-import android.view.View
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -56,7 +55,6 @@ class MainActivity : MvpAppCompatActivity(), MainView {
     override fun init() {
         Log.d(MAIN, "initializing")
         System.loadLibrary("arklib")
-        setSupportActionBar(binding.toolbar)
         binding.bottomNavigation.setOnApplyWindowInsetsListener(null)
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
@@ -165,18 +163,6 @@ class MainActivity : MvpAppCompatActivity(), MainView {
 
     fun setBottomNavigationVisibility(isVisible: Boolean) {
         binding.bottomNavigation.isVisible = isVisible
-    }
-
-    fun setTitle(title: String) {
-        supportActionBar?.title = title
-    }
-
-    fun setToolbarVisibility(show: Boolean) {
-        if (show) {
-            binding.layoutToolbar.visibility = View.VISIBLE
-        } else {
-            binding.layoutToolbar.visibility = View.GONE
-        }
     }
 
     fun setSelectedTab(menuItemID: Int) {

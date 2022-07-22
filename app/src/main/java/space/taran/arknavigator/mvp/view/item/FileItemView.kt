@@ -10,7 +10,7 @@ interface FileItemView {
 
     fun setGenericIcon(path: Path)
 
-    fun setSelectedOnBind(isSelectingEnabled: Boolean, isItemSelected: Boolean)
+    fun reset(isSelectingEnabled: Boolean, isItemSelected: Boolean)
     fun setSelected(isItemSelected: Boolean)
 
     fun setIconOrPreview(path: Path, resource: ResourceMeta)

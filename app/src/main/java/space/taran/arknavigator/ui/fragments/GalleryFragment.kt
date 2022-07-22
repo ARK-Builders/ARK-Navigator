@@ -89,7 +89,6 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
         initResultListener()
 
         FullscreenHelper.setStatusBarVisibility(false, requireActivity().window)
-        (requireActivity() as MainActivity).setToolbarVisibility(false)
         (requireActivity() as MainActivity).setBottomNavigationVisibility(false)
 
         requireActivity().onBackPressedDispatcher.addCallback(this) {
@@ -275,7 +274,6 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
 
     override fun exitFullscreen() {
         FullscreenHelper.setStatusBarVisibility(true, requireActivity().window)
-        (requireActivity() as MainActivity).setToolbarVisibility(true)
         (requireActivity() as MainActivity).setBottomNavigationVisibility(true)
     }
 
@@ -305,7 +303,11 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
     private fun showTagMenuPopup(tag: Tag, tagView: View) {
         val menuBinding = PopupGalleryTagMenuBinding
             .inflate(requireActivity().layoutInflater)
-        val popup = DefaultPopup(menuBinding, R.style.BottomFadeScaleAnimation)
+        val popup = DefaultPopup(
+            menuBinding,
+            R.style.BottomFadeScaleAnimation,
+            R.drawable.bg_rounded_16dp
+        )
         menuBinding.apply {
             btnNewSelection.setOnClickListener {
                 presenter.onTagSelected(tag)

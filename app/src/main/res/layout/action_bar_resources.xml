@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="?attr/actionBarSize"
+    android:background="@color/colorPrimary">
+
+    <ImageView
+        android:id="@+id/iv_disable_selection_mode"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginStart="2dp"
+        android:background="?selectableItemBackgroundBorderless"
+        android:paddingHorizontal="12dp"
+        android:src="@drawable/ic_close"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_selected_of"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:ellipsize="end"
+        android:gravity="start|center_vertical"
+        android:maxLines="1"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintEnd_toStartOf="@id/btn_normal_mode"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintStart_toEndOf="@id/iv_disable_selection_mode"
+        tools:text="1 of 20" />
+
+    <ImageView
+        android:id="@+id/iv_use_selected"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:background="?selectableItemBackgroundBorderless"
+        android:paddingHorizontal="12dp"
+        android:src="@drawable/ic_vert_dots"
+        android:visibility="gone"
+        app:layout_constraintStart_toEndOf="@id/tv_selected_of" />
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_marginStart="14dp"
+        android:ellipsize="end"
+        android:gravity="start|center_vertical"
+        android:maxLines="1"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@id/btn_normal_mode"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:text="Title" />
+
+    <ImageView
+        android:id="@+id/btn_normal_mode"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:background="?selectableItemBackgroundBorderless"
+        android:paddingHorizontal="12dp"
+        android:src="@drawable/ic_cloud_on"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toStartOf="@id/btn_sort" />
+
+    <ImageView
+        android:id="@+id/btn_focus_mode"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:background="?selectableItemBackgroundBorderless"
+        android:paddingHorizontal="12dp"
+        android:src="@drawable/ic_target"
+        app:layout_constraintEnd_toStartOf="@id/btn_sort" />
+
+    <ImageView
+        android:id="@+id/btn_sort"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:background="?selectableItemBackgroundBorderless"
+        android:paddingHorizontal="12dp"
+        android:src="@drawable/ic_sort"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -57,7 +57,6 @@ class FoldersFragment : MvpAppCompatFragment(), FoldersView {
     override fun init() {
         Log.d(FOLDERS_SCREEN, "initializing FoldersFragment")
         (activity as MainActivity).setSelectedTab(R.id.page_roots)
-        (activity as MainActivity).setToolbarVisibility(false)
         foldersTreeAdapter = FoldersTreeAdapter(presenter.foldersTreePresenter)
         binding.rvRoots.layoutManager = LinearLayoutManager(context)
         binding.rvRoots.adapter = foldersTreeAdapter

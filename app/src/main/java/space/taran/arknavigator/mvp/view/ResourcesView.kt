@@ -14,6 +14,8 @@ interface ResourcesView : MvpView {
     fun setToolbarTitle(title: String)
     fun setKindTagsEnabled(enabled: Boolean)
     fun updateMenu()
+    fun setSelectingEnabled(enabled: Boolean)
+    fun setSelectingCount(selected: Int, all: Int)
     fun setTagsFilterEnabled(enabled: Boolean)
     fun setTagsFilterText(filter: String)
     fun drawTags()
