@@ -17,6 +17,10 @@ import kotlinx.coroutines.launch
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import moxy.presenterScope
+import space.taran.arkfilepicker.ArkFilePickerConfig
+import space.taran.arkfilepicker.ArkFilePickerFragment
+import space.taran.arkfilepicker.ArkFilePickerMode
+import space.taran.arkfilepicker.onArkPathPicked
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.FragmentResourcesBinding
 import space.taran.arknavigator.databinding.PopupSelectedResourcesActionsBinding
@@ -241,12 +245,31 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         actionBar.ivUseSelected.setOnClickListener {
             val menuBinding = PopupSelectedResourcesActionsBinding
                 .inflate(requireActivity().layoutInflater)
-            DefaultPopup(
+            val popup = DefaultPopup(
                 menuBinding,
                 R.style.FadeAnimation,
                 R.drawable.bg_rounded_8,
                 24f
-            ).showBelow(it)
+            )
+            menuBinding.apply {
+                btnMove.setOnClickListener {
+                    ArkFilePickerFragment
+                        .newInstance(moveFilePickerConfig())
+                        .show(childFragmentManager, null)
+                    popup.popupWindow.dismiss()
+                }
+                btnCopy.setOnClickListener {
+                    ArkFilePickerFragment
+                        .newInstance(copyFilePickerConfig())
+                        .show(childFragmentManager, null)
+                    popup.popupWindow.dismiss()
+                }
+                btnRemove.setOnClickListener {
+                    presenter.onRemoveSelectedResourcesClicked()
+                    popup.popupWindow.dismiss()
+                }
+            }
+            popup.showBelow(it)
         }
         actionBar.btnSort.setOnClickListener {
             val dialog = SortDialogFragment.newInstance()
@@ -261,6 +284,20 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
     }
 
     private fun initResultListeners() {
+        childFragmentManager.onArkPathPicked(
+            this,
+            MOVE_SELECTED_REQUEST_KEY
+        ) {
+            presenter.onMoveSelectedResourcesClicked(it)
+        }
+
+        childFragmentManager.onArkPathPicked(
+            this,
+            COPY_SELECTED_REQUEST_KEY
+        ) {
+            presenter.onCopySelectedResourcesClicked(it)
+        }
+
         setFragmentResultListener(
             GalleryFragment.REQUEST_TAGS_CHANGED_KEY
         ) { _, _ ->
@@ -372,7 +409,22 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         } == null
     }
 
+    private fun moveFilePickerConfig() = ArkFilePickerConfig(
+        titleStringId = R.string.move_to,
+        mode = ArkFilePickerMode.FOLDER,
+        pathPickedRequestKey = MOVE_SELECTED_REQUEST_KEY
+    )
+
+    private fun copyFilePickerConfig() = ArkFilePickerConfig(
+        titleStringId = R.string.copy_to,
+        mode = ArkFilePickerMode.FOLDER,
+        pathPickedRequestKey = COPY_SELECTED_REQUEST_KEY
+    )
+
     companion object {
+        private const val MOVE_SELECTED_REQUEST_KEY = "moveSelected"
+        private const val COPY_SELECTED_REQUEST_KEY = "copySelected"
+
         private const val DRAG_TRAVEL_TIME_THRESHOLD = 30 // milliseconds
         private const val DRAG_TRAVEL_DELTA_THRESHOLD = 0.1 // ratio
         private const val DRAG_TRAVEL_SPEED_THRESHOLD =

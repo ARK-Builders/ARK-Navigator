@@ -38,8 +38,10 @@ class ResourcesGridPresenter(
     @Inject
     lateinit var preferences: Preferences
 
-    private var resources = listOf<ResourceItem>()
-    private var selection = listOf<ResourceItem>()
+    var resources = listOf<ResourceItem>()
+        private set
+    var selection = listOf<ResourceItem>()
+        private set
 
     private lateinit var index: ResourcesIndex
     private lateinit var storage: TagsStorage
