@@ -15,6 +15,10 @@ object LinkKindFactory : ResourceKindFactory<ResourceKind.Link> {
     override val acceptedMimeTypes: Set<String>
         get() = setOf()
 
+    private val json = Json {
+        ignoreUnknownKeys = true
+    }
+
     override fun fromPath(path: Path): ResourceKind.Link {
         val zip = ZipFile(path.toFile())
         val jsonEntry = zip
@@ -23,7 +27,7 @@ object LinkKindFactory : ResourceKindFactory<ResourceKind.Link> {
             .find { entry -> entry.name == JSON_FILE }
             ?: return ResourceKind.Link()
 
-        val link = Json.decodeFromStream<JsonLink>(zip.getInputStream(jsonEntry))
+        val link = json.decodeFromStream<JsonLink>(zip.getInputStream(jsonEntry))
 
         return ResourceKind.Link(link.title, link.desc, link.url)
     }
