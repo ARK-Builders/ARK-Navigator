@@ -9,6 +9,7 @@ import space.taran.arknavigator.utils.Tags
 @StateStrategyType(AddToEndSingleStrategy::class)
 interface EditTagsDialogView : MvpView {
     fun init()
+    fun showKeyboardAndView()
     fun setQuickTags(tags: Tags)
     fun setResourceTags(tags: Tags)
     fun setInput(input: String)

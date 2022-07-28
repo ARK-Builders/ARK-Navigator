@@ -84,9 +84,9 @@ class GalleryPresenter(
         }
     }
 
-    fun onPageChanged(newPos: Int) {
+    fun onPageChanged(newPos: Int) = presenterScope.launch {
         if (resources.isEmpty())
-            return
+            return@launch
 
         checkResourceChanges(newPos)
 
@@ -103,7 +103,7 @@ class GalleryPresenter(
         else -> GalleryItemType.OTHER
     }
 
-    fun bindView(view: PreviewItemView) {
+    fun bindView(view: PreviewItemView) = presenterScope.launch {
         view.reset()
         val meta = resources[view.pos]
         val path = index.getPath(meta.id)
@@ -125,31 +125,31 @@ class GalleryPresenter(
         viewState.displayPreviewTags(currentResource.id, tags)
     }
 
-    fun onOpenFabClick() {
+    fun onOpenFabClick() = presenterScope.launch {
         Log.d(GALLERY_SCREEN, "[open_resource] clicked at position $currentPos")
         val kind = currentResource.kind
         if (kind is ResourceKind.Link) {
-            val url = kind.url ?: return
+            val url = kind.url ?: return@launch
             viewState.openLink(url)
-            return
+            return@launch
         }
 
         viewState.viewInExternalApp(index.getPath(currentResource.id))
     }
 
-    fun onShareFabClick() {
+    fun onShareFabClick() = presenterScope.launch {
         Log.d(GALLERY_SCREEN, "[share_resource] clicked at position $currentPos")
         val kind = currentResource.kind
         if (kind is ResourceKind.Link) {
-            val url = kind.url ?: return
+            val url = kind.url ?: return@launch
             viewState.shareLink(url)
-            return
+            return@launch
         }
 
         viewState.shareResource(index.getPath(currentResource.id))
     }
 
-    fun onEditFabClick() {
+    fun onEditFabClick() = presenterScope.launch {
         Log.d(GALLERY_SCREEN, "[edit_resource] clicked at position $currentPos")
         viewState.editResource(index.getPath(currentResource.id))
     }
@@ -215,7 +215,7 @@ class GalleryPresenter(
         }
     }
 
-    private fun displayPreview() {
+    private fun displayPreview() = presenterScope.launch {
         val resource = resources[currentPos]
         val tags = storage.getTags(resource.id)
         val filePath = index.getPath(resource.id)
@@ -253,7 +253,7 @@ class GalleryPresenter(
         }
     }
 
-    private fun invalidateResources() {
+    private suspend fun invalidateResources() {
         val indexedIds = index.listIds(rootAndFav.fav)
         val newResources =
             resources.filter { meta -> indexedIds.contains(meta.id) }.toMutableList()
@@ -279,7 +279,7 @@ class GalleryPresenter(
         viewState.setControlsVisibility(isControlsVisible)
     }
 
-    fun onPlayButtonClick() {
+    fun onPlayButtonClick() = presenterScope.launch {
         viewState.viewInExternalApp(index.getPath(currentResource.id))
     }
 

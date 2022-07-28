@@ -9,18 +9,18 @@ import kotlin.io.path.Path
 class ResourceIndexStub : ResourcesIndex {
     private val metas = TestData.metasById().toMutableMap()
 
-    override fun listResources(prefix: Path?): Set<ResourceMeta> =
+    override suspend fun listResources(prefix: Path?): Set<ResourceMeta> =
         metas.values.toSet()
 
-    override fun getPath(id: ResourceId): Path =
+    override suspend fun getPath(id: ResourceId): Path =
         Path("")
 
-    override fun getMeta(id: ResourceId): ResourceMeta =
+    override suspend fun getMeta(id: ResourceId): ResourceMeta =
         metas[id]!!
 
     override suspend fun reindex() {}
 
-    override fun remove(id: ResourceId): Path {
+    override suspend fun remove(id: ResourceId): Path {
         metas.remove(id)
         return Path("")
     }

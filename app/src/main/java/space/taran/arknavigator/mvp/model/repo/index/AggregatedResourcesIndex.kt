@@ -19,17 +19,17 @@ class AggregatedResourcesIndex(
     private val shards: Collection<PlainResourcesIndex>
 ) : ResourcesIndex {
 
-    override fun listResources(prefix: Path?): Set<ResourceMeta> =
+    override suspend fun listResources(prefix: Path?): Set<ResourceMeta> =
         shards.flatMap { it.listResources(prefix) }
             .toSet()
 
-    override fun getPath(id: ResourceId): Path =
+    override suspend fun getPath(id: ResourceId): Path =
         tryShards { it.tryGetPath(id) }
 
-    override fun getMeta(id: ResourceId): ResourceMeta =
+    override suspend fun getMeta(id: ResourceId): ResourceMeta =
         tryShards { it.tryGetMeta(id) }
 
-    override fun remove(id: ResourceId): Path =
+    override suspend fun remove(id: ResourceId): Path =
         tryShards { it.tryRemove(id) }
 
     private fun <R> tryShards(f: (shard: PlainResourcesIndex) -> R?): R {
