@@ -4,6 +4,8 @@ import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.supervisorScope
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import space.taran.arknavigator.mvp.model.dao.Resource
 import space.taran.arknavigator.mvp.model.dao.ResourceDao
@@ -14,6 +16,7 @@ import space.taran.arknavigator.mvp.model.repo.preview.PreviewAndThumbnail
 import space.taran.arknavigator.utils.LogTags.PREVIEWS
 import space.taran.arknavigator.utils.LogTags.RESOURCES_INDEX
 import space.taran.arknavigator.utils.listChildren
+import space.taran.arknavigator.utils.withContextAndLock
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -34,8 +37,9 @@ class PlainResourcesIndex internal constructor(
     private val root: Path,
     private val dao: ResourceDao,
     resources: Map<Path, ResourceMeta>
-) :
-    ResourcesIndex {
+) : ResourcesIndex {
+
+    private val mutex = Mutex()
 
     internal val metaByPath: MutableMap<Path, ResourceMeta> =
         resources.toMutableMap()
@@ -47,13 +51,14 @@ class PlainResourcesIndex internal constructor(
             .toMap()
             .toMutableMap()
 
-    override fun listResources(prefix: Path?): Set<ResourceMeta> {
+    override suspend fun listResources(
+        prefix: Path?
+    ): Set<ResourceMeta> = mutex.withLock {
         val metas = if (prefix != null) {
             metaByPath.filterKeys { it.startsWith(prefix) }
         } else {
             metaByPath
-        }
-            .values
+        }.values
 
         Log.d(RESOURCES_INDEX, "${metas.size} resources returned")
         return metas.toSet()
@@ -61,18 +66,23 @@ class PlainResourcesIndex internal constructor(
 
     fun contains(id: ResourceId) = pathById.containsKey(id)
 
-    override fun getPath(id: ResourceId): Path = tryGetPath(id)!!
+    override suspend fun getPath(id: ResourceId): Path = mutex.withLock {
+        tryGetPath(id)!!
+    }
 
-    override fun getMeta(id: ResourceId): ResourceMeta = tryGetMeta(id)!!
+    override suspend fun getMeta(id: ResourceId): ResourceMeta = mutex.withLock {
+        tryGetMeta(id)!!
+    }
 
-    override fun remove(id: ResourceId): Path {
+    override suspend fun remove(id: ResourceId): Path = mutex.withLock {
         Log.d(RESOURCES_INDEX, "forgetting resource $id")
         return tryRemove(id)!!
     }
 
-    override suspend fun reindex(): Unit = withContext(Dispatchers.IO) {
-        reindexRoot(calculateDifference())
-    }
+    override suspend fun reindex(): Unit =
+        withContextAndLock(Dispatchers.IO, mutex) {
+            reindexRoot(calculateDifference())
+        }
 
     // should be only used in AggregatedResourcesIndex
     fun tryGetPath(id: ResourceId): Path? = pathById[id]
@@ -191,9 +201,7 @@ class PlainResourcesIndex internal constructor(
         withContext(Dispatchers.IO) {
             Log.d(
                 PREVIEWS,
-                "providing previews/thumbnails for ${
-                metaByPath.size
-                } resources"
+                "providing previews/thumbnails for ${metaByPath.size} resources"
             )
             PreviewAndThumbnail.initDirs()
 

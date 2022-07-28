@@ -52,12 +52,13 @@ class EditTagsDialogPresenter(
     private var textRemovedRecentlyJob: Job? = null
 
     override fun onFirstViewAttach() {
-        if (_index != null && _storage != null) {
-            index = _index
-            storage = _storage
-            init()
-        } else {
-            presenterScope.launch {
+        viewState.init()
+        presenterScope.launch {
+            if (_index != null && _storage != null) {
+                index = _index
+                storage = _storage
+                init()
+            } else {
                 index = indexRepo.provide(rootAndFav)
                 storage = tagsStorageRepo.provide(rootAndFav)
                 init()
@@ -65,12 +66,12 @@ class EditTagsDialogPresenter(
         }
     }
 
-    private fun init() {
-        viewState.init()
+    private suspend fun init() {
         resourceTags += listResourceTags()
         quickTags += listQuickTags()
         viewState.setQuickTags(filterQuickTags())
         viewState.setResourceTags(resourceTags)
+        viewState.showKeyboardAndView()
     }
 
     fun onInputChanged(newInput: String) {
@@ -175,7 +176,7 @@ class EditTagsDialogPresenter(
                 tag.startsWith(input, true)
             }.toSet()
 
-    private fun listQuickTags(): Set<Tag> {
+    private suspend fun listQuickTags(): Set<Tag> {
         val allTags = storage.groupTagsByResources(index.listAllIds())
             .values
             .flatten()

@@ -5,6 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
@@ -55,7 +56,7 @@ class ResourcesGridPresenter(
 
     fun getCount() = selection.size
 
-    fun bindView(view: FileItemView) {
+    fun bindView(view: FileItemView) = runBlocking {
         val resource = selection[view.position()]
         Log.d(RESOURCES_SCREEN, "binding view for resource ${resource.meta.name}")
 
@@ -217,9 +218,8 @@ class ResourcesGridPresenter(
         }
         Log.d(
             RESOURCES_SCREEN,
-            "sorting by $sorting of ${
-            resources.size
-            } resources took $sortTime milliseconds"
+            "sorting by $sorting of ${resources.size} " +
+                "resources took $sortTime milliseconds"
         )
     }
 
