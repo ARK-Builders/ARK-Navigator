@@ -14,9 +14,12 @@ import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.setFragmentResult
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.chip.Chip
 import java.nio.file.Path
 import kotlin.io.path.absolutePathString
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import moxy.MvpAppCompatDialogFragment
 import moxy.ktx.moxyPresenter
 import space.taran.arknavigator.R
@@ -32,6 +35,7 @@ import space.taran.arknavigator.ui.fragments.utils.toastIndexFailedPaths
 import space.taran.arknavigator.utils.LogTags
 import space.taran.arknavigator.utils.Tags
 import space.taran.arknavigator.utils.extensions.placeCursorToEnd
+import space.taran.arknavigator.utils.extensions.showKeyboard
 
 class EditTagsDialogFragment(
     private val index: ResourcesIndex? = null,
@@ -81,12 +85,27 @@ class EditTagsDialogFragment(
         layoutOutside.setOnClickListener {
             presenter.onInputDone()
         }
-        root.viewTreeObserver.addOnGlobalLayoutListener {
+    }
+
+    override fun showKeyboardAndView() = with(binding) {
+        etNewTags.placeCursorToEnd()
+        etNewTags.showKeyboard()
+        etNewTags.onBackPressedListener = {
+            if (!presenter.onBackClick())
+                dismissDialog()
+
+            true
+        }
+        lifecycleScope.launch {
+            // Waiting for the keyboard to show up, otherwise there will be lags
+            // Android doesn't have a listener for this
+            delay(50)
             if (root.currentState == R.id.start) {
                 root.setTransitionDuration(OPEN_DURATION)
                 root.transitionToEnd()
             }
         }
+        return@with
     }
 
     override fun setResourceTags(tags: Tags) {
@@ -152,18 +171,20 @@ class EditTagsDialogFragment(
         )
     }
 
-    override fun onResume() {
-        super.onResume()
-        binding.etNewTags.placeCursorToEnd()
-        binding.etNewTags.onBackPressedListener = {
-            if (!presenter.onBackClick())
-                dismissDialog()
+    override fun getTheme() = R.style.EditTagsDialogTheme
 
-            true
+    override fun onResume() = with(binding) {
+        super.onResume()
+        if (root.currentState == R.id.end) {
+            etNewTags.placeCursorToEnd()
+            etNewTags.onBackPressedListener = {
+                if (!presenter.onBackClick())
+                    dismissDialog()
+
+                true
+            }
         }
     }
-
-    override fun getTheme() = R.style.EditTagsDialogTheme
 
     private fun notifyTagsChanged() {
         setFragmentResult(REQUEST_TAGS_CHANGED_KEY, bundleOf())
@@ -183,7 +204,7 @@ class EditTagsDialogFragment(
         const val FRAGMENT_TAG = "editTagsDialogTag"
         private const val ROOT_AND_FAV_KEY = "rootAndFav"
         private const val RESOURCE_KEY = "resource"
-        private const val OPEN_DURATION = 400
+        private const val OPEN_DURATION = 300
         private const val CLOSE_DURATION = 200
 
         fun newInstance(

@@ -5,6 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
@@ -27,6 +28,8 @@ import javax.inject.Inject
 import kotlin.io.path.notExists
 import kotlin.system.measureTimeMillis
 
+class ResourceItem(val meta: ResourceMeta, var isSelected: Boolean = false)
+
 class ResourcesGridPresenter(
     val rootAndFav: RootAndFav,
     val viewState: ResourcesView,
@@ -36,8 +39,10 @@ class ResourcesGridPresenter(
     @Inject
     lateinit var preferences: Preferences
 
-    private var resources = listOf<ResourceMeta>()
-    private var selection = listOf<ResourceMeta>()
+    var resources = listOf<ResourceItem>()
+        private set
+    var selection = listOf<ResourceItem>()
+        private set
 
     private lateinit var index: ResourcesIndex
     private lateinit var storage: TagsStorage
@@ -47,15 +52,17 @@ class ResourcesGridPresenter(
         private set
     var ascending: Boolean = true
         private set
+    var selectingEnabled: Boolean = false
 
     fun getCount() = selection.size
 
-    fun bindView(view: FileItemView) {
+    fun bindView(view: FileItemView) = runBlocking {
         val resource = selection[view.position()]
-        Log.d(RESOURCES_SCREEN, "binding view for resource ${resource.id}")
+        Log.d(RESOURCES_SCREEN, "binding view for resource ${resource.meta.name}")
 
-        val path = index.getPath(resource.id)
+        val path = index.getPath(resource.meta.id)
 
+        view.reset(selectingEnabled, resource.isSelected)
         view.setText(path.fileName.toString())
 
         if (Files.isDirectory(path)) {
@@ -65,12 +72,12 @@ class ResourcesGridPresenter(
         if (path.notExists())
             scope.launch { resourcesPresenter.onRemovedResourceDetected() }
 
-        view.setIconOrPreview(path, resource)
+        view.setIconOrPreview(path, resource.meta)
     }
 
     fun onItemClick(pos: Int) = scope.launch {
-        val containsNotExistingResource = selection.any { meta ->
-            index.getPath(meta.id).notExists()
+        val containsNotExistingResource = selection.any { item ->
+            index.getPath(item.meta.id).notExists()
         }
 
         if (containsNotExistingResource) {
@@ -84,9 +91,31 @@ class ResourcesGridPresenter(
         router.navigateToFragmentUsingAdd(
             Screens.GalleryScreen(
                 rootAndFav,
-                selection.map { it.id },
+                selection.map { it.meta.id },
                 pos
             )
+        )
+    }
+
+    fun onSelectingChanged(enabled: Boolean) {
+        selectingEnabled = enabled
+        if (!selectingEnabled)
+            resources.forEach { it.isSelected = false }
+        viewState.onSelectingChanged(enabled)
+        viewState.setSelectingEnabled(enabled)
+        viewState.setSelectingCount(
+            resources.filter { it.isSelected }.size,
+            resources.size
+        )
+    }
+
+    fun onItemSelectChanged(itemView: FileItemView) {
+        val item = selection[itemView.position()]
+        item.isSelected = !item.isSelected
+        itemView.setSelected(item.isSelected)
+        viewState.setSelectingCount(
+            resources.filter { it.isSelected }.size,
+            resources.size
         )
     }
 
@@ -120,7 +149,7 @@ class ResourcesGridPresenter(
         selection: Set<ResourceId>
     ) = withContext(Dispatchers.Default) {
         this@ResourcesGridPresenter.selection = resources
-            .filter { selection.contains(it.id) }
+            .filter { selection.contains(it.meta.id) }
 
         withContext(Dispatchers.Main) {
             setProgressVisibility(false)
@@ -131,7 +160,7 @@ class ResourcesGridPresenter(
     suspend fun resetResources(
         resources: Set<ResourceMeta>
     ) = withContext(Dispatchers.Default) {
-        this@ResourcesGridPresenter.resources = resources.toList()
+        this@ResourcesGridPresenter.resources = mapNewResources(resources)
         sortAllResources()
         selection = this@ResourcesGridPresenter.resources
         withContext(Dispatchers.Main) {
@@ -157,6 +186,21 @@ class ResourcesGridPresenter(
         }
     }
 
+    private fun mapNewResources(
+        newResources: Set<ResourceMeta>
+    ): List<ResourceItem> {
+        if (!selectingEnabled)
+            return newResources.map { ResourceItem(it) }
+
+        return newResources.map { meta ->
+            val selected = resources
+                .find { item -> item.meta == meta }
+                ?.isSelected ?: false
+
+            ResourceItem(meta, selected)
+        }
+    }
+
     private fun sortAllResources() {
         val sortTime = measureTimeMillis {
             val comparator = reifySorting(sorting)
@@ -174,9 +218,8 @@ class ResourcesGridPresenter(
         }
         Log.d(
             RESOURCES_SCREEN,
-            "sorting by $sorting of ${
-            resources.size
-            } resources took $sortTime milliseconds"
+            "sorting by $sorting of ${resources.size} " +
+                "resources took $sortTime milliseconds"
         )
     }
 

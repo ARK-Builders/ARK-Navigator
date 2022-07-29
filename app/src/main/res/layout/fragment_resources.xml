@@ -5,6 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <include
+        android:id="@+id/action_bar"
+        layout="@layout/action_bar_resources"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_resources"
         android:layout_width="match_parent"
@@ -12,7 +16,7 @@
         android:clipToPadding="false"
         android:padding="10dp"
         app:layout_constraintBottom_toTopOf="@+id/layout_drag_handler"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/action_bar" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_drag_handler"

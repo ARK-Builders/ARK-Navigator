@@ -38,4 +38,6 @@ interface GalleryView : CommonMvpView {
     fun notifyResourcesChanged()
     @StateStrategyType(SkipStrategy::class)
     fun notifyTagsChanged()
+    @StateStrategyType(SkipStrategy::class)
+    fun notifyCurrentItemChanged()
 }

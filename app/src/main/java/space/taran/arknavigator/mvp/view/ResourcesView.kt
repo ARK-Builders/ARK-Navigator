@@ -13,6 +13,8 @@ interface ResourcesView : CommonMvpView {
     fun setToolbarTitle(title: String)
     fun setKindTagsEnabled(enabled: Boolean)
     fun updateMenu()
+    fun setSelectingEnabled(enabled: Boolean)
+    fun setSelectingCount(selected: Int, all: Int)
     fun setTagsFilterEnabled(enabled: Boolean)
     fun setTagsFilterText(filter: String)
     fun drawTags()
@@ -23,4 +25,6 @@ interface ResourcesView : CommonMvpView {
     fun toastResourcesSelectedFocusMode(selected: Int, hidden: Int)
     @StateStrategyType(SkipStrategy::class)
     fun toastPathsFailed(failedPaths: List<Path>)
+    @StateStrategyType(SkipStrategy::class)
+    fun onSelectingChanged(enabled: Boolean)
 }

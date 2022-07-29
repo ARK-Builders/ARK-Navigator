@@ -292,7 +292,7 @@ class TagsSelectorPresenter(
         onSelectionChangeListener(selection)
     }
 
-    private fun findLastActualAction(): TagsSelectorAction? {
+    private suspend fun findLastActualAction(): TagsSelectorAction? {
         val tagItems = provideTagItemsByResources().values.flatten().toSet()
 
         while (actionsHistory.lastOrNull() != null) {
@@ -384,7 +384,7 @@ class TagsSelectorPresenter(
             calculateTagsAndSelection()
     }
 
-    private fun provideTagItemsByResources(): Map<ResourceId, Set<TagItem>> {
+    private suspend fun provideTagItemsByResources(): Map<ResourceId, Set<TagItem>> {
         val resources = index!!.listIds(prefix)
         val tagItemsByResources: Map<ResourceId, Set<TagItem>> =
             storage!!.groupTagsByResources(resources).map {

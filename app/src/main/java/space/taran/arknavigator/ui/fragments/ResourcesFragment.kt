@@ -4,9 +4,6 @@ import android.os.Bundle
 import android.os.SystemClock
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -20,8 +17,13 @@ import kotlinx.coroutines.launch
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import moxy.presenterScope
+import space.taran.arkfilepicker.ArkFilePickerConfig
+import space.taran.arkfilepicker.ArkFilePickerFragment
+import space.taran.arkfilepicker.ArkFilePickerMode
+import space.taran.arkfilepicker.onArkPathPicked
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.FragmentResourcesBinding
+import space.taran.arknavigator.databinding.PopupSelectedResourcesActionsBinding
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.presenter.ResourcesPresenter
 import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.QueryMode
@@ -33,6 +35,7 @@ import space.taran.arknavigator.ui.adapter.TagsSelectorAdapter
 import space.taran.arknavigator.ui.fragments.dialog.SortDialogFragment
 import space.taran.arknavigator.ui.fragments.utils.toast
 import space.taran.arknavigator.ui.fragments.utils.toastFailedPaths
+import space.taran.arknavigator.ui.view.DefaultPopup
 import space.taran.arknavigator.utils.FullscreenHelper
 import space.taran.arknavigator.utils.LogTags.RESOURCES_SCREEN
 import space.taran.arknavigator.utils.Tag
@@ -99,70 +102,46 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         App.instance.appComponent.inject(this)
     }
 
-    override fun init() {
+    override fun init() = with(binding) {
         Log.d(RESOURCES_SCREEN, "initializing ResourcesFragment")
 
         initResultListeners()
+        initMenuListeners()
 
         FullscreenHelper.setStatusBarVisibility(true, requireActivity().window)
         (activity as MainActivity).setSelectedTab(R.id.page_tags)
-        (activity as MainActivity).setToolbarVisibility(true)
         (requireActivity() as MainActivity).setBottomNavigationVisibility(true)
-        setHasOptionsMenu(true)
 
         resourcesAdapter = ResourcesRVAdapter(presenter.gridPresenter)
-        binding.rvResources.adapter = resourcesAdapter
-        binding.rvResources.layoutManager = GridLayoutManager(context, 3)
+        rvResources.adapter = resourcesAdapter
+        rvResources.setItemViewCacheSize(0)
+        rvResources.layoutManager = GridLayoutManager(context, 3)
         tagsSelectorAdapter = TagsSelectorAdapter(
-            this,
+            this@ResourcesFragment,
             binding,
             presenter.tagsSelectorPresenter
         ).also {
             App.instance.appComponent.inject(it)
         }
-        binding.layoutDragHandler.setOnTouchListener(::dragHandlerTouchListener)
-        binding.etTagsFilter.doAfterTextChanged {
+
+        layoutDragHandler.setOnTouchListener(::dragHandlerTouchListener)
+        etTagsFilter.doAfterTextChanged {
             presenter.tagsSelectorPresenter.onFilterChanged(it.toString())
         }
-        binding.switchKind.setOnCheckedChangeListener { _, checked ->
+        switchKind.setOnCheckedChangeListener { _, checked ->
             presenter.tagsSelectorPresenter.onKindTagsToggle(checked)
         }
-        binding.btnClear.setOnClickListener {
+        btnClear.setOnClickListener {
             presenter.tagsSelectorPresenter.onClearClick()
         }
 
-        requireActivity().onBackPressedDispatcher.addCallback(this) {
-            presenter.onBackClick()
-        }
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        Log.d(RESOURCES_SCREEN, "options item selected in ResourcesFragment")
-        when (item.itemId) {
-            R.id.menu_tags_sort_by -> {
-                val dialog = SortDialogFragment.newInstance()
-                dialog.show(childFragmentManager, null)
+        this@ResourcesFragment
+            .requireActivity()
+            .onBackPressedDispatcher
+            .addCallback(this@ResourcesFragment) {
+                presenter.onBackClick()
             }
-            R.id.menu_focus_mode ->
-                presenter.tagsSelectorPresenter.onQueryModeChanged(QueryMode.FOCUS)
-            R.id.menu_normal_mode ->
-                presenter.tagsSelectorPresenter.onQueryModeChanged(QueryMode.NORMAL)
-        }
-        return true
-    }
-
-    override fun onPrepareOptionsMenu(menu: Menu) {
-        super.onPrepareOptionsMenu(menu)
-        menu.findItem(R.id.menu_normal_mode).isVisible =
-            presenter.tagsSelectorPresenter.queryMode != QueryMode.NORMAL
-        menu.findItem(R.id.menu_focus_mode).isVisible =
-            presenter.tagsSelectorPresenter.queryMode != QueryMode.FOCUS
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        super.onCreateOptionsMenu(menu, inflater)
-        Log.d(RESOURCES_SCREEN, "inflating options menu in ResourcesFragment")
-        inflater.inflate(R.menu.menu_tags_screen, menu)
+        return@with
     }
 
     override fun onResume() {
@@ -172,7 +151,7 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
     }
 
     override fun setToolbarTitle(title: String) {
-        (activity as MainActivity).setTitle(title)
+        binding.actionBar.tvTitle.text = title
     }
 
     override fun setKindTagsEnabled(enabled: Boolean) {
@@ -197,8 +176,28 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         resourcesAdapter?.notifyDataSetChanged()
     }
 
-    override fun updateMenu() {
-        requireActivity().invalidateOptionsMenu()
+    override fun updateMenu() = with(binding) {
+        val queryMode = presenter.tagsSelectorPresenter.queryMode
+        val normalVisibility =
+            if (queryMode != QueryMode.NORMAL) View.VISIBLE else View.INVISIBLE
+        val focusVisibility =
+            if (queryMode != QueryMode.FOCUS) View.VISIBLE else View.INVISIBLE
+        actionBar.btnNormalMode.visibility = normalVisibility
+        actionBar.btnFocusMode.visibility = focusVisibility
+        return@with
+    }
+
+    override fun setSelectingEnabled(enabled: Boolean) = with(binding.actionBar) {
+        tvTitle.isVisible = !enabled
+        tvSelectedOf.isVisible = enabled
+        ivDisableSelectionMode.isVisible = enabled
+        ivUseSelected.isVisible = enabled
+
+        return@with
+    }
+
+    override fun setSelectingCount(selected: Int, all: Int) {
+        binding.actionBar.tvSelectedOf.text = "$selected of $all"
     }
 
     override fun setTagsFilterEnabled(enabled: Boolean) {
@@ -235,19 +234,71 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
 
     override fun toastPathsFailed(failedPaths: List<Path>) =
         toastFailedPaths(failedPaths)
+    override fun onSelectingChanged(enabled: Boolean) {
+        binding.rvResources.recycledViewPool.clear()
+        resourcesAdapter?.onSelectingChanged(enabled)
+    }
 
-    override fun toastIndexFailedPath(paths: List<Path>) {
-        toastIndexFailedPaths(paths)
-        Log.d(
-            RESOURCES_SCREEN,
-            getString(
-                R.string.toast_could_not_process_link_resource_by_path,
-                paths.joinToString("\n") { it.absolutePathString() }
+    private fun initMenuListeners() = with(binding) {
+        actionBar.ivDisableSelectionMode.setOnClickListener {
+            presenter.gridPresenter.onSelectingChanged(false)
+        }
+        actionBar.ivUseSelected.setOnClickListener {
+            val menuBinding = PopupSelectedResourcesActionsBinding
+                .inflate(requireActivity().layoutInflater)
+            val popup = DefaultPopup(
+                menuBinding,
+                R.style.FadeAnimation,
+                R.drawable.bg_rounded_8,
+                24f
             )
-        )
+            menuBinding.apply {
+                btnMove.setOnClickListener {
+                    ArkFilePickerFragment
+                        .newInstance(moveFilePickerConfig())
+                        .show(childFragmentManager, null)
+                    popup.popupWindow.dismiss()
+                }
+                btnCopy.setOnClickListener {
+                    ArkFilePickerFragment
+                        .newInstance(copyFilePickerConfig())
+                        .show(childFragmentManager, null)
+                    popup.popupWindow.dismiss()
+                }
+                btnRemove.setOnClickListener {
+                    presenter.onRemoveSelectedResourcesClicked()
+                    popup.popupWindow.dismiss()
+                }
+            }
+            popup.showBelow(it)
+        }
+        actionBar.btnSort.setOnClickListener {
+            val dialog = SortDialogFragment.newInstance()
+            dialog.show(childFragmentManager, null)
+        }
+        actionBar.btnNormalMode.setOnClickListener {
+            presenter.tagsSelectorPresenter.onQueryModeChanged(QueryMode.NORMAL)
+        }
+        actionBar.btnFocusMode.setOnClickListener {
+            presenter.tagsSelectorPresenter.onQueryModeChanged(QueryMode.FOCUS)
+        }
     }
 
     private fun initResultListeners() {
+        childFragmentManager.onArkPathPicked(
+            this,
+            MOVE_SELECTED_REQUEST_KEY
+        ) {
+            presenter.onMoveSelectedResourcesClicked(it)
+        }
+
+        childFragmentManager.onArkPathPicked(
+            this,
+            COPY_SELECTED_REQUEST_KEY
+        ) {
+            presenter.onCopySelectedResourcesClicked(it)
+        }
+
         setFragmentResultListener(
             GalleryFragment.REQUEST_TAGS_CHANGED_KEY
         ) { _, _ ->
@@ -359,7 +410,33 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         } == null
     }
 
+    override fun toastIndexFailedPath(paths: List<Path>) {
+        toastIndexFailedPaths(paths)
+        Log.d(
+            RESOURCES_SCREEN,
+            getString(
+                R.string.toast_could_not_process_link_resource_by_path,
+                paths.joinToString("\n") { it.absolutePathString() }
+            )
+        )
+    }
+
+    private fun moveFilePickerConfig() = ArkFilePickerConfig(
+        titleStringId = R.string.move_to,
+        mode = ArkFilePickerMode.FOLDER,
+        pathPickedRequestKey = MOVE_SELECTED_REQUEST_KEY
+    )
+
+    private fun copyFilePickerConfig() = ArkFilePickerConfig(
+        titleStringId = R.string.copy_to,
+        mode = ArkFilePickerMode.FOLDER,
+        pathPickedRequestKey = COPY_SELECTED_REQUEST_KEY
+    )
+
     companion object {
+        private const val MOVE_SELECTED_REQUEST_KEY = "moveSelected"
+        private const val COPY_SELECTED_REQUEST_KEY = "copySelected"
+
         private const val DRAG_TRAVEL_TIME_THRESHOLD = 30 // milliseconds
         private const val DRAG_TRAVEL_DELTA_THRESHOLD = 0.1 // ratio
         private const val DRAG_TRAVEL_SPEED_THRESHOLD =

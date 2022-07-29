@@ -2,10 +2,6 @@ package space.taran.arknavigator.mvp.presenter
 
 import android.util.Log
 import androidx.recyclerview.widget.DiffUtil
-import java.io.FileReader
-import java.nio.file.Files
-import java.nio.file.Path
-import javax.inject.Inject
 import kotlin.io.path.notExists
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -20,6 +16,7 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
 import space.taran.arknavigator.mvp.model.repo.kind.ResourceKind
+import space.taran.arknavigator.mvp.model.repo.preview.PreviewAndThumbnail
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import space.taran.arknavigator.mvp.presenter.adapter.ResourceMetaDiffUtilCallback
@@ -30,6 +27,11 @@ import space.taran.arknavigator.ui.adapter.previewpager.PreviewItemView
 import space.taran.arknavigator.ui.adapter.previewpager.PreviewPlainTextItemView
 import space.taran.arknavigator.utils.LogTags.GALLERY_SCREEN
 import space.taran.arknavigator.utils.Tag
+import java.io.FileReader
+import java.nio.file.Files
+import java.nio.file.Path
+import javax.inject.Inject
+import kotlin.io.path.getLastModifiedTime
 
 enum class GalleryItemType {
     PLAINTEXT, OTHER
@@ -100,16 +102,18 @@ class GalleryPresenter(
         }
     }
 
-    fun onPageChanged(newPos: Int) {
+    fun onPageChanged(newPos: Int) = presenterScope.launch {
         if (resources.isEmpty())
-            return
+            return@launch
 
-        val path = index.getPath(resources[newPos].id)
-        if (path.notExists())
-            onRemovedResourceDetected()
+        checkResourceChanges(newPos)
 
         currentPos = newPos
         displayPreview()
+    }
+
+    fun onResume() {
+        checkResourceChanges(currentPos)
     }
 
     fun detectItemType(pos: Int) = when (resources[pos].kind) {
@@ -117,7 +121,7 @@ class GalleryPresenter(
         else -> GalleryItemType.OTHER
     }
 
-    fun bindView(view: PreviewItemView) {
+    fun bindView(view: PreviewItemView) = presenterScope.launch {
         view.reset()
         val meta = resources[view.pos]
         val path = index.getPath(meta.id)
@@ -139,31 +143,31 @@ class GalleryPresenter(
         viewState.displayPreviewTags(currentResource.id, tags)
     }
 
-    fun onOpenFabClick() {
+    fun onOpenFabClick() = presenterScope.launch {
         Log.d(GALLERY_SCREEN, "[open_resource] clicked at position $currentPos")
         val kind = currentResource.kind
         if (kind is ResourceKind.Link) {
-            val url = kind.url ?: return
+            val url = kind.url ?: return@launch
             viewState.openLink(url)
-            return
+            return@launch
         }
 
         viewState.viewInExternalApp(index.getPath(currentResource.id))
     }
 
-    fun onShareFabClick() {
+    fun onShareFabClick() = presenterScope.launch {
         Log.d(GALLERY_SCREEN, "[share_resource] clicked at position $currentPos")
         val kind = currentResource.kind
         if (kind is ResourceKind.Link) {
-            val url = kind.url ?: return
+            val url = kind.url ?: return@launch
             viewState.shareLink(url)
-            return
+            return@launch
         }
 
         viewState.shareResource(index.getPath(currentResource.id))
     }
 
-    fun onEditFabClick() {
+    fun onEditFabClick() = presenterScope.launch {
         Log.d(GALLERY_SCREEN, "[edit_resource] clicked at position $currentPos")
         viewState.editResource(index.getPath(currentResource.id))
     }
@@ -202,6 +206,20 @@ class GalleryPresenter(
         viewState.showEditTagsDialog(currentResource.id)
     }
 
+    private fun checkResourceChanges(
+        pos: Int
+    ) = presenterScope.launch(Dispatchers.IO) {
+        if (resources.isEmpty()) return@launch
+        val meta = resources[pos]
+        val path = index.getPath(meta.id)
+        if (path.notExists()) {
+            onRemovedResourceDetected()
+            return@launch
+        }
+        if (path.getLastModifiedTime() != meta.modified)
+            onEditedResourceDetected(path, meta)
+    }
+
     private suspend fun deleteResource(resource: ResourceId) {
         Log.d(GALLERY_SCREEN, "deleting resource $resource")
 
@@ -215,7 +233,7 @@ class GalleryPresenter(
         }
     }
 
-    private fun displayPreview() {
+    private fun displayPreview() = presenterScope.launch {
         val resource = resources[currentPos]
         val tags = storage.getTags(resource.id)
         val filePath = index.getPath(resource.id)
@@ -223,7 +241,7 @@ class GalleryPresenter(
         viewState.displayPreviewTags(resource.id, tags)
     }
 
-    private fun onRemovedResourceDetected() = presenterScope.launch {
+    private suspend fun onRemovedResourceDetected() = withContext(Dispatchers.Main) {
         viewState.setProgressVisibility(true, "Indexing")
 
         index.reindex(indexFailedPathCallback)
@@ -235,7 +253,30 @@ class GalleryPresenter(
         checkIndexFailedPath()
     }
 
-    private fun invalidateResources() {
+    private suspend fun onEditedResourceDetected(
+        path: Path,
+        oldMeta: ResourceMeta
+    ) = withContext(Dispatchers.IO) {
+        val newMeta = ResourceMeta.fromPath(
+            path,
+            indexFailedPathCallback
+        ) ?: return@withContext
+        PreviewAndThumbnail.generate(path, newMeta)
+
+        val indexToReplace = resources.indexOf(oldMeta)
+        resources[indexToReplace] = newMeta
+
+        index.updateResource(oldMeta.id, path, newMeta)
+        tagsStorageRepo.provide(rootAndFav, indexFailedPathCallback)
+
+        withContext(Dispatchers.Main) {
+            viewState.notifyCurrentItemChanged()
+            viewState.notifyResourcesChanged()
+        }
+        checkIndexFailedPath()
+    }
+
+    private suspend fun invalidateResources() {
         val indexedIds = index.listIds(rootAndFav.fav)
         val newResources =
             resources.filter { meta -> indexedIds.contains(meta.id) }.toMutableList()
@@ -261,7 +302,7 @@ class GalleryPresenter(
         viewState.setControlsVisibility(isControlsVisible)
     }
 
-    fun onPlayButtonClick() {
+    fun onPlayButtonClick() = presenterScope.launch {
         viewState.viewInExternalApp(index.getPath(currentResource.id))
     }
 

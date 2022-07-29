@@ -1,7 +1,6 @@
 package space.taran.arknavigator.ui.fragments
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
@@ -13,7 +12,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.addCallback
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
 import androidx.core.os.bundleOf
 import androidx.core.view.doOnNextLayout
@@ -68,20 +66,6 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
         }
     }
 
-    private val imageEditor =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            it.data?.let { intent ->
-                Log.d(GALLERY_SCREEN, "Edit image result: $intent")
-                if (it.resultCode == Activity.RESULT_OK) {
-                    val originFileUri = intent.getStringExtra("RESULT_ORIGINAL_URI")
-                    val saveFileUri = intent.getStringExtra("RESULT_SAVE_URI")
-                    Log.d(GALLERY_SCREEN, "RESULT_ORIGINAL_URI: $originFileUri")
-                    Log.d(GALLERY_SCREEN, "RESULT_SAVE_URI: $saveFileUri")
-                    pagerAdapter.notifyItemChanged(binding.viewPager.currentItem)
-                }
-            }
-        }
-
     private lateinit var pagerAdapter: PreviewsPager
 
     override fun onCreateView(
@@ -107,7 +91,6 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
         initResultListener()
 
         FullscreenHelper.setStatusBarVisibility(false, requireActivity().window)
-        (requireActivity() as MainActivity).setToolbarVisibility(false)
         (requireActivity() as MainActivity).setBottomNavigationVisibility(false)
 
         requireActivity().onBackPressedDispatcher.addCallback(this) {
@@ -180,7 +163,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
             putExtra("real_file_path_2", resourcePath.toString())
         }
         try {
-            imageEditor.launch(intent)
+            requireContext().startActivity(intent)
         } catch (e: ActivityNotFoundException) {
             Toast.makeText(
                 requireContext(), getString(R.string.no_app_found_to_open_this_file),
@@ -303,8 +286,16 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
 
     override fun exitFullscreen() {
         FullscreenHelper.setStatusBarVisibility(true, requireActivity().window)
-        (requireActivity() as MainActivity).setToolbarVisibility(true)
         (requireActivity() as MainActivity).setBottomNavigationVisibility(true)
+    }
+
+    override fun notifyCurrentItemChanged() {
+        pagerAdapter.notifyItemChanged(binding.viewPager.currentItem)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        presenter.onResume()
     }
 
     private fun initViewPager() = with(binding.viewPager) {
@@ -324,7 +315,11 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
     private fun showTagMenuPopup(tag: Tag, tagView: View) {
         val menuBinding = PopupGalleryTagMenuBinding
             .inflate(requireActivity().layoutInflater)
-        val popup = DefaultPopup(menuBinding, R.style.BottomFadeScaleAnimation)
+        val popup = DefaultPopup(
+            menuBinding,
+            R.style.BottomFadeScaleAnimation,
+            R.drawable.bg_rounded_16dp
+        )
         menuBinding.apply {
             btnNewSelection.setOnClickListener {
                 presenter.onTagSelected(tag)

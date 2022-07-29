@@ -17,11 +17,12 @@
         android:id="@+id/layout_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
+        android:background="@drawable/bg_rounded_6_top"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <HorizontalScrollView
+            android:layout_marginTop="4dp"
             android:id="@+id/horizontalScrollView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -89,7 +90,7 @@
                 android:background="@null"
                 android:imeOptions="actionDone|flagNoExtractUi"
                 android:inputType="text"
-                app:layout_minWidth="10dp" />
+                app:layout_minWidth="20dp" />
 
             <ImageView
                 android:id="@+id/btn_add"

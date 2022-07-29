@@ -46,7 +46,6 @@ class SettingsFragment : MvpAppCompatFragment(), SettingsView {
     override fun init() {
         Log.d(SETTINGS_SCREEN, "initializing SettingsFragment")
         (activity as MainActivity).setSelectedTab(R.id.page_settings)
-        (activity as MainActivity).setToolbarVisibility(false)
         (requireActivity() as MainActivity).setBottomNavigationVisibility(true)
         initListeners()
 

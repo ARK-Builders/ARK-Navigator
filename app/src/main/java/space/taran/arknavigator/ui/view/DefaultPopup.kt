@@ -1,24 +1,31 @@
 package space.taran.arknavigator.ui.view
 
-import android.graphics.Color
 import android.graphics.Rect
-import android.graphics.drawable.ColorDrawable
 import android.view.Gravity
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.PopupWindow
+import androidx.annotation.DrawableRes
 import androidx.annotation.StyleRes
+import androidx.core.content.res.ResourcesCompat
 import androidx.viewbinding.ViewBinding
+import space.taran.arknavigator.utils.dpToPx
 
-class DefaultPopup(val binding: ViewBinding, @StyleRes val styleId: Int) {
+class DefaultPopup(
+    val binding: ViewBinding,
+    @StyleRes val animationId: Int? = null,
+    @DrawableRes val bgId: Int? = null,
+    val elevation: Float = 0f,
+) {
     val popupWindow: PopupWindow
 
     init {
+        val context = binding.root.context
         binding.root.measure(
             View.MeasureSpec.UNSPECIFIED,
             View.MeasureSpec.UNSPECIFIED
         )
-        popupWindow = PopupWindow(binding.root.context)
+        popupWindow = PopupWindow(context)
         popupWindow.apply {
             contentView = binding.root
             width = LinearLayout.LayoutParams.WRAP_CONTENT
@@ -28,8 +35,16 @@ class DefaultPopup(val binding: ViewBinding, @StyleRes val styleId: Int) {
                     View.MeasureSpec.UNSPECIFIED
                 )
             isFocusable = true
-            animationStyle = styleId
-            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            animationId?.let { animationStyle = it }
+            bgId?.let {
+                val drawable = ResourcesCompat.getDrawable(
+                    context.resources,
+                    it,
+                    null
+                )
+                setBackgroundDrawable(drawable)
+            }
+            elevation = context.dpToPx(this@DefaultPopup.elevation)
         }
     }
 
@@ -42,6 +57,18 @@ class DefaultPopup(val binding: ViewBinding, @StyleRes val styleId: Int) {
             Gravity.NO_GRAVITY,
             popupLeft,
             targetRect.top - binding.root.measuredHeight
+        )
+    }
+
+    fun showBelow(target: View) {
+        val targetRect = getViewRectOnScreen(target)
+        val xOffset = (target.width - binding.root.measuredWidth) / 2
+        val popupLeft = targetRect.left + xOffset
+        popupWindow.showAtLocation(
+            target,
+            Gravity.NO_GRAVITY,
+            popupLeft,
+            targetRect.top + targetRect.height()
         )
     }
 
