@@ -1,6 +1,8 @@
 package space.taran.arknavigator.mvp.model.repo.index
 
 import android.util.Log
+import java.nio.file.Path
+import kotlin.system.measureTimeMillis
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -12,8 +14,6 @@ import space.taran.arknavigator.mvp.model.repo.index.PlainResourcesIndex.Compani
 import space.taran.arknavigator.mvp.model.repo.index.PlainResourcesIndex.Companion.loadResources
 import space.taran.arknavigator.mvp.model.repo.index.PlainResourcesIndex.Companion.scanResources
 import space.taran.arknavigator.utils.LogTags.RESOURCES_INDEX
-import java.nio.file.Path
-import kotlin.system.measureTimeMillis
 
 class ResourcesIndexRepo(
     private val dao: ResourceDao,
@@ -22,7 +22,10 @@ class ResourcesIndexRepo(
     private val provideMutex = Mutex()
     private val indexByRoot = mutableMapOf<Path, PlainResourcesIndex>()
 
-    suspend fun loadFromDatabase(root: Path): PlainResourcesIndex =
+    suspend fun loadFromDatabase(
+        root: Path,
+        indexFailedPathCallback: IndexFailedPathCallback
+    ): PlainResourcesIndex =
         withContext(Dispatchers.IO) {
             Log.d(
                 RESOURCES_INDEX,
@@ -38,13 +41,15 @@ class ResourcesIndexRepo(
 
             val index = PlainResourcesIndex(root, dao, loadResources(resources))
             Log.d(RESOURCES_INDEX, "index created")
-
-            index.reindex()
+            index.reindex(indexFailedPathCallback)
             indexByRoot[root] = index
             return@withContext index
         }
 
-    suspend fun buildFromFilesystem(root: Path): PlainResourcesIndex =
+    suspend fun buildFromFilesystem(
+        root: Path,
+        indexFailedPathCallback: IndexFailedPathCallback
+    ): PlainResourcesIndex =
         withContext(Dispatchers.IO) {
             Log.d(RESOURCES_INDEX, "building index from root $root")
 
@@ -61,7 +66,7 @@ class ResourcesIndexRepo(
             var metadata: Map<Path, ResourceMeta>
 
             val time2 = measureTimeMillis {
-                metadata = scanResources(files)
+                metadata = scanResources(files, indexFailedPathCallback)
             }
             Log.d(
                 RESOURCES_INDEX,
@@ -75,14 +80,17 @@ class ResourcesIndexRepo(
             return@withContext index
         }
 
-    suspend fun provide(rootAndFav: RootAndFav): ResourcesIndex =
+    suspend fun provide(
+        rootAndFav: RootAndFav,
+        indexFailedPathCallback: IndexFailedPathCallback
+    ): ResourcesIndex =
         withContext(Dispatchers.IO) {
             val roots = foldersRepo.resolveRoots(rootAndFav)
 
             provideMutex.withLock {
                 val indexShards = roots.map { root ->
                     indexByRoot[root] ?: let {
-                        val index = loadFromDatabase(root)
+                        val index = loadFromDatabase(root, indexFailedPathCallback)
                         indexByRoot[root] = index
                         index
                     }
@@ -92,8 +100,13 @@ class ResourcesIndexRepo(
             }
         }
 
-    suspend fun provide(root: Path): ResourcesIndex =
-        provide(RootAndFav(root.toString(), favString = null))
+    suspend fun provide(
+        root: Path,
+        indexFailedPathCallback: IndexFailedPathCallback
+    ): ResourcesIndex = provide(
+        RootAndFav(root.toString(), favString = null),
+        indexFailedPathCallback
+    )
 
     suspend fun isIndexed(rootAndFav: RootAndFav): Boolean {
         val roots = foldersRepo.resolveRoots(rootAndFav)

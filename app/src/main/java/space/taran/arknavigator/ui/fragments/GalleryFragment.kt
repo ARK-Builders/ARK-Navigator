@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.chip.Chip
 import java.nio.file.Path
+import kotlin.io.path.absolutePathString
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import space.taran.arknavigator.BuildConfig
@@ -41,6 +42,7 @@ import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.adapter.previewpager.PreviewsPager
 import space.taran.arknavigator.ui.extra.ExtraLoader
 import space.taran.arknavigator.ui.fragments.dialog.EditTagsDialogFragment
+import space.taran.arknavigator.ui.fragments.utils.toastIndexFailedPaths
 import space.taran.arknavigator.ui.view.DefaultPopup
 import space.taran.arknavigator.ui.view.DepthPageTransformer
 import space.taran.arknavigator.utils.FullscreenHelper
@@ -230,6 +232,16 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
         setFragmentResult(REQUEST_TAGS_CHANGED_KEY, bundleOf())
     }
 
+    override fun toastIndexFailedPath(paths: List<Path>) {
+        toastIndexFailedPaths(paths)
+        Log.d(
+            GALLERY_SCREEN,
+            getString(
+                R.string.toast_could_not_process_link_resource_by_path,
+                paths.joinToString("\n") { it.absolutePathString() }
+            )
+        )
+    }
     override fun displayPreviewTags(resource: ResourceId, tags: Tags) {
         Log.d(
             GALLERY_SCREEN,

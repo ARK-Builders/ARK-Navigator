@@ -2,6 +2,11 @@ package space.taran.arknavigator.mvp.presenter
 
 import android.util.Log
 import androidx.recyclerview.widget.DiffUtil
+import java.io.FileReader
+import java.nio.file.Files
+import java.nio.file.Path
+import javax.inject.Inject
+import kotlin.io.path.notExists
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
@@ -9,6 +14,7 @@ import kotlinx.coroutines.withContext
 import moxy.MvpPresenter
 import moxy.presenterScope
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
+import space.taran.arknavigator.mvp.model.repo.index.IndexFailedPathCallback
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
@@ -24,11 +30,6 @@ import space.taran.arknavigator.ui.adapter.previewpager.PreviewItemView
 import space.taran.arknavigator.ui.adapter.previewpager.PreviewPlainTextItemView
 import space.taran.arknavigator.utils.LogTags.GALLERY_SCREEN
 import space.taran.arknavigator.utils.Tag
-import java.io.FileReader
-import java.nio.file.Files
-import java.nio.file.Path
-import javax.inject.Inject
-import kotlin.io.path.notExists
 
 enum class GalleryItemType {
     PLAINTEXT, OTHER
@@ -63,6 +64,14 @@ class GalleryPresenter(
     @Inject
     lateinit var tagsStorageRepo: TagsStorageRepo
 
+    val failedPaths = mutableListOf<Path>()
+    val indexFailedPathCallback = object : IndexFailedPathCallback {
+        override fun indexFailed(path: Path) {
+            if (failedPaths.contains(path))
+                failedPaths.add(path)
+        }
+    }
+
     override fun onFirstViewAttach() {
         Log.d(GALLERY_SCREEN, "first view attached in GalleryPresenter")
         super.onFirstViewAttach()
@@ -73,12 +82,21 @@ class GalleryPresenter(
             if (!indexRepo.isIndexed(rootAndFav))
                 viewState.setProgressVisibility(true, "Indexing")
 
-            index = indexRepo.provide(rootAndFav)
-            storage = tagsStorageRepo.provide(rootAndFav)
+            index = indexRepo.provide(rootAndFav, indexFailedPathCallback)
+            storage = tagsStorageRepo.provide(rootAndFav, indexFailedPathCallback)
             resources = resourcesIds.map { index.getMeta(it) }.toMutableList()
 
             viewState.updatePagerAdapter()
             viewState.setProgressVisibility(false)
+            checkIndexFailedPath()
+        }
+    }
+
+    private fun checkIndexFailedPath() {
+        if (failedPaths.isEmpty()) return
+        presenterScope.launch(Dispatchers.Main) {
+            viewState.toastIndexFailedPath(failedPaths)
+            failedPaths.clear()
         }
     }
 
@@ -208,12 +226,13 @@ class GalleryPresenter(
     private fun onRemovedResourceDetected() = presenterScope.launch {
         viewState.setProgressVisibility(true, "Indexing")
 
-        index.reindex()
+        index.reindex(indexFailedPathCallback)
         // update current tags storage
-        tagsStorageRepo.provide(rootAndFav)
+        tagsStorageRepo.provide(rootAndFav, indexFailedPathCallback)
         invalidateResources()
         viewState.setProgressVisibility(false)
         viewState.notifyResourcesChanged()
+        checkIndexFailedPath()
     }
 
     private fun invalidateResources() {

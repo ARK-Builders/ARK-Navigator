@@ -1,6 +1,11 @@
 package space.taran.arknavigator.mvp.model.repo.index
 
 import android.util.Log
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
+import kotlin.io.path.ExperimentalPathApi
+import kotlin.system.measureTimeMillis
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.supervisorScope
@@ -14,11 +19,6 @@ import space.taran.arknavigator.mvp.model.repo.preview.PreviewAndThumbnail
 import space.taran.arknavigator.utils.LogTags.PREVIEWS
 import space.taran.arknavigator.utils.LogTags.RESOURCES_INDEX
 import space.taran.arknavigator.utils.listChildren
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
-import kotlin.io.path.ExperimentalPathApi
-import kotlin.system.measureTimeMillis
 
 internal data class Difference(
     val deleted: List<Path>,
@@ -34,8 +34,7 @@ class PlainResourcesIndex internal constructor(
     private val root: Path,
     private val dao: ResourceDao,
     resources: Map<Path, ResourceMeta>
-) :
-    ResourcesIndex {
+) : ResourcesIndex {
 
     internal val metaByPath: MutableMap<Path, ResourceMeta> =
         resources.toMutableMap()
@@ -68,8 +67,10 @@ class PlainResourcesIndex internal constructor(
         return tryRemove(id)!!
     }
 
-    override suspend fun reindex(): Unit = withContext(Dispatchers.IO) {
-        reindexRoot(calculateDifference())
+    override suspend fun reindex(
+        indexFailedPathCallback: IndexFailedPathCallback
+    ): Unit = withContext(Dispatchers.IO) {
+        reindexRoot(calculateDifference(), indexFailedPathCallback)
     }
 
     // should be only used in AggregatedResourcesIndex
@@ -104,7 +105,10 @@ class PlainResourcesIndex internal constructor(
         return path
     }
 
-    internal suspend fun reindexRoot(diff: Difference) =
+    internal suspend fun reindexRoot(
+        diff: Difference,
+        indexFailedPathCallback: IndexFailedPathCallback
+    ) =
         withContext(Dispatchers.IO) {
             Log.d(
                 RESOURCES_INDEX,
@@ -134,7 +138,7 @@ class PlainResourcesIndex internal constructor(
 
             val time1 = measureTimeMillis {
                 toInsert.forEach { path ->
-                    val meta = ResourceMeta.fromPath(path)
+                    val meta = ResourceMeta.fromPath(path, indexFailedPathCallback)
                     if (meta != null) {
                         newResources[path] = meta
                         metaByPath[path] = meta
@@ -242,11 +246,16 @@ class PlainResourcesIndex internal constructor(
 
     companion object {
 
-        internal suspend fun scanResources(files: List<Path>):
-            Map<Path, ResourceMeta> =
+        internal suspend fun scanResources(
+            files: List<Path>,
+            indexFailedPathCallback: IndexFailedPathCallback
+        ): Map<Path, ResourceMeta> =
             withContext(Dispatchers.IO) {
                 files.mapNotNull {
-                    ResourceMeta.fromPath(it)?.let { meta ->
+                    ResourceMeta.fromPath(
+                        it,
+                        indexFailedPathCallback
+                    )?.let { meta ->
                         it to meta
                     }
                 }.toMap()

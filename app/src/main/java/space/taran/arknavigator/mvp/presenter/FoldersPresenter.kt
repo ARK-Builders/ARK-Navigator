@@ -18,6 +18,8 @@ import space.taran.arknavigator.utils.LogTags.FOLDERS_SCREEN
 import space.taran.arknavigator.utils.listDevices
 import java.nio.file.Path
 import javax.inject.Inject
+import kotlinx.coroutines.Dispatchers
+import space.taran.arknavigator.mvp.model.repo.index.IndexFailedPathCallback
 
 class FoldersPresenter : MvpPresenter<FoldersView>() {
     @Inject
@@ -44,7 +46,12 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
         }
 
     private lateinit var devices: List<Path>
-
+    val failedPaths = mutableListOf<Path>()
+    val indexFailedPathCallback = object : IndexFailedPathCallback {
+        override fun indexFailed(path: Path) {
+            failedPaths.add(path)
+        }
+    }
     override fun onFirstViewAttach() {
         Log.d(FOLDERS_SCREEN, "first view attached in RootsPresenter")
         super.onFirstViewAttach()
@@ -105,10 +112,11 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
                 "Indexing ${index + 1}/${roots.size}"
             )
             foldersRepo.insertRoot(root)
-            resourcesIndexRepo.buildFromFilesystem(root)
+            resourcesIndexRepo.buildFromFilesystem(root, indexFailedPathCallback)
         }
         viewState.setProgressVisibility(false)
         foldersTreePresenter.updateNodes(devices, foldersRepo.provideFolders())
+        checkIndexFailedPath()
     }
 
     private suspend fun addRoot(root: Path) {
@@ -126,10 +134,11 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
         viewState.toastIndexingCanTakeMinutes()
 
         viewState.setProgressVisibility(true, "Indexing")
-        resourcesIndexRepo.buildFromFilesystem(root)
+        resourcesIndexRepo.buildFromFilesystem(root, indexFailedPathCallback)
         viewState.setProgressVisibility(false)
 
         foldersTreePresenter.updateNodes(devices, foldersRepo.provideFolders())
+        checkIndexFailedPath()
     }
 
     private fun addFavorite(favorite: Path) =
@@ -158,5 +167,13 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
     fun onBackClick() {
         Log.d(FOLDERS_SCREEN, "[back] clicked")
         router.exit()
+    }
+
+    private fun checkIndexFailedPath() {
+        if (failedPaths.isEmpty()) return
+        presenterScope.launch(Dispatchers.Main) {
+            viewState.toastIndexFailedPath(failedPaths)
+            failedPaths.clear()
+        }
     }
 }

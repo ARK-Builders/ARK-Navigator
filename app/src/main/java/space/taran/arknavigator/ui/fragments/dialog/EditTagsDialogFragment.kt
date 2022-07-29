@@ -3,6 +3,7 @@ package space.taran.arknavigator.ui.fragments.dialog
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -14,6 +15,8 @@ import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.setFragmentResult
 import com.google.android.material.chip.Chip
+import java.nio.file.Path
+import kotlin.io.path.absolutePathString
 import moxy.MvpAppCompatDialogFragment
 import moxy.ktx.moxyPresenter
 import space.taran.arknavigator.R
@@ -25,6 +28,8 @@ import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.presenter.dialog.EditTagsDialogPresenter
 import space.taran.arknavigator.mvp.view.dialog.EditTagsDialogView
 import space.taran.arknavigator.ui.App
+import space.taran.arknavigator.ui.fragments.utils.toastIndexFailedPaths
+import space.taran.arknavigator.utils.LogTags
 import space.taran.arknavigator.utils.Tags
 import space.taran.arknavigator.utils.extensions.placeCursorToEnd
 
@@ -134,6 +139,17 @@ class EditTagsDialogFragment(
         })
         binding.root.setTransitionDuration(CLOSE_DURATION)
         binding.root.transitionToStart()
+    }
+
+    override fun toastIndexFailedPath(paths: List<Path>) {
+        toastIndexFailedPaths(paths)
+        Log.d(
+            LogTags.TAGS_SELECTOR,
+            getString(
+                R.string.toast_could_not_process_link_resource_by_path,
+                paths.joinToString("\n") { it.absolutePathString() }
+            )
+        )
     }
 
     override fun onResume() {

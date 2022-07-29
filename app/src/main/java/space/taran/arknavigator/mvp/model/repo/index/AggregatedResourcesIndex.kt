@@ -43,7 +43,7 @@ class AggregatedResourcesIndex(
         throw AssertionError("At least one of shards must yield success")
     }
 
-    override suspend fun reindex() {
-        shards.forEach { it.reindex() }
+    override suspend fun reindex(indexFailedPathCallback: IndexFailedPathCallback) {
+        shards.forEach { it.reindex(indexFailedPathCallback) }
     }
 }

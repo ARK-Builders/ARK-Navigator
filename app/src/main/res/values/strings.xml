@@ -80,5 +80,7 @@
     <string name="crash_dialog_description">Sorry, the application crashed. Please send a report to the developers.</string>
     <string name="crash_dialog_title">Crash</string>
     <string name="crash_dialog_comment">You can add a comment here:</string>
+    <string name="toast_could_not_process_link_resource_by_path">Could not process Link resource by path %s</string>
+    <string name="toast_could_not_process_resources">Could not process %d resources</string>
 
 </resources>

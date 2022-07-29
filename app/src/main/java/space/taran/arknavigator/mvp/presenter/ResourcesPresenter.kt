@@ -24,6 +24,8 @@ import space.taran.arknavigator.utils.LogTags.RESOURCES_SCREEN
 import space.taran.arknavigator.utils.Tag
 import java.nio.file.Path
 import javax.inject.Inject
+import kotlinx.coroutines.Dispatchers
+import space.taran.arknavigator.mvp.model.repo.index.IndexFailedPathCallback
 
 class ResourcesPresenter(
     private val rootAndFav: RootAndFav,
@@ -63,6 +65,13 @@ class ResourcesPresenter(
             App.instance.appComponent.inject(this)
         }
 
+    val failedPaths = mutableListOf<Path>()
+    val indexFailedPathCallback = object : IndexFailedPathCallback {
+        override fun indexFailed(path: Path) {
+            failedPaths.add(path)
+        }
+    }
+
     override fun onFirstViewAttach() {
         Log.d(RESOURCES_SCREEN, "first view attached in ResourcesPresenter")
         super.onFirstViewAttach()
@@ -86,14 +95,19 @@ class ResourcesPresenter(
                 all.toList()
             }
             Log.d(RESOURCES_SCREEN, "using roots $roots")
+            val rootToIndex = roots.associateWith {
+                resourcesIndexRepo.loadFromDatabase(
+                    it,
+                    indexFailedPathCallback
+                )
+            }
 
-            val rootToIndex = roots
-                .map { it to resourcesIndexRepo.loadFromDatabase(it) }
-                .toMap()
-
-            val rootToStorage = roots
-                .map { it to tagsStorageRepo.provide(it) }
-                .toMap()
+            val rootToStorage = roots.associateWith {
+                tagsStorageRepo.provide(
+                    it,
+                    indexFailedPathCallback
+                )
+            }
 
             index = AggregatedResourcesIndex(rootToIndex.values)
             storage = AggregatedTagsStorage(rootToStorage.values)
@@ -117,6 +131,7 @@ class ResourcesPresenter(
 
             viewState.setToolbarTitle("$title${roots.size} of roots chosen")
             viewState.setProgressVisibility(false)
+            checkIndexFailedPath()
         }
     }
 
@@ -138,16 +153,25 @@ class ResourcesPresenter(
     suspend fun onRemovedResourceDetected() {
         viewState.setProgressVisibility(true, "Indexing")
 
-        index.reindex()
+        index.reindex(indexFailedPathCallback)
         // update current tags storage
-        tagsStorageRepo.provide(rootAndFav)
+        tagsStorageRepo.provide(rootAndFav, indexFailedPathCallback)
 
         viewState.setProgressVisibility(true, "Sorting")
         onResourcesOrTagsChanged()
         viewState.setProgressVisibility(false)
+        checkIndexFailedPath()
     }
 
     private suspend fun onSelectionChange(selection: Set<ResourceId>) {
         gridPresenter.updateSelection(selection)
+    }
+
+    private fun checkIndexFailedPath() {
+        if (failedPaths.isEmpty()) return
+        presenterScope.launch(Dispatchers.Main) {
+            viewState.toastIndexFailedPath(failedPaths)
+            failedPaths.clear()
+        }
     }
 }

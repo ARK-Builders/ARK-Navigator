@@ -1,5 +1,6 @@
 package space.taran.arknavigator.mvp.model.repo.index
 
+import java.io.IOException
 import space.taran.arknavigator.mvp.model.dao.ResourceWithExtra
 import space.taran.arknavigator.mvp.model.repo.kind.GeneralKindFactory
 import space.taran.arknavigator.mvp.model.repo.kind.ResourceKind
@@ -19,14 +20,22 @@ data class ResourceMeta(
 
     companion object {
 
-        fun fromPath(path: Path): ResourceMeta? {
+        fun fromPath(
+            path: Path,
+            indexFailedPathCallback: IndexFailedPathCallback
+        ): ResourceMeta? {
             val size = Files.size(path)
             if (size < 1) {
                 return null
             }
 
             val id = computeId(size, path)
-            val kind = GeneralKindFactory.fromPath(path)
+            val kind = try {
+                GeneralKindFactory.fromPath(path)
+            } catch (e: IOException) {
+                indexFailedPathCallback.indexFailed(path)
+                null
+            }
 
             return ResourceMeta(
                 id = id,
