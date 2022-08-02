@@ -2,8 +2,11 @@ package space.taran.arknavigator.mvp.model.repo.tags
 
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.utils.Tags
+import java.nio.file.Path
 
 interface TagsStorage {
+
+    fun roots(): List<Path>
 
     fun contains(id: ResourceId): Boolean
 
@@ -15,7 +18,7 @@ interface TagsStorage {
         ids.map { it to getTags(it) }
             .toMap()
 
-    suspend fun setTags(id: ResourceId, tags: Tags)
+    suspend fun setTagsAndPersist(id: ResourceId, tags: Tags)
 
     fun listUntaggedResources(): Set<ResourceId>
 

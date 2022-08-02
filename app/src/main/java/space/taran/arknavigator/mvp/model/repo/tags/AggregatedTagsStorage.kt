@@ -2,11 +2,13 @@ package space.taran.arknavigator.mvp.model.repo.tags
 
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.utils.Tags
+import java.nio.file.Path
 
 class AggregatedTagsStorage(
     private val shards: Collection<TagsStorage>
-) :
-    TagsStorage {
+) : TagsStorage {
+
+    override fun roots(): List<Path> = shards.flatMap { it.roots() }
 
     override fun contains(id: ResourceId): Boolean =
         shards.any { it.contains(id) }
@@ -26,10 +28,10 @@ class AggregatedTagsStorage(
     override fun getTags(ids: Iterable<ResourceId>): Tags =
         ids.flatMap { id -> getTags(id) }.toSet()
 
-    override suspend fun setTags(id: ResourceId, tags: Tags) =
+    override suspend fun setTagsAndPersist(id: ResourceId, tags: Tags) =
         shards.forEach {
             if (it.contains(id))
-                it.setTags(id, tags)
+                it.setTagsAndPersist(id, tags)
         }
 
     // assuming that resources in the shards do not overlap

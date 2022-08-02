@@ -133,7 +133,7 @@ class EditTagsDialogPresenter(
         if (input.isNotEmpty()) {
             resourceTags += input
         }
-        storage.setTags(resourceId, resourceTags)
+        storage.setTagsAndPersist(resourceId, resourceTags)
         viewState.dismissDialog()
     }
 

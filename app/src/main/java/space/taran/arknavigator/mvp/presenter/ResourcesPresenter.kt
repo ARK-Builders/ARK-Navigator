@@ -16,6 +16,7 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.tags.AggregatedTagsStorage
+import space.taran.arknavigator.mvp.model.repo.tags.PlainTagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import space.taran.arknavigator.mvp.presenter.adapter.ResourcesGridPresenter
@@ -25,6 +26,7 @@ import space.taran.arknavigator.navigation.AppRouter
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.utils.LogTags.RESOURCES_SCREEN
 import space.taran.arknavigator.utils.Tag
+import space.taran.arknavigator.utils.findNotExistName
 import java.nio.file.Path
 import javax.inject.Inject
 import kotlin.io.path.copyTo
@@ -132,17 +134,20 @@ class ResourcesPresenter(
         withContext(Dispatchers.Main) {
             viewState.setProgressVisibility(true, "Moving")
         }
-        val resourcesToMove = gridPresenter.resources.filter { it.isSelected }
-        val results = resourcesToMove.map { item ->
-            async {
-                val path = index.getPath(item.meta.id)
-                val newPath = directoryToMove.resolve(path.name)
+        val resourcesToMove = gridPresenter
+            .resources
+            .filter { it.isSelected }
+            .map { it.meta.id }
+        val jobs = resourcesToMove.map { id ->
+            launch {
+                val path = index.getPath(id)
+                val newPath = directoryToMove.findNotExistName(path.name)
                 path.copyTo(newPath)
                 if (path != newPath)
                     path.deleteIfExists()
             }
         }
-        results.forEach { it.await() }
+        jobs.forEach { it.join() }
         index.reindex()
         tagsStorageRepo.provide(rootAndFav)
         withContext(Dispatchers.Main) {
@@ -150,22 +155,27 @@ class ResourcesPresenter(
             gridPresenter.onSelectingChanged(false)
             viewState.setProgressVisibility(false)
         }
+        migrateTags(resourcesToMove, directoryToMove)
     }
 
     fun onCopySelectedResourcesClicked(
         directoryToCopy: Path
     ) = presenterScope.launch(Dispatchers.IO) {
-        val resourcesToCopy = gridPresenter.resources.filter { it.isSelected }
-        resourcesToCopy.forEach { item ->
+        val resourcesToCopy = gridPresenter
+            .resources
+            .filter { it.isSelected }
+            .map { it.meta.id }
+        resourcesToCopy.map { id ->
             launch {
-                val path = index.getPath(item.meta.id)
-                val newPath = directoryToCopy.resolve(path.name)
+                val path = index.getPath(id)
+                val newPath = directoryToCopy.findNotExistName(path.name)
                 path.copyTo(newPath)
             }
         }
         withContext(Dispatchers.Main) {
             gridPresenter.onSelectingChanged(false)
         }
+        migrateTags(resourcesToCopy, directoryToCopy)
     }
 
     fun onRemoveSelectedResourcesClicked() = presenterScope.launch(Dispatchers.IO) {
@@ -186,6 +196,20 @@ class ResourcesPresenter(
             onResourcesOrTagsChanged()
             gridPresenter.onSelectingChanged(false)
             viewState.setProgressVisibility(false)
+        }
+    }
+
+    private suspend fun migrateTags(resources: List<ResourceId>, to: Path) {
+        val newRoot = foldersRepo.findRootByPath(to)
+        newRoot?.let {
+            if (storage.roots().contains(newRoot))
+                return
+            val newStorage = PlainTagsStorage(it, resources, preferences).apply {
+                init()
+            }
+            resources
+                .associateWith { storage.getTags(it) }
+                .apply { newStorage.setTagsAndPersist(this) }
         }
     }
 
@@ -213,5 +237,9 @@ class ResourcesPresenter(
 
     private suspend fun onSelectionChange(selection: Set<ResourceId>) {
         gridPresenter.updateSelection(selection)
+    }
+
+    companion object {
+        private const val COPY_POSTFIX = "_1"
     }
 }

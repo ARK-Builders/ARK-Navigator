@@ -19,12 +19,13 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.attribute.FileTime
+import kotlin.io.path.getLastModifiedTime
 
 // The storage is being read from the FS both during application startup
 // and during application lifecycle since it can be changed from outside.
 // We also must persist all changes during application lifecycle into FS.
 class PlainTagsStorage(
-    root: Path,
+    val root: Path,
     val resources: Collection<ResourceId>,
     private val preferences: Preferences
 ) : TagsStorage {
@@ -78,6 +79,14 @@ class PlainTagsStorage(
         }
     }
 
+    suspend fun readStorageIfChanged() {
+        if (lastModified != storageFile.getLastModifiedTime()) {
+            tagsById.putAll(readStorage())
+        }
+    }
+
+    override fun roots(): List<Path> = listOf(root)
+
     override fun contains(id: ResourceId): Boolean = tagsById.containsKey(id)
 
     // if this id isn't present in storage, then the call is wrong
@@ -89,23 +98,23 @@ class PlainTagsStorage(
     override fun getTags(ids: Iterable<ResourceId>): Tags =
         ids.flatMap { id -> getTags(id) }.toSet()
 
-    override suspend fun setTags(id: ResourceId, tags: Tags) =
+    override suspend fun setTagsAndPersist(id: ResourceId, tags: Tags) =
         withContext(Dispatchers.IO + NonCancellable) {
-            if (!tagsById.containsKey(id)) {
-                throw AssertionError("Storage isn't aware about this resource id")
-            }
-
-            if (tags.isEmpty()) {
-                Log.d(TAGS_STORAGE, "erasing tags for $id and removing the resource")
-                tagsById.remove(id)
-            }
-
-            Log.d(TAGS_STORAGE, "new tags for resource $id: $tags")
-            tagsById[id] = tags
-
+            setTags(id, tags)
             launch { persist() }
             return@withContext
         }
+
+    suspend fun setTagsAndPersist(
+        tagsByIds: Map<ResourceId, Tags>
+    ) = withContext(Dispatchers.IO + NonCancellable) {
+        tagsByIds.forEach { idToTags ->
+            setTags(idToTags.key, idToTags.value)
+        }
+
+        launch { persist() }
+        return@withContext
+    }
 
     override fun listUntaggedResources(): Set<ResourceId> =
         tagsById
@@ -125,6 +134,26 @@ class PlainTagsStorage(
         Log.d(TAGS_STORAGE, "forgetting resource $id")
         tagsById.remove(id)
         persist()
+    }
+
+    private fun setTags(id: ResourceId, tags: Tags) {
+        if (!tagsById.containsKey(id)) {
+            error("Storage isn't aware about this resource id")
+        }
+
+        if (tags.isEmpty()) {
+            Log.d(
+                TAGS_STORAGE,
+                "erasing tags for $id and removing the resource"
+            )
+            tagsById.remove(id)
+        }
+
+        Log.d(
+            TAGS_STORAGE,
+            "new tags for resource $id: $tags"
+        )
+        tagsById[id] = tags
     }
 
     private suspend fun persist() =
