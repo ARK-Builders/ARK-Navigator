@@ -178,6 +178,15 @@ class ResourcesPresenter(
         migrateTags(resourcesToCopy, directoryToCopy)
     }
 
+    fun onShareSelectedResourcesClicked() = presenterScope.launch {
+        val selected = gridPresenter
+            .resources
+            .filter { it.isSelected }
+            .map { index.getPath(it.meta.id) }
+        viewState.shareResources(selected)
+        gridPresenter.onSelectingChanged(false)
+    }
+
     fun onRemoveSelectedResourcesClicked() = presenterScope.launch(Dispatchers.IO) {
         withContext(Dispatchers.Main) {
             viewState.setProgressVisibility(true, "Removing")

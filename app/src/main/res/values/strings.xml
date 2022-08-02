@@ -83,5 +83,6 @@
     <string name="remove">Remove</string>
     <string name="move_to">Move to</string>
     <string name="copy_to">Copy to</string>
+    <string name="share">Share</string>
 
 </resources>

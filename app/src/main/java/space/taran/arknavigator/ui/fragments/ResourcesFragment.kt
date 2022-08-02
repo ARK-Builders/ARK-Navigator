@@ -1,5 +1,6 @@
 package space.taran.arknavigator.ui.fragments
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.SystemClock
 import android.util.Log
@@ -9,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.setFragmentResultListener
@@ -21,6 +23,7 @@ import space.taran.arkfilepicker.ArkFilePickerConfig
 import space.taran.arkfilepicker.ArkFilePickerFragment
 import space.taran.arkfilepicker.ArkFilePickerMode
 import space.taran.arkfilepicker.onArkPathPicked
+import space.taran.arknavigator.BuildConfig
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.FragmentResourcesBinding
 import space.taran.arknavigator.databinding.PopupSelectedResourcesActionsBinding
@@ -238,6 +241,22 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         resourcesAdapter?.onSelectingChanged(enabled)
     }
 
+    override fun shareResources(resources: List<Path>) {
+        val fileUris = resources.map {
+            FileProvider.getUriForFile(
+                requireContext(),
+                BuildConfig.APPLICATION_ID + ".provider",
+                it.toFile()
+            )
+        }
+        val intent = Intent().apply {
+            action = Intent.ACTION_SEND_MULTIPLE
+            type = "file/*"
+            putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList(fileUris))
+        }
+        startActivity(intent)
+    }
+
     private fun initMenuListeners() = with(binding) {
         actionBar.ivDisableSelectionMode.setOnClickListener {
             presenter.gridPresenter.onSelectingChanged(false)
@@ -262,6 +281,10 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
                     ArkFilePickerFragment
                         .newInstance(copyFilePickerConfig())
                         .show(childFragmentManager, null)
+                    popup.popupWindow.dismiss()
+                }
+                btnShare.setOnClickListener {
+                    presenter.onShareSelectedResourcesClicked()
                     popup.popupWindow.dismiss()
                 }
                 btnRemove.setOnClickListener {

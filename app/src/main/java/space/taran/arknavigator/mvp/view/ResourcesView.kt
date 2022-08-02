@@ -28,4 +28,6 @@ interface ResourcesView : MvpView {
     fun toastPathsFailed(failedPaths: List<Path>)
     @StateStrategyType(SkipStrategy::class)
     fun onSelectingChanged(enabled: Boolean)
+    @StateStrategyType(SkipStrategy::class)
+    fun shareResources(resources: List<Path>)
 }
