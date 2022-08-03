@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.FileProvider
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.setFragmentResultListener
@@ -35,6 +36,7 @@ import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.adapter.ResourcesRVAdapter
 import space.taran.arknavigator.ui.adapter.TagsSelectorAdapter
+import space.taran.arknavigator.ui.fragments.dialog.ConfirmationDialogFragment
 import space.taran.arknavigator.ui.fragments.dialog.SortDialogFragment
 import space.taran.arknavigator.ui.fragments.utils.toast
 import space.taran.arknavigator.ui.fragments.utils.toastFailedPaths
@@ -46,6 +48,7 @@ import space.taran.arknavigator.utils.extensions.closeKeyboard
 import space.taran.arknavigator.utils.extensions.placeCursorToEnd
 import space.taran.arknavigator.utils.extensions.showKeyboard
 import java.nio.file.Path
+import kotlin.io.path.Path
 import kotlin.math.abs
 
 // `root` is used for querying tags storage and resources index,
@@ -254,7 +257,12 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
             type = "file/*"
             putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList(fileUris))
         }
-        startActivity(intent)
+        startActivity(
+            Intent.createChooser(
+                intent,
+                getString(R.string.share_resources_with)
+            )
+        )
     }
 
     private fun initMenuListeners() = with(binding) {
@@ -288,7 +296,20 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
                     popup.popupWindow.dismiss()
                 }
                 btnRemove.setOnClickListener {
-                    presenter.onRemoveSelectedResourcesClicked()
+                    val selectedSize = presenter.gridPresenter.resources
+                        .filter { it.isSelected }
+                        .size
+                    val description = "$selectedSize " +
+                        getString(R.string.resources_will_be_removed)
+                    ConfirmationDialogFragment
+                        .newInstance(
+                            getString(R.string.are_you_sure),
+                            description,
+                            getString(R.string.yes),
+                            getString(R.string.no),
+                            DELETE_CONFIRMATION_REQUEST_KEY
+                        )
+                        .show(parentFragmentManager, null)
                     popup.popupWindow.dismiss()
                 }
             }
@@ -310,8 +331,22 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         childFragmentManager.onArkPathPicked(
             this,
             MOVE_SELECTED_REQUEST_KEY
-        ) {
-            presenter.onMoveSelectedResourcesClicked(it)
+        ) { path ->
+            val selectedSize = presenter.gridPresenter.resources
+                .filter { it.isSelected }
+                .size
+            val description = "$selectedSize " +
+                getString(R.string.resources_will_be_moved)
+            ConfirmationDialogFragment
+                .newInstance(
+                    getString(R.string.are_you_sure),
+                    description,
+                    getString(R.string.yes),
+                    getString(R.string.no),
+                    MOVE_CONFIRMATION_REQUEST_KEY,
+                    bundleOf(MOVE_TO_PATH_KEY to path.toString())
+                )
+                .show(parentFragmentManager, null)
         }
 
         childFragmentManager.onArkPathPicked(
@@ -319,6 +354,23 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
             COPY_SELECTED_REQUEST_KEY
         ) {
             presenter.onCopySelectedResourcesClicked(it)
+        }
+
+        setFragmentResultListener(
+            MOVE_CONFIRMATION_REQUEST_KEY
+        ) { _, bundle ->
+            presenter.onMoveSelectedResourcesClicked(
+                Path(
+                    bundle
+                        .getString(MOVE_TO_PATH_KEY)!!
+                )
+            )
+        }
+
+        setFragmentResultListener(
+            DELETE_CONFIRMATION_REQUEST_KEY
+        ) { _, _ ->
+            presenter.onRemoveSelectedResourcesClicked()
         }
 
         setFragmentResultListener(
@@ -447,6 +499,9 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
     companion object {
         private const val MOVE_SELECTED_REQUEST_KEY = "moveSelected"
         private const val COPY_SELECTED_REQUEST_KEY = "copySelected"
+        private const val MOVE_CONFIRMATION_REQUEST_KEY = "moveConfirm"
+        private const val DELETE_CONFIRMATION_REQUEST_KEY = "deleteConfirm"
+        private const val MOVE_TO_PATH_KEY = "moveToPath"
 
         private const val DRAG_TRAVEL_TIME_THRESHOLD = 30 // milliseconds
         private const val DRAG_TRAVEL_DELTA_THRESHOLD = 0.1 // ratio

@@ -26,7 +26,7 @@ import space.taran.arknavigator.navigation.AppRouter
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.utils.LogTags.RESOURCES_SCREEN
 import space.taran.arknavigator.utils.Tag
-import space.taran.arknavigator.utils.findNotExistName
+import space.taran.arknavigator.utils.findNotExistCopyName
 import java.nio.file.Path
 import javax.inject.Inject
 import kotlin.io.path.copyTo
@@ -141,13 +141,14 @@ class ResourcesPresenter(
         val jobs = resourcesToMove.map { id ->
             launch {
                 val path = index.getPath(id)
-                val newPath = directoryToMove.findNotExistName(path.name)
+                val newPath = directoryToMove.findNotExistCopyName(path.name)
                 path.copyTo(newPath)
                 if (path != newPath)
                     path.deleteIfExists()
             }
         }
         jobs.forEach { it.join() }
+        migrateTags(resourcesToMove, directoryToMove)
         index.reindex()
         tagsStorageRepo.provide(rootAndFav)
         withContext(Dispatchers.Main) {
@@ -155,7 +156,6 @@ class ResourcesPresenter(
             gridPresenter.onSelectingChanged(false)
             viewState.setProgressVisibility(false)
         }
-        migrateTags(resourcesToMove, directoryToMove)
     }
 
     fun onCopySelectedResourcesClicked(
@@ -168,7 +168,7 @@ class ResourcesPresenter(
         resourcesToCopy.map { id ->
             launch {
                 val path = index.getPath(id)
-                val newPath = directoryToCopy.findNotExistName(path.name)
+                val newPath = directoryToCopy.findNotExistCopyName(path.name)
                 path.copyTo(newPath)
             }
         }
@@ -211,8 +211,6 @@ class ResourcesPresenter(
     private suspend fun migrateTags(resources: List<ResourceId>, to: Path) {
         val newRoot = foldersRepo.findRootByPath(to)
         newRoot?.let {
-            if (storage.roots().contains(newRoot))
-                return
             val newStorage = PlainTagsStorage(it, resources, preferences).apply {
                 init()
             }

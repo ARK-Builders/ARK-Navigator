@@ -2,13 +2,10 @@ package space.taran.arknavigator.mvp.model.repo.tags
 
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.utils.Tags
-import java.nio.file.Path
 
 class AggregatedTagsStorage(
     private val shards: Collection<TagsStorage>
 ) : TagsStorage {
-
-    override fun roots(): List<Path> = shards.flatMap { it.roots() }
 
     override fun contains(id: ResourceId): Boolean =
         shards.any { it.contains(id) }

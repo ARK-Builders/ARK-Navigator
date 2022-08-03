@@ -3,12 +3,9 @@ package space.taran.arknavigator.stub
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.utils.Tags
-import java.nio.file.Path
 
 class TagsStorageStub : TagsStorage {
     private val tagsById = TestData.tagsById().toMutableMap()
-
-    override fun roots(): List<Path> = emptyList()
 
     override fun contains(id: ResourceId): Boolean =
         tagsById.contains(id)

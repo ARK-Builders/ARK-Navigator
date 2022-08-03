@@ -49,7 +49,7 @@ fun listChildren(folder: Path): Pair<List<Path>, List<Path>> = folder
     .filter { !Files.isHidden(it) }
     .partition { Files.isDirectory(it) }
 
-fun Path.findNotExistName(name: String): Path {
+fun Path.findNotExistCopyName(name: String): Path {
     var filesCounter = 1
     var newPath = this.resolve(name)
     while (newPath.exists()) {

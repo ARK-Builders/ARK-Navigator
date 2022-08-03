@@ -50,7 +50,7 @@ class SettingsFragment : MvpAppCompatFragment(), SettingsView {
         initListeners()
 
         childFragmentManager.setFragmentResultListener(
-            ConfirmationDialogFragment.POSITIVE_KEY,
+            ConfirmationDialogFragment.DEFAULT_POSITIVE_REQUEST_KEY,
             this
         ) { _, _ ->
             presenter.onResetPreferencesClick()
@@ -115,7 +115,7 @@ class SettingsFragment : MvpAppCompatFragment(), SettingsView {
 
         resetPreferences.setOnClickListener {
             val dialog = ConfirmationDialogFragment.newInstance(
-                getString(R.string.are_you_sure_),
+                getString(R.string.are_you_sure),
                 getString(R.string.all_preferences_will_be_reset_to_default),
                 getString(R.string.yes),
                 getString(R.string.no)

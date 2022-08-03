@@ -20,6 +20,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.attribute.FileTime
 import kotlin.io.path.getLastModifiedTime
+import kotlin.io.path.notExists
 
 // The storage is being read from the FS both during application startup
 // and during application lifecycle since it can be changed from outside.
@@ -80,12 +81,11 @@ class PlainTagsStorage(
     }
 
     suspend fun readStorageIfChanged() {
+        if (storageFile.notExists()) return
         if (lastModified != storageFile.getLastModifiedTime()) {
             tagsById.putAll(readStorage())
         }
     }
-
-    override fun roots(): List<Path> = listOf(root)
 
     override fun contains(id: ResourceId): Boolean = tagsById.containsKey(id)
 
