@@ -27,10 +27,11 @@ import space.taran.arknavigator.utils.Tag
 import java.nio.file.Path
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
-import space.taran.arknavigator.mvp.model.repo.index.IndexFailedPathCallback
 import kotlin.io.path.copyTo
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.name
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.collect
 
 class ResourcesPresenter(
     private val rootAndFav: RootAndFav,
@@ -70,18 +71,17 @@ class ResourcesPresenter(
             App.instance.appComponent.inject(this)
         }
 
-    val failedPaths = mutableListOf<Path>()
-    val indexFailedPathCallback = object : IndexFailedPathCallback {
-        override fun indexFailed(path: Path) {
-            failedPaths.add(path)
-        }
-    }
-
+    private val kindDetectFailedFlow = MutableSharedFlow<Path>()
     override fun onFirstViewAttach() {
         Log.d(RESOURCES_SCREEN, "first view attached in ResourcesPresenter")
         super.onFirstViewAttach()
 
         viewState.init()
+        presenterScope.launch {
+            kindDetectFailedFlow.collect {
+                viewState.toastIndexFailedPath(it)
+            }
+        }
         presenterScope.launch {
             viewState.setProgressVisibility(true, "Indexing")
             val folders = foldersRepo.provideFoldersWithMissing()
@@ -103,14 +103,14 @@ class ResourcesPresenter(
             val rootToIndex = roots.associateWith {
                 resourcesIndexRepo.loadFromDatabase(
                     it,
-                    indexFailedPathCallback
+                    kindDetectFailedFlow
                 )
             }
 
             val rootToStorage = roots.associateWith {
                 tagsStorageRepo.provide(
                     it,
-                    indexFailedPathCallback
+                    kindDetectFailedFlow
                 )
             }
 
@@ -136,7 +136,6 @@ class ResourcesPresenter(
 
             viewState.setToolbarTitle("$title${roots.size} of roots chosen")
             viewState.setProgressVisibility(false)
-            checkIndexFailedPath()
         }
     }
 
@@ -157,14 +156,13 @@ class ResourcesPresenter(
             }
         }
         results.forEach { it.await() }
-        index.reindex(indexFailedPathCallback)
-        tagsStorageRepo.provide(rootAndFav, indexFailedPathCallback)
+        index.reindex()
+        tagsStorageRepo.provide(rootAndFav)
         withContext(Dispatchers.Main) {
             onResourcesOrTagsChanged()
             gridPresenter.onSelectingChanged(false)
             viewState.setProgressVisibility(false)
         }
-        checkIndexFailedPath()
     }
 
     fun onCopySelectedResourcesClicked(
@@ -195,14 +193,13 @@ class ResourcesPresenter(
             }
         }
         results.forEach { it.await() }
-        index.reindex(indexFailedPathCallback)
-        tagsStorageRepo.provide(rootAndFav, indexFailedPathCallback)
+        index.reindex()
+        tagsStorageRepo.provide(rootAndFav)
         withContext(Dispatchers.Main) {
             onResourcesOrTagsChanged()
             gridPresenter.onSelectingChanged(false)
             viewState.setProgressVisibility(false)
         }
-        checkIndexFailedPath()
     }
 
     suspend fun onResourcesOrTagsChanged() {
@@ -218,25 +215,16 @@ class ResourcesPresenter(
     suspend fun onRemovedResourceDetected() {
         viewState.setProgressVisibility(true, "Indexing")
 
-        index.reindex(indexFailedPathCallback)
+        index.reindex()
         // update current tags storage
-        tagsStorageRepo.provide(rootAndFav, indexFailedPathCallback)
+        tagsStorageRepo.provide(rootAndFav)
 
         viewState.setProgressVisibility(true, "Sorting")
         onResourcesOrTagsChanged()
         viewState.setProgressVisibility(false)
-        checkIndexFailedPath()
     }
 
     private suspend fun onSelectionChange(selection: Set<ResourceId>) {
         gridPresenter.updateSelection(selection)
-    }
-
-    private fun checkIndexFailedPath() {
-        if (failedPaths.isEmpty()) return
-        presenterScope.launch(Dispatchers.Main) {
-            viewState.toastIndexFailedPath(failedPaths)
-            failedPaths.clear()
-        }
     }
 }

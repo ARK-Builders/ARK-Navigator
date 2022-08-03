@@ -1,13 +1,13 @@
 package space.taran.arknavigator.mvp.view.dialog
 
+import moxy.MvpView
 import moxy.viewstate.strategy.AddToEndSingleStrategy
 import moxy.viewstate.strategy.SkipStrategy
 import moxy.viewstate.strategy.StateStrategyType
-import space.taran.arknavigator.mvp.view.CommonMvpView
 import space.taran.arknavigator.utils.Tags
 
 @StateStrategyType(AddToEndSingleStrategy::class)
-interface EditTagsDialogView : CommonMvpView {
+interface EditTagsDialogView : MvpView {
     fun init()
     fun showKeyboardAndView()
     fun setQuickTags(tags: Tags)

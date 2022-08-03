@@ -9,7 +9,7 @@ import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import java.nio.file.Path
-import space.taran.arknavigator.mvp.model.repo.index.IndexFailedPathCallback
+import kotlinx.coroutines.flow.MutableSharedFlow
 
 class TagsStorageRepo(
     private val foldersRepo: FoldersRepo,
@@ -21,14 +21,14 @@ class TagsStorageRepo(
 
     suspend fun provide(
         rootAndFav: RootAndFav,
-        indexFailedPathCallback: IndexFailedPathCallback
+        kindDetectFailedFlow: MutableSharedFlow<Path>? = null
     ): TagsStorage =
         withContext(Dispatchers.IO) {
             val roots = foldersRepo.resolveRoots(rootAndFav)
 
             provideMutex.withLock {
                 val storageShards = roots.map { root ->
-                    val index = indexRepo.provide(root, indexFailedPathCallback)
+                    val index = indexRepo.provide(root, kindDetectFailedFlow)
                     val resources = index.listAllIds()
                     if (storageByRoot[root] != null) {
                         val storage = storageByRoot[root]!!
@@ -50,9 +50,9 @@ class TagsStorageRepo(
 
     suspend fun provide(
         root: Path,
-        indexFailedPathCallback: IndexFailedPathCallback
+        kindDetectFailedFlow: MutableSharedFlow<Path>? = null
     ): TagsStorage = provide(
         RootAndFav(root.toString(), favString = null),
-        indexFailedPathCallback
+        kindDetectFailedFlow
     )
 }

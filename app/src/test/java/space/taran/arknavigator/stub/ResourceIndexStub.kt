@@ -5,7 +5,7 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import java.nio.file.Path
 import kotlin.io.path.Path
-import space.taran.arknavigator.mvp.model.repo.index.IndexFailedPathCallback
+import kotlinx.coroutines.flow.MutableSharedFlow
 
 class ResourceIndexStub : ResourcesIndex {
     private val metas = TestData.metasById().toMutableMap()
@@ -19,7 +19,7 @@ class ResourceIndexStub : ResourcesIndex {
     override suspend fun getMeta(id: ResourceId): ResourceMeta =
         metas[id]!!
 
-    override suspend fun reindex(indexFailedPathCallback: IndexFailedPathCallback) {}
+    override suspend fun reindex(kindDetectFailedFlow: MutableSharedFlow<Path>?) {}
 
     override suspend fun remove(id: ResourceId): Path {
         metas.remove(id)

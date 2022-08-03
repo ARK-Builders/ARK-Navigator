@@ -20,31 +20,28 @@ data class ResourceMeta(
 
     companion object {
 
-        fun fromPath(
-            path: Path,
-            indexFailedPathCallback: IndexFailedPathCallback
-        ): ResourceMeta? {
+        fun fromPath(path: Path): Result<ResourceMeta?> {
             val size = Files.size(path)
             if (size < 1) {
-                return null
+                return Result.success(null)
             }
 
             val id = computeId(size, path)
-            val kind = try {
-                GeneralKindFactory.fromPath(path)
+            return try {
+                val kind = GeneralKindFactory.fromPath(path)
+                Result.success(
+                    ResourceMeta(
+                        id = id,
+                        name = path.fileName.toString(),
+                        extension = extension(path),
+                        modified = Files.getLastModifiedTime(path),
+                        size = size,
+                        kind = kind,
+                    )
+                )
             } catch (e: IOException) {
-                indexFailedPathCallback.indexFailed(path)
-                null
+                Result.failure<ResourceMeta>(e)
             }
-
-            return ResourceMeta(
-                id = id,
-                name = path.fileName.toString(),
-                extension = extension(path),
-                modified = Files.getLastModifiedTime(path),
-                size = size,
-                kind = kind,
-            )
         }
 
         fun fromRoom(room: ResourceWithExtra): ResourceMeta =

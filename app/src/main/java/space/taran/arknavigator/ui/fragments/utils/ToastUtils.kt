@@ -23,20 +23,12 @@ fun Context.toastFailedPaths(failedPaths: List<Path>) {
     toast(R.string.toast_failed_paths, list, moreTime = true)
 }
 
-fun Fragment.toastIndexFailedPaths(failedPaths: List<Path>) {
-    if (failedPaths.size == 1) {
-        toast(
-            R.string.toast_could_not_process_link_resource_by_path,
-            failedPaths.first().absolutePathString(),
-            moreTime = true
-        )
-    } else {
-        toast(
-            R.string.toast_could_not_process_resources,
-            failedPaths.size,
-            moreTime = true
-        )
-    }
+fun Fragment.toastKindDetectFailedPath(failedPath: Path) {
+    toast(
+        R.string.toast_could_not_detect_kind_for,
+        failedPath.absolutePathString(),
+        moreTime = true
+    )
 }
 
 fun Fragment.toast(

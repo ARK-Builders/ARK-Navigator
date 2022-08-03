@@ -1,6 +1,7 @@
 package space.taran.arknavigator.mvp.model.repo.index
 
 import java.nio.file.Path
+import kotlinx.coroutines.flow.MutableSharedFlow
 
 interface ResourcesIndex {
     // we pass all known resource ids to a storage because
@@ -20,7 +21,7 @@ interface ResourcesIndex {
 
     suspend fun getMeta(id: ResourceId): ResourceMeta
 
-    suspend fun reindex(indexFailedPathCallback: IndexFailedPathCallback)
+    suspend fun reindex(kindDetectFailedFlow: MutableSharedFlow<Path>? = null)
 
     suspend fun remove(id: ResourceId): Path
 

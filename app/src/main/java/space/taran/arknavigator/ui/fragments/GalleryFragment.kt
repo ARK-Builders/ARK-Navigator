@@ -40,7 +40,7 @@ import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.adapter.previewpager.PreviewsPager
 import space.taran.arknavigator.ui.extra.ExtraLoader
 import space.taran.arknavigator.ui.fragments.dialog.EditTagsDialogFragment
-import space.taran.arknavigator.ui.fragments.utils.toastIndexFailedPaths
+import space.taran.arknavigator.ui.fragments.utils.toastKindDetectFailedPath
 import space.taran.arknavigator.ui.view.DefaultPopup
 import space.taran.arknavigator.ui.view.DepthPageTransformer
 import space.taran.arknavigator.utils.FullscreenHelper
@@ -215,16 +215,17 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
         setFragmentResult(REQUEST_TAGS_CHANGED_KEY, bundleOf())
     }
 
-    override fun toastIndexFailedPath(paths: List<Path>) {
-        toastIndexFailedPaths(paths)
+    override fun toastIndexFailedPath(path: Path) {
+        toastKindDetectFailedPath(path)
         Log.d(
             GALLERY_SCREEN,
             getString(
-                R.string.toast_could_not_process_link_resource_by_path,
-                paths.joinToString("\n") { it.absolutePathString() }
+                R.string.toast_could_not_detect_kind_for,
+                path.absolutePathString()
             )
         )
     }
+
     override fun displayPreviewTags(resource: ResourceId, tags: Tags) {
         Log.d(
             GALLERY_SCREEN,

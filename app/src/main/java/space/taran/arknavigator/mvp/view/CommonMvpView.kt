@@ -7,5 +7,5 @@ import moxy.viewstate.strategy.StateStrategyType
 
 interface CommonMvpView : MvpView {
     @StateStrategyType(SkipStrategy::class)
-    fun toastIndexFailedPath(paths: List<Path>)
+    fun toastIndexFailedPath(path: Path)
 }

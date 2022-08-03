@@ -1,6 +1,5 @@
 package space.taran.arknavigator.mvp.presenter.dialog
 
-import java.nio.file.Path
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
@@ -17,8 +16,6 @@ import space.taran.arknavigator.mvp.view.dialog.EditTagsDialogView
 import space.taran.arknavigator.utils.Popularity
 import space.taran.arknavigator.utils.Tag
 import javax.inject.Inject
-import kotlinx.coroutines.Dispatchers
-import space.taran.arknavigator.mvp.model.repo.index.IndexFailedPathCallback
 
 sealed class EditTagsAction {
     data class AddTag(val tag: Tag) : EditTagsAction()
@@ -53,12 +50,6 @@ class EditTagsDialogPresenter(
     private var wasTextRemovedRecently = false
     private var wasTagRemovedRecently = false
     private var textRemovedRecentlyJob: Job? = null
-    val failedPaths = mutableListOf<Path>()
-    val indexFailedPathCallback = object : IndexFailedPathCallback {
-        override fun indexFailed(path: Path) {
-            failedPaths.add(path)
-        }
-    }
 
     override fun onFirstViewAttach() {
         viewState.init()
@@ -68,22 +59,10 @@ class EditTagsDialogPresenter(
                 storage = _storage
                 init()
             } else {
-                index = indexRepo.provide(rootAndFav, indexFailedPathCallback)
-                storage = tagsStorageRepo.provide(
-                    rootAndFav,
-                    indexFailedPathCallback
-                )
+                index = indexRepo.provide(rootAndFav)
+                storage = tagsStorageRepo.provide(rootAndFav)
                 init()
-                checkIndexFailedPath()
             }
-        }
-    }
-
-    private fun checkIndexFailedPath() {
-        if (failedPaths.isEmpty()) return
-        presenterScope.launch(Dispatchers.Main) {
-            viewState.toastIndexFailedPath(failedPaths)
-            failedPaths.clear()
         }
     }
 

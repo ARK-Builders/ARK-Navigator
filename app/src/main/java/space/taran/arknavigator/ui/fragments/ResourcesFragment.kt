@@ -45,7 +45,7 @@ import space.taran.arknavigator.utils.extensions.showKeyboard
 import java.nio.file.Path
 import kotlin.io.path.absolutePathString
 import kotlin.math.abs
-import space.taran.arknavigator.ui.fragments.utils.toastIndexFailedPaths
+import space.taran.arknavigator.ui.fragments.utils.toastKindDetectFailedPath
 
 // `root` is used for querying tags storage and resources index,
 //       if it is `null`, then resources from all roots are taken
@@ -410,13 +410,13 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         } == null
     }
 
-    override fun toastIndexFailedPath(paths: List<Path>) {
-        toastIndexFailedPaths(paths)
+    override fun toastIndexFailedPath(path: Path) {
+        toastKindDetectFailedPath(path)
         Log.d(
             RESOURCES_SCREEN,
             getString(
-                R.string.toast_could_not_process_link_resource_by_path,
-                paths.joinToString("\n") { it.absolutePathString() }
+                R.string.toast_could_not_detect_kind_for,
+                path.absolutePathString()
             )
         )
     }

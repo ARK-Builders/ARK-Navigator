@@ -10,7 +10,6 @@ import kotlinx.coroutines.withContext
 import moxy.MvpPresenter
 import moxy.presenterScope
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
-import space.taran.arknavigator.mvp.model.repo.index.IndexFailedPathCallback
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
@@ -32,6 +31,8 @@ import java.nio.file.Files
 import java.nio.file.Path
 import javax.inject.Inject
 import kotlin.io.path.getLastModifiedTime
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.collect
 
 enum class GalleryItemType {
     PLAINTEXT, OTHER
@@ -66,39 +67,27 @@ class GalleryPresenter(
     @Inject
     lateinit var tagsStorageRepo: TagsStorageRepo
 
-    val failedPaths = mutableListOf<Path>()
-    val indexFailedPathCallback = object : IndexFailedPathCallback {
-        override fun indexFailed(path: Path) {
-            if (failedPaths.contains(path))
-                failedPaths.add(path)
-        }
-    }
+    private val kindDetectFailedFlow = MutableSharedFlow<Path>()
 
     override fun onFirstViewAttach() {
         Log.d(GALLERY_SCREEN, "first view attached in GalleryPresenter")
         super.onFirstViewAttach()
-
+        presenterScope.launch {
+            kindDetectFailedFlow.collect {
+                viewState.toastIndexFailedPath(it)
+            }
+        }
         presenterScope.launch {
             viewState.init()
-
             if (!indexRepo.isIndexed(rootAndFav))
                 viewState.setProgressVisibility(true, "Indexing")
 
-            index = indexRepo.provide(rootAndFav, indexFailedPathCallback)
-            storage = tagsStorageRepo.provide(rootAndFav, indexFailedPathCallback)
+            index = indexRepo.provide(rootAndFav, kindDetectFailedFlow)
+            storage = tagsStorageRepo.provide(rootAndFav, kindDetectFailedFlow)
             resources = resourcesIds.map { index.getMeta(it) }.toMutableList()
 
             viewState.updatePagerAdapter()
             viewState.setProgressVisibility(false)
-            checkIndexFailedPath()
-        }
-    }
-
-    private fun checkIndexFailedPath() {
-        if (failedPaths.isEmpty()) return
-        presenterScope.launch(Dispatchers.Main) {
-            viewState.toastIndexFailedPath(failedPaths)
-            failedPaths.clear()
         }
     }
 
@@ -244,36 +233,31 @@ class GalleryPresenter(
     private suspend fun onRemovedResourceDetected() = withContext(Dispatchers.Main) {
         viewState.setProgressVisibility(true, "Indexing")
 
-        index.reindex(indexFailedPathCallback)
+        index.reindex()
         // update current tags storage
-        tagsStorageRepo.provide(rootAndFav, indexFailedPathCallback)
+        tagsStorageRepo.provide(rootAndFav)
         invalidateResources()
         viewState.setProgressVisibility(false)
         viewState.notifyResourcesChanged()
-        checkIndexFailedPath()
     }
 
     private suspend fun onEditedResourceDetected(
         path: Path,
         oldMeta: ResourceMeta
     ) = withContext(Dispatchers.IO) {
-        val newMeta = ResourceMeta.fromPath(
-            path,
-            indexFailedPathCallback
-        ) ?: return@withContext
+        val newMeta = ResourceMeta.fromPath(path).getOrNull() ?: return@withContext
         PreviewAndThumbnail.generate(path, newMeta)
 
         val indexToReplace = resources.indexOf(oldMeta)
         resources[indexToReplace] = newMeta
 
         index.updateResource(oldMeta.id, path, newMeta)
-        tagsStorageRepo.provide(rootAndFav, indexFailedPathCallback)
+        tagsStorageRepo.provide(rootAndFav)
 
         withContext(Dispatchers.Main) {
             viewState.notifyCurrentItemChanged()
             viewState.notifyResourcesChanged()
         }
-        checkIndexFailedPath()
     }
 
     private suspend fun invalidateResources() {

@@ -1,6 +1,7 @@
 package space.taran.arknavigator.mvp.model.repo.index
 
 import java.nio.file.Path
+import kotlinx.coroutines.flow.MutableSharedFlow
 
 /**
  * [AggregatedResourceIndex] is useful for "aggregated" navigation mode — a mode in
@@ -43,8 +44,8 @@ class AggregatedResourcesIndex(
         throw AssertionError("At least one of shards must yield success")
     }
 
-    override suspend fun reindex(indexFailedPathCallback: IndexFailedPathCallback) {
-        shards.forEach { it.reindex(indexFailedPathCallback) }
+    override suspend fun reindex(kindDetectFailedFlow: MutableSharedFlow<Path>?) {
+        shards.forEach { it.reindex(kindDetectFailedFlow) }
     }
 
     override suspend fun updateResource(

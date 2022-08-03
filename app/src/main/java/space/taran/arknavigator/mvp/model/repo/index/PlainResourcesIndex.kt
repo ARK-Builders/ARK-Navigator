@@ -22,6 +22,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.io.path.ExperimentalPathApi
+import kotlinx.coroutines.flow.MutableSharedFlow
 
 internal data class Difference(
     val deleted: List<Path>,
@@ -80,10 +81,10 @@ class PlainResourcesIndex internal constructor(
     }
 
     override suspend fun reindex(
-        indexFailedPathCallback: IndexFailedPathCallback
+        kindDetectFailedFlow: MutableSharedFlow<Path>?
     ): Unit =
         withContextAndLock(Dispatchers.IO, mutex) {
-            reindexRoot(calculateDifference(), indexFailedPathCallback)
+            reindexRoot(calculateDifference(), kindDetectFailedFlow)
         }
 
     // should be only used in AggregatedResourcesIndex
@@ -120,7 +121,7 @@ class PlainResourcesIndex internal constructor(
 
     internal suspend fun reindexRoot(
         diff: Difference,
-        indexFailedPathCallback: IndexFailedPathCallback
+        kindDetectFailedFlow: MutableSharedFlow<Path>? = null
     ) =
         withContext(Dispatchers.IO) {
             Log.d(
@@ -151,11 +152,14 @@ class PlainResourcesIndex internal constructor(
 
             val time1 = measureTimeMillis {
                 toInsert.forEach { path ->
-                    val meta = ResourceMeta.fromPath(path, indexFailedPathCallback)
-                    if (meta != null) {
-                        newResources[path] = meta
-                        metaByPath[path] = meta
-                        pathById[meta.id] = path
+                    ResourceMeta.fromPath(path).onSuccess { meta ->
+                        if (meta != null) {
+                            newResources[path] = meta
+                            metaByPath[path] = meta
+                            pathById[meta.id] = path
+                        }
+                    }.onFailure {
+                        kindDetectFailedFlow?.emit(path)
                     }
                 }
             }
@@ -274,14 +278,13 @@ class PlainResourcesIndex internal constructor(
 
         internal suspend fun scanResources(
             files: List<Path>,
-            indexFailedPathCallback: IndexFailedPathCallback
+            kindDetectFailedFlow: MutableSharedFlow<Path>? = null
         ): Map<Path, ResourceMeta> =
             withContext(Dispatchers.IO) {
                 files.mapNotNull {
-                    ResourceMeta.fromPath(
-                        it,
-                        indexFailedPathCallback
-                    )?.let { meta ->
+                    ResourceMeta.fromPath(it).onFailure { throwable ->
+                        kindDetectFailedFlow?.emit(it)
+                    }.getOrNull()?.let { meta ->
                         it to meta
                     }
                 }.toMap()
