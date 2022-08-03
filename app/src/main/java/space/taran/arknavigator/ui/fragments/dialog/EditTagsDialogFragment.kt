@@ -154,7 +154,6 @@ class EditTagsDialogFragment(
         binding.root.setTransitionDuration(CLOSE_DURATION)
         binding.root.transitionToStart()
     }
-
     override fun getTheme() = R.style.EditTagsDialogTheme
 
     override fun onResume() = with(binding) {
@@ -164,7 +163,6 @@ class EditTagsDialogFragment(
             etNewTags.onBackPressedListener = {
                 if (!presenter.onBackClick())
                     dismissDialog()
-
                 true
             }
         }

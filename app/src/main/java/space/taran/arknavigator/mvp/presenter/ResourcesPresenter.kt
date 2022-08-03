@@ -1,7 +1,6 @@
 package space.taran.arknavigator.mvp.presenter
 
 import android.util.Log
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -27,9 +26,12 @@ import space.taran.arknavigator.utils.LogTags.RESOURCES_SCREEN
 import space.taran.arknavigator.utils.Tag
 import java.nio.file.Path
 import javax.inject.Inject
+import kotlinx.coroutines.Dispatchers
 import kotlin.io.path.copyTo
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.name
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.collect
 
 class ResourcesPresenter(
     private val rootAndFav: RootAndFav,
@@ -69,11 +71,17 @@ class ResourcesPresenter(
             App.instance.appComponent.inject(this)
         }
 
+    private val kindDetectFailedFlow = MutableSharedFlow<Path>()
     override fun onFirstViewAttach() {
         Log.d(RESOURCES_SCREEN, "first view attached in ResourcesPresenter")
         super.onFirstViewAttach()
 
         viewState.init()
+        presenterScope.launch {
+            kindDetectFailedFlow.collect {
+                viewState.toastIndexFailedPath(it)
+            }
+        }
         presenterScope.launch {
             viewState.setProgressVisibility(true, "Indexing")
             val folders = foldersRepo.provideFoldersWithMissing()
@@ -92,14 +100,19 @@ class ResourcesPresenter(
                 all.toList()
             }
             Log.d(RESOURCES_SCREEN, "using roots $roots")
+            val rootToIndex = roots.associateWith {
+                resourcesIndexRepo.loadFromDatabase(
+                    it,
+                    kindDetectFailedFlow
+                )
+            }
 
-            val rootToIndex = roots
-                .map { it to resourcesIndexRepo.loadFromDatabase(it) }
-                .toMap()
-
-            val rootToStorage = roots
-                .map { it to tagsStorageRepo.provide(it) }
-                .toMap()
+            val rootToStorage = roots.associateWith {
+                tagsStorageRepo.provide(
+                    it,
+                    kindDetectFailedFlow
+                )
+            }
 
             index = AggregatedResourcesIndex(rootToIndex.values)
             storage = AggregatedTagsStorage(rootToStorage.values)

@@ -6,6 +6,7 @@ import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import space.taran.arknavigator.R
 import java.nio.file.Path
+import kotlin.io.path.absolutePathString
 
 fun Context.toast(
     @StringRes stringId: Int,
@@ -22,11 +23,19 @@ fun Context.toastFailedPaths(failedPaths: List<Path>) {
     toast(R.string.toast_failed_paths, list, moreTime = true)
 }
 
+fun Fragment.toastKindDetectFailedPath(failedPath: Path) {
+    toast(
+        R.string.toast_could_not_detect_kind_for,
+        failedPath.absolutePathString(),
+        moreTime = true
+    )
+}
+
 fun Fragment.toast(
     @StringRes stringId: Int,
     vararg args: Any,
     moreTime: Boolean = false,
-) = requireContext().toast(stringId, *args, moreTime)
+) = requireContext().toast(stringId, *args, moreTime = moreTime)
 
 fun Fragment.toastFailedPaths(
     failedPaths: List<Path>

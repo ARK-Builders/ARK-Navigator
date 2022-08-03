@@ -2,6 +2,7 @@ package space.taran.arknavigator.mvp.model.repo.kind
 
 import android.net.Uri
 import android.util.Log
+import java.io.IOException
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.utils.LogTags
@@ -16,6 +17,7 @@ object VideoKindFactory : ResourceKindFactory<ResourceKind.Video> {
         setOf("video/mp4")
     override val acceptedKindCode = KindCode.VIDEO
 
+    @Throws(IOException::class)
     override fun fromPath(path: Path): ResourceKind.Video {
         val retriever = FFmpegMediaMetadataRetriever()
 
@@ -23,6 +25,7 @@ object VideoKindFactory : ResourceKindFactory<ResourceKind.Video> {
             retriever.setDataSource(App.instance, Uri.fromFile(path.toFile()))
         } catch (e: IllegalArgumentException) {
             Log.e(LogTags.PREVIEWS, "Failed to setDataSource for ${path.name}")
+            throw IOException("failed to read video file")
         }
         val durationMillis = retriever
             .extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_DURATION)

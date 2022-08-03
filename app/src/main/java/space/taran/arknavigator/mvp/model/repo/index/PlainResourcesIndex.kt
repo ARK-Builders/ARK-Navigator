@@ -1,6 +1,7 @@
 package space.taran.arknavigator.mvp.model.repo.index
 
 import android.util.Log
+import kotlin.system.measureTimeMillis
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.supervisorScope
@@ -21,7 +22,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.io.path.ExperimentalPathApi
-import kotlin.system.measureTimeMillis
+import kotlinx.coroutines.flow.MutableSharedFlow
 
 internal data class Difference(
     val deleted: List<Path>,
@@ -79,9 +80,11 @@ class PlainResourcesIndex internal constructor(
         return tryRemove(id)!!
     }
 
-    override suspend fun reindex(): Unit =
+    override suspend fun reindex(
+        kindDetectFailedFlow: MutableSharedFlow<Path>?
+    ): Unit =
         withContextAndLock(Dispatchers.IO, mutex) {
-            reindexRoot(calculateDifference())
+            reindexRoot(calculateDifference(), kindDetectFailedFlow)
         }
 
     // should be only used in AggregatedResourcesIndex
@@ -116,7 +119,10 @@ class PlainResourcesIndex internal constructor(
         return path
     }
 
-    internal suspend fun reindexRoot(diff: Difference) =
+    internal suspend fun reindexRoot(
+        diff: Difference,
+        kindDetectFailedFlow: MutableSharedFlow<Path>? = null
+    ) =
         withContext(Dispatchers.IO) {
             Log.d(
                 RESOURCES_INDEX,
@@ -146,11 +152,14 @@ class PlainResourcesIndex internal constructor(
 
             val time1 = measureTimeMillis {
                 toInsert.forEach { path ->
-                    val meta = ResourceMeta.fromPath(path)
-                    if (meta != null) {
-                        newResources[path] = meta
-                        metaByPath[path] = meta
-                        pathById[meta.id] = path
+                    ResourceMeta.fromPath(path).onSuccess { meta ->
+                        if (meta != null) {
+                            newResources[path] = meta
+                            metaByPath[path] = meta
+                            pathById[meta.id] = path
+                        }
+                    }.onFailure {
+                        kindDetectFailedFlow?.emit(path)
                     }
                 }
             }
@@ -267,11 +276,15 @@ class PlainResourcesIndex internal constructor(
 
     companion object {
 
-        internal suspend fun scanResources(files: List<Path>):
-            Map<Path, ResourceMeta> =
+        internal suspend fun scanResources(
+            files: List<Path>,
+            kindDetectFailedFlow: MutableSharedFlow<Path>? = null
+        ): Map<Path, ResourceMeta> =
             withContext(Dispatchers.IO) {
                 files.mapNotNull {
-                    ResourceMeta.fromPath(it)?.let { meta ->
+                    ResourceMeta.fromPath(it).onFailure { throwable ->
+                        kindDetectFailedFlow?.emit(it)
+                    }.getOrNull()?.let { meta ->
                         it to meta
                     }
                 }.toMap()

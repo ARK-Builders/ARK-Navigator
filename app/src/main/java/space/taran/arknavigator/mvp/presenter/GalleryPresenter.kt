@@ -2,6 +2,7 @@ package space.taran.arknavigator.mvp.presenter
 
 import android.util.Log
 import androidx.recyclerview.widget.DiffUtil
+import kotlin.io.path.notExists
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
@@ -30,7 +31,8 @@ import java.nio.file.Files
 import java.nio.file.Path
 import javax.inject.Inject
 import kotlin.io.path.getLastModifiedTime
-import kotlin.io.path.notExists
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.collect
 
 enum class GalleryItemType {
     PLAINTEXT, OTHER
@@ -65,18 +67,23 @@ class GalleryPresenter(
     @Inject
     lateinit var tagsStorageRepo: TagsStorageRepo
 
+    private val kindDetectFailedFlow = MutableSharedFlow<Path>()
+
     override fun onFirstViewAttach() {
         Log.d(GALLERY_SCREEN, "first view attached in GalleryPresenter")
         super.onFirstViewAttach()
-
+        presenterScope.launch {
+            kindDetectFailedFlow.collect {
+                viewState.toastIndexFailedPath(it)
+            }
+        }
         presenterScope.launch {
             viewState.init()
-
             if (!indexRepo.isIndexed(rootAndFav))
                 viewState.setProgressVisibility(true, "Indexing")
 
-            index = indexRepo.provide(rootAndFav)
-            storage = tagsStorageRepo.provide(rootAndFav)
+            index = indexRepo.provide(rootAndFav, kindDetectFailedFlow)
+            storage = tagsStorageRepo.provide(rootAndFav, kindDetectFailedFlow)
             resources = resourcesIds.map { index.getMeta(it) }.toMutableList()
 
             viewState.updatePagerAdapter()
@@ -238,7 +245,7 @@ class GalleryPresenter(
         path: Path,
         oldMeta: ResourceMeta
     ) = withContext(Dispatchers.IO) {
-        val newMeta = ResourceMeta.fromPath(path) ?: return@withContext
+        val newMeta = ResourceMeta.fromPath(path).getOrNull() ?: return@withContext
         PreviewAndThumbnail.generate(path, newMeta)
 
         val indexToReplace = resources.indexOf(oldMeta)

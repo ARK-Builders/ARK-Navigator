@@ -25,6 +25,8 @@ import space.taran.arknavigator.utils.FullscreenHelper
 import space.taran.arknavigator.utils.LogTags.FOLDERS_SCREEN
 import java.nio.file.Path
 import kotlin.io.path.Path
+import kotlin.io.path.absolutePathString
+import space.taran.arknavigator.ui.fragments.utils.toastKindDetectFailedPath
 
 class FoldersFragment : MvpAppCompatFragment(), FoldersView {
     private var foldersTreeAdapter: FoldersTreeAdapter? = null
@@ -106,6 +108,17 @@ class FoldersFragment : MvpAppCompatFragment(), FoldersView {
 
     override fun toastIndexingCanTakeMinutes() =
         toast(R.string.toast_indexing_can_take_minutes)
+
+    override fun toastIndexFailedPath(path: Path) {
+        toastKindDetectFailedPath(path)
+        Log.d(
+            FOLDERS_SCREEN,
+            getString(
+                R.string.toast_could_not_detect_kind_for,
+                path.absolutePathString()
+            )
+        )
+    }
 
     private fun initResultListeners() {
         childFragmentManager.setFragmentResultListener(
