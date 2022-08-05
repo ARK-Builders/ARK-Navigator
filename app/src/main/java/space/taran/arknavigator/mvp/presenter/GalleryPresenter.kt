@@ -2,6 +2,11 @@ package space.taran.arknavigator.mvp.presenter
 
 import android.util.Log
 import androidx.recyclerview.widget.DiffUtil
+import java.io.FileReader
+import java.nio.file.Files
+import java.nio.file.Path
+import javax.inject.Inject
+import kotlin.io.path.notExists
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
@@ -30,7 +35,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import javax.inject.Inject
 import kotlin.io.path.getLastModifiedTime
-import kotlin.io.path.notExists
+import kotlinx.coroutines.flow.collect
 
 enum class GalleryItemType {
     PLAINTEXT, OTHER
@@ -68,14 +73,18 @@ class GalleryPresenter(
     override fun onFirstViewAttach() {
         Log.d(GALLERY_SCREEN, "first view attached in GalleryPresenter")
         super.onFirstViewAttach()
-
         presenterScope.launch {
             viewState.init()
-
             if (!indexRepo.isIndexed(rootAndFav))
                 viewState.setProgressVisibility(true, "Indexing")
 
-            index = indexRepo.provide(rootAndFav)
+            index = indexRepo.provide(rootAndFav) { kindDetectFailedFlow ->
+                presenterScope.launch {
+                    kindDetectFailedFlow.collect { path ->
+                        viewState.toastIndexFailedPath(path)
+                    }
+                }
+            }
             storage = tagsStorageRepo.provide(rootAndFav)
             resources = resourcesIds.map { index.getMeta(it) }.toMutableList()
 
@@ -238,7 +247,7 @@ class GalleryPresenter(
         path: Path,
         oldMeta: ResourceMeta
     ) = withContext(Dispatchers.IO) {
-        val newMeta = ResourceMeta.fromPath(path) ?: return@withContext
+        val newMeta = ResourceMeta.fromPath(path).getOrNull() ?: return@withContext
         PreviewAndThumbnail.generate(path, newMeta)
 
         val indexToReplace = resources.indexOf(oldMeta)

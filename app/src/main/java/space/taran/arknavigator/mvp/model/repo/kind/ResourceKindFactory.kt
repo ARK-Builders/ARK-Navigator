@@ -1,10 +1,12 @@
 package space.taran.arknavigator.mvp.model.repo.kind
 
+import java.io.IOException
 import space.taran.arknavigator.mvp.model.dao.ResourceExtra
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.utils.extension
 import space.taran.arknavigator.utils.getMimeTypeUsingTika
 import java.nio.file.Path
+import java.util.zip.ZipException
 
 interface ResourceKindFactory<T : ResourceKind> {
     val acceptedExtensions: Set<String>
@@ -30,6 +32,7 @@ object GeneralKindFactory {
             ArchiveKindFactory
         )
 
+    @Throws(ZipException::class, IOException::class)
     fun fromPath(path: Path): ResourceKind? =
         findFactory(path)?.fromPath(path)
 

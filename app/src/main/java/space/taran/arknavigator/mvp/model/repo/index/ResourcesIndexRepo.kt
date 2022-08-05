@@ -1,7 +1,10 @@
 package space.taran.arknavigator.mvp.model.repo.index
 
 import android.util.Log
+import java.nio.file.Path
+import kotlin.system.measureTimeMillis
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -12,8 +15,6 @@ import space.taran.arknavigator.mvp.model.repo.index.PlainResourcesIndex.Compani
 import space.taran.arknavigator.mvp.model.repo.index.PlainResourcesIndex.Companion.loadResources
 import space.taran.arknavigator.mvp.model.repo.index.PlainResourcesIndex.Companion.scanResources
 import space.taran.arknavigator.utils.LogTags.RESOURCES_INDEX
-import java.nio.file.Path
-import kotlin.system.measureTimeMillis
 
 class ResourcesIndexRepo(
     private val dao: ResourceDao,
@@ -22,7 +23,10 @@ class ResourcesIndexRepo(
     private val provideMutex = Mutex()
     private val indexByRoot = mutableMapOf<Path, PlainResourcesIndex>()
 
-    suspend fun loadFromDatabase(root: Path): PlainResourcesIndex =
+    suspend fun loadFromDatabase(
+        root: Path,
+        setKindDetectFailedFlow: ((SharedFlow<Path>) -> Unit)? = null
+    ): PlainResourcesIndex =
         withContext(Dispatchers.IO) {
             Log.d(
                 RESOURCES_INDEX,
@@ -37,9 +41,12 @@ class ResourcesIndexRepo(
             )
 
             val index = PlainResourcesIndex(root, dao, loadResources(resources))
+            if (setKindDetectFailedFlow != null) {
+                setKindDetectFailedFlow(index.kindDetectFailedFlow)
+            }
             Log.d(RESOURCES_INDEX, "index created")
-
             index.reindex()
+            Log.d(RESOURCES_INDEX, "index done")
             indexByRoot[root] = index
             return@withContext index
         }
@@ -75,14 +82,17 @@ class ResourcesIndexRepo(
             return@withContext index
         }
 
-    suspend fun provide(rootAndFav: RootAndFav): ResourcesIndex =
+    suspend fun provide(
+        rootAndFav: RootAndFav,
+        setKindDetectFailedFlow: ((SharedFlow<Path>) -> Unit)? = null
+    ): ResourcesIndex =
         withContext(Dispatchers.IO) {
             val roots = foldersRepo.resolveRoots(rootAndFav)
 
             provideMutex.withLock {
                 val indexShards = roots.map { root ->
                     indexByRoot[root] ?: let {
-                        val index = loadFromDatabase(root)
+                        val index = loadFromDatabase(root, setKindDetectFailedFlow)
                         indexByRoot[root] = index
                         index
                     }
@@ -92,8 +102,13 @@ class ResourcesIndexRepo(
             }
         }
 
-    suspend fun provide(root: Path): ResourcesIndex =
-        provide(RootAndFav(root.toString(), favString = null))
+    suspend fun provide(
+        root: Path,
+        setKindDetectFailedFlow: ((SharedFlow<Path>) -> Unit)? = null
+    ): ResourcesIndex = provide(
+        RootAndFav(root.toString(), favString = null),
+        setKindDetectFailedFlow
+    )
 
     suspend fun isIndexed(rootAndFav: RootAndFav): Boolean {
         val roots = foldersRepo.resolveRoots(rootAndFav)

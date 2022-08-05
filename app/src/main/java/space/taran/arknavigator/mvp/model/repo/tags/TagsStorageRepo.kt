@@ -9,6 +9,7 @@ import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import java.nio.file.Path
+import kotlinx.coroutines.flow.SharedFlow
 
 class TagsStorageRepo(
     private val foldersRepo: FoldersRepo,
@@ -18,13 +19,16 @@ class TagsStorageRepo(
     private val provideMutex = Mutex()
     private val storageByRoot = mutableMapOf<Path, PlainTagsStorage>()
 
-    suspend fun provide(rootAndFav: RootAndFav): TagsStorage =
+    suspend fun provide(
+        rootAndFav: RootAndFav,
+        setKindDetectFailedFlow: ((SharedFlow<Path>) -> Unit)? = null
+    ): TagsStorage =
         withContext(Dispatchers.IO) {
             val roots = foldersRepo.resolveRoots(rootAndFav)
 
             provideMutex.withLock {
                 val storageShards = roots.map { root ->
-                    val index = indexRepo.provide(root)
+                    val index = indexRepo.provide(root, setKindDetectFailedFlow)
                     val resources = index.listAllIds()
                     if (storageByRoot[root] != null) {
                         val storage = storageByRoot[root]!!
@@ -44,6 +48,11 @@ class TagsStorageRepo(
             }
         }
 
-    suspend fun provide(root: Path): TagsStorage =
-        provide(RootAndFav(root.toString(), favString = null))
+    suspend fun provide(
+        root: Path,
+        setKindDetectFailedFlow: ((SharedFlow<Path>) -> Unit)? = null
+    ): TagsStorage = provide(
+        RootAndFav(root.toString(), favString = null),
+        setKindDetectFailedFlow
+    )
 }

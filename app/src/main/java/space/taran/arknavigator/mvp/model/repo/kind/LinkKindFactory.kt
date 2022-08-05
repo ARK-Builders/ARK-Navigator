@@ -6,6 +6,7 @@ import kotlinx.serialization.json.decodeFromStream
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import java.nio.file.Path
 import java.util.zip.ZipFile
+import java.util.zip.ZipException
 
 object LinkKindFactory : ResourceKindFactory<ResourceKind.Link> {
     private const val JSON_FILE = "link.json"
@@ -15,6 +16,7 @@ object LinkKindFactory : ResourceKindFactory<ResourceKind.Link> {
     override val acceptedMimeTypes: Set<String>
         get() = setOf()
 
+    @Throws(ZipException::class)
     override fun fromPath(path: Path): ResourceKind.Link {
         val zip = ZipFile(path.toFile())
         val jsonEntry = zip

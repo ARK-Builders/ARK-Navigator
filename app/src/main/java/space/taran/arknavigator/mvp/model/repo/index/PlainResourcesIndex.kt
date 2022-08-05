@@ -1,6 +1,11 @@
 package space.taran.arknavigator.mvp.model.repo.index
 
 import android.util.Log
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
+import kotlin.io.path.ExperimentalPathApi
+import kotlin.system.measureTimeMillis
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.supervisorScope
@@ -21,7 +26,9 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.io.path.ExperimentalPathApi
-import kotlin.system.measureTimeMillis
+import kotlin.io.path.absolutePathString
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 
 internal data class Difference(
     val deleted: List<Path>,
@@ -38,6 +45,10 @@ class PlainResourcesIndex internal constructor(
     private val dao: ResourceDao,
     resources: Map<Path, ResourceMeta>
 ) : ResourcesIndex {
+    private val _kindDetectFailedFlow: MutableSharedFlow<Path> = MutableSharedFlow()
+
+    override val kindDetectFailedFlow: SharedFlow<Path>
+        get() = _kindDetectFailedFlow
 
     private val mutex = Mutex()
 
@@ -146,11 +157,19 @@ class PlainResourcesIndex internal constructor(
 
             val time1 = measureTimeMillis {
                 toInsert.forEach { path ->
-                    val meta = ResourceMeta.fromPath(path)
-                    if (meta != null) {
-                        newResources[path] = meta
-                        metaByPath[path] = meta
-                        pathById[meta.id] = path
+                    ResourceMeta.fromPath(path).onSuccess { meta ->
+                        if (meta != null) {
+                            newResources[path] = meta
+                            metaByPath[path] = meta
+                            pathById[meta.id] = path
+                        }
+                    }.onFailure {
+                        _kindDetectFailedFlow.emit(path)
+                        Log.d(
+                            RESOURCES_INDEX,
+                            "Could not detect kind for %s" +
+                                " ${path.absolutePathString()}"
+                        )
                     }
                 }
             }
@@ -267,11 +286,18 @@ class PlainResourcesIndex internal constructor(
 
     companion object {
 
-        internal suspend fun scanResources(files: List<Path>):
-            Map<Path, ResourceMeta> =
+        internal suspend fun scanResources(
+            files: List<Path>
+        ): Map<Path, ResourceMeta> =
             withContext(Dispatchers.IO) {
                 files.mapNotNull {
-                    ResourceMeta.fromPath(it)?.let { meta ->
+                    ResourceMeta.fromPath(it).onFailure { throwable ->
+                        Log.d(
+                            RESOURCES_INDEX,
+                            "Could not detect kind for %s" +
+                                " ${it.absolutePathString()}"
+                        )
+                    }.getOrNull()?.let { meta ->
                         it to meta
                     }
                 }.toMap()

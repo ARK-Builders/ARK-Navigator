@@ -27,9 +27,11 @@ import space.taran.arknavigator.utils.LogTags.RESOURCES_SCREEN
 import space.taran.arknavigator.utils.Tag
 import java.nio.file.Path
 import javax.inject.Inject
+import kotlinx.coroutines.Dispatchers
 import kotlin.io.path.copyTo
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.name
+import kotlinx.coroutines.flow.collect
 
 class ResourcesPresenter(
     private val rootAndFav: RootAndFav,
@@ -92,14 +94,19 @@ class ResourcesPresenter(
                 all.toList()
             }
             Log.d(RESOURCES_SCREEN, "using roots $roots")
+            val rootToIndex = roots.associateWith {
+                resourcesIndexRepo.loadFromDatabase(it) { kindDetectFailedFlow ->
+                    presenterScope.launch {
+                        kindDetectFailedFlow.collect { path ->
+                            viewState.toastIndexFailedPath(path)
+                        }
+                    }
+                }
+            }
 
-            val rootToIndex = roots
-                .map { it to resourcesIndexRepo.loadFromDatabase(it) }
-                .toMap()
-
-            val rootToStorage = roots
-                .map { it to tagsStorageRepo.provide(it) }
-                .toMap()
+            val rootToStorage = roots.associateWith {
+                tagsStorageRepo.provide(it)
+            }
 
             index = AggregatedResourcesIndex(rootToIndex.values)
             storage = AggregatedTagsStorage(rootToStorage.values)
