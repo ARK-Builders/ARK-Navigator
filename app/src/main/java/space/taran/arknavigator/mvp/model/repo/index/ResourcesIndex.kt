@@ -1,8 +1,10 @@
 package space.taran.arknavigator.mvp.model.repo.index
 
 import java.nio.file.Path
+import kotlinx.coroutines.flow.SharedFlow
 
 interface ResourcesIndex {
+    val kindDetectFailedFlow: SharedFlow<Path>
     // we pass all known resource ids to a storage because
     // 1) any storage exists globally
     // 2) we maintain only 1 storage per root

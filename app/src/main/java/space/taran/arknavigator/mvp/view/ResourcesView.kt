@@ -1,13 +1,12 @@
 package space.taran.arknavigator.mvp.view
 
-import moxy.MvpView
 import moxy.viewstate.strategy.AddToEndSingleStrategy
 import moxy.viewstate.strategy.SkipStrategy
 import moxy.viewstate.strategy.StateStrategyType
 import java.nio.file.Path
 
 @StateStrategyType(AddToEndSingleStrategy::class)
-interface ResourcesView : MvpView {
+interface ResourcesView : CommonMvpView {
     fun init()
     fun updateAdapter()
     fun setProgressVisibility(isVisible: Boolean, withText: String = "")

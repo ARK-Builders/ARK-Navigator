@@ -38,13 +38,11 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
     var foldersTreePresenter = FoldersTreePresenter(
         viewState,
         ::onFoldersTreeAddFavoriteBtnClick
-    )
-        .apply {
-            App.instance.appComponent.inject(this)
-        }
+    ).apply {
+        App.instance.appComponent.inject(this)
+    }
 
     private lateinit var devices: List<Path>
-
     override fun onFirstViewAttach() {
         Log.d(FOLDERS_SCREEN, "first view attached in RootsPresenter")
         super.onFirstViewAttach()
@@ -69,7 +67,7 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
         }
     }
 
-    fun onFoldersTreeAddFavoriteBtnClick(path: Path) {
+    private fun onFoldersTreeAddFavoriteBtnClick(path: Path) {
         viewState.openRootPickerDialog(listOf(path))
     }
 

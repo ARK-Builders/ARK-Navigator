@@ -17,6 +17,8 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.chip.Chip
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.nio.file.Path
+import kotlin.io.path.absolutePathString
 import moxy.MvpAppCompatDialogFragment
 import moxy.ktx.moxyPresenter
 import space.taran.arknavigator.R
@@ -154,7 +156,6 @@ class EditTagsDialogFragment(
         binding.root.setTransitionDuration(CLOSE_DURATION)
         binding.root.transitionToStart()
     }
-
     override fun getTheme() = R.style.EditTagsDialogTheme
 
     override fun onResume() = with(binding) {
@@ -164,7 +165,6 @@ class EditTagsDialogFragment(
             etNewTags.onBackPressedListener = {
                 if (!presenter.onBackClick())
                     dismissDialog()
-
                 true
             }
         }
