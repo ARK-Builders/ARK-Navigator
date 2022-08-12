@@ -2,10 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginStart="16dp"
-    android:layout_marginEnd="16dp"
     android:background="@drawable/bg_rounded_16dp"
     android:backgroundTint="@color/white"
     android:orientation="vertical"
@@ -14,27 +12,27 @@
     <TextView
         android:id="@+id/titleTV"
         style="@style/MarginTextStyle"
-        android:layout_width="wrap_content"
-        android:layout_gravity="center"
+        android:layout_width="match_parent"
         android:gravity="center"
-        android:padding="4dp"
-        android:textSize="20sp"
+        android:textSize="18sp"
         android:textStyle="bold"
         tools:text="Title" />
 
     <TextView
         android:id="@+id/infoTV"
         style="@style/RegularTextStyle"
+        android:layout_width="match_parent"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
+        android:gravity="center"
         tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec pretium dui eros, auctor" />
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="10dp"
         android:orientation="horizontal">
 
         <TextView
@@ -62,4 +60,9 @@
             android:textStyle="bold" />
     </LinearLayout>
 
+    <View
+        android:layout_width="wrap_content"
+        android:layout_height="1dp"
+        android:layout_gravity="fill_horizontal" />
 </LinearLayout>
+

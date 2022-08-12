@@ -43,6 +43,8 @@ class ResourcesGridPresenter(
         private set
     var selection = listOf<ResourceItem>()
         private set
+    val selectedResources: List<ResourceMeta>
+        get() = resources.filter { it.isSelected }.map { it.meta }
 
     private lateinit var index: ResourcesIndex
     private lateinit var storage: TagsStorage

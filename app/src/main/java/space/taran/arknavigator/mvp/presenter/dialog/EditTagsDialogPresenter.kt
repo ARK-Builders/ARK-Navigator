@@ -18,13 +18,17 @@ import space.taran.arknavigator.utils.Tag
 import javax.inject.Inject
 
 sealed class EditTagsAction {
-    data class AddTag(val tag: Tag) : EditTagsAction()
+    data class AddTag(
+        val tag: Tag,
+        val affectedIds: Set<ResourceId>
+    ) : EditTagsAction()
+
     data class RemoveTag(val tag: Tag) : EditTagsAction()
 }
 
 class EditTagsDialogPresenter(
     private val rootAndFav: RootAndFav,
-    private val resourceId: ResourceId,
+    val resources: List<ResourceId>,
     private val _index: ResourcesIndex?,
     private val _storage: TagsStorage?
 ) : MvpPresenter<EditTagsDialogView>() {
@@ -44,7 +48,8 @@ class EditTagsDialogPresenter(
             viewState.setInput(field)
         }
     private val actionsHistory = ArrayDeque<EditTagsAction>()
-    private val resourceTags = mutableSetOf<Tag>()
+    private val tagsByResources = mutableMapOf<ResourceId, MutableSet<Tag>>()
+    private val commonTags = mutableSetOf<Tag>()
     private val quickTags = mutableSetOf<Tag>()
 
     private var wasTextRemovedRecently = false
@@ -67,10 +72,13 @@ class EditTagsDialogPresenter(
     }
 
     private suspend fun init() {
-        resourceTags += listResourceTags()
+        tagsByResources += resources
+            .associateWith { id -> storage.getTags(id).toMutableSet() }
+            .toMutableMap()
+        commonTags += listCommonTags()
         quickTags += listQuickTags()
         viewState.setQuickTags(filterQuickTags())
-        viewState.setResourceTags(resourceTags)
+        viewState.setResourceTags(commonTags)
         viewState.showKeyboardAndView()
     }
 
@@ -110,7 +118,7 @@ class EditTagsDialogPresenter(
         if (input.isNotEmpty() || wasTextRemovedRecently || wasTagRemovedRecently)
             return
 
-        val lastTag = resourceTags.lastOrNull() ?: return
+        val lastTag = commonTags.lastOrNull() ?: return
         removeTag(lastTag)
         wasTagRemovedRecently = true
         tagWasRemovedRecentlyTimer()
@@ -120,8 +128,18 @@ class EditTagsDialogPresenter(
         if (actionsHistory.isEmpty()) return false
 
         when (val lastAction = actionsHistory.last()) {
-            is EditTagsAction.AddTag -> resourceTags -= lastAction.tag
-            is EditTagsAction.RemoveTag -> resourceTags += lastAction.tag
+            is EditTagsAction.AddTag -> {
+                commonTags -= lastAction.tag
+                lastAction.affectedIds.forEach { id ->
+                    tagsByResources[id]?.minusAssign(lastAction.tag)
+                }
+            }
+            is EditTagsAction.RemoveTag -> {
+                commonTags += lastAction.tag
+                tagsByResources.forEach { entry ->
+                    entry.value += lastAction.tag
+                }
+            }
         }
         actionsHistory.removeLast()
         updateTags()
@@ -130,29 +148,42 @@ class EditTagsDialogPresenter(
     }
 
     fun onInputDone() = presenterScope.launch {
-        if (input.isNotEmpty()) {
-            resourceTags += input
+        if (input.isNotEmpty())
+            addTag(input)
+
+        tagsByResources.forEach { entry ->
+            storage.setTags(entry.key, entry.value)
         }
-        storage.setTags(resourceId, resourceTags)
+        launch { storage.persist() }
         viewState.dismissDialog()
     }
 
     private fun addTag(tag: Tag) {
-        resourceTags += tag
-        actionsHistory.addLast(EditTagsAction.AddTag(tag))
+        commonTags += tag
+        val affectedIds = tagsByResources.mapNotNull { entry ->
+            if (entry.value.contains(tag))
+                return@mapNotNull null
 
+            entry.value += tag
+            entry.key
+        }.toSet()
+
+        actionsHistory.addLast(EditTagsAction.AddTag(tag, affectedIds))
         updateTags()
     }
 
     private fun removeTag(tag: Tag) {
-        resourceTags -= tag
-        actionsHistory.addLast(EditTagsAction.RemoveTag(tag))
+        commonTags -= tag
+        tagsByResources.forEach { entry ->
+            entry.value -= tag
+        }
 
+        actionsHistory.addLast(EditTagsAction.RemoveTag(tag))
         updateTags()
     }
 
     private fun updateTags() {
-        viewState.setResourceTags(resourceTags)
+        viewState.setResourceTags(commonTags)
         viewState.setQuickTags(filterQuickTags())
     }
 
@@ -171,7 +202,7 @@ class EditTagsDialogPresenter(
     }
 
     private fun filterQuickTags(): Set<Tag> =
-        (quickTags - resourceTags)
+        (quickTags - commonTags)
             .filter { tag ->
                 tag.startsWith(input, true)
             }.toSet()
@@ -187,7 +218,14 @@ class EditTagsDialogPresenter(
             .toSet()
     }
 
-    private fun listResourceTags() = storage.getTags(resourceId).toMutableSet()
+    private fun listCommonTags(): MutableSet<Tag> {
+        val tagsList = resources.map { id -> storage.getTags(id) }
+        var common = tagsList.first()
+        tagsList.drop(1).forEach { tags ->
+            common = common.intersect(tags)
+        }
+        return common.toMutableSet()
+    }
 
     companion object {
         private val TAG_SEPARATORS = listOf(",")

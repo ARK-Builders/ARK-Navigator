@@ -16,9 +16,15 @@ class TagsStorageStub : TagsStorage {
         getTags(id)
     }.toSet()
 
-    override suspend fun setTags(id: ResourceId, tags: Tags) {
+    override fun setTags(id: ResourceId, tags: Tags) {
         tagsById[id] = tags
     }
+
+    override suspend fun setTagsAndPersist(id: ResourceId, tags: Tags) {
+        tagsById[id] = tags
+    }
+
+    override suspend fun persist() {}
 
     override fun listUntaggedResources(): Set<ResourceId> = tagsById
         .filter { (_, tags) -> tags.isEmpty() }

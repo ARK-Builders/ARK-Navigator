@@ -15,7 +15,11 @@ interface TagsStorage {
         ids.map { it to getTags(it) }
             .toMap()
 
-    suspend fun setTags(id: ResourceId, tags: Tags)
+    fun setTags(id: ResourceId, tags: Tags)
+
+    suspend fun setTagsAndPersist(id: ResourceId, tags: Tags)
+
+    suspend fun persist()
 
     fun listUntaggedResources(): Set<ResourceId>
 

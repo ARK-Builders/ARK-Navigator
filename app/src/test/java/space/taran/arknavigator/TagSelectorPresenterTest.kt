@@ -140,7 +140,7 @@ class TagSelectorPresenterTest {
     fun `removing the selected tag should change the selection`() =
         runTest(dispatcher) {
             presenter.onTagItemClick(TagItem.PlainTagItem(TAG1)).join()
-            storage.setTags(R1, setOf())
+            storage.setTagsAndPersist(R1, setOf())
             presenter.calculateTagsAndSelection()
             assertEquals(presenter.selection, setOf(R1, R2, R3, R4))
         }
