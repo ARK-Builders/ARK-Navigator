@@ -47,9 +47,9 @@ import space.taran.arknavigator.utils.LogTags.GALLERY_SCREEN
 import space.taran.arknavigator.utils.Tag
 import space.taran.arknavigator.utils.Tags
 import space.taran.arknavigator.utils.extension
-import space.taran.arknavigator.utils.extensions.makeGone
 import space.taran.arknavigator.utils.extensions.makeVisible
 import java.nio.file.Path
+import kotlinx.coroutines.launch
 
 class GalleryFragment : MvpAppCompatFragment(), GalleryView {
 
@@ -225,20 +225,21 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
             GALLERY_SCREEN,
             "displaying tags of resource $resource for preview"
         )
+        lifecycleScope.launch {
+            binding.tagsCg.removeAllViews()
 
-        binding.tagsCg.removeAllViews()
+            tags.forEach { tag ->
+                val chip = Chip(context)
+                chip.text = tag
 
-        tags.forEach { tag ->
-            val chip = Chip(context)
-            chip.text = tag
-
-            chip.setOnClickListener {
-                showTagMenuPopup(tag, chip)
+                chip.setOnClickListener {
+                    showTagMenuPopup(tag, chip)
+                }
+                binding.tagsCg.addView(chip)
             }
-            binding.tagsCg.addView(chip)
-        }
 
-        binding.tagsCg.addView(createEditChip())
+            binding.tagsCg.addView(createEditChip())
+        }
     }
 
     override fun showEditTagsDialog(
@@ -351,21 +352,22 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
 
     private fun setupOpenEditFABs(kind: ResourceKind?) {
         binding.apply {
-            openResourceFab.makeGone()
-            editResourceFab.makeGone()
-            when (kind) {
-                is ResourceKind.Video, is ResourceKind.Link, null -> {
-                    // "open" capabilities only
-                    openResourceFab.makeVisible()
-                }
-                is ResourceKind.Document, is ResourceKind.PlainText -> {
-                    // both "open" and "edit" capabilities
-                    editResourceFab.makeVisible()
-                    openResourceFab.makeVisible()
-                }
-                is ResourceKind.Image -> {
-                    // "edit" capabilities only
-                    editResourceFab.makeVisible()
+            lifecycleScope.launch {
+                when (kind) {
+                    is ResourceKind.Video, is ResourceKind.Link, null -> {
+                        // "open" capabilities only
+                        openResourceFab.makeVisible()
+                    }
+                    is ResourceKind.Document, is ResourceKind.PlainText -> {
+                        // both "open" and "edit" capabilities
+                        editResourceFab.makeVisible()
+                        openResourceFab.makeVisible()
+                    }
+                    is ResourceKind.Image -> {
+                        // "edit" capabilities only
+                        editResourceFab.makeVisible()
+                    }
+                    else -> {}
                 }
             }
         }

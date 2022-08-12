@@ -20,15 +20,16 @@
         <HorizontalScrollView
             android:id="@+id/scroll_tags_cg"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="68dp"
             android:orientation="horizontal"
             android:scrollbars="none"
+            android:fillViewport="true"
             app:layout_constraintBottom_toBottomOf="parent">
 
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/tags_cg"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:orientation="horizontal"
                 app:singleLine="true"
                 android:padding="10dp" />
@@ -111,37 +112,38 @@
             app:elevation="6dp"
             app:tint="@color/white" />
 
-        <LinearLayout
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/edit_resource_fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:backgroundTint="@color/colorPrimary"
+            android:src="@drawable/ic_edit_file"
+            app:layout_constraintEnd_toStartOf="@+id/open_resource_fab"
+            app:layout_constraintBottom_toTopOf="@id/scroll_extra_info"
+            android:layout_marginBottom="16dp"
+            android:layout_marginEnd="16dp"
+            app:borderWidth="0dp"
+            app:elevation="6dp"
+            android:visibility="gone"
+            tools:visibility="visible"
+            app:tint="@color/white" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/open_resource_fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:backgroundTint="@color/colorPrimary"
+            android:src="@drawable/ic_baseline_chooser_24"
             app:layout_constraintBottom_toTopOf="@id/scroll_extra_info"
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="16dp"
-            android:orientation="horizontal">
-
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/edit_resource_fab"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:backgroundTint="@color/colorPrimary"
-                android:src="@drawable/ic_edit_file"
-                app:borderWidth="0dp"
-                app:elevation="6dp"
-                app:tint="@color/white" />
-
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/open_resource_fab"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:backgroundTint="@color/colorPrimary"
-                android:src="@drawable/ic_baseline_chooser_24"
-                app:borderWidth="0dp"
-                app:elevation="6dp"
-                app:tint="@color/white" />
-
-        </LinearLayout>
+            app:borderWidth="0dp"
+            app:elevation="6dp"
+            android:visibility="gone"
+            tools:visibility="visible"
+            app:tint="@color/white" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <include
