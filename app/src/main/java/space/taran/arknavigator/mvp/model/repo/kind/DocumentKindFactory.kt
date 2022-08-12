@@ -7,7 +7,6 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.utils.LogTags.RESOURCES_INDEX
 import space.taran.arknavigator.utils.extension
 import java.io.FileNotFoundException
-import java.io.IOException
 import java.nio.file.Path
 
 object DocumentKindFactory : ResourceKindFactory<ResourceKind.Document> {
@@ -17,7 +16,6 @@ object DocumentKindFactory : ResourceKindFactory<ResourceKind.Document> {
         get() = setOf("application/pdf")
     override val acceptedKindCode = KindCode.DOCUMENT
 
-    @Throws(IOException::class)
     override fun fromPath(path: Path): ResourceKind.Document {
         if (extension(path) != "pdf") return ResourceKind.Document()
 

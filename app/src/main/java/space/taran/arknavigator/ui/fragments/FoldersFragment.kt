@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
@@ -21,12 +22,11 @@ import space.taran.arknavigator.ui.fragments.dialog.FolderPickerDialogFragment
 import space.taran.arknavigator.ui.fragments.dialog.RootsScanDialogFragment
 import space.taran.arknavigator.ui.fragments.utils.toast
 import space.taran.arknavigator.ui.fragments.utils.toastFailedPaths
+import space.taran.arknavigator.ui.view.StackedToasts
 import space.taran.arknavigator.utils.FullscreenHelper
 import space.taran.arknavigator.utils.LogTags.FOLDERS_SCREEN
 import java.nio.file.Path
 import kotlin.io.path.Path
-import kotlin.io.path.absolutePathString
-import space.taran.arknavigator.ui.fragments.utils.toastKindDetectFailedPath
 
 class FoldersFragment : MvpAppCompatFragment(), FoldersView {
     private var foldersTreeAdapter: FoldersTreeAdapter? = null
@@ -38,6 +38,7 @@ class FoldersFragment : MvpAppCompatFragment(), FoldersView {
             App.instance.appComponent.inject(this)
         }
     }
+    private lateinit var stackedToasts: StackedToasts
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -59,6 +60,7 @@ class FoldersFragment : MvpAppCompatFragment(), FoldersView {
     override fun init() {
         Log.d(FOLDERS_SCREEN, "initializing FoldersFragment")
         (activity as MainActivity).setSelectedTab(R.id.page_roots)
+        stackedToasts = StackedToasts(binding.rvToasts, lifecycleScope)
         foldersTreeAdapter = FoldersTreeAdapter(presenter.foldersTreePresenter)
         binding.rvRoots.layoutManager = LinearLayoutManager(context)
         binding.rvRoots.adapter = foldersTreeAdapter
@@ -110,14 +112,7 @@ class FoldersFragment : MvpAppCompatFragment(), FoldersView {
         toast(R.string.toast_indexing_can_take_minutes)
 
     override fun toastIndexFailedPath(path: Path) {
-        toastKindDetectFailedPath(path)
-        Log.d(
-            FOLDERS_SCREEN,
-            getString(
-                R.string.toast_could_not_detect_kind_for,
-                path.absolutePathString()
-            )
-        )
+        stackedToasts.toast(path)
     }
 
     private fun initResultListeners() {

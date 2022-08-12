@@ -147,4 +147,10 @@
         android:id="@+id/layoutProgress"
         layout="@layout/layout_progress" />
 
+    <space.taran.arknavigator.ui.view.StackedToastsRecyclerView
+        android:id="@+id/rv_toasts"
+        android:elevation="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

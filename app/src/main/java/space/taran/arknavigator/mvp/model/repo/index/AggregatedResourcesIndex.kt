@@ -1,7 +1,8 @@
 package space.taran.arknavigator.mvp.model.repo.index
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.merge
 import java.nio.file.Path
-import kotlinx.coroutines.flow.SharedFlow
 
 /**
  * [AggregatedResourceIndex] is useful for "aggregated" navigation mode — a mode in
@@ -19,6 +20,10 @@ import kotlinx.coroutines.flow.SharedFlow
 class AggregatedResourcesIndex(
     private val shards: Collection<PlainResourcesIndex>
 ) : ResourcesIndex {
+
+    override val kindDetectFailedFlow: Flow<Path> = shards.map {
+        it.kindDetectFailedFlow
+    }.merge()
 
     override suspend fun listResources(prefix: Path?): Set<ResourceMeta> =
         shards.flatMap { it.listResources(prefix) }
@@ -58,7 +63,4 @@ class AggregatedResourcesIndex(
                 it.updateResource(oldId, path, newResource)
         }
     }
-
-    override val kindDetectFailedFlow: SharedFlow<Path>
-        get() = tryShards { it.kindDetectFailedFlow }
 }
