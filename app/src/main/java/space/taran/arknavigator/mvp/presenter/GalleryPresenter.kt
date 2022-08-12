@@ -183,7 +183,7 @@ class GalleryPresenter(
         val newTags = tags - tag
         viewState.displayPreviewTags(id, newTags)
         Log.d(GALLERY_SCREEN, "tags $tags set to $currentResource")
-        storage.setTags(currentResource.id, newTags)
+        storage.setTagsAndPersist(currentResource.id, newTags)
         viewState.notifyTagsChanged()
     }
 

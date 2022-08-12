@@ -29,4 +29,6 @@ interface ResourcesView : CommonMvpView {
     fun onSelectingChanged(enabled: Boolean)
     @StateStrategyType(SkipStrategy::class)
     fun clearStackedToasts()
+    @StateStrategyType(SkipStrategy::class)
+    fun shareResources(resources: List<Path>)
 }

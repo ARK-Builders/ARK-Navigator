@@ -32,16 +32,20 @@ class ConfirmationDialogFragment : DialogFragment() {
         binding.apply {
             titleTV.text = args.getString(TITLE)
             infoTV.text = args.getString(DESCRIPTION)
-            posBtn.text = args.getString(POSITIVE_KEY)
-            negBtn.textOrGone(args.getString(NEGATIVE_KEY))
+            posBtn.text = args.getString(POSITIVE_BTN_KEY)
+            negBtn.textOrGone(args.getString(NEGATIVE_BTN_KEY))
 
             posBtn.setOnClickListener {
-                setFragmentResult(POSITIVE_KEY, bundleOf())
+                val requestKey = args
+                    .getString(POSITIVE_REQUEST_KEY) ?: DEFAULT_POSITIVE_REQUEST_KEY
+                setFragmentResult(
+                    requestKey,
+                    args.getBundle(EXTRA_BUNDLE) ?: bundleOf()
+                )
                 dismiss()
             }
 
             negBtn.setOnClickListener {
-                setFragmentResult(NEGATIVE_KEY, bundleOf())
                 dismiss()
             }
         }
@@ -50,23 +54,30 @@ class ConfirmationDialogFragment : DialogFragment() {
     }
 
     companion object {
-        const val TITLE = "title"
-        const val DESCRIPTION = "description"
-        const val POSITIVE_KEY = "positive_key"
-        const val NEGATIVE_KEY = "negative_key"
+        private const val TITLE = "title"
+        private const val DESCRIPTION = "description"
+        private const val POSITIVE_BTN_KEY = "positive_key"
+        private const val NEGATIVE_BTN_KEY = "negative_key"
+        private const val POSITIVE_REQUEST_KEY = "positiveRequestKey"
+        const val DEFAULT_POSITIVE_REQUEST_KEY = "defaultPositiveRequestKey"
         const val CONFIRMATION_DIALOG_TAG = "confirmationDialogFragment"
+        const val EXTRA_BUNDLE = "extraBundle"
 
         fun newInstance(
             title: String,
             description: String,
             posBtnText: String,
-            negBtnText: String? = null
+            negBtnText: String?,
+            positiveRequestKey: String? = null,
+            bundle: Bundle? = null
         ): ConfirmationDialogFragment = ConfirmationDialogFragment().also { f ->
             f.arguments = bundleOf(
                 TITLE to title,
                 DESCRIPTION to description,
-                POSITIVE_KEY to posBtnText,
-                NEGATIVE_KEY to negBtnText
+                POSITIVE_BTN_KEY to posBtnText,
+                NEGATIVE_BTN_KEY to negBtnText,
+                POSITIVE_REQUEST_KEY to positiveRequestKey,
+                EXTRA_BUNDLE to bundle
             )
         }
     }

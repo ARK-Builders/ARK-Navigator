@@ -250,7 +250,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
         )
         val dialog = EditTagsDialogFragment.newInstance(
             requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
-            resource,
+            listOf(resource),
             presenter.index,
             presenter.storage
         )

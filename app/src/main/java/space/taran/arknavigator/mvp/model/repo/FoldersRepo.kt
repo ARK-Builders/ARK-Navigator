@@ -67,6 +67,10 @@ class FoldersRepo(
             provideFolders().keys.toList()
     }
 
+    fun findRootByPath(path: Path): Path? = folders.keys.find { root ->
+        path.startsWith(root)
+    }
+
     private suspend fun query(): PartialResult<Folders, List<Path>> =
         withContext(Dispatchers.IO) {
             val missingPaths = mutableListOf<Path>()

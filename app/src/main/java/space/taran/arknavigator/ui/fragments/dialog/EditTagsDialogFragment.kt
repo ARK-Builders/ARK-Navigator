@@ -40,7 +40,7 @@ class EditTagsDialogFragment(
     private val presenter by moxyPresenter {
         EditTagsDialogPresenter(
             requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
-            requireArguments().getLong(RESOURCE_KEY),
+            requireArguments().getLongArray(RESOURCES_KEY)!!.toList(),
             index,
             storage
         ).apply {
@@ -58,6 +58,8 @@ class EditTagsDialogFragment(
     }
 
     override fun init(): Unit = with(binding) {
+        if (presenter.resources.size != 1)
+            tvTags.text = getString(R.string.common_tags)
         setupFullHeight()
         etNewTags.doAfterTextChanged { editable ->
             presenter.onInputChanged(editable.toString())
@@ -185,26 +187,26 @@ class EditTagsDialogFragment(
         const val REQUEST_TAGS_CHANGED_KEY = "tagsChangedEditTags"
         const val FRAGMENT_TAG = "editTagsDialogTag"
         private const val ROOT_AND_FAV_KEY = "rootAndFav"
-        private const val RESOURCE_KEY = "resource"
+        private const val RESOURCES_KEY = "resources"
         private const val OPEN_DURATION = 300
         private const val CLOSE_DURATION = 200
 
         fun newInstance(
             rootAndFav: RootAndFav,
-            resource: ResourceId,
+            resources: List<ResourceId>,
             index: ResourcesIndex,
             storage: TagsStorage
         ) =
             EditTagsDialogFragment(index, storage).apply {
                 arguments = Bundle().apply {
                     putParcelable(ROOT_AND_FAV_KEY, rootAndFav)
-                    putLong(RESOURCE_KEY, resource)
+                    putLongArray(RESOURCES_KEY, resources.toLongArray())
                 }
             }
     }
 }
 
-private interface RelaxedTransitionListener : MotionLayout.TransitionListener {
+interface RelaxedTransitionListener : MotionLayout.TransitionListener {
     override fun onTransitionChange(
         motionLayout: MotionLayout?,
         startId: Int,

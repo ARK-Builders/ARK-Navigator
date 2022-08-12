@@ -6,6 +6,7 @@ import space.taran.arknavigator.ui.App
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import kotlin.io.path.exists
 import kotlin.io.path.extension
 import kotlin.io.path.listDirectoryEntries
 
@@ -47,6 +48,16 @@ fun listChildren(folder: Path): Pair<List<Path>, List<Path>> = folder
     .listDirectoryEntries()
     .filter { !Files.isHidden(it) }
     .partition { Files.isDirectory(it) }
+
+fun Path.findNotExistCopyName(name: String): Path {
+    var filesCounter = 1
+    var newPath = this.resolve(name)
+    while (newPath.exists()) {
+        newPath = this.resolve(name + "_$filesCounter")
+        filesCounter++
+    }
+    return newPath
+}
 
 fun findLongestCommonPrefix(paths: List<Path>): Path {
     if (paths.isEmpty()) {

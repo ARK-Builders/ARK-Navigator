@@ -16,6 +16,16 @@
         android:text="@string/copy_to" />
 
     <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_edit_tags"
+        style="@style/PopupTextButtonMedium"
+        android:text="@string/edit_tags" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_share"
+        style="@style/PopupTextButtonMedium"
+        android:text="@string/share" />
+
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_remove"
         style="@style/PopupTextButtonMedium"
         android:text="@string/remove" />

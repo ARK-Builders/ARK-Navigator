@@ -73,6 +73,7 @@
             app:showDivider="middle">
 
             <TextView
+                android:id="@+id/tv_tags"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Resource tags:"

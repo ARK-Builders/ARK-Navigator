@@ -1,5 +1,6 @@
 package space.taran.arknavigator.ui.fragments
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.SystemClock
 import android.util.Log
@@ -9,6 +10,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.FileProvider
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.setFragmentResultListener
@@ -18,13 +21,10 @@ import kotlinx.coroutines.launch
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import moxy.presenterScope
-import space.taran.arkfilepicker.ArkFilePickerConfig
-import space.taran.arkfilepicker.ArkFilePickerFragment
-import space.taran.arkfilepicker.ArkFilePickerMode
 import space.taran.arkfilepicker.onArkPathPicked
+import space.taran.arknavigator.BuildConfig
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.FragmentResourcesBinding
-import space.taran.arknavigator.databinding.PopupSelectedResourcesActionsBinding
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.presenter.ResourcesPresenter
 import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.QueryMode
@@ -33,10 +33,10 @@ import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.adapter.ResourcesRVAdapter
 import space.taran.arknavigator.ui.adapter.TagsSelectorAdapter
+import space.taran.arknavigator.ui.fragments.dialog.ConfirmationDialogFragment
 import space.taran.arknavigator.ui.fragments.dialog.SortDialogFragment
 import space.taran.arknavigator.ui.fragments.utils.toast
 import space.taran.arknavigator.ui.fragments.utils.toastFailedPaths
-import space.taran.arknavigator.ui.view.DefaultPopup
 import space.taran.arknavigator.ui.view.StackedToasts
 import space.taran.arknavigator.utils.FullscreenHelper
 import space.taran.arknavigator.utils.LogTags.RESOURCES_SCREEN
@@ -45,6 +45,7 @@ import space.taran.arknavigator.utils.extensions.closeKeyboard
 import space.taran.arknavigator.utils.extensions.placeCursorToEnd
 import space.taran.arknavigator.utils.extensions.showKeyboard
 import java.nio.file.Path
+import kotlin.io.path.Path
 import kotlin.math.abs
 
 // `root` is used for querying tags storage and resources index,
@@ -57,7 +58,7 @@ import kotlin.math.abs
 //       (recommended instead of passing same value for `path` and `root)
 class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
 
-    private val presenter by moxyPresenter {
+    val presenter by moxyPresenter {
         ResourcesPresenter(
             requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
             requireArguments().getString(SELECTED_TAG_KEY)
@@ -246,38 +247,33 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         resourcesAdapter?.onSelectingChanged(enabled)
     }
 
+    override fun shareResources(resources: List<Path>) {
+        val fileUris = resources.map {
+            FileProvider.getUriForFile(
+                requireContext(),
+                BuildConfig.APPLICATION_ID + ".provider",
+                it.toFile()
+            )
+        }
+        val intent = Intent().apply {
+            action = Intent.ACTION_SEND_MULTIPLE
+            type = "file/*"
+            putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList(fileUris))
+        }
+        startActivity(
+            Intent.createChooser(
+                intent,
+                getString(R.string.share_resources_with)
+            )
+        )
+    }
+
     private fun initMenuListeners() = with(binding) {
         actionBar.ivDisableSelectionMode.setOnClickListener {
             presenter.gridPresenter.onSelectingChanged(false)
         }
         actionBar.ivUseSelected.setOnClickListener {
-            val menuBinding = PopupSelectedResourcesActionsBinding
-                .inflate(requireActivity().layoutInflater)
-            val popup = DefaultPopup(
-                menuBinding,
-                R.style.FadeAnimation,
-                R.drawable.bg_rounded_8,
-                24f
-            )
-            menuBinding.apply {
-                btnMove.setOnClickListener {
-                    ArkFilePickerFragment
-                        .newInstance(moveFilePickerConfig())
-                        .show(childFragmentManager, null)
-                    popup.popupWindow.dismiss()
-                }
-                btnCopy.setOnClickListener {
-                    ArkFilePickerFragment
-                        .newInstance(copyFilePickerConfig())
-                        .show(childFragmentManager, null)
-                    popup.popupWindow.dismiss()
-                }
-                btnRemove.setOnClickListener {
-                    presenter.onRemoveSelectedResourcesClicked()
-                    popup.popupWindow.dismiss()
-                }
-            }
-            popup.showBelow(it)
+            setupAndShowSelectedResourcesMenu(it)
         }
         actionBar.btnSort.setOnClickListener {
             val dialog = SortDialogFragment.newInstance()
@@ -295,8 +291,22 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         childFragmentManager.onArkPathPicked(
             this,
             MOVE_SELECTED_REQUEST_KEY
-        ) {
-            presenter.onMoveSelectedResourcesClicked(it)
+        ) { path ->
+            val selectedSize = presenter.gridPresenter.resources
+                .filter { it.isSelected }
+                .size
+            val description = "$selectedSize " +
+                getString(R.string.resources_will_be_moved)
+            ConfirmationDialogFragment
+                .newInstance(
+                    getString(R.string.are_you_sure),
+                    description,
+                    getString(R.string.yes),
+                    getString(R.string.no),
+                    MOVE_CONFIRMATION_REQUEST_KEY,
+                    bundleOf(MOVE_TO_PATH_KEY to path.toString())
+                )
+                .show(parentFragmentManager, null)
         }
 
         childFragmentManager.onArkPathPicked(
@@ -304,6 +314,23 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
             COPY_SELECTED_REQUEST_KEY
         ) {
             presenter.onCopySelectedResourcesClicked(it)
+        }
+
+        setFragmentResultListener(
+            MOVE_CONFIRMATION_REQUEST_KEY
+        ) { _, bundle ->
+            presenter.onMoveSelectedResourcesClicked(
+                Path(
+                    bundle
+                        .getString(MOVE_TO_PATH_KEY)!!
+                )
+            )
+        }
+
+        setFragmentResultListener(
+            DELETE_CONFIRMATION_REQUEST_KEY
+        ) { _, _ ->
+            presenter.onRemoveSelectedResourcesClicked()
         }
 
         setFragmentResultListener(
@@ -421,21 +448,12 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         stackedToasts.toast(path)
     }
 
-    private fun moveFilePickerConfig() = ArkFilePickerConfig(
-        titleStringId = R.string.move_to,
-        mode = ArkFilePickerMode.FOLDER,
-        pathPickedRequestKey = MOVE_SELECTED_REQUEST_KEY
-    )
-
-    private fun copyFilePickerConfig() = ArkFilePickerConfig(
-        titleStringId = R.string.copy_to,
-        mode = ArkFilePickerMode.FOLDER,
-        pathPickedRequestKey = COPY_SELECTED_REQUEST_KEY
-    )
-
     companion object {
-        private const val MOVE_SELECTED_REQUEST_KEY = "moveSelected"
-        private const val COPY_SELECTED_REQUEST_KEY = "copySelected"
+        const val MOVE_SELECTED_REQUEST_KEY = "moveSelected"
+        const val COPY_SELECTED_REQUEST_KEY = "copySelected"
+        private const val MOVE_CONFIRMATION_REQUEST_KEY = "moveConfirm"
+        const val DELETE_CONFIRMATION_REQUEST_KEY = "deleteConfirm"
+        private const val MOVE_TO_PATH_KEY = "moveToPath"
 
         private const val DRAG_TRAVEL_TIME_THRESHOLD = 30 // milliseconds
         private const val DRAG_TRAVEL_DELTA_THRESHOLD = 0.1 // ratio
