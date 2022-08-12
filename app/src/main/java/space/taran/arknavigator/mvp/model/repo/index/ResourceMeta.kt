@@ -1,10 +1,11 @@
 package space.taran.arknavigator.mvp.model.repo.index
 
-import java.io.IOException
 import space.taran.arknavigator.mvp.model.dao.ResourceWithExtra
 import space.taran.arknavigator.mvp.model.repo.kind.GeneralKindFactory
 import space.taran.arknavigator.mvp.model.repo.kind.ResourceKind
+import space.taran.arknavigator.utils.MetaResult
 import space.taran.arknavigator.utils.extension
+import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.attribute.FileTime
@@ -20,28 +21,33 @@ data class ResourceMeta(
 
     companion object {
 
-        fun fromPath(path: Path): Result<ResourceMeta?> {
+        fun fromPath(path: Path): MetaResult {
             val size = Files.size(path)
             if (size < 1) {
-                return Result.failure(IOException("Invalid file size"))
+                return MetaResult.failure(IOException("Invalid file size"))
             }
 
             val id = computeId(size, path)
-            return try {
-                val kind = GeneralKindFactory.fromPath(path)
-                Result.success(
-                    ResourceMeta(
-                        id = id,
-                        name = path.fileName.toString(),
-                        extension = extension(path),
-                        modified = Files.getLastModifiedTime(path),
-                        size = size,
-                        kind = kind,
-                    )
-                )
-            } catch (e: IOException) {
-                Result.failure<ResourceMeta>(e)
+
+            var kind: ResourceKind? = null
+            var kindDetectException: Exception? = null
+
+            try {
+                kind = GeneralKindFactory.fromPath(path)
+            } catch (e: Exception) {
+                kindDetectException = e
             }
+
+            val meta = ResourceMeta(
+                id = id,
+                name = path.fileName.toString(),
+                extension = extension(path),
+                modified = Files.getLastModifiedTime(path),
+                size = size,
+                kind = kind,
+            )
+
+            return MetaResult(meta, kindDetectException)
         }
 
         fun fromRoom(room: ResourceWithExtra): ResourceMeta =

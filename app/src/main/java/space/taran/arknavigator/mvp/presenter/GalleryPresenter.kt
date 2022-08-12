@@ -2,13 +2,10 @@ package space.taran.arknavigator.mvp.presenter
 
 import android.util.Log
 import androidx.recyclerview.widget.DiffUtil
-import java.io.FileReader
-import java.nio.file.Files
-import java.nio.file.Path
-import javax.inject.Inject
-import kotlin.io.path.notExists
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import moxy.MvpPresenter
@@ -35,7 +32,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import javax.inject.Inject
 import kotlin.io.path.getLastModifiedTime
-import kotlinx.coroutines.flow.collect
+import kotlin.io.path.notExists
 
 enum class GalleryItemType {
     PLAINTEXT, OTHER
@@ -78,13 +75,10 @@ class GalleryPresenter(
             if (!indexRepo.isIndexed(rootAndFav))
                 viewState.setProgressVisibility(true, "Indexing")
 
-            index = indexRepo.provide(rootAndFav) { kindDetectFailedFlow ->
-                presenterScope.launch {
-                    kindDetectFailedFlow.collect { path ->
-                        viewState.toastIndexFailedPath(path)
-                    }
-                }
-            }
+            index = indexRepo.provide(rootAndFav)
+            index.kindDetectFailedFlow.onEach { failed ->
+                viewState.toastIndexFailedPath(failed)
+            }.launchIn(presenterScope)
             storage = tagsStorageRepo.provide(rootAndFav)
             resources = resourcesIds.map { index.getMeta(it) }.toMutableList()
 
@@ -247,7 +241,7 @@ class GalleryPresenter(
         path: Path,
         oldMeta: ResourceMeta
     ) = withContext(Dispatchers.IO) {
-        val newMeta = ResourceMeta.fromPath(path).getOrNull() ?: return@withContext
+        val newMeta = ResourceMeta.fromPath(path).meta ?: return@withContext
         PreviewAndThumbnail.generate(path, newMeta)
 
         val indexToReplace = resources.indexOf(oldMeta)

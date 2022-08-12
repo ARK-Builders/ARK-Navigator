@@ -3,19 +3,20 @@ package space.taran.arknavigator.mvp.presenter
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import moxy.MvpPresenter
 import moxy.presenterScope
 import space.taran.arknavigator.mvp.model.repo.FoldersRepo
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
-import space.taran.arknavigator.mvp.model.repo.index.AggregatedResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
-import space.taran.arknavigator.mvp.model.repo.tags.AggregatedTagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import space.taran.arknavigator.mvp.presenter.adapter.ResourcesGridPresenter
@@ -27,11 +28,9 @@ import space.taran.arknavigator.utils.LogTags.RESOURCES_SCREEN
 import space.taran.arknavigator.utils.Tag
 import java.nio.file.Path
 import javax.inject.Inject
-import kotlinx.coroutines.Dispatchers
 import kotlin.io.path.copyTo
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.name
-import kotlinx.coroutines.flow.collect
 
 class ResourcesPresenter(
     private val rootAndFav: RootAndFav,
@@ -94,22 +93,12 @@ class ResourcesPresenter(
                 all.toList()
             }
             Log.d(RESOURCES_SCREEN, "using roots $roots")
-            val rootToIndex = roots.associateWith {
-                resourcesIndexRepo.loadFromDatabase(it) { kindDetectFailedFlow ->
-                    presenterScope.launch {
-                        kindDetectFailedFlow.collect { path ->
-                            viewState.toastIndexFailedPath(path)
-                        }
-                    }
-                }
-            }
-
-            val rootToStorage = roots.associateWith {
-                tagsStorageRepo.provide(it)
-            }
-
-            index = AggregatedResourcesIndex(rootToIndex.values)
-            storage = AggregatedTagsStorage(rootToStorage.values)
+            index = resourcesIndexRepo.provide(rootAndFav)
+            index.kindDetectFailedFlow.onEach { path ->
+                viewState.toastIndexFailedPath(path)
+            }.launchIn(presenterScope)
+            index.reindex()
+            storage = tagsStorageRepo.provide(rootAndFav)
 
             gridPresenter.init(index, storage, router)
 
@@ -130,6 +119,10 @@ class ResourcesPresenter(
 
             viewState.setToolbarTitle("$title${roots.size} of roots chosen")
             viewState.setProgressVisibility(false)
+            launch {
+                delay(DELAY_CLEAR_TOASTS)
+                viewState.clearStackedToasts()
+            }
         }
     }
 
@@ -220,5 +213,9 @@ class ResourcesPresenter(
 
     private suspend fun onSelectionChange(selection: Set<ResourceId>) {
         gridPresenter.updateSelection(selection)
+    }
+
+    companion object {
+        private const val DELAY_CLEAR_TOASTS = 1_500L
     }
 }

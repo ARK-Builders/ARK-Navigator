@@ -2,11 +2,11 @@ package space.taran.arknavigator.mvp.model.repo.kind
 
 import android.net.Uri
 import android.util.Log
-import java.io.IOException
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.utils.LogTags
 import wseemann.media.FFmpegMediaMetadataRetriever
+import java.io.IOException
 import java.nio.file.Path
 import kotlin.io.path.name
 
@@ -17,7 +17,6 @@ object VideoKindFactory : ResourceKindFactory<ResourceKind.Video> {
         setOf("video/mp4")
     override val acceptedKindCode = KindCode.VIDEO
 
-    @Throws(IOException::class)
     override fun fromPath(path: Path): ResourceKind.Video {
         val retriever = FFmpegMediaMetadataRetriever()
 

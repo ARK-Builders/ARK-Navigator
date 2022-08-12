@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_progress"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:gravity="center"
     android:background="@color/grayTransparent"
+    android:orientation="vertical"
     android:elevation="16dp"
     android:clickable="true">
 
@@ -12,15 +14,12 @@
         android:id="@+id/progress_indicator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
         android:indeterminate="true" />
 
     <space.taran.arknavigator.ui.view.LoadingTextView
         android:id="@+id/progress_text"
         style="@style/BoldWhiteText"
-        android:layout_below="@id/progress_indicator"
-        android:layout_centerHorizontal="true"
         android:layout_marginTop="8dp"
         android:textSize="16sp"
         tools:text="Indexing..." />
-</RelativeLayout>
+</LinearLayout>

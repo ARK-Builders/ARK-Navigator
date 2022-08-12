@@ -12,6 +12,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.setFragmentResultListener
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import kotlinx.coroutines.launch
 import moxy.MvpAppCompatFragment
@@ -36,6 +37,7 @@ import space.taran.arknavigator.ui.fragments.dialog.SortDialogFragment
 import space.taran.arknavigator.ui.fragments.utils.toast
 import space.taran.arknavigator.ui.fragments.utils.toastFailedPaths
 import space.taran.arknavigator.ui.view.DefaultPopup
+import space.taran.arknavigator.ui.view.StackedToasts
 import space.taran.arknavigator.utils.FullscreenHelper
 import space.taran.arknavigator.utils.LogTags.RESOURCES_SCREEN
 import space.taran.arknavigator.utils.Tag
@@ -43,9 +45,7 @@ import space.taran.arknavigator.utils.extensions.closeKeyboard
 import space.taran.arknavigator.utils.extensions.placeCursorToEnd
 import space.taran.arknavigator.utils.extensions.showKeyboard
 import java.nio.file.Path
-import kotlin.io.path.absolutePathString
 import kotlin.math.abs
-import space.taran.arknavigator.ui.fragments.utils.toastKindDetectFailedPath
 
 // `root` is used for querying tags storage and resources index,
 //       if it is `null`, then resources from all roots are taken
@@ -69,6 +69,7 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
 
     private lateinit var binding: FragmentResourcesBinding
     private var resourcesAdapter: ResourcesRVAdapter? = null
+    private lateinit var stackedToasts: StackedToasts
 
     private val frameTop by lazy {
         val loc = IntArray(2)
@@ -107,6 +108,7 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
 
         initResultListeners()
         initMenuListeners()
+        stackedToasts = StackedToasts(binding.rvToasts, lifecycleScope)
 
         FullscreenHelper.setStatusBarVisibility(true, requireActivity().window)
         (activity as MainActivity).setSelectedTab(R.id.page_tags)
@@ -235,15 +237,8 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
     override fun toastPathsFailed(failedPaths: List<Path>) =
         toastFailedPaths(failedPaths)
 
-    override fun toastIndexFailedPath(paths: List<Path>) {
-        toastIndexFailedPaths(paths)
-        Log.d(
-            RESOURCES_SCREEN,
-            getString(
-                R.string.toast_could_not_process_link_resource_by_path,
-                paths.joinToString("\n") { it.absolutePathString() }
-            )
-        )
+    override fun clearStackedToasts() {
+        stackedToasts.clearToasts()
     }
 
     override fun onSelectingChanged(enabled: Boolean) {
@@ -423,14 +418,7 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
     }
 
     override fun toastIndexFailedPath(path: Path) {
-        toastKindDetectFailedPath(path)
-        Log.d(
-            RESOURCES_SCREEN,
-            getString(
-                R.string.toast_could_not_detect_kind_for,
-                path.absolutePathString()
-            )
-        )
+        stackedToasts.toast(path)
     }
 
     private fun moveFilePickerConfig() = ArkFilePickerConfig(

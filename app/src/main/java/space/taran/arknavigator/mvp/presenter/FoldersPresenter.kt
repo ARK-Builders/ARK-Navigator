@@ -2,6 +2,8 @@ package space.taran.arknavigator.mvp.presenter
 
 import android.util.Log
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import moxy.MvpPresenter
 import moxy.presenterScope
@@ -97,13 +99,17 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
         }
 
     fun onRootsFound(roots: List<Path>) = presenterScope.launch(NonCancellable) {
-        roots.forEachIndexed { index, root ->
+        roots.forEachIndexed { pos, root ->
             viewState.setProgressVisibility(
                 true,
-                "Indexing ${index + 1}/${roots.size}"
+                "Indexing ${pos + 1}/${roots.size}"
             )
             foldersRepo.insertRoot(root)
-            resourcesIndexRepo.buildFromFilesystem(root)
+            val index = resourcesIndexRepo.provide(root)
+            index.kindDetectFailedFlow.onEach { failed ->
+                viewState.toastIndexFailedPath(failed)
+            }.launchIn(presenterScope)
+            index.reindex()
         }
         viewState.setProgressVisibility(false)
         foldersTreePresenter.updateNodes(devices, foldersRepo.provideFolders())
@@ -124,7 +130,12 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
         viewState.toastIndexingCanTakeMinutes()
 
         viewState.setProgressVisibility(true, "Indexing")
-        resourcesIndexRepo.buildFromFilesystem(root)
+        val index = resourcesIndexRepo.provide(root)
+        index.kindDetectFailedFlow.onEach { failed ->
+            viewState.toastIndexFailedPath(failed)
+        }.launchIn(presenterScope)
+        index.reindex()
+
         viewState.setProgressVisibility(false)
 
         foldersTreePresenter.updateNodes(devices, foldersRepo.provideFolders())

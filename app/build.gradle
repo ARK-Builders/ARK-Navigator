@@ -133,6 +133,10 @@ dependencies {
     implementation "ch.acra:acra-http:5.9.3"
     implementation "ch.acra:acra-dialog:5.9.3"
 
+    implementation "com.mikepenz:fastadapter:5.6.0"
+    implementation "com.mikepenz:fastadapter-extensions-binding:5.6.0"
+    implementation "com.mikepenz:fastadapter-extensions-diff:5.6.0"
+
     testImplementation "org.junit.jupiter:junit-jupiter-api:5.8.2"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.8.2"
     testImplementation "io.mockk:mockk:1.12.3"
