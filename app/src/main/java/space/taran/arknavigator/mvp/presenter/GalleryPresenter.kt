@@ -218,7 +218,7 @@ class GalleryPresenter(
         }
     }
 
-    private fun displayPreview() = presenterScope.launch {
+    private suspend fun displayPreview() {
         val resource = resources[currentPos]
         val tags = storage.getTags(resource.id)
         val filePath = index.getPath(resource.id)

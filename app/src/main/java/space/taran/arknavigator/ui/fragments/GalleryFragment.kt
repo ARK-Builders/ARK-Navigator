@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.chip.Chip
+import kotlinx.coroutines.launch
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import space.taran.arknavigator.BuildConfig
@@ -47,9 +48,9 @@ import space.taran.arknavigator.utils.LogTags.GALLERY_SCREEN
 import space.taran.arknavigator.utils.Tag
 import space.taran.arknavigator.utils.Tags
 import space.taran.arknavigator.utils.extension
+import space.taran.arknavigator.utils.extensions.makeGone
 import space.taran.arknavigator.utils.extensions.makeVisible
 import java.nio.file.Path
-import kotlinx.coroutines.launch
 
 class GalleryFragment : MvpAppCompatFragment(), GalleryView {
 
@@ -134,16 +135,23 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
         presenter.diffResult?.dispatchUpdatesTo(pagerAdapter)
     }
 
-    override fun setupPreview(pos: Int, resource: ResourceMeta, filePath: String) =
-        with(binding) {
-            setupOpenEditFABs(resource.kind)
-            ExtraLoader.load(
-                resource,
-                listOf(primaryExtra, secondaryExtra),
-                verbose = true
-            )
-            requireArguments().putInt(START_AT_KEY, pos)
+    override fun setupPreview(
+        pos: Int,
+        resource: ResourceMeta,
+        filePath: String
+    ) {
+        lifecycleScope.launch {
+            with(binding) {
+                setupOpenEditFABs(resource.kind)
+                ExtraLoader.load(
+                    resource,
+                    listOf(primaryExtra, secondaryExtra),
+                    verbose = true
+                )
+                requireArguments().putInt(START_AT_KEY, pos)
+            }
         }
+    }
 
     override fun setPreviewsScrollingEnabled(enabled: Boolean) {
         binding.viewPager.isUserInputEnabled = enabled
@@ -221,11 +229,11 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
     }
 
     override fun displayPreviewTags(resource: ResourceId, tags: Tags) {
-        Log.d(
-            GALLERY_SCREEN,
-            "displaying tags of resource $resource for preview"
-        )
         lifecycleScope.launch {
+            Log.d(
+                GALLERY_SCREEN,
+                "displaying tags of resource $resource for preview"
+            )
             binding.tagsCg.removeAllViews()
 
             tags.forEach { tag ->
@@ -350,26 +358,24 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
         }
     }
 
-    private fun setupOpenEditFABs(kind: ResourceKind?) {
-        binding.apply {
-            lifecycleScope.launch {
-                when (kind) {
-                    is ResourceKind.Video, is ResourceKind.Link, null -> {
-                        // "open" capabilities only
-                        openResourceFab.makeVisible()
-                    }
-                    is ResourceKind.Document, is ResourceKind.PlainText -> {
-                        // both "open" and "edit" capabilities
-                        editResourceFab.makeVisible()
-                        openResourceFab.makeVisible()
-                    }
-                    is ResourceKind.Image -> {
-                        // "edit" capabilities only
-                        editResourceFab.makeVisible()
-                    }
-                    else -> {}
-                }
+    private fun setupOpenEditFABs(kind: ResourceKind?) = binding.apply {
+        openResourceFab.makeGone()
+        editResourceFab.makeGone()
+        when (kind) {
+            is ResourceKind.Video, is ResourceKind.Link, null -> {
+                // "open" capabilities only
+                openResourceFab.makeVisible()
             }
+            is ResourceKind.Document, is ResourceKind.PlainText -> {
+                // both "open" and "edit" capabilities
+                editResourceFab.makeVisible()
+                openResourceFab.makeVisible()
+            }
+            is ResourceKind.Image -> {
+                // "edit" capabilities only
+                editResourceFab.makeVisible()
+            }
+            else -> {}
         }
     }
 

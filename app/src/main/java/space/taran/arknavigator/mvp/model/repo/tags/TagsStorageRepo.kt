@@ -30,6 +30,7 @@ class TagsStorageRepo(
                 if (storageByRoot[root] != null) {
                     val storage = storageByRoot[root]!!
                     storage.checkResources(resources)
+                    storage.readStorageIfChanged()
                     storage
                 } else {
                     val fresh =
