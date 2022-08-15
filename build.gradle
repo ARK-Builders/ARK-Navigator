@@ -36,6 +36,6 @@ allprojects {
         maven { url "https://plugins.gradle.org/m2/" }
         gradlePluginPortal()
         maven { url 'https://jitpack.io' }
-        maven githubPackage.invoke("ARK-Builders/arklib-android")
+        maven githubPackage.invoke("hhio618/arklib-android")
     }
 }
