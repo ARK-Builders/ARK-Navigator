@@ -16,7 +16,8 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
 import space.taran.arknavigator.mvp.model.repo.kind.ResourceKind
-import space.taran.arknavigator.mvp.model.repo.preview.PreviewAndThumbnail
+import space.taran.arknavigator.mvp.model.repo.preview.PreviewStorage
+import space.taran.arknavigator.mvp.model.repo.preview.PreviewStorageRepo
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import space.taran.arknavigator.mvp.presenter.adapter.ResourceMetaDiffUtilCallback
@@ -53,6 +54,8 @@ class GalleryPresenter(
         private set
     lateinit var storage: TagsStorage
         private set
+    lateinit var previewStorage: PreviewStorage
+        private set
     var resources: MutableList<ResourceMeta> = mutableListOf()
         private set
     var diffResult: DiffUtil.DiffResult? = null
@@ -63,6 +66,9 @@ class GalleryPresenter(
 
     @Inject
     lateinit var indexRepo: ResourcesIndexRepo
+
+    @Inject
+    lateinit var previewStorageRepo: PreviewStorageRepo
 
     @Inject
     lateinit var tagsStorageRepo: TagsStorageRepo
@@ -80,6 +86,7 @@ class GalleryPresenter(
                 viewState.toastIndexFailedPath(failed)
             }.launchIn(presenterScope)
             storage = tagsStorageRepo.provide(rootAndFav)
+            previewStorage = previewStorageRepo.provide(rootAndFav)
             resources = resourcesIds.map { index.getMeta(it) }.toMutableList()
 
             viewState.updatePagerAdapter()
@@ -110,7 +117,7 @@ class GalleryPresenter(
         view.reset()
         val meta = resources[view.pos]
         val path = index.getPath(meta.id)
-        view.setSource(path, meta)
+        view.setSource(path, meta, previewStorage.locate(path, meta))
     }
 
     fun bindPlainTextView(view: PreviewPlainTextItemView) = presenterScope.launch {
@@ -242,7 +249,7 @@ class GalleryPresenter(
         oldMeta: ResourceMeta
     ) = withContext(Dispatchers.IO) {
         val newMeta = ResourceMeta.fromPath(path).meta ?: return@withContext
-        PreviewAndThumbnail.generate(path, newMeta)
+        previewStorage.generate(path, newMeta)
 
         val indexToReplace = resources.indexOf(oldMeta)
         resources[indexToReplace] = newMeta

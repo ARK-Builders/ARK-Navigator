@@ -14,7 +14,7 @@ import space.taran.arknavigator.mvp.model.dao.ResourceDao
 import space.taran.arknavigator.mvp.model.dao.ResourceExtra
 import space.taran.arknavigator.mvp.model.dao.ResourceWithExtra
 import space.taran.arknavigator.mvp.model.repo.kind.GeneralKindFactory
-import space.taran.arknavigator.mvp.model.repo.preview.PreviewAndThumbnail
+import space.taran.arknavigator.mvp.model.repo.preview.PreviewStorage
 import space.taran.arknavigator.utils.LogTags.PREVIEWS
 import space.taran.arknavigator.utils.LogTags.RESOURCES_INDEX
 import space.taran.arknavigator.utils.listChildren
@@ -39,6 +39,7 @@ internal data class Difference(
 class PlainResourcesIndex internal constructor(
     private val root: Path,
     private val dao: ResourceDao,
+    private val previewStorage: PreviewStorage,
     resources: Map<Path, ResourceMeta>
 ) : ResourcesIndex {
     private val _kindDetectFailedFlow: MutableSharedFlow<Path> = MutableSharedFlow()
@@ -132,7 +133,7 @@ class PlainResourcesIndex internal constructor(
                 val id = metaByPath[it]!!.id
                 pathById.remove(id)
                 metaByPath.remove(it)
-                PreviewAndThumbnail.forget(id)
+                previewStorage.forget(id)
             }
 
             val pathsToDelete = diff.deleted + diff.updated
@@ -217,12 +218,11 @@ class PlainResourcesIndex internal constructor(
                 PREVIEWS,
                 "providing previews/thumbnails for ${metaByPath.size} resources"
             )
-            PreviewAndThumbnail.initDirs()
 
             supervisorScope {
                 metaByPath.entries.map { (path: Path, meta: ResourceMeta) ->
                     async(Dispatchers.IO) {
-                        PreviewAndThumbnail.generate(path, meta)
+                        previewStorage.generate(path, meta)
                     } to path
                 }.forEach { (generateTask, path) ->
                     try {

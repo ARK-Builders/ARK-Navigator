@@ -17,6 +17,8 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
+import space.taran.arknavigator.mvp.model.repo.preview.PreviewStorage
+import space.taran.arknavigator.mvp.model.repo.preview.PreviewStorageRepo
 import space.taran.arknavigator.mvp.model.repo.tags.PlainTagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
@@ -54,8 +56,15 @@ class ResourcesPresenter(
     @Inject
     lateinit var preferences: Preferences
 
+    @Inject
+    lateinit var previewStorageRepo: PreviewStorageRepo
+
     lateinit var index: ResourcesIndex
+        private set
     lateinit var storage: TagsStorage
+        private set
+    lateinit var previewStorage: PreviewStorage
+        private set
 
     val gridPresenter =
         ResourcesGridPresenter(rootAndFav, viewState, presenterScope, this)
@@ -101,8 +110,9 @@ class ResourcesPresenter(
             }.launchIn(presenterScope)
             index.reindex()
             storage = tagsStorageRepo.provide(rootAndFav)
+            previewStorage = previewStorageRepo.provide(rootAndFav)
 
-            gridPresenter.init(index, storage, router)
+            gridPresenter.init(index, storage, router, previewStorage)
 
             val resources = index.listResources(rootAndFav.fav)
             viewState.setProgressVisibility(true, "Sorting")

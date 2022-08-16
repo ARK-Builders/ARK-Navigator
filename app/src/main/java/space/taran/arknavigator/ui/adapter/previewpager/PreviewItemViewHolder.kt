@@ -42,8 +42,11 @@ class PreviewItemViewHolder(
 
     override var pos = -1
 
-    override fun setSource(source: Path, meta: ResourceMeta) = with(binding) {
-        val preview = PreviewAndThumbnail.locate(source, meta)?.preview
+    override fun setSource(
+        source: Path,
+        meta: ResourceMeta,
+        previewAndThumbnail: PreviewAndThumbnail?
+    ) = with(binding) {
         val placeholder = ImageUtils.iconForExtension(extension(source))
 
         if (meta.kind is ResourceKind.Video) {
@@ -54,7 +57,7 @@ class PreviewItemViewHolder(
             icPlay.isVisible = false
         }
 
-        loadImage(meta.id, preview, placeholder)
+        loadImage(meta.id, previewAndThumbnail?.preview, placeholder)
     }
 
     override fun reset() = with(binding) {
