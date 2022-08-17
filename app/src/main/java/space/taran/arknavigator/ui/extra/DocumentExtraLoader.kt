@@ -1,6 +1,7 @@
 package space.taran.arknavigator.ui.extra
 
 import android.widget.TextView
+import space.taran.arknavigator.R
 import space.taran.arknavigator.mvp.model.repo.kind.ResourceKind
 import space.taran.arknavigator.utils.extensions.textOrGone
 
@@ -16,6 +17,18 @@ object DocumentExtraLoader {
                 else -> "$pages"
             }
             pagesTV.textOrGone(label)
+        }
+    }
+
+    fun loadWithLabel(
+        document: ResourceKind.Document,
+        tvPageNumber: TextView
+    ) {
+        val pages = document.pages
+        if (pages != null) {
+            tvPageNumber.textOrGone(
+                tvPageNumber.context.getString(R.string.doc_page_no_label, pages)
+            )
         }
     }
 }

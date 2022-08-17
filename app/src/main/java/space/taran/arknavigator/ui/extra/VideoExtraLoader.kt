@@ -1,6 +1,7 @@
 package space.taran.arknavigator.ui.extra
 
 import android.widget.TextView
+import space.taran.arknavigator.R
 import space.taran.arknavigator.mvp.model.repo.kind.ResourceKind
 import space.taran.arknavigator.utils.extensions.textOrGone
 
@@ -27,7 +28,6 @@ object VideoExtraLoader {
             durationTV.textOrGone(durationTextCode(duration))
         }
     }
-
     private fun durationTextCode(millis: Long): String {
         // use `Duration.ofMillis(timeMillis).secondsPart()` in API 31
 
@@ -60,6 +60,33 @@ object VideoExtraLoader {
             2560 to 1440 -> "1440p"
             3840 to 2160 -> "2160p"
             else -> "${width}x$height"
+        }
+    }
+
+    fun loadInfo(
+        video: ResourceKind.Video,
+        txtResolution: TextView,
+        txtDuration: TextView
+    ) {
+        val width = video.width
+        val height = video.height
+
+        if (width != null && height != null) {
+            txtResolution.textOrGone(
+                txtResolution.context.getString(
+                    R.string.resource_resolution_label,
+                    "${width}x$height"
+                )
+            )
+        }
+        val duration = video.duration
+        if (duration != null) {
+            txtDuration.textOrGone(
+                txtDuration.context.getString(
+                    R.string.resource_duration_label,
+                    durationTextCode(duration)
+                )
+            )
         }
     }
 }

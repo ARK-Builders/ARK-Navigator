@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:scrollbars="none"
+    android:background="@drawable/bg_dialog_rounded_16dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="20dp">
+
+        <TextView
+            android:id="@+id/resource_title"
+            style="@style/RegularTextStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Properties"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/resource_name"
+            style="@style/RegularTextStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="20dp"
+            android:lineSpacingMultiplier="1.15"
+            android:textSize="18sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/resource_title"
+            tools:text="Name\nxyz.jpg" />
+
+        <TextView
+            android:id="@+id/resource_id"
+            style="@style/RegularTextStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:lineSpacingMultiplier="1.15"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="@+id/resource_name"
+            app:layout_constraintStart_toStartOf="@+id/resource_name"
+            app:layout_constraintTop_toBottomOf="@id/resource_name"
+            tools:text="Id\n123" />
+
+        <TextView
+            android:id="@+id/resource_path"
+            style="@style/RegularTextStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:lineSpacingMultiplier="1.15"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="@+id/resource_name"
+            app:layout_constraintStart_toStartOf="@+id/resource_name"
+            app:layout_constraintTop_toBottomOf="@id/resource_id"
+            tools:text="Path\nsdcard/xyz" />
+
+
+        <TextView
+            android:id="@+id/resource_size"
+            style="@style/RegularTextStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:lineSpacingMultiplier="1.15"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="@+id/resource_name"
+            app:layout_constraintStart_toStartOf="@+id/resource_name"
+            app:layout_constraintTop_toBottomOf="@id/resource_path"
+            tools:text="Size\n108 MB" />
+
+        <TextView
+            android:id="@+id/resource_resolution"
+            style="@style/RegularTextStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:lineSpacingMultiplier="1.15"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="@+id/resource_name"
+            app:layout_constraintStart_toStartOf="@+id/resource_name"
+            app:layout_constraintTop_toBottomOf="@id/resource_size"
+            tools:text="Resolution\n100*100" />
+
+        <TextView
+            android:id="@+id/resource_duration"
+            style="@style/RegularTextStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:lineSpacingMultiplier="1.15"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="@+id/resource_name"
+            app:layout_constraintStart_toStartOf="@+id/resource_name"
+            app:layout_constraintTop_toBottomOf="@id/resource_resolution"
+            tools:text="Duration\n1.2 Min" />
+        <TextView
+            android:id="@+id/resource_link"
+            style="@style/RegularTextStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:lineSpacingMultiplier="1.15"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="@+id/resource_name"
+            app:layout_constraintStart_toStartOf="@+id/resource_name"
+            app:layout_constraintTop_toBottomOf="@id/resource_duration"
+            tools:text="Duration\n1.2 Min" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
+
