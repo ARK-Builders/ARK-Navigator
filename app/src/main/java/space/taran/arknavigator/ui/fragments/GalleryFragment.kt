@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.chip.Chip
+import java.nio.file.Path
 import kotlinx.coroutines.launch
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
@@ -39,6 +40,7 @@ import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.adapter.previewpager.PreviewsPager
 import space.taran.arknavigator.ui.extra.ExtraLoader
+import space.taran.arknavigator.ui.fragments.dialog.DetailsAlertDialog
 import space.taran.arknavigator.ui.fragments.dialog.EditTagsDialogFragment
 import space.taran.arknavigator.ui.view.DefaultPopup
 import space.taran.arknavigator.ui.view.DepthPageTransformer
@@ -50,7 +52,6 @@ import space.taran.arknavigator.utils.Tags
 import space.taran.arknavigator.utils.extension
 import space.taran.arknavigator.utils.extensions.makeGone
 import space.taran.arknavigator.utils.extensions.makeVisible
-import java.nio.file.Path
 
 class GalleryFragment : MvpAppCompatFragment(), GalleryView {
 
@@ -109,6 +110,9 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
                 true
             }
 
+            infoResourceFab.setOnClickListener {
+                presenter.onInfoFabClick()
+            }
             shareResourceFab.setOnClickListener {
                 presenter.onShareFabClick()
             }
@@ -200,6 +204,10 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
         intent.putExtra(Intent.EXTRA_TEXT, link)
         intent.type = "text/plain"
         startActivity(Intent.createChooser(intent, "Share the link with:"))
+    }
+
+    override fun showInfoAlert(path: Path, resourceMeta: ResourceMeta) {
+        DetailsAlertDialog(path, resourceMeta, requireContext()).show()
     }
 
     override fun viewInExternalApp(resourcePath: Path) {

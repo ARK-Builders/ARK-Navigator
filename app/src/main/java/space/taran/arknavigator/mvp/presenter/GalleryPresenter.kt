@@ -140,6 +140,11 @@ class GalleryPresenter(
         viewState.viewInExternalApp(index.getPath(currentResource.id))
     }
 
+    fun onInfoFabClick() = presenterScope.launch {
+        Log.d(GALLERY_SCREEN, "[info_resource] clicked at position $currentPos")
+        viewState.showInfoAlert(index.getPath(currentResource.id), currentResource)
+    }
+
     fun onShareFabClick() = presenterScope.launch {
         Log.d(GALLERY_SCREEN, "[share_resource] clicked at position $currentPos")
         val kind = currentResource.kind

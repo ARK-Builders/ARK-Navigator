@@ -99,6 +99,20 @@
             app:tint="@color/white" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/info_resource_fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:backgroundTint="@color/colorPrimary"
+            android:src="@drawable/ic_baseline_info"
+            app:maxImageSize="20dp"
+            app:borderWidth="0dp"
+            app:elevation="6dp"
+            app:layout_constraintEnd_toStartOf="@+id/share_resource_fab"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/white" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/share_resource_fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

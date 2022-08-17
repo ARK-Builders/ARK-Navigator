@@ -91,4 +91,14 @@
     <string name="common_tags">Common tags:</string>
     <string name="edit_tags">Edit tags</string>
     <string name="select_at_least_one_resource">Please select at least one resource</string>
+    <string name="resource_id_label">Id\n%d</string>
+    <string name="resource_name_label">Name\n%s</string>
+    <string name="resource_path_label">Path\n%s</string>
+    <string name="resource_size_label">Size\n%s</string>
+    <string name="resource_resolution_label">Resolution\n%s</string>
+    <string name="resource_duration_label">Duration\n%s</string>
+    <string name="doc_page_no_label">Page numbers\n%d</string>
+    <string name="link_title_label">Link Title\n%s</string>
+    <string name="link_description_label">Link Description\n%s</string>
+    <string name="link_label">Link\n%s</string>
 </resources>
