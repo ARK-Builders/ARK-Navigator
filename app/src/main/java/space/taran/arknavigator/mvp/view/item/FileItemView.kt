@@ -1,6 +1,7 @@
 package space.taran.arknavigator.mvp.view.item
 
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
+import space.taran.arknavigator.mvp.model.repo.preview.PreviewAndThumbnail
 import java.nio.file.Path
 
 interface FileItemView {
@@ -13,7 +14,11 @@ interface FileItemView {
     fun reset(isSelectingEnabled: Boolean, isItemSelected: Boolean)
     fun setSelected(isItemSelected: Boolean)
 
-    fun setIconOrPreview(path: Path, resource: ResourceMeta)
+    fun setIconOrPreview(
+        path: Path,
+        resource: ResourceMeta,
+        previewAndThumbnail: PreviewAndThumbnail?
+    )
 
     fun setText(title: String)
 }

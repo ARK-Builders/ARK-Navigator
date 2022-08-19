@@ -55,22 +55,24 @@ class FileItemViewHolder(
             return@with
         }
 
-    override fun setIconOrPreview(path: Path, resource: ResourceMeta): Unit =
-        with(binding.root) {
-            val placeholder = ImageUtils.iconForExtension(extension(path))
-            val thumbnail = PreviewAndThumbnail.locate(path, resource)?.thumbnail
+    override fun setIconOrPreview(
+        path: Path,
+        resource: ResourceMeta,
+        previewAndThumbnail: PreviewAndThumbnail?
+    ) = with(binding.root) {
+        val placeholder = ImageUtils.iconForExtension(extension(path))
 
-            ImageUtils.loadThumbnailWithPlaceholder(
-                resource.id,
-                thumbnail,
-                placeholder,
-                binding.iv
-            )
-            ExtraLoader.load(
-                resource, listOf(binding.primaryExtra, binding.secondaryExtra),
-                verbose = false
-            )
-        }
+        ImageUtils.loadThumbnailWithPlaceholder(
+            resource.id,
+            previewAndThumbnail?.thumbnail,
+            placeholder,
+            binding.iv
+        )
+        ExtraLoader.load(
+            resource, listOf(binding.primaryExtra, binding.secondaryExtra),
+            verbose = false
+        )
+    }
 
     override fun setText(title: String) = with(binding.root) {
         binding.tvTitle.text = title

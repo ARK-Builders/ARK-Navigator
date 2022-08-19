@@ -13,6 +13,7 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
+import space.taran.arknavigator.mvp.model.repo.preview.PreviewStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.presenter.ResourcesPresenter
 import space.taran.arknavigator.mvp.view.ResourcesView
@@ -49,6 +50,7 @@ class ResourcesGridPresenter(
     private lateinit var index: ResourcesIndex
     private lateinit var storage: TagsStorage
     private lateinit var router: AppRouter
+    private lateinit var previewStorage: PreviewStorage
 
     var sorting = Sorting.DEFAULT
         private set
@@ -74,7 +76,11 @@ class ResourcesGridPresenter(
         if (path.notExists())
             scope.launch { resourcesPresenter.onRemovedResourceDetected() }
 
-        view.setIconOrPreview(path, resource.meta)
+        view.setIconOrPreview(
+            path,
+            resource.meta,
+            previewStorage.locate(path, resource.meta)
+        )
     }
 
     fun onItemClick(pos: Int) = scope.launch {
@@ -124,11 +130,14 @@ class ResourcesGridPresenter(
     suspend fun init(
         index: ResourcesIndex,
         storage: TagsStorage,
-        router: AppRouter
+        router: AppRouter,
+        previewStorage: PreviewStorage
     ) {
         this.index = index
         this.storage = storage
         this.router = router
+        this.previewStorage = previewStorage
+
         sorting = Sorting.values()[preferences.get(PreferenceKey.Sorting)]
         ascending = preferences.get(PreferenceKey.IsSortingAscending)
 

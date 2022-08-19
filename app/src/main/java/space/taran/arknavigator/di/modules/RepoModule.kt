@@ -7,6 +7,7 @@ import space.taran.arknavigator.mvp.model.dao.Database
 import space.taran.arknavigator.mvp.model.repo.FoldersRepo
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
+import space.taran.arknavigator.mvp.model.repo.preview.PreviewStorageRepo
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import space.taran.arknavigator.utils.LogTags.MAIN
 import javax.inject.Singleton
@@ -24,10 +25,15 @@ class RepoModule {
     @Provides
     fun resourcesIndexesRepo(
         database: Database,
-        foldersRepo: FoldersRepo
+        foldersRepo: FoldersRepo,
+        previewStorageRepo: PreviewStorageRepo
     ): ResourcesIndexRepo {
         Log.d(MAIN, "creating ResourcesIndexesRepo")
-        return ResourcesIndexRepo(database.resourceDao(), foldersRepo)
+        return ResourcesIndexRepo(
+            database.resourceDao(),
+            foldersRepo,
+            previewStorageRepo
+        )
     }
 
     @Singleton
@@ -39,4 +45,10 @@ class RepoModule {
     ): TagsStorageRepo {
         return TagsStorageRepo(foldersRepo, resourcesIndexRepo, preferences)
     }
+
+    @Singleton
+    @Provides
+    fun previewStorageRepo(
+        foldersRepo: FoldersRepo
+    ) = PreviewStorageRepo(foldersRepo)
 }

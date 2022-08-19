@@ -9,12 +9,14 @@ import space.taran.arknavigator.mvp.model.dao.ResourceDao
 import space.taran.arknavigator.mvp.model.repo.FoldersRepo
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.model.repo.index.PlainResourcesIndex.Companion.loadResources
+import space.taran.arknavigator.mvp.model.repo.preview.PreviewStorageRepo
 import space.taran.arknavigator.utils.LogTags.RESOURCES_INDEX
 import java.nio.file.Path
 
 class ResourcesIndexRepo(
     private val dao: ResourceDao,
-    private val foldersRepo: FoldersRepo
+    private val foldersRepo: FoldersRepo,
+    private val previewStorageRepo: PreviewStorageRepo
 ) {
     private val provideMutex = Mutex()
     private val indexByRoot = mutableMapOf<Path, PlainResourcesIndex>()
@@ -34,7 +36,12 @@ class ResourcesIndexRepo(
             "${resources.size} resources retrieved from DB"
         )
 
-        return@withContext PlainResourcesIndex(root, dao, loadResources(resources))
+        return@withContext PlainResourcesIndex(
+            root,
+            dao,
+            previewStorageRepo.provide(root),
+            loadResources(resources)
+        )
     }
 
     suspend fun provide(
