@@ -83,6 +83,12 @@ class SettingsPresenter : MvpPresenter<SettingsView>() {
         notifyBackupPref()
     }
 
+    fun onShortNameClick(checked: Boolean) = presenterScope.launch {
+        viewState.toastShortName(checked)
+        preferences.set(PreferenceKey.ShortFileNames, checked)
+        notifyShortName()
+    }
+
     fun onResetPreferencesClick() {
         presenterScope.launch {
             preferences.clearPreferences()
@@ -96,6 +102,7 @@ class SettingsPresenter : MvpPresenter<SettingsView>() {
         notifyIndexReplicationPref()
         notifyRemovingLostResourcesTags()
         notifyBackupPref()
+        notifyShortName()
     }
 
     private suspend fun notifyCrashReportPref() =
@@ -120,5 +127,9 @@ class SettingsPresenter : MvpPresenter<SettingsView>() {
 
     private suspend fun notifyBackupPref() = viewState.setBackup(
         preferences.get(PreferenceKey.BackupEnabled)
+    )
+
+    private suspend fun notifyShortName() = viewState.setShortFileNames(
+        preferences.get(PreferenceKey.ShortFileNames)
     )
 }

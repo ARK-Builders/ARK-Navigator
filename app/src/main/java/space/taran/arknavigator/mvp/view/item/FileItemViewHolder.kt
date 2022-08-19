@@ -74,8 +74,9 @@ class FileItemViewHolder(
         )
     }
 
-    override fun setText(title: String) = with(binding.root) {
-        binding.tvTitle.text = title
+    override fun setText(title: String, shortName: Boolean) = with(binding) {
+        tvTitle.text = title
+        tvTitle.maxLines = if (shortName) SHORT_NAME_LINES else Integer.MAX_VALUE
     }
 
     fun onSelectingChanged(enabled: Boolean) {
@@ -114,6 +115,7 @@ class FileItemViewHolder(
     }
 
     companion object {
+        private const val SHORT_NAME_LINES = 1
         private const val DEFAULT_ELEVATION = 1f
         private const val SELECTED_ELEVATION = 8f
         private const val ANIM_DURATION = 200L

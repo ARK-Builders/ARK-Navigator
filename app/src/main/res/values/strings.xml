@@ -101,4 +101,7 @@
     <string name="link_title_label">Link Title\n%s</string>
     <string name="link_description_label">Link Description\n%s</string>
     <string name="link_label">Link\n%s</string>
+    <string name="short_file_names">Short file names</string>
+    <string name="short_names_disabled">Short file names disabled!</string>
+    <string name="short_names_enabled">Short file names enabled!</string>
 </resources>

@@ -15,7 +15,8 @@ interface Preferences {
             PreferenceKey.ImgCacheReplication,
             PreferenceKey.IndexReplication,
             PreferenceKey.RemovingLostResourcesTags,
-            PreferenceKey.BackupEnabled
+            PreferenceKey.BackupEnabled,
+            PreferenceKey.ShortFileNames
         )
 
         preferencesToReset.forEach {
@@ -34,4 +35,5 @@ sealed class PreferenceKey<out T>(val defaultValue: T) {
     object ShowKinds : PreferenceKey<Boolean>(false)
     object WasRootsScanShown : PreferenceKey<Boolean>(false)
     object BackupEnabled : PreferenceKey<Boolean>(true)
+    object ShortFileNames : PreferenceKey<Boolean>(true)
 }

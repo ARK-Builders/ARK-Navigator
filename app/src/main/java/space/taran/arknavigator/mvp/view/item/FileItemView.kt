@@ -20,5 +20,5 @@ interface FileItemView {
         previewAndThumbnail: PreviewAndThumbnail?
     )
 
-    fun setText(title: String)
+    fun setText(title: String, shortName: Boolean = false)
 }
