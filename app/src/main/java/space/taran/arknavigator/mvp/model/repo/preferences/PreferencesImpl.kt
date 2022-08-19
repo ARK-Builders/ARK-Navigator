@@ -57,6 +57,8 @@ class PreferencesImpl @Inject constructor(val context: Context) : ArkPreferences
                 booleanPreferencesKey("was_roots_scan_shown")
             PreferenceKey.BackupEnabled ->
                 booleanPreferencesKey("backup")
+            PreferenceKey.ShortFileNames ->
+                booleanPreferencesKey("short_file_names")
         }
 
         return result as Preferences.Key<T>

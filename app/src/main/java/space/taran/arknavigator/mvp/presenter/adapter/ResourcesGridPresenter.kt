@@ -3,8 +3,10 @@ package space.taran.arknavigator.mvp.presenter.adapter
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
@@ -58,6 +60,8 @@ class ResourcesGridPresenter(
         private set
     var selectingEnabled: Boolean = false
 
+    private var shortFileNames = true
+
     fun getCount() = selection.size
 
     fun bindView(view: FileItemView) = runBlocking {
@@ -67,7 +71,7 @@ class ResourcesGridPresenter(
         val path = index.getPath(resource.meta.id)
 
         view.reset(selectingEnabled, resource.isSelected)
-        view.setText(path.fileName.toString())
+        view.setText(path.fileName.toString(), shortFileNames)
 
         if (Files.isDirectory(path)) {
             throw AssertionError("Resource can't be a directory")
@@ -140,20 +144,25 @@ class ResourcesGridPresenter(
 
         sorting = Sorting.values()[preferences.get(PreferenceKey.Sorting)]
         ascending = preferences.get(PreferenceKey.IsSortingAscending)
+        shortFileNames = preferences.get(PreferenceKey.ShortFileNames)
 
-        scope.launch(Dispatchers.IO) {
-            preferences.flow(PreferenceKey.Sorting).collect { intSorting ->
-                val newSorting = Sorting.values()[intSorting]
-                if (sorting != newSorting)
-                    updateSorting(newSorting)
+        preferences.flow(PreferenceKey.Sorting).onEach { intSorting ->
+            val newSorting = Sorting.values()[intSorting]
+            if (sorting != newSorting)
+                updateSorting(newSorting)
+        }.launchIn(scope + Dispatchers.IO)
+
+        preferences.flow(PreferenceKey.IsSortingAscending).onEach {
+            if (ascending != it)
+                updateAscending(it)
+        }.launchIn(scope + Dispatchers.IO)
+
+        preferences.flow(PreferenceKey.ShortFileNames).onEach {
+            if (shortFileNames != it) {
+                shortFileNames = it
+                viewState.updateAdapter()
             }
-        }
-        scope.launch(Dispatchers.IO) {
-            preferences.flow(PreferenceKey.IsSortingAscending).collect {
-                if (ascending != it)
-                    updateAscending(it)
-            }
-        }
+        }.launchIn(scope)
     }
 
     suspend fun updateSelection(

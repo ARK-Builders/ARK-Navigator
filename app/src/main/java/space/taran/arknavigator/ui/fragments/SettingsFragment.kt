@@ -78,6 +78,10 @@ class SettingsFragment : MvpAppCompatFragment(), SettingsView {
             presenter.onBackupClick(it)
         }
 
+        switchShortName.setOnUserCheckedChangeListener {
+            presenter.onShortNameClick(it)
+        }
+
         crashInfo.setOnClickListener {
             showInfoDialog(
                 R.string.what_are_crash_reports_,
@@ -107,6 +111,13 @@ class SettingsFragment : MvpAppCompatFragment(), SettingsView {
         }
 
         infoBackup.setOnClickListener {
+            showInfoDialog(
+                R.string.what_is_backup,
+                R.string.explanation_of_this_feature
+            )
+        }
+
+        infoShortName.setOnClickListener {
             showInfoDialog(
                 R.string.what_is_backup,
                 R.string.explanation_of_this_feature
@@ -153,6 +164,9 @@ class SettingsFragment : MvpAppCompatFragment(), SettingsView {
     override fun setBackup(enabled: Boolean) =
         binding.switchBackup.toggleSwitchSilent(enabled)
 
+    override fun setShortFileNames(enabled: Boolean) =
+        binding.switchShortName.toggleSwitchSilent(enabled)
+
     override fun toastCrashReportingEnabled(enabled: Boolean) =
         toast(
             if (enabled) R.string.crash_reporting_enabled
@@ -182,6 +196,13 @@ class SettingsFragment : MvpAppCompatFragment(), SettingsView {
             if (enabled) R.string.backup_enabled
             else R.string.backup_disabled
         )
+
+    override fun toastShortName(enabled: Boolean) {
+        toast(
+            if (enabled) R.string.short_names_enabled
+            else R.string.short_names_disabled
+        )
+    }
 
     companion object {
         fun newInstance() =
