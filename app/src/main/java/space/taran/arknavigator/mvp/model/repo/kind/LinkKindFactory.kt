@@ -2,10 +2,10 @@ package space.taran.arknavigator.mvp.model.repo.kind
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.decodeFromStream
+import space.taran.arklib.loadLinkFile
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import java.nio.file.Path
-import java.util.zip.ZipFile
+import kotlin.io.path.pathString
 
 object LinkKindFactory : ResourceKindFactory<ResourceKind.Link> {
     private const val JSON_FILE = "link.json"
@@ -16,14 +16,8 @@ object LinkKindFactory : ResourceKindFactory<ResourceKind.Link> {
         get() = setOf()
 
     override fun fromPath(path: Path): ResourceKind.Link {
-        val zip = ZipFile(path.toFile())
-        val jsonEntry = zip
-            .entries()
-            .asSequence()
-            .find { entry -> entry.name == JSON_FILE }
-            ?: return ResourceKind.Link()
-
-        val link = Json.decodeFromStream<JsonLink>(zip.getInputStream(jsonEntry))
+        val linkJson = loadLinkFile(path.pathString)
+        val link = Json.decodeFromString(JsonLink.serializer(), linkJson)
 
         return ResourceKind.Link(link.title, link.desc, link.url)
     }
