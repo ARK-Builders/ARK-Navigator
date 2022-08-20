@@ -2,13 +2,13 @@ package space.taran.arknavigator.mvp.model.repo.preview.generator
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import space.taran.arklib.loadLinkPreview
 import java.nio.file.Path
-import java.util.zip.ZipFile
+import kotlin.io.path.pathString
 
 object LinkPreviewGenerator : PreviewGenerator() {
     override val acceptedExtensions = setOf("link")
     override val acceptedMimeTypes = emptySet<String>()
-    private const val IMAGE_FILE = "link.png"
 
     override fun generate(path: Path, previewPath: Path, thumbnailPath: Path) {
         val preview = generatePreview(path)
@@ -18,13 +18,11 @@ object LinkPreviewGenerator : PreviewGenerator() {
     }
 
     private fun generatePreview(source: Path): Bitmap {
-        val zip = ZipFile(source.toFile())
-        val entries = zip.entries()
-        val imageEntry = entries
-            .asSequence()
-            .find { entry -> entry.name == IMAGE_FILE }
-            ?: error("No image inside .link file")
-
-        return BitmapFactory.decodeStream(zip.getInputStream(imageEntry))
+        val previewBytes =
+            loadLinkPreview(source.pathString) ?: error("No image inside .link file")
+        if (previewBytes.isEmpty()) {
+            error("Image inside .link file was empty")
+        }
+        return BitmapFactory.decodeByteArray(previewBytes, 0, previewBytes.size)
     }
 }
