@@ -4,9 +4,15 @@ import java.nio.file.Path
 
 object ImagePreviewGenerator : PreviewGenerator() {
     override val acceptedExtensions: Set<String> =
-        setOf("jpg", "jpeg", "png", "svg", "gif")
+        setOf("jpg", "jpeg", "png", "svg", "gif", "webp")
     override val acceptedMimeTypes: Set<String>
-        get() = setOf("image/jpeg", "image/jpg", "image/png", "image/gif")
+        get() = setOf(
+            "image/jpeg",
+            "image/jpg",
+            "image/png",
+            "image/gif",
+            "image/webp"
+        )
 
     override fun generate(path: Path, previewPath: Path, thumbnailPath: Path) {
         val thumbnail = resizePreviewToThumbnail(path)
