@@ -19,7 +19,7 @@ data class ResourceMeta(
 
     companion object {
 
-        fun fromPath(path: Path): ResourceMeta? {
+        fun fromPath(path: Path): space.taran.arklib.index.ResourceMeta {
             val size = Files.size(path)
             if (size < 1) {
                 return null
@@ -28,7 +28,7 @@ data class ResourceMeta(
             val id = computeId(size, path)
             val kind = GeneralKindFactory.fromPath(path)
 
-            return ResourceMeta(
+            return space.taran.arklib.index.ResourceMeta(
                 id = id,
                 name = path.fileName.toString(),
                 extension = extension(path),
@@ -38,8 +38,8 @@ data class ResourceMeta(
             )
         }
 
-        fun fromRoom(room: ResourceWithExtra): ResourceMeta =
-            ResourceMeta(
+        fun fromRoom(room: ResourceWithExtra): space.taran.arklib.index.ResourceMeta =
+            space.taran.arklib.index.ResourceMeta(
                 id = room.resource.id,
                 name = room.resource.name,
                 extension = room.resource.extension,

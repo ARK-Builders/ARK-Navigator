@@ -83,7 +83,8 @@ android {
 }
 
 dependencies {
-    implementation 'space.taran:arklib:0.1.0-SNAPSHOT-027435cc9c'
+//    implementation 'space.taran:arklib:0.1.0-SNAPSHOT-027435cc9c'
+    implementation "space.taran:arklib:0.1.0-SNAPSHOT-87467d16f0"
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7"
@@ -110,6 +111,7 @@ dependencies {
     implementation "com.github.moxy-community:moxy-androidx:2.2.2"
     implementation "com.github.moxy-community:moxy-ktx:2.2.2"
     implementation "com.github.moxy-community:moxy-material:2.2.2"
+//    implementation project(path: ':lib')
     kapt "com.github.moxy-community:moxy-compiler:2.2.2"
 
     implementation "androidx.room:room-runtime:2.4.2"
