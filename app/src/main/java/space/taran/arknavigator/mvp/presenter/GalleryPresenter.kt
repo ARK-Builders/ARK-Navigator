@@ -9,11 +9,8 @@ import kotlinx.coroutines.withContext
 import moxy.MvpPresenter
 import moxy.presenterScope
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
-import space.taran.arknavigator.mvp.model.repo.index.ResourceId
-import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
-import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
-import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
-import space.taran.arknavigator.mvp.model.repo.kind.ResourceKind
+import space.taran.arknavigator.mvp.model.repo.index.*
+import space.taran.arklib.index.ResourceKind
 import space.taran.arknavigator.mvp.model.repo.preview.PreviewAndThumbnail
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
@@ -238,7 +235,7 @@ class GalleryPresenter(
         path: Path,
         oldMeta: ResourceMeta
     ) = withContext(Dispatchers.IO) {
-        val newMeta = ResourceMeta.fromPath(path) ?: return@withContext
+        val newMeta = ResourceMetaExtra.fromPath(path) ?: return@withContext
         PreviewAndThumbnail.generate(path, newMeta)
 
         val indexToReplace = resources.indexOf(oldMeta)

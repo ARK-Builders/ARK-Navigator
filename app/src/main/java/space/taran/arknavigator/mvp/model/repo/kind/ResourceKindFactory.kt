@@ -5,6 +5,7 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.utils.extension
 import space.taran.arknavigator.utils.getMimeTypeUsingTika
 import java.nio.file.Path
+import space.taran.arklib.index.ResourceKind
 
 interface ResourceKindFactory<T : ResourceKind> {
     val acceptedExtensions: Set<String>

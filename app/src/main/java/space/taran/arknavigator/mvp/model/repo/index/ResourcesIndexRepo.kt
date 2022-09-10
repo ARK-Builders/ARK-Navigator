@@ -70,7 +70,10 @@ class ResourcesIndexRepo(
 
             val index = PlainResourcesIndex(root, dao, metadata)
 
-            index.persistResources(index.metaByPath)
+            Log.d(
+                RESOURCES_INDEX, "resource index initialized"
+            )
+            index.persistResources(metadata)
             indexByRoot[root] = index
             return@withContext index
         }

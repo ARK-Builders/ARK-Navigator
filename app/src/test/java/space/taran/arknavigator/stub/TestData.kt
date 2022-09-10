@@ -1,7 +1,7 @@
 package space.taran.arknavigator.stub
 
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
-import space.taran.arknavigator.mvp.model.repo.kind.ResourceKind
+import space.taran.arklib.index.ResourceKind
 import java.nio.file.attribute.FileTime
 import java.util.Date
 

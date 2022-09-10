@@ -8,6 +8,7 @@ import space.taran.arknavigator.utils.LogTags
 import wseemann.media.FFmpegMediaMetadataRetriever
 import java.nio.file.Path
 import kotlin.io.path.name
+import space.taran.arklib.index.ResourceKind
 
 object VideoKindFactory : ResourceKindFactory<ResourceKind.Video> {
     override val acceptedExtensions: Set<String> =

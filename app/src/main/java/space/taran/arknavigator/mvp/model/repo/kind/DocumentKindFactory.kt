@@ -8,7 +8,7 @@ import space.taran.arknavigator.utils.LogTags.RESOURCES_INDEX
 import space.taran.arknavigator.utils.extension
 import java.io.FileNotFoundException
 import java.nio.file.Path
-
+import space.taran.arklib.index.ResourceKind
 object DocumentKindFactory : ResourceKindFactory<ResourceKind.Document> {
     override val acceptedExtensions: Set<String> =
         setOf("pdf", "doc", "docx", "odt", "ods", "md")
@@ -37,11 +37,14 @@ object DocumentKindFactory : ResourceKindFactory<ResourceKind.Document> {
         val totalPages = pdfRenderer.pageCount
         val pages = if (totalPages > 0) totalPages else null
 
-        return ResourceKind.Document(pages)
+        if (pages != null) {
+            return ResourceKind.Document(pages.toLong())
+        }
+        return ResourceKind.Document(null)
     }
 
     override fun fromRoom(extras: Map<MetaExtraTag, String>): ResourceKind.Document =
-        ResourceKind.Document(extras[MetaExtraTag.PAGES]?.toInt())
+        ResourceKind.Document(extras[MetaExtraTag.PAGES]?.toLong())
 
     override fun toRoom(
         id: ResourceId,

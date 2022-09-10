@@ -3,7 +3,7 @@ package space.taran.arknavigator.mvp.model.dao
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
-import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
+import space.taran.arklib.index.ResourceMeta
 import space.taran.arknavigator.utils.Milliseconds
 import space.taran.arknavigator.utils.StringPath
 import java.nio.file.Path

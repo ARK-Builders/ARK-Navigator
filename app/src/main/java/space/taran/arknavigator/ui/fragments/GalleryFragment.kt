@@ -30,7 +30,7 @@ import space.taran.arknavigator.databinding.PopupGalleryTagMenuBinding
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
-import space.taran.arknavigator.mvp.model.repo.kind.ResourceKind
+import space.taran.arklib.index.ResourceKind
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 import space.taran.arknavigator.mvp.view.GalleryView
 import space.taran.arknavigator.ui.App

@@ -2,7 +2,7 @@ package space.taran.arknavigator.mvp.model.repo.preview
 
 import android.util.Log
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
-import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
+import space.taran.arklib.index.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.kind.ImageKindFactory
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.utils.LogTags.PREVIEWS

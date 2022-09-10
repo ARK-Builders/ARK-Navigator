@@ -6,7 +6,7 @@ import kotlinx.serialization.json.decodeFromStream
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import java.nio.file.Path
 import java.util.zip.ZipFile
-
+import space.taran.arklib.index.ResourceKind
 object LinkKindFactory : ResourceKindFactory<ResourceKind.Link> {
     private const val JSON_FILE = "link.json"
 

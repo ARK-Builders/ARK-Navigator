@@ -2,6 +2,7 @@ package space.taran.arknavigator.mvp.model.repo.kind
 
 import java.nio.file.Path
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
+import space.taran.arklib.index.ResourceKind
 
 object ArchiveKindFactory : ResourceKindFactory<ResourceKind.Archive> {
     override val acceptedExtensions: Set<String> =

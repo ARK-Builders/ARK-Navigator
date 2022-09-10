@@ -1,7 +1,7 @@
 package space.taran.arknavigator.mvp.model.repo.index
 
 import java.nio.file.Path
-
+import space.taran.arklib.index.ResourceMeta
 interface ResourcesIndex {
     // we pass all known resource ids to a storage because
     // 1) any storage exists globally

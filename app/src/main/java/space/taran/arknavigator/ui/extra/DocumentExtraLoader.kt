@@ -1,7 +1,7 @@
 package space.taran.arknavigator.ui.extra
 
 import android.widget.TextView
-import space.taran.arknavigator.mvp.model.repo.kind.ResourceKind
+import space.taran.arklib.index.ResourceKind
 import space.taran.arknavigator.utils.extensions.textOrGone
 
 object DocumentExtraLoader {
@@ -10,7 +10,7 @@ object DocumentExtraLoader {
         if (pages != null) {
             val label = when {
                 verbose -> {
-                    if (pages == 1) "$pages page"
+                    if (pages.toInt() == 1) "$pages page"
                     else "$pages pages"
                 }
                 else -> "$pages"

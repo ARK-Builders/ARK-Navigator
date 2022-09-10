@@ -17,6 +17,7 @@ import androidx.core.view.isVisible
 import moxy.MvpAppCompatActivity
 import moxy.ktx.moxyPresenter
 import ru.terrakok.cicerone.NavigatorHolder
+import space.taran.arklib.initRustLogger
 import space.taran.arknavigator.BuildConfig
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.ActivityMainBinding
@@ -55,6 +56,7 @@ class MainActivity : MvpAppCompatActivity(), MainView {
     override fun init() {
         Log.d(MAIN, "initializing")
         System.loadLibrary("arklib")
+        initRustLogger()
         binding.bottomNavigation.setOnApplyWindowInsetsListener(null)
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {

@@ -3,7 +3,7 @@ package space.taran.arknavigator.mvp.model.repo.kind
 import space.taran.arklib.index.ResourceKind
 
 typealias ResourceKind = ResourceKind
-//sealed class ResourceKind(val code: KindCode) {
+// sealed class ResourceKind(val code: KindCode) {
 //    class Image : ResourceKind(KindCode.IMAGE)
 //
 //    class Video(
@@ -23,13 +23,14 @@ typealias ResourceKind = ResourceKind
 //    class PlainText : ResourceKind(KindCode.PLAINTEXT)
 //
 //    class Archive : ResourceKind(KindCode.ARCHIVE)
-//}
+// }
 
 // These enums are only used to store different kind in one table in Room
-enum class KindCode {
-    IMAGE, VIDEO, DOCUMENT, LINK, PLAINTEXT, ARCHIVE
-}
-
-enum class MetaExtraTag {
-    DURATION, WIDTH, HEIGHT, PAGES, TITLE, DESCRIPTION, URL
-}
+// enum class KindCode {
+//    IMAGE, VIDEO, DOCUMENT, LINK, PLAINTEXT, ARCHIVE
+// }
+typealias KindCode = space.taran.arklib.index.KindCode
+// enum class MetaExtraTag {
+//    DURATION, WIDTH, HEIGHT, PAGES, TITLE, DESCRIPTION, URL
+// }
+typealias MetaExtraTag = space.taran.arklib.index.MetaExtraTag

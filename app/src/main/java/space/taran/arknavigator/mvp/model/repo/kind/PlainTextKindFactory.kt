@@ -2,7 +2,7 @@ package space.taran.arknavigator.mvp.model.repo.kind
 
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import java.nio.file.Path
-
+import space.taran.arklib.index.ResourceKind
 object PlainTextKindFactory : ResourceKindFactory<ResourceKind.PlainText> {
     override val acceptedExtensions: Set<String> =
         setOf("txt")
