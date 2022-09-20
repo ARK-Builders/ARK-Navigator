@@ -1,6 +1,9 @@
 package space.taran.arknavigator.mvp.model.repo.tags
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -8,6 +11,7 @@ import space.taran.arknavigator.mvp.model.repo.FoldersRepo
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
+import space.taran.arknavigator.mvp.model.repo.stats.StatsEvent
 import java.nio.file.Path
 
 class TagsStorageRepo(
@@ -16,7 +20,11 @@ class TagsStorageRepo(
     private val preferences: Preferences
 ) {
     private val provideMutex = Mutex()
+    private val scope = CoroutineScope(Dispatchers.IO)
     private val storageByRoot = mutableMapOf<Path, PlainTagsStorage>()
+    private val mutStatsFlow = MutableSharedFlow<StatsEvent>()
+    val statsFlow: SharedFlow<StatsEvent>
+        get() = mutStatsFlow
 
     suspend fun provide(
         rootAndFav: RootAndFav
@@ -33,8 +41,13 @@ class TagsStorageRepo(
                     storage.readStorageIfChanged()
                     storage
                 } else {
-                    val fresh =
-                        PlainTagsStorage(root, resources, preferences)
+                    val fresh = PlainTagsStorage(
+                        root,
+                        resources,
+                        mutStatsFlow,
+                        scope,
+                        preferences
+                    )
                     fresh.init()
                     fresh.cleanup(resources)
                     storageByRoot[root] = fresh
