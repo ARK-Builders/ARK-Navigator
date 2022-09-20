@@ -19,7 +19,8 @@ import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.preview.PreviewStorage
 import space.taran.arknavigator.mvp.model.repo.preview.PreviewStorageRepo
-import space.taran.arknavigator.mvp.model.repo.tags.PlainTagsStorage
+import space.taran.arknavigator.mvp.model.repo.stats.StatsStorage
+import space.taran.arknavigator.mvp.model.repo.stats.StatsStorageRepo
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import space.taran.arknavigator.mvp.presenter.adapter.ResourcesGridPresenter
@@ -59,11 +60,16 @@ class ResourcesPresenter(
     @Inject
     lateinit var previewStorageRepo: PreviewStorageRepo
 
+    @Inject
+    lateinit var statsStorageRepo: StatsStorageRepo
+
     lateinit var index: ResourcesIndex
         private set
     lateinit var storage: TagsStorage
         private set
     lateinit var previewStorage: PreviewStorage
+        private set
+    lateinit var statsStorage: StatsStorage
         private set
 
     val gridPresenter =
@@ -111,6 +117,7 @@ class ResourcesPresenter(
             index.reindex()
             storage = tagsStorageRepo.provide(rootAndFav)
             previewStorage = previewStorageRepo.provide(rootAndFav)
+            statsStorage = statsStorageRepo.provide(rootAndFav)
 
             gridPresenter.init(index, storage, router, previewStorage)
 
@@ -119,7 +126,7 @@ class ResourcesPresenter(
 
             gridPresenter.resetResources(resources)
             val kindTagsEnabled = preferences.get(PreferenceKey.ShowKinds)
-            tagsSelectorPresenter.init(index, storage, kindTagsEnabled)
+            tagsSelectorPresenter.init(index, storage, statsStorage, kindTagsEnabled)
             viewState.setKindTagsEnabled(kindTagsEnabled)
             externallySelectedTag?.let {
                 tagsSelectorPresenter.onTagExternallySelect(it)
@@ -221,12 +228,13 @@ class ResourcesPresenter(
     private suspend fun migrateTags(resources: List<ResourceId>, to: Path) {
         val newRoot = foldersRepo.findRootByPath(to)
         newRoot?.let {
-            val newStorage = PlainTagsStorage(it, resources, preferences).apply {
-                init()
-            }
+            val newStorage = tagsStorageRepo.provide(it)
             resources
                 .associateWith { storage.getTags(it) }
-                .apply { newStorage.setTagsAndPersist(this) }
+                .forEach { (id, tags) ->
+                    newStorage.setTags(id, tags)
+                }
+            newStorage.persist()
         }
     }
 

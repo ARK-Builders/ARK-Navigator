@@ -1,8 +1,10 @@
 package space.taran.arknavigator.mvp.model.repo.tags
 
 import android.util.Log
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import space.taran.arknavigator.mvp.model.arkFolder
@@ -10,6 +12,7 @@ import space.taran.arknavigator.mvp.model.arkTagsStorage
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
+import space.taran.arknavigator.mvp.model.repo.stats.StatsEvent
 import space.taran.arknavigator.utils.Constants.Companion.NO_TAGS
 import space.taran.arknavigator.utils.Converters.Companion.stringFromTags
 import space.taran.arknavigator.utils.Converters.Companion.tagsFromString
@@ -28,6 +31,8 @@ import kotlin.io.path.notExists
 class PlainTagsStorage(
     val root: Path,
     val resources: Collection<ResourceId>,
+    private val statsFlow: MutableSharedFlow<StatsEvent>,
+    private val scope: CoroutineScope,
     private val preferences: Preferences
 ) : TagsStorage {
 
@@ -72,7 +77,7 @@ class PlainTagsStorage(
             Log.d(TAGS_STORAGE, "lostResources: $lostResources")
 
         if (preferences.get(PreferenceKey.RemovingLostResourcesTags))
-            lostResources.forEach { resource -> tagsById.remove(resource) }
+            lostResources.forEach { resource -> remove(resource) }
 
         val newResources = indexedResources.subtract(knownResources)
         for (resource in newResources) {
@@ -132,6 +137,9 @@ class PlainTagsStorage(
 
     override suspend fun remove(id: ResourceId) = withContext(Dispatchers.IO) {
         Log.d(TAGS_STORAGE, "forgetting resource $id")
+        sendStatsEvent(
+            StatsEvent.TagsChanged(id, tagsById[id] ?: emptySet(), emptySet())
+        )
         tagsById.remove(id)
         persist()
     }
@@ -152,6 +160,10 @@ class PlainTagsStorage(
         Log.d(
             TAGS_STORAGE,
             "new tags for resource $id: $tags"
+        )
+
+        sendStatsEvent(
+            StatsEvent.TagsChanged(id, tagsById[id] ?: emptySet(), tags)
         )
         tagsById[id] = tags
     }
@@ -258,6 +270,10 @@ class PlainTagsStorage(
 
             Log.d(TAGS_STORAGE, "${tagsById.size} entries has been written")
         }
+
+    private fun sendStatsEvent(event: StatsEvent) = scope.launch {
+        statsFlow.emit(event)
+    }
 
     companion object {
         private const val STORAGE_VERSION = 2

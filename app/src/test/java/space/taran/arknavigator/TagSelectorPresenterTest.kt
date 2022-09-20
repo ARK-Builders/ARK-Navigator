@@ -28,6 +28,7 @@ import space.taran.arknavigator.stub.R2
 import space.taran.arknavigator.stub.R3
 import space.taran.arknavigator.stub.R4
 import space.taran.arknavigator.stub.ResourceIndexStub
+import space.taran.arknavigator.stub.StatsStorageStub
 import space.taran.arknavigator.stub.TAG1
 import space.taran.arknavigator.stub.TAG2
 import space.taran.arknavigator.stub.TagsStorageStub
@@ -66,7 +67,7 @@ class TagSelectorPresenterTest {
         )
         index = ResourceIndexStub()
         storage = TagsStorageStub()
-        presenter.init(index, storage, false)
+        presenter.init(index, storage, StatsStorageStub(), false)
     }
 
     @Test

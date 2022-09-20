@@ -8,6 +8,8 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.kind.KindCode
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
+import space.taran.arknavigator.mvp.model.repo.stats.StatsEvent
+import space.taran.arknavigator.mvp.model.repo.stats.StatsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.ui.resource.StringProvider
@@ -42,6 +44,7 @@ class TagsSelectorPresenter(
 
     private var index: ResourcesIndex? = null
     private var storage: TagsStorage? = null
+    private lateinit var statsStorage: StatsStorage
     private var filter = ""
 
     var queryMode = QueryMode.NORMAL
@@ -70,9 +73,15 @@ class TagsSelectorPresenter(
     var isClearBtnEnabled = false
         private set
 
-    fun init(index: ResourcesIndex, storage: TagsStorage, kindTagsEnabled: Boolean) {
+    fun init(
+        index: ResourcesIndex,
+        storage: TagsStorage,
+        statsStorage: StatsStorage,
+        kindTagsEnabled: Boolean,
+    ) {
         this.index = index
         this.storage = storage
+        this.statsStorage = statsStorage
         showKindTags = kindTagsEnabled
     }
 
@@ -350,6 +359,8 @@ class TagsSelectorPresenter(
 
     private suspend fun includeTag(item: TagItem) {
         Log.d(TAGS_SELECTOR, "including tag $item")
+        if (item is TagItem.PlainTagItem)
+            statsStorage.handleEvent(StatsEvent.TagUsed(item.tag))
 
         includedTagItems.add(item)
         excludedTagItems.remove(item)
