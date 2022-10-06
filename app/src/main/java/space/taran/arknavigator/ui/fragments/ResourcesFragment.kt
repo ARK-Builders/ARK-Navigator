@@ -35,6 +35,7 @@ import space.taran.arknavigator.ui.adapter.ResourcesRVAdapter
 import space.taran.arknavigator.ui.adapter.TagsSelectorAdapter
 import space.taran.arknavigator.ui.fragments.dialog.ConfirmationDialogFragment
 import space.taran.arknavigator.ui.fragments.dialog.SortDialogFragment
+import space.taran.arknavigator.ui.fragments.dialog.TagsSortDialogFragment
 import space.taran.arknavigator.ui.fragments.utils.toast
 import space.taran.arknavigator.ui.fragments.utils.toastFailedPaths
 import space.taran.arknavigator.ui.view.StackedToasts
@@ -136,6 +137,11 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         }
         btnClear.setOnClickListener {
             presenter.tagsSelectorPresenter.onClearClick()
+        }
+        btnTagsSorting.setOnClickListener {
+            TagsSortDialogFragment
+                .newInstance()
+                .show(childFragmentManager, null)
         }
 
         this@ResourcesFragment

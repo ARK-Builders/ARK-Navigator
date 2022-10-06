@@ -67,9 +67,25 @@
             app:chipIcon="@drawable/ic_close"
             app:chipIconTint="@color/black"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/iv_drag_handler"
+            app:layout_constraintEnd_toStartOf="@id/btn_tags_sorting"
             app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginEnd="8dp"
+            app:chipEndPadding="4dp"
+            app:chipStartPadding="4dp"
+            app:textEndPadding="0dp"
+            app:textStartPadding="0dp" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/btn_tags_sorting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:chipIcon="@drawable/ic_sort"
+            app:chipIconTint="@color/black"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginEnd="8dp"
+            app:chipEndPadding="4dp"
+            app:chipStartPadding="4dp"
             app:textEndPadding="0dp"
             app:textStartPadding="0dp" />
 

@@ -61,7 +61,8 @@ class PlainStatsStorage(
 
         return when (this) {
             is StatsEvent.TagsChanged -> ids.contains(resource)
-            is StatsEvent.TagUsed -> tagsStorage.getTags(ids).contains(tag)
+            is StatsEvent.PlainTagUsed -> tagsStorage.getTags(ids).contains(tag)
+            is StatsEvent.KindTagUsed -> true
         }
     }
 }

@@ -1,12 +1,15 @@
 package space.taran.arknavigator
 
 import android.util.Log
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
 import io.mockk.mockkStatic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -17,11 +20,14 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
+import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
+import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.QueryMode
 import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagItem
 import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagsSelectorAction
 import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagsSelectorPresenter
+import space.taran.arknavigator.mvp.presenter.dialog.TagsSorting
 import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.stub.R1
 import space.taran.arknavigator.stub.R2
@@ -58,7 +64,7 @@ class TagSelectorPresenterTest {
     }
 
     @BeforeEach
-    fun beforeEach() {
+    fun beforeEach() = runBlocking {
         presenter = TagsSelectorPresenter(
             viewState,
             null,
@@ -67,6 +73,10 @@ class TagSelectorPresenterTest {
         )
         index = ResourceIndexStub()
         storage = TagsStorageStub()
+        val preferences = mockk<Preferences>(relaxed = true)
+        presenter.preferences = preferences
+        coEvery { preferences.get(PreferenceKey.TagsSorting) } returns TagsSorting.POPULARITY.ordinal
+        coEvery { preferences.get(PreferenceKey.TagsSortingAscending) } returns true
         presenter.init(index, storage, StatsStorageStub(), false)
     }
 

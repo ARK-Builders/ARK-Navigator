@@ -1,5 +1,7 @@
 package space.taran.arknavigator.ui.fragments.dialog
 
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -32,6 +34,7 @@ class SortDialogFragment : MvpAppCompatDialogFragment(), SortDialogView {
         savedInstanceState: Bundle?
     ): View {
         binding = DialogSortBinding.inflate(inflater)
+        dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         return binding.root
     }
 
