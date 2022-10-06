@@ -2,6 +2,8 @@ package space.taran.arknavigator.mvp.presenter.adapter.tagsselector
 
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
@@ -11,6 +13,7 @@ import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.stats.StatsEvent
 import space.taran.arknavigator.mvp.model.repo.stats.StatsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
+import space.taran.arknavigator.mvp.presenter.dialog.TagsSorting
 import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.ui.resource.StringProvider
 import space.taran.arknavigator.utils.LogTags.TAGS_SELECTOR
@@ -47,6 +50,11 @@ class TagsSelectorPresenter(
     private lateinit var statsStorage: StatsStorage
     private var filter = ""
 
+    var sorting = TagsSorting.POPULARITY
+        private set
+    var sortingAscending = true
+        private set
+
     var queryMode = QueryMode.NORMAL
         private set
     var filterEnabled = false
@@ -73,7 +81,7 @@ class TagsSelectorPresenter(
     var isClearBtnEnabled = false
         private set
 
-    fun init(
+    suspend fun init(
         index: ResourcesIndex,
         storage: TagsStorage,
         statsStorage: StatsStorage,
@@ -83,6 +91,20 @@ class TagsSelectorPresenter(
         this.storage = storage
         this.statsStorage = statsStorage
         showKindTags = kindTagsEnabled
+        sorting = TagsSorting.values()[preferences.get(PreferenceKey.TagsSorting)]
+        sortingAscending = preferences.get(PreferenceKey.TagsSortingAscending)
+        preferences.flow(PreferenceKey.TagsSorting).onEach {
+            val newSorting = TagsSorting.values()[it]
+            if (sorting == newSorting) return@onEach
+            sorting = newSorting
+            calculateTagsAndSelection()
+        }.launchIn(scope)
+
+        preferences.flow(PreferenceKey.TagsSortingAscending).onEach { ascending ->
+            if (sortingAscending == ascending) return@onEach
+            sortingAscending = ascending
+            calculateTagsAndSelection()
+        }.launchIn(scope)
     }
 
     fun onTagItemClick(item: TagItem) = scope.launch {
@@ -206,23 +228,11 @@ class TagsSelectorPresenter(
                 excludedTagItems
             ).toList()
 
-        val tagsOfSelectedResPopularity = Popularity
-            .calculate(tagsOfSelectedResources)
-
-        val tagsOfUnselectedResPopularity = Popularity
-            .calculate(tagsOfUnselectedResources)
-
-        val tagsPopularity = Popularity
-            .calculate(tagItemsByResources.values.flatten())
-        availableTagItems = availableTagItems.sortedByDescending {
-            tagsOfSelectedResPopularity[it]
-        }
-        unavailableTagItems = unavailableTagItems.sortedByDescending {
-            tagsOfUnselectedResPopularity[it]
-        }
-
-        includedAndExcludedTagsForDisplay = (includedTagItems + excludedTagItems)
-            .sortedByDescending { tagsPopularity[it] }
+        sort(
+            tagsOfSelectedResources,
+            tagsOfUnselectedResources,
+            tagItemsByResources
+        )
 
         if (filterEnabled) filterTags()
         else resetTags()
@@ -245,6 +255,74 @@ class TagsSelectorPresenter(
             QueryMode.FOCUS -> calculateFocusModeSelectionIfNeeded(
                 tagItemsByResources
             )
+        }
+    }
+
+    private fun sort(
+        tagsOfSelectedResources: List<TagItem>,
+        tagsOfUnselectedResources: List<TagItem>,
+        tagItemsByResources: Map<ResourceId, Set<TagItem>>
+    ) {
+        when (sorting) {
+            TagsSorting.POPULARITY -> sortByPopularity(
+                tagsOfSelectedResources,
+                tagsOfUnselectedResources,
+                tagItemsByResources
+            )
+            TagsSorting.LAST_USED -> sortByLastUsed()
+        }
+        if (!sortingAscending) {
+            availableTagItems = availableTagItems.reversed()
+            unavailableTagItems = unavailableTagItems.reversed()
+            includedAndExcludedTagsForDisplay =
+                includedAndExcludedTagsForDisplay.reversed()
+        }
+    }
+
+    private fun sortByPopularity(
+        tagsOfSelectedResources: List<TagItem>,
+        tagsOfUnselectedResources: List<TagItem>,
+        tagItemsByResources: Map<ResourceId, Set<TagItem>>
+    ) {
+        val tagsOfSelectedResPopularity = Popularity
+            .calculate(tagsOfSelectedResources)
+
+        val tagsOfUnselectedResPopularity = Popularity
+            .calculate(tagsOfUnselectedResources)
+
+        val tagsPopularity = Popularity
+            .calculate(tagItemsByResources.values.flatten())
+        availableTagItems = availableTagItems.sortedBy {
+            tagsOfSelectedResPopularity[it]
+        }
+        unavailableTagItems = unavailableTagItems.sortedBy {
+            tagsOfUnselectedResPopularity[it]
+        }
+
+        includedAndExcludedTagsForDisplay = (includedTagItems + excludedTagItems)
+            .sortedBy { tagsPopularity[it] }
+    }
+
+    private fun sortByLastUsed() {
+        val lastUsed = statsStorage.statsTagUsedTSList()
+        val kindCodes = KindCode.values().associateBy { it.name }
+        val lastUsedTagItems = lastUsed.map { tag ->
+            if (kindCodes.containsKey(tag))
+                TagItem.KindTagItem(kindCodes[tag]!!)
+            else
+                TagItem.PlainTagItem(tag)
+        }.withIndex().associate { it.value to it.index }
+        availableTagItems = availableTagItems.sortedBy {
+            lastUsedTagItems[it]
+        }
+
+        unavailableTagItems = unavailableTagItems.sortedBy {
+            lastUsedTagItems[it]
+        }
+
+        val includedAnExcluded = includedTagItems + excludedTagItems
+        includedAndExcludedTagsForDisplay = includedAnExcluded.sortedBy {
+            lastUsedTagItems[it]
         }
     }
 
@@ -359,8 +437,12 @@ class TagsSelectorPresenter(
 
     private suspend fun includeTag(item: TagItem) {
         Log.d(TAGS_SELECTOR, "including tag $item")
-        if (item is TagItem.PlainTagItem)
-            statsStorage.handleEvent(StatsEvent.TagUsed(item.tag))
+        val event = when (item) {
+            is TagItem.KindTagItem -> StatsEvent.KindTagUsed(item.kind)
+            is TagItem.PlainTagItem -> StatsEvent.PlainTagUsed(item.tag)
+        }
+
+        statsStorage.handleEvent(event)
 
         includedTagItems.add(item)
         excludedTagItems.remove(item)

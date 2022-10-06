@@ -1,6 +1,7 @@
 package space.taran.arknavigator.mvp.model.repo.stats
 
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
+import space.taran.arknavigator.mvp.model.repo.kind.KindCode
 import space.taran.arknavigator.utils.Tag
 import space.taran.arknavigator.utils.Tags
 
@@ -11,7 +12,11 @@ sealed class StatsEvent(val categories: List<StatsCategory>) {
         val newTags: Tags
     ) : StatsEvent(listOf(StatsCategory.TAG_LABELED_N))
 
-    class TagUsed(val tag: Tag) : StatsEvent(listOf(StatsCategory.TAG_USED_TS))
+    class PlainTagUsed(val tag: Tag) : StatsEvent(listOf(StatsCategory.TAG_USED_TS))
+
+    class KindTagUsed(
+        val kindCode: KindCode
+    ) : StatsEvent(listOf(StatsCategory.TAG_USED_TS))
 }
 
 enum class StatsCategory {
@@ -23,6 +28,6 @@ interface StatsStorage {
     fun handleEvent(event: StatsEvent)
     fun statsTagLabeledAmount(): Map<Tag, Int>
     fun statsTagUsedTS(): Map<Tag, Long>
-    fun statsTagUsedTSDescending() =
-        statsTagUsedTS().toList().sortedByDescending { it.second }.map { it.first }
+    fun statsTagUsedTSList() =
+        statsTagUsedTS().toList().sortedBy { it.second }.map { it.first }
 }

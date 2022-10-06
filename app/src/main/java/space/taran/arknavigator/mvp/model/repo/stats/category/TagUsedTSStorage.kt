@@ -31,8 +31,10 @@ class TagUsedTSStorage(
 
     override fun handleEvent(event: StatsEvent) {
         when (event) {
-            is StatsEvent.TagUsed ->
+            is StatsEvent.PlainTagUsed ->
                 tagUsedTS[event.tag] = System.currentTimeMillis()
+            is StatsEvent.KindTagUsed ->
+                tagUsedTS[event.kindCode.name] = System.currentTimeMillis()
             else -> {}
         }
         requestFlush()

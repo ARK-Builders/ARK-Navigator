@@ -24,34 +24,16 @@
             android:layout_marginTop="8dp">
 
             <com.google.android.material.radiobutton.MaterialRadioButton
-                android:id="@+id/rb_name"
+                android:id="@+id/rb_popularity"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Name" />
+                android:text="Popularity" />
 
             <com.google.android.material.radiobutton.MaterialRadioButton
-                android:id="@+id/rb_size"
+                android:id="@+id/rb_used"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Size" />
-
-            <com.google.android.material.radiobutton.MaterialRadioButton
-                android:id="@+id/rb_last_modified"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Last modified" />
-
-            <com.google.android.material.radiobutton.MaterialRadioButton
-                android:id="@+id/rb_type"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Extension" />
-
-            <com.google.android.material.radiobutton.MaterialRadioButton
-                android:id="@+id/rb_default"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="As-is" />
+                android:text="Last used" />
 
         </RadioGroup>
 

@@ -26,6 +26,7 @@ import space.taran.arknavigator.ui.fragments.FoldersFragment
 import space.taran.arknavigator.ui.fragments.GalleryFragment
 import space.taran.arknavigator.ui.fragments.ResourcesFragment
 import space.taran.arknavigator.ui.fragments.SettingsFragment
+import space.taran.arknavigator.ui.fragments.dialog.TagsSortDialogFragment
 import javax.inject.Singleton
 
 @Singleton
@@ -61,4 +62,5 @@ interface AppComponent {
     fun inject(sortDialogPresenter: SortDialogPresenter)
     fun inject(tagsSelectorPresenter: TagsSelectorPresenter)
     fun inject(tagsSelectorAdapter: TagsSelectorAdapter)
+    fun inject(tagsSortDialogFragment: TagsSortDialogFragment)
 }
