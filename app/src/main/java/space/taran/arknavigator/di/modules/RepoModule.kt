@@ -6,6 +6,7 @@ import dagger.Provides
 import space.taran.arknavigator.mvp.model.dao.Database
 import space.taran.arknavigator.mvp.model.repo.FoldersRepo
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
+import space.taran.arknavigator.mvp.model.repo.meta.MetadataStorageRepo
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.preview.PreviewStorageRepo
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
@@ -51,4 +52,10 @@ class RepoModule {
     fun previewStorageRepo(
         foldersRepo: FoldersRepo
     ) = PreviewStorageRepo(foldersRepo)
+
+    @Singleton
+    @Provides
+    fun metadataStorageRepo(
+        foldersRepo: FoldersRepo
+    ) = MetadataStorageRepo(foldersRepo)
 }
