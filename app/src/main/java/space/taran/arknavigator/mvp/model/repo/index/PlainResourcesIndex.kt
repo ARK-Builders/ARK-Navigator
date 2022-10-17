@@ -14,7 +14,9 @@ import space.taran.arknavigator.mvp.model.dao.ResourceDao
 import space.taran.arknavigator.mvp.model.dao.ResourceExtra
 import space.taran.arknavigator.mvp.model.dao.ResourceWithExtra
 import space.taran.arknavigator.mvp.model.repo.kind.GeneralKindFactory
+import space.taran.arknavigator.mvp.model.repo.meta.MetadataStorage
 import space.taran.arknavigator.mvp.model.repo.preview.PreviewStorage
+import space.taran.arknavigator.utils.LogTags.METADATA
 import space.taran.arknavigator.utils.LogTags.PREVIEWS
 import space.taran.arknavigator.utils.LogTags.RESOURCES_INDEX
 import space.taran.arknavigator.utils.listChildren
@@ -40,6 +42,7 @@ class PlainResourcesIndex internal constructor(
     private val root: Path,
     private val dao: ResourceDao,
     private val previewStorage: PreviewStorage,
+    private val metadataStorage: MetadataStorage,
     resources: Map<Path, ResourceMeta>
 ) : ResourcesIndex {
     private val _kindDetectFailedFlow: MutableSharedFlow<Path> = MutableSharedFlow()
@@ -88,7 +91,7 @@ class PlainResourcesIndex internal constructor(
 
     override suspend fun reindex(): Unit =
         withContextAndLock(Dispatchers.IO, mutex) {
-            reindexRoot(calculateDifference())
+            reindexRoot(calculateDifference(), metadataStorage)
         }
 
     // should be only used in AggregatedResourcesIndex
@@ -123,7 +126,7 @@ class PlainResourcesIndex internal constructor(
         return path
     }
 
-    internal suspend fun reindexRoot(diff: Difference) =
+    internal suspend fun reindexRoot(diff: Difference, metadataStorage: MetadataStorage) =
         withContext(Dispatchers.IO) {
             Log.d(
                 RESOURCES_INDEX,
@@ -151,9 +154,14 @@ class PlainResourcesIndex internal constructor(
             val newResources = mutableMapOf<Path, ResourceMeta>()
             val toInsert = diff.updated + diff.added
 
+            val time0 = measureTimeMillis {
+                populateMetadataStorage()
+            }
+            Log.d(PREVIEWS, "resources metadata storage populated in ${time0}ms")
+
             val time1 = measureTimeMillis {
                 toInsert.forEach { path ->
-                    val result = ResourceMeta.fromPath(path)
+                    val result = ResourceMeta.fromPath(path, metadataStorage)
                     result.onSuccess { meta ->
                         newResources[path] = meta
                         metaByPath[path] = meta
@@ -212,6 +220,33 @@ class PlainResourcesIndex internal constructor(
             Difference(absent, updated, added)
         }
 
+    internal suspend fun populateMetadataStorage() =
+        withContext(Dispatchers.IO) {
+            Log.d(
+                METADATA,
+                "generating metadata for ${metaByPath.size} resources"
+            )
+
+            supervisorScope {
+                metaByPath.entries.map { (path: Path, meta: ResourceMeta) ->
+                    async(Dispatchers.IO) {
+                        metadataStorage.generate(path, meta)
+                    } to path
+                }.forEach { (generateTask, path) ->
+                    try {
+                        generateTask.await()
+                    } catch (e: Exception) {
+                        Log.e(
+                            METADATA,
+                            "Failed to generate metadata for id ${
+                                metaByPath[path]?.id
+                            } ($path)"
+                        )
+                    }
+                }
+            }
+        }
+
     internal suspend fun providePreviews() =
         withContext(Dispatchers.IO) {
             Log.d(
@@ -222,7 +257,7 @@ class PlainResourcesIndex internal constructor(
             supervisorScope {
                 metaByPath.entries.map { (path: Path, meta: ResourceMeta) ->
                     async(Dispatchers.IO) {
-                        previewStorage.generate(path, meta)
+                        previewStorage.store(path, meta)
                     } to path
                 }.forEach { (generateTask, path) ->
                     try {

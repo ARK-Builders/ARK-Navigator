@@ -3,6 +3,8 @@ package space.taran.arknavigator.mvp.model.repo.kind
 import android.net.Uri
 import android.util.Log
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
+import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
+import space.taran.arknavigator.mvp.model.repo.meta.MetadataStorage
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.utils.LogTags
 import wseemann.media.FFmpegMediaMetadataRetriever
@@ -17,7 +19,7 @@ object VideoKindFactory : ResourceKindFactory<ResourceKind.Video> {
         setOf("video/mp4")
     override val acceptedKindCode = KindCode.VIDEO
 
-    override fun fromPath(path: Path): ResourceKind.Video {
+    override fun fromPath(path: Path, meta: ResourceMeta, metadataStorage: MetadataStorage): ResourceKind.Video {
         val retriever = FFmpegMediaMetadataRetriever()
 
         try {

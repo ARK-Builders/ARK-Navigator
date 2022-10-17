@@ -9,13 +9,13 @@ class AggregatedMetadataStorage(
     private val shards: Collection<PlainMetadataStorage>
 ) : MetadataStorage {
 
-    override fun locate(path: Path, resource: ResourceMeta): Map<MetaExtraTag, String>? {
+    override fun locate(path: Path, resource: ResourceMeta): ResourceMeta {
         shards.forEach { shard ->
-            shard.locate(path, resource)?.let {
+            shard.locate(path, resource).let {
                 return it
             }
         }
-        return null
+        return resource
     }
 
     override fun forget(id: ResourceId) = shards.forEach {
@@ -24,12 +24,11 @@ class AggregatedMetadataStorage(
 
     override fun generate(
         path: Path,
-        extras: Map<MetaExtraTag, String>,
         meta: ResourceMeta
     ) = shards
         .find { shard -> path.startsWith(shard.root) }
         .let {
             require(it != null) { "At least one of shards must yield success" }
-            it.generate(path, extras, meta)
+            it.generate(path, meta)
         }
 }

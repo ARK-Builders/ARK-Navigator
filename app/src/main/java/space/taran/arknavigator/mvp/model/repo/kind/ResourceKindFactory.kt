@@ -2,6 +2,9 @@ package space.taran.arknavigator.mvp.model.repo.kind
 
 import space.taran.arknavigator.mvp.model.dao.ResourceExtra
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
+import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
+import space.taran.arknavigator.mvp.model.repo.meta.AggregatedMetadataStorage
+import space.taran.arknavigator.mvp.model.repo.meta.MetadataStorage
 import space.taran.arknavigator.utils.extension
 import space.taran.arknavigator.utils.getMimeTypeUsingTika
 import java.nio.file.Path
@@ -14,7 +17,7 @@ interface ResourceKindFactory<T : ResourceKind> {
     fun isValid(mimeType: String) = acceptedMimeTypes.contains(mimeType)
     fun isValid(kindCode: Int) = acceptedKindCode.ordinal == kindCode
 
-    fun fromPath(path: Path): T
+    fun fromPath(path: Path, meta: ResourceMeta, metadataStorage: MetadataStorage): T
     fun fromRoom(extras: Map<MetaExtraTag, String>): T
     fun toRoom(id: ResourceId, kind: T): Map<MetaExtraTag, String?>
 }
@@ -30,8 +33,8 @@ object GeneralKindFactory {
             ArchiveKindFactory
         )
 
-    fun fromPath(path: Path): ResourceKind =
-        findFactory(path)?.fromPath(path) ?: error("Factory not found")
+    fun fromPath(path: Path, meta: ResourceMeta, metadataStorage: MetadataStorage): ResourceKind =
+        findFactory(path)?.fromPath(path, meta, metadataStorage) ?: error("Factory not found")
 
     fun fromRoom(
         kindCode: Int?,

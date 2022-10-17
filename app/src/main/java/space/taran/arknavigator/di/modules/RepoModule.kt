@@ -27,13 +27,15 @@ class RepoModule {
     fun resourcesIndexesRepo(
         database: Database,
         foldersRepo: FoldersRepo,
-        previewStorageRepo: PreviewStorageRepo
+        previewStorageRepo: PreviewStorageRepo,
+        metadataStorageRepo: MetadataStorageRepo
     ): ResourcesIndexRepo {
         Log.d(MAIN, "creating ResourcesIndexesRepo")
         return ResourcesIndexRepo(
             database.resourceDao(),
             foldersRepo,
-            previewStorageRepo
+            previewStorageRepo,
+            metadataStorageRepo
         )
     }
 

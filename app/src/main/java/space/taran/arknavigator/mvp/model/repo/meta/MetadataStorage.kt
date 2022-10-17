@@ -10,9 +10,9 @@ import java.util.*
 
 interface MetadataStorage {
 
-    fun locate(path: Path, resource: ResourceMeta): Map<MetaExtraTag, String?>?
+    fun locate(path: Path, resource: ResourceMeta): ResourceMeta
 
     fun forget(id: ResourceId)
 
-    fun generate(path: Path, extras: Map<MetaExtraTag, String?>, meta: ResourceMeta)
+    fun generate(path: Path, meta: ResourceMeta)
 }

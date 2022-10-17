@@ -21,13 +21,13 @@ class AggregatedPreviewStorage(
         it.forget(id)
     }
 
-    override fun generate(
+    override fun store(
         path: Path,
         meta: ResourceMeta
     ) = shards
         .find { shard -> path.startsWith(shard.root) }
         .let {
             require(it != null) { "At least one of shards must yield success" }
-            it.generate(path, meta)
+            it.store(path, meta)
         }
 }

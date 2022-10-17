@@ -59,7 +59,7 @@ class PlainPreviewStorage(val root: Path) : PreviewStorage {
         thumbnailPath(id).deleteIfExists()
     }
 
-    override fun generate(path: Path, meta: ResourceMeta) {
+    override fun store(path: Path, meta: ResourceMeta) {
         require(!path.isDirectory()) { "Previews for folders are constant" }
 
         val previewPath = previewPath(meta.id)

@@ -1,5 +1,8 @@
 package space.taran.arknavigator.mvp.model.repo.kind
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 sealed class ResourceKind(val code: KindCode) {
     class Image : ResourceKind(KindCode.IMAGE)
 
@@ -8,6 +11,7 @@ sealed class ResourceKind(val code: KindCode) {
         val width: Long? = null,
         val duration: Long? = null
     ) : ResourceKind(KindCode.VIDEO)
+
 
     class Document(val pages: Int? = null) : ResourceKind(KindCode.DOCUMENT)
 

@@ -2,6 +2,7 @@ package space.taran.arknavigator.mvp.model.repo.index
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.merge
+import space.taran.arknavigator.mvp.model.repo.meta.MetadataStorage
 import java.nio.file.Path
 
 /**
