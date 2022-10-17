@@ -15,6 +15,7 @@ import space.taran.arknavigator.mvp.model.repo.stats.category.StatsCategoryStora
 import space.taran.arknavigator.mvp.model.repo.stats.category.TagLabeledNStorage
 import space.taran.arknavigator.mvp.model.repo.stats.category.TagUsedTSStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
+import timber.log.Timber
 import java.nio.file.Path
 import kotlin.io.path.createDirectories
 
@@ -46,8 +47,8 @@ class PlainStatsStorage(
     override fun handleEvent(event: StatsEvent) {
         scope.launch {
             if (!event.belongToRoot()) return@launch
+            Timber.i("Event [$event] received in root [$root]")
             categoryStorages
-                .filter { storage -> event.categories.contains(storage.category) }
                 .forEach { storage -> storage.handleEvent(event) }
         }
     }

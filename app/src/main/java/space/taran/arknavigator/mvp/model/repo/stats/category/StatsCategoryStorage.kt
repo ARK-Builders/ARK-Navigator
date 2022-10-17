@@ -12,7 +12,7 @@ import space.taran.arknavigator.mvp.model.repo.stats.StatsCategory
 import space.taran.arknavigator.mvp.model.repo.stats.StatsEvent
 import java.nio.file.Path
 
-private const val DEBOUNCE_FLUSH = 30_000L
+private const val FLUSH_INTERVAL = 10_000L
 
 abstract class StatsCategoryStorage<out T>(
     val root: Path,
@@ -21,7 +21,7 @@ abstract class StatsCategoryStorage<out T>(
     abstract val fileName: Path
     abstract val category: StatsCategory
     private val flushFlow = MutableSharedFlow<Unit>().also { flow ->
-        flow.debounce(DEBOUNCE_FLUSH).onEach {
+        flow.debounce(FLUSH_INTERVAL).onEach {
             flush()
         }.launchIn(scope)
     }

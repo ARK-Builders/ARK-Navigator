@@ -10,6 +10,7 @@ import space.taran.arknavigator.mvp.model.repo.stats.StatsCategory
 import space.taran.arknavigator.mvp.model.repo.stats.StatsEvent
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.utils.Tag
+import timber.log.Timber
 import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.exists
@@ -41,6 +42,7 @@ class TagLabeledNStorage(
                 }
             requestFlush()
         }
+        Timber.i("initialized with $tagLabeledAmount")
     }
 
     override fun handleEvent(event: StatsEvent) {
@@ -56,7 +58,7 @@ class TagLabeledNStorage(
                     tagLabeledAmount.merge(it, 1, Int::minus)
                 }
             }
-            else -> {}
+            else -> return
         }
         requestFlush()
     }
@@ -66,6 +68,7 @@ class TagLabeledNStorage(
     override fun flush() {
         val data = Json.encodeToString(JsonTagLabeledN(tagLabeledAmount))
         locateStorage().writeText(data)
+        Timber.i("flushed with $tagLabeledAmount")
     }
 }
 
