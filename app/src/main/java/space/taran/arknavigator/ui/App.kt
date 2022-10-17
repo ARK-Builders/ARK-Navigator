@@ -15,6 +15,7 @@ import space.taran.arknavigator.di.AppComponent
 import space.taran.arknavigator.di.DaggerAppComponent
 import space.taran.arknavigator.di.modules.AppModule
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
+import timber.log.Timber
 
 class App : Application() {
 
@@ -27,6 +28,8 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        Timber.plant(Timber.DebugTree())
 
         instance = this
 

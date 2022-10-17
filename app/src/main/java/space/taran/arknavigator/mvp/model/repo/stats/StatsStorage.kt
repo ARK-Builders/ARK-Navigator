@@ -5,18 +5,18 @@ import space.taran.arknavigator.mvp.model.repo.kind.KindCode
 import space.taran.arknavigator.utils.Tag
 import space.taran.arknavigator.utils.Tags
 
-sealed class StatsEvent(val categories: List<StatsCategory>) {
-    class TagsChanged(
+sealed class StatsEvent {
+    data class TagsChanged(
         val resource: ResourceId,
         val oldTags: Tags,
         val newTags: Tags
-    ) : StatsEvent(listOf(StatsCategory.TAG_LABELED_N))
+    ) : StatsEvent()
 
-    class PlainTagUsed(val tag: Tag) : StatsEvent(listOf(StatsCategory.TAG_USED_TS))
+    data class PlainTagUsed(val tag: Tag) : StatsEvent()
 
-    class KindTagUsed(
+    data class KindTagUsed(
         val kindCode: KindCode
-    ) : StatsEvent(listOf(StatsCategory.TAG_USED_TS))
+    ) : StatsEvent()
 }
 
 enum class StatsCategory {

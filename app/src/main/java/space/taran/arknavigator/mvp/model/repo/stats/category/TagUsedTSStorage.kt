@@ -8,6 +8,7 @@ import kotlinx.serialization.json.decodeFromStream
 import space.taran.arknavigator.mvp.model.repo.stats.StatsCategory
 import space.taran.arknavigator.mvp.model.repo.stats.StatsEvent
 import space.taran.arknavigator.utils.Tag
+import timber.log.Timber
 import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.inputStream
@@ -27,6 +28,7 @@ class TagUsedTSStorage(
         if (storage.notExists()) return
         val json = Json.decodeFromStream<JsonTagUsedTS>(storage.inputStream())
         tagUsedTS.putAll(json.data)
+        Timber.i("initialized with $tagUsedTS")
     }
 
     override fun handleEvent(event: StatsEvent) {
@@ -35,7 +37,7 @@ class TagUsedTSStorage(
                 tagUsedTS[event.tag] = System.currentTimeMillis()
             is StatsEvent.KindTagUsed ->
                 tagUsedTS[event.kindCode.name] = System.currentTimeMillis()
-            else -> {}
+            else -> return
         }
         requestFlush()
     }
@@ -45,6 +47,7 @@ class TagUsedTSStorage(
     override fun flush() {
         val data = Json.encodeToString(JsonTagUsedTS(tagUsedTS))
         locateStorage().writeText(data)
+        Timber.i("flushed with $tagUsedTS")
     }
 }
 
