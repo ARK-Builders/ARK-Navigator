@@ -7,7 +7,6 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:animateLayoutChanges="true"
         android:orientation="vertical">
 
         <TextView
@@ -16,248 +15,18 @@
             android:textSize="26sp"
             android:textStyle="bold" />
 
-        <RelativeLayout
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_preference"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
-            android:orientation="horizontal">
+            android:layout_height="wrap_content"/>
 
-            <TextView
-                android:id="@+id/crashReportTV"
-                style="@style/RegularTextStyle"
-                android:layout_centerVertical="true"
-                android:text="@string/crash_reports"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <ImageView
-                android:id="@+id/crashInfo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_toEndOf="@+id/crashReportTV"
-                android:background="@drawable/ripple_simple_bg"
-                android:clickable="true"
-                android:focusable="true"
-                android:padding="4dp"
-                android:src="@drawable/ic_info" />
-
-            <space.taran.arknavigator.ui.view.UserSwitchMaterial
-                android:id="@+id/crashReportSwitch"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_alignParentEnd="true"
-                android:layout_toStartOf="@+id/crashInfo"
-                android:minHeight="0dp"
-                android:padding="8dp" />
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="12dp"
-            android:layout_marginEnd="16dp"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/cacheReplicationTV"
-                style="@style/RegularTextStyle"
-                android:layout_centerVertical="true"
-                android:text="@string/images_cache_replication"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <ImageView
-                android:id="@+id/imgCacheInfo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_toEndOf="@+id/cacheReplicationTV"
-                android:background="@drawable/ripple_simple_bg"
-                android:clickable="true"
-                android:focusable="true"
-                android:padding="4dp"
-                android:src="@drawable/ic_info" />
-
-            <space.taran.arknavigator.ui.view.UserSwitchMaterial
-                android:id="@+id/cacheReplicationSwitch"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_alignParentEnd="true"
-                android:layout_toStartOf="@+id/imgCacheInfo"
-                android:minHeight="0dp"
-                android:padding="8dp" />
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="12dp"
-            android:layout_marginEnd="16dp"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/indexReplicationTV"
-                style="@style/RegularTextStyle"
-                android:layout_centerVertical="true"
-                android:text="@string/index_replication"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <ImageView
-                android:id="@+id/indexReplicationInfo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_toEndOf="@+id/indexReplicationTV"
-                android:background="@drawable/ripple_simple_bg"
-                android:clickable="true"
-                android:focusable="true"
-                android:padding="4dp"
-                android:src="@drawable/ic_info" />
-
-            <space.taran.arknavigator.ui.view.UserSwitchMaterial
-                android:id="@+id/indexReplicationSwitch"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_alignParentEnd="true"
-                android:layout_toStartOf="@+id/indexReplicationInfo"
-                android:minHeight="0dp"
-                android:padding="8dp" />
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="12dp"
-            android:layout_marginEnd="16dp"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/tv_removing_tags"
-                style="@style/RegularTextStyle"
-                android:layout_centerVertical="true"
-                android:text="@string/removing_lost_resources_tags"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <ImageView
-                android:id="@+id/info_removing_tags"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_toEndOf="@+id/tv_removing_tags"
-                android:background="@drawable/ripple_simple_bg"
-                android:clickable="true"
-                android:focusable="true"
-                android:padding="4dp"
-                android:src="@drawable/ic_info" />
-
-            <space.taran.arknavigator.ui.view.UserSwitchMaterial
-                android:id="@+id/switch_removing_tags"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_alignParentEnd="true"
-                android:layout_toStartOf="@+id/info_removing_tags"
-                android:minHeight="0dp"
-                android:padding="8dp" />
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="12dp"
-            android:layout_marginEnd="16dp"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/tv_backup"
-                style="@style/RegularTextStyle"
-                android:layout_centerVertical="true"
-                android:text="@string/backup"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <ImageView
-                android:id="@+id/info_backup"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_toEndOf="@+id/tv_backup"
-                android:background="@drawable/ripple_simple_bg"
-                android:clickable="true"
-                android:focusable="true"
-                android:padding="4dp"
-                android:src="@drawable/ic_info" />
-
-            <space.taran.arknavigator.ui.view.UserSwitchMaterial
-                android:id="@+id/switch_backup"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_alignParentEnd="true"
-                android:layout_toStartOf="@+id/info_backup"
-                android:minHeight="0dp"
-                android:padding="8dp" />
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="12dp"
-            android:layout_marginEnd="16dp"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/tv_short_name"
-                style="@style/RegularTextStyle"
-                android:layout_centerVertical="true"
-                android:text="@string/short_file_names"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <ImageView
-                android:id="@+id/info_short_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_toEndOf="@+id/tv_short_name"
-                android:background="@drawable/ripple_simple_bg"
-                android:clickable="true"
-                android:focusable="true"
-                android:padding="4dp"
-                android:src="@drawable/ic_info" />
-
-            <space.taran.arknavigator.ui.view.UserSwitchMaterial
-                android:id="@+id/switch_short_name"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_alignParentEnd="true"
-                android:layout_toStartOf="@+id/info_short_name"
-                android:minHeight="0dp"
-                android:padding="8dp" />
-
-        </RelativeLayout>
 
         <Button
             android:id="@+id/resetPreferences"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
             android:text="@string/reset_preferences" />
 
     </LinearLayout>

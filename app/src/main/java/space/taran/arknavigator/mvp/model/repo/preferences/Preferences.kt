@@ -38,4 +38,5 @@ sealed class PreferenceKey<out T>(val defaultValue: T) {
     object WasRootsScanShown : PreferenceKey<Boolean>(false)
     object BackupEnabled : PreferenceKey<Boolean>(true)
     object ShortFileNames : PreferenceKey<Boolean>(true)
+    object CollectTagUsageStats : PreferenceKey<Boolean>(true)
 }
