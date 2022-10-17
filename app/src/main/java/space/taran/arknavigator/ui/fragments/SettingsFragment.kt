@@ -1,130 +1,134 @@
 package space.taran.arknavigator.ui.fragments
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
-import moxy.MvpAppCompatFragment
-import moxy.ktx.moxyPresenter
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import by.kirich1409.viewbindingdelegate.viewBinding
+import com.mikepenz.fastadapter.FastAdapter
+import com.mikepenz.fastadapter.adapters.ItemAdapter
+import com.mikepenz.fastadapter.binding.AbstractBindingItem
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.FragmentSettingsBinding
-import space.taran.arknavigator.mvp.presenter.SettingsPresenter
-import space.taran.arknavigator.mvp.view.SettingsView
+import space.taran.arknavigator.databinding.ItemBooleanPreferenceBinding
+import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
+import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.fragments.dialog.ConfirmationDialogFragment
 import space.taran.arknavigator.ui.fragments.dialog.InfoDialogFragment
 import space.taran.arknavigator.ui.fragments.utils.toast
 import space.taran.arknavigator.utils.LogTags.SETTINGS_SCREEN
+import javax.inject.Inject
 
-class SettingsFragment : MvpAppCompatFragment(), SettingsView {
+class SettingsFragment : Fragment(R.layout.fragment_settings) {
 
-    private lateinit var binding: FragmentSettingsBinding
+    private val binding by viewBinding(FragmentSettingsBinding::bind)
+    private val adapter = ItemAdapter<BooleanPreferenceItem>()
 
-    private val presenter by moxyPresenter {
-        SettingsPresenter().apply {
-            Log.d(SETTINGS_SCREEN, "creating SettingsPresenter")
-            App.instance.appComponent.inject(this)
-        }
+    @Inject
+    lateinit var preferences: Preferences
+
+    //region booleanPreferenceModels
+
+    private val booleanPreferenceModels = listOf(
+        BooleanPreferenceModel(
+            PreferenceKey.CrashReport,
+            R.string.crash_reports,
+            R.string.what_are_crash_reports_,
+            R.string.crash_reports_explanation,
+            R.string.crash_reporting_enabled,
+            R.string.crash_reporting_disabled
+        ),
+        BooleanPreferenceModel(
+            PreferenceKey.ImgCacheReplication,
+            R.string.images_cache_replication,
+            R.string.what_is_image_replication_,
+            R.string.explanation_of_this_feature,
+            R.string.images_cache_replication_enabled,
+            R.string.images_cache_replication_disabled
+        ),
+        BooleanPreferenceModel(
+            PreferenceKey.IndexReplication,
+            R.string.index_replication,
+            R.string.what_is_index_replication_,
+            R.string.explanation_of_this_feature,
+            R.string.index_replication_enabled,
+            R.string.index_replication_disabled
+        ),
+        BooleanPreferenceModel(
+            PreferenceKey.RemovingLostResourcesTags,
+            R.string.removing_lost_resources_tags,
+            R.string.what_is_removing_tags,
+            R.string.explanation_of_this_feature,
+            R.string.removing_tags_enabled,
+            R.string.removing_tags_disabled
+        ),
+        BooleanPreferenceModel(
+            PreferenceKey.BackupEnabled,
+            R.string.backup,
+            R.string.what_is_backup,
+            R.string.explanation_of_this_feature,
+            R.string.backup_enabled,
+            R.string.backup_disabled
+        ),
+        BooleanPreferenceModel(
+            PreferenceKey.ShortFileNames,
+            R.string.short_file_names,
+            R.string.what_is_backup,
+            R.string.explanation_of_this_feature,
+            R.string.short_names_enabled,
+            R.string.short_names_disabled
+        ),
+        BooleanPreferenceModel(
+            PreferenceKey.CollectTagUsageStats,
+            R.string.collect_tag_usage_stats,
+            R.string.collect_tag_usage_stats,
+            R.string.explanation_of_this_feature,
+            R.string.collect_tag_usage_stats_enabled,
+            R.string.collect_tag_usage_stats_disabled
+        ),
+    )
+
+    //endregion
+
+    override fun onAttach(context: Context) {
+        App.instance.appComponent.inject(this)
+        super.onAttach(context)
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        super.onCreateView(inflater, container, savedInstanceState)
-
-        Log.d(SETTINGS_SCREEN, "inflating layout for SettingsFragment")
-        binding = FragmentSettingsBinding.inflate(inflater, container, false)
-
-        return binding.root
-    }
-
-    override fun init() {
-        Log.d(SETTINGS_SCREEN, "initializing SettingsFragment")
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         (activity as MainActivity).setSelectedTab(R.id.page_settings)
         (requireActivity() as MainActivity).setBottomNavigationVisibility(true)
-        initListeners()
 
-        childFragmentManager.setFragmentResultListener(
-            ConfirmationDialogFragment.DEFAULT_POSITIVE_REQUEST_KEY,
-            this
-        ) { _, _ ->
-            presenter.onResetPreferencesClick()
-        }
-    }
+        binding.rvPreference.layoutManager =
+            object : LinearLayoutManager(requireContext()) {
+                override fun canScrollVertically() = false
+            }
+        binding.rvPreference.adapter = FastAdapter.with(adapter)
+        adapter.set(
+            booleanPreferenceModels.map { model ->
+                BooleanPreferenceItem(
+                    model,
+                    requireContext(),
+                    childFragmentManager,
+                    lifecycleScope,
+                    preferences
+                )
+            }
+        )
 
-    private fun initListeners() = binding.apply {
-        crashReportSwitch.setOnUserCheckedChangeListener {
-            presenter.onCrashReportingClick(it)
-        }
-
-        cacheReplicationSwitch.setOnUserCheckedChangeListener {
-            presenter.onImgCacheReplicationClick(it)
-        }
-
-        indexReplicationSwitch.setOnUserCheckedChangeListener {
-            presenter.onIndexReplicationClick(it)
-        }
-
-        switchRemovingTags.setOnUserCheckedChangeListener {
-            presenter.onRemovingLostResourcesTagsClick(it)
-        }
-
-        switchBackup.setOnUserCheckedChangeListener {
-            presenter.onBackupClick(it)
-        }
-
-        switchShortName.setOnUserCheckedChangeListener {
-            presenter.onShortNameClick(it)
-        }
-
-        crashInfo.setOnClickListener {
-            showInfoDialog(
-                R.string.what_are_crash_reports_,
-                R.string.crash_reports_explanation
-            )
-        }
-
-        imgCacheInfo.setOnClickListener {
-            showInfoDialog(
-                R.string.what_is_image_replication_,
-                R.string.explanation_of_this_feature
-            )
-        }
-
-        indexReplicationInfo.setOnClickListener {
-            showInfoDialog(
-                R.string.what_is_index_replication_,
-                R.string.explanation_of_this_feature
-            )
-        }
-
-        infoRemovingTags.setOnClickListener {
-            showInfoDialog(
-                R.string.what_is_removing_tags,
-                R.string.explanation_of_this_feature
-            )
-        }
-
-        infoBackup.setOnClickListener {
-            showInfoDialog(
-                R.string.what_is_backup,
-                R.string.explanation_of_this_feature
-            )
-        }
-
-        infoShortName.setOnClickListener {
-            showInfoDialog(
-                R.string.what_is_backup,
-                R.string.explanation_of_this_feature
-            )
-        }
-
-        resetPreferences.setOnClickListener {
+        binding.resetPreferences.setOnClickListener {
             val dialog = ConfirmationDialogFragment.newInstance(
                 getString(R.string.are_you_sure),
                 getString(R.string.all_preferences_will_be_reset_to_default),
@@ -136,72 +140,16 @@ class SettingsFragment : MvpAppCompatFragment(), SettingsView {
                 ConfirmationDialogFragment.CONFIRMATION_DIALOG_TAG
             )
         }
-    }
 
-    private fun showInfoDialog(
-        @StringRes titleRes: Int,
-        @StringRes descriptionRes: Int
-    ) {
-        val title = getString(titleRes)
-        val description = getString(descriptionRes)
-
-        val dialog = InfoDialogFragment.newInstance(title, description)
-        dialog.show(childFragmentManager, InfoDialogFragment.BASE_INFO_DIALOG_TAG)
-    }
-
-    override fun setCrashReportPreference(isCrashReportEnabled: Boolean) =
-        binding.crashReportSwitch.toggleSwitchSilent(isCrashReportEnabled)
-
-    override fun setImgCacheReplicationPref(isImgReplicationEnabled: Boolean) =
-        binding.cacheReplicationSwitch.toggleSwitchSilent(isImgReplicationEnabled)
-
-    override fun setIndexReplicationPref(isIndexReplication: Boolean) =
-        binding.indexReplicationSwitch.toggleSwitchSilent(isIndexReplication)
-
-    override fun setRemovingLostResourcesTags(enabled: Boolean) =
-        binding.switchRemovingTags.toggleSwitchSilent(enabled)
-
-    override fun setBackup(enabled: Boolean) =
-        binding.switchBackup.toggleSwitchSilent(enabled)
-
-    override fun setShortFileNames(enabled: Boolean) =
-        binding.switchShortName.toggleSwitchSilent(enabled)
-
-    override fun toastCrashReportingEnabled(enabled: Boolean) =
-        toast(
-            if (enabled) R.string.crash_reporting_enabled
-            else R.string.crash_reporting_disabled
-        )
-
-    override fun toastImageCacheReplicationEnabled(enabled: Boolean) =
-        toast(
-            if (enabled) R.string.images_cache_replication_enabled
-            else R.string.images_cache_replication_disabled
-        )
-
-    override fun toastIndexReplicationEnabled(enabled: Boolean) =
-        toast(
-            if (enabled) R.string.index_replication_enabled
-            else R.string.index_replication_disabled
-        )
-
-    override fun toastRemovingTagsEnabled(enabled: Boolean) =
-        toast(
-            if (enabled) R.string.removing_tags_enabled
-            else R.string.removing_tags_disabled
-        )
-
-    override fun toastBackup(enabled: Boolean) =
-        toast(
-            if (enabled) R.string.backup_enabled
-            else R.string.backup_disabled
-        )
-
-    override fun toastShortName(enabled: Boolean) {
-        toast(
-            if (enabled) R.string.short_names_enabled
-            else R.string.short_names_disabled
-        )
+        childFragmentManager.setFragmentResultListener(
+            ConfirmationDialogFragment.DEFAULT_POSITIVE_REQUEST_KEY,
+            this
+        ) { _, _ ->
+            lifecycleScope.launch {
+                preferences.clearPreferences()
+                adapter.fastAdapter?.notifyDataSetChanged()
+            }
+        }
     }
 
     companion object {
@@ -209,5 +157,63 @@ class SettingsFragment : MvpAppCompatFragment(), SettingsView {
             SettingsFragment().apply {
                 Log.d(SETTINGS_SCREEN, "creating new instance")
             }
+    }
+}
+
+private class BooleanPreferenceModel(
+    val key: PreferenceKey<Boolean>,
+    @StringRes val name: Int,
+    @StringRes val title: Int,
+    @StringRes val desc: Int,
+    @StringRes val toastEnabled: Int,
+    @StringRes val toastDisabled: Int,
+)
+
+private class BooleanPreferenceItem(
+    val model: BooleanPreferenceModel,
+    val ctx: Context,
+    val fragmentManager: FragmentManager,
+    val lifecycleScope: CoroutineScope,
+    val preferences: Preferences
+) : AbstractBindingItem<ItemBooleanPreferenceBinding>() {
+    override val type = R.id.fastadapter_item
+    private var preferenceEnabled = false
+
+    override fun createBinding(
+        inflater: LayoutInflater,
+        parent: ViewGroup?
+    ) = ItemBooleanPreferenceBinding.inflate(inflater, parent, false)
+
+    override fun bindView(
+        binding: ItemBooleanPreferenceBinding,
+        payloads: List<Any>
+    ) = with(binding) {
+        tvName.text = ctx.getString(model.name)
+        btnInfo.setOnClickListener {
+            val title = ctx.getString(model.title)
+            val description = ctx.getString(model.desc)
+
+            val dialog = InfoDialogFragment.newInstance(title, description)
+            dialog.show(fragmentManager, InfoDialogFragment.BASE_INFO_DIALOG_TAG)
+        }
+        lifecycleScope.launch {
+            preferenceEnabled = preferences.get(model.key)
+            switchBtn.isChecked = preferenceEnabled
+            setupSwitchListener(switchBtn)
+        }
+        return@with
+    }
+
+    private fun setupSwitchListener(switchBtn: View) {
+        switchBtn.setOnClickListener {
+            preferenceEnabled = !preferenceEnabled
+            ctx.toast(
+                if (preferenceEnabled) model.toastEnabled
+                else model.toastDisabled
+            )
+            lifecycleScope.launch {
+                preferences.set(model.key, preferenceEnabled)
+            }
+        }
     }
 }

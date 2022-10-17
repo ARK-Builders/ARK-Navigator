@@ -11,7 +11,6 @@ import space.taran.arknavigator.mvp.presenter.FoldersPresenter
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 import space.taran.arknavigator.mvp.presenter.MainPresenter
 import space.taran.arknavigator.mvp.presenter.ResourcesPresenter
-import space.taran.arknavigator.mvp.presenter.SettingsPresenter
 import space.taran.arknavigator.mvp.presenter.adapter.ResourcesGridPresenter
 import space.taran.arknavigator.mvp.presenter.adapter.folderstree.FoldersTreePresenter
 import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagsSelectorPresenter
@@ -52,7 +51,6 @@ interface AppComponent {
     fun inject(galleryPresenter: GalleryPresenter)
     fun inject(galleryFragment: GalleryFragment)
     fun inject(settingsFragment: SettingsFragment)
-    fun inject(settingsPresenter: SettingsPresenter)
     fun inject(resourcesGridPresenter: ResourcesGridPresenter)
     fun inject(foldersTreePresenter: FoldersTreePresenter)
     fun inject(editTagsDialogPresenter: EditTagsDialogPresenter)

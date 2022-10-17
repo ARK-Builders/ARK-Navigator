@@ -104,4 +104,7 @@
     <string name="short_file_names">Short file names</string>
     <string name="short_names_disabled">Short file names disabled!</string>
     <string name="short_names_enabled">Short file names enabled!</string>
+    <string name="collect_tag_usage_stats">Local collect tag usage statistics</string>
+    <string name="collect_tag_usage_stats_enabled">Collecting tag usage statistics enabled!</string>
+    <string name="collect_tag_usage_stats_disabled">Collecting tag usage statistics disabled!</string>
 </resources>
