@@ -18,7 +18,11 @@ object DocumentKindFactory : ResourceKindFactory<ResourceKind.Document> {
         get() = setOf("application/pdf")
     override val acceptedKindCode = KindCode.DOCUMENT
 
-    override fun fromPath(path: Path, meta: ResourceMeta, metadataStorage: MetadataStorage): ResourceKind.Document {
+    override fun fromPath(
+        path: Path,
+        meta: ResourceMeta,
+        metadataStorage: MetadataStorage
+    ): ResourceKind.Document {
         if (extension(path) != "pdf") return ResourceKind.Document()
 
         var parcelFileDescriptor: ParcelFileDescriptor? = null

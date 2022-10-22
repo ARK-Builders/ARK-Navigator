@@ -12,7 +12,6 @@ sealed class ResourceKind(val code: KindCode) {
         val duration: Long? = null
     ) : ResourceKind(KindCode.VIDEO)
 
-
     class Document(val pages: Int? = null) : ResourceKind(KindCode.DOCUMENT)
 
     class Link(

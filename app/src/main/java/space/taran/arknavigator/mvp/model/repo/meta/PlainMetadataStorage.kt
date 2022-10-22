@@ -11,7 +11,11 @@ import space.taran.arknavigator.mvp.model.repo.kind.ResourceKind
 import space.taran.arknavigator.utils.LogTags.METADATA
 import java.nio.file.Files
 import java.nio.file.Path
-import kotlin.io.path.*
+import kotlin.io.path.isDirectory
+import kotlin.io.path.deleteIfExists
+import kotlin.io.path.createDirectories
+import kotlin.io.path.bufferedReader
+import kotlin.io.path.writeText
 
 class PlainMetadataStorage(val root: Path) : MetadataStorage {
     private val metaDir = root.arkFolder().arkMetadata()
@@ -33,7 +37,8 @@ class PlainMetadataStorage(val root: Path) : MetadataStorage {
         val result = resource.copy()
         result.kind = Json.decodeFromString(
             ResourceKind.serializer(),
-            metadata.bufferedReader().use { it.readText() })
+            metadata.bufferedReader().use { it.readText() }
+        )
         return result
     }
 

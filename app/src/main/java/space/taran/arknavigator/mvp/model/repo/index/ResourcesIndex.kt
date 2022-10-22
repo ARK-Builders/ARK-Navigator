@@ -1,7 +1,6 @@
 package space.taran.arknavigator.mvp.model.repo.index
 
 import kotlinx.coroutines.flow.Flow
-import space.taran.arknavigator.mvp.model.repo.meta.MetadataStorage
 import java.nio.file.Path
 
 interface ResourcesIndex {

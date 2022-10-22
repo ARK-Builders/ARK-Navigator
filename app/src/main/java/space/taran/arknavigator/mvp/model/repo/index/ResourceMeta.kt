@@ -2,20 +2,14 @@ package space.taran.arknavigator.mvp.model.repo.index
 
 import space.taran.arknavigator.mvp.model.dao.ResourceWithExtra
 import space.taran.arknavigator.mvp.model.repo.kind.GeneralKindFactory
-import space.taran.arknavigator.mvp.model.repo.kind.MetaExtraTag
 import space.taran.arknavigator.mvp.model.repo.kind.ResourceKind
 import space.taran.arknavigator.mvp.model.repo.meta.MetadataStorage
-import space.taran.arknavigator.mvp.model.repo.meta.MetadataStorageRepo
-import space.taran.arknavigator.mvp.model.repo.preview.PreviewStorage
-import space.taran.arknavigator.mvp.model.repo.preview.PreviewStorageRepo
 import space.taran.arknavigator.utils.MetaResult
 import space.taran.arknavigator.utils.extension
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.attribute.FileTime
-import javax.inject.Inject
-
 
 data class ResourceMeta(
     val id: ResourceId,

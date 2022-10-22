@@ -13,17 +13,17 @@ object ExtraLoader {
 
         when (meta.kind) {
             is ResourceKind.Video -> VideoExtraLoader.load(
-                meta.kind,
+                meta.kind as ResourceKind.Video,
                 extraTVs[0],
                 extraTVs[1]
             )
             is ResourceKind.Document -> DocumentExtraLoader.load(
-                meta.kind,
+                meta.kind as ResourceKind.Document,
                 extraTVs[0],
                 verbose
             )
             is ResourceKind.Link -> LinkExtraLoader.load(
-                meta.kind,
+                meta.kind as ResourceKind.Link,
                 extraTVs[1],
                 verbose
             )
@@ -43,16 +43,16 @@ object ExtraLoader {
 
         when (meta.kind) {
             is ResourceKind.Video -> VideoExtraLoader.loadInfo(
-                meta.kind,
+                meta.kind as ResourceKind.Video,
                 kindPlaceholders[0],
                 kindPlaceholders[1]
             )
             is ResourceKind.Document -> DocumentExtraLoader.loadWithLabel(
-                meta.kind,
+                meta.kind as ResourceKind.Document,
                 kindPlaceholders[0]
             )
             is ResourceKind.Link -> LinkExtraLoader.loadWithLabel(
-                meta.kind,
+                meta.kind as ResourceKind.Link,
                 kindPlaceholders[0],
                 kindPlaceholders[1],
                 kindPlaceholders[2]

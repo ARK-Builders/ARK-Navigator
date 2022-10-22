@@ -19,7 +19,11 @@ object VideoKindFactory : ResourceKindFactory<ResourceKind.Video> {
         setOf("video/mp4")
     override val acceptedKindCode = KindCode.VIDEO
 
-    override fun fromPath(path: Path, meta: ResourceMeta, metadataStorage: MetadataStorage): ResourceKind.Video {
+    override fun fromPath(
+        path: Path,
+        meta: ResourceMeta,
+        metadataStorage: MetadataStorage
+    ): ResourceKind.Video {
         val retriever = FFmpegMediaMetadataRetriever()
 
         try {

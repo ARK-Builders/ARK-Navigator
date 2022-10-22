@@ -261,7 +261,8 @@ class GalleryPresenter(
         path: Path,
         oldMeta: ResourceMeta
     ) = withContext(Dispatchers.IO) {
-        val newMeta = ResourceMeta.fromPath(path, metadataStorage).meta ?: return@withContext
+        val newMeta = ResourceMeta.fromPath(path, metadataStorage).meta
+            ?: return@withContext
         previewStorage.store(path, newMeta)
 
         val indexToReplace = resources.indexOf(oldMeta)

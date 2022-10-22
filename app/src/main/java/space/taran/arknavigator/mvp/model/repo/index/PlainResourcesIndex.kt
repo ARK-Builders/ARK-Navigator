@@ -126,7 +126,10 @@ class PlainResourcesIndex internal constructor(
         return path
     }
 
-    internal suspend fun reindexRoot(diff: Difference, metadataStorage: MetadataStorage) =
+    internal suspend fun reindexRoot(
+        diff: Difference,
+        metadataStorage: MetadataStorage
+    ) =
         withContext(Dispatchers.IO) {
             Log.d(
                 RESOURCES_INDEX,
@@ -239,7 +242,7 @@ class PlainResourcesIndex internal constructor(
                         Log.e(
                             METADATA,
                             "Failed to generate metadata for id ${
-                                metaByPath[path]?.id
+                            metaByPath[path]?.id
                             } ($path)"
                         )
                     }

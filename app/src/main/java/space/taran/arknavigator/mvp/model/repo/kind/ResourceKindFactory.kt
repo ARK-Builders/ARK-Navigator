@@ -3,7 +3,6 @@ package space.taran.arknavigator.mvp.model.repo.kind
 import space.taran.arknavigator.mvp.model.dao.ResourceExtra
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
-import space.taran.arknavigator.mvp.model.repo.meta.AggregatedMetadataStorage
 import space.taran.arknavigator.mvp.model.repo.meta.MetadataStorage
 import space.taran.arknavigator.utils.extension
 import space.taran.arknavigator.utils.getMimeTypeUsingTika
@@ -33,8 +32,13 @@ object GeneralKindFactory {
             ArchiveKindFactory
         )
 
-    fun fromPath(path: Path, meta: ResourceMeta, metadataStorage: MetadataStorage): ResourceKind =
-        findFactory(path)?.fromPath(path, meta, metadataStorage) ?: error("Factory not found")
+    fun fromPath(
+        path: Path,
+        meta: ResourceMeta,
+        metadataStorage: MetadataStorage
+    ): ResourceKind =
+        findFactory(path)?.fromPath(path, meta, metadataStorage)
+            ?: error("Factory not found")
 
     fun fromRoom(
         kindCode: Int?,

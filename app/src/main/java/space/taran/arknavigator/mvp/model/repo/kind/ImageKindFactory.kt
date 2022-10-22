@@ -19,7 +19,11 @@ object ImageKindFactory : ResourceKindFactory<ResourceKind.Image> {
 
     override val acceptedKindCode = KindCode.IMAGE
 
-    override fun fromPath(path: Path, meta: ResourceMeta, metadataStorage: MetadataStorage) = ResourceKind.Image()
+    override fun fromPath(
+        path: Path,
+        meta: ResourceMeta,
+        metadataStorage: MetadataStorage
+    ) = ResourceKind.Image()
 
     override fun fromRoom(extras: Map<MetaExtraTag, String>) = ResourceKind.Image()
 
