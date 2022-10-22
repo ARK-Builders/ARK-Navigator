@@ -4,6 +4,8 @@ import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
 import android.util.Log
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
+import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
+import space.taran.arknavigator.mvp.model.repo.meta.MetadataStorage
 import space.taran.arknavigator.utils.LogTags.RESOURCES_INDEX
 import space.taran.arknavigator.utils.extension
 import java.io.FileNotFoundException
@@ -16,7 +18,11 @@ object DocumentKindFactory : ResourceKindFactory<ResourceKind.Document> {
         get() = setOf("application/pdf")
     override val acceptedKindCode = KindCode.DOCUMENT
 
-    override fun fromPath(path: Path): ResourceKind.Document {
+    override fun fromPath(
+        path: Path,
+        meta: ResourceMeta,
+        metadataStorage: MetadataStorage
+    ): ResourceKind.Document {
         if (extension(path) != "pdf") return ResourceKind.Document()
 
         var parcelFileDescriptor: ParcelFileDescriptor? = null

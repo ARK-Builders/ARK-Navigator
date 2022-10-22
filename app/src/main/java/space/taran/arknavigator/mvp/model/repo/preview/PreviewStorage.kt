@@ -10,5 +10,5 @@ interface PreviewStorage {
 
     fun forget(id: ResourceId)
 
-    fun generate(path: Path, meta: ResourceMeta)
+    fun store(path: Path, meta: ResourceMeta)
 }

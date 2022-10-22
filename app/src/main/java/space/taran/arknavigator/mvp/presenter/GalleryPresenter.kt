@@ -16,6 +16,8 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
 import space.taran.arknavigator.mvp.model.repo.kind.ResourceKind
+import space.taran.arknavigator.mvp.model.repo.meta.MetadataStorage
+import space.taran.arknavigator.mvp.model.repo.meta.MetadataStorageRepo
 import space.taran.arknavigator.mvp.model.repo.preview.PreviewStorage
 import space.taran.arknavigator.mvp.model.repo.preview.PreviewStorageRepo
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
@@ -56,6 +58,8 @@ class GalleryPresenter(
         private set
     lateinit var previewStorage: PreviewStorage
         private set
+    lateinit var metadataStorage: MetadataStorage
+        private set
     var resources: MutableList<ResourceMeta> = mutableListOf()
         private set
     var diffResult: DiffUtil.DiffResult? = null
@@ -69,6 +73,9 @@ class GalleryPresenter(
 
     @Inject
     lateinit var previewStorageRepo: PreviewStorageRepo
+
+    @Inject
+    lateinit var metadataStorageRepo: MetadataStorageRepo
 
     @Inject
     lateinit var tagsStorageRepo: TagsStorageRepo
@@ -87,6 +94,7 @@ class GalleryPresenter(
             }.launchIn(presenterScope)
             storage = tagsStorageRepo.provide(rootAndFav)
             previewStorage = previewStorageRepo.provide(rootAndFav)
+            metadataStorage = metadataStorageRepo.provide(rootAndFav)
             resources = resourcesIds.map { index.getMeta(it) }.toMutableList()
 
             viewState.updatePagerAdapter()
@@ -253,8 +261,9 @@ class GalleryPresenter(
         path: Path,
         oldMeta: ResourceMeta
     ) = withContext(Dispatchers.IO) {
-        val newMeta = ResourceMeta.fromPath(path).meta ?: return@withContext
-        previewStorage.generate(path, newMeta)
+        val newMeta = ResourceMeta.fromPath(path, metadataStorage).meta
+            ?: return@withContext
+        previewStorage.store(path, newMeta)
 
         val indexToReplace = resources.indexOf(oldMeta)
         resources[indexToReplace] = newMeta

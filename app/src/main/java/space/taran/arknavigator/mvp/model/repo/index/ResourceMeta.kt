@@ -3,6 +3,7 @@ package space.taran.arknavigator.mvp.model.repo.index
 import space.taran.arknavigator.mvp.model.dao.ResourceWithExtra
 import space.taran.arknavigator.mvp.model.repo.kind.GeneralKindFactory
 import space.taran.arknavigator.mvp.model.repo.kind.ResourceKind
+import space.taran.arknavigator.mvp.model.repo.meta.MetadataStorage
 import space.taran.arknavigator.utils.MetaResult
 import space.taran.arknavigator.utils.extension
 import java.io.IOException
@@ -16,12 +17,11 @@ data class ResourceMeta(
     val extension: String,
     val modified: FileTime,
     val size: Long,
-    val kind: ResourceKind?
+    var kind: ResourceKind?,
 ) {
-
     companion object {
 
-        fun fromPath(path: Path): MetaResult {
+        fun fromPath(path: Path, metadataStorage: MetadataStorage): MetaResult {
             val size = Files.size(path)
             if (size < 1) {
                 return MetaResult.failure(IOException("Invalid file size"))
@@ -29,24 +29,22 @@ data class ResourceMeta(
 
             val id = computeId(size, path)
 
-            var kind: ResourceKind? = null
-            var kindDetectException: Exception? = null
-
-            try {
-                kind = GeneralKindFactory.fromPath(path)
-            } catch (e: Exception) {
-                kindDetectException = e
-            }
-
             val meta = ResourceMeta(
                 id = id,
                 name = path.fileName.toString(),
                 extension = extension(path),
                 modified = Files.getLastModifiedTime(path),
                 size = size,
-                kind = kind,
+                kind = null
             )
 
+            var kindDetectException: Exception? = null
+
+            try {
+                meta.kind = GeneralKindFactory.fromPath(path, meta, metadataStorage)
+            } catch (e: Exception) {
+                kindDetectException = e
+            }
             return MetaResult(meta, kindDetectException)
         }
 

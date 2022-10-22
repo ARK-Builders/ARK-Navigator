@@ -1,25 +1,27 @@
 package space.taran.arknavigator.mvp.model.repo.kind
 
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-import space.taran.arklib.loadLinkFile
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
+import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
+import space.taran.arknavigator.mvp.model.repo.meta.MetadataStorage
 import java.nio.file.Path
-import kotlin.io.path.pathString
 
 object LinkKindFactory : ResourceKindFactory<ResourceKind.Link> {
-    private const val JSON_FILE = "link.json"
-
     override val acceptedExtensions = setOf("link")
     override val acceptedKindCode = KindCode.LINK
     override val acceptedMimeTypes: Set<String>
         get() = setOf()
 
-    override fun fromPath(path: Path): ResourceKind.Link {
-        val linkJson = loadLinkFile(path.pathString)
-        val link = Json.decodeFromString(JsonLink.serializer(), linkJson)
+    override fun fromPath(
+        path: Path,
+        meta: ResourceMeta,
+        metadataStorage: MetadataStorage
+    ): ResourceKind.Link {
+        // TODO: we don't need these lines anymore, but what about the native bindings?
+        // val linkJson = loadLinkFile(path.pathString)
+        // val link = Json.decodeFromString(JsonLink.serializer(), linkJson)
 
-        return ResourceKind.Link(link.title, link.desc, link.url)
+        return metadataStorage.locate(path, meta).kind as ResourceKind.Link
     }
 
     override fun fromRoom(extras: Map<MetaExtraTag, String>): ResourceKind.Link =

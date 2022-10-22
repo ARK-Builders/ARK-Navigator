@@ -1,6 +1,8 @@
 package space.taran.arknavigator.mvp.model.repo.kind
 
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
+import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
+import space.taran.arknavigator.mvp.model.repo.meta.MetadataStorage
 import java.nio.file.Path
 
 object ImageKindFactory : ResourceKindFactory<ResourceKind.Image> {
@@ -17,7 +19,11 @@ object ImageKindFactory : ResourceKindFactory<ResourceKind.Image> {
 
     override val acceptedKindCode = KindCode.IMAGE
 
-    override fun fromPath(path: Path) = ResourceKind.Image()
+    override fun fromPath(
+        path: Path,
+        meta: ResourceMeta,
+        metadataStorage: MetadataStorage
+    ) = ResourceKind.Image()
 
     override fun fromRoom(extras: Map<MetaExtraTag, String>) = ResourceKind.Image()
 
