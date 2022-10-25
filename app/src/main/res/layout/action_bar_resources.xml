@@ -54,9 +54,18 @@
         android:textColor="@color/white"
         android:textSize="18sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@id/btn_normal_mode"
+        app:layout_constraintEnd_toStartOf="@id/btn_shuffle"
         app:layout_constraintStart_toStartOf="parent"
         tools:text="Title" />
+
+    <ImageView
+        android:id="@+id/btn_shuffle"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:background="?selectableItemBackgroundBorderless"
+        android:paddingHorizontal="12dp"
+        android:src="@drawable/ic_dice"
+        app:layout_constraintEnd_toStartOf="@id/btn_normal_mode"/>
 
     <ImageView
         android:id="@+id/btn_normal_mode"

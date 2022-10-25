@@ -188,6 +188,14 @@ class ResourcesGridPresenter(
         }
     }
 
+    suspend fun shuffleResources() = withContext(Dispatchers.Default) {
+        resources = selection.shuffled()
+        selection = resources
+        withContext(Dispatchers.Main) {
+            viewState.updateAdapter()
+        }
+    }
+
     private fun updateSorting(sorting: Sorting) {
         scope.launch(Dispatchers.Default) {
             setProgressVisibility(true, "Sorting")
