@@ -105,6 +105,13 @@ class TagsSelectorPresenter(
             sortingAscending = ascending
             calculateTagsAndSelection()
         }.launchIn(scope)
+
+        val collecting = preferences.get(PreferenceKey.CollectTagUsageStats)
+        viewState.setTagsSortingVisibility(collecting)
+
+        preferences.flow(PreferenceKey.CollectTagUsageStats).onEach {
+            viewState.setTagsSortingVisibility(it)
+        }.launchIn(scope)
     }
 
     fun onTagItemClick(item: TagItem) = scope.launch {

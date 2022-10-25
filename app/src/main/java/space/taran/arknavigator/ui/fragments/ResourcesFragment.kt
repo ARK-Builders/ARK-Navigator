@@ -223,6 +223,15 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         binding.etTagsFilter.setText(filter)
     }
 
+    override fun setTagsSortingVisibility(
+        visible: Boolean
+    ) {
+        binding.btnTagsSorting.isVisible = visible
+        val params = binding.btnClear.layoutParams as ConstraintLayout.LayoutParams
+        params.horizontalBias = if (visible) 1f else 0.5f
+        binding.btnClear.layoutParams = params
+    }
+
     override fun drawTags() {
         tagsSelectorAdapter?.drawTags()
     }

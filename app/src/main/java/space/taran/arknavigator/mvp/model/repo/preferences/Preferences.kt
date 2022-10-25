@@ -29,7 +29,7 @@ sealed class PreferenceKey<out T>(val defaultValue: T) {
     object Sorting : PreferenceKey<Int>(0)
     object IsSortingAscending : PreferenceKey<Boolean>(true)
     object TagsSorting : PreferenceKey<Int>(0)
-    object TagsSortingAscending : PreferenceKey<Boolean>(true)
+    object TagsSortingAscending : PreferenceKey<Boolean>(false)
     object CrashReport : PreferenceKey<Boolean>(true)
     object ImgCacheReplication : PreferenceKey<Boolean>(false)
     object IndexReplication : PreferenceKey<Boolean>(false)

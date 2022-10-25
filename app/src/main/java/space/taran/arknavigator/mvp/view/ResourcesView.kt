@@ -18,6 +18,7 @@ interface ResourcesView : CommonMvpView {
     fun setTagsFilterEnabled(enabled: Boolean)
     fun setTagsFilterText(filter: String)
     fun drawTags()
+    fun setTagsSortingVisibility(visible: Boolean)
 
     @StateStrategyType(SkipStrategy::class)
     fun toastResourcesSelected(selected: Int)

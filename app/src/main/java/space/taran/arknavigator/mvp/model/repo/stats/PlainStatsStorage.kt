@@ -11,6 +11,8 @@ import kotlinx.coroutines.withContext
 import space.taran.arknavigator.mvp.model.arkFolder
 import space.taran.arknavigator.mvp.model.arkStats
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
+import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
+import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.stats.category.StatsCategoryStorage
 import space.taran.arknavigator.mvp.model.repo.stats.category.TagLabeledNStorage
 import space.taran.arknavigator.mvp.model.repo.stats.category.TagUsedTSStorage
@@ -23,6 +25,7 @@ class PlainStatsStorage(
     private val root: Path,
     private val index: ResourcesIndex,
     private val tagsStorage: TagsStorage,
+    private val preferences: Preferences,
     private val statsFlow: SharedFlow<StatsEvent>
 ) : StatsStorage {
     private val scope = CoroutineScope(Dispatchers.IO)
@@ -32,9 +35,16 @@ class PlainStatsStorage(
             .also { categoryStorages.add(it) }
     private val tagUsedTs =
         TagUsedTSStorage(root, scope).also { categoryStorages.add(it) }
+    private var collectingTagEvents = true
 
     init {
         statsFlow.onEach(::handleEvent).launchIn(scope)
+        scope.launch {
+            collectingTagEvents = preferences.get(PreferenceKey.CollectTagUsageStats)
+            preferences.flow(PreferenceKey.CollectTagUsageStats).onEach { new ->
+                collectingTagEvents = new
+            }.launchIn(scope)
+        }
     }
 
     override suspend fun init() = withContext(Dispatchers.IO) {
@@ -45,6 +55,11 @@ class PlainStatsStorage(
     }
 
     override fun handleEvent(event: StatsEvent) {
+        if (!collectingTagEvents &&
+            StatsStorage.TAGS_USAGE_EVENTS.contains(event.javaClass)
+        ) {
+            return
+        }
         scope.launch {
             if (!event.belongToRoot()) return@launch
             Timber.i("Event [$event] received in root [$root]")
