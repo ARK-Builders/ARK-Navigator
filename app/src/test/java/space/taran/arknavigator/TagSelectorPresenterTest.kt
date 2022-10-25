@@ -77,6 +77,7 @@ class TagSelectorPresenterTest {
         presenter.preferences = preferences
         coEvery { preferences.get(PreferenceKey.TagsSorting) } returns TagsSorting.POPULARITY.ordinal
         coEvery { preferences.get(PreferenceKey.TagsSortingAscending) } returns true
+        coEvery { preferences.get(PreferenceKey.CollectTagUsageStats) } returns true
         presenter.init(index, storage, StatsStorageStub(), false)
     }
 

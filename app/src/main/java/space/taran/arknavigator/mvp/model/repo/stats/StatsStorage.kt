@@ -30,4 +30,12 @@ interface StatsStorage {
     fun statsTagUsedTS(): Map<Tag, Long>
     fun statsTagUsedTSList() =
         statsTagUsedTS().toList().sortedBy { it.second }.map { it.first }
+
+    companion object {
+        val TAGS_USAGE_EVENTS = listOf<Class<out StatsEvent>>(
+            StatsEvent.TagsChanged::class.java,
+            StatsEvent.PlainTagUsed::class.java,
+            StatsEvent.KindTagUsed::class.java
+        )
+    }
 }
