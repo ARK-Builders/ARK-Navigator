@@ -300,6 +300,10 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         actionBar.btnFocusMode.setOnClickListener {
             presenter.tagsSelectorPresenter.onQueryModeChanged(QueryMode.FOCUS)
         }
+
+        actionBar.btnShuffle.setOnClickListener {
+            presenter.onShuffleResources()
+        }
     }
 
     private fun initResultListeners() {

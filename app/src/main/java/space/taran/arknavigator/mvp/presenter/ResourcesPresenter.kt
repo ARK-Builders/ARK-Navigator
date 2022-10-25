@@ -195,6 +195,10 @@ class ResourcesPresenter(
         migrateTags(resourcesToCopy, directoryToCopy)
     }
 
+    fun onShuffleResources() = presenterScope.launch(Dispatchers.Default) {
+        gridPresenter.shuffleResources()
+    }
+
     fun onShareSelectedResourcesClicked() = presenterScope.launch {
         val selected = gridPresenter
             .resources
