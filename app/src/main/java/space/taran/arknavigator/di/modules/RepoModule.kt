@@ -9,6 +9,7 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
 import space.taran.arknavigator.mvp.model.repo.meta.MetadataStorageRepo
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.preview.PreviewStorageRepo
+import space.taran.arknavigator.mvp.model.repo.scores.ScoreStorageRepo
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import space.taran.arknavigator.utils.LogTags.MAIN
 import javax.inject.Singleton
@@ -60,4 +61,13 @@ class RepoModule {
     fun metadataStorageRepo(
         foldersRepo: FoldersRepo
     ) = MetadataStorageRepo(foldersRepo)
+
+    @Singleton
+    @Provides
+    fun scoreStorageRepo(
+        foldersRepo: FoldersRepo,
+        indexRepo: ResourcesIndexRepo
+    ): ScoreStorageRepo {
+        return ScoreStorageRepo(foldersRepo, indexRepo)
+    }
 }

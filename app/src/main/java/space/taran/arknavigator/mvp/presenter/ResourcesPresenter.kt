@@ -21,6 +21,9 @@ import space.taran.arknavigator.mvp.model.repo.preview.PreviewStorage
 import space.taran.arknavigator.mvp.model.repo.preview.PreviewStorageRepo
 import space.taran.arknavigator.mvp.model.repo.stats.StatsStorage
 import space.taran.arknavigator.mvp.model.repo.stats.StatsStorageRepo
+import space.taran.arknavigator.mvp.model.repo.scores.ScoreStorage
+import space.taran.arknavigator.mvp.model.repo.scores.ScoreStorageRepo
+import space.taran.arknavigator.mvp.model.repo.tags.PlainTagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import space.taran.arknavigator.mvp.presenter.adapter.ResourcesGridPresenter
@@ -63,6 +66,9 @@ class ResourcesPresenter(
     @Inject
     lateinit var statsStorageRepo: StatsStorageRepo
 
+    @Inject
+    lateinit var scoreStorageRepo: ScoreStorageRepo
+
     lateinit var index: ResourcesIndex
         private set
     lateinit var storage: TagsStorage
@@ -70,6 +76,8 @@ class ResourcesPresenter(
     lateinit var previewStorage: PreviewStorage
         private set
     lateinit var statsStorage: StatsStorage
+        private set
+    lateinit var scoreStorage: ScoreStorage
         private set
 
     val gridPresenter =
@@ -118,8 +126,9 @@ class ResourcesPresenter(
             storage = tagsStorageRepo.provide(rootAndFav)
             previewStorage = previewStorageRepo.provide(rootAndFav)
             statsStorage = statsStorageRepo.provide(rootAndFav)
+            scoreStorage = scoreStorageRepo.provide(rootAndFav)
 
-            gridPresenter.init(index, storage, router, previewStorage)
+            gridPresenter.init(index, storage, router, previewStorage, scoreStorage)
 
             val resources = index.listResources(rootAndFav.fav)
             viewState.setProgressVisibility(true, "Sorting")
@@ -198,6 +207,12 @@ class ResourcesPresenter(
     fun onShuffleResources() = presenterScope.launch(Dispatchers.Default) {
         gridPresenter.shuffleResources()
     }
+
+    fun onPinSelectedResources(pinIt: Boolean) = presenterScope.launch {
+        gridPresenter.pinSelectedResources(pinIt)
+    }
+
+    fun showOrHidePinning() = gridPresenter.areSelectedResourcesUnPinned()
 
     fun onShareSelectedResourcesClicked() = presenterScope.launch {
         val selected = gridPresenter
