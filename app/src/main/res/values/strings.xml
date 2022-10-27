@@ -114,4 +114,6 @@
     <string name="labeled_amount">Labeled amount</string>
     <string name="ascending">Ascending</string>
     <string name="descending">Descending</string>
+    <string name="pin">Pin</string>
+    <string name="unpin">Unpin</string>
 </resources>

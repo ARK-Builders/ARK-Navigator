@@ -114,6 +114,10 @@ class FileItemViewHolder(
         }
     }
 
+    override fun setPinned(isPinned: Boolean) {
+        binding.vPinned.isVisible = isPinned
+    }
+
     companion object {
         private const val SHORT_NAME_LINES = 1
         private const val DEFAULT_ELEVATION = 1f

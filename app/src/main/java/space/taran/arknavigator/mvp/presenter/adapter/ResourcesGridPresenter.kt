@@ -16,6 +16,7 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.preview.PreviewStorage
+import space.taran.arknavigator.mvp.model.repo.scores.ScoreStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.presenter.ResourcesPresenter
 import space.taran.arknavigator.mvp.view.ResourcesView
@@ -31,7 +32,11 @@ import javax.inject.Inject
 import kotlin.io.path.notExists
 import kotlin.system.measureTimeMillis
 
-class ResourceItem(val meta: ResourceMeta, var isSelected: Boolean = false)
+class ResourceItem(
+    val meta: ResourceMeta,
+    var isSelected: Boolean = false,
+    var isPinned: Boolean = false
+)
 
 class ResourcesGridPresenter(
     val rootAndFav: RootAndFav,
@@ -53,6 +58,7 @@ class ResourcesGridPresenter(
     private lateinit var storage: TagsStorage
     private lateinit var router: AppRouter
     private lateinit var previewStorage: PreviewStorage
+    private lateinit var scoreStorage: ScoreStorage
 
     var sorting = Sorting.DEFAULT
         private set
@@ -72,6 +78,7 @@ class ResourcesGridPresenter(
 
         view.reset(selectingEnabled, resource.isSelected)
         view.setText(path.fileName.toString(), shortFileNames)
+        view.setPinned(resource.isPinned)
 
         if (Files.isDirectory(path)) {
             throw AssertionError("Resource can't be a directory")
@@ -135,12 +142,14 @@ class ResourcesGridPresenter(
         index: ResourcesIndex,
         storage: TagsStorage,
         router: AppRouter,
-        previewStorage: PreviewStorage
+        previewStorage: PreviewStorage,
+        scoreStorage: ScoreStorage
     ) {
         this.index = index
         this.storage = storage
         this.router = router
         this.previewStorage = previewStorage
+        this.scoreStorage = scoreStorage
 
         sorting = Sorting.values()[preferences.get(PreferenceKey.Sorting)]
         ascending = preferences.get(PreferenceKey.IsSortingAscending)
@@ -171,6 +180,7 @@ class ResourcesGridPresenter(
         this@ResourcesGridPresenter.selection = resources
             .filter { selection.contains(it.meta.id) }
 
+        sortUnpinnedResourcesOnly()
         withContext(Dispatchers.Main) {
             setProgressVisibility(false)
             viewState.updateAdapter()
@@ -182,18 +192,60 @@ class ResourcesGridPresenter(
     ) = withContext(Dispatchers.Default) {
         this@ResourcesGridPresenter.resources = mapNewResources(resources)
         sortAllResources()
-        selection = this@ResourcesGridPresenter.resources
+        sortUnpinnedResourcesOnly()
         withContext(Dispatchers.Main) {
             setProgressVisibility(false)
         }
     }
 
     suspend fun shuffleResources() = withContext(Dispatchers.Default) {
-        resources = selection.shuffled()
-        selection = resources
+        val shuffledRes = selection
+            .filter {
+                !it.isPinned
+            }
+            .shuffled()
+        val unShuffledRes =
+            selection.filter { it.isPinned }
+                .toMutableList()
+        unShuffledRes.addAll(shuffledRes)
+        selection = unShuffledRes
+        selection.forEach {
+            Log.d("Resource id", it.meta.id.toString())
+        }
         withContext(Dispatchers.Main) {
             viewState.updateAdapter()
         }
+    }
+
+    suspend fun pinSelectedResources(pinIt: Boolean) =
+        withContext(Dispatchers.Default) {
+            selection.filter {
+                it.isSelected
+            }.filter {
+                if (pinIt)
+                    !it.isPinned
+                else
+                    it.isPinned
+            }.forEachIndexed { index, item ->
+                item.isPinned = pinIt
+                if (pinIt) scoreStorage.setScore(
+                    item.meta.id,
+                    scoreStorage.countScores() + 1
+                )
+                else scoreStorage.setScore(item.meta.id, 0)
+            }
+            scope.launch {
+                scoreStorage.persist()
+            }
+            sortUnpinnedResourcesOnly()
+            withContext(Dispatchers.Main) {
+                onSelectingChanged(false)
+                viewState.updateAdapter()
+            }
+        }
+
+    fun areSelectedResourcesUnPinned() = selection.any {
+        it.isSelected && !it.isPinned
     }
 
     private fun updateSorting(sorting: Sorting) {
@@ -218,7 +270,11 @@ class ResourcesGridPresenter(
         newResources: Set<ResourceMeta>
     ): List<ResourceItem> {
         if (!selectingEnabled)
-            return newResources.map { ResourceItem(it) }
+            return newResources.map { meta ->
+                val pinned = scoreStorage
+                    .getScore(meta.id)!! > 0
+                ResourceItem(meta, isPinned = pinned)
+            }
 
         return newResources.map { meta ->
             val selected = resources
@@ -258,6 +314,17 @@ class ResourcesGridPresenter(
             setProgressVisibility(false)
             viewState.updateAdapter()
         }
+    }
+
+    private fun sortUnpinnedResourcesOnly() {
+        val selection = this.selection.toSet()
+        this.selection = resources.filter {
+            selection.contains(it)
+        }.sortedWith(
+            compareBy {
+                !it.isPinned
+            }
+        )
     }
 
     private suspend fun setProgressVisibility(

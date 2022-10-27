@@ -51,6 +51,8 @@ class ResourcesRVAdapter(
     }
 
     fun onSelectingChanged(enabled: Boolean) {
-        viewHolders.forEach { it.onSelectingChanged(enabled) }
+        viewHolders.forEach {
+            it.onSelectingChanged(enabled)
+        }
     }
 }

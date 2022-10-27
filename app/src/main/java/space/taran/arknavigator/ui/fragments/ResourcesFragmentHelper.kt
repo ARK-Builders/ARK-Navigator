@@ -1,6 +1,7 @@
 package space.taran.arknavigator.ui.fragments
 
 import android.view.View
+import androidx.core.view.isVisible
 import space.taran.arkfilepicker.ArkFilePickerConfig
 import space.taran.arkfilepicker.ArkFilePickerFragment
 import space.taran.arkfilepicker.ArkFilePickerMode
@@ -92,6 +93,34 @@ fun ResourcesFragment.setupAndShowSelectedResourcesMenu(menuBtn: View) {
                 )
                 .show(parentFragmentManager, null)
             popup.popupWindow.dismiss()
+        }
+        with(btnPin) {
+            isVisible = presenter.showOrHidePinning()
+            setOnClickListener {
+                val selected = presenter.gridPresenter.selectedResources
+                if (selected.isEmpty()) {
+                    toast(R.string.select_at_least_one_resource)
+                    popup.popupWindow.dismiss()
+                    return@setOnClickListener
+                }
+                presenter.onPinSelectedResources(true)
+                onSelectingChanged(false)
+                popup.popupWindow.dismiss()
+            }
+        }
+        with(btnUnpin) {
+            isVisible = !presenter.showOrHidePinning()
+            setOnClickListener {
+                val selected = presenter.gridPresenter.selectedResources
+                if (selected.isEmpty()) {
+                    toast(R.string.select_at_least_one_resource)
+                    popup.popupWindow.dismiss()
+                    return@setOnClickListener
+                }
+                presenter.onPinSelectedResources(false)
+                onSelectingChanged(false)
+                popup.popupWindow.dismiss()
+            }
         }
     }
     popup.showBelow(menuBtn)

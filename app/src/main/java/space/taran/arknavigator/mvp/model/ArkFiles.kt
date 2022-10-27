@@ -5,6 +5,7 @@ import space.taran.arknavigator.mvp.model.ArkFiles.FAVORITES_FILE
 import space.taran.arknavigator.mvp.model.ArkFiles.METADATA_FOLDER
 import space.taran.arknavigator.mvp.model.ArkFiles.PREVIEWS_FOLDER
 import space.taran.arknavigator.mvp.model.ArkFiles.STATS_FOLDER
+import space.taran.arknavigator.mvp.model.ArkFiles.SCORES_STORAGE_FILE
 import space.taran.arknavigator.mvp.model.ArkFiles.TAGS_STORAGE_FILE
 import space.taran.arknavigator.mvp.model.ArkFiles.THUMBNAILS_FOLDER
 import java.nio.file.Path
@@ -17,6 +18,7 @@ object ArkFiles {
     const val PREVIEWS_FOLDER = "previews"
     const val METADATA_FOLDER = "meta"
     const val THUMBNAILS_FOLDER = "thumbnails"
+    const val SCORES_STORAGE_FILE = "scores"
 }
 
 fun Path.arkFolder() = resolve(ARK_FOLDER)
@@ -26,3 +28,4 @@ fun Path.arkTagsStorage() = resolve(TAGS_STORAGE_FILE)
 fun Path.arkPreviews() = resolve(PREVIEWS_FOLDER)
 fun Path.arkThumbnails() = resolve(THUMBNAILS_FOLDER)
 fun Path.arkMetadata() = resolve(METADATA_FOLDER)
+fun Path.arkScoresStorage() = resolve(SCORES_STORAGE_FILE)

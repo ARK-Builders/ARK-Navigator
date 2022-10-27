@@ -21,4 +21,6 @@ interface FileItemView {
     )
 
     fun setText(title: String, shortName: Boolean = false)
+
+    fun setPinned(isPinned: Boolean)
 }

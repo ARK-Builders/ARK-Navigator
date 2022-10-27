@@ -28,6 +28,8 @@ object LogTags {
 
     const val TAGS_STORAGE: String = "tags-storage"
 
+    const val SCORES_STORAGE: String = "scores-storage"
+
     const val ITEMS_CONTAINER: String = "item-container"
 
     const val DATABASE: String = "database"

@@ -21,6 +21,17 @@
         android:text="@string/edit_tags" />
 
     <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_pin"
+        style="@style/PopupTextButtonMedium"
+        android:text="@string/pin" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_unpin"
+        style="@style/PopupTextButtonMedium"
+        android:visibility="gone"
+        android:text="@string/unpin"/>
+
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_share"
         style="@style/PopupTextButtonMedium"
         android:text="@string/share" />
