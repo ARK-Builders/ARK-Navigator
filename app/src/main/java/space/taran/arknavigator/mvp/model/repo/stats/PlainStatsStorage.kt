@@ -15,7 +15,9 @@ import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.stats.category.StatsCategoryStorage
 import space.taran.arknavigator.mvp.model.repo.stats.category.TagLabeledNStorage
-import space.taran.arknavigator.mvp.model.repo.stats.category.TagUsedTSStorage
+import space.taran.arknavigator.mvp.model.repo.stats.category.TagLabeledTSStorage
+import space.taran.arknavigator.mvp.model.repo.stats.category.TagQueriedNStorage
+import space.taran.arknavigator.mvp.model.repo.stats.category.TagQueriedTSStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import timber.log.Timber
 import java.nio.file.Path
@@ -30,11 +32,15 @@ class PlainStatsStorage(
 ) : StatsStorage {
     private val scope = CoroutineScope(Dispatchers.IO)
     private val categoryStorages = mutableListOf<StatsCategoryStorage<Any>>()
+    private val tagLabeledTS =
+        TagLabeledTSStorage(root, scope).also { categoryStorages.add(it) }
     private val tagLabeledN =
         TagLabeledNStorage(index, tagsStorage, root, scope)
             .also { categoryStorages.add(it) }
-    private val tagUsedTs =
-        TagUsedTSStorage(root, scope).also { categoryStorages.add(it) }
+    private val tagQueriedTS =
+        TagQueriedTSStorage(root, scope).also { categoryStorages.add(it) }
+    private val tagQueriedN =
+        TagQueriedNStorage(root, scope).also { categoryStorages.add(it) }
     private var collectingTagEvents = true
 
     init {
@@ -55,12 +61,12 @@ class PlainStatsStorage(
     }
 
     override fun handleEvent(event: StatsEvent) {
-        if (!collectingTagEvents &&
-            StatsStorage.TAGS_USAGE_EVENTS.contains(event.javaClass)
-        ) {
-            return
-        }
         scope.launch {
+            if (!collectingTagEvents &&
+                StatsStorage.TAGS_USAGE_EVENTS.contains(event.javaClass)
+            ) {
+                return@launch
+            }
             if (!event.belongToRoot()) return@launch
             Timber.i("Event [$event] received in root [$root]")
             categoryStorages
@@ -68,9 +74,13 @@ class PlainStatsStorage(
         }
     }
 
+    override fun statsTagLabeledTS() = tagLabeledTS.provideData()
+
     override fun statsTagLabeledAmount() = tagLabeledN.provideData()
 
-    override fun statsTagUsedTS() = tagUsedTs.provideData()
+    override fun statsTagQueriedTS() = tagQueriedTS.provideData()
+
+    override fun statsTagQueriedAmount() = tagQueriedN.provideData()
 
     private suspend fun StatsEvent.belongToRoot(): Boolean {
         val ids = index.listAllIds()

@@ -19,20 +19,16 @@ sealed class StatsEvent {
     ) : StatsEvent()
 }
 
-enum class StatsCategory {
-    TAG_LABELED_N, TAG_USED_TS
-}
-
 interface StatsStorage {
     suspend fun init()
     fun handleEvent(event: StatsEvent)
     fun statsTagLabeledAmount(): Map<Tag, Int>
-    fun statsTagUsedTS(): Map<Tag, Long>
-    fun statsTagUsedTSList() =
-        statsTagUsedTS().toList().sortedBy { it.second }.map { it.first }
+    fun statsTagQueriedAmount(): Map<Tag, Int>
+    fun statsTagQueriedTS(): Map<Tag, Long>
+    fun statsTagLabeledTS(): Map<Tag, Long>
 
     companion object {
-        val TAGS_USAGE_EVENTS = listOf<Class<out StatsEvent>>(
+        val TAGS_USAGE_EVENTS = listOf(
             StatsEvent.TagsChanged::class.java,
             StatsEvent.PlainTagUsed::class.java,
             StatsEvent.KindTagUsed::class.java

@@ -10,6 +10,8 @@ class StatsStorageStub : StatsStorage {
     override fun handleEvent(event: StatsEvent) {}
 
     override fun statsTagLabeledAmount(): Map<Tag, Int> = emptyMap()
+    override fun statsTagQueriedAmount(): Map<Tag, Int> = emptyMap()
 
-    override fun statsTagUsedTS(): Map<Tag, Long> = emptyMap()
+    override fun statsTagQueriedTS(): Map<Tag, Long> = emptyMap()
+    override fun statsTagLabeledTS(): Map<Tag, Long> = emptyMap()
 }

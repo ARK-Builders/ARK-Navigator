@@ -6,13 +6,11 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
-import space.taran.arknavigator.mvp.model.repo.stats.StatsCategory
 import space.taran.arknavigator.mvp.model.repo.stats.StatsEvent
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.utils.Tag
 import timber.log.Timber
 import java.nio.file.Path
-import kotlin.io.path.Path
 import kotlin.io.path.exists
 import kotlin.io.path.inputStream
 import kotlin.io.path.writeText
@@ -23,8 +21,7 @@ class TagLabeledNStorage(
     root: Path,
     scope: CoroutineScope
 ) : StatsCategoryStorage<Map<Tag, Int>>(root, scope) {
-    override val fileName = Path("tag-labeled-n")
-    override val category = StatsCategory.TAG_LABELED_N
+    override val fileName = "tag-labeled-n"
     private val tagLabeledAmount = mutableMapOf<Tag, Int>()
 
     override suspend fun init() {

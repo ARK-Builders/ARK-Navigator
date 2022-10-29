@@ -25,8 +25,27 @@ class AggregatedStatsStorage(val shards: List<StatsStorage>) : StatsStorage {
                 acc
             }
 
-    override fun statsTagUsedTS(): Map<Tag, Long> = shards
-        .map { it.statsTagUsedTS() }
+    override fun statsTagQueriedAmount(): Map<Tag, Int> =
+        shards
+            .map { it.statsTagQueriedAmount() }
+            .fold(mutableMapOf()) { acc, shard ->
+                shard.forEach { (tag, amount) ->
+                    acc.merge(tag, amount, Int::plus)
+                }
+                acc
+            }
+
+    override fun statsTagQueriedTS(): Map<Tag, Long> = shards
+        .map { it.statsTagQueriedTS() }
+        .fold(mutableMapOf()) { acc, shard ->
+            shard.forEach { (tag, shardTS) ->
+                acc[tag] = maxOf(acc[tag] ?: -1, shardTS)
+            }
+            acc
+        }
+
+    override fun statsTagLabeledTS(): Map<Tag, Long> = shards
+        .map { it.statsTagLabeledTS() }
         .fold(mutableMapOf()) { acc, shard ->
             shard.forEach { (tag, shardTS) ->
                 acc[tag] = maxOf(acc[tag] ?: -1, shardTS)

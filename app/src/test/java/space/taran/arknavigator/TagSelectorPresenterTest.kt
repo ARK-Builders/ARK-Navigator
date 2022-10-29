@@ -75,8 +75,8 @@ class TagSelectorPresenterTest {
         storage = TagsStorageStub()
         val preferences = mockk<Preferences>(relaxed = true)
         presenter.preferences = preferences
-        coEvery { preferences.get(PreferenceKey.TagsSorting) } returns TagsSorting.POPULARITY.ordinal
-        coEvery { preferences.get(PreferenceKey.TagsSortingAscending) } returns true
+        coEvery { preferences.get(PreferenceKey.TagsSortingSelector) } returns TagsSorting.POPULARITY.ordinal
+        coEvery { preferences.get(PreferenceKey.TagsSortingSelectorAsc) } returns true
         coEvery { preferences.get(PreferenceKey.CollectTagUsageStats) } returns true
         presenter.init(index, storage, StatsStorageStub(), false)
     }
