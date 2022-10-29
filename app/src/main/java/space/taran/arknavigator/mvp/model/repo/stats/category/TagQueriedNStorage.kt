@@ -1,55 +1,57 @@
+@file:OptIn(ExperimentalSerializationApi::class)
+
 package space.taran.arknavigator.mvp.model.repo.stats.category
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
-import space.taran.arknavigator.mvp.model.repo.stats.StatsCategory
 import space.taran.arknavigator.mvp.model.repo.stats.StatsEvent
 import space.taran.arknavigator.utils.Tag
 import timber.log.Timber
 import java.nio.file.Path
-import kotlin.io.path.Path
 import kotlin.io.path.inputStream
 import kotlin.io.path.notExists
 import kotlin.io.path.writeText
 
-class TagUsedTSStorage(
+class TagQueriedNStorage(
     root: Path,
     scope: CoroutineScope
-) : StatsCategoryStorage<Map<Tag, Long>>(root, scope) {
-    override val fileName = Path("tag-used-ts")
-    override val category = StatsCategory.TAG_USED_TS
-    private val tagUsedTS = mutableMapOf<Tag, Long>()
+) : StatsCategoryStorage<Map<Tag, Int>>(root, scope) {
+    override val fileName: String = "tag-queried-n"
+
+    private val tagQueriedN = mutableMapOf<Tag, Int>()
 
     override suspend fun init() {
-        val storage = locateStorage()
-        if (storage.notExists()) return
-        val json = Json.decodeFromStream<JsonTagUsedTS>(storage.inputStream())
-        tagUsedTS.putAll(json.data)
-        Timber.i("initialized with $tagUsedTS")
+        val storage = locateStorage()?.also { if (it.notExists()) return }
+        storage!!.inputStream().use {
+            val json = Json.decodeFromStream<JsonTagQueriedN>(it)
+            tagQueriedN.putAll(json.data)
+            Timber.i("initialized with $tagQueriedN")
+        }
     }
 
     override fun handleEvent(event: StatsEvent) {
         when (event) {
             is StatsEvent.PlainTagUsed ->
-                tagUsedTS[event.tag] = System.currentTimeMillis()
+                tagQueriedN.merge(event.tag, 1, Int::plus)
             is StatsEvent.KindTagUsed ->
-                tagUsedTS[event.kindCode.name] = System.currentTimeMillis()
+                tagQueriedN.merge(event.kindCode.name, 1, Int::plus)
             else -> return
         }
         requestFlush()
     }
 
-    override fun provideData() = tagUsedTS
+    override fun provideData() = tagQueriedN
 
     override fun flush() {
-        val data = Json.encodeToString(JsonTagUsedTS(tagUsedTS))
+        val data = Json.encodeToString(JsonTagQueriedN(tagQueriedN))
         locateStorage().writeText(data)
-        Timber.i("flushed with $tagUsedTS")
+        Timber.i("flushed with $tagQueriedN")
     }
 }
 
 @Serializable
-private class JsonTagUsedTS(val data: Map<Tag, Long>)
+private class JsonTagQueriedN(val data: Map<Tag, Int>)

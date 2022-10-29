@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import space.taran.arknavigator.mvp.model.arkFolder
 import space.taran.arknavigator.mvp.model.arkStats
-import space.taran.arknavigator.mvp.model.repo.stats.StatsCategory
 import space.taran.arknavigator.mvp.model.repo.stats.StatsEvent
 import java.nio.file.Path
 
@@ -18,8 +17,7 @@ abstract class StatsCategoryStorage<out T>(
     val root: Path,
     val scope: CoroutineScope
 ) {
-    abstract val fileName: Path
-    abstract val category: StatsCategory
+    abstract val fileName: String
     private val flushFlow = MutableSharedFlow<Unit>().also { flow ->
         flow.debounce(FLUSH_INTERVAL).onEach {
             flush()

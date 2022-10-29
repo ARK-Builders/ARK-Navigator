@@ -7,7 +7,9 @@ import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import java.nio.file.Path
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class StatsStorageRepo @Inject constructor(
     private val foldersRepo: FoldersRepo,
     private val indexRepo: ResourcesIndexRepo,
