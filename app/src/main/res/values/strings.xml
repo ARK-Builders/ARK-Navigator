@@ -107,4 +107,11 @@
     <string name="collect_tag_usage_stats">Local collect tag usage statistics</string>
     <string name="collect_tag_usage_stats_enabled">Collecting tag usage statistics enabled!</string>
     <string name="collect_tag_usage_stats_disabled">Collecting tag usage statistics disabled!</string>
+    <string name="popularity">Popularity</string>
+    <string name="queried_time">Queried time</string>
+    <string name="queried_amount">Queried amount</string>
+    <string name="labeled_time">Labeled time</string>
+    <string name="labeled_amount">Labeled amount</string>
+    <string name="ascending">Ascending</string>
+    <string name="descending">Descending</string>
 </resources>

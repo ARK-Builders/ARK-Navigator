@@ -57,7 +57,8 @@ fun ResourcesFragment.setupAndShowSelectedResourcesMenu(menuBtn: View) {
                     presenter.rootAndFav,
                     selected,
                     presenter.index,
-                    presenter.storage
+                    presenter.storage,
+                    presenter.statsStorage
                 )
                 .show(childFragmentManager, null)
             popup.popupWindow.dismiss()

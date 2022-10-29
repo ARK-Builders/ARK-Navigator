@@ -43,9 +43,14 @@ class PreferencesImpl @Inject constructor(val context: Context) : ArkPreferences
             PreferenceKey.Sorting -> intPreferencesKey("sorting")
             PreferenceKey.IsSortingAscending ->
                 booleanPreferencesKey("sorting_is_ascending")
-            PreferenceKey.TagsSorting -> intPreferencesKey("tags_sorting")
-            PreferenceKey.TagsSortingAscending ->
-                booleanPreferencesKey("tags_sorting_ascending")
+            PreferenceKey.TagsSortingSelector ->
+                intPreferencesKey("tags_sorting_selector")
+            PreferenceKey.TagsSortingSelectorAsc ->
+                booleanPreferencesKey("tags_sorting_selector_asc")
+            PreferenceKey.TagsSortingEdit ->
+                intPreferencesKey("tags_sorting_edit")
+            PreferenceKey.TagsSortingEditAsc ->
+                intPreferencesKey("tags_sorting_edit_asc")
             PreferenceKey.CrashReport ->
                 booleanPreferencesKey("crash_report")
             PreferenceKey.ImgCacheReplication ->

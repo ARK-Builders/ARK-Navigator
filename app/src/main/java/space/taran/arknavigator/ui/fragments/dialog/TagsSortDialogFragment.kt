@@ -25,8 +25,10 @@ class TagsSortDialogFragment : DialogFragment(R.layout.dialog_tags_sort) {
     private val binding by viewBinding(DialogTagsSortBinding::bind)
 
     @Inject
-    lateinit var factory: TagsSortViewModelFactory
-    private val viewModel: TagsSortViewModel by viewModels { factory }
+    lateinit var factory: TagsSortViewModelFactory.Factory
+    private val viewModel: TagsSortViewModel by viewModels {
+        factory.create(requireArguments().getBoolean(SELECTOR_NOT_EDIT_KEY))
+    }
 
     override fun onAttach(context: Context) {
         App.instance.appComponent.inject(this)
@@ -44,8 +46,17 @@ class TagsSortDialogFragment : DialogFragment(R.layout.dialog_tags_sort) {
         rbPopularity.setOnClickListener {
             viewModel.onSortingChanged(TagsSorting.POPULARITY)
         }
-        rbUsed.setOnClickListener {
-            viewModel.onSortingChanged(TagsSorting.LAST_USED)
+        rbQueriedTs.setOnClickListener {
+            viewModel.onSortingChanged(TagsSorting.QUERIED_TS)
+        }
+        rbQueriedN.setOnClickListener {
+            viewModel.onSortingChanged(TagsSorting.QUERIED_N)
+        }
+        rbLabeledTs.setOnClickListener {
+            viewModel.onSortingChanged(TagsSorting.LABELED_TS)
+        }
+        rbLabeledAmount.setOnClickListener {
+            viewModel.onSortingChanged(TagsSorting.LABELED_N)
         }
         rbAscending.setOnClickListener {
             viewModel.onAscendingChanged(true)
@@ -65,9 +76,12 @@ class TagsSortDialogFragment : DialogFragment(R.layout.dialog_tags_sort) {
         }
 
         when (state.sorting) {
-            TagsSorting.POPULARITY -> rbPopularity.isChecked = true
-            TagsSorting.LAST_USED -> rbUsed.isChecked = true
-        }
+            TagsSorting.POPULARITY -> rbPopularity
+            TagsSorting.QUERIED_TS -> rbQueriedTs
+            TagsSorting.QUERIED_N -> rbQueriedN
+            TagsSorting.LABELED_TS -> rbLabeledTs
+            TagsSorting.LABELED_N -> rbLabeledAmount
+        }.isChecked = true
 
         rbAscending.isChecked = state.ascending
         rbDescending.isChecked = !state.ascending
@@ -78,6 +92,14 @@ class TagsSortDialogFragment : DialogFragment(R.layout.dialog_tags_sort) {
     }
 
     companion object {
-        fun newInstance() = TagsSortDialogFragment()
+        private const val SELECTOR_NOT_EDIT_KEY = "selectorNotEdit"
+
+        fun newInstance(
+            selectorNotEdit: Boolean
+        ) = TagsSortDialogFragment().apply {
+            arguments = Bundle().apply {
+                putBoolean(SELECTOR_NOT_EDIT_KEY, selectorNotEdit)
+            }
+        }
     }
 }

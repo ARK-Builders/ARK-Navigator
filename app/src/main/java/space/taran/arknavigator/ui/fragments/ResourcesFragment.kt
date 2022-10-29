@@ -140,7 +140,7 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         }
         btnTagsSorting.setOnClickListener {
             TagsSortDialogFragment
-                .newInstance()
+                .newInstance(selectorNotEdit = true)
                 .show(childFragmentManager, null)
         }
 
