@@ -3,6 +3,9 @@ package space.taran.arknavigator.mvp.presenter.dialog
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.Container
@@ -13,7 +16,6 @@ import org.orbitmvi.orbit.syntax.simple.reduce
 import org.orbitmvi.orbit.viewmodel.container
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
-import javax.inject.Inject
 
 sealed class TagsSortState {
     object Loading : TagsSortState()
@@ -24,7 +26,7 @@ sealed class TagsSortState {
 }
 
 enum class TagsSorting {
-    POPULARITY, LAST_USED
+    POPULARITY, QUERIED_TS, QUERIED_N, LABELED_TS, LABELED_N
 }
 
 sealed class TagsSortSideEffect {
@@ -32,18 +34,25 @@ sealed class TagsSortSideEffect {
 }
 
 class TagsSortViewModel(
+    private val selectorNotEdit: Boolean,
     private val preferences: Preferences
 ) : ViewModel(), ContainerHost<TagsSortState, TagsSortSideEffect> {
     override val container: Container<TagsSortState, TagsSortSideEffect> =
         container(TagsSortState.Loading)
 
+    private val sortingPrefKey = if (selectorNotEdit)
+        PreferenceKey.TagsSortingSelector else PreferenceKey.TagsSortingEdit
+
+    private val ascPrefKey = if (selectorNotEdit)
+        PreferenceKey.TagsSortingSelectorAsc else PreferenceKey.TagsSortingEditAsc
+
     init {
         intent {
             val sortingDef = viewModelScope.async {
-                preferences.get(PreferenceKey.TagsSorting)
+                preferences.get(sortingPrefKey)
             }
             val ascendingDef = viewModelScope.async {
-                preferences.get(PreferenceKey.TagsSortingAscending)
+                preferences.get(ascPrefKey)
             }
             val sorting = TagsSorting.values()[sortingDef.await()]
             val ascending = ascendingDef.await()
@@ -57,7 +66,7 @@ class TagsSortViewModel(
     fun onSortingChanged(sorting: TagsSorting) = intent {
         viewModelScope.launch {
             preferences.set(
-                PreferenceKey.TagsSorting,
+                sortingPrefKey,
                 sorting.ordinal
             )
         }
@@ -67,7 +76,7 @@ class TagsSortViewModel(
     fun onAscendingChanged(ascending: Boolean) = intent {
         viewModelScope.launch {
             preferences.set(
-                PreferenceKey.TagsSortingAscending,
+                ascPrefKey,
                 ascending
             )
         }
@@ -75,10 +84,18 @@ class TagsSortViewModel(
     }
 }
 
-class TagsSortViewModelFactory @Inject constructor(
+class TagsSortViewModelFactory @AssistedInject constructor(
+    @Assisted private val selectorNotEdit: Boolean,
     private val preferences: Preferences
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return TagsSortViewModel(preferences) as T
+        return TagsSortViewModel(selectorNotEdit, preferences) as T
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            @Assisted selectorNotEdit: Boolean
+        ): TagsSortViewModelFactory
     }
 }

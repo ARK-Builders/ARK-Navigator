@@ -3,6 +3,8 @@ package space.taran.arknavigator.mvp.presenter.dialog
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import moxy.MvpPresenter
 import moxy.presenterScope
@@ -10,6 +12,10 @@ import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
+import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
+import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
+import space.taran.arknavigator.mvp.model.repo.stats.StatsStorage
+import space.taran.arknavigator.mvp.model.repo.stats.StatsStorageRepo
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import space.taran.arknavigator.mvp.view.dialog.EditTagsDialogView
@@ -30,17 +36,28 @@ class EditTagsDialogPresenter(
     private val rootAndFav: RootAndFav,
     val resources: List<ResourceId>,
     private val _index: ResourcesIndex?,
-    private val _storage: TagsStorage?
+    private val _storage: TagsStorage?,
+    private val _statsStorage: StatsStorage?
 ) : MvpPresenter<EditTagsDialogView>() {
 
     private lateinit var index: ResourcesIndex
     private lateinit var storage: TagsStorage
+    private lateinit var statsStorage: StatsStorage
 
     @Inject
     lateinit var indexRepo: ResourcesIndexRepo
 
     @Inject
     lateinit var tagsStorageRepo: TagsStorageRepo
+
+    @Inject
+    lateinit var statsStorageRepo: StatsStorageRepo
+
+    @Inject
+    lateinit var preferences: Preferences
+
+    private var sorting = TagsSorting.POPULARITY
+    private var sortingAscending = false
 
     private var input = ""
         set(value) {
@@ -50,7 +67,7 @@ class EditTagsDialogPresenter(
     private val actionsHistory = ArrayDeque<EditTagsAction>()
     private val tagsByResources = mutableMapOf<ResourceId, MutableSet<Tag>>()
     private val commonTags = mutableSetOf<Tag>()
-    private val quickTags = mutableSetOf<Tag>()
+    private var quickTags = listOf<Tag>()
 
     private var wasTextRemovedRecently = false
     private var wasTagRemovedRecently = false
@@ -59,13 +76,21 @@ class EditTagsDialogPresenter(
     override fun onFirstViewAttach() {
         viewState.init()
         presenterScope.launch {
-            if (_index != null && _storage != null) {
+            val showTagSorting = preferences.get(PreferenceKey.CollectTagUsageStats)
+            if (showTagSorting)
+                initSortingPref()
+            else
+                viewState.hideSortingBtn()
+
+            if (_index != null && _storage != null && _statsStorage != null) {
                 index = _index
                 storage = _storage
+                statsStorage = _statsStorage
                 init()
             } else {
                 index = indexRepo.provide(rootAndFav)
                 storage = tagsStorageRepo.provide(rootAndFav)
+                statsStorage = statsStorageRepo.provide(rootAndFav)
                 init()
             }
         }
@@ -76,10 +101,30 @@ class EditTagsDialogPresenter(
             .associateWith { id -> storage.getTags(id).toMutableSet() }
             .toMutableMap()
         commonTags += listCommonTags()
-        quickTags += listQuickTags()
+        quickTags = listQuickTags()
         viewState.setQuickTags(filterQuickTags())
         viewState.setResourceTags(commonTags)
         viewState.showKeyboardAndView()
+    }
+
+    private suspend fun initSortingPref() {
+        sorting = TagsSorting.values()[
+            preferences.get(PreferenceKey.TagsSortingEdit)
+        ]
+        sortingAscending = preferences.get(PreferenceKey.TagsSortingEditAsc)
+        preferences.flow(PreferenceKey.TagsSortingEdit).onEach {
+            val newSorting = TagsSorting.values()[it]
+            if (sorting == newSorting) return@onEach
+            sorting = newSorting
+            quickTags = listQuickTags()
+            viewState.setQuickTags(filterQuickTags())
+        }.launchIn(presenterScope)
+        preferences.flow(PreferenceKey.TagsSortingEditAsc).onEach { ascending ->
+            if (sortingAscending == ascending) return@onEach
+            sortingAscending = ascending
+            quickTags = listQuickTags()
+            viewState.setQuickTags(filterQuickTags())
+        }.launchIn(presenterScope)
     }
 
     fun onInputChanged(newInput: String) {
@@ -201,21 +246,32 @@ class EditTagsDialogPresenter(
         wasTagRemovedRecently = false
     }
 
-    private fun filterQuickTags(): Set<Tag> =
+    private fun filterQuickTags(): List<Tag> =
         (quickTags - commonTags)
             .filter { tag ->
                 tag.startsWith(input, true)
-            }.toSet()
+            }
 
-    private suspend fun listQuickTags(): Set<Tag> {
+    private suspend fun listQuickTags(): List<Tag> {
         val allTags = storage.groupTagsByResources(index.listAllIds())
             .values
             .flatten()
-        val popularity = Popularity.calculate(allTags)
+        val sortCriteria = when (sorting) {
+            TagsSorting.POPULARITY -> Popularity.calculate(allTags)
+            TagsSorting.QUERIED_TS -> statsStorage.statsTagQueriedTS()
+            TagsSorting.QUERIED_N -> statsStorage.statsTagQueriedAmount()
+            TagsSorting.LABELED_TS -> statsStorage.statsTagLabeledTS()
+            TagsSorting.LABELED_N -> statsStorage.statsTagLabeledAmount()
+        } as Map<Tag, Comparable<Any>>
 
-        return allTags
-            .sortedByDescending { popularity[it] }
-            .toSet()
+        var quick = allTags
+            .distinct()
+            .sortedBy { sortCriteria[it] }
+
+        if (!sortingAscending)
+            quick = quick.reversed()
+
+        return quick
     }
 
     private fun listCommonTags(): MutableSet<Tag> {

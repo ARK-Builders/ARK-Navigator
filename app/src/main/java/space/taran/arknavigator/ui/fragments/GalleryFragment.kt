@@ -22,7 +22,6 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.chip.Chip
-import java.nio.file.Path
 import kotlinx.coroutines.launch
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
@@ -52,6 +51,7 @@ import space.taran.arknavigator.utils.Tags
 import space.taran.arknavigator.utils.extension
 import space.taran.arknavigator.utils.extensions.makeGone
 import space.taran.arknavigator.utils.extensions.makeVisible
+import java.nio.file.Path
 
 class GalleryFragment : MvpAppCompatFragment(), GalleryView {
 
@@ -269,7 +269,8 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
             requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
             listOf(resource),
             presenter.index,
-            presenter.storage
+            presenter.storage,
+            presenter.statsStorage
         )
         dialog.show(childFragmentManager, EditTagsDialogFragment.FRAGMENT_TAG)
     }

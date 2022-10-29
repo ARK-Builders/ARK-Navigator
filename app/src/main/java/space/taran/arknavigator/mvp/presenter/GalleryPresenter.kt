@@ -20,6 +20,8 @@ import space.taran.arknavigator.mvp.model.repo.meta.MetadataStorage
 import space.taran.arknavigator.mvp.model.repo.meta.MetadataStorageRepo
 import space.taran.arknavigator.mvp.model.repo.preview.PreviewStorage
 import space.taran.arknavigator.mvp.model.repo.preview.PreviewStorageRepo
+import space.taran.arknavigator.mvp.model.repo.stats.StatsStorage
+import space.taran.arknavigator.mvp.model.repo.stats.StatsStorageRepo
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import space.taran.arknavigator.mvp.presenter.adapter.ResourceMetaDiffUtilCallback
@@ -60,6 +62,8 @@ class GalleryPresenter(
         private set
     lateinit var metadataStorage: MetadataStorage
         private set
+    lateinit var statsStorage: StatsStorage
+        private set
     var resources: MutableList<ResourceMeta> = mutableListOf()
         private set
     var diffResult: DiffUtil.DiffResult? = null
@@ -80,6 +84,9 @@ class GalleryPresenter(
     @Inject
     lateinit var tagsStorageRepo: TagsStorageRepo
 
+    @Inject
+    lateinit var statsStorageRepo: StatsStorageRepo
+
     override fun onFirstViewAttach() {
         Log.d(GALLERY_SCREEN, "first view attached in GalleryPresenter")
         super.onFirstViewAttach()
@@ -95,6 +102,7 @@ class GalleryPresenter(
             storage = tagsStorageRepo.provide(rootAndFav)
             previewStorage = previewStorageRepo.provide(rootAndFav)
             metadataStorage = metadataStorageRepo.provide(rootAndFav)
+            statsStorage = statsStorageRepo.provide(rootAndFav)
             resources = resourcesIds.map { index.getMeta(it) }.toMutableList()
 
             viewState.updatePagerAdapter()

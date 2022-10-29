@@ -91,16 +91,17 @@ class TagsSelectorPresenter(
         this.storage = storage
         this.statsStorage = statsStorage
         showKindTags = kindTagsEnabled
-        sorting = TagsSorting.values()[preferences.get(PreferenceKey.TagsSorting)]
-        sortingAscending = preferences.get(PreferenceKey.TagsSortingAscending)
-        preferences.flow(PreferenceKey.TagsSorting).onEach {
+        sorting =
+            TagsSorting.values()[preferences.get(PreferenceKey.TagsSortingSelector)]
+        sortingAscending = preferences.get(PreferenceKey.TagsSortingSelectorAsc)
+        preferences.flow(PreferenceKey.TagsSortingSelector).onEach {
             val newSorting = TagsSorting.values()[it]
             if (sorting == newSorting) return@onEach
             sorting = newSorting
             calculateTagsAndSelection()
         }.launchIn(scope)
 
-        preferences.flow(PreferenceKey.TagsSortingAscending).onEach { ascending ->
+        preferences.flow(PreferenceKey.TagsSortingSelectorAsc).onEach { ascending ->
             if (sortingAscending == ascending) return@onEach
             sortingAscending = ascending
             calculateTagsAndSelection()
@@ -270,14 +271,15 @@ class TagsSelectorPresenter(
         tagsOfUnselectedResources: List<TagItem>,
         tagItemsByResources: Map<ResourceId, Set<TagItem>>
     ) {
-        when (sorting) {
-            TagsSorting.POPULARITY -> sortByPopularity(
+        if (sorting == TagsSorting.POPULARITY) {
+            sortByPopularity(
                 tagsOfSelectedResources,
                 tagsOfUnselectedResources,
                 tagItemsByResources
             )
-            TagsSorting.LAST_USED -> sortByLastUsed()
-        }
+        } else
+            sortByStatsCriteria()
+
         if (!sortingAscending) {
             availableTagItems = availableTagItems.reversed()
             unavailableTagItems = unavailableTagItems.reversed()
@@ -310,26 +312,35 @@ class TagsSelectorPresenter(
             .sortedBy { tagsPopularity[it] }
     }
 
-    private fun sortByLastUsed() {
-        val lastUsed = statsStorage.statsTagUsedTSList()
+    private fun sortByStatsCriteria() {
+        val sortCriteria = when (sorting) {
+            TagsSorting.POPULARITY ->
+                error("TagsSorting.POPULARITY must be handled before")
+            TagsSorting.QUERIED_TS -> statsStorage.statsTagQueriedTS()
+            TagsSorting.QUERIED_N -> statsStorage.statsTagQueriedAmount()
+            TagsSorting.LABELED_TS -> statsStorage.statsTagLabeledTS()
+            TagsSorting.LABELED_N -> statsStorage.statsTagLabeledAmount()
+        } as Map<Tag, Comparable<Any>>
+
         val kindCodes = KindCode.values().associateBy { it.name }
-        val lastUsedTagItems = lastUsed.map { tag ->
-            if (kindCodes.containsKey(tag))
+        val tagItemsToCriteria = sortCriteria.map { (tag, criteria) ->
+            val item = if (kindCodes.containsKey(tag))
                 TagItem.KindTagItem(kindCodes[tag]!!)
             else
                 TagItem.PlainTagItem(tag)
-        }.withIndex().associate { it.value to it.index }
+            item to criteria
+        }.toMap()
         availableTagItems = availableTagItems.sortedBy {
-            lastUsedTagItems[it]
+            tagItemsToCriteria[it]
         }
 
         unavailableTagItems = unavailableTagItems.sortedBy {
-            lastUsedTagItems[it]
+            tagItemsToCriteria[it]
         }
 
         val includedAnExcluded = includedTagItems + excludedTagItems
         includedAndExcludedTagsForDisplay = includedAnExcluded.sortedBy {
-            lastUsedTagItems[it]
+            tagItemsToCriteria[it]
         }
     }
 

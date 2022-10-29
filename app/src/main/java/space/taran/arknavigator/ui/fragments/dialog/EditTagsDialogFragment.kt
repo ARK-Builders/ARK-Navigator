@@ -24,17 +24,20 @@ import space.taran.arknavigator.databinding.DialogEditTagsBinding
 import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
+import space.taran.arknavigator.mvp.model.repo.stats.StatsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.presenter.dialog.EditTagsDialogPresenter
 import space.taran.arknavigator.mvp.view.dialog.EditTagsDialogView
 import space.taran.arknavigator.ui.App
+import space.taran.arknavigator.utils.Tag
 import space.taran.arknavigator.utils.Tags
 import space.taran.arknavigator.utils.extensions.placeCursorToEnd
 import space.taran.arknavigator.utils.extensions.showKeyboard
 
 class EditTagsDialogFragment(
     private val index: ResourcesIndex? = null,
-    private val storage: TagsStorage? = null
+    private val storage: TagsStorage? = null,
+    private val statsStorage: StatsStorage? = null
 ) : MvpAppCompatDialogFragment(), EditTagsDialogView {
     private lateinit var binding: DialogEditTagsBinding
     private val presenter by moxyPresenter {
@@ -42,7 +45,8 @@ class EditTagsDialogFragment(
             requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
             requireArguments().getLongArray(RESOURCES_KEY)!!.toList(),
             index,
-            storage
+            storage,
+            statsStorage
         ).apply {
             App.instance.appComponent.inject(this)
         }
@@ -61,6 +65,11 @@ class EditTagsDialogFragment(
         if (presenter.resources.size != 1)
             tvTags.text = getString(R.string.common_tags)
         setupFullHeight()
+        btnTagsSorting.setOnClickListener {
+            TagsSortDialogFragment
+                .newInstance(selectorNotEdit = false)
+                .show(childFragmentManager, null)
+        }
         etNewTags.doAfterTextChanged { editable ->
             presenter.onInputChanged(editable.toString())
         }
@@ -123,7 +132,7 @@ class EditTagsDialogFragment(
         }
     }
 
-    override fun setQuickTags(tags: Tags) {
+    override fun setQuickTags(tags: List<Tag>) {
         binding.cgQuick.removeAllViews()
 
         tags.forEach { tag ->
@@ -141,6 +150,11 @@ class EditTagsDialogFragment(
         binding.btnAdd.isVisible = input.isNotEmpty()
         if (binding.etNewTags.text.toString() != input)
             binding.etNewTags.setText(input)
+    }
+
+    override fun hideSortingBtn() {
+        binding.btnTagsSorting.isVisible = false
+        binding.viewSpacer.isVisible = true
     }
 
     override fun dismissDialog() {
@@ -195,9 +209,10 @@ class EditTagsDialogFragment(
             rootAndFav: RootAndFav,
             resources: List<ResourceId>,
             index: ResourcesIndex,
-            storage: TagsStorage
+            storage: TagsStorage,
+            statsStorage: StatsStorage
         ) =
-            EditTagsDialogFragment(index, storage).apply {
+            EditTagsDialogFragment(index, storage, statsStorage).apply {
                 arguments = Bundle().apply {
                     putParcelable(ROOT_AND_FAV_KEY, rootAndFav)
                     putLongArray(RESOURCES_KEY, resources.toLongArray())

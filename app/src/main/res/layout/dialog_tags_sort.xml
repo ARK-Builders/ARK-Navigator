@@ -27,14 +27,31 @@
                 android:id="@+id/rb_popularity"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Popularity" />
+                android:text="@string/popularity" />
 
             <com.google.android.material.radiobutton.MaterialRadioButton
-                android:id="@+id/rb_used"
+                android:id="@+id/rb_queried_ts"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Last used" />
+                android:text="@string/queried_time" />
 
+            <com.google.android.material.radiobutton.MaterialRadioButton
+                android:id="@+id/rb_queried_n"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/queried_amount" />
+
+            <com.google.android.material.radiobutton.MaterialRadioButton
+                android:id="@+id/rb_labeled_ts"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/labeled_time" />
+
+            <com.google.android.material.radiobutton.MaterialRadioButton
+                android:id="@+id/rb_labeled_amount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/labeled_amount" />
         </RadioGroup>
 
         <View
@@ -53,13 +70,13 @@
                 android:id="@+id/rb_ascending"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Ascending" />
+                android:text="@string/ascending" />
 
             <com.google.android.material.radiobutton.MaterialRadioButton
                 android:id="@+id/rb_descending"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Descending" />
+                android:text="@string/descending" />
 
         </RadioGroup>
 
