@@ -21,6 +21,7 @@ import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import space.taran.arknavigator.mvp.view.dialog.EditTagsDialogView
 import space.taran.arknavigator.utils.Popularity
 import space.taran.arknavigator.utils.Tag
+import space.taran.arknavigator.utils.TagUtils
 import javax.inject.Inject
 
 sealed class EditTagsAction {
@@ -204,16 +205,18 @@ class EditTagsDialogPresenter(
     }
 
     private fun addTag(tag: Tag) {
-        commonTags += tag
+        val validatedTag = TagUtils.validateTag(tag) ?: return
+
+        commonTags += validatedTag
         val affectedIds = tagsByResources.mapNotNull { entry ->
-            if (entry.value.contains(tag))
+            if (entry.value.contains(validatedTag))
                 return@mapNotNull null
 
-            entry.value += tag
+            entry.value += validatedTag
             entry.key
         }.toSet()
 
-        actionsHistory.addLast(EditTagsAction.AddTag(tag, affectedIds))
+        actionsHistory.addLast(EditTagsAction.AddTag(validatedTag, affectedIds))
         updateTags()
     }
 

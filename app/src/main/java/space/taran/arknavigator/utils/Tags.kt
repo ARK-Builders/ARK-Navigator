@@ -4,6 +4,14 @@ typealias Tag = String
 
 typealias Tags = Set<Tag>
 
+object TagUtils {
+    fun validateTag(tag: Tag): Tag? {
+        val validated = tag.trim()
+        if (validated.isEmpty()) return null
+        return validated
+    }
+}
+
 class Constants {
     companion object {
         val NO_TAGS: Tags = emptySet()

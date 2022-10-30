@@ -155,6 +155,7 @@ class PlainTagsStorage(
                 "erasing tags for $id and removing the resource"
             )
             tagsById.remove(id)
+            return
         }
 
         Log.d(
