@@ -206,7 +206,11 @@ class PlainResourcesIndex internal constructor(
             val updated = present
                 .map { it to metaByPath[it]!! }
                 .filter { (path, meta) ->
-                    Files.getLastModifiedTime(path) > meta.modified
+                    val timestamp = Files.getLastModifiedTime(path).toMillis()
+
+                    // FileTime might have nanoseconds inside,
+                    // we should provide some threshold
+                    timestamp > meta.modified.toMillis() + 1
                 }
                 .map { (path, _) -> path }
 
