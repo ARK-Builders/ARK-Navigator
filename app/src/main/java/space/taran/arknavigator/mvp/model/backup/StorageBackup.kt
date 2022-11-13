@@ -54,11 +54,12 @@ class StorageBackup @Inject constructor(
         val filesToBackup = listOf(
             arkPath.resolve(ArkFiles.FAVORITES_FILE),
             arkPath.resolve(ArkFiles.TAGS_STORAGE_FILE)
-        )
+        ).filter { it.exists() }
+
+        if (filesToBackup.isEmpty()) return
 
         ZipOutputStream(backupPath.outputStream()).use { zipOut ->
             filesToBackup
-                .filter { it.exists() }
                 .forEach { backupFile ->
                     val zipEntry = ZipEntry(backupFile.fileName.toString())
                     zipOut.putNextEntry(zipEntry)
