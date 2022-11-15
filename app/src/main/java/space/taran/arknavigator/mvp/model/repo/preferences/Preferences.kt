@@ -16,7 +16,8 @@ interface Preferences {
             PreferenceKey.IndexReplication,
             PreferenceKey.RemovingLostResourcesTags,
             PreferenceKey.BackupEnabled,
-            PreferenceKey.ShortFileNames
+            PreferenceKey.ShortFileNames,
+            PreferenceKey.SortByScores
         )
 
         preferencesToReset.forEach {
@@ -41,4 +42,5 @@ sealed class PreferenceKey<out T>(val defaultValue: T) {
     object BackupEnabled : PreferenceKey<Boolean>(true)
     object ShortFileNames : PreferenceKey<Boolean>(true)
     object CollectTagUsageStats : PreferenceKey<Boolean>(true)
+    object SortByScores : PreferenceKey<Boolean>(false)
 }

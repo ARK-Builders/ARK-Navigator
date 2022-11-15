@@ -68,6 +68,8 @@ class ResourcesGridPresenter(
 
     private var shortFileNames = true
 
+    private var sortByScores = false
+
     fun getCount() = selection.size
 
     fun bindView(view: FileItemView) = runBlocking {
@@ -75,10 +77,15 @@ class ResourcesGridPresenter(
         Log.d(RESOURCES_SCREEN, "binding view for resource ${resource.meta.name}")
 
         val path = index.getPath(resource.meta.id)
+        val score = scoreStorage.getScore(resource.meta.id)
 
         view.reset(selectingEnabled, resource.isSelected)
         view.setText(path.fileName.toString(), shortFileNames)
-        view.setPinned(resource.isPinned)
+        view.displayScore(sortByScores, score)
+        Log.d(
+            RESOURCES_SCREEN,
+            "binding score $score for resource ${resource.meta.id}"
+        )
 
         if (Files.isDirectory(path)) {
             throw AssertionError("Resource can't be a directory")
@@ -154,6 +161,7 @@ class ResourcesGridPresenter(
         sorting = Sorting.values()[preferences.get(PreferenceKey.Sorting)]
         ascending = preferences.get(PreferenceKey.IsSortingAscending)
         shortFileNames = preferences.get(PreferenceKey.ShortFileNames)
+        sortByScores = preferences.get(PreferenceKey.SortByScores)
 
         preferences.flow(PreferenceKey.Sorting).onEach { intSorting ->
             val newSorting = Sorting.values()[intSorting]
@@ -172,6 +180,14 @@ class ResourcesGridPresenter(
                 viewState.updateAdapter()
             }
         }.launchIn(scope)
+
+        preferences.flow(PreferenceKey.SortByScores).onEach {
+            if (sortByScores != it) {
+                sortByScores = it
+                sortAllResources()
+                sortSelectionAndUpdateAdapter()
+            }
+        }.launchIn(scope + Dispatchers.IO)
     }
 
     suspend fun updateSelection(
@@ -179,8 +195,6 @@ class ResourcesGridPresenter(
     ) = withContext(Dispatchers.Default) {
         this@ResourcesGridPresenter.selection = resources
             .filter { selection.contains(it.meta.id) }
-
-        sortUnpinnedResourcesOnly()
         withContext(Dispatchers.Main) {
             setProgressVisibility(false)
             viewState.updateAdapter()
@@ -192,60 +206,83 @@ class ResourcesGridPresenter(
     ) = withContext(Dispatchers.Default) {
         this@ResourcesGridPresenter.resources = mapNewResources(resources)
         sortAllResources()
-        sortUnpinnedResourcesOnly()
         withContext(Dispatchers.Main) {
             setProgressVisibility(false)
         }
     }
 
     suspend fun shuffleResources() = withContext(Dispatchers.Default) {
-        val shuffledRes = selection
-            .filter {
-                !it.isPinned
-            }
-            .shuffled()
-        val unShuffledRes =
-            selection.filter { it.isPinned }
-                .toMutableList()
-        unShuffledRes.addAll(shuffledRes)
-        selection = unShuffledRes
-        selection.forEach {
-            Log.d("Resource id", it.meta.id.toString())
-        }
+        selection = selection.shuffled()
+        Log.d(
+            RESOURCES_SCREEN,
+            "reordering resources randomly"
+        )
         withContext(Dispatchers.Main) {
             viewState.updateAdapter()
         }
     }
 
-    suspend fun pinSelectedResources(pinIt: Boolean) =
-        withContext(Dispatchers.Default) {
-            selection.filter {
-                it.isSelected
-            }.filter {
-                if (pinIt)
-                    !it.isPinned
-                else
-                    it.isPinned
-            }.forEachIndexed { index, item ->
-                item.isPinned = pinIt
-                if (pinIt) scoreStorage.setScore(
-                    item.meta.id,
-                    scoreStorage.countScores() + 1
-                )
-                else scoreStorage.setScore(item.meta.id, 0)
-            }
-            scope.launch {
-                scoreStorage.persist()
-            }
-            sortUnpinnedResourcesOnly()
-            withContext(Dispatchers.Main) {
-                onSelectingChanged(false)
-                viewState.updateAdapter()
-            }
+    suspend fun unShuffleResources() = withContext(Dispatchers.Default) {
+        sortAllResources()
+        sortSelectionAndUpdateAdapter()
+        Log.d(
+            RESOURCES_SCREEN,
+            "reordering resources back from random order"
+        )
+    }
+
+    suspend fun increaseScore() = changeScore(1)
+
+    suspend fun decreaseScore() = changeScore(-1)
+
+    suspend fun resetScores() = withContext(Dispatchers.IO) {
+        scoreStorage.resetScores(selectedResources)
+        withContext(Dispatchers.Main) {
+            sortAllResources()
+            sortSelectionAndUpdateAdapter()
+            onSelectingChanged(false)
+        }
+    }
+
+    fun allowScoring() =
+        selectedResources.isNotEmpty() && selectedResources.size == 1 && sortByScores
+
+    fun allowResettingScores() = selectedResources.isNotEmpty() && sortByScores &&
+        selectedResources.all {
+            scoreStorage.getScore(it.id) > 0 || scoreStorage.getScore(it.id) < 0
         }
 
-    fun areSelectedResourcesUnPinned() = selection.any {
-        it.isSelected && !it.isPinned
+    fun updateAdapterWithScores() {
+        sortAllResources()
+        sortSelectionAndUpdateAdapter()
+    }
+
+    private suspend fun changeScore(inc: Int) = withContext(Dispatchers.Default) {
+        val selectedResource: ResourceMeta = with(selectedResources) {
+            if (isEmpty())
+                return@withContext
+            if (size > 1)
+                return@withContext
+            this[0]
+        }
+        val score = scoreStorage.getScore(selectedResource.id)
+        scoreStorage.setScore(selectedResource.id, score + inc)
+        withContext(Dispatchers.IO) {
+            scoreStorage.persist()
+        }
+        withContext(Dispatchers.Main) {
+            sortAllResources()
+            sortSelectionAndUpdateAdapter()
+            onSelectingChanged(false)
+        }
+    }
+
+    private fun compareResourcesByScores() = compareBy<ResourceItem> {
+        scoreStorage.getScore(it.meta.id) == 0
+    }.then { a, b ->
+        val aScore = scoreStorage.getScore(a.meta.id)
+        val bScore = scoreStorage.getScore(b.meta.id)
+        bScore.compareTo(aScore)
     }
 
     private fun updateSorting(sorting: Sorting) {
@@ -271,9 +308,7 @@ class ResourcesGridPresenter(
     ): List<ResourceItem> {
         if (!selectingEnabled)
             return newResources.map { meta ->
-                val pinned = scoreStorage
-                    .getScore(meta.id)!! > 0
-                ResourceItem(meta, isPinned = pinned)
+                ResourceItem(meta)
             }
 
         return newResources.map { meta ->
@@ -291,11 +326,21 @@ class ResourcesGridPresenter(
             if (comparator != null) {
                 resources = resources.map { it to it }
                     .toMap()
-                    .toSortedMap(unequalCompareBy(comparator))
+                    .toSortedMap(
+                        unequalCompareBy(
+                            if (sortByScores)
+                                compareResourcesByScores()
+                                    .then(comparator)
+                            else comparator
+                        )
+                    )
                     .values
                     .toList()
-            }
-
+            } else resources = resources.sortedWith(
+                unequalCompareBy(
+                    compareResourcesByScores()
+                )
+            )
             if (sorting != Sorting.DEFAULT && !ascending) {
                 resources = resources.reversed()
             }
@@ -307,24 +352,17 @@ class ResourcesGridPresenter(
         )
     }
 
-    private fun sortSelectionAndUpdateAdapter() {
+    private fun sortSelection() {
         val selection = this.selection.toSet()
         this.selection = resources.filter { selection.contains(it) }
+    }
+
+    private fun sortSelectionAndUpdateAdapter() {
+        sortSelection()
         scope.launch(Dispatchers.Main) {
             setProgressVisibility(false)
             viewState.updateAdapter()
         }
-    }
-
-    private fun sortUnpinnedResourcesOnly() {
-        val selection = this.selection.toSet()
-        this.selection = resources.filter {
-            selection.contains(it)
-        }.sortedWith(
-            compareBy {
-                !it.isPinned
-            }
-        )
     }
 
     private suspend fun setProgressVisibility(

@@ -45,10 +45,11 @@ import space.taran.arknavigator.ui.view.DefaultPopup
 import space.taran.arknavigator.ui.view.DepthPageTransformer
 import space.taran.arknavigator.ui.view.StackedToasts
 import space.taran.arknavigator.utils.FullscreenHelper
-import space.taran.arknavigator.utils.LogTags.GALLERY_SCREEN
 import space.taran.arknavigator.utils.Tag
 import space.taran.arknavigator.utils.Tags
+import space.taran.arknavigator.utils.Score
 import space.taran.arknavigator.utils.extension
+import space.taran.arknavigator.utils.LogTags.GALLERY_SCREEN
 import space.taran.arknavigator.utils.extensions.makeGone
 import space.taran.arknavigator.utils.extensions.makeVisible
 import java.nio.file.Path
@@ -123,6 +124,14 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
 
             editResourceFab.setOnClickListener {
                 presenter.onEditFabClick()
+            }
+
+            increaseScore.setOnClickListener {
+                presenter.onIncreaseScore()
+            }
+
+            decreaseScore.setOnClickListener {
+                presenter.onDecreaseScore()
             }
         }
     }
@@ -306,6 +315,26 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
         pagerAdapter.notifyItemChanged(binding.viewPager.currentItem)
     }
 
+    override fun notifyResourceScoresChanged() {
+        setFragmentResult(SCORES_CHANGED_KEY, bundleOf())
+    }
+
+    override fun displayScore(score: Score) {
+        binding.scoreValue.apply {
+            text = if (score == 0) null
+            else score.toString()
+        }
+    }
+
+    override fun setScoringControlsVisibility(isVisible: Boolean) {
+        with(binding) {
+            increaseScore.isVisible = isVisible
+            decreaseScore.isVisible = isVisible
+            scoreValue.isVisible = isVisible
+            starIcon.isVisible = isVisible
+        }
+    }
+
     override fun onResume() {
         super.onResume()
         presenter.onResume()
@@ -477,6 +506,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
         private const val START_AT_KEY = "startAt"
         const val REQUEST_TAGS_CHANGED_KEY = "tagsChangedGallery"
         const val REQUEST_RESOURCES_CHANGED_KEY = "resourcesChangedGallery"
+        const val SCORES_CHANGED_KEY = "scoresChangedInGallery"
 
         fun newInstance(
             rootAndFav: RootAndFav,

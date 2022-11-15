@@ -38,7 +38,11 @@ class SortDialogFragment : MvpAppCompatDialogFragment(), SortDialogView {
         return binding.root
     }
 
-    override fun init(sorting: Sorting, ascending: Boolean) = with(binding) {
+    override fun init(
+        sorting: Sorting,
+        ascending: Boolean,
+        sortByScoresEnabled: Boolean
+    ) = with(binding) {
         when (sorting) {
             Sorting.DEFAULT -> rbDefault.isChecked = true
             Sorting.NAME -> rbName.isChecked = true
@@ -55,6 +59,9 @@ class SortDialogFragment : MvpAppCompatDialogFragment(), SortDialogView {
             } else {
                 rbDescending.isChecked = true
             }
+        }
+        if (sortByScoresEnabled) {
+            swScores.isChecked = true
         }
 
         rgSorting.setOnCheckedChangeListener { _, checkedId ->
@@ -88,6 +95,14 @@ class SortDialogFragment : MvpAppCompatDialogFragment(), SortDialogView {
             )
 
             presenter.onAscendingSelected(newAscending)
+        }
+
+        swScores.setOnCheckedChangeListener { _, isChecked ->
+            Log.d(
+                RESOURCES_SCREEN,
+                "sorting by scores ${if (isChecked) "enabled" else "disabled"}"
+            )
+            presenter.onScoresSwitched(isChecked)
         }
     }
 

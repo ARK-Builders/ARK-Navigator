@@ -2,6 +2,7 @@ package space.taran.arknavigator.mvp.view.item
 
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.preview.PreviewAndThumbnail
+import space.taran.arknavigator.utils.Score
 import java.nio.file.Path
 
 interface FileItemView {
@@ -23,4 +24,6 @@ interface FileItemView {
     fun setText(title: String, shortName: Boolean = false)
 
     fun setPinned(isPinned: Boolean)
+
+    fun displayScore(sortByScoresEnabled: Boolean, score: Score)
 }

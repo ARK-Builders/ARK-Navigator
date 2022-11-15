@@ -7,6 +7,6 @@ import space.taran.arknavigator.utils.Sorting
 
 @StateStrategyType(AddToEndSingleStrategy::class)
 interface SortDialogView : MvpView {
-    fun init(sorting: Sorting, ascending: Boolean)
+    fun init(sorting: Sorting, ascending: Boolean, sortByScoresEnabled: Boolean)
     fun closeDialog()
 }
