@@ -18,8 +18,12 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
 import space.taran.arknavigator.mvp.model.repo.kind.ResourceKind
 import space.taran.arknavigator.mvp.model.repo.meta.MetadataStorage
 import space.taran.arknavigator.mvp.model.repo.meta.MetadataStorageRepo
+import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
+import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.preview.PreviewStorage
 import space.taran.arknavigator.mvp.model.repo.preview.PreviewStorageRepo
+import space.taran.arknavigator.mvp.model.repo.scores.ScoreStorage
+import space.taran.arknavigator.mvp.model.repo.scores.ScoreStorageRepo
 import space.taran.arknavigator.mvp.model.repo.stats.StatsStorage
 import space.taran.arknavigator.mvp.model.repo.stats.StatsStorageRepo
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
@@ -31,6 +35,7 @@ import space.taran.arknavigator.navigation.Screens
 import space.taran.arknavigator.ui.adapter.previewpager.PreviewItemView
 import space.taran.arknavigator.ui.adapter.previewpager.PreviewPlainTextItemView
 import space.taran.arknavigator.utils.LogTags.GALLERY_SCREEN
+import space.taran.arknavigator.utils.Score
 import space.taran.arknavigator.utils.Tag
 import java.io.FileReader
 import java.nio.file.Files
@@ -64,10 +69,16 @@ class GalleryPresenter(
         private set
     lateinit var statsStorage: StatsStorage
         private set
+    lateinit var scoreStorage: ScoreStorage
+        private set
     var resources: MutableList<ResourceMeta> = mutableListOf()
         private set
     var diffResult: DiffUtil.DiffResult? = null
         private set
+    var sortByScores = false
+
+    @Inject
+    lateinit var preferences: Preferences
 
     @Inject
     lateinit var router: AppRouter
@@ -87,6 +98,9 @@ class GalleryPresenter(
     @Inject
     lateinit var statsStorageRepo: StatsStorageRepo
 
+    @Inject
+    lateinit var scoreStorageRepo: ScoreStorageRepo
+
     override fun onFirstViewAttach() {
         Log.d(GALLERY_SCREEN, "first view attached in GalleryPresenter")
         super.onFirstViewAttach()
@@ -103,10 +117,13 @@ class GalleryPresenter(
             previewStorage = previewStorageRepo.provide(rootAndFav)
             metadataStorage = metadataStorageRepo.provide(rootAndFav)
             statsStorage = statsStorageRepo.provide(rootAndFav)
+            scoreStorage = scoreStorageRepo.provide(rootAndFav)
             resources = resourcesIds.map { index.getMeta(it) }.toMutableList()
+            sortByScores = preferences.get(PreferenceKey.SortByScores)
 
             viewState.updatePagerAdapter()
             viewState.setProgressVisibility(false)
+            viewState.setScoringControlsVisibility(sortByScores)
         }
     }
 
@@ -219,6 +236,22 @@ class GalleryPresenter(
         viewState.showEditTagsDialog(currentResource.id)
     }
 
+    fun onIncreaseScore() = changeScore(1)
+
+    fun onDecreaseScore() = changeScore(-1)
+
+    private fun changeScore(inc: Score) = presenterScope.launch {
+        val score = scoreStorage.getScore(currentResource.id) + inc
+        scoreStorage.setScore(currentResource.id, score)
+        withContext(Dispatchers.IO) {
+            scoreStorage.persist()
+        }
+        withContext(Dispatchers.Main) {
+            viewState.displayScore(score)
+        }
+        viewState.notifyResourceScoresChanged()
+    }
+
     private fun checkResourceChanges(
         pos: Int
     ) = presenterScope.launch(Dispatchers.IO) {
@@ -250,8 +283,10 @@ class GalleryPresenter(
         val resource = resources[currentPos]
         val tags = storage.getTags(resource.id)
         val filePath = index.getPath(resource.id)
+        val score = scoreStorage.getScore(resource.id)
         viewState.setupPreview(currentPos, resource, filePath.fileName.toString())
         viewState.displayPreviewTags(resource.id, tags)
+        viewState.displayScore(score)
     }
 
     private suspend fun onRemovedResourceDetected() = withContext(Dispatchers.Main) {

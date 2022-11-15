@@ -69,6 +69,8 @@ class PreferencesImpl @Inject constructor(val context: Context) : ArkPreferences
                 booleanPreferencesKey("short_file_names")
             PreferenceKey.CollectTagUsageStats ->
                 booleanPreferencesKey("collect_tag_usage_stats")
+            PreferenceKey.SortByScores ->
+                booleanPreferencesKey("sort_using_scores")
         }
 
         return result as Preferences.Key<T>

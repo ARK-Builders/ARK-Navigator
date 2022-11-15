@@ -21,15 +21,19 @@
         android:text="@string/edit_tags" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_pin"
+        android:id="@+id/btn_increaseScore"
         style="@style/PopupTextButtonMedium"
-        android:text="@string/pin" />
+        android:text="@string/increase_score" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_unpin"
+        android:id="@+id/btn_decreaseScore"
         style="@style/PopupTextButtonMedium"
-        android:visibility="gone"
-        android:text="@string/unpin"/>
+        android:text="@string/decrease_score" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_resetScores"
+        style="@style/PopupTextButtonMedium"
+        android:text="@string/reset_scores" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_share"
@@ -40,5 +44,4 @@
         android:id="@+id/btn_remove"
         style="@style/PopupTextButtonMedium"
         android:text="@string/remove" />
-
 </LinearLayout>

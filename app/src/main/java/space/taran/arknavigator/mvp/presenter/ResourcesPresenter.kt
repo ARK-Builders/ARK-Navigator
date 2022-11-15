@@ -204,15 +204,29 @@ class ResourcesPresenter(
         migrateTags(resourcesToCopy, directoryToCopy)
     }
 
-    fun onShuffleResources() = presenterScope.launch(Dispatchers.Default) {
+    fun onShuffleSwitchedOn() = presenterScope.launch(Dispatchers.Default) {
         gridPresenter.shuffleResources()
     }
 
-    fun onPinSelectedResources(pinIt: Boolean) = presenterScope.launch {
-        gridPresenter.pinSelectedResources(pinIt)
+    fun onShuffleSwitchedOff() = presenterScope.launch {
+        gridPresenter.unShuffleResources()
     }
 
-    fun showOrHidePinning() = gridPresenter.areSelectedResourcesUnPinned()
+    fun onIncreaseScoreClicked() = presenterScope.launch(Dispatchers.Default) {
+        gridPresenter.increaseScore()
+    }
+
+    fun onDecreaseScoreClicked() = presenterScope.launch(Dispatchers.Default) {
+        gridPresenter.decreaseScore()
+    }
+
+    fun onResetScoresClicked() = presenterScope.launch(Dispatchers.IO) {
+        gridPresenter.resetScores()
+    }
+
+    fun allowScoring() = gridPresenter.allowScoring()
+
+    fun allowResettingScores() = gridPresenter.allowResettingScores()
 
     fun onShareSelectedResourcesClicked() = presenterScope.launch {
         val selected = gridPresenter
@@ -242,6 +256,14 @@ class ResourcesPresenter(
             gridPresenter.onSelectingChanged(false)
             viewState.setProgressVisibility(false)
         }
+    }
+
+    fun updateAdapterWithScores() {
+        Log.d(
+            RESOURCES_SCREEN,
+            "updating resources after scores change"
+        )
+        gridPresenter.updateAdapterWithScores()
     }
 
     private suspend fun migrateTags(resources: List<ResourceId>, to: Path) {

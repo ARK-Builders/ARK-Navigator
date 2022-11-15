@@ -17,7 +17,8 @@ class SortDialogPresenter : MvpPresenter<SortDialogView>() {
         presenterScope.launch {
             val sorting = Sorting.values()[preferences.get(PreferenceKey.Sorting)]
             val ascending = preferences.get(PreferenceKey.IsSortingAscending)
-            viewState.init(sorting, ascending)
+            val sortByScores = preferences.get(PreferenceKey.SortByScores)
+            viewState.init(sorting, ascending, sortByScores)
         }
     }
 
@@ -28,6 +29,11 @@ class SortDialogPresenter : MvpPresenter<SortDialogView>() {
 
     fun onAscendingSelected(ascending: Boolean) = presenterScope.launch {
         preferences.set(PreferenceKey.IsSortingAscending, ascending)
+        viewState.closeDialog()
+    }
+
+    fun onScoresSwitched(enabled: Boolean) = presenterScope.launch {
+        preferences.set(PreferenceKey.SortByScores, enabled)
         viewState.closeDialog()
     }
 }

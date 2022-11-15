@@ -5,6 +5,7 @@ import moxy.viewstate.strategy.SkipStrategy
 import moxy.viewstate.strategy.StateStrategyType
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
+import space.taran.arknavigator.utils.Score
 import space.taran.arknavigator.utils.Tags
 import java.nio.file.Path
 
@@ -19,6 +20,8 @@ interface GalleryView : CommonMvpView {
     fun setupPreview(pos: Int, resource: ResourceMeta, filePath: String)
     fun displayPreviewTags(resource: ResourceId, tags: Tags)
     fun setProgressVisibility(isVisible: Boolean, withText: String = "")
+    fun displayScore(score: Score)
+    fun setScoringControlsVisibility(isVisible: Boolean)
 
     @StateStrategyType(SkipStrategy::class)
     fun openLink(link: String)
@@ -42,4 +45,6 @@ interface GalleryView : CommonMvpView {
     fun notifyTagsChanged()
     @StateStrategyType(SkipStrategy::class)
     fun notifyCurrentItemChanged()
+    @StateStrategyType(SkipStrategy::class)
+    fun notifyResourceScoresChanged()
 }

@@ -87,6 +87,8 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
 
     private var tagsSelectorAdapter: TagsSelectorAdapter? = null
 
+    private var shuffledState = -1
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -183,6 +185,10 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
 
     override fun updateAdapter() {
         resourcesAdapter?.notifyDataSetChanged()
+    }
+
+    override fun updateAdapterWithScores() {
+        presenter.updateAdapterWithScores()
     }
 
     override fun updateMenu() = with(binding) {
@@ -301,8 +307,19 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
             presenter.tagsSelectorPresenter.onQueryModeChanged(QueryMode.FOCUS)
         }
 
-        actionBar.btnShuffle.setOnClickListener {
-            presenter.onShuffleResources()
+        actionBar.btnShuffle.apply {
+            setOnClickListener {
+                shuffledState *= -1
+                val dice = this.drawable
+                if (shuffledState == -1) {
+                    dice?.setTintList(null)
+                    presenter.onShuffleSwitchedOff()
+                }
+                if (shuffledState == 1) {
+                    dice?.setTint(R.color.blue)
+                    presenter.onShuffleSwitchedOn()
+                }
+            }
         }
     }
 
@@ -370,6 +387,18 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
                     onResourcesOrTagsChanged()
                 }
             }
+        }
+
+        setFragmentResultListener(
+            RESET_SCORES_FOR_SELECTED
+        ) { _, _ ->
+            presenter.onResetScoresClicked()
+        }
+
+        setFragmentResultListener(
+            GalleryFragment.SCORES_CHANGED_KEY
+        ) { _, _ ->
+            presenter.updateAdapterWithScores()
         }
     }
 
@@ -473,6 +502,7 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         private const val MOVE_CONFIRMATION_REQUEST_KEY = "moveConfirm"
         const val DELETE_CONFIRMATION_REQUEST_KEY = "deleteConfirm"
         private const val MOVE_TO_PATH_KEY = "moveToPath"
+        const val RESET_SCORES_FOR_SELECTED = "resetSelectedScores"
 
         private const val DRAG_TRAVEL_TIME_THRESHOLD = 30 // milliseconds
         private const val DRAG_TRAVEL_DELTA_THRESHOLD = 0.1 // ratio

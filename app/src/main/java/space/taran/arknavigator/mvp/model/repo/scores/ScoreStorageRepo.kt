@@ -25,12 +25,13 @@ class ScoreStorageRepo(
                     val index = indexRepo.provide(root)
                     val resources = index.listAllIds()
                     if (storageByRoot[root] != null) {
+                        storageByRoot[root]?.refresh(resources)
                         storageByRoot[root]!!
                     } else {
-                        val fresh = PlainScoreStorage(root, resources)
-                        fresh.init()
-                        storageByRoot[root] = fresh
-                        fresh
+                        val scoreStorage = PlainScoreStorage(root, resources)
+                        scoreStorage.init()
+                        storageByRoot[root] = scoreStorage
+                        scoreStorage
                     }
                 }
                 return@withContext AggregatedScoreStorage(storageShards)

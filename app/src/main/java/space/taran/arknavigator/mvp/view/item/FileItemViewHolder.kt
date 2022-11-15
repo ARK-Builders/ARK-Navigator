@@ -1,6 +1,7 @@
 package space.taran.arknavigator.mvp.view.item
 
 import android.animation.ValueAnimator
+import android.view.View
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import space.taran.arknavigator.R
@@ -9,6 +10,7 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.mvp.model.repo.preview.PreviewAndThumbnail
 import space.taran.arknavigator.ui.extra.ExtraLoader
 import space.taran.arknavigator.utils.ImageUtils
+import space.taran.arknavigator.utils.Score
 import space.taran.arknavigator.utils.dpToPx
 import space.taran.arknavigator.utils.extension
 import java.nio.file.Path
@@ -116,6 +118,26 @@ class FileItemViewHolder(
 
     override fun setPinned(isPinned: Boolean) {
         binding.vPinned.isVisible = isPinned
+    }
+
+    override fun displayScore(sortByScoresEnabled: Boolean, score: Score) {
+        with(binding) {
+            if (!sortByScoresEnabled) {
+                scoreValue.visibility = View.GONE
+                vPriority.visibility = View.GONE
+                return
+            }
+            if (score == 0) {
+                scoreValue.visibility = View.GONE
+                vPriority.visibility = View.GONE
+                return
+            }
+            scoreValue.apply {
+                text = score.toString()
+                isVisible = true
+            }
+            vPriority.isVisible = true
+        }
     }
 
     companion object {

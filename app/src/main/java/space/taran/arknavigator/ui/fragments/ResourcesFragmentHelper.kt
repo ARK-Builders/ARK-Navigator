@@ -94,32 +94,45 @@ fun ResourcesFragment.setupAndShowSelectedResourcesMenu(menuBtn: View) {
                 .show(parentFragmentManager, null)
             popup.popupWindow.dismiss()
         }
-        with(btnPin) {
-            isVisible = presenter.showOrHidePinning()
+        with(btnIncreaseScore) {
+            isVisible = presenter.allowScoring()
             setOnClickListener {
-                val selected = presenter.gridPresenter.selectedResources
-                if (selected.isEmpty()) {
-                    toast(R.string.select_at_least_one_resource)
-                    popup.popupWindow.dismiss()
-                    return@setOnClickListener
-                }
-                presenter.onPinSelectedResources(true)
-                onSelectingChanged(false)
+                presenter.onIncreaseScoreClicked()
                 popup.popupWindow.dismiss()
             }
         }
-        with(btnUnpin) {
-            isVisible = !presenter.showOrHidePinning()
+        with(btnDecreaseScore) {
+            isVisible = presenter.allowScoring()
             setOnClickListener {
-                val selected = presenter.gridPresenter.selectedResources
-                if (selected.isEmpty()) {
+                presenter.onDecreaseScoreClicked()
+                popup.popupWindow.dismiss()
+            }
+        }
+        with(btnResetScores) {
+            val selectedSize = presenter.gridPresenter.selectedResources.size
+            isVisible = presenter.allowResettingScores()
+            text = getString(
+                R.string.reset_scores,
+                if (selectedSize == 1) "" else "s"
+            )
+            setOnClickListener {
+                popup.popupWindow.dismiss()
+                if (selectedSize == 0) {
                     toast(R.string.select_at_least_one_resource)
                     popup.popupWindow.dismiss()
                     return@setOnClickListener
                 }
-                presenter.onPinSelectedResources(false)
-                onSelectingChanged(false)
-                popup.popupWindow.dismiss()
+                ConfirmationDialogFragment.newInstance(
+                    getString(R.string.are_you_sure),
+                    getString(
+                        R.string.resource_scores_erased,
+                        selectedSize,
+                        if (selectedSize == 1) "" else "s"
+                    ),
+                    getString(R.string.yes),
+                    getString(R.string.no),
+                    ResourcesFragment.RESET_SCORES_FOR_SELECTED
+                ).show(parentFragmentManager, null)
             }
         }
     }
