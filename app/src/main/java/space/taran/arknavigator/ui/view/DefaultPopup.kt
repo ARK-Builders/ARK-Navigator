@@ -17,9 +17,9 @@ class DefaultPopup(
     @DrawableRes val bgId: Int? = null,
     val elevation: Float = 0f,
 ) {
-    val popupWindow: PopupWindow
+    lateinit var popupWindow: PopupWindow
 
-    init {
+    private fun init() {
         val context = binding.root.context
         binding.root.measure(
             View.MeasureSpec.UNSPECIFIED,
@@ -49,6 +49,7 @@ class DefaultPopup(
     }
 
     fun showAbove(target: View) {
+        init()
         val targetRect = getViewRectOnScreen(target)
         val xOffset = (target.width - binding.root.measuredWidth) / 2
         val popupLeft = targetRect.left + xOffset
@@ -61,6 +62,7 @@ class DefaultPopup(
     }
 
     fun showBelow(target: View) {
+        init()
         val targetRect = getViewRectOnScreen(target)
         val xOffset = (target.width - binding.root.measuredWidth) / 2
         val popupLeft = targetRect.left + xOffset

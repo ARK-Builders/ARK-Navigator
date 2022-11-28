@@ -43,25 +43,30 @@ class SortDialogFragment : MvpAppCompatDialogFragment(), SortDialogView {
         ascending: Boolean,
         sortByScoresEnabled: Boolean
     ) = with(binding) {
-        when (sorting) {
-            Sorting.DEFAULT -> rbDefault.isChecked = true
-            Sorting.NAME -> rbName.isChecked = true
-            Sorting.SIZE -> rbSize.isChecked = true
-            Sorting.LAST_MODIFIED -> rbLastModified.isChecked = true
-            Sorting.TYPE -> rbType.isChecked = true
+        val selectedSortingBtn = when (sorting) {
+            Sorting.DEFAULT -> rbDefault
+            Sorting.NAME -> rbName
+            Sorting.SIZE -> rbSize
+            Sorting.LAST_MODIFIED -> rbLastModified
+            Sorting.TYPE -> rbType
         }
+        selectedSortingBtn.isChecked = true
+        selectedSortingBtn.jumpDrawablesToCurrentState()
 
         if (sorting == Sorting.DEFAULT) {
             changeSortOrderEnabledStatus(this, false)
         } else {
             if (ascending) {
                 rbAscending.isChecked = true
+                rbAscending.jumpDrawablesToCurrentState()
             } else {
                 rbDescending.isChecked = true
+                rbDescending.jumpDrawablesToCurrentState()
             }
         }
         if (sortByScoresEnabled) {
             swScores.isChecked = true
+            swScores.jumpDrawablesToCurrentState()
         }
 
         rgSorting.setOnCheckedChangeListener { _, checkedId ->
