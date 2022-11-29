@@ -7,14 +7,18 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import moxy.MvpPresenter
 import moxy.presenterScope
-import space.taran.arknavigator.mvp.model.repo.FoldersRepo
+import space.taran.arkfilepicker.folders.FoldersRepo
+import space.taran.arkfilepicker.folders.RootAndFav
+import space.taran.arkfilepicker.presentation.folderstree.DeviceNode
+import space.taran.arkfilepicker.presentation.folderstree.FavoriteNode
+import space.taran.arkfilepicker.presentation.folderstree.FolderNode
+import space.taran.arkfilepicker.presentation.folderstree.RootNode
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
-import space.taran.arknavigator.mvp.presenter.adapter.folderstree.FoldersTreePresenter
 import space.taran.arknavigator.mvp.view.FoldersView
 import space.taran.arknavigator.navigation.AppRouter
-import space.taran.arknavigator.ui.App
+import space.taran.arknavigator.navigation.Screens
 import space.taran.arknavigator.ui.resource.StringProvider
 import space.taran.arknavigator.utils.LogTags.FOLDERS_SCREEN
 import space.taran.arknavigator.utils.listDevices
@@ -37,13 +41,6 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
     @Inject
     lateinit var preferences: Preferences
 
-    var foldersTreePresenter = FoldersTreePresenter(
-        viewState,
-        ::onFoldersTreeAddFavoriteBtnClick
-    ).apply {
-        App.instance.appComponent.inject(this)
-    }
-
     private lateinit var devices: List<Path>
     override fun onFirstViewAttach() {
         Log.d(FOLDERS_SCREEN, "first view attached in RootsPresenter")
@@ -52,12 +49,12 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
         viewState.init()
         presenterScope.launch {
             viewState.setProgressVisibility(true, "Loading")
-            val folders = foldersRepo.provideFoldersWithMissing()
+            val folders = foldersRepo.provideWithMissing()
             devices = listDevices()
 
             viewState.toastFailedPath(folders.failed)
 
-            foldersTreePresenter.updateNodes(devices, folders.succeeded)
+            viewState.updateFoldersTree(devices, folders.succeeded)
             viewState.setProgressVisibility(false)
 
             if (!preferences.get(PreferenceKey.WasRootsScanShown) &&
@@ -69,8 +66,28 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
         }
     }
 
-    private fun onFoldersTreeAddFavoriteBtnClick(path: Path) {
-        viewState.openRootPickerDialog(listOf(path))
+    fun onNavigateBtnClick(node: FolderNode) {
+        when (node) {
+            is DeviceNode -> {}
+            is RootNode -> {
+                router.navigateTo(
+                    Screens.ResourcesScreen(
+                        RootAndFav(node.path.toString(), null)
+                    )
+                )
+            }
+            is FavoriteNode -> {
+                router.navigateTo(
+                    Screens.ResourcesScreen(
+                        RootAndFav(node.root.toString(), node.path.toString())
+                    )
+                )
+            }
+        }
+    }
+
+    fun onFoldersTreeAddFavoriteBtnClick(node: FolderNode) {
+        viewState.openRootPickerDialog(listOf(node.path))
     }
 
     fun onAddRootBtnClick() {
@@ -104,7 +121,7 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
                 true,
                 "Indexing ${pos + 1}/${roots.size}"
             )
-            foldersRepo.insertRoot(root)
+            foldersRepo.addRoot(root)
             val index = resourcesIndexRepo.provide(root)
             index.kindDetectFailedFlow.onEach { failed ->
                 viewState.toastIndexFailedPath(failed)
@@ -112,7 +129,7 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
             index.reindex()
         }
         viewState.setProgressVisibility(false)
-        foldersTreePresenter.updateNodes(devices, foldersRepo.provideFolders())
+        viewState.updateFoldersTree(devices, foldersRepo.provideFolders())
     }
 
     private suspend fun addRoot(root: Path) {
@@ -125,7 +142,7 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
             throw AssertionError("Path must be checked in RootPicker")
         }
 
-        foldersRepo.insertRoot(path)
+        foldersRepo.addRoot(path)
 
         viewState.toastIndexingCanTakeMinutes()
 
@@ -138,7 +155,7 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
 
         viewState.setProgressVisibility(false)
 
-        foldersTreePresenter.updateNodes(devices, foldersRepo.provideFolders())
+        viewState.updateFoldersTree(devices, foldersRepo.provideFolders())
     }
 
     private fun addFavorite(favorite: Path) =
@@ -158,9 +175,9 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
                 throw AssertionError("Path must be checked in RootPicker")
             }
 
-            foldersRepo.insertFavorite(root, relative)
+            foldersRepo.addFavorite(root, relative)
 
-            foldersTreePresenter.updateNodes(devices, foldersRepo.provideFolders())
+            viewState.updateFoldersTree(devices, foldersRepo.provideFolders())
             viewState.setProgressVisibility(false)
         }
 

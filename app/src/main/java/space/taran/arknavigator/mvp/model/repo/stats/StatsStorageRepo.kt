@@ -1,7 +1,7 @@
 package space.taran.arknavigator.mvp.model.repo.stats
 
-import space.taran.arknavigator.mvp.model.repo.FoldersRepo
-import space.taran.arknavigator.mvp.model.repo.RootAndFav
+import space.taran.arkfilepicker.folders.FoldersRepo
+import space.taran.arkfilepicker.folders.RootAndFav
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo

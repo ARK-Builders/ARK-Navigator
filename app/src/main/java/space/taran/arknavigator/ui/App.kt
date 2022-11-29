@@ -9,11 +9,11 @@ import org.acra.config.httpSender
 import org.acra.data.StringFormat
 import org.acra.ktx.initAcra
 import org.acra.sender.HttpSender
+import space.taran.arkfilepicker.folders.FoldersRepo
 import space.taran.arknavigator.BuildConfig
 import space.taran.arknavigator.R
 import space.taran.arknavigator.di.AppComponent
 import space.taran.arknavigator.di.DaggerAppComponent
-import space.taran.arknavigator.di.modules.AppModule
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import timber.log.Timber
 
@@ -29,13 +29,18 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
 
+        FoldersRepo.init(this)
         Timber.plant(Timber.DebugTree())
 
         instance = this
 
-        appComponent = DaggerAppComponent.builder()
-            .appModule(AppModule(this))
-            .build()
+        appComponent = DaggerAppComponent
+            .factory()
+            .create(
+                app = this,
+                context = this,
+                foldersRepo = FoldersRepo.instance
+            )
 
         initAcra()
         appComponent.arkBackup().backup()

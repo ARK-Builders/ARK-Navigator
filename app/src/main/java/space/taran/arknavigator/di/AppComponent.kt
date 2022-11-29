@@ -1,6 +1,9 @@
 package space.taran.arknavigator.di
 
+import android.content.Context
+import dagger.BindsInstance
 import dagger.Component
+import space.taran.arkfilepicker.folders.FoldersRepo
 import space.taran.arknavigator.di.modules.AppModule
 import space.taran.arknavigator.di.modules.CiceroneModule
 import space.taran.arknavigator.di.modules.DatabaseModule
@@ -12,12 +15,12 @@ import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 import space.taran.arknavigator.mvp.presenter.MainPresenter
 import space.taran.arknavigator.mvp.presenter.ResourcesPresenter
 import space.taran.arknavigator.mvp.presenter.adapter.ResourcesGridPresenter
-import space.taran.arknavigator.mvp.presenter.adapter.folderstree.FoldersTreePresenter
 import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagsSelectorPresenter
 import space.taran.arknavigator.mvp.presenter.dialog.EditTagsDialogPresenter
 import space.taran.arknavigator.mvp.presenter.dialog.FolderPickerDialogPresenter
 import space.taran.arknavigator.mvp.presenter.dialog.SortDialogPresenter
 import space.taran.arknavigator.mvp.view.item.FileItemViewHolder
+import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.adapter.TagsSelectorAdapter
 import space.taran.arknavigator.ui.adapter.previewpager.PreviewItemViewHolder
@@ -52,7 +55,6 @@ interface AppComponent {
     fun inject(galleryFragment: GalleryFragment)
     fun inject(settingsFragment: SettingsFragment)
     fun inject(resourcesGridPresenter: ResourcesGridPresenter)
-    fun inject(foldersTreePresenter: FoldersTreePresenter)
     fun inject(editTagsDialogPresenter: EditTagsDialogPresenter)
     fun inject(fileItemViewHolder: FileItemViewHolder)
     fun inject(previewItemViewHolder: PreviewItemViewHolder)
@@ -61,4 +63,13 @@ interface AppComponent {
     fun inject(tagsSelectorPresenter: TagsSelectorPresenter)
     fun inject(tagsSelectorAdapter: TagsSelectorAdapter)
     fun inject(tagsSortDialogFragment: TagsSortDialogFragment)
+
+    @Component.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance app: App,
+            @BindsInstance context: Context,
+            @BindsInstance foldersRepo: FoldersRepo
+        ): AppComponent
+    }
 }

@@ -19,9 +19,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import moxy.MvpAppCompatDialogFragment
 import moxy.ktx.moxyPresenter
+import space.taran.arkfilepicker.folders.RootAndFav
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.DialogEditTagsBinding
-import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.stats.StatsStorage

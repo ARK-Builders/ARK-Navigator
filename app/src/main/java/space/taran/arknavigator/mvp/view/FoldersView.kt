@@ -9,7 +9,7 @@ import java.nio.file.Path
 interface FoldersView : CommonMvpView {
     fun init()
     fun setProgressVisibility(isVisible: Boolean, withText: String = "")
-    fun updateFoldersTree()
+    fun updateFoldersTree(devices: List<Path>, rootsWithFavs: Map<Path, List<Path>>)
 
     @StateStrategyType(SkipStrategy::class)
     fun openRootPickerDialog(paths: List<Path>)

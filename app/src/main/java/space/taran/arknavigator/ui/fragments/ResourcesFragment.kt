@@ -21,11 +21,11 @@ import kotlinx.coroutines.launch
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import moxy.presenterScope
-import space.taran.arkfilepicker.onArkPathPicked
+import space.taran.arkfilepicker.folders.RootAndFav
+import space.taran.arkfilepicker.presentation.onArkPathPicked
 import space.taran.arknavigator.BuildConfig
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.FragmentResourcesBinding
-import space.taran.arknavigator.mvp.model.repo.RootAndFav
 import space.taran.arknavigator.mvp.presenter.ResourcesPresenter
 import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.QueryMode
 import space.taran.arknavigator.mvp.view.ResourcesView

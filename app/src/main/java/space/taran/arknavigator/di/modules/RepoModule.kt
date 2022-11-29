@@ -3,8 +3,8 @@ package space.taran.arknavigator.di.modules
 import android.util.Log
 import dagger.Module
 import dagger.Provides
+import space.taran.arkfilepicker.folders.FoldersRepo
 import space.taran.arknavigator.mvp.model.dao.Database
-import space.taran.arknavigator.mvp.model.repo.FoldersRepo
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
 import space.taran.arknavigator.mvp.model.repo.meta.MetadataStorageRepo
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
@@ -16,13 +16,6 @@ import javax.inject.Singleton
 
 @Module
 class RepoModule {
-    @Singleton
-    @Provides
-    fun foldersRepo(database: Database): FoldersRepo {
-        Log.d(MAIN, "creating FoldersRepo")
-        return FoldersRepo(database.rootDao())
-    }
-
     @Singleton
     @Provides
     fun resourcesIndexesRepo(
