@@ -4,7 +4,7 @@ import android.util.Log
 import kotlinx.coroutines.launch
 import moxy.MvpPresenter
 import moxy.presenterScope
-import space.taran.arknavigator.mvp.model.repo.FoldersRepo
+import space.taran.arkfilepicker.folders.FoldersRepo
 import space.taran.arknavigator.mvp.presenter.adapter.FoldersGridPresenter
 import space.taran.arknavigator.mvp.view.dialog.FolderPickerDialogView
 import space.taran.arknavigator.utils.LogTags.FOLDER_PICKER
@@ -31,7 +31,7 @@ class FolderPickerDialogPresenter(
         presenterScope.launch {
             devices = listDevices()
             viewState.init()
-            val folders = foldersRepo.provideFoldersWithMissing().succeeded
+            val folders = foldersRepo.provideWithMissing().succeeded
             roots = folders.keys
             favorites = folders.values.flatten()
             gridPresenter.init(paths)

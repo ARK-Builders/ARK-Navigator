@@ -10,8 +10,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import moxy.MvpPresenter
 import moxy.presenterScope
-import space.taran.arknavigator.mvp.model.repo.FoldersRepo
-import space.taran.arknavigator.mvp.model.repo.RootAndFav
+import space.taran.arkfilepicker.folders.FoldersRepo
+import space.taran.arkfilepicker.folders.RootAndFav
 import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
@@ -101,7 +101,7 @@ class ResourcesPresenter(
         viewState.init()
         presenterScope.launch {
             viewState.setProgressVisibility(true, "Indexing")
-            val folders = foldersRepo.provideFoldersWithMissing()
+            val folders = foldersRepo.provideWithMissing()
             Log.d(RESOURCES_SCREEN, "folders retrieved: $folders")
 
             viewState.toastPathsFailed(folders.failed)
@@ -112,7 +112,7 @@ class ResourcesPresenter(
                     throw AssertionError("Requested root wasn't found in DB")
                 }
 
-                listOf(rootAndFav.root)
+                listOf(rootAndFav.root!!)
             } else {
                 all.toList()
             }

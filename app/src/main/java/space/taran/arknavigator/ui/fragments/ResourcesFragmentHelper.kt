@@ -3,8 +3,8 @@ package space.taran.arknavigator.ui.fragments
 import android.view.View
 import androidx.core.view.isVisible
 import space.taran.arkfilepicker.ArkFilePickerConfig
-import space.taran.arkfilepicker.ArkFilePickerFragment
-import space.taran.arkfilepicker.ArkFilePickerMode
+import space.taran.arkfilepicker.presentation.filepicker.ArkFilePickerFragment
+import space.taran.arkfilepicker.presentation.filepicker.ArkFilePickerMode
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.PopupSelectedResourcesActionsBinding
 import space.taran.arknavigator.ui.fragments.dialog.ConfirmationDialogFragment
@@ -140,11 +140,13 @@ fun ResourcesFragment.setupAndShowSelectedResourcesMenu(menuBtn: View) {
 private fun moveFilePickerConfig() = ArkFilePickerConfig(
     titleStringId = R.string.move_to,
     mode = ArkFilePickerMode.FOLDER,
-    pathPickedRequestKey = ResourcesFragment.MOVE_SELECTED_REQUEST_KEY
+    pathPickedRequestKey = ResourcesFragment.MOVE_SELECTED_REQUEST_KEY,
+    showRoots = true
 )
 
 private fun copyFilePickerConfig() = ArkFilePickerConfig(
     titleStringId = R.string.copy_to,
     mode = ArkFilePickerMode.FOLDER,
-    pathPickedRequestKey = ResourcesFragment.COPY_SELECTED_REQUEST_KEY
+    pathPickedRequestKey = ResourcesFragment.COPY_SELECTED_REQUEST_KEY,
+    showRoots = true
 )

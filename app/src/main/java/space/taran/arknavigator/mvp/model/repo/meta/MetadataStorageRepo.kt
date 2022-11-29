@@ -1,7 +1,7 @@
 package space.taran.arknavigator.mvp.model.repo.meta
 
-import space.taran.arknavigator.mvp.model.repo.FoldersRepo
-import space.taran.arknavigator.mvp.model.repo.RootAndFav
+import space.taran.arkfilepicker.folders.FoldersRepo
+import space.taran.arkfilepicker.folders.RootAndFav
 import java.nio.file.Path
 
 class MetadataStorageRepo(

@@ -2,7 +2,7 @@ package space.taran.arknavigator.mvp.presenter
 
 import android.util.Log
 import moxy.MvpPresenter
-import space.taran.arknavigator.mvp.model.repo.RootAndFav
+import space.taran.arkfilepicker.folders.RootAndFav
 import space.taran.arknavigator.mvp.view.MainView
 import space.taran.arknavigator.navigation.AppRouter
 import space.taran.arknavigator.navigation.Screens

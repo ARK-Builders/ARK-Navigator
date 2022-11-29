@@ -11,13 +11,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
+import space.taran.arkfilepicker.presentation.folderstree.FolderTreeView
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.FragmentFoldersBinding
 import space.taran.arknavigator.mvp.presenter.FoldersPresenter
 import space.taran.arknavigator.mvp.view.FoldersView
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.activity.MainActivity
-import space.taran.arknavigator.ui.adapter.folderstree.FoldersTreeAdapter
 import space.taran.arknavigator.ui.fragments.dialog.FolderPickerDialogFragment
 import space.taran.arknavigator.ui.fragments.dialog.RootsScanDialogFragment
 import space.taran.arknavigator.ui.fragments.utils.toast
@@ -29,7 +29,6 @@ import java.nio.file.Path
 import kotlin.io.path.Path
 
 class FoldersFragment : MvpAppCompatFragment(), FoldersView {
-    private var foldersTreeAdapter: FoldersTreeAdapter? = null
 
     private lateinit var binding: FragmentFoldersBinding
     private val presenter by moxyPresenter {
@@ -39,6 +38,7 @@ class FoldersFragment : MvpAppCompatFragment(), FoldersView {
         }
     }
     private lateinit var stackedToasts: StackedToasts
+    private var foldersTree: FolderTreeView? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -61,9 +61,13 @@ class FoldersFragment : MvpAppCompatFragment(), FoldersView {
         Log.d(FOLDERS_SCREEN, "initializing FoldersFragment")
         (activity as MainActivity).setSelectedTab(R.id.page_roots)
         stackedToasts = StackedToasts(binding.rvToasts, lifecycleScope)
-        foldersTreeAdapter = FoldersTreeAdapter(presenter.foldersTreePresenter)
         binding.rvRoots.layoutManager = LinearLayoutManager(context)
-        binding.rvRoots.adapter = foldersTreeAdapter
+        foldersTree = FolderTreeView(
+            binding.rvRoots,
+            onNavigateClick = presenter::onNavigateBtnClick,
+            onAddClick = { presenter.onFoldersTreeAddFavoriteBtnClick(it) },
+            showAdd = true
+        )
 
         initResultListeners()
 
@@ -88,8 +92,11 @@ class FoldersFragment : MvpAppCompatFragment(), FoldersView {
         }
     }
 
-    override fun updateFoldersTree() {
-        foldersTreeAdapter?.dispatchUpdates()
+    override fun updateFoldersTree(
+        devices: List<Path>,
+        rootsWithFavs: Map<Path, List<Path>>
+    ) {
+        foldersTree?.set(devices, rootsWithFavs)
     }
 
     override fun openRootPickerDialog(paths: List<Path>) =
