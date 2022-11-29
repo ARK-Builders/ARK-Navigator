@@ -11,10 +11,10 @@ class AggregatedScoreStorage(
     override fun contains(id: ResourceId) = shards
         .any { it.contains(id) }
 
-    override fun setScore(id: ResourceId, score: Score) {
+    override fun setScore(id: ResourceId, name: String, score: Score) {
         shards.forEach {
             if (it.contains(id))
-                it.setScore(id, score)
+                it.setScore(id, name, score)
         }
     }
 

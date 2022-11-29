@@ -245,9 +245,9 @@ class ResourcesGridPresenter(
     }
 
     fun allowScoring() =
-        selectedResources.isNotEmpty() && selectedResources.size == 1 && sortByScores
+        selectedResources.isNotEmpty() && sortByScores
 
-    fun allowResettingScores() = selectedResources.isNotEmpty() && sortByScores &&
+    fun allowResettingScores() = allowScoring() &&
         selectedResources.all {
             scoreStorage.getScore(it.id) > 0 || scoreStorage.getScore(it.id) < 0
         }
@@ -258,31 +258,27 @@ class ResourcesGridPresenter(
     }
 
     private suspend fun changeScore(inc: Int) = withContext(Dispatchers.Default) {
-        val selectedResource: ResourceMeta = with(selectedResources) {
-            if (isEmpty())
-                return@withContext
-            if (size > 1)
-                return@withContext
-            this[0]
+        with(selectedResources) {
+            if (isNotEmpty()) {
+                this.forEach {
+                    val score = scoreStorage.getScore(it.id)
+                    scoreStorage.setScore(it.id, it.name, score + inc)
+                }
+            }
         }
-        val score = scoreStorage.getScore(selectedResource.id)
-        scoreStorage.setScore(selectedResource.id, score + inc)
         withContext(Dispatchers.IO) {
             scoreStorage.persist()
         }
         withContext(Dispatchers.Main) {
             sortAllResources()
             sortSelectionAndUpdateAdapter()
-            onSelectingChanged(false)
         }
     }
 
-    private fun compareResourcesByScores() = compareBy<ResourceItem> {
-        scoreStorage.getScore(it.meta.id) == 0
-    }.then { a, b ->
+    private fun compareResourcesByScores() = Comparator<ResourceItem> { a, b ->
         val aScore = scoreStorage.getScore(a.meta.id)
         val bScore = scoreStorage.getScore(b.meta.id)
-        bScore.compareTo(aScore)
+        aScore.compareTo(bScore)
     }
 
     private fun updateSorting(sorting: Sorting) {

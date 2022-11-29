@@ -87,7 +87,7 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
 
     private var tagsSelectorAdapter: TagsSelectorAdapter? = null
 
-    private var shuffledState = -1
+    private var isShuffled = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -309,15 +309,14 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
 
         actionBar.btnShuffle.apply {
             setOnClickListener {
-                shuffledState *= -1
                 val dice = this.drawable
-                if (shuffledState == -1) {
-                    dice?.setTintList(null)
-                    presenter.onShuffleSwitchedOff()
-                }
-                if (shuffledState == 1) {
+                isShuffled = !isShuffled
+                if (isShuffled) {
                     dice?.setTint(R.color.blue)
                     presenter.onShuffleSwitchedOn()
+                } else {
+                    dice?.setTintList(null)
+                    presenter.onShuffleSwitchedOff()
                 }
             }
         }

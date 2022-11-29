@@ -98,14 +98,12 @@ fun ResourcesFragment.setupAndShowSelectedResourcesMenu(menuBtn: View) {
             isVisible = presenter.allowScoring()
             setOnClickListener {
                 presenter.onIncreaseScoreClicked()
-                popup.popupWindow.dismiss()
             }
         }
         with(btnDecreaseScore) {
             isVisible = presenter.allowScoring()
             setOnClickListener {
                 presenter.onDecreaseScoreClicked()
-                popup.popupWindow.dismiss()
             }
         }
         with(btnResetScores) {
