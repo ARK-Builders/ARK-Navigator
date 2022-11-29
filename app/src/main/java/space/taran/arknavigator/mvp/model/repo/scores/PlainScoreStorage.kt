@@ -24,11 +24,11 @@ class PlainScoreStorage(
 
     private var lastModified = FileTime.fromMillis(0L)
 
-    private lateinit var scoreById: MutableMap<ResourceId, Score>
+    private lateinit var scoreById: MutableMap<ResourceId, Pair<String, Score>>
 
     suspend fun init() = withContext(Dispatchers.IO) {
         val result = resources.associateWith {
-            0
+            "" to 0
         }.toMutableMap()
 
         if (Files.exists(storageFile)) {
@@ -49,20 +49,39 @@ class PlainScoreStorage(
         scoreById = result
     }
 
-    fun refresh(resources: Collection<ResourceId>) = run {
+    fun refresh(resources: Collection<ResourceMeta>) = run {
         Log.d(
             SCORES_STORAGE,
             "refreshing score storage with new and edited resources"
         )
         val scoreById = this.scoreById
-        this.scoreById = resources.associateWith {
-            0
-        }.toMutableMap()
-        this.scoreById.map { entry ->
-            if (scoreById.containsKey(entry.key)) {
-                this.scoreById[entry.key] = scoreById[entry.key]!!
+        this.scoreById = resources.map { it.id }
+            .associateWith { "" to 0 }
+            .toMutableMap()
+        resources.map { meta ->
+            scoreById.forEach {
+                if (it.key == meta.id) {
+                    this.scoreById[meta.id] = scoreById[meta.id]!!
+                }
+                if (it.value.first == meta.name) {
+                    Log.d(
+                        SCORES_STORAGE,
+                        "updating old id: ${it.key} for " +
+                            "score: ${it.value.second} with new id: ${meta.id}"
+                    )
+                    this.scoreById[meta.id] = meta.name to it.value.second
+                }
             }
         }
+
+        this.scoreById.map { entry ->
+            Log.d(
+                SCORES_STORAGE,
+                "updated resource: ${entry.key}, " +
+                    entry.value.first
+            )
+        }
+
         Log.d(
             SCORES_STORAGE,
             "${this.scoreById.size} resources available in score storage"
@@ -71,21 +90,19 @@ class PlainScoreStorage(
 
     override fun contains(id: ResourceId) = scoreById.containsKey(id)
 
-    override fun setScore(id: ResourceId, score: Score) {
+    override fun setScore(id: ResourceId, name: String, score: Score) {
         if (!scoreById.containsKey(id))
             error("Storage isn't aware of this resource id")
 
         Log.d(
             SCORES_STORAGE,
-            "new score for resource $id: $score"
+            "new score for resource $id, $name: $score"
         )
-        scoreById[id] = score
+        scoreById[id] = Pair(name, score)
     }
 
     override fun getScore(id: ResourceId) =
-        if (contains(id))
-            scoreById[id]!!
-        else 0
+        scoreById.getOrDefault(id, "" to 0).second
 
     override suspend fun persist() =
         withContext(Dispatchers.IO) {
@@ -96,7 +113,7 @@ class PlainScoreStorage(
     override suspend fun resetScores(resources: List<ResourceMeta>) {
         resources.map {
             if (scoreById.containsKey(it.id)) {
-                scoreById[it.id] = 0
+                scoreById[it.id] = "" to 0
             }
         }
         persist()
@@ -106,7 +123,7 @@ class PlainScoreStorage(
         )
     }
 
-    private suspend fun readStorage(): Map<ResourceId, Score> =
+    private suspend fun readStorage(): Map<ResourceId, Pair<String, Score>> =
         withContext(Dispatchers.IO) {
             val lines = Files.readAllLines(storageFile, UTF_8)
             val version = lines.removeAt(0)
@@ -114,13 +131,14 @@ class PlainScoreStorage(
             val result = lines.map {
                 val parts = it.split(KEY_VALUE_SEPARATOR)
                 val id = parts[0].toLong()
-                val score = parts[1].toInt()
+                val name = parts[1]
+                val score = parts[2].toInt()
 
                 if (score == 0)
                     throw AssertionError(
                         "score storage must have contained un-scored resources"
                     )
-                id to score
+                id to (name to score)
             }.toMap()
 
             Log.d("all scores", "$result")
@@ -134,12 +152,14 @@ class PlainScoreStorage(
         lines.add("$STORAGE_VERSION_PREFIX$STORAGE_VERSION")
 
         val entries = scoreById.filterValues {
-            it > 0 || it < 0
+            it.second != 0
         }
 
         lines.addAll(
-            entries.map { (id, score) ->
-                "$id$KEY_VALUE_SEPARATOR$score"
+            entries.map { (id, nameScorePair) ->
+                "$id$KEY_VALUE_SEPARATOR" +
+                    "${nameScorePair.first}$KEY_VALUE_SEPARATOR" +
+                    "${nameScorePair.second}"
             }
         )
 

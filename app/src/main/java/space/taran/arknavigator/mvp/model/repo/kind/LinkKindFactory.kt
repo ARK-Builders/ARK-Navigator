@@ -21,7 +21,8 @@ object LinkKindFactory : ResourceKindFactory<ResourceKind.Link> {
         // val linkJson = loadLinkFile(path.pathString)
         // val link = Json.decodeFromString(JsonLink.serializer(), linkJson)
 
-        return metadataStorage.locate(path, meta).kind as ResourceKind.Link
+        return metadataStorage.locate(path, meta)
+            .kind as ResourceKind.Link
     }
 
     override fun fromRoom(extras: Map<MetaExtraTag, String>): ResourceKind.Link =

@@ -242,7 +242,7 @@ class GalleryPresenter(
 
     private fun changeScore(inc: Score) = presenterScope.launch {
         val score = scoreStorage.getScore(currentResource.id) + inc
-        scoreStorage.setScore(currentResource.id, score)
+        scoreStorage.setScore(currentResource.id, currentResource.name, score)
         withContext(Dispatchers.IO) {
             scoreStorage.persist()
         }
@@ -295,6 +295,7 @@ class GalleryPresenter(
         index.reindex()
         // update current tags storage
         tagsStorageRepo.provide(rootAndFav)
+        scoreStorageRepo.provide(rootAndFav)
         invalidateResources()
         viewState.setProgressVisibility(false)
         viewState.notifyResourcesChanged()
@@ -313,6 +314,8 @@ class GalleryPresenter(
 
         index.updateResource(oldMeta.id, path, newMeta)
         tagsStorageRepo.provide(rootAndFav)
+
+        scoreStorageRepo.provide(rootAndFav)
 
         withContext(Dispatchers.Main) {
             viewState.notifyCurrentItemChanged()
