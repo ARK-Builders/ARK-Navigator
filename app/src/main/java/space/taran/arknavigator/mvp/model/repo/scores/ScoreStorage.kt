@@ -8,7 +8,7 @@ interface ScoreStorage {
 
     fun contains(id: ResourceId): Boolean
 
-    fun setScore(id: ResourceId, name: String, score: Score)
+    fun setScore(id: ResourceId, score: Score)
 
     fun getScore(id: ResourceId): Score
 

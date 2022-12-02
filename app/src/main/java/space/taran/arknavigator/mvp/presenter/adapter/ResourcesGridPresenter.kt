@@ -262,7 +262,7 @@ class ResourcesGridPresenter(
             if (isNotEmpty()) {
                 this.forEach {
                     val score = scoreStorage.getScore(it.id)
-                    scoreStorage.setScore(it.id, it.name, score + inc)
+                    scoreStorage.setScore(it.id, score + inc)
                 }
             }
         }
