@@ -87,11 +87,11 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
     }
 
     fun onFoldersTreeAddFavoriteBtnClick(node: FolderNode) {
-        viewState.openRootPickerDialog(listOf(node.path))
+        viewState.openRootPickerDialog(node.path)
     }
 
     fun onAddRootBtnClick() {
-        viewState.openRootPickerDialog(devices)
+        viewState.openRootPickerDialog(null)
     }
 
     fun onPickRootBtnClick(path: Path, rootNotFavorite: Boolean) =

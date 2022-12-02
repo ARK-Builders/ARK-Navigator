@@ -19,10 +19,10 @@ import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.preview.PreviewStorage
 import space.taran.arknavigator.mvp.model.repo.preview.PreviewStorageRepo
-import space.taran.arknavigator.mvp.model.repo.stats.StatsStorage
-import space.taran.arknavigator.mvp.model.repo.stats.StatsStorageRepo
 import space.taran.arknavigator.mvp.model.repo.scores.ScoreStorage
 import space.taran.arknavigator.mvp.model.repo.scores.ScoreStorageRepo
+import space.taran.arknavigator.mvp.model.repo.stats.StatsStorage
+import space.taran.arknavigator.mvp.model.repo.stats.StatsStorageRepo
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import space.taran.arknavigator.mvp.presenter.adapter.ResourcesGridPresenter
@@ -37,7 +37,6 @@ import java.nio.file.Path
 import javax.inject.Inject
 import kotlin.io.path.copyTo
 import kotlin.io.path.deleteIfExists
-import kotlin.io.path.name
 
 class ResourcesPresenter(
     val rootAndFav: RootAndFav,
@@ -166,7 +165,7 @@ class ResourcesPresenter(
         val jobs = resourcesToMove.map { id ->
             launch {
                 val path = index.getPath(id)
-                val newPath = directoryToMove.findNotExistCopyName(path.name)
+                val newPath = directoryToMove.findNotExistCopyName(path)
                 path.copyTo(newPath)
                 if (path != newPath)
                     path.deleteIfExists()
@@ -193,7 +192,7 @@ class ResourcesPresenter(
         resourcesToCopy.map { id ->
             launch {
                 val path = index.getPath(id)
-                val newPath = directoryToCopy.findNotExistCopyName(path.name)
+                val newPath = directoryToCopy.findNotExistCopyName(path)
                 path.copyTo(newPath)
             }
         }

@@ -18,8 +18,9 @@ import space.taran.arknavigator.mvp.presenter.FoldersPresenter
 import space.taran.arknavigator.mvp.view.FoldersView
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.activity.MainActivity
-import space.taran.arknavigator.ui.fragments.dialog.FolderPickerDialogFragment
+import space.taran.arknavigator.ui.fragments.dialog.RootPickerDialogFragment
 import space.taran.arknavigator.ui.fragments.dialog.RootsScanDialogFragment
+import space.taran.arknavigator.ui.fragments.dialog.onRootOrFavPicked
 import space.taran.arknavigator.ui.fragments.utils.toast
 import space.taran.arknavigator.ui.fragments.utils.toastFailedPaths
 import space.taran.arknavigator.ui.view.StackedToasts
@@ -99,8 +100,8 @@ class FoldersFragment : MvpAppCompatFragment(), FoldersView {
         foldersTree?.set(devices, rootsWithFavs)
     }
 
-    override fun openRootPickerDialog(paths: List<Path>) =
-        FolderPickerDialogFragment.newInstance(paths)
+    override fun openRootPickerDialog(path: Path?) =
+        RootPickerDialogFragment.newInstance(path)
             .show(childFragmentManager, null)
 
     override fun toastFailedPath(failedPaths: List<Path>) =
@@ -123,17 +124,10 @@ class FoldersFragment : MvpAppCompatFragment(), FoldersView {
     }
 
     private fun initResultListeners() {
-        childFragmentManager.setFragmentResultListener(
-            FolderPickerDialogFragment.REQUEST_PATH_PICKED_KEY,
-            this
-        ) { _, bundle ->
-            val path = bundle.getString(FolderPickerDialogFragment.RESULT_PATH_KEY)!!
-            val rootNotFavorite =
-                bundle.getBoolean(
-                    FolderPickerDialogFragment.RESULT_ROOT_NOT_FAVORITE_KEY
-                )
-            presenter.onPickRootBtnClick(Path(path), rootNotFavorite)
-        }
+        childFragmentManager
+            .onRootOrFavPicked(this) { path, rootNotFavorite ->
+                presenter.onPickRootBtnClick(path, rootNotFavorite)
+            }
 
         childFragmentManager.setFragmentResultListener(
             RootsScanDialogFragment.REQUEST_KEY_ROOTS_FOUND,

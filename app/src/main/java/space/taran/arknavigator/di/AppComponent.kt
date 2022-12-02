@@ -17,7 +17,6 @@ import space.taran.arknavigator.mvp.presenter.ResourcesPresenter
 import space.taran.arknavigator.mvp.presenter.adapter.ResourcesGridPresenter
 import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagsSelectorPresenter
 import space.taran.arknavigator.mvp.presenter.dialog.EditTagsDialogPresenter
-import space.taran.arknavigator.mvp.presenter.dialog.FolderPickerDialogPresenter
 import space.taran.arknavigator.mvp.presenter.dialog.SortDialogPresenter
 import space.taran.arknavigator.mvp.view.item.FileItemViewHolder
 import space.taran.arknavigator.ui.App
@@ -28,6 +27,7 @@ import space.taran.arknavigator.ui.fragments.FoldersFragment
 import space.taran.arknavigator.ui.fragments.GalleryFragment
 import space.taran.arknavigator.ui.fragments.ResourcesFragment
 import space.taran.arknavigator.ui.fragments.SettingsFragment
+import space.taran.arknavigator.ui.fragments.dialog.RootPickerDialogFragment
 import space.taran.arknavigator.ui.fragments.dialog.TagsSortDialogFragment
 import javax.inject.Singleton
 
@@ -58,11 +58,11 @@ interface AppComponent {
     fun inject(editTagsDialogPresenter: EditTagsDialogPresenter)
     fun inject(fileItemViewHolder: FileItemViewHolder)
     fun inject(previewItemViewHolder: PreviewItemViewHolder)
-    fun inject(folderPickerDialogPresenter: FolderPickerDialogPresenter)
     fun inject(sortDialogPresenter: SortDialogPresenter)
     fun inject(tagsSelectorPresenter: TagsSelectorPresenter)
     fun inject(tagsSelectorAdapter: TagsSelectorAdapter)
     fun inject(tagsSortDialogFragment: TagsSortDialogFragment)
+    fun inject(rootPickerDialogFragment: RootPickerDialogFragment)
 
     @Component.Factory
     interface Factory {
