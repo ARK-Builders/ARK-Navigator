@@ -242,7 +242,7 @@ class GalleryPresenter(
 
     private fun changeScore(inc: Score) = presenterScope.launch {
         val score = scoreStorage.getScore(currentResource.id) + inc
-        scoreStorage.setScore(currentResource.id, currentResource.name, score)
+        scoreStorage.setScore(currentResource.id, score)
         withContext(Dispatchers.IO) {
             scoreStorage.persist()
         }

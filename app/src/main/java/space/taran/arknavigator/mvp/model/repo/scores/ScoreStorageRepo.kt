@@ -24,9 +24,8 @@ class ScoreStorageRepo(
                 val storageShards = roots.map { root ->
                     val index = indexRepo.provide(root)
                     val resources = index.listAllIds()
-                    val resMeta = resources.map { index.getMeta(it) }
                     if (storageByRoot[root] != null) {
-                        storageByRoot[root]?.refresh(resMeta)
+                        storageByRoot[root]?.refresh(resources)
                         storageByRoot[root]!!
                     } else {
                         val scoreStorage = PlainScoreStorage(root, resources)

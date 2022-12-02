@@ -24,11 +24,11 @@ class PlainScoreStorage(
 
     private var lastModified = FileTime.fromMillis(0L)
 
-    private lateinit var scoreById: MutableMap<ResourceId, Pair<String, Score>>
+    private lateinit var scoreById: MutableMap<ResourceId, Score>
 
     suspend fun init() = withContext(Dispatchers.IO) {
         val result = resources.associateWith {
-            "" to 0
+            0
         }.toMutableMap()
 
         if (Files.exists(storageFile)) {
@@ -49,37 +49,17 @@ class PlainScoreStorage(
         scoreById = result
     }
 
-    fun refresh(resources: Collection<ResourceMeta>) = run {
+    fun refresh(resources: Collection<ResourceId>) = run {
         Log.d(
             SCORES_STORAGE,
             "refreshing score storage with new and edited resources"
         )
         val scoreById = this.scoreById
-        this.scoreById = resources.map { it.id }
-            .associateWith { "" to 0 }
-            .toMutableMap()
-        resources.map { meta ->
-            scoreById.forEach {
-                if (it.key == meta.id) {
-                    this.scoreById[meta.id] = scoreById[meta.id]!!
-                }
-                if (it.value.first == meta.name) {
-                    Log.d(
-                        SCORES_STORAGE,
-                        "updating old id: ${it.key} for " +
-                            "score: ${it.value.second} with new id: ${meta.id}"
-                    )
-                    this.scoreById[meta.id] = meta.name to it.value.second
-                }
-            }
-        }
-
-        this.scoreById.map { entry ->
-            Log.d(
-                SCORES_STORAGE,
-                "updated resource: ${entry.key}, " +
-                    entry.value.first
-            )
+        this.scoreById = resources.associateWith {
+            0
+        }.toMutableMap()
+        resources.forEach { id ->
+            this.scoreById[id] = scoreById[id]!!
         }
 
         Log.d(
@@ -90,19 +70,19 @@ class PlainScoreStorage(
 
     override fun contains(id: ResourceId) = scoreById.containsKey(id)
 
-    override fun setScore(id: ResourceId, name: String, score: Score) {
+    override fun setScore(id: ResourceId, score: Score) {
         if (!scoreById.containsKey(id))
             error("Storage isn't aware of this resource id")
 
         Log.d(
             SCORES_STORAGE,
-            "new score for resource $id, $name: $score"
+            "new score for resource $id: $score"
         )
-        scoreById[id] = Pair(name, score)
+        scoreById[id] = score
     }
 
     override fun getScore(id: ResourceId) =
-        scoreById.getOrDefault(id, "" to 0).second
+        scoreById.getOrDefault(id, 0)
 
     override suspend fun persist() =
         withContext(Dispatchers.IO) {
@@ -113,7 +93,7 @@ class PlainScoreStorage(
     override suspend fun resetScores(resources: List<ResourceMeta>) {
         resources.map {
             if (scoreById.containsKey(it.id)) {
-                scoreById[it.id] = "" to 0
+                scoreById[it.id] = 0
             }
         }
         persist()
@@ -123,7 +103,7 @@ class PlainScoreStorage(
         )
     }
 
-    private suspend fun readStorage(): Map<ResourceId, Pair<String, Score>> =
+    private suspend fun readStorage(): Map<ResourceId, Score> =
         withContext(Dispatchers.IO) {
             val lines = Files.readAllLines(storageFile, UTF_8)
             val version = lines.removeAt(0)
@@ -131,14 +111,13 @@ class PlainScoreStorage(
             val result = lines.map {
                 val parts = it.split(KEY_VALUE_SEPARATOR)
                 val id = parts[0].toLong()
-                val name = parts[1]
-                val score = parts[2].toInt()
+                val score = parts[1].toInt()
 
                 if (score == 0)
                     throw AssertionError(
                         "score storage must have contained un-scored resources"
                     )
-                id to (name to score)
+                id to score
             }.toMap()
 
             Log.d("all scores", "$result")
@@ -152,14 +131,12 @@ class PlainScoreStorage(
         lines.add("$STORAGE_VERSION_PREFIX$STORAGE_VERSION")
 
         val entries = scoreById.filterValues {
-            it.second != 0
+            it != 0
         }
 
         lines.addAll(
-            entries.map { (id, nameScorePair) ->
-                "$id$KEY_VALUE_SEPARATOR" +
-                    "${nameScorePair.first}$KEY_VALUE_SEPARATOR" +
-                    "${nameScorePair.second}"
+            entries.map { (id, score) ->
+                "$id$KEY_VALUE_SEPARATOR$score"
             }
         )
 
