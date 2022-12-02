@@ -12,7 +12,7 @@ interface FoldersView : CommonMvpView {
     fun updateFoldersTree(devices: List<Path>, rootsWithFavs: Map<Path, List<Path>>)
 
     @StateStrategyType(SkipStrategy::class)
-    fun openRootPickerDialog(paths: List<Path>)
+    fun openRootPickerDialog(path: Path?)
 
     @StateStrategyType(SkipStrategy::class)
     fun openRootsScanDialog()

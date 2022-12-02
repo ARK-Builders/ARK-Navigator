@@ -9,6 +9,8 @@ import java.nio.file.Paths
 import kotlin.io.path.exists
 import kotlin.io.path.extension
 import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.nameWithoutExtension
+import kotlin.io.path.notExists
 
 val ROOT_PATH: Path = Paths.get("/")
 
@@ -49,11 +51,22 @@ fun listChildren(folder: Path): Pair<List<Path>, List<Path>> = folder
     .filter { !Files.isHidden(it) }
     .partition { Files.isDirectory(it) }
 
-fun Path.findNotExistCopyName(name: String): Path {
+fun Path.findNotExistCopyName(name: Path): Path {
+    val parentDir = this
+
+    val originalNamePath = parentDir.resolve(name.fileName)
+    if (originalNamePath.notExists())
+        return originalNamePath
+
     var filesCounter = 1
-    var newPath = this.resolve(name)
+
+    fun formatNameWithCounter() =
+        "${name.nameWithoutExtension}_$filesCounter.${name.extension}"
+
+    var newPath = parentDir.resolve(formatNameWithCounter())
+
     while (newPath.exists()) {
-        newPath = this.resolve(name + "_$filesCounter")
+        newPath = parentDir.resolve(formatNameWithCounter())
         filesCounter++
     }
     return newPath
