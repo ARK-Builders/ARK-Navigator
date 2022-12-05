@@ -11,7 +11,10 @@ import space.taran.arknavigator.utils.Tag
 
 class Screens {
     class FoldersScreen : SupportAppScreen() {
-        override fun getFragment() = FoldersFragment()
+        override fun getFragment() = FoldersFragment.newInstance()
+    }
+    class FoldersScreenRescanRoots : SupportAppScreen() {
+        override fun getFragment() = FoldersFragment.newInstance(rescan = true)
     }
 
     class ResourcesScreen(val rootAndFav: RootAndFav) : SupportAppScreen() {
