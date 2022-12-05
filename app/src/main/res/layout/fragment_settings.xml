@@ -2,6 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:overScrollMode="never">
 
     <LinearLayout
@@ -25,9 +26,32 @@
             android:id="@+id/resetPreferences"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
             android:layout_marginTop="16dp"
+            android:layout_marginStart="16dp"
+            android:textAllCaps="false"
             android:text="@string/reset_preferences" />
+
+        <TextView
+            style="@style/MarginTextStyle"
+            android:layout_marginTop="16dp"
+            android:text="@string/utils"
+            android:textSize="26sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_rescan"
+            android:layout_width="wrap_content"
+            app:icon="@drawable/ic_baseline_search_24"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="16dp"
+            android:textAllCaps="false"
+            android:text="Rescan roots" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="10dp"/>
 
     </LinearLayout>
 

@@ -25,7 +25,9 @@ import space.taran.arknavigator.utils.listDevices
 import java.nio.file.Path
 import javax.inject.Inject
 
-class FoldersPresenter : MvpPresenter<FoldersView>() {
+class FoldersPresenter(
+    private val rescanRoots: Boolean
+) : MvpPresenter<FoldersView>() {
     @Inject
     lateinit var router: AppRouter
 
@@ -56,6 +58,11 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
 
             viewState.updateFoldersTree(devices, folders.succeeded)
             viewState.setProgressVisibility(false)
+
+            if (rescanRoots) {
+                viewState.openRootsScanDialog()
+                return@launch
+            }
 
             if (!preferences.get(PreferenceKey.WasRootsScanShown) &&
                 folders.succeeded.keys.isEmpty()
@@ -116,19 +123,9 @@ class FoldersPresenter : MvpPresenter<FoldersView>() {
         }
 
     fun onRootsFound(roots: List<Path>) = presenterScope.launch(NonCancellable) {
-        roots.forEachIndexed { pos, root ->
-            viewState.setProgressVisibility(
-                true,
-                "Indexing ${pos + 1}/${roots.size}"
-            )
+        roots.forEach { root ->
             foldersRepo.addRoot(root)
-            val index = resourcesIndexRepo.provide(root)
-            index.kindDetectFailedFlow.onEach { failed ->
-                viewState.toastIndexFailedPath(failed)
-            }.launchIn(presenterScope)
-            index.reindex()
         }
-        viewState.setProgressVisibility(false)
         viewState.updateFoldersTree(devices, foldersRepo.provideFolders())
     }
 

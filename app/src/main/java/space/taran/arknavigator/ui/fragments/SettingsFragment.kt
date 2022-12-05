@@ -22,6 +22,8 @@ import space.taran.arknavigator.databinding.FragmentSettingsBinding
 import space.taran.arknavigator.databinding.ItemBooleanPreferenceBinding
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
+import space.taran.arknavigator.navigation.AppRouter
+import space.taran.arknavigator.navigation.Screens
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.fragments.dialog.ConfirmationDialogFragment
@@ -37,6 +39,9 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
 
     @Inject
     lateinit var preferences: Preferences
+
+    @Inject
+    lateinit var router: AppRouter
 
     //region booleanPreferenceModels
 
@@ -139,6 +144,10 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
                 childFragmentManager,
                 ConfirmationDialogFragment.CONFIRMATION_DIALOG_TAG
             )
+        }
+
+        binding.btnRescan.setOnClickListener {
+            router.newRootScreen(Screens.FoldersScreenRescanRoots())
         }
 
         childFragmentManager.setFragmentResultListener(

@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -33,7 +34,9 @@ class FoldersFragment : MvpAppCompatFragment(), FoldersView {
 
     private lateinit var binding: FragmentFoldersBinding
     private val presenter by moxyPresenter {
-        FoldersPresenter().apply {
+        FoldersPresenter(
+            requireArguments().getBoolean(RESCAN_ROOTS_BUNDLE_KEY, false)
+        ).apply {
             Log.d(FOLDERS_SCREEN, "RootsPresenter created")
             App.instance.appComponent.inject(this)
         }
@@ -140,6 +143,19 @@ class FoldersFragment : MvpAppCompatFragment(), FoldersView {
                     } ?: return@setFragmentResultListener
 
             presenter.onRootsFound(roots)
+        }
+    }
+
+    companion object {
+        private const val RESCAN_ROOTS_BUNDLE_KEY = "rescanRoots"
+
+        fun newInstance() = FoldersFragment().apply {
+            arguments = bundleOf()
+        }
+        fun newInstance(rescan: Boolean) = FoldersFragment().apply {
+            arguments = bundleOf().apply {
+                putBoolean(RESCAN_ROOTS_BUNDLE_KEY, rescan)
+            }
         }
     }
 }
