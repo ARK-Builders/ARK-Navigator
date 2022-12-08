@@ -9,7 +9,6 @@ import space.taran.arknavigator.mvp.model.repo.index.ResourceId
 import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.utils.LogTags.SCORES_STORAGE
 import space.taran.arknavigator.utils.Score
-import java.lang.AssertionError
 import java.nio.charset.StandardCharsets.UTF_8
 import java.nio.file.Files
 import java.nio.file.Path
@@ -49,19 +48,14 @@ class PlainScoreStorage(
         scoreById = result
     }
 
-    fun refresh(resources: Collection<ResourceId>) = run {
+    fun refresh(resources: Collection<ResourceId>) {
         Log.d(
             SCORES_STORAGE,
             "refreshing score storage with new and edited resources"
         )
-        val scoreById = this.scoreById
-        this.scoreById = resources.associateWith {
-            0
-        }.toMutableMap()
         resources.forEach { id ->
-            this.scoreById[id] = scoreById[id]!!
+            scoreById.computeIfAbsent(id) { 0 }
         }
-
         Log.d(
             SCORES_STORAGE,
             "${this.scoreById.size} resources available in score storage"
@@ -81,8 +75,7 @@ class PlainScoreStorage(
         scoreById[id] = score
     }
 
-    override fun getScore(id: ResourceId) =
-        scoreById.getOrDefault(id, 0)
+    override fun getScore(id: ResourceId) = scoreById[id]!!
 
     override suspend fun persist() =
         withContext(Dispatchers.IO) {
