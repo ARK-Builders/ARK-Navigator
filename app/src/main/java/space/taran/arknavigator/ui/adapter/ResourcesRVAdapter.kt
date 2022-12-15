@@ -36,10 +36,13 @@ class ResourcesRVAdapter(
                 presenter.onItemClick(position)
         }
         holder.binding.root.setOnLongClickListener {
-            if (!presenter.selectingEnabled) {
+            if (presenter.selectingEnabled) {
+                presenter.onSelectedItemLongClick(holder)
+            } else {
                 presenter.onSelectingChanged(true)
                 holder.binding.root.performClick()
             }
+
             return@setOnLongClickListener true
         }
         viewHolders.add(holder)

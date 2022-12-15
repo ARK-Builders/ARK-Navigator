@@ -21,30 +21,51 @@ interface GalleryView : CommonMvpView {
     fun displayPreviewTags(resource: ResourceId, tags: Tags)
     fun setProgressVisibility(isVisible: Boolean, withText: String = "")
     fun displayScore(score: Score)
+    fun displaySelected(
+        selected: Boolean,
+        showAnim: Boolean,
+        selectedCount: Int,
+        itemCount: Int
+    )
+
     fun setScoringControlsVisibility(isVisible: Boolean)
 
     @StateStrategyType(SkipStrategy::class)
     fun openLink(link: String)
+
     @StateStrategyType(SkipStrategy::class)
     fun shareLink(link: String)
+
     @StateStrategyType(SkipStrategy::class)
     fun showInfoAlert(path: Path, resourceMeta: ResourceMeta)
+
     @StateStrategyType(SkipStrategy::class)
     fun viewInExternalApp(resourcePath: Path)
+
     @StateStrategyType(SkipStrategy::class)
     fun editResource(resourcePath: Path)
+
     @StateStrategyType(SkipStrategy::class)
     fun shareResource(resourcePath: Path)
+
     @StateStrategyType(SkipStrategy::class)
     fun showEditTagsDialog(resource: Long)
+
     @StateStrategyType(SkipStrategy::class)
     fun deleteResource(pos: Int)
+
     @StateStrategyType(SkipStrategy::class)
     fun notifyResourcesChanged()
+
     @StateStrategyType(SkipStrategy::class)
     fun notifyTagsChanged()
+
     @StateStrategyType(SkipStrategy::class)
     fun notifyCurrentItemChanged()
+
     @StateStrategyType(SkipStrategy::class)
     fun notifyResourceScoresChanged()
+
+    @StateStrategyType(SkipStrategy::class)
+    fun notifySelectedChanged(selected: List<ResourceId>)
 }
