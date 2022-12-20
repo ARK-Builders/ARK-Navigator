@@ -105,7 +105,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
             presenter.onBackClick()
         }
 
-        pagerAdapter = PreviewsPager(presenter)
+        pagerAdapter = PreviewsPager(requireContext(), presenter)
 
         initViewPager()
 
@@ -135,6 +135,11 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
 
             layoutSelected.setOnClickListener {
                 presenter.onSelectBtnClick()
+            }
+
+            layoutSelected.setOnLongClickListener {
+                presenter.onSelectingChanged()
+                return@setOnLongClickListener true
             }
 
             increaseScore.setOnClickListener {
@@ -256,10 +261,16 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
         setFragmentResult(SCORES_CHANGED_KEY, bundleOf())
     }
 
-    override fun notifySelectedChanged(selected: List<ResourceId>) {
+    override fun notifySelectedChanged(
+        selected: List<ResourceId>
+    ) {
         setFragmentResult(
             SELECTED_CHANGED_KEY,
             bundleOf().apply {
+                putBoolean(
+                    SELECTING_ENABLED_KEY,
+                    requireArguments().getBoolean(SELECTING_ENABLED_KEY)
+                )
                 putLongArray(SELECTED_RESOURCES_KEY, selected.toLongArray())
             }
         )
@@ -373,6 +384,18 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
     override fun onResume() {
         super.onResume()
         presenter.onResume()
+    }
+
+    override fun toggleSelecting(enabled: Boolean) {
+        binding.layoutSelected.isVisible = enabled
+        requireArguments().apply {
+            putBoolean(SELECTING_ENABLED_KEY, enabled)
+        }
+        if (enabled) {
+            presenter.onSelectBtnClick()
+        } else {
+            binding.cbSelected.isChecked = false
+        }
     }
 
     private fun initViewPager() = with(binding.viewPager) {
@@ -539,7 +562,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
         private const val ROOT_AND_FAV_KEY = "rootAndFav"
         private const val RESOURCES_KEY = "resources"
         private const val START_AT_KEY = "startAt"
-        private const val SELECTING_ENABLED_KEY = "selectingEnabled"
+        const val SELECTING_ENABLED_KEY = "selectingEnabled"
         const val SELECTED_RESOURCES_KEY = "selectedResources"
         const val REQUEST_TAGS_CHANGED_KEY = "tagsChangedGallery"
         const val REQUEST_RESOURCES_CHANGED_KEY = "resourcesChangedGallery"

@@ -1,16 +1,22 @@
 package space.taran.arknavigator.ui.adapter.previewpager
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.view.GestureDetector
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.ViewGroup
+import androidx.core.view.GestureDetectorCompat
 import androidx.recyclerview.widget.RecyclerView
 import space.taran.arknavigator.databinding.ItemImageBinding
 import space.taran.arknavigator.databinding.ItemPreviewPlainTextBinding
 import space.taran.arknavigator.mvp.presenter.GalleryItemType
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 
-class PreviewsPager(val presenter: GalleryPresenter) :
-    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class PreviewsPager(
+    val context: Context,
+    val presenter: GalleryPresenter
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun getItemCount() = presenter.resources.size
 
@@ -22,7 +28,7 @@ class PreviewsPager(val presenter: GalleryPresenter) :
                     parent,
                     false
                 ),
-                presenter
+                getGestureDetector()
             )
             GalleryItemType.OTHER.ordinal -> PreviewItemViewHolder(
                 ItemImageBinding.inflate(
@@ -30,7 +36,8 @@ class PreviewsPager(val presenter: GalleryPresenter) :
                     parent,
                     false
                 ),
-                presenter
+                presenter,
+                getGestureDetector()
             )
             else -> error("Wrong viewType")
         }
@@ -59,5 +66,20 @@ class PreviewsPager(val presenter: GalleryPresenter) :
         super.onViewRecycled(holder)
         if (holder is PreviewItemViewHolder)
             holder.onRecycled()
+    }
+
+    private fun getGestureDetector(): GestureDetectorCompat {
+        val listener = object : GestureDetector.SimpleOnGestureListener() {
+            override fun onSingleTapConfirmed(e: MotionEvent?): Boolean {
+                presenter.onPreviewsItemClick()
+                return true
+            }
+
+            override fun onLongPress(e: MotionEvent?) {
+                if (!presenter.selectingEnabled)
+                    presenter.onSelectingChanged()
+            }
+        }
+        return GestureDetectorCompat(context, listener)
     }
 }

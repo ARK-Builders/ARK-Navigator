@@ -55,6 +55,9 @@ interface GalleryView : CommonMvpView {
     fun deleteResource(pos: Int)
 
     @StateStrategyType(SkipStrategy::class)
+    fun toggleSelecting(enabled: Boolean)
+
+    @StateStrategyType(SkipStrategy::class)
     fun notifyResourcesChanged()
 
     @StateStrategyType(SkipStrategy::class)

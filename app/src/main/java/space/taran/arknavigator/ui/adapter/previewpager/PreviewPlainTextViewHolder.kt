@@ -1,22 +1,18 @@
 package space.taran.arknavigator.ui.adapter.previewpager
 
 import android.annotation.SuppressLint
-import android.view.GestureDetector
-import android.view.MotionEvent
 import androidx.core.view.GestureDetectorCompat
 import androidx.recyclerview.widget.RecyclerView
 import space.taran.arknavigator.databinding.ItemPreviewPlainTextBinding
-import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 
 @SuppressLint("ClickableViewAccessibility")
 class PreviewPlainTextViewHolder(
     private val binding: ItemPreviewPlainTextBinding,
-    private val presenter: GalleryPresenter
+    private val detector: GestureDetectorCompat
 ) : RecyclerView.ViewHolder(binding.root), PreviewPlainTextItemView {
     override var pos = -1
 
     init {
-        val detector = getGestureDetector()
         binding.tvContent.setOnTouchListener { view, event ->
             return@setOnTouchListener detector.onTouchEvent(event)
         }
@@ -28,15 +24,5 @@ class PreviewPlainTextViewHolder(
 
     override fun reset() = with(binding) {
         tvContent.text = ""
-    }
-
-    private fun getGestureDetector(): GestureDetectorCompat {
-        val listener = object : GestureDetector.SimpleOnGestureListener() {
-            override fun onSingleTapConfirmed(e: MotionEvent?): Boolean {
-                presenter.onPreviewsItemClick()
-                return true
-            }
-        }
-        return GestureDetectorCompat(itemView.context, listener)
     }
 }

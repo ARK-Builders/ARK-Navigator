@@ -52,7 +52,7 @@ class GalleryPresenter(
     private val rootAndFav: RootAndFav,
     private val resourcesIds: List<ResourceId>,
     private val startAt: Int,
-    private val selectingEnabled: Boolean,
+    var selectingEnabled: Boolean,
     private val selectedResources: MutableList<ResourceId>
 ) : MvpPresenter<GalleryView>() {
 
@@ -373,14 +373,22 @@ class GalleryPresenter(
         viewState.setControlsVisibility(isControlsVisible)
     }
 
+    fun onSelectingChanged() {
+        selectingEnabled = !selectingEnabled
+        viewState.toggleSelecting(selectingEnabled)
+        selectedResources.clear()
+        if (selectingEnabled) {
+            selectedResources.add(currentResource.id)
+        }
+    }
+
     fun onPlayButtonClick() = presenterScope.launch {
         viewState.viewInExternalApp(index.getPath(currentResource.id))
     }
 
     fun onBackClick() {
         Log.d(GALLERY_SCREEN, "quitting from GalleryPresenter")
-        if (selectingEnabled)
-            viewState.notifySelectedChanged(selectedResources)
+        viewState.notifySelectedChanged(selectedResources)
         viewState.exitFullscreen()
         router.exit()
     }

@@ -399,11 +399,17 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         setFragmentResultListener(
             GalleryFragment.SELECTED_CHANGED_KEY
         ) { _, bundle ->
-            presenter.gridPresenter.onSelectedChangedExternally(
-                bundle.getLongArray(
-                    GalleryFragment.SELECTED_RESOURCES_KEY
-                )!!.toList()
+            val selectingEnabled = bundle.getBoolean(
+                GalleryFragment.SELECTING_ENABLED_KEY
             )
+            presenter.gridPresenter.onSelectingChanged(selectingEnabled)
+            if (selectingEnabled) {
+                presenter.gridPresenter.onSelectedChangedExternally(
+                    bundle.getLongArray(
+                        GalleryFragment.SELECTED_RESOURCES_KEY
+                    )!!.toList()
+                )
+            }
         }
     }
 
