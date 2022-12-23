@@ -28,6 +28,15 @@
         android:gravity="center"
         tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec pretium dui eros, auctor" />
 
+    <CheckBox
+        android:id="@+id/deleteChkBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:text="@string/delete_folder"
+        android:visibility="gone" />
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -21,6 +21,7 @@ import space.taran.arknavigator.navigation.AppRouter
 import space.taran.arknavigator.navigation.Screens
 import space.taran.arknavigator.ui.resource.StringProvider
 import space.taran.arknavigator.utils.LogTags.FOLDERS_SCREEN
+import space.taran.arknavigator.utils.LogTags.FOLDERS_TREE
 import space.taran.arknavigator.utils.listDevices
 import java.nio.file.Path
 import javax.inject.Inject
@@ -44,6 +45,7 @@ class FoldersPresenter(
     lateinit var preferences: Preferences
 
     private lateinit var devices: List<Path>
+
     override fun onFirstViewAttach() {
         Log.d(FOLDERS_SCREEN, "first view attached in RootsPresenter")
         super.onFirstViewAttach()
@@ -128,6 +130,50 @@ class FoldersPresenter(
         }
         viewState.updateFoldersTree(devices, foldersRepo.provideFolders())
     }
+
+    fun onForgetBtnClick(node: FolderNode) {
+        viewState.openConfirmForgetFolderDialog(node)
+    }
+
+    fun onForgetRoot(root: Path, deleteFromMemory: Boolean) =
+        presenterScope.launch(NonCancellable) {
+            viewState.setProgressVisibility(true, "Forgetting root")
+            if (deleteFromMemory) {
+                Log.d(
+                    FOLDERS_TREE,
+                    "forgetting and deleting root folder $root"
+                )
+                foldersRepo.deleteRoot(root)
+            } else {
+                Log.d(
+                    FOLDERS_TREE,
+                    "forgetting root folder $root"
+                )
+                foldersRepo.forgetRoot(root)
+            }
+            viewState.updateFoldersTree(devices, foldersRepo.provideFolders())
+            viewState.setProgressVisibility(false)
+        }
+
+    fun onForgetFavorite(root: Path, favorite: Path, deleteFromMemory: Boolean) =
+        presenterScope.launch(NonCancellable) {
+            viewState.setProgressVisibility(true, "Forgetting favorite")
+            if (deleteFromMemory) {
+                Log.d(
+                    FOLDERS_TREE,
+                    "forgetting and deleting favorite $favorite"
+                )
+                foldersRepo.deleteFavorite(root, favorite)
+            } else {
+                Log.d(
+                    FOLDERS_TREE,
+                    "forgetting favorite $favorite"
+                )
+                foldersRepo.forgetFavorite(root, favorite)
+            }
+            viewState.updateFoldersTree(devices, foldersRepo.provideFolders())
+            viewState.setProgressVisibility(false)
+        }
 
     private suspend fun addRoot(root: Path) {
         viewState.setProgressVisibility(true, "Adding folder")
