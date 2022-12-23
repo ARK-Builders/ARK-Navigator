@@ -101,7 +101,7 @@ dependencies {
 
     implementation 'com.davemorrissey.labs:subsampling-scale-image-view-androidx:3.10.0'
     implementation 'com.github.MikeOrtiz:TouchImageView:3.1.1'
-    implementation 'com.github.ARK-Builders:ark-filepicker:ae2c37ea87'
+    implementation 'com.github.ARK-Builders:ark-filepicker:ed2ef717e4'
 
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2"
 

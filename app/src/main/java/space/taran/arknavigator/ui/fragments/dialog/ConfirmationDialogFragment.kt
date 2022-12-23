@@ -7,8 +7,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
+import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.setFragmentResult
+import space.taran.arkfilepicker.folders.FoldersRepo.Companion.DELETE_FOLDER_KEY
+import space.taran.arkfilepicker.folders.FoldersRepo.Companion.FORGET_FAVORITE_KEY
+import space.taran.arkfilepicker.folders.FoldersRepo.Companion.FORGET_ROOT_KEY
 import space.taran.arknavigator.databinding.DialogInfoBinding
 import space.taran.arknavigator.utils.extensions.textOrGone
 
@@ -28,19 +32,23 @@ class ConfirmationDialogFragment : DialogFragment() {
         dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
         val args = requireArguments()
+        val bundle = args.getBundle(EXTRA_BUNDLE)
 
         binding.apply {
             titleTV.text = args.getString(TITLE)
             infoTV.text = args.getString(DESCRIPTION)
             posBtn.text = args.getString(POSITIVE_BTN_KEY)
             negBtn.textOrGone(args.getString(NEGATIVE_BTN_KEY))
-
+            deleteChkBox.isVisible = args
+                .getString(POSITIVE_REQUEST_KEY) == FORGET_ROOT_KEY ||
+                args.getString(POSITIVE_REQUEST_KEY) == FORGET_FAVORITE_KEY
             posBtn.setOnClickListener {
                 val requestKey = args
                     .getString(POSITIVE_REQUEST_KEY) ?: DEFAULT_POSITIVE_REQUEST_KEY
+                bundle?.putBoolean(DELETE_FOLDER_KEY, deleteChkBox.isChecked)
                 setFragmentResult(
                     requestKey,
-                    args.getBundle(EXTRA_BUNDLE) ?: bundleOf()
+                    bundle ?: bundleOf()
                 )
                 dismiss()
             }
