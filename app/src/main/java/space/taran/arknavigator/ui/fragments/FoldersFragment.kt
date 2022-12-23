@@ -12,6 +12,15 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
+import space.taran.arkfilepicker.folders.FoldersRepo.Companion.DELETE_FOLDER_KEY
+import space.taran.arkfilepicker.folders.FoldersRepo.Companion.FAVORITE_KEY
+import space.taran.arkfilepicker.folders.FoldersRepo.Companion.FORGET_FAVORITE_KEY
+import space.taran.arkfilepicker.folders.FoldersRepo.Companion.FORGET_ROOT_KEY
+import space.taran.arkfilepicker.folders.FoldersRepo.Companion.ROOT_KEY
+import space.taran.arkfilepicker.presentation.folderstree.FolderNode
+import space.taran.arkfilepicker.presentation.folderstree.DeviceNode
+import space.taran.arkfilepicker.presentation.folderstree.RootNode
+import space.taran.arkfilepicker.presentation.folderstree.FavoriteNode
 import space.taran.arkfilepicker.presentation.folderstree.FolderTreeView
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.FragmentFoldersBinding
@@ -19,6 +28,7 @@ import space.taran.arknavigator.mvp.presenter.FoldersPresenter
 import space.taran.arknavigator.mvp.view.FoldersView
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.activity.MainActivity
+import space.taran.arknavigator.ui.fragments.dialog.ConfirmationDialogFragment
 import space.taran.arknavigator.ui.fragments.dialog.RootPickerDialogFragment
 import space.taran.arknavigator.ui.fragments.dialog.RootsScanDialogFragment
 import space.taran.arknavigator.ui.fragments.dialog.onRootOrFavPicked
@@ -70,6 +80,7 @@ class FoldersFragment : MvpAppCompatFragment(), FoldersView {
             binding.rvRoots,
             onNavigateClick = presenter::onNavigateBtnClick,
             onAddClick = { presenter.onFoldersTreeAddFavoriteBtnClick(it) },
+            onForgetClick = presenter::onForgetBtnClick,
             showAdd = true
         )
 
@@ -107,6 +118,30 @@ class FoldersFragment : MvpAppCompatFragment(), FoldersView {
         RootPickerDialogFragment.newInstance(path)
             .show(childFragmentManager, null)
 
+    override fun openConfirmForgetFolderDialog(node: FolderNode) {
+        val bundle = bundleOf()
+        var positiveRequestKey = FORGET_ROOT_KEY
+        when (node) {
+            is DeviceNode -> {}
+            is RootNode -> {
+                bundle.putString(ROOT_KEY, node.path.toString())
+            }
+            is FavoriteNode -> {
+                bundle.putString(ROOT_KEY, node.root.toString())
+                bundle.putString(FAVORITE_KEY, node.path.toString())
+                positiveRequestKey = FORGET_FAVORITE_KEY
+            }
+        }
+        ConfirmationDialogFragment.newInstance(
+            getString(R.string.are_you_sure),
+            getString(R.string.folder_forget_warn),
+            getString(R.string.yes),
+            getString(R.string.no),
+            positiveRequestKey,
+            bundle
+        ).show(childFragmentManager, null)
+    }
+
     override fun toastFailedPath(failedPaths: List<Path>) =
         toastFailedPaths(failedPaths)
 
@@ -143,6 +178,27 @@ class FoldersFragment : MvpAppCompatFragment(), FoldersView {
                     } ?: return@setFragmentResultListener
 
             presenter.onRootsFound(roots)
+        }
+
+        childFragmentManager.setFragmentResultListener(
+            FORGET_ROOT_KEY,
+            this
+        ) { _, bundle ->
+            presenter.onForgetRoot(
+                Path(bundle.getString(ROOT_KEY, "")),
+                bundle.getBoolean(DELETE_FOLDER_KEY)
+            )
+        }
+
+        childFragmentManager.setFragmentResultListener(
+            FORGET_FAVORITE_KEY,
+            this
+        ) { _, bundle ->
+            presenter.onForgetFavorite(
+                Path(bundle.getString(ROOT_KEY, "")),
+                Path(bundle.getString(FAVORITE_KEY, "")),
+                bundle.getBoolean(DELETE_FOLDER_KEY)
+            )
         }
     }
 
