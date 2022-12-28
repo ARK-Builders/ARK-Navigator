@@ -11,15 +11,16 @@ apply plugin: 'kotlin-parcelize'
 apply plugin: "de.mannodermaus.android-junit5"
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 32
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8.toString()
+        jvmTarget = JavaVersion.VERSION_11.toString()
+        freeCompilerArgs=['-Xjvm-default=all']
     }
 
     defaultConfig {
@@ -29,7 +30,7 @@ android {
         def appVersionName = System.getenv("BRANCH_NAME") ?: "1.0"
         applicationId "space.taran.arknavigator"
         minSdkVersion 26
-        targetSdkVersion 31
+        targetSdkVersion 32
         versionCode 1
         versionName appVersionName
         setProperty("archivesBaseName", "ark-navigator")
