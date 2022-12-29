@@ -9,6 +9,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
+import androidx.annotation.ColorInt
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.FileProvider
 import androidx.core.os.bundleOf
@@ -310,9 +311,11 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         actionBar.btnShuffle.apply {
             setOnClickListener {
                 val dice = this.drawable
+                @ColorInt
+                val diceColor = R.color.blue
                 isShuffled = !isShuffled
                 if (isShuffled) {
-                    dice?.setTint(R.color.blue)
+                    dice?.setTint(diceColor)
                     presenter.onShuffleSwitchedOn()
                 } else {
                     dice?.setTintList(null)
