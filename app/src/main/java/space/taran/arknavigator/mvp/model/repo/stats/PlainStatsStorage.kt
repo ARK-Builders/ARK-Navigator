@@ -8,9 +8,9 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import space.taran.arknavigator.mvp.model.arkFolder
-import space.taran.arknavigator.mvp.model.arkStats
-import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
+import space.taran.arklib.arkFolder
+import space.taran.arklib.arkStats
+import space.taran.arklib.domain.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.stats.category.StatsCategoryStorage

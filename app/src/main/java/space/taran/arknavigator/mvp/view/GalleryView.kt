@@ -3,8 +3,8 @@ package space.taran.arknavigator.mvp.view
 import moxy.viewstate.strategy.AddToEndSingleStrategy
 import moxy.viewstate.strategy.SkipStrategy
 import moxy.viewstate.strategy.StateStrategyType
-import space.taran.arknavigator.mvp.model.repo.index.ResourceId
-import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
+import space.taran.arklib.ResourceId
+import space.taran.arklib.domain.index.ResourceMeta
 import space.taran.arknavigator.utils.Score
 import space.taran.arknavigator.utils.Tags
 import java.nio.file.Path
@@ -36,7 +36,7 @@ interface GalleryView : CommonMvpView {
     @StateStrategyType(SkipStrategy::class)
     fun shareResource(resourcePath: Path)
     @StateStrategyType(SkipStrategy::class)
-    fun showEditTagsDialog(resource: Long)
+    fun showEditTagsDialog(resource: ResourceId)
     @StateStrategyType(SkipStrategy::class)
     fun deleteResource(pos: Int)
     @StateStrategyType(SkipStrategy::class)

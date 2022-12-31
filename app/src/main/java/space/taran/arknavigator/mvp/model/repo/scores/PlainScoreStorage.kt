@@ -3,10 +3,11 @@ package space.taran.arknavigator.mvp.model.repo.scores
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import space.taran.arknavigator.mvp.model.arkFolder
-import space.taran.arknavigator.mvp.model.arkScoresStorage
-import space.taran.arknavigator.mvp.model.repo.index.ResourceId
-import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
+import space.taran.arklib.Converters
+import space.taran.arklib.ResourceId
+import space.taran.arklib.arkFolder
+import space.taran.arklib.arkScoresStorage
+import space.taran.arklib.domain.index.ResourceMeta
 import space.taran.arknavigator.utils.LogTags.SCORES_STORAGE
 import space.taran.arknavigator.utils.Score
 import java.nio.charset.StandardCharsets.UTF_8
@@ -103,8 +104,10 @@ class PlainScoreStorage(
             verifyVersion(version)
             val result = lines.map {
                 val parts = it.split(KEY_VALUE_SEPARATOR)
-                val id = parts[0].toLong()
-                val score = parts[1].toInt()
+                val id = ResourceId.create(
+                    parts[0].toLong(), parts[1].toLong()
+                )
+                val score = parts[2].toInt()
 
                 if (score == 0)
                     throw AssertionError(
@@ -129,7 +132,9 @@ class PlainScoreStorage(
 
         lines.addAll(
             entries.map { (id, score) ->
-                "$id$KEY_VALUE_SEPARATOR$score"
+                val converters = Converters()
+                converters.resourceIdToString(id) +
+                    "$KEY_VALUE_SEPARATOR$score"
             }
         )
 

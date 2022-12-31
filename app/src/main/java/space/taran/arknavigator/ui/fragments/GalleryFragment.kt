@@ -26,13 +26,14 @@ import kotlinx.coroutines.launch
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import space.taran.arkfilepicker.folders.RootAndFav
+import space.taran.arklib.ResourceId
+import space.taran.arklib.domain.index.ResourceKind
+import space.taran.arklib.domain.index.ResourceMeta
+import space.taran.arklib.utils.extension
 import space.taran.arknavigator.BuildConfig
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.FragmentGalleryBinding
 import space.taran.arknavigator.databinding.PopupGalleryTagMenuBinding
-import space.taran.arknavigator.mvp.model.repo.index.ResourceId
-import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
-import space.taran.arknavigator.mvp.model.repo.kind.ResourceKind
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 import space.taran.arknavigator.mvp.view.GalleryView
 import space.taran.arknavigator.ui.App
@@ -48,7 +49,6 @@ import space.taran.arknavigator.utils.FullscreenHelper
 import space.taran.arknavigator.utils.Tag
 import space.taran.arknavigator.utils.Tags
 import space.taran.arknavigator.utils.Score
-import space.taran.arknavigator.utils.extension
 import space.taran.arknavigator.utils.LogTags.GALLERY_SCREEN
 import space.taran.arknavigator.utils.extensions.makeGone
 import space.taran.arknavigator.utils.extensions.makeVisible
@@ -61,7 +61,8 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
     private val presenter by moxyPresenter {
         GalleryPresenter(
             requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
-            requireArguments().getLongArray(RESOURCES_KEY)!!.toList(),
+            requireArguments().getParcelableArray(RESOURCES_KEY)!!.toList()
+                as List<ResourceId>,
             requireArguments().getInt(START_AT_KEY)
         ).apply {
             Log.d(GALLERY_SCREEN, "creating GalleryPresenter")
@@ -516,7 +517,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
             GalleryFragment().apply {
                 arguments = Bundle().apply {
                     putParcelable(ROOT_AND_FAV_KEY, rootAndFav)
-                    putLongArray(RESOURCES_KEY, resources.toLongArray())
+                    putParcelableArray(RESOURCES_KEY, resources.toTypedArray())
                     putInt(START_AT_KEY, startAt)
                 }
             }

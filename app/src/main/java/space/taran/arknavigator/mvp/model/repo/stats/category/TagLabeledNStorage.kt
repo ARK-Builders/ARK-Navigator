@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
-import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
+import space.taran.arklib.domain.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.stats.StatsEvent
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.utils.Tag

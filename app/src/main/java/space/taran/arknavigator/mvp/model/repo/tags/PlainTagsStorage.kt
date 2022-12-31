@@ -7,9 +7,10 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import space.taran.arknavigator.mvp.model.arkFolder
-import space.taran.arknavigator.mvp.model.arkTagsStorage
-import space.taran.arknavigator.mvp.model.repo.index.ResourceId
+import space.taran.arklib.Converters
+import space.taran.arklib.ResourceId
+import space.taran.arklib.arkFolder
+import space.taran.arklib.arkTagsStorage
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.stats.StatsEvent
@@ -233,8 +234,10 @@ class PlainTagsStorage(
             val result = lines
                 .map {
                     val parts = it.split(KEY_VALUE_SEPARATOR)
-                    val id = parts[0].toLong()
-                    val tags = tagsFromString(parts[1])
+                    val id = ResourceId.create(
+                        parts[0].toLong(), parts[1].toLong()
+                    )
+                    val tags = tagsFromString(parts[2])
 
                     if (tags.isEmpty()) {
                         throw AssertionError(
@@ -262,7 +265,9 @@ class PlainTagsStorage(
             val entries = tagsById.filterValues { it.isNotEmpty() }
             lines.addAll(
                 entries.map { (id, tags) ->
-                    "$id$KEY_VALUE_SEPARATOR ${stringFromTags(tags)}"
+                    val converters = Converters()
+                    converters.resourceIdToString(id) +
+                        "$KEY_VALUE_SEPARATOR ${stringFromTags(tags)}"
                 }
             )
 

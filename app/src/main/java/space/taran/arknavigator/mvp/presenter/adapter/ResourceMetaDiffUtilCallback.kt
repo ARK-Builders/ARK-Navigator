@@ -1,7 +1,7 @@
 package space.taran.arknavigator.mvp.presenter.adapter
 
 import androidx.recyclerview.widget.DiffUtil
-import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
+import space.taran.arklib.domain.index.ResourceMeta
 
 class ResourceMetaDiffUtilCallback(
     private val oldList: List<ResourceMeta>,

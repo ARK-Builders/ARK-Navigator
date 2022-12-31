@@ -8,9 +8,9 @@ import android.graphics.drawable.InsetDrawable
 import android.os.Bundle
 import android.view.WindowManager
 import org.apache.commons.io.FileUtils
+import space.taran.arklib.domain.index.ResourceMeta
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.DialogResourceInfoBinding
-import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
 import space.taran.arknavigator.ui.extra.ExtraLoader
 import java.nio.file.Path
 import kotlin.io.path.absolutePathString

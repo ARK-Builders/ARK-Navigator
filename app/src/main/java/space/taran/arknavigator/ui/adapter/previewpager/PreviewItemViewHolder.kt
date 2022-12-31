@@ -9,16 +9,16 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.ortiz.touchview.OnTouchImageViewListener
+import space.taran.arklib.ResourceId
+import space.taran.arklib.domain.index.ResourceKind
+import space.taran.arklib.domain.index.ResourceMeta
+import space.taran.arklib.domain.preview.PreviewAndThumbnail
+import space.taran.arklib.utils.ImageUtils
+import space.taran.arklib.utils.ImageUtils.loadGlideZoomImage
+import space.taran.arklib.utils.ImageUtils.loadSubsamplingImage
+import space.taran.arklib.utils.extension
 import space.taran.arknavigator.databinding.ItemImageBinding
-import space.taran.arknavigator.mvp.model.repo.index.ResourceId
-import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
-import space.taran.arknavigator.mvp.model.repo.kind.ResourceKind
-import space.taran.arknavigator.mvp.model.repo.preview.PreviewAndThumbnail
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
-import space.taran.arknavigator.utils.ImageUtils
-import space.taran.arknavigator.utils.ImageUtils.loadGlideZoomImage
-import space.taran.arknavigator.utils.ImageUtils.loadSubsamplingImage
-import space.taran.arknavigator.utils.extension
 import space.taran.arknavigator.utils.extensions.makeVisibleAndSetOnClickListener
 import java.nio.file.Path
 

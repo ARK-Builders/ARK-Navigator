@@ -10,7 +10,7 @@ import junit.framework.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import space.taran.arknavigator.mvp.model.repo.index.computeId
+import space.taran.arklib.computeId
 import space.taran.arknavigator.ui.activity.MainActivity
 
 @RunWith(AndroidJUnit4::class)
@@ -44,6 +44,6 @@ class ResourceMetaTest {
         } catch (e: Exception) {
             throw RuntimeException(e)
         }
-        assertEquals(computeId(size, file.toPath()), 0xe4c0951c)
+        assertEquals(computeId(size, file.toPath()).crc32, 0xe4c0951c)
     }
 }

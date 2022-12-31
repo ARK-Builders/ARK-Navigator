@@ -6,8 +6,8 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import space.taran.arknavigator.mvp.model.arkFolder
-import space.taran.arknavigator.mvp.model.arkStats
+import space.taran.arklib.arkFolder
+import space.taran.arklib.arkStats
 import space.taran.arknavigator.mvp.model.repo.stats.StatsEvent
 import java.nio.file.Path
 

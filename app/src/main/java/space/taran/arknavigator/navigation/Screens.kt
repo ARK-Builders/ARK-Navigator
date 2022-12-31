@@ -2,7 +2,7 @@ package space.taran.arknavigator.navigation
 
 import ru.terrakok.cicerone.android.support.SupportAppScreen
 import space.taran.arkfilepicker.folders.RootAndFav
-import space.taran.arknavigator.mvp.model.repo.index.ResourceId
+import space.taran.arklib.ResourceId
 import space.taran.arknavigator.ui.fragments.FoldersFragment
 import space.taran.arknavigator.ui.fragments.GalleryFragment
 import space.taran.arknavigator.ui.fragments.ResourcesFragment

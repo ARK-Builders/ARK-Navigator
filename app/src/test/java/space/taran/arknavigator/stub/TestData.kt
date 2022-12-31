@@ -1,7 +1,8 @@
 package space.taran.arknavigator.stub
 
-import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
-import space.taran.arknavigator.mvp.model.repo.kind.ResourceKind
+import space.taran.arklib.ResourceId
+import space.taran.arklib.domain.index.ResourceKind
+import space.taran.arklib.domain.index.ResourceMeta
 import java.nio.file.attribute.FileTime
 import java.util.Date
 
@@ -51,10 +52,10 @@ object TestData {
     private fun fileTime() = FileTime.from(Date().toInstant())
 }
 
-const val R1 = 1L
-const val R2 = 2L
-const val R3 = 3L
-const val R4 = 4L
+val R1 = ResourceId.create(1L, 1L)
+val R2 = ResourceId.create(2L, 2L)
+val R3 = ResourceId.create(3L, 3L)
+val R4 = ResourceId.create(4L, 4L)
 
 const val TAG1 = "tag1"
 const val TAG2 = "tag2"

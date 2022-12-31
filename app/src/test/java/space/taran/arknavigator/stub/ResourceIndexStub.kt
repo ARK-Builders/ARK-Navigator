@@ -1,13 +1,13 @@
 package space.taran.arknavigator.stub
 
-import space.taran.arknavigator.mvp.model.repo.index.ResourceId
-import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
-import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
 import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import space.taran.arklib.ResourceId
+import space.taran.arklib.domain.index.ResourceMeta
+import space.taran.arklib.domain.index.ResourcesIndex
 
 class ResourceIndexStub : ResourcesIndex {
     private val metas = TestData.metasById().toMutableMap()

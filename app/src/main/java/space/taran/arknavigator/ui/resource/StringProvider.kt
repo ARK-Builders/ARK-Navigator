@@ -2,8 +2,8 @@ package space.taran.arknavigator.ui.resource
 
 import android.content.Context
 import androidx.annotation.StringRes
+import space.taran.arklib.domain.index.KindCode
 import space.taran.arknavigator.R
-import space.taran.arknavigator.mvp.model.repo.kind.KindCode
 
 class StringProvider(private val context: Context) {
     fun getString(@StringRes stringResId: Int): String {
