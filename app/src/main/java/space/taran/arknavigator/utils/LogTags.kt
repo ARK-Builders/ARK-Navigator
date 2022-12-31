@@ -12,8 +12,6 @@ object LogTags {
 
     const val RESOURCES_SCREEN: String = "resources-screen"
 
-    const val RESOURCES_INDEX: String = "resources-index"
-
     const val GALLERY_SCREEN: String = "gallery-screen"
 
     const val FOLDERS_SCREEN: String = "folders-screen"
@@ -33,14 +31,6 @@ object LogTags {
     const val ITEMS_CONTAINER: String = "item-container"
 
     const val DATABASE: String = "database"
-
-    const val PREVIEWS: String = "previews"
-
-    const val METADATA: String = "metadata"
-
-    const val IMAGES: String = "images"
-
-    const val GLIDE: String = "glide"
 
     const val FILES: String = "files"
 }

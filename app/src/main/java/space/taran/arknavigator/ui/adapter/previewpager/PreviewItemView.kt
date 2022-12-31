@@ -1,7 +1,7 @@
 package space.taran.arknavigator.ui.adapter.previewpager
 
-import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
-import space.taran.arknavigator.mvp.model.repo.preview.PreviewAndThumbnail
+import space.taran.arklib.domain.index.ResourceMeta
+import space.taran.arklib.domain.preview.PreviewAndThumbnail
 import java.nio.file.Path
 
 interface PreviewItemView {

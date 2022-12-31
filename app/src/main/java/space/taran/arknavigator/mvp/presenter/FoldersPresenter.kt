@@ -13,7 +13,7 @@ import space.taran.arkfilepicker.presentation.folderstree.DeviceNode
 import space.taran.arkfilepicker.presentation.folderstree.FavoriteNode
 import space.taran.arkfilepicker.presentation.folderstree.FolderNode
 import space.taran.arkfilepicker.presentation.folderstree.RootNode
-import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
+import space.taran.arklib.domain.index.ResourcesIndexRepo
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.view.FoldersView

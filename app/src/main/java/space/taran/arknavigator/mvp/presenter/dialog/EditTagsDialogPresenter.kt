@@ -9,9 +9,9 @@ import kotlinx.coroutines.launch
 import moxy.MvpPresenter
 import moxy.presenterScope
 import space.taran.arkfilepicker.folders.RootAndFav
-import space.taran.arknavigator.mvp.model.repo.index.ResourceId
-import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
-import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
+import space.taran.arklib.ResourceId
+import space.taran.arklib.domain.index.ResourcesIndex
+import space.taran.arklib.domain.index.ResourcesIndexRepo
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.stats.StatsStorage
