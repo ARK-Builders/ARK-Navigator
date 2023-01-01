@@ -81,7 +81,7 @@ class FoldersFragment : MvpAppCompatFragment(), FoldersView {
             onNavigateClick = presenter::onNavigateBtnClick,
             onAddClick = { presenter.onFoldersTreeAddFavoriteBtnClick(it) },
             onForgetClick = presenter::onForgetBtnClick,
-            showAdd = true
+            showOptions = true
         )
 
         initResultListeners()
