@@ -37,7 +37,7 @@ class DetailsAlertDialog(
         // common resources for all file type
         dialogResourceInfoBinding.resourceId.text = context.getString(
             R.string.resource_id_label,
-            resourceMeta.id
+            resourceMeta.id.crc32
         )
         dialogResourceInfoBinding.resourceName.text = context.getString(
             R.string.resource_name_label,
