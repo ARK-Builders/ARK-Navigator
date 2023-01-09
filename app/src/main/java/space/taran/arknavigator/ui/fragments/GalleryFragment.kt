@@ -110,8 +110,10 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
         initViewPager()
 
         binding.apply {
-            layoutSelected.isVisible =
+            val selectingEnabled =
                 requireArguments().getBoolean(SELECTING_ENABLED_KEY)
+            layoutSelected.isVisible = selectingEnabled
+            fabStartSelect.isVisible = !selectingEnabled
 
             removeResourceFab.setOnLongClickListener {
                 presenter.onRemoveFabClick()
@@ -123,6 +125,9 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
             }
             shareResourceFab.setOnClickListener {
                 presenter.onShareFabClick()
+            }
+            fabStartSelect.setOnClickListener {
+                presenter.onSelectingChanged()
             }
 
             openResourceFab.setOnClickListener {
@@ -388,6 +393,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
 
     override fun toggleSelecting(enabled: Boolean) {
         binding.layoutSelected.isVisible = enabled
+        binding.fabStartSelect.isVisible = !enabled
         requireArguments().apply {
             putBoolean(SELECTING_ENABLED_KEY, enabled)
         }

@@ -74,11 +74,6 @@ class PreviewsPager(
                 presenter.onPreviewsItemClick()
                 return true
             }
-
-            override fun onLongPress(e: MotionEvent?) {
-                if (!presenter.selectingEnabled)
-                    presenter.onSelectingChanged()
-            }
         }
         return GestureDetectorCompat(context, listener)
     }

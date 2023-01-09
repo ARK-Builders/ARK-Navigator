@@ -87,6 +87,19 @@
             </LinearLayout>
         </HorizontalScrollView>
 
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_start_select"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/scroll_extra_info"
+            android:backgroundTint="@color/colorPrimary"
+            android:layout_margin="16dp"
+            android:src="@drawable/ic_list_add"
+            app:tint="@color/white"
+            app:borderWidth="0dp"
+            />
+
         <LinearLayout
             android:id="@+id/layout_selected"
             android:layout_width="wrap_content"
