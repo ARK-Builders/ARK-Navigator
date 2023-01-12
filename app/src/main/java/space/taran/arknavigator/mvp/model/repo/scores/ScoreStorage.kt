@@ -1,7 +1,7 @@
 package space.taran.arknavigator.mvp.model.repo.scores
 
-import space.taran.arknavigator.mvp.model.repo.index.ResourceId
-import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
+import space.taran.arklib.ResourceId
+import space.taran.arklib.domain.index.ResourceMeta
 import space.taran.arknavigator.utils.Score
 
 interface ScoreStorage {

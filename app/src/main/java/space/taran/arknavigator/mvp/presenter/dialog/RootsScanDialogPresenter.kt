@@ -7,7 +7,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import moxy.MvpPresenter
 import moxy.presenterScope
-import space.taran.arknavigator.mvp.model.arkFolder
+import space.taran.arklib.arkFolder
 import space.taran.arknavigator.mvp.view.dialog.RootsScanView
 import space.taran.arknavigator.utils.LogTags
 import space.taran.arknavigator.utils.listDevices

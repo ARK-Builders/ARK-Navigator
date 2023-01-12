@@ -6,13 +6,13 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.ItemFileGridBinding
-import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
-import space.taran.arknavigator.mvp.model.repo.preview.PreviewAndThumbnail
+import space.taran.arklib.domain.index.ResourceMeta
+import space.taran.arklib.domain.preview.PreviewAndThumbnail
+import space.taran.arklib.utils.ImageUtils
 import space.taran.arknavigator.ui.extra.ExtraLoader
-import space.taran.arknavigator.utils.ImageUtils
 import space.taran.arknavigator.utils.Score
 import space.taran.arknavigator.utils.dpToPx
-import space.taran.arknavigator.utils.extension
+import space.taran.arklib.utils.extension
 import java.nio.file.Path
 
 class FileItemViewHolder(

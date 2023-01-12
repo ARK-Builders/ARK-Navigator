@@ -2,8 +2,13 @@ package space.taran.arknavigator.mvp.model.dao
 
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import space.taran.arklib.ResourceId.Companion.Converter
+import space.taran.arklib.domain.dao.Resource
+import space.taran.arklib.domain.dao.ResourceDao
+import space.taran.arklib.domain.dao.ResourceExtra
 import space.taran.arknavigator.ui.App
 
 @androidx.room.Database(
@@ -14,6 +19,7 @@ import space.taran.arknavigator.ui.App
     version = 18,
     exportSchema = false
 )
+@TypeConverters(Converter::class)
 abstract class Database : RoomDatabase() {
     abstract fun resourceDao(): ResourceDao
 
