@@ -3,7 +3,7 @@ package space.taran.arknavigator.mvp.presenter.adapter
 import space.taran.arknavigator.mvp.view.dialog.FolderPickerDialogView
 import space.taran.arknavigator.mvp.view.item.FileItemView
 import space.taran.arknavigator.utils.findLongestCommonPrefix
-import space.taran.arknavigator.utils.listChildren
+import space.taran.arklib.utils.listChildren
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.isDirectory

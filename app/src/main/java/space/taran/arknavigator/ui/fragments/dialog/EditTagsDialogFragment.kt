@@ -22,8 +22,8 @@ import moxy.ktx.moxyPresenter
 import space.taran.arkfilepicker.folders.RootAndFav
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.DialogEditTagsBinding
-import space.taran.arknavigator.mvp.model.repo.index.ResourceId
-import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
+import space.taran.arklib.ResourceId
+import space.taran.arklib.domain.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.stats.StatsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.presenter.dialog.EditTagsDialogPresenter
@@ -43,7 +43,8 @@ class EditTagsDialogFragment(
     private val presenter by moxyPresenter {
         EditTagsDialogPresenter(
             requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
-            requireArguments().getLongArray(RESOURCES_KEY)!!.toList(),
+            requireArguments().getParcelableArray(RESOURCES_KEY)!!
+                as List<ResourceId>,
             index,
             storage,
             statsStorage
@@ -215,7 +216,7 @@ class EditTagsDialogFragment(
             EditTagsDialogFragment(index, storage, statsStorage).apply {
                 arguments = Bundle().apply {
                     putParcelable(ROOT_AND_FAV_KEY, rootAndFav)
-                    putLongArray(RESOURCES_KEY, resources.toLongArray())
+                    putParcelableArray(RESOURCES_KEY, resources.toTypedArray())
                 }
             }
     }

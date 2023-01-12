@@ -5,9 +5,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import space.taran.arknavigator.mvp.model.repo.index.ResourceId
-import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
-import space.taran.arknavigator.mvp.model.repo.kind.KindCode
+import space.taran.arklib.ResourceId
+import space.taran.arklib.domain.index.ResourcesIndex
+import space.taran.arklib.domain.kind.KindCode
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.stats.StatsEvent

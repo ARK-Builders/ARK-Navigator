@@ -6,7 +6,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import space.taran.arkfilepicker.folders.FoldersRepo
 import space.taran.arkfilepicker.folders.RootAndFav
-import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndexRepo
+import space.taran.arklib.domain.index.ResourcesIndexRepo
 import java.nio.file.Path
 
 class ScoreStorageRepo(

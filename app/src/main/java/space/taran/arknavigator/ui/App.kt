@@ -10,6 +10,7 @@ import org.acra.data.StringFormat
 import org.acra.ktx.initAcra
 import org.acra.sender.HttpSender
 import space.taran.arkfilepicker.folders.FoldersRepo
+import space.taran.arklib.initArkLib
 import space.taran.arknavigator.BuildConfig
 import space.taran.arknavigator.R
 import space.taran.arknavigator.di.AppComponent
@@ -42,6 +43,7 @@ class App : Application() {
                 foldersRepo = FoldersRepo.instance
             )
 
+        initArkLib()
         initAcra()
         appComponent.arkBackup().backup()
     }
