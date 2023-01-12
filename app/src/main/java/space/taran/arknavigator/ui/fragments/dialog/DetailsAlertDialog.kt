@@ -10,7 +10,7 @@ import android.view.WindowManager
 import org.apache.commons.io.FileUtils
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.DialogResourceInfoBinding
-import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
+import space.taran.arklib.domain.index.ResourceMeta
 import space.taran.arknavigator.ui.extra.ExtraLoader
 import java.nio.file.Path
 import kotlin.io.path.absolutePathString
@@ -37,7 +37,7 @@ class DetailsAlertDialog(
         // common resources for all file type
         dialogResourceInfoBinding.resourceId.text = context.getString(
             R.string.resource_id_label,
-            resourceMeta.id
+            resourceMeta.id.crc32
         )
         dialogResourceInfoBinding.resourceName.text = context.getString(
             R.string.resource_name_label,
@@ -49,7 +49,7 @@ class DetailsAlertDialog(
         )
         dialogResourceInfoBinding.resourceSize.text = context.getString(
             R.string.resource_size_label,
-            FileUtils.byteCountToDisplaySize(resourceMeta.size)
+            FileUtils.byteCountToDisplaySize(resourceMeta.size())
         )
         // load specific metadata from specific kind
         ExtraLoader.loadWithLabel(

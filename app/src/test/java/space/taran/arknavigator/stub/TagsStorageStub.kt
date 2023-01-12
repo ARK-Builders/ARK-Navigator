@@ -1,6 +1,6 @@
 package space.taran.arknavigator.stub
 
-import space.taran.arknavigator.mvp.model.repo.index.ResourceId
+import space.taran.arklib.ResourceId
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.utils.Tags
 

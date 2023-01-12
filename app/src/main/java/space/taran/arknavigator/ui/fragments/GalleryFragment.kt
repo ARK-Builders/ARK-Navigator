@@ -30,9 +30,9 @@ import space.taran.arknavigator.BuildConfig
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.FragmentGalleryBinding
 import space.taran.arknavigator.databinding.PopupGalleryTagMenuBinding
-import space.taran.arknavigator.mvp.model.repo.index.ResourceId
-import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
-import space.taran.arknavigator.mvp.model.repo.kind.ResourceKind
+import space.taran.arklib.ResourceId
+import space.taran.arklib.domain.index.ResourceMeta
+import space.taran.arklib.domain.kind.ResourceKind
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 import space.taran.arknavigator.mvp.view.GalleryView
 import space.taran.arknavigator.ui.App
@@ -49,7 +49,9 @@ import space.taran.arknavigator.utils.LogTags.GALLERY_SCREEN
 import space.taran.arknavigator.utils.Score
 import space.taran.arknavigator.utils.Tag
 import space.taran.arknavigator.utils.Tags
-import space.taran.arknavigator.utils.extension
+import space.taran.arknavigator.utils.Score
+import space.taran.arklib.utils.extension
+import space.taran.arknavigator.utils.LogTags.GALLERY_SCREEN
 import space.taran.arknavigator.utils.extensions.makeGone
 import space.taran.arknavigator.utils.extensions.makeVisible
 import timber.log.Timber
@@ -62,11 +64,13 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
     private val presenter by moxyPresenter {
         GalleryPresenter(
             requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
-            requireArguments().getLongArray(RESOURCES_KEY)!!.toList(),
+            requireArguments().getParcelableArray(RESOURCES_KEY)!!.toList()
+                as List<ResourceId>,
             requireArguments().getInt(START_AT_KEY),
             requireArguments().getBoolean(SELECTING_ENABLED_KEY),
-            requireArguments().getLongArray(SELECTED_RESOURCES_KEY)!!
-                .toMutableList(),
+            (requireArguments().getParcelableArray(SELECTED_RESOURCES_KEY)!!
+                .toList() as List<ResourceId>)
+            .toMutableList(),
         ).apply {
             Log.d(GALLERY_SCREEN, "creating GalleryPresenter")
             App.instance.appComponent.inject(this)
@@ -584,10 +588,13 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
         ) = GalleryFragment().apply {
             arguments = Bundle().apply {
                 putParcelable(ROOT_AND_FAV_KEY, rootAndFav)
-                putLongArray(RESOURCES_KEY, resources.toLongArray())
+                putParcelableArray(RESOURCES_KEY, resources.toTypedArray())
                 putInt(START_AT_KEY, startAt)
                 putBoolean(SELECTING_ENABLED_KEY, selectingEnabled)
-                putLongArray(SELECTED_RESOURCES_KEY, selectedResources.toLongArray())
+                putParcelableArray(
+                    SELECTED_RESOURCES_KEY,
+                    selectedResources.toTypedArray()
+                )
             }
         }
     }

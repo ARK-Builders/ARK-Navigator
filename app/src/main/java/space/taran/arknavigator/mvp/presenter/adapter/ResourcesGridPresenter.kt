@@ -10,12 +10,12 @@ import kotlinx.coroutines.plus
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import space.taran.arkfilepicker.folders.RootAndFav
-import space.taran.arknavigator.mvp.model.repo.index.ResourceId
-import space.taran.arknavigator.mvp.model.repo.index.ResourceMeta
-import space.taran.arknavigator.mvp.model.repo.index.ResourcesIndex
+import space.taran.arklib.ResourceId
+import space.taran.arklib.domain.index.ResourceMeta
+import space.taran.arklib.domain.index.ResourcesIndex
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
-import space.taran.arknavigator.mvp.model.repo.preview.PreviewStorage
+import space.taran.arklib.domain.preview.PreviewStorage
 import space.taran.arknavigator.mvp.model.repo.scores.ScoreStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.presenter.ResourcesPresenter
