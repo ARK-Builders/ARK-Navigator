@@ -17,6 +17,7 @@ object PdfPreviewGenerator : PreviewGenerator() {
     }
 
     private fun generatePreview(source: Path): Bitmap {
+        // TODO: quality must be configurable in preferences screen
         return pdfPreviewGenerate(source.toString(), PreviewQuality.HIGH)
     }
 }

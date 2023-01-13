@@ -58,7 +58,7 @@ class MainActivity : MvpAppCompatActivity(), MainView {
         System.loadLibrary("arklib")
         initRustLogger()
 
-        setSupportActionBar(binding.toolbar)
+        // setSupportActionBar(binding.toolbar)
         binding.bottomNavigation.setOnApplyWindowInsetsListener(null)
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {

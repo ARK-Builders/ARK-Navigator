@@ -1,5 +1,6 @@
 package space.taran.arknavigator.mvp.model.repo.index
 
+import space.taran.arklib.computeId
 import space.taran.arknavigator.mvp.model.dao.ResourceWithExtra
 import space.taran.arknavigator.mvp.model.repo.kind.GeneralKindFactory
 import space.taran.arknavigator.mvp.model.repo.kind.ResourceKind
@@ -12,7 +13,7 @@ import java.nio.file.Path
 import java.nio.file.attribute.FileTime
 
 data class ResourceMeta(
-    val id: ResourceId,
+    val id: Long, // TODO: must be ResourceId
     val name: String,
     val extension: String,
     val modified: FileTime,
@@ -27,7 +28,8 @@ data class ResourceMeta(
                 return MetaResult.failure(IOException("Invalid file size"))
             }
 
-            val id = computeId(size, path)
+            // TODO: must be full id after migration
+            val id = computeId(size, path).crc32
 
             val meta = ResourceMeta(
                 id = id,
