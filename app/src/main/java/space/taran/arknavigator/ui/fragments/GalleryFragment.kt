@@ -61,7 +61,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
     private val presenter by moxyPresenter {
         GalleryPresenter(
             requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
-            requireArguments().getParcelableArray(RESOURCES_KEY)!!
+            requireArguments().getParcelableArray(RESOURCES_KEY)!!.toList()
                 as List<ResourceId>,
             requireArguments().getInt(START_AT_KEY)
         ).apply {

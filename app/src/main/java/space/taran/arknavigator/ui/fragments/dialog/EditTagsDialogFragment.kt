@@ -43,7 +43,7 @@ class EditTagsDialogFragment(
     private val presenter by moxyPresenter {
         EditTagsDialogPresenter(
             requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
-            requireArguments().getParcelableArray(RESOURCES_KEY)!!
+            requireArguments().getParcelableArray(RESOURCES_KEY)!!.toList()
                 as List<ResourceId>,
             index,
             storage,

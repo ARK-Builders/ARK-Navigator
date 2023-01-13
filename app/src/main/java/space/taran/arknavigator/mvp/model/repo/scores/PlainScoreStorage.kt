@@ -106,7 +106,7 @@ class PlainScoreStorage(
                 val crc32 = parts[0].toLong()
                 val dataSize = parts[1].toLong()
                 val id = ResourceId(dataSize, crc32)
-                val score = parts[1].toInt()
+                val score = parts[2].toInt()
 
                 if (score == 0)
                     throw AssertionError(

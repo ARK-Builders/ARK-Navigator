@@ -236,7 +236,7 @@ class PlainTagsStorage(
                     val crc32 = parts[0].toLong()
                     val dataSize = parts[1].toLong()
                     val id = ResourceId(dataSize, crc32)
-                    val tags = tagsFromString(parts[1])
+                    val tags = tagsFromString(parts[2])
 
                     if (tags.isEmpty()) {
                         throw AssertionError(
