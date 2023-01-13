@@ -1,8 +1,6 @@
 package space.taran.arknavigator.ui.adapter.previewpager
 
 import android.annotation.SuppressLint
-import android.view.GestureDetector
-import android.view.MotionEvent
 import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
@@ -26,10 +24,10 @@ import java.nio.file.Path
 class PreviewItemViewHolder(
     private val binding: ItemImageBinding,
     private val presenter: GalleryPresenter,
+    private val gestureDetector: GestureDetectorCompat
 ) : RecyclerView.ViewHolder(binding.root), PreviewItemView {
 
     init {
-        val gestureDetector = getGestureDetector()
         binding.ivSubsampling.setOnTouchListener { view, motionEvent ->
             return@setOnTouchListener gestureDetector.onTouchEvent(motionEvent)
         }
@@ -114,15 +112,5 @@ class PreviewItemViewHolder(
 
                 override fun onPreviewReleased() {}
             })
-    }
-
-    private fun getGestureDetector(): GestureDetectorCompat {
-        val listener = object : GestureDetector.SimpleOnGestureListener() {
-            override fun onSingleTapConfirmed(e: MotionEvent?): Boolean {
-                presenter.onPreviewsItemClick()
-                return true
-            }
-        }
-        return GestureDetectorCompat(itemView.context, listener)
     }
 }

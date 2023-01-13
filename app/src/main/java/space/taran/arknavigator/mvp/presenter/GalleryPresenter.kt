@@ -51,7 +51,9 @@ enum class GalleryItemType {
 class GalleryPresenter(
     private val rootAndFav: RootAndFav,
     private val resourcesIds: List<ResourceId>,
-    private val startAt: Int
+    private val startAt: Int,
+    var selectingEnabled: Boolean,
+    private val selectedResources: MutableList<ResourceId>
 ) : MvpPresenter<GalleryView>() {
 
     private var isControlsVisible = false
@@ -232,6 +234,22 @@ class GalleryPresenter(
         viewState.notifyTagsChanged()
     }
 
+    fun onSelectBtnClick() {
+        val wasSelected = currentResource.id in selectedResources
+
+        if (wasSelected)
+            selectedResources.remove(currentResource.id)
+        else
+            selectedResources.add(currentResource.id)
+
+        viewState.displaySelected(
+            !wasSelected,
+            showAnim = true,
+            selectedResources.size,
+            resources.size
+        )
+    }
+
     fun onEditTagsDialogBtnClick() {
         viewState.showEditTagsDialog(currentResource.id)
     }
@@ -287,6 +305,12 @@ class GalleryPresenter(
         viewState.setupPreview(currentPos, resource, filePath.fileName.toString())
         viewState.displayPreviewTags(resource.id, tags)
         viewState.displayScore(score)
+        viewState.displaySelected(
+            resource.id in selectedResources,
+            showAnim = false,
+            selectedResources.size,
+            resources.size
+        )
     }
 
     private suspend fun onRemovedResourceDetected() = withContext(Dispatchers.Main) {
@@ -349,12 +373,22 @@ class GalleryPresenter(
         viewState.setControlsVisibility(isControlsVisible)
     }
 
+    fun onSelectingChanged() {
+        selectingEnabled = !selectingEnabled
+        viewState.toggleSelecting(selectingEnabled)
+        selectedResources.clear()
+        if (selectingEnabled) {
+            selectedResources.add(currentResource.id)
+        }
+    }
+
     fun onPlayButtonClick() = presenterScope.launch {
         viewState.viewInExternalApp(index.getPath(currentResource.id))
     }
 
     fun onBackClick() {
         Log.d(GALLERY_SCREEN, "quitting from GalleryPresenter")
+        viewState.notifySelectedChanged(selectedResources)
         viewState.exitFullscreen()
         router.exit()
     }

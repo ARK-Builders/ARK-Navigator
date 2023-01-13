@@ -187,10 +187,6 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         resourcesAdapter?.notifyDataSetChanged()
     }
 
-    override fun updateAdapterWithScores() {
-        presenter.updateAdapterWithScores()
-    }
-
     override fun updateMenu() = with(binding) {
         val queryMode = presenter.tagsSelectorPresenter.queryMode
         val normalVisibility =
@@ -397,7 +393,23 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         setFragmentResultListener(
             GalleryFragment.SCORES_CHANGED_KEY
         ) { _, _ ->
-            presenter.updateAdapterWithScores()
+            presenter.gridPresenter.onScoresChangedExternally()
+        }
+
+        setFragmentResultListener(
+            GalleryFragment.SELECTED_CHANGED_KEY
+        ) { _, bundle ->
+            val selectingEnabled = bundle.getBoolean(
+                GalleryFragment.SELECTING_ENABLED_KEY
+            )
+            presenter.gridPresenter.onSelectingChanged(selectingEnabled)
+            if (selectingEnabled) {
+                presenter.gridPresenter.onSelectedChangedExternally(
+                    bundle.getLongArray(
+                        GalleryFragment.SELECTED_RESOURCES_KEY
+                    )!!.toList()
+                )
+            }
         }
     }
 
