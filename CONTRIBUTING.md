@@ -30,14 +30,6 @@ The projects embeds `ktlint` in order to enforce consistent code style.
 
 Before a PR can be merged, you would have to fix all code style errors.
 
-Please, install pre-commit Git hook locally by following command:
-
-```
-./gradlew installGitHook
-```
-
-This enables `ktlint` check to be executed automatically before any Git commit. 
-
 ### Code review
 
 We care a lot about our software quality, that's why we are conducting strict code reviews before merging:
@@ -53,3 +45,7 @@ Right now, the team isn't that big, so please be patient 🙂
 
 If Pull Request is long time in reviewing phase, `main` branch might go forward too far.
 Please, fix all merge conflicts in this case 🛠
+
+## Additional read
+
+https://docs.github.com/en/get-started/quickstart/github-flow
