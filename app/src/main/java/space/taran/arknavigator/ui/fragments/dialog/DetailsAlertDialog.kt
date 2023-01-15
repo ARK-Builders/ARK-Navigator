@@ -49,7 +49,7 @@ class DetailsAlertDialog(
         )
         dialogResourceInfoBinding.resourceSize.text = context.getString(
             R.string.resource_size_label,
-            FileUtils.byteCountToDisplaySize(resourceMeta.size)
+            FileUtils.byteCountToDisplaySize(resourceMeta.size())
         )
         // load specific metadata from specific kind
         ExtraLoader.loadWithLabel(
