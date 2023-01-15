@@ -261,22 +261,16 @@ class PlainResourcesIndex internal constructor(
                 "providing previews/thumbnails for ${metaByPath.size} resources"
             )
 
-            supervisorScope {
-                metaByPath.entries.map { (path: Path, meta: ResourceMeta) ->
-                    async(Dispatchers.IO) {
-                        previewStorage.store(path, meta)
-                    } to path
-                }.forEach { (generateTask, path) ->
-                    try {
-                        generateTask.await()
-                    } catch (e: Exception) {
-                        Log.e(
-                            PREVIEWS,
-                            "Failed to generate preview/thumbnail for id ${
-                            metaByPath[path]?.id
-                            } ($path)"
-                        )
-                    }
+            metaByPath.entries.forEach { (path: Path, meta: ResourceMeta) ->
+                try {
+                    previewStorage.store(path, meta)
+                } catch (e: Throwable) {
+                    Log.e(
+                        PREVIEWS,
+                        "Failed to generate preview/thumbnail for id ${
+                        metaByPath[path]?.id
+                        } ($path)"
+                    )
                 }
             }
         }
