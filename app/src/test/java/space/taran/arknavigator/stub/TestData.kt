@@ -13,7 +13,6 @@ object TestData {
             "Resource1",
             ".jpg",
             fileTime(),
-            100,
             ResourceKind.Image()
         ),
         R2 to ResourceMeta(
@@ -21,7 +20,6 @@ object TestData {
             "Resource2",
             ".jpg",
             fileTime(),
-            100,
             ResourceKind.Image()
         ),
         R3 to ResourceMeta(
@@ -29,7 +27,6 @@ object TestData {
             "Resource3",
             ".jpg",
             fileTime(),
-            120,
             ResourceKind.Image()
         ),
         R4 to ResourceMeta(
@@ -37,7 +34,6 @@ object TestData {
             "Resource4",
             ".odt",
             fileTime(),
-            140,
             ResourceKind.Document()
         )
     )
