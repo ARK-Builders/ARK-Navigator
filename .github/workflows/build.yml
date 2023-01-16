@@ -43,7 +43,7 @@ jobs:
           path: ./app/build/outputs/apk/release/ark-navigator-universal-release.apk
 
   test:
-    needs: build
+#    needs: build
     environment: Development
     runs-on: ubuntu-latest
     steps:
@@ -59,7 +59,7 @@ jobs:
       run: ./gradlew testDebugUnitTest
 
   lint:
-    needs: test
+#    needs: test
     environment: Development
     runs-on: ubuntu-latest
     steps:
@@ -74,13 +74,13 @@ jobs:
     - name: Run linter
       run: ./gradlew lint
 
-#    - uses: actions/upload-artifact@v3
-#      with:
-#        name: lint-results
-#        path: ./app/build/reports/lint-results-debug.html
+    - uses: actions/upload-artifact@v3
+      with:
+        name: lint-results
+        path: ./app/build/reports/lint-results-debug.html
 
   ktlint:
-    needs: test
+#    needs: test
     environment: Development
     runs-on: ubuntu-latest
     steps:
