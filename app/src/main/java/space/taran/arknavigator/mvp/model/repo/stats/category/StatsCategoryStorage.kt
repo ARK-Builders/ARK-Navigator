@@ -9,6 +9,7 @@ import kotlinx.coroutines.launch
 import space.taran.arklib.arkFolder
 import space.taran.arklib.arkStats
 import space.taran.arknavigator.mvp.model.repo.stats.StatsEvent
+import timber.log.Timber
 import java.nio.file.Path
 
 private const val FLUSH_INTERVAL = 10_000L
@@ -20,7 +21,12 @@ abstract class StatsCategoryStorage<out T>(
     abstract val fileName: String
     private val flushFlow = MutableSharedFlow<Unit>().also { flow ->
         flow.debounce(FLUSH_INTERVAL).onEach {
-            flush()
+            // There may be an exception after root is removed
+            try {
+                flush()
+            } catch (e: Exception) {
+                Timber.e(e)
+            }
         }.launchIn(scope)
     }
 

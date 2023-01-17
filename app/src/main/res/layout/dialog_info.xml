@@ -34,7 +34,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        android:text="@string/delete_folder"
+        android:text="@string/delete_files"
         android:visibility="gone" />
 
     <LinearLayout
