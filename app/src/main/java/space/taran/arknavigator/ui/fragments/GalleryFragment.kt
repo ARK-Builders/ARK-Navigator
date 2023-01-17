@@ -278,7 +278,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
                     SELECTING_ENABLED_KEY,
                     requireArguments().getBoolean(SELECTING_ENABLED_KEY)
                 )
-                putLongArray(SELECTED_RESOURCES_KEY, selected.toLongArray())
+                putParcelableArray(SELECTED_RESOURCES_KEY, selectedResources.toTypedArray())
             }
         )
     }

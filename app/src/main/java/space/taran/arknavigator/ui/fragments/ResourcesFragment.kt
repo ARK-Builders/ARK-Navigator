@@ -405,7 +405,7 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
             presenter.gridPresenter.onSelectingChanged(selectingEnabled)
             if (selectingEnabled) {
                 presenter.gridPresenter.onSelectedChangedExternally(
-                    bundle.getLongArray(
+                    bundle.getParcelableArray(
                         GalleryFragment.SELECTED_RESOURCES_KEY
                     )!!.toList()
                 )
