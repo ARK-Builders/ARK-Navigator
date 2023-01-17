@@ -120,8 +120,8 @@
     <string name="pin">Pin</string>
     <string name="unpin">Unpin</string>
     <string name="scores">Scores</string>
-    <string name="resource_scores_erased">%1$s resource score%2$s will be erased.</string>
+    <string name="resource_scores_erased">%1$d resource score%2$s will be erased.</string>
     <string name="utils">Utils</string>
     <string name="folder_forget_warn">Navigator will forget the folder and all its children</string>
-    <string name="delete_folder">Delete folder from memory</string>
+    <string name="delete_files">Delete files</string>
 </resources>
