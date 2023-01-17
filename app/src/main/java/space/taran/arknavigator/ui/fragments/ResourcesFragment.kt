@@ -407,7 +407,7 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
                 presenter.gridPresenter.onSelectedChangedExternally(
                     bundle.getParcelableArray(
                         GalleryFragment.SELECTED_RESOURCES_KEY
-                    )!!.toList()
+                    )!!.toList() as List<ResourceId>
                 )
             }
         }
