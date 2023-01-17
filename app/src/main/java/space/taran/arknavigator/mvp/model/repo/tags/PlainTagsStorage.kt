@@ -233,10 +233,11 @@ class PlainTagsStorage(
             val result = lines
                 .map {
                     val parts = it.split(KEY_VALUE_SEPARATOR)
-                    val crc32 = parts[0].toLong()
-                    val dataSize = parts[1].toLong()
+                    val rawId = parts[0].split('-')
+                    val crc32 = rawId[0].toLong()
+                    val dataSize = rawId[1].toLong()
                     val id = ResourceId(dataSize, crc32)
-                    val tags = tagsFromString(parts[2])
+                    val tags = tagsFromString(parts[1])
 
                     if (tags.isEmpty()) {
                         throw AssertionError(
@@ -264,8 +265,8 @@ class PlainTagsStorage(
             val entries = tagsById.filterValues { it.isNotEmpty() }
             lines.addAll(
                 entries.map { (id, tags) ->
-                    "${id.crc32}$KEY_VALUE_SEPARATOR" +
-                        "${id.dataSize}$KEY_VALUE_SEPARATOR ${stringFromTags(tags)}"
+                    "${id.dataSize}-${id.crc32}$KEY_VALUE_SEPARATOR " +
+                    stringFromTags(tags)
                 }
             )
 

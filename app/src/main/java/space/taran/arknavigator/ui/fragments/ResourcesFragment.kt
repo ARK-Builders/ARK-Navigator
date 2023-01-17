@@ -23,6 +23,7 @@ import moxy.ktx.moxyPresenter
 import moxy.presenterScope
 import space.taran.arkfilepicker.folders.RootAndFav
 import space.taran.arkfilepicker.presentation.onArkPathPicked
+import space.taran.arklib.ResourceId
 import space.taran.arknavigator.BuildConfig
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.FragmentResourcesBinding
@@ -405,9 +406,9 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
             presenter.gridPresenter.onSelectingChanged(selectingEnabled)
             if (selectingEnabled) {
                 presenter.gridPresenter.onSelectedChangedExternally(
-                    bundle.getLongArray(
+                    bundle.getParcelableArray(
                         GalleryFragment.SELECTED_RESOURCES_KEY
-                    )!!.toList()
+                    )!!.toList() as List<ResourceId>
                 )
             }
         }
