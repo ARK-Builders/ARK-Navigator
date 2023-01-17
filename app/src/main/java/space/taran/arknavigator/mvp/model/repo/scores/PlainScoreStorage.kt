@@ -103,10 +103,11 @@ class PlainScoreStorage(
             verifyVersion(version)
             val result = lines.map {
                 val parts = it.split(KEY_VALUE_SEPARATOR)
-                val crc32 = parts[0].toLong()
-                val dataSize = parts[1].toLong()
+                val rawId = parts[0].split('-')
+                val crc32 = rawId[0].toLong()
+                val dataSize = rawId[1].toLong()
                 val id = ResourceId(dataSize, crc32)
-                val score = parts[2].toInt()
+                val score = parts[1].toInt()
 
                 if (score == 0)
                     throw AssertionError(
@@ -131,8 +132,7 @@ class PlainScoreStorage(
 
         lines.addAll(
             entries.map { (id, score) ->
-                "${id.crc32}$KEY_VALUE_SEPARATOR" +
-                    ":${id.dataSize}$KEY_VALUE_SEPARATOR$score"
+                "${id.dataSize}-${id.crc32}$KEY_VALUE_SEPARATOR $score"
             }
         )
 

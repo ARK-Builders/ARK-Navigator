@@ -45,8 +45,6 @@ import space.taran.arknavigator.ui.view.DefaultPopup
 import space.taran.arknavigator.ui.view.DepthPageTransformer
 import space.taran.arknavigator.ui.view.StackedToasts
 import space.taran.arknavigator.utils.FullscreenHelper
-import space.taran.arknavigator.utils.LogTags.GALLERY_SCREEN
-import space.taran.arknavigator.utils.Score
 import space.taran.arknavigator.utils.Tag
 import space.taran.arknavigator.utils.Tags
 import space.taran.arknavigator.utils.Score
@@ -280,7 +278,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
                     SELECTING_ENABLED_KEY,
                     requireArguments().getBoolean(SELECTING_ENABLED_KEY)
                 )
-                putLongArray(SELECTED_RESOURCES_KEY, selected.toLongArray())
+                putParcelableArray(SELECTED_RESOURCES_KEY, selected.toTypedArray())
             }
         )
     }
