@@ -23,6 +23,7 @@ import moxy.ktx.moxyPresenter
 import moxy.presenterScope
 import space.taran.arkfilepicker.folders.RootAndFav
 import space.taran.arkfilepicker.presentation.onArkPathPicked
+import space.taran.arklib.ResourceId
 import space.taran.arknavigator.BuildConfig
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.FragmentResourcesBinding
