@@ -45,6 +45,8 @@ import space.taran.arknavigator.ui.view.DefaultPopup
 import space.taran.arknavigator.ui.view.DepthPageTransformer
 import space.taran.arknavigator.ui.view.StackedToasts
 import space.taran.arknavigator.utils.FullscreenHelper
+import space.taran.arknavigator.utils.LogTags.GALLERY_SCREEN
+import space.taran.arknavigator.utils.Score
 import space.taran.arknavigator.utils.Tag
 import space.taran.arknavigator.utils.Tags
 import space.taran.arknavigator.utils.Score
@@ -52,6 +54,7 @@ import space.taran.arklib.utils.extension
 import space.taran.arknavigator.utils.LogTags.GALLERY_SCREEN
 import space.taran.arknavigator.utils.extensions.makeGone
 import space.taran.arknavigator.utils.extensions.makeVisible
+import timber.log.Timber
 import java.nio.file.Path
 
 class GalleryFragment : MvpAppCompatFragment(), GalleryView {
@@ -63,7 +66,11 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
             requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
             requireArguments().getParcelableArray(RESOURCES_KEY)!!.toList()
                 as List<ResourceId>,
-            requireArguments().getInt(START_AT_KEY)
+            requireArguments().getInt(START_AT_KEY),
+            requireArguments().getBoolean(SELECTING_ENABLED_KEY),
+            (requireArguments().getParcelableArray(SELECTED_RESOURCES_KEY)!!.toList()
+                as List<ResourceId>)
+                .toMutableList(),
         ).apply {
             Log.d(GALLERY_SCREEN, "creating GalleryPresenter")
             App.instance.appComponent.inject(this)
@@ -102,11 +109,16 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
             presenter.onBackClick()
         }
 
-        pagerAdapter = PreviewsPager(presenter)
+        pagerAdapter = PreviewsPager(requireContext(), presenter)
 
         initViewPager()
 
         binding.apply {
+            val selectingEnabled =
+                requireArguments().getBoolean(SELECTING_ENABLED_KEY)
+            layoutSelected.isVisible = selectingEnabled
+            fabStartSelect.isVisible = !selectingEnabled
+
             removeResourceFab.setOnLongClickListener {
                 presenter.onRemoveFabClick()
                 true
@@ -118,6 +130,9 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
             shareResourceFab.setOnClickListener {
                 presenter.onShareFabClick()
             }
+            fabStartSelect.setOnClickListener {
+                presenter.onSelectingChanged()
+            }
 
             openResourceFab.setOnClickListener {
                 presenter.onOpenFabClick()
@@ -125,6 +140,15 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
 
             editResourceFab.setOnClickListener {
                 presenter.onEditFabClick()
+            }
+
+            layoutSelected.setOnClickListener {
+                presenter.onSelectBtnClick()
+            }
+
+            layoutSelected.setOnLongClickListener {
+                presenter.onSelectingChanged()
+                return@setOnLongClickListener true
             }
 
             increaseScore.setOnClickListener {
@@ -242,6 +266,25 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
         setFragmentResult(REQUEST_TAGS_CHANGED_KEY, bundleOf())
     }
 
+    override fun notifyResourceScoresChanged() {
+        setFragmentResult(SCORES_CHANGED_KEY, bundleOf())
+    }
+
+    override fun notifySelectedChanged(
+        selected: List<ResourceId>
+    ) {
+        setFragmentResult(
+            SELECTED_CHANGED_KEY,
+            bundleOf().apply {
+                putBoolean(
+                    SELECTING_ENABLED_KEY,
+                    requireArguments().getBoolean(SELECTING_ENABLED_KEY)
+                )
+                putLongArray(SELECTED_RESOURCES_KEY, selected.toLongArray())
+            }
+        )
+    }
+
     override fun toastIndexFailedPath(path: Path) {
         stackedToasts.toast(path)
     }
@@ -316,8 +359,19 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
         pagerAdapter.notifyItemChanged(binding.viewPager.currentItem)
     }
 
-    override fun notifyResourceScoresChanged() {
-        setFragmentResult(SCORES_CHANGED_KEY, bundleOf())
+    override fun displaySelected(
+        selected: Boolean,
+        showAnim: Boolean,
+        selectedCount: Int,
+        itemCount: Int
+    ) = with(binding) {
+        Timber.d("display ${System.currentTimeMillis()}")
+        cbSelected.isChecked = selected
+        if (!showAnim)
+            cbSelected.jumpDrawablesToCurrentState()
+        tvSelectedOf.text = "$selectedCount/$itemCount"
+
+        return@with
     }
 
     override fun displayScore(score: Score) {
@@ -339,6 +393,19 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
     override fun onResume() {
         super.onResume()
         presenter.onResume()
+    }
+
+    override fun toggleSelecting(enabled: Boolean) {
+        binding.layoutSelected.isVisible = enabled
+        binding.fabStartSelect.isVisible = !enabled
+        requireArguments().apply {
+            putBoolean(SELECTING_ENABLED_KEY, enabled)
+        }
+        if (enabled) {
+            presenter.onSelectBtnClick()
+        } else {
+            binding.cbSelected.isChecked = false
+        }
     }
 
     private fun initViewPager() = with(binding.viewPager) {
@@ -505,21 +572,27 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
         private const val ROOT_AND_FAV_KEY = "rootAndFav"
         private const val RESOURCES_KEY = "resources"
         private const val START_AT_KEY = "startAt"
+        const val SELECTING_ENABLED_KEY = "selectingEnabled"
+        const val SELECTED_RESOURCES_KEY = "selectedResources"
         const val REQUEST_TAGS_CHANGED_KEY = "tagsChangedGallery"
         const val REQUEST_RESOURCES_CHANGED_KEY = "resourcesChangedGallery"
         const val SCORES_CHANGED_KEY = "scoresChangedInGallery"
+        const val SELECTED_CHANGED_KEY = "selectedChanged"
 
         fun newInstance(
             rootAndFav: RootAndFav,
             resources: List<ResourceId>,
-            startAt: Int
-        ) =
-            GalleryFragment().apply {
-                arguments = Bundle().apply {
-                    putParcelable(ROOT_AND_FAV_KEY, rootAndFav)
-                    putParcelableArray(RESOURCES_KEY, resources.toTypedArray())
-                    putInt(START_AT_KEY, startAt)
-                }
+            startAt: Int,
+            selectingEnabled: Boolean = false,
+            selectedResources: List<ResourceId> = emptyList(),
+        ) = GalleryFragment().apply {
+            arguments = Bundle().apply {
+                putParcelable(ROOT_AND_FAV_KEY, rootAndFav)
+                putParcelableArray(RESOURCES_KEY, resources.toTypedArray())
+                putInt(START_AT_KEY, startAt)
+                putBoolean(SELECTING_ENABLED_KEY, selectingEnabled)
+                putParcelableArray(SELECTED_RESOURCES_KEY, selectedResources.toTypedArray())
             }
+        }
     }
 }

@@ -2,15 +2,50 @@ name: Build the app
 
 on: [push]
 
+env:
+  ACRA_LOGIN: ${{ secrets.ACRARIUM_BASIC_AUTH_LOGIN }}
+  ACRA_PASS: ${{ secrets.ACRARIUM_BASIC_AUTH_PASSWORD }}
+  ACRA_URI: ${{ secrets.ACRARIUM_URI }}
+  BRANCH_NAME: ${{ github.ref_name }}
+
 jobs:
   build:
-    runs-on: ubuntu-latest
     environment: Development
-    env:
-      ACRA_LOGIN: ${{ secrets.ACRARIUM_BASIC_AUTH_LOGIN }}
-      ACRA_PASS: ${{ secrets.ACRARIUM_BASIC_AUTH_PASSWORD }}
-      ACRA_URI: ${{ secrets.ACRARIUM_URI }}
-      BRANCH_NAME: ${{ github.ref_name }}
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'adopt'
+
+    - name: Build Release APK
+      run: ./gradlew assembleRelease
+
+    - name: Upload Release arm64-v8a APK
+      uses: actions/upload-artifact@v3
+      with:
+          name: ark-navigator-arm64-v8a-apk
+          path: ./app/build/outputs/apk/release/ark-navigator-arm64-v8a-release.apk
+
+    - name: Upload Release armeabi-v7a APK
+      uses: actions/upload-artifact@v3
+      with:
+          name: ark-navigator-armeabi-v7a-apk
+          path: ./app/build/outputs/apk/release/ark-navigator-armeabi-v7a-release.apk
+
+    - name: Upload Release universal APK
+      uses: actions/upload-artifact@v3
+      with:
+          name: ark-navigator-universal-apk
+          path: ./app/build/outputs/apk/release/ark-navigator-universal-release.apk
+
+  test:
+#    needs: build
+    environment: Development
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
 
@@ -23,26 +58,18 @@ jobs:
     - name: Run unit tests
       run: ./gradlew testDebugUnitTest
 
-    - name: Build Release APK
-      run: ./gradlew assembleRelease
+  lint:
+    needs: test
+    environment: Development
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
 
-    - name: Upload Release arm64-v8a APK
-      uses: actions/upload-artifact@v3
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
       with:
-          name: release-arm64-v8a-apk
-          path: ./app/build/outputs/apk/release/app-arm64-v8a-release.apk
-
-    - name: Upload Release armeabi-v7a APK
-      uses: actions/upload-artifact@v3
-      with:
-          name: release-armeabi-v7a-apk
-          path: ./app/build/outputs/apk/release/app-armeabi-v7a-release.apk
-
-    - name: Upload Release universal APK
-      uses: actions/upload-artifact@v3
-      with:
-          name: release-universal-apk
-          path: ./app/build/outputs/apk/release/app-universal-release.apk
+        java-version: '11'
+        distribution: 'adopt'
 
     - name: Run linter
       run: ./gradlew lint
@@ -50,7 +77,20 @@ jobs:
     - uses: actions/upload-artifact@v3
       with:
         name: lint-results
-        path: ./app/build/reports/lint-results.html
+        path: ./app/build/reports/lint-results-debug.html
+
+  ktlint:
+    needs: test
+    environment: Development
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'adopt'
 
     - name: Kotlin linter
       run: ./gradlew ktlintCheck

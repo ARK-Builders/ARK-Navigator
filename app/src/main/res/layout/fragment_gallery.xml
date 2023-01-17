@@ -88,6 +88,49 @@
         </HorizontalScrollView>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_start_select"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/scroll_extra_info"
+            android:backgroundTint="@color/colorPrimary"
+            android:layout_margin="16dp"
+            android:src="@drawable/ic_list_add"
+            app:tint="@color/white"
+            app:borderWidth="0dp"
+            />
+
+        <LinearLayout
+            android:id="@+id/layout_selected"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/scroll_extra_info"
+            android:background="@drawable/bg_rounded_black_transparent"
+            android:visibility="gone"
+            android:layout_marginStart="16dp"
+            android:layout_marginBottom="16dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/cb_selected"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:clickable="false"
+                android:focusable="false"
+                android:button="@null"
+                android:background="?android:attr/listChoiceIndicatorMultiple"/>
+
+            <TextView
+                android:id="@+id/tv_selected_of"
+                android:layout_width="wrap_content"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/remove_resource_fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

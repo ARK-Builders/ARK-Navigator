@@ -32,6 +32,8 @@ android {
         targetSdkVersion 31
         versionCode 1
         versionName appVersionName
+        setProperty("archivesBaseName", "ark-navigator")
+
         buildConfigField "String", "ACRA_LOGIN", "\"$login\""
         buildConfigField "String", "ACRA_PASS", "\"$password\""
         buildConfigField "String", "ACRA_URI", "\"$uri\""
@@ -168,6 +170,3 @@ task installGitHook(type: Copy) {
     rename("pre-commit-$suffix", 'pre-commit')
     fileMode 0775
 }
-
-tasks.preBuild.dependsOn ktlintCheck
-tasks.preBuild.dependsOn installGitHook

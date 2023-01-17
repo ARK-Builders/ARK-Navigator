@@ -256,14 +256,6 @@ class ResourcesPresenter(
         }
     }
 
-    fun updateAdapterWithScores() {
-        Log.d(
-            RESOURCES_SCREEN,
-            "updating resources after scores change"
-        )
-        gridPresenter.updateAdapterWithScores()
-    }
-
     private suspend fun migrateTags(resources: List<ResourceId>, to: Path) {
         val newRoot = foldersRepo.findRootByPath(to)
         newRoot?.let {

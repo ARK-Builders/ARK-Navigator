@@ -13,6 +13,7 @@ class Screens {
     class FoldersScreen : SupportAppScreen() {
         override fun getFragment() = FoldersFragment.newInstance()
     }
+
     class FoldersScreenRescanRoots : SupportAppScreen() {
         override fun getFragment() = FoldersFragment.newInstance(rescan = true)
     }
@@ -37,6 +38,22 @@ class Screens {
     ) : SupportAppScreen() {
         override fun getFragment() =
             GalleryFragment.newInstance(rootAndFav, resources, startAt)
+    }
+
+    class GalleryScreenWithSelected(
+        val rootAndFav: RootAndFav,
+        val resources: List<ResourceId>,
+        val startAt: Int,
+        val selectedResources: List<ResourceId>
+    ) : SupportAppScreen() {
+        override fun getFragment() =
+            GalleryFragment.newInstance(
+                rootAndFav,
+                resources,
+                startAt,
+                true,
+                selectedResources
+            )
     }
 
     class SettingsScreen : SupportAppScreen() {

@@ -19,6 +19,7 @@ import kotlin.io.path.createDirectories
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.exists
 import kotlin.io.path.inputStream
+import kotlin.io.path.isRegularFile
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.notExists
 import kotlin.io.path.outputStream
@@ -29,6 +30,12 @@ class StorageBackup @Inject constructor(
 ) {
     private val keepDates: List<String> = getKeepBackupDates()
     private val today: String = keepDates[0]
+
+    private val foldersToIgnore = listOf(
+        ArkFiles.PREVIEWS_FOLDER,
+        ArkFiles.THUMBNAILS_FOLDER
+    )
+    private val filesToIgnore = listOf<String>()
 
     fun backup() = CoroutineScope(Dispatchers.IO).launch {
         if (!preferences.get(PreferenceKey.BackupEnabled))
@@ -49,19 +56,26 @@ class StorageBackup @Inject constructor(
             .createDirectories()
             .resolve("$BACKUP_NAME_PREFIX$today.zip")
 
-        val arkPath = root.resolve(ArkFiles.ARK_FOLDER)
+        val arkPath = root.arkFolder()
 
-        val filesToBackup = listOf(
-            arkPath.resolve(ArkFiles.FAVORITES_FILE),
-            arkPath.resolve(ArkFiles.TAGS_STORAGE_FILE)
-        ).filter { it.exists() }
+        val filesToBackup = arkPath.toFile()
+            .walkTopDown()
+            .onEnter { enteredFolder -> enteredFolder.name !in foldersToIgnore }
+            .toList()
+            .map { it.toPath() }
+            // only files are needed, folders will be created automatically in zip
+            .filter { file ->
+                file.isRegularFile() &&
+                    file.fileName.toString() !in filesToIgnore
+            }
 
         if (filesToBackup.isEmpty()) return
 
         ZipOutputStream(backupPath.outputStream()).use { zipOut ->
             filesToBackup
                 .forEach { backupFile ->
-                    val zipEntry = ZipEntry(backupFile.fileName.toString())
+                    val name = arkPath.relativize(backupFile).toString()
+                    val zipEntry = ZipEntry(name)
                     zipOut.putNextEntry(zipEntry)
                     backupFile.inputStream().use {
                         it.copyTo(zipOut)

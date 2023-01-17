@@ -32,7 +32,7 @@ import javax.inject.Inject
 import kotlin.io.path.notExists
 import kotlin.system.measureTimeMillis
 
-class ResourceItem(
+data class ResourceItem(
     val meta: ResourceMeta,
     var isSelected: Boolean = false,
     var isPinned: Boolean = false
@@ -252,9 +252,34 @@ class ResourcesGridPresenter(
             scoreStorage.getScore(it.id) > 0 || scoreStorage.getScore(it.id) < 0
         }
 
-    fun updateAdapterWithScores() {
+    fun onScoresChangedExternally() {
         sortAllResources()
         sortSelectionAndUpdateAdapter()
+    }
+
+    fun onSelectedChangedExternally(selected: List<ResourceId>) =
+        scope.launch(Dispatchers.Default) {
+            resources.forEach { item ->
+                item.isSelected = item.meta.id in selected
+            }
+            withContext(Dispatchers.Main) {
+                viewState.updateAdapter()
+                viewState.setSelectingCount(
+                    resources.filter { it.isSelected }.size,
+                    resources.size
+                )
+            }
+        }
+
+    fun onSelectedItemLongClick(item: FileItemView) {
+        router.navigateToFragmentUsingAdd(
+            Screens.GalleryScreenWithSelected(
+                rootAndFav,
+                selection.map { it.meta.id },
+                item.position(),
+                selectedResources.map { it.id }
+            )
+        )
     }
 
     private suspend fun changeScore(inc: Int) = withContext(Dispatchers.Default) {
