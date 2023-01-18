@@ -104,8 +104,8 @@ class PlainScoreStorage(
             val result = lines.map {
                 val parts = it.split(KEY_VALUE_SEPARATOR)
                 val rawId = parts[0].split('-')
-                val crc32 = rawId[0].toLong()
-                val dataSize = rawId[1].toLong()
+                val dataSize = rawId[0].toLong()
+                val crc32 = rawId[1].toLong()
                 val id = ResourceId(dataSize, crc32)
                 val score = parts[1].toInt()
 
@@ -132,7 +132,7 @@ class PlainScoreStorage(
 
         lines.addAll(
             entries.map { (id, score) ->
-                "${id.dataSize}-${id.crc32}$KEY_VALUE_SEPARATOR $score"
+                "${id.dataSize}-${id.crc32}$KEY_VALUE_SEPARATOR$score"
             }
         )
 
