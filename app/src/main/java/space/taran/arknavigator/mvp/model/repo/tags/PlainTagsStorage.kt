@@ -234,8 +234,8 @@ class PlainTagsStorage(
                 .map {
                     val parts = it.split(KEY_VALUE_SEPARATOR)
                     val rawId = parts[0].split('-')
-                    val crc32 = rawId[0].toLong()
-                    val dataSize = rawId[1].toLong()
+                    val dataSize = rawId[0].toLong()
+                    val crc32 = rawId[1].toLong()
                     val id = ResourceId(dataSize, crc32)
                     val tags = tagsFromString(parts[1])
 
@@ -265,8 +265,8 @@ class PlainTagsStorage(
             val entries = tagsById.filterValues { it.isNotEmpty() }
             lines.addAll(
                 entries.map { (id, tags) ->
-                    "${id.dataSize}-${id.crc32}$KEY_VALUE_SEPARATOR " +
-                    stringFromTags(tags)
+                    "${id.dataSize}-${id.crc32}$KEY_VALUE_SEPARATOR" +
+                        stringFromTags(tags)
                 }
             )
 
