@@ -43,7 +43,7 @@ jobs:
           path: ./app/build/outputs/apk/release/ark-navigator-universal-release.apk
 
   test:
-#    needs: build
+    needs: build
     environment: Development
     runs-on: ubuntu-latest
     steps:
