@@ -66,9 +66,11 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
                 as List<ResourceId>,
             requireArguments().getInt(START_AT_KEY),
             requireArguments().getBoolean(SELECTING_ENABLED_KEY),
-            (requireArguments().getParcelableArray(SELECTED_RESOURCES_KEY)!!
-                .toList() as List<ResourceId>)
-            .toMutableList(),
+            (
+                requireArguments().getParcelableArray(SELECTED_RESOURCES_KEY)!!
+                    .toList() as List<ResourceId>
+                )
+                .toMutableList(),
         ).apply {
             Log.d(GALLERY_SCREEN, "creating GalleryPresenter")
             App.instance.appComponent.inject(this)
