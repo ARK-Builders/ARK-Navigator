@@ -23,6 +23,9 @@ jobs:
         java-version: '11'
         distribution: 'adopt'
 
+    - name: Validate Gradle wrapper
+      uses: gradle/wrapper-validation-action@v1.0.5
+
     - name: Build Release APK
       run: ./gradlew assembleRelease
 
