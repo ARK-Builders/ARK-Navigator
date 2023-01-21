@@ -4,6 +4,7 @@ import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -13,12 +14,14 @@ import moxy.presenterScope
 import space.taran.arkfilepicker.folders.FoldersRepo
 import space.taran.arkfilepicker.folders.RootAndFav
 import space.taran.arklib.ResourceId
+import space.taran.arklib.domain.Message
 import space.taran.arklib.domain.index.ResourcesIndex
 import space.taran.arklib.domain.index.ResourcesIndexRepo
-import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
-import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arklib.domain.preview.PreviewStorage
 import space.taran.arklib.domain.preview.PreviewStorageRepo
+import space.taran.arklib.utils.Constants
+import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
+import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.scores.ScoreStorage
 import space.taran.arknavigator.mvp.model.repo.scores.ScoreStorageRepo
 import space.taran.arknavigator.mvp.model.repo.stats.StatsStorage
@@ -35,6 +38,7 @@ import space.taran.arknavigator.utils.Tag
 import space.taran.arknavigator.utils.findNotExistCopyName
 import java.nio.file.Path
 import javax.inject.Inject
+import javax.inject.Named
 import kotlin.io.path.copyTo
 import kotlin.io.path.deleteIfExists
 
@@ -66,6 +70,10 @@ class ResourcesPresenter(
 
     @Inject
     lateinit var scoreStorageRepo: ScoreStorageRepo
+
+    @Inject
+    @Named(Constants.DI.MESSAGE_FLOW_NAME)
+    lateinit var messageFlow: MutableSharedFlow<Message>
 
     lateinit var index: ResourcesIndex
         private set
@@ -117,8 +125,12 @@ class ResourcesPresenter(
             }
             Log.d(RESOURCES_SCREEN, "using roots $roots")
             index = resourcesIndexRepo.provide(rootAndFav)
-            index.kindDetectFailedFlow.onEach { path ->
-                viewState.toastIndexFailedPath(path)
+            messageFlow.onEach { message ->
+                when (message) {
+                    is Message.KindDetectFailed -> viewState.toastIndexFailedPath(
+                        message.path
+                    )
+                }
             }.launchIn(presenterScope)
             index.reindex()
             storage = tagsStorageRepo.provide(rootAndFav)

@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.recyclerview.widget.DiffUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -12,16 +13,18 @@ import moxy.MvpPresenter
 import moxy.presenterScope
 import space.taran.arkfilepicker.folders.RootAndFav
 import space.taran.arklib.ResourceId
+import space.taran.arklib.domain.Message
 import space.taran.arklib.domain.index.ResourceMeta
 import space.taran.arklib.domain.index.ResourcesIndex
 import space.taran.arklib.domain.index.ResourcesIndexRepo
 import space.taran.arklib.domain.kind.ResourceKind
 import space.taran.arklib.domain.meta.MetadataStorage
 import space.taran.arklib.domain.meta.MetadataStorageRepo
-import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
-import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arklib.domain.preview.PreviewStorage
 import space.taran.arklib.domain.preview.PreviewStorageRepo
+import space.taran.arklib.utils.Constants
+import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
+import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.scores.ScoreStorage
 import space.taran.arknavigator.mvp.model.repo.scores.ScoreStorageRepo
 import space.taran.arknavigator.mvp.model.repo.stats.StatsStorage
@@ -41,6 +44,7 @@ import java.io.FileReader
 import java.nio.file.Files
 import java.nio.file.Path
 import javax.inject.Inject
+import javax.inject.Named
 import kotlin.io.path.getLastModifiedTime
 import kotlin.io.path.notExists
 
@@ -103,6 +107,10 @@ class GalleryPresenter(
     @Inject
     lateinit var scoreStorageRepo: ScoreStorageRepo
 
+    @Inject
+    @Named(Constants.DI.MESSAGE_FLOW_NAME)
+    lateinit var messageFlow: MutableSharedFlow<Message>
+
     override fun onFirstViewAttach() {
         Log.d(GALLERY_SCREEN, "first view attached in GalleryPresenter")
         super.onFirstViewAttach()
@@ -112,8 +120,12 @@ class GalleryPresenter(
                 viewState.setProgressVisibility(true, "Indexing")
 
             index = indexRepo.provide(rootAndFav)
-            index.kindDetectFailedFlow.onEach { failed ->
-                viewState.toastIndexFailedPath(failed)
+            messageFlow.onEach { message ->
+                when (message) {
+                    is Message.KindDetectFailed -> viewState.toastIndexFailedPath(
+                        message.path
+                    )
+                }
             }.launchIn(presenterScope)
             storage = tagsStorageRepo.provide(rootAndFav)
             previewStorage = previewStorageRepo.provide(rootAndFav)

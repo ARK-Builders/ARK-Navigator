@@ -5,14 +5,9 @@ import space.taran.arklib.domain.index.ResourceMeta
 import space.taran.arklib.domain.index.ResourcesIndex
 import java.nio.file.Path
 import kotlin.io.path.Path
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 
 class ResourceIndexStub : ResourcesIndex {
     private val metas = TestData.metasById().toMutableMap()
-    override val kindDetectFailedFlow: SharedFlow<Path>
-        get() = MutableSharedFlow<Path>().asSharedFlow()
 
     override suspend fun listResources(prefix: Path?): Set<ResourceMeta> =
         metas.values.toSet()
