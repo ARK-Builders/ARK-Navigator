@@ -2,6 +2,7 @@ package space.taran.arknavigator.mvp.presenter
 
 import android.util.Log
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -13,7 +14,9 @@ import space.taran.arkfilepicker.presentation.folderstree.DeviceNode
 import space.taran.arkfilepicker.presentation.folderstree.FavoriteNode
 import space.taran.arkfilepicker.presentation.folderstree.FolderNode
 import space.taran.arkfilepicker.presentation.folderstree.RootNode
+import space.taran.arklib.domain.Message
 import space.taran.arklib.domain.index.ResourcesIndexRepo
+import space.taran.arklib.utils.Constants
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.view.FoldersView
@@ -25,6 +28,7 @@ import space.taran.arknavigator.utils.LogTags.FOLDERS_TREE
 import space.taran.arknavigator.utils.listDevices
 import java.nio.file.Path
 import javax.inject.Inject
+import javax.inject.Named
 
 class FoldersPresenter(
     private val rescanRoots: Boolean
@@ -44,6 +48,10 @@ class FoldersPresenter(
     @Inject
     lateinit var preferences: Preferences
 
+    @Inject
+    @Named(Constants.DI.MESSAGE_FLOW_NAME)
+    lateinit var messageFlow: MutableSharedFlow<Message>
+
     private lateinit var devices: List<Path>
 
     override fun onFirstViewAttach() {
@@ -60,6 +68,14 @@ class FoldersPresenter(
 
             viewState.updateFoldersTree(devices, folders.succeeded)
             viewState.setProgressVisibility(false)
+
+            messageFlow.onEach { message ->
+                when (message) {
+                    is Message.KindDetectFailed -> viewState.toastIndexFailedPath(
+                        message.path
+                    )
+                }
+            }.launchIn(presenterScope)
 
             if (rescanRoots) {
                 viewState.openRootsScanDialog()
@@ -191,9 +207,6 @@ class FoldersPresenter(
 
         viewState.setProgressVisibility(true, "Indexing")
         val index = resourcesIndexRepo.provide(root)
-        index.kindDetectFailedFlow.onEach { failed ->
-            viewState.toastIndexFailedPath(failed)
-        }.launchIn(presenterScope)
         index.reindex()
 
         viewState.setProgressVisibility(false)
