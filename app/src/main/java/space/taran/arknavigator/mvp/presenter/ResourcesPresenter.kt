@@ -132,9 +132,9 @@ class ResourcesPresenter(
                     )
                 }
             }.launchIn(presenterScope)
+            previewStorage = previewStorageRepo.provide(rootAndFav)
             index.reindex()
             storage = tagsStorageRepo.provide(rootAndFav)
-            previewStorage = previewStorageRepo.provide(rootAndFav)
             statsStorage = statsStorageRepo.provide(rootAndFav)
             scoreStorage = scoreStorageRepo.provide(rootAndFav)
 
