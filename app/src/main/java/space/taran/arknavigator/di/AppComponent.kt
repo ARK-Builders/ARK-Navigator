@@ -6,7 +6,6 @@ import dagger.Component
 import space.taran.arkfilepicker.folders.FoldersRepo
 import space.taran.arknavigator.di.modules.AppModule
 import space.taran.arknavigator.di.modules.CiceroneModule
-import space.taran.arknavigator.di.modules.DatabaseModule
 import space.taran.arknavigator.di.modules.RepoModule
 import space.taran.arknavigator.mvp.model.backup.StorageBackup
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
@@ -36,7 +35,6 @@ import javax.inject.Singleton
     modules = [
         AppModule::class,
         CiceroneModule::class,
-        DatabaseModule::class,
         RepoModule::class
     ]
 )

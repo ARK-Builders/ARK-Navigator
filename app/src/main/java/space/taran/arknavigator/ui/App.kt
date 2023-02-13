@@ -31,6 +31,7 @@ class App : Application() {
         super.onCreate()
 
         FoldersRepo.init(this)
+        initArkLib()
         Timber.plant(Timber.DebugTree())
 
         instance = this
@@ -43,9 +44,8 @@ class App : Application() {
                 foldersRepo = FoldersRepo.instance
             )
 
-        initArkLib()
-        initAcra()
         appComponent.arkBackup().backup()
+        initAcra()
     }
 
     private fun initAcra() = CoroutineScope(Dispatchers.IO).launch {
