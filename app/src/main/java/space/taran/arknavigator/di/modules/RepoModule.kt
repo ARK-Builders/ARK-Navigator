@@ -10,7 +10,6 @@ import space.taran.arklib.domain.index.ResourcesIndexRepo
 import space.taran.arklib.domain.meta.MetadataStorageRepo
 import space.taran.arklib.domain.preview.PreviewStorageRepo
 import space.taran.arklib.utils.Constants
-import space.taran.arknavigator.mvp.model.dao.Database
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.scores.ScoreStorageRepo
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
@@ -29,7 +28,6 @@ class RepoModule {
     @Singleton
     @Provides
     fun resourcesIndexesRepo(
-        database: Database,
         foldersRepo: FoldersRepo,
         previewStorageRepo: PreviewStorageRepo,
         metadataStorageRepo: MetadataStorageRepo,
@@ -38,7 +36,6 @@ class RepoModule {
     ): ResourcesIndexRepo {
         Log.d(MAIN, "creating ResourcesIndexesRepo")
         return ResourcesIndexRepo(
-            database.resourceDao(),
             foldersRepo,
             previewStorageRepo,
             metadataStorageRepo,

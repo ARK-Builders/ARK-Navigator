@@ -13,6 +13,7 @@ import moxy.MvpPresenter
 import moxy.presenterScope
 import space.taran.arkfilepicker.folders.RootAndFav
 import space.taran.arklib.ResourceId
+import space.taran.arklib.computeId
 import space.taran.arklib.domain.Message
 import space.taran.arklib.domain.index.ResourceMeta
 import space.taran.arklib.domain.index.ResourcesIndex
@@ -45,6 +46,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import javax.inject.Inject
 import javax.inject.Named
+import kotlin.io.path.fileSize
 import kotlin.io.path.getLastModifiedTime
 import kotlin.io.path.notExists
 
@@ -341,7 +343,8 @@ class GalleryPresenter(
         path: Path,
         oldMeta: ResourceMeta
     ) = withContext(Dispatchers.IO) {
-        val newMeta = ResourceMeta.fromPath(path, metadataStorage).meta
+        val id = computeId(path.fileSize(), path)
+        val newMeta = ResourceMeta.fromPath(id, path, metadataStorage).meta
             ?: return@withContext
         previewStorage.store(path, newMeta)
 
