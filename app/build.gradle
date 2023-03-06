@@ -86,8 +86,8 @@ android {
 }
 
 dependencies {
-    implementation 'space.taran:arklib:0.1.0-SNAPSHOT-7c93693afe'
-    // for local use arklib
+    implementation 'space.taran:arklib:0.1.0-SNAPSHOT-4512e54fcd'
+    // for local development, you can inject local AAR dependency
     // implementation files('libs/lib-debug.aar')
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
