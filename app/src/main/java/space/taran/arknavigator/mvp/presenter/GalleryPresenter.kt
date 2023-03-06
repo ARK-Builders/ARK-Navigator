@@ -342,24 +342,27 @@ class GalleryPresenter(
     private suspend fun onEditedResourceDetected(
         path: Path,
         oldMeta: ResourceMeta
-    ) = withContext(Dispatchers.IO) {
-        val id = computeId(path.fileSize(), path)
-        val newMeta = ResourceMeta.fromPath(id, path, metadataStorage).meta
-            ?: return@withContext
-        previewStorage.store(path, newMeta)
+    ) = withContext(Dispatchers.Main) {
+        viewState.setProgressVisibility(true, "Indexing")
 
-        val indexToReplace = resources.indexOf(oldMeta)
-        resources[indexToReplace] = newMeta
+        withContext(Dispatchers.Default) {
+            val tags = storage.getTags(oldMeta.id)
+            val newId = computeId(path.fileSize(), path)
 
-        index.updateResource(oldMeta.id, path, newMeta)
-        tagsStorageRepo.provide(rootAndFav)
+            index.reindex()
+            tagsStorageRepo.provide(rootAndFav)
+            scoreStorageRepo.provide(rootAndFav)
+            storage.setTagsAndPersist(newId, tags)
 
-        scoreStorageRepo.provide(rootAndFav)
-
-        withContext(Dispatchers.Main) {
-            viewState.notifyCurrentItemChanged()
-            viewState.notifyResourcesChanged()
+            val indexToReplace = resources.indexOf(oldMeta)
+            val newMeta = index.getMeta(newId)
+            resources[indexToReplace] = newMeta
         }
+
+        invalidateResources()
+        viewState.notifyCurrentItemChanged()
+        viewState.notifyResourcesChanged()
+        viewState.setProgressVisibility(false)
     }
 
     private suspend fun invalidateResources() {
