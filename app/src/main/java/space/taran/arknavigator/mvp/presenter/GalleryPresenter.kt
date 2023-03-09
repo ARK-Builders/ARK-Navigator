@@ -13,7 +13,6 @@ import moxy.MvpPresenter
 import moxy.presenterScope
 import space.taran.arkfilepicker.folders.RootAndFav
 import space.taran.arklib.ResourceId
-import space.taran.arklib.computeId
 import space.taran.arklib.domain.Message
 import space.taran.arklib.domain.index.ResourceMeta
 import space.taran.arklib.domain.index.ResourcesIndex
@@ -46,7 +45,6 @@ import java.nio.file.Files
 import java.nio.file.Path
 import javax.inject.Inject
 import javax.inject.Named
-import kotlin.io.path.fileSize
 import kotlin.io.path.getLastModifiedTime
 import kotlin.io.path.notExists
 
@@ -291,11 +289,11 @@ class GalleryPresenter(
         val meta = resources[pos]
         val path = index.getPath(meta.id)
         if (path.notExists()) {
-            onRemovedResourceDetected()
+            onRemovedOrEditedResourceDetected()
             return@launch
         }
         if (path.getLastModifiedTime() != meta.modified)
-            onEditedResourceDetected(path, meta)
+            onRemovedOrEditedResourceDetected()
     }
 
     private suspend fun deleteResource(resource: ResourceId) {
@@ -327,43 +325,20 @@ class GalleryPresenter(
         )
     }
 
-    private suspend fun onRemovedResourceDetected() = withContext(Dispatchers.Main) {
-        viewState.setProgressVisibility(true, "Indexing")
-
-        index.reindex()
-        // update current tags storage
-        tagsStorageRepo.provide(rootAndFav)
-        scoreStorageRepo.provide(rootAndFav)
-        invalidateResources()
-        viewState.setProgressVisibility(false)
-        viewState.notifyResourcesChanged()
-    }
-
-    private suspend fun onEditedResourceDetected(
-        path: Path,
-        oldMeta: ResourceMeta
-    ) = withContext(Dispatchers.Main) {
-        viewState.setProgressVisibility(true, "Indexing")
-
-        withContext(Dispatchers.Default) {
-            val tags = storage.getTags(oldMeta.id)
-            val newId = computeId(path.fileSize(), path)
+    private suspend fun onRemovedOrEditedResourceDetected() =
+        withContext(Dispatchers.Main) {
+            viewState.setProgressVisibility(true, "Indexing")
 
             index.reindex()
+            // update current storages with new resources
             tagsStorageRepo.provide(rootAndFav)
             scoreStorageRepo.provide(rootAndFav)
-            storage.setTagsAndPersist(newId, tags)
 
-            val indexToReplace = resources.indexOf(oldMeta)
-            val newMeta = index.getMeta(newId)
-            resources[indexToReplace] = newMeta
+            invalidateResources()
+            viewState.notifyCurrentItemChanged()
+            viewState.notifyResourcesChanged()
+            viewState.setProgressVisibility(false)
         }
-
-        invalidateResources()
-        viewState.notifyCurrentItemChanged()
-        viewState.notifyResourcesChanged()
-        viewState.setProgressVisibility(false)
-    }
 
     private suspend fun invalidateResources() {
         val indexedIds = index.listIds(rootAndFav.fav)
