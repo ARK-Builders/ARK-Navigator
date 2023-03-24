@@ -135,13 +135,15 @@ class ResourcesPresenter(
             }.launchIn(presenterScope)
             index.reindex()
             storage = tagsStorageRepo.provide(rootAndFav)
+            if (storage.isCorrupted()) {
+                viewState.showCorruptNotificationDialog(
+                    PlainTagsStorage.TYPE
+                )
+                return@launch
+            }
             previewStorage = previewStorageRepo.provide(rootAndFav)
             statsStorage = statsStorageRepo.provide(rootAndFav)
             scoreStorage = scoreStorageRepo.provide(rootAndFav)
-
-            if (storage.isCorrupted()) viewState.showCorruptNotificationDialog(
-                PlainTagsStorage.TYPE
-            )
 
             gridPresenter.init(index, storage, router, previewStorage, scoreStorage)
 
