@@ -42,6 +42,8 @@ class PlainTagsStorage(
 
     private lateinit var tagsById: MutableMap<ResourceId, Tags>
 
+    private var isCorrupted = false
+
     suspend fun init() = withContext(Dispatchers.IO) {
         val result = resources.map { it to NO_TAGS }
             .toMap()
@@ -144,6 +146,8 @@ class PlainTagsStorage(
         persist()
     }
 
+    override fun isCorrupted() = isCorrupted
+
     override fun setTags(id: ResourceId, tags: Tags) {
         if (!tagsById.containsKey(id)) {
             error("Storage isn't aware about this resource id")
@@ -230,21 +234,24 @@ class PlainTagsStorage(
             val lines = Files.readAllLines(storageFile, StandardCharsets.UTF_8)
             verifyVersion(lines.removeAt(0))
 
-            val result = lines
+            val result = mutableMapOf<ResourceId, Tags>()
+            lines
                 .map {
+                    if (!it.contains(KEY_VALUE_SEPARATOR)) {
+                        isCorrupted = true
+                        return@map
+                    }
+
                     val parts = it.split(KEY_VALUE_SEPARATOR)
                     val id = ResourceId.fromString(parts[0])
                     val tags = tagsFromString(parts[1])
 
                     if (tags.isEmpty()) {
-                        throw AssertionError(
-                            "Tags storage must not contain empty sets of tags"
-                        )
+                        isCorrupted = tags.isEmpty()
+                        return@map
                     }
-
-                    id to tags
+                    result[id] = tags
                 }
-                .toMap()
 
             if (result.isEmpty()) {
                 throw AssertionError("Tags storage must not be empty")
@@ -280,6 +287,8 @@ class PlainTagsStorage(
     companion object {
         private const val STORAGE_VERSION = 2
         private const val STORAGE_VERSION_PREFIX = "version "
+
+        const val TYPE = "Tags"
 
         const val KEY_VALUE_SEPARATOR = ':'
 

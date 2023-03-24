@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@drawable/bg_rounded_16dp"
+    android:backgroundTint="@color/white"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <TextView
+        android:id="@+id/titleTV"
+        style="@style/MarginTextStyle"
+        android:layout_width="match_parent"
+        android:gravity="center"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        tools:text="Corrupted Storage" />
+
+    <TextView
+        android:id="@+id/infoTV"
+        style="@style/RegularTextStyle"
+        android:layout_width="match_parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:gravity="center"
+        tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec pretium dui eros, auctor" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/closeBtn"
+            style="@style/RegularTextStyle"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/ripple_simple_bg"
+            android:paddingStart="16dp"
+            android:paddingTop="4dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="4dp"
+            android:text="@string/close"
+            android:textAllCaps="true"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/backupBtn"
+            style="@style/RegularTextStyle"
+            android:background="@drawable/ripple_simple_bg"
+            android:paddingStart="16dp"
+            android:paddingTop="4dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="4dp"
+            android:text="@string/backup_files"
+            android:textAllCaps="true"
+            android:visibility="gone"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="wrap_content"
+        android:layout_height="1dp"
+        android:layout_gravity="fill_horizontal" />
+</LinearLayout>

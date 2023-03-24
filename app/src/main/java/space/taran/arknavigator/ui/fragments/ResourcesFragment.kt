@@ -36,6 +36,7 @@ import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.adapter.ResourcesRVAdapter
 import space.taran.arknavigator.ui.adapter.TagsSelectorAdapter
 import space.taran.arknavigator.ui.fragments.dialog.ConfirmationDialogFragment
+import space.taran.arknavigator.ui.fragments.dialog.StorageCorruptionNotificationDialogFragment
 import space.taran.arknavigator.ui.fragments.dialog.SortDialogFragment
 import space.taran.arknavigator.ui.fragments.dialog.TagsSortDialogFragment
 import space.taran.arknavigator.ui.fragments.utils.toast
@@ -287,6 +288,14 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         )
     }
 
+    override fun showCorruptNotificationDialog(storageType: String) {
+        StorageCorruptionNotificationDialogFragment.newInstance(storageType)
+            .show(
+                childFragmentManager,
+                StorageCorruptionNotificationDialogFragment.TAG
+            )
+    }
+
     private fun initMenuListeners() = with(binding) {
         actionBar.ivDisableSelectionMode.setOnClickListener {
             presenter.gridPresenter.onSelectingChanged(false)
@@ -416,6 +425,13 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
                 )
             }
         }
+
+        childFragmentManager.setFragmentResultListener(
+            StorageCorruptionNotificationDialogFragment.STORAGE_CORRUPTION_DETECTED,
+            this
+        ) { _, _ ->
+            presenter.onBackClick()
+        }
     }
 
     private fun dragHandlerTouchListener(view: View, event: MotionEvent): Boolean {
@@ -519,6 +535,7 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         const val DELETE_CONFIRMATION_REQUEST_KEY = "deleteConfirm"
         private const val MOVE_TO_PATH_KEY = "moveToPath"
         const val RESET_SCORES_FOR_SELECTED = "resetSelectedScores"
+        const val STORAGE_CORRUPTION_DETECTED = "storage corrupted"
 
         private const val DRAG_TRAVEL_TIME_THRESHOLD = 30 // milliseconds
         private const val DRAG_TRAVEL_DELTA_THRESHOLD = 0.1 // ratio

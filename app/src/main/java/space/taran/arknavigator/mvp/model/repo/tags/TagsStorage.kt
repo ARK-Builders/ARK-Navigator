@@ -26,4 +26,6 @@ interface TagsStorage {
     suspend fun cleanup(existing: Collection<ResourceId>)
 
     suspend fun remove(id: ResourceId)
+
+    fun isCorrupted(): Boolean
 }

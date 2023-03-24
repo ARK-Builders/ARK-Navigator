@@ -55,4 +55,6 @@ class AggregatedTagsStorage(
         shards.forEach {
             it.remove(id)
         }
+
+    override fun isCorrupted() = shards.any { it.isCorrupted() }
 }

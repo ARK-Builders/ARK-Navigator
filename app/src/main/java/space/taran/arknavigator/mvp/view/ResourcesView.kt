@@ -32,4 +32,6 @@ interface ResourcesView : CommonMvpView {
     fun clearStackedToasts()
     @StateStrategyType(SkipStrategy::class)
     fun shareResources(resources: List<Path>)
+    @StateStrategyType(SkipStrategy::class)
+    fun showCorruptNotificationDialog(storageType: String)
 }

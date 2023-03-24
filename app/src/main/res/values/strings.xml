@@ -124,4 +124,9 @@
     <string name="utils">Utils</string>
     <string name="folder_forget_warn">Navigator will forget the folder and all its children</string>
     <string name="delete_files">Delete files</string>
+    <string name="backup_files">Backup</string>
+    <string name="ignore">Ignore</string>
+    <string name="close">Close</string>
+    <string name="corrupted_storage">Corrupted Storage</string>
+    <string name="storage_corrupt_info">%1$s storage is corrupted. \nGo back to folders</string>
 </resources>
