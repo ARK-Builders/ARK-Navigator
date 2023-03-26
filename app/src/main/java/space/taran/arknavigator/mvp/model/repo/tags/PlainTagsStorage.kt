@@ -130,11 +130,13 @@ class PlainTagsStorage(
 
     override suspend fun cleanup(existing: Collection<ResourceId>) =
         withContext(Dispatchers.IO) {
-            val disappeared = tagsById.keys.minus(existing)
+            if (!isCorrupted) {
+                val disappeared = tagsById.keys.minus(existing)
 
-            Log.d(TAGS_STORAGE, "forgetting ${disappeared.size} resources")
-            disappeared.forEach { tagsById.remove(it) }
-            persist()
+                Log.d(TAGS_STORAGE, "forgetting ${disappeared.size} resources")
+                disappeared.forEach { tagsById.remove(it) }
+                persist()
+            }
         }
 
     override suspend fun remove(id: ResourceId) = withContext(Dispatchers.IO) {
@@ -235,23 +237,18 @@ class PlainTagsStorage(
             verifyVersion(lines.removeAt(0))
 
             val result = mutableMapOf<ResourceId, Tags>()
-            lines
-                .map {
-                    if (!it.contains(KEY_VALUE_SEPARATOR)) {
-                        isCorrupted = true
-                        return@map
-                    }
 
+            try {
+                lines.map {
                     val parts = it.split(KEY_VALUE_SEPARATOR)
                     val id = ResourceId.fromString(parts[0])
                     val tags = tagsFromString(parts[1])
-
-                    if (tags.isEmpty()) {
-                        isCorrupted = tags.isEmpty()
-                        return@map
-                    }
+                    isCorrupted = tags.isEmpty()
                     result[id] = tags
                 }
+            } catch (e: Exception) {
+                isCorrupted = true
+            }
 
             if (result.isEmpty()) {
                 throw AssertionError("Tags storage must not be empty")
