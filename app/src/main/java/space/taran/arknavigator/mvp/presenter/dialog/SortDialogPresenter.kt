@@ -26,14 +26,4 @@ class SortDialogPresenter : MvpPresenter<SortDialogView>() {
         preferences.set(PreferenceKey.Sorting, sorting.ordinal)
         viewState.closeDialog()
     }
-
-    fun onAscendingSelected(ascending: Boolean) = presenterScope.launch {
-        preferences.set(PreferenceKey.IsSortingAscending, ascending)
-        viewState.closeDialog()
-    }
-
-    fun onScoresSwitched(enabled: Boolean) = presenterScope.launch {
-        preferences.set(PreferenceKey.SortByScores, enabled)
-        viewState.closeDialog()
-    }
 }

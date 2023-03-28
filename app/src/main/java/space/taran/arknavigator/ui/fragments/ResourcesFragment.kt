@@ -90,7 +90,7 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
     private var tagsSelectorAdapter: TagsSelectorAdapter? = null
 
     private var isShuffled = false
-
+    private var isAscending = true
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -109,7 +109,7 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         App.instance.appComponent.inject(this)
     }
 
-    override fun init() = with(binding) {
+    override fun init(ascending: Boolean, sortByScoresEnabled: Boolean) = with(binding) {
         Log.d(RESOURCES_SCREEN, "initializing ResourcesFragment")
 
         initResultListeners()
@@ -146,6 +146,18 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
             TagsSortDialogFragment
                 .newInstance(selectorNotEdit = true)
                 .show(childFragmentManager, null)
+        }
+        this@ResourcesFragment.updateOrderBtn(ascending)
+        if (sortByScoresEnabled) {
+            swScores.isChecked = true
+            swScores.jumpDrawablesToCurrentState()
+        }
+        swScores.setOnCheckedChangeListener { _, isChecked ->
+            Log.d(
+                RESOURCES_SCREEN,
+                "sorting by scores ${if (isChecked) "enabled" else "disabled"}"
+            )
+            presenter.onScoresSwitched(isChecked)
         }
 
         this@ResourcesFragment
@@ -200,6 +212,13 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         return@with
     }
 
+    override fun updateOrderBtn(isAscending: Boolean) = with(binding) {
+        this@ResourcesFragment.isAscending = isAscending
+        val drawable = if(isAscending) resources.getDrawable(R.drawable.order_ascending)
+        else resources.getDrawable(R.drawable.order_descending);
+        actionBar.btnOrder.setImageDrawable(drawable);
+        return@with
+    }
     override fun setSelectingEnabled(enabled: Boolean) = with(binding.actionBar) {
         tvTitle.isVisible = !enabled
         tvSelectedOf.isVisible = enabled
@@ -308,7 +327,11 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         actionBar.btnFocusMode.setOnClickListener {
             presenter.tagsSelectorPresenter.onQueryModeChanged(QueryMode.FOCUS)
         }
-
+        actionBar.btnOrder.apply {
+            setOnClickListener {
+                presenter.onAscendingChanged(!isAscending);
+            }
+        }
         actionBar.btnShuffle.apply {
             setOnClickListener {
                 val dice = this.drawable

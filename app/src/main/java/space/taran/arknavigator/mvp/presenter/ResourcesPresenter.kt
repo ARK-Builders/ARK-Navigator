@@ -106,8 +106,11 @@ class ResourcesPresenter(
         Log.d(RESOURCES_SCREEN, "first view attached in ResourcesPresenter")
         super.onFirstViewAttach()
 
-        viewState.init()
+
         presenterScope.launch {
+            val ascending = preferences.get(PreferenceKey.IsSortingAscending)
+            val sortByScores = preferences.get(PreferenceKey.SortByScores)
+            viewState.init(ascending, sortByScores)
             viewState.setProgressVisibility(true, "Indexing")
             val folders = foldersRepo.provideWithMissing()
             Log.d(RESOURCES_SCREEN, "folders retrieved: $folders")
@@ -214,6 +217,18 @@ class ResourcesPresenter(
             gridPresenter.onSelectingChanged(false)
         }
         migrateTags(resourcesToCopy, directoryToCopy)
+    }
+
+    fun onAscendingChanged(isAscending: Boolean) = presenterScope.launch {
+        viewState.updateOrderBtn(isAscending)
+        preferences.set(
+            PreferenceKey.IsSortingAscending,
+            isAscending
+        )
+    }
+
+    fun onScoresSwitched(enabled: Boolean) = presenterScope.launch {
+        preferences.set(PreferenceKey.SortByScores, enabled)
     }
 
     fun onShuffleSwitchedOn() = presenterScope.launch(Dispatchers.Default) {
