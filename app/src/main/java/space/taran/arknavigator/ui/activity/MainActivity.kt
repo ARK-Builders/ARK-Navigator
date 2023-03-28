@@ -24,6 +24,7 @@ import space.taran.arknavigator.mvp.presenter.MainPresenter
 import space.taran.arknavigator.mvp.view.MainView
 import space.taran.arknavigator.navigation.AppNavigator
 import space.taran.arknavigator.ui.App
+import space.taran.arknavigator.ui.fragments.utils.toast
 import space.taran.arknavigator.utils.LogTags.MAIN
 import space.taran.arknavigator.utils.LogTags.PERMISSIONS
 import javax.inject.Inject
@@ -159,6 +160,11 @@ class MainActivity : MvpAppCompatActivity(), MainView {
         }
 
         super.onRequestPermissionsResult(requestCode, permissions, granted)
+    }
+
+    override fun enterResourceFragmentFailed() {
+        toast(R.string.toast_add_paths)
+        binding.bottomNavigation.selectedItemId = R.id.page_roots
     }
 
     fun setBottomNavigationVisibility(isVisible: Boolean) {

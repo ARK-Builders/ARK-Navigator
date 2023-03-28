@@ -111,6 +111,9 @@ class FoldersFragment : MvpAppCompatFragment(), FoldersView {
         devices: List<Path>,
         rootsWithFavs: Map<Path, List<Path>>
     ) {
+        if(rootsWithFavs.size < 1){
+            binding.noFolderHint.setVisibility(View.VISIBLE) }
+        else binding.noFolderHint.setVisibility(View.INVISIBLE)
         foldersTree?.set(devices, rootsWithFavs)
     }
 

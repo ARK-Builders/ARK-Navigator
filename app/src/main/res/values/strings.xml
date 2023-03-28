@@ -63,6 +63,7 @@
     <string name="toast_resources_selected_focus_mode">%1$d resources selected\n(%2$d hidden by focus mode)</string>
     <string name="toast_indexing_can_take_minutes">Indexing of huge folders can take minutes</string>
     <string name="toast_failed_paths">Failed to verify the following paths:\n %1$s</string>
+    <string name="toast_add_paths"> Add at least one folder to start using the app</string>
     <string name="scan_completed">Scan completed</string>
     <string name="scan">Scan</string>
     <string name="skip">Skip</string>

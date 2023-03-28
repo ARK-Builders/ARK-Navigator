@@ -1,7 +1,10 @@
 package space.taran.arknavigator.mvp.presenter
 
 import android.util.Log
+import kotlinx.coroutines.launch
 import moxy.MvpPresenter
+import moxy.presenterScope
+import space.taran.arkfilepicker.folders.FoldersRepo
 import space.taran.arkfilepicker.folders.RootAndFav
 import space.taran.arknavigator.mvp.view.MainView
 import space.taran.arknavigator.navigation.AppRouter
@@ -12,6 +15,8 @@ import javax.inject.Inject
 class MainPresenter : MvpPresenter<MainView>() {
     @Inject
     lateinit var router: AppRouter
+    @Inject
+    lateinit var folders: FoldersRepo
 
     override fun onFirstViewAttach() {
         Log.d(MAIN, "first view attached in MainPresenter")
@@ -34,7 +39,16 @@ class MainPresenter : MvpPresenter<MainView>() {
 
     fun goToResourcesScreen() {
         Log.d(MAIN, "creating Resources screen")
-        router.newRootScreen(Screens.ResourcesScreen(RootAndFav(null, null)))
+        presenterScope.launch {
+            val folders = folders.provideFolders()
+            if(folders.size < 1){
+                viewState.enterResourceFragmentFailed()
+            }else {
+                Log.d(MAIN, "switching to Resources screen")
+                router.newRootScreen(Screens.ResourcesScreen(RootAndFav(null, null)))
+            }
+            true
+        }
     }
 
     fun goToSettingsScreen() {
