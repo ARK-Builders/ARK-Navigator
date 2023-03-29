@@ -9,6 +9,14 @@
         android:id="@+id/action_bar"
         layout="@layout/action_bar_resources"/>
 
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/progress_preview_generation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:indeterminate="true"
+        app:layout_constraintTop_toBottomOf="@id/action_bar"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_resources"
         android:layout_width="match_parent"
@@ -16,7 +24,7 @@
         android:clipToPadding="false"
         android:padding="10dp"
         app:layout_constraintBottom_toTopOf="@+id/layout_drag_handler"
-        app:layout_constraintTop_toBottomOf="@id/action_bar" />
+        app:layout_constraintTop_toBottomOf="@id/progress_preview_generation" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_drag_handler"

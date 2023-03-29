@@ -287,6 +287,10 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         )
     }
 
+    override fun setPreviewGenerationProgress(isVisible: Boolean) {
+        binding.progressPreviewGeneration.isVisible = isVisible
+    }
+
     private fun initMenuListeners() = with(binding) {
         actionBar.ivDisableSelectionMode.setOnClickListener {
             presenter.gridPresenter.onSelectingChanged(false)
