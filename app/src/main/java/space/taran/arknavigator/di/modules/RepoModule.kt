@@ -8,7 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import space.taran.arkfilepicker.folders.FoldersRepo
 import space.taran.arklib.domain.Message
-import space.taran.arklib.domain.index.ResourcesIndexRepo
+import space.taran.arklib.domain.index.ResourceIndexRepo
 import space.taran.arklib.domain.meta.MetadataStorageRepo
 import space.taran.arklib.domain.preview.PreviewStorageRepo
 import space.taran.arklib.utils.Constants
@@ -34,17 +34,13 @@ class RepoModule {
 
     @Singleton
     @Provides
-    fun resourcesIndexesRepo(
+    fun resourceIndexRepo(
         foldersRepo: FoldersRepo,
-        metadataStorageRepo: MetadataStorageRepo,
         @Named(Constants.DI.MESSAGE_FLOW_NAME)
-        messageFlow: MutableSharedFlow<Message>,
-    ): ResourcesIndexRepo {
-        Log.d(MAIN, "creating ResourcesIndexesRepo")
-        return ResourcesIndexRepo(
-            foldersRepo,
-            metadataStorageRepo,
-            messageFlow
+    ): ResourceIndexRepo {
+        Log.d(MAIN, "creating ResourceIndexRepo")
+        return ResourceIndexRepo(
+            foldersRepo
         )
     }
 
@@ -52,36 +48,30 @@ class RepoModule {
     @Provides
     fun tagsStorageRepo(
         foldersRepo: FoldersRepo,
-        resourcesIndexRepo: ResourcesIndexRepo,
+        resourceIndexRepo: ResourceIndexRepo,
         preferences: Preferences
     ): TagsStorageRepo {
-        return TagsStorageRepo(foldersRepo, resourcesIndexRepo, preferences)
+        return TagsStorageRepo(foldersRepo, resourceIndexRepo, preferences)
     }
 
     @Singleton
     @Provides
     fun previewStorageRepo(
-        foldersRepo: FoldersRepo,
-        indexRepo: ResourcesIndexRepo,
         @Named(Constants.DI.APP_SCOPE_NAME)
         appScope: CoroutineScope
     ) = PreviewStorageRepo(
-        foldersRepo,
-        indexRepo,
         appScope
     )
 
     @Singleton
     @Provides
-    fun metadataStorageRepo(
-        foldersRepo: FoldersRepo
-    ) = MetadataStorageRepo(foldersRepo)
+    fun metadataStorageRepo() = MetadataStorageRepo()
 
     @Singleton
     @Provides
     fun scoreStorageRepo(
         foldersRepo: FoldersRepo,
-        indexRepo: ResourcesIndexRepo
+        indexRepo: ResourceIndexRepo
     ): ScoreStorageRepo {
         return ScoreStorageRepo(foldersRepo, indexRepo)
     }

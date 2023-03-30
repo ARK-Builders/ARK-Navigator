@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import space.taran.arklib.arkFolder
 import space.taran.arklib.arkStats
-import space.taran.arklib.domain.index.ResourcesIndex
+import space.taran.arklib.domain.index.ResourceIndex
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.stats.category.StatsCategoryStorage
@@ -25,7 +25,7 @@ import kotlin.io.path.createDirectories
 
 class PlainStatsStorage(
     private val root: Path,
-    private val index: ResourcesIndex,
+    private val index: ResourceIndex,
     private val tagsStorage: TagsStorage,
     private val preferences: Preferences,
     private val statsFlow: SharedFlow<StatsEvent>
@@ -83,7 +83,7 @@ class PlainStatsStorage(
     override fun statsTagQueriedAmount() = tagQueriedN.provideData()
 
     private suspend fun StatsEvent.belongToRoot(): Boolean {
-        val ids = index.listAllIds()
+        val ids = index.allIds()
 
         return when (this) {
             is StatsEvent.TagsChanged -> ids.contains(resource)

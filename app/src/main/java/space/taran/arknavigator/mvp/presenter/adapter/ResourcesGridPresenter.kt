@@ -11,8 +11,8 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import space.taran.arkfilepicker.folders.RootAndFav
 import space.taran.arklib.ResourceId
-import space.taran.arklib.domain.index.ResourceMeta
-import space.taran.arklib.domain.index.ResourcesIndex
+import space.taran.arklib.domain.index.Resource
+import space.taran.arklib.domain.index.ResourceIndex
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arklib.domain.preview.PreviewStorage
@@ -33,7 +33,7 @@ import kotlin.io.path.notExists
 import kotlin.system.measureTimeMillis
 
 data class ResourceItem(
-    val meta: ResourceMeta,
+    val resource: Resource,
     var isSelected: Boolean = false,
     var isPinned: Boolean = false
 )
@@ -51,10 +51,10 @@ class ResourcesGridPresenter(
         private set
     var selection = listOf<ResourceItem>()
         private set
-    val selectedResources: List<ResourceMeta>
-        get() = resources.filter { it.isSelected }.map { it.meta }
+    val selectedResources: List<Resource>
+        get() = resources.filter { it.isSelected }.map { it.resource }
 
-    private lateinit var index: ResourcesIndex
+    private lateinit var index: ResourceIndex
     private lateinit var storage: TagsStorage
     private lateinit var router: AppRouter
     private lateinit var previewStorage: PreviewStorage
@@ -73,18 +73,18 @@ class ResourcesGridPresenter(
     fun getCount() = selection.size
 
     fun bindView(view: FileItemView) = runBlocking {
-        val resource = selection[view.position()]
-        Log.d(RESOURCES_SCREEN, "binding view for resource ${resource.meta.name}")
+        val item = selection[view.position()]
+        Log.d(RESOURCES_SCREEN, "binding view for resource ${item.resource.name}")
 
-        val path = index.getPath(resource.meta.id)
-        val score = scoreStorage.getScore(resource.meta.id)
+        val path = index.getPath(item.resource.id)!!
+        val score = scoreStorage.getScore(item.resource.id)
 
-        view.reset(selectingEnabled, resource.isSelected)
+        view.reset(selectingEnabled, item.isSelected)
         view.setText(path.fileName.toString(), shortFileNames)
         view.displayScore(sortByScores, score)
         Log.d(
             RESOURCES_SCREEN,
-            "binding score $score for resource ${resource.meta.id}"
+            "binding score $score for resource ${item.resource.id}"
         )
 
         if (Files.isDirectory(path)) {
@@ -96,14 +96,14 @@ class ResourcesGridPresenter(
 
         view.setIconOrPreview(
             path,
-            resource.meta,
-            previewStorage.locate(path, resource.meta)
+            item.resource,
+            previewStorage.locate(path, item.resource)
         )
     }
 
     fun onItemClick(pos: Int) = scope.launch {
         val containsNotExistingResource = selection.any { item ->
-            index.getPath(item.meta.id).notExists()
+            index.getPath(item.resource.id)!!.notExists()
         }
 
         if (containsNotExistingResource) {
@@ -117,7 +117,7 @@ class ResourcesGridPresenter(
         router.navigateToFragmentUsingAdd(
             Screens.GalleryScreen(
                 rootAndFav,
-                selection.map { it.meta.id },
+                selection.map { it.resource.id },
                 pos
             )
         )
@@ -146,7 +146,7 @@ class ResourcesGridPresenter(
     }
 
     suspend fun init(
-        index: ResourcesIndex,
+        index: ResourceIndex,
         storage: TagsStorage,
         router: AppRouter,
         previewStorage: PreviewStorage,
@@ -194,7 +194,7 @@ class ResourcesGridPresenter(
         selection: Set<ResourceId>
     ) = withContext(Dispatchers.Default) {
         this@ResourcesGridPresenter.selection = resources
-            .filter { selection.contains(it.meta.id) }
+            .filter { selection.contains(it.resource.id) }
         withContext(Dispatchers.Main) {
             setProgressVisibility(false)
             viewState.updateAdapter()
@@ -202,7 +202,7 @@ class ResourcesGridPresenter(
     }
 
     suspend fun resetResources(
-        resources: Set<ResourceMeta>
+        resources: Set<Resource>
     ) = withContext(Dispatchers.Default) {
         this@ResourcesGridPresenter.resources = mapNewResources(resources)
         sortAllResources()
@@ -260,7 +260,7 @@ class ResourcesGridPresenter(
     fun onSelectedChangedExternally(selected: List<ResourceId>) =
         scope.launch(Dispatchers.Default) {
             resources.forEach { item ->
-                item.isSelected = item.meta.id in selected
+                item.isSelected = item.resource.id in selected
             }
             withContext(Dispatchers.Main) {
                 viewState.updateAdapter()
@@ -275,7 +275,7 @@ class ResourcesGridPresenter(
         router.navigateToFragmentUsingAdd(
             Screens.GalleryScreenWithSelected(
                 rootAndFav,
-                selection.map { it.meta.id },
+                selection.map { it.resource.id },
                 item.position(),
                 selectedResources.map { it.id }
             )
@@ -301,8 +301,8 @@ class ResourcesGridPresenter(
     }
 
     private fun compareResourcesByScores() = Comparator<ResourceItem> { a, b ->
-        val aScore = scoreStorage.getScore(a.meta.id)
-        val bScore = scoreStorage.getScore(b.meta.id)
+        val aScore = scoreStorage.getScore(a.resource.id)
+        val bScore = scoreStorage.getScore(b.resource.id)
         aScore.compareTo(bScore)
     }
 
@@ -325,19 +325,19 @@ class ResourcesGridPresenter(
     }
 
     private fun mapNewResources(
-        newResources: Set<ResourceMeta>
+        newResources: Set<Resource>
     ): List<ResourceItem> {
         if (!selectingEnabled)
-            return newResources.map { meta ->
-                ResourceItem(meta)
+            return newResources.map { resource ->
+                ResourceItem(resource)
             }
 
-        return newResources.map { meta ->
+        return newResources.map { resource ->
             val selected = resources
-                .find { item -> item.meta == meta }
+                .find { item -> item.resource == resource }
                 ?.isSelected ?: false
 
-            ResourceItem(meta, selected)
+            ResourceItem(resource, selected)
         }
     }
 

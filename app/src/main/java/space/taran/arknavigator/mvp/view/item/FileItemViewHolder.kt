@@ -6,7 +6,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.ItemFileGridBinding
-import space.taran.arklib.domain.index.ResourceMeta
+import space.taran.arklib.domain.index.Resource
 import space.taran.arklib.domain.preview.PreviewAndThumbnail
 import space.taran.arklib.utils.ImageUtils
 import space.taran.arknavigator.ui.extra.ExtraLoader
@@ -59,7 +59,7 @@ class FileItemViewHolder(
 
     override fun setIconOrPreview(
         path: Path,
-        resource: ResourceMeta,
+        resource: Resource,
         previewAndThumbnail: PreviewAndThumbnail?
     ) = with(binding.root) {
         val placeholder = ImageUtils.iconForExtension(extension(path))

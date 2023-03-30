@@ -1,6 +1,6 @@
 package space.taran.arknavigator.ui.adapter.previewpager
 
-import space.taran.arklib.domain.index.ResourceMeta
+import space.taran.arklib.domain.index.Resource
 import space.taran.arklib.domain.preview.PreviewAndThumbnail
 import java.nio.file.Path
 
@@ -10,7 +10,7 @@ interface PreviewItemView {
     fun reset()
     fun setSource(
         source: Path,
-        meta: ResourceMeta,
+        resource: Resource,
         previewAndThumbnail: PreviewAndThumbnail?
     )
 }

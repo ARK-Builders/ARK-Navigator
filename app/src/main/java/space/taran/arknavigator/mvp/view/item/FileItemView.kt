@@ -1,6 +1,6 @@
 package space.taran.arknavigator.mvp.view.item
 
-import space.taran.arklib.domain.index.ResourceMeta
+import space.taran.arklib.domain.index.Resource
 import space.taran.arklib.domain.preview.PreviewAndThumbnail
 import space.taran.arknavigator.utils.Score
 import java.nio.file.Path
@@ -17,7 +17,7 @@ interface FileItemView {
 
     fun setIconOrPreview(
         path: Path,
-        resource: ResourceMeta,
+        resource: Resource,
         previewAndThumbnail: PreviewAndThumbnail?
     )
 

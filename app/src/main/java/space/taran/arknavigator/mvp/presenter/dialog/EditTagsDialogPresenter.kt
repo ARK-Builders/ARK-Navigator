@@ -10,8 +10,8 @@ import moxy.MvpPresenter
 import moxy.presenterScope
 import space.taran.arkfilepicker.folders.RootAndFav
 import space.taran.arklib.ResourceId
-import space.taran.arklib.domain.index.ResourcesIndex
-import space.taran.arklib.domain.index.ResourcesIndexRepo
+import space.taran.arklib.domain.index.ResourceIndex
+import space.taran.arklib.domain.index.ResourceIndexRepo
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.stats.StatsStorage
@@ -36,17 +36,17 @@ sealed class EditTagsAction {
 class EditTagsDialogPresenter(
     private val rootAndFav: RootAndFav,
     val resources: List<ResourceId>,
-    private val _index: ResourcesIndex?,
+    private val _index: ResourceIndex?,
     private val _storage: TagsStorage?,
     private val _statsStorage: StatsStorage?
 ) : MvpPresenter<EditTagsDialogView>() {
 
-    private lateinit var index: ResourcesIndex
+    private lateinit var index: ResourceIndex
     private lateinit var storage: TagsStorage
     private lateinit var statsStorage: StatsStorage
 
     @Inject
-    lateinit var indexRepo: ResourcesIndexRepo
+    lateinit var indexRepo: ResourceIndexRepo
 
     @Inject
     lateinit var tagsStorageRepo: TagsStorageRepo
@@ -256,7 +256,7 @@ class EditTagsDialogPresenter(
             }
 
     private suspend fun listQuickTags(): List<Tag> {
-        val allTags = storage.groupTagsByResources(index.listAllIds())
+        val allTags = storage.groupTagsByResources(index.allIds())
             .values
             .flatten()
         val sortCriteria = when (sorting) {

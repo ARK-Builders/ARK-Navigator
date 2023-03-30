@@ -31,8 +31,8 @@ import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.FragmentGalleryBinding
 import space.taran.arknavigator.databinding.PopupGalleryTagMenuBinding
 import space.taran.arklib.ResourceId
-import space.taran.arklib.domain.index.ResourceMeta
-import space.taran.arklib.domain.kind.ResourceKind
+import space.taran.arklib.domain.index.Resource
+import space.taran.arklib.domain.kind.Metadata
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 import space.taran.arknavigator.mvp.view.GalleryView
 import space.taran.arknavigator.ui.App
@@ -180,12 +180,12 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
 
     override fun setupPreview(
         pos: Int,
-        resource: ResourceMeta,
+        resource: Resource,
         filePath: String
     ) {
         lifecycleScope.launch {
             with(binding) {
-                setupOpenEditFABs(resource.kind)
+                setupOpenEditFABs(resource.metadata)
                 ExtraLoader.load(
                     resource,
                     listOf(primaryExtra, secondaryExtra),
@@ -245,7 +245,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
         startActivity(Intent.createChooser(intent, "Share the link with:"))
     }
 
-    override fun showInfoAlert(path: Path, resourceMeta: ResourceMeta) {
+    override fun showInfoAlert(path: Path, resourceMeta: Resource) {
         DetailsAlertDialog(path, resourceMeta, requireContext()).show()
     }
 
@@ -476,20 +476,20 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
         }
     }
 
-    private fun setupOpenEditFABs(kind: ResourceKind?) = binding.apply {
+    private fun setupOpenEditFABs(meta: Metadata?) = binding.apply {
         openResourceFab.makeGone()
         editResourceFab.makeGone()
-        when (kind) {
-            is ResourceKind.Video, is ResourceKind.Link, null -> {
+        when (meta) {
+            is Metadata.Video, is Metadata.Link, null -> {
                 // "open" capabilities only
                 openResourceFab.makeVisible()
             }
-            is ResourceKind.Document, is ResourceKind.PlainText -> {
+            is Metadata.Document, is Metadata.PlainText -> {
                 // both "open" and "edit" capabilities
                 editResourceFab.makeVisible()
                 openResourceFab.makeVisible()
             }
-            is ResourceKind.Image -> {
+            is Metadata.Image -> {
                 // "edit" capabilities only
                 editResourceFab.makeVisible()
             }

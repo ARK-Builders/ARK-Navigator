@@ -23,7 +23,7 @@ import space.taran.arkfilepicker.folders.RootAndFav
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.DialogEditTagsBinding
 import space.taran.arklib.ResourceId
-import space.taran.arklib.domain.index.ResourcesIndex
+import space.taran.arklib.domain.index.ResourceIndex
 import space.taran.arknavigator.mvp.model.repo.stats.StatsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.presenter.dialog.EditTagsDialogPresenter
@@ -35,7 +35,7 @@ import space.taran.arknavigator.utils.extensions.placeCursorToEnd
 import space.taran.arknavigator.utils.extensions.showKeyboard
 
 class EditTagsDialogFragment(
-    private val index: ResourcesIndex? = null,
+    private val index: ResourceIndex? = null,
     private val storage: TagsStorage? = null,
     private val statsStorage: StatsStorage? = null
 ) : MvpAppCompatDialogFragment(), EditTagsDialogView {
@@ -209,7 +209,7 @@ class EditTagsDialogFragment(
         fun newInstance(
             rootAndFav: RootAndFav,
             resources: List<ResourceId>,
-            index: ResourcesIndex,
+            index: ResourceIndex,
             storage: TagsStorage,
             statsStorage: StatsStorage
         ) =

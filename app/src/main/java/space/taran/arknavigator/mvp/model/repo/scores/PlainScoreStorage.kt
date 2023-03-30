@@ -4,9 +4,9 @@ import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import space.taran.arklib.arkFolder
-import space.taran.arklib.arkScoresStorage
+import space.taran.arklib.arkScores
 import space.taran.arklib.ResourceId
-import space.taran.arklib.domain.index.ResourceMeta
+import space.taran.arklib.domain.index.Resource
 import space.taran.arknavigator.utils.LogTags.SCORES_STORAGE
 import space.taran.arknavigator.utils.Score
 import java.nio.charset.StandardCharsets.UTF_8
@@ -19,7 +19,7 @@ class PlainScoreStorage(
     val root: Path,
     val resources: Collection<ResourceId>
 ) : ScoreStorage {
-    private val storageFile = root.arkFolder().arkScoresStorage()
+    private val storageFile = root.arkFolder().arkScores()
 
     private var lastModified = FileTime.fromMillis(0L)
 
@@ -83,7 +83,7 @@ class PlainScoreStorage(
             return@withContext
         }
 
-    override suspend fun resetScores(resources: List<ResourceMeta>) {
+    override suspend fun resetScores(resources: List<Resource>) {
         resources.map {
             if (scoreById.containsKey(it.id)) {
                 scoreById[it.id] = 0

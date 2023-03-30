@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import space.taran.arklib.arkFolder
-import space.taran.arklib.arkTagsStorage
+import space.taran.arklib.arkTags
 import space.taran.arklib.ResourceId
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
@@ -37,7 +37,7 @@ class PlainTagsStorage(
     private val preferences: Preferences
 ) : TagsStorage {
 
-    private val storageFile: Path = root.arkFolder().arkTagsStorage()
+    private val storageFile: Path = root.arkFolder().arkTags()
 
     private var lastModified: FileTime = FileTime.fromMillis(0L)
 
@@ -102,10 +102,9 @@ class PlainTagsStorage(
     override fun contains(id: ResourceId): Boolean = tagsById.containsKey(id)
 
     // if this id isn't present in storage, then the call is wrong
-    // because the caller always takes this id from ResourcesIndex
+    // because the caller always takes this id from ResourceIndex
     // and the index and storage must be in sync
     override fun getTags(id: ResourceId): Tags = tagsById[id]!!
-    // todo: check the file's modification date and pull external updates
 
     override fun getTags(ids: Iterable<ResourceId>): Tags =
         ids.flatMap { id -> getTags(id) }.toSet()
@@ -197,9 +196,6 @@ class PlainTagsStorage(
 
             if (modified > lastModified) {
                 Log.d(TAGS_STORAGE, "storage file was modified externally, merging")
-                // todo: for real merge we need to track our own changes locally
-                // without this, we need to stop all competing devices to remove a tag or a resource
-                // so far, just ensuring that we are not losing additions
 
                 readStorage().onSuccess { outside ->
 

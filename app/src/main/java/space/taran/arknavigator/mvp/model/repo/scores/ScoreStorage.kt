@@ -1,7 +1,7 @@
 package space.taran.arknavigator.mvp.model.repo.scores
 
 import space.taran.arklib.ResourceId
-import space.taran.arklib.domain.index.ResourceMeta
+import space.taran.arklib.domain.index.Resource
 import space.taran.arknavigator.utils.Score
 
 interface ScoreStorage {
@@ -12,7 +12,7 @@ interface ScoreStorage {
 
     fun getScore(id: ResourceId): Score
 
-    suspend fun resetScores(resources: List<ResourceMeta>)
+    suspend fun resetScores(resources: List<Resource>)
 
     suspend fun persist()
 }

@@ -94,10 +94,10 @@ fun findLongestCommonPrefix(paths: List<Path>): Path {
 
 fun reifySorting(sorting: Sorting): Comparator<ResourceItem>? =
     when (sorting) {
-        Sorting.NAME -> compareBy(String.CASE_INSENSITIVE_ORDER) { it.meta.name }
-        Sorting.SIZE -> compareBy { it.meta.size() }
-        Sorting.TYPE -> compareBy { it.meta.extension }
-        Sorting.LAST_MODIFIED -> compareBy { it.meta.modified }
+        Sorting.NAME -> compareBy(String.CASE_INSENSITIVE_ORDER) { it.resource.name }
+        Sorting.SIZE -> compareBy { it.resource.size() }
+        Sorting.TYPE -> compareBy { it.resource.extension }
+        Sorting.LAST_MODIFIED -> compareBy { it.resource.modified }
         Sorting.DEFAULT -> null
     }
 

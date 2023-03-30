@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import space.taran.arklib.ResourceId
-import space.taran.arklib.domain.index.ResourcesIndex
+import space.taran.arklib.domain.index.ResourceIndex
 import space.taran.arklib.domain.kind.KindCode
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
@@ -45,7 +45,7 @@ class TagsSelectorPresenter(
 
     val actionsHistory = ArrayDeque<TagsSelectorAction>()
 
-    private var index: ResourcesIndex? = null
+    private var index: ResourceIndex? = null
     private var storage: TagsStorage? = null
     private lateinit var statsStorage: StatsStorage
     private var filter = ""
@@ -82,7 +82,7 @@ class TagsSelectorPresenter(
         private set
 
     suspend fun init(
-        index: ResourcesIndex,
+        index: ResourceIndex,
         storage: TagsStorage,
         statsStorage: StatsStorage,
         kindTagsEnabled: Boolean,
@@ -496,7 +496,7 @@ class TagsSelectorPresenter(
     }
 
     private suspend fun provideTagItemsByResources(): Map<ResourceId, Set<TagItem>> {
-        val resources = index!!.listIds(prefix)
+        val resources = index!!.allIds()
         val tagItemsByResources: Map<ResourceId, Set<TagItem>> =
             storage!!.groupTagsByResources(resources).map {
                 it.key to it.value.map { tag -> TagItem.PlainTagItem(tag) }.toSet()
@@ -506,10 +506,10 @@ class TagsSelectorPresenter(
 
         return tagItemsByResources.map { (id, tags) ->
             var listOfTags = tags
-            val kind = index!!.getMeta(id).kind
-            if (kind != null) {
+            val meta = index!!.getResource(id)!!.metadata
+            if (meta != null) {
                 listOfTags =
-                    listOfTags + TagItem.KindTagItem(kind.code)
+                    listOfTags + TagItem.KindTagItem(meta.code)
             }
             id to listOfTags
         }.toMap()

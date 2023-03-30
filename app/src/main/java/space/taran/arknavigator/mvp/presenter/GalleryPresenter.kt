@@ -14,10 +14,10 @@ import moxy.presenterScope
 import space.taran.arkfilepicker.folders.RootAndFav
 import space.taran.arklib.ResourceId
 import space.taran.arklib.domain.Message
-import space.taran.arklib.domain.index.ResourceMeta
-import space.taran.arklib.domain.index.ResourcesIndex
-import space.taran.arklib.domain.index.ResourcesIndexRepo
-import space.taran.arklib.domain.kind.ResourceKind
+import space.taran.arklib.domain.index.Resource
+import space.taran.arklib.domain.index.ResourceIndex
+import space.taran.arklib.domain.index.ResourceIndexRepo
+import space.taran.arklib.domain.kind.Metadata
 import space.taran.arklib.domain.meta.MetadataStorage
 import space.taran.arklib.domain.meta.MetadataStorageRepo
 import space.taran.arklib.domain.preview.PreviewStorage
@@ -32,7 +32,7 @@ import space.taran.arknavigator.mvp.model.repo.stats.StatsStorageRepo
 import space.taran.arknavigator.mvp.model.repo.tags.PlainTagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
-import space.taran.arknavigator.mvp.presenter.adapter.ResourceMetaDiffUtilCallback
+import space.taran.arknavigator.mvp.presenter.adapter.ResourceDiffUtilCallback
 import space.taran.arknavigator.mvp.view.GalleryView
 import space.taran.arknavigator.navigation.AppRouter
 import space.taran.arknavigator.navigation.Screens
@@ -64,10 +64,10 @@ class GalleryPresenter(
 
     private var isControlsVisible = false
     private var currentPos = startAt
-    private val currentResource: ResourceMeta
+    private val currentResource: Resource
         get() = resources[currentPos]
 
-    lateinit var index: ResourcesIndex
+    lateinit var index: ResourceIndex
         private set
     lateinit var storage: TagsStorage
         private set
@@ -79,7 +79,7 @@ class GalleryPresenter(
         private set
     lateinit var scoreStorage: ScoreStorage
         private set
-    var resources: MutableList<ResourceMeta> = mutableListOf()
+    var resources: MutableList<Resource> = mutableListOf()
         private set
     var diffResult: DiffUtil.DiffResult? = null
         private set
@@ -92,7 +92,7 @@ class GalleryPresenter(
     lateinit var router: AppRouter
 
     @Inject
-    lateinit var indexRepo: ResourcesIndexRepo
+    lateinit var indexRepo: ResourceIndexRepo
 
     @Inject
     lateinit var previewStorageRepo: PreviewStorageRepo
@@ -129,8 +129,8 @@ class GalleryPresenter(
                 }
             }.launchIn(presenterScope)
             storage = tagsStorageRepo.provide(rootAndFav)
-            previewStorage = previewStorageRepo.provide(rootAndFav)
-            metadataStorage = metadataStorageRepo.provide(rootAndFav)
+            previewStorage = previewStorageRepo.provide(index)
+            metadataStorage = metadataStorageRepo.provide(index)
             statsStorage = statsStorageRepo.provide(rootAndFav)
             scoreStorage = scoreStorageRepo.provide(rootAndFav)
 
@@ -138,7 +138,7 @@ class GalleryPresenter(
                 PlainTagsStorage.TYPE
             )
 
-            resources = resourcesIds.map { index.getMeta(it) }.toMutableList()
+            resources = resourcesIds.map { index.getResource(it)!! }.toMutableList()
             sortByScores = preferences.get(PreferenceKey.SortByScores)
 
             viewState.updatePagerAdapter()
@@ -161,23 +161,22 @@ class GalleryPresenter(
         checkResourceChanges(currentPos)
     }
 
-    fun detectItemType(pos: Int) = when (resources[pos].kind) {
-        is ResourceKind.PlainText -> GalleryItemType.PLAINTEXT
+    fun detectItemType(pos: Int) = when (resources[pos].metadata) {
+        is Metadata.PlainText -> GalleryItemType.PLAINTEXT
         else -> GalleryItemType.OTHER
     }
 
     fun bindView(view: PreviewItemView) = presenterScope.launch {
         view.reset()
-        val meta = resources[view.pos]
-        val path = index.getPath(meta.id)
-        view.setSource(path, meta, previewStorage.locate(path, meta))
+        val resource = resources[view.pos]
+        val path = index.getPath(resource.id)!!
+        view.setSource(path, resource, previewStorage.locate(path, resource))
     }
 
     fun bindPlainTextView(view: PreviewPlainTextItemView) = presenterScope.launch {
         view.reset()
-        val meta = resources[view.pos]
-        val path = index.getPath(meta.id)
-        val contentResult = readText(path)
+        val resource = resources[view.pos]
+        val contentResult = readText(index.getPath(resource.id)!!)
         contentResult.onSuccess {
             view.setContent(it)
         }
@@ -190,36 +189,37 @@ class GalleryPresenter(
 
     fun onOpenFabClick() = presenterScope.launch {
         Log.d(GALLERY_SCREEN, "[open_resource] clicked at position $currentPos")
-        val kind = currentResource.kind
-        if (kind is ResourceKind.Link) {
-            val url = kind.url ?: return@launch
+        val meta = currentResource.metadata
+        if (meta is Metadata.Link) {
+            val url = meta.url ?: return@launch
             viewState.openLink(url)
             return@launch
         }
 
-        viewState.viewInExternalApp(index.getPath(currentResource.id))
+        viewState.viewInExternalApp(index.getPath(currentResource.id)!!)
     }
 
     fun onInfoFabClick() = presenterScope.launch {
         Log.d(GALLERY_SCREEN, "[info_resource] clicked at position $currentPos")
-        viewState.showInfoAlert(index.getPath(currentResource.id), currentResource)
+        val path = index.getPath(currentResource.id)!!
+        viewState.showInfoAlert(path, currentResource)
     }
 
     fun onShareFabClick() = presenterScope.launch {
         Log.d(GALLERY_SCREEN, "[share_resource] clicked at position $currentPos")
-        val kind = currentResource.kind
-        if (kind is ResourceKind.Link) {
-            val url = kind.url ?: return@launch
+        val meta = currentResource.metadata
+        if (meta is Metadata.Link) {
+            val url = meta.url ?: return@launch
             viewState.shareLink(url)
             return@launch
         }
 
-        viewState.shareResource(index.getPath(currentResource.id))
+        viewState.shareResource(index.getPath(currentResource.id)!!)
     }
 
     fun onEditFabClick() = presenterScope.launch {
         Log.d(GALLERY_SCREEN, "[edit_resource] clicked at position $currentPos")
-        viewState.editResource(index.getPath(currentResource.id))
+        viewState.editResource(index.getPath(currentResource.id)!!)
     }
 
     fun onRemoveFabClick() = presenterScope.launch(NonCancellable) {
@@ -292,20 +292,20 @@ class GalleryPresenter(
         pos: Int
     ) = presenterScope.launch(Dispatchers.IO) {
         if (resources.isEmpty()) return@launch
-        val meta = resources[pos]
+        val resource = resources[pos]
 
         val path = try {
-            index.getPath(meta.id)
+            index.getPath(resource.id)!!
         } catch (e: Throwable) {
             Timber.e(
-                "Resource[${meta.id}] is presented in gallery but not in index",
+                "Resource[${resource.id}] is presented in gallery but not in index",
                 e
             )
             onRemovedOrEditedResourceDetected()
             return@launch
         }
 
-        if (path.notExists() || path.getLastModifiedTime() != meta.modified) {
+        if (path.notExists() || path.getLastModifiedTime() != resource.modified) {
             onRemovedOrEditedResourceDetected()
         }
     }
@@ -313,20 +313,20 @@ class GalleryPresenter(
     private suspend fun deleteResource(resource: ResourceId) {
         Log.d(GALLERY_SCREEN, "deleting resource $resource")
 
-        storage.remove(resource)
-        val path = index.remove(resource)
-        Log.d(GALLERY_SCREEN, "path $path removed from index")
-        viewState.notifyResourcesChanged()
+        val path = index.getPath(resource)
 
-        presenterScope.launch(NonCancellable + Dispatchers.IO) {
-            Files.delete(path)
-        }
+        Files.delete(path)
+        // todo verify that blocking deletion is fine
+        //        presenterScope.launch(NonCancellable + Dispatchers.IO) {
+        //            Files.delete(path)
+        //        }
+        storage.remove(resource)
     }
 
     private suspend fun displayPreview() {
         val resource = resources[currentPos]
         val tags = storage.getTags(resource.id)
-        val filePath = index.getPath(resource.id)
+        val filePath = index.getPath(resource.id)!!
         val score = scoreStorage.getScore(resource.id)
         viewState.setupPreview(currentPos, resource, filePath.fileName.toString())
         viewState.displayPreviewTags(resource.id, tags)
@@ -343,7 +343,7 @@ class GalleryPresenter(
         withContext(Dispatchers.Main) {
             viewState.setProgressVisibility(true, "Indexing")
 
-            index.reindex()
+            index.updateAll()
             // update current storages with new resources
             tagsStorageRepo.provide(rootAndFav)
             scoreStorageRepo.provide(rootAndFav)
@@ -355,9 +355,10 @@ class GalleryPresenter(
         }
 
     private suspend fun invalidateResources() {
-        val indexedIds = index.listIds(rootAndFav.fav)
-        val newResources =
-            resources.filter { meta -> indexedIds.contains(meta.id) }.toMutableList()
+        val indexedIds = index.allIds()
+        val newResources = resources.filter { resource ->
+            indexedIds.contains(resource.id)
+        }.toMutableList()
 
         if (newResources.isEmpty()) {
             onBackClick()
@@ -365,7 +366,7 @@ class GalleryPresenter(
         }
 
         diffResult = DiffUtil.calculateDiff(
-            ResourceMetaDiffUtilCallback(
+            ResourceDiffUtilCallback(
                 resources,
                 newResources
             )
@@ -390,7 +391,7 @@ class GalleryPresenter(
     }
 
     fun onPlayButtonClick() = presenterScope.launch {
-        viewState.viewInExternalApp(index.getPath(currentResource.id))
+        viewState.viewInExternalApp(index.getPath(currentResource.id)!!)
     }
 
     fun onBackClick() {

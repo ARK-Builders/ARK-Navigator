@@ -10,14 +10,14 @@ import android.view.WindowManager
 import org.apache.commons.io.FileUtils
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.DialogResourceInfoBinding
-import space.taran.arklib.domain.index.ResourceMeta
+import space.taran.arklib.domain.index.Resource
 import space.taran.arknavigator.ui.extra.ExtraLoader
 import java.nio.file.Path
 import kotlin.io.path.absolutePathString
 
 class DetailsAlertDialog(
     val path: Path,
-    val resourceMeta: ResourceMeta,
+    val resourceMeta: Resource,
     context: Context
 ) : Dialog(context) {
 

@@ -15,7 +15,7 @@ import space.taran.arkfilepicker.presentation.folderstree.FavoriteNode
 import space.taran.arkfilepicker.presentation.folderstree.FolderNode
 import space.taran.arkfilepicker.presentation.folderstree.RootNode
 import space.taran.arklib.domain.Message
-import space.taran.arklib.domain.index.ResourcesIndexRepo
+import space.taran.arklib.domain.index.ResourceIndexRepo
 import space.taran.arklib.domain.preview.PreviewStorageRepo
 import space.taran.arklib.utils.Constants
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
@@ -41,7 +41,7 @@ class FoldersPresenter(
     lateinit var foldersRepo: FoldersRepo
 
     @Inject
-    lateinit var resourcesIndexRepo: ResourcesIndexRepo
+    lateinit var resourcesIndexRepo: ResourceIndexRepo
 
     @Inject
     lateinit var previewsStorageRepo: PreviewStorageRepo
@@ -211,8 +211,8 @@ class FoldersPresenter(
 
         viewState.setProgressVisibility(true, "Indexing")
         val index = resourcesIndexRepo.provide(root)
-        previewsStorageRepo.provide(root)
-        index.reindex()
+        previewsStorageRepo.provide(index)
+        index.updateAll()
 
         viewState.setProgressVisibility(false)
 

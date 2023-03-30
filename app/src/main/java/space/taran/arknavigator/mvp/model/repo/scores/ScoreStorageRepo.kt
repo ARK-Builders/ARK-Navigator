@@ -6,12 +6,12 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import space.taran.arkfilepicker.folders.FoldersRepo
 import space.taran.arkfilepicker.folders.RootAndFav
-import space.taran.arklib.domain.index.ResourcesIndexRepo
+import space.taran.arklib.domain.index.ResourceIndexRepo
 import java.nio.file.Path
 
 class ScoreStorageRepo(
     private val foldersRepo: FoldersRepo,
-    private val indexRepo: ResourcesIndexRepo
+    private val indexRepo: ResourceIndexRepo
 ) {
     private val provideMutex = Mutex()
     private val storageByRoot = mutableMapOf<Path, PlainScoreStorage>()
@@ -23,7 +23,7 @@ class ScoreStorageRepo(
             provideMutex.withLock {
                 val storageShards = roots.map { root ->
                     val index = indexRepo.provide(root)
-                    val resources = index.listAllIds()
+                    val resources = index.allIds()
                     if (storageByRoot[root] != null) {
                         storageByRoot[root]?.refresh(resources)
                         storageByRoot[root]!!

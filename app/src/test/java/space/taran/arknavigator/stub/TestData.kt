@@ -1,40 +1,40 @@
 package space.taran.arknavigator.stub
 
 import space.taran.arklib.ResourceId
-import space.taran.arklib.domain.kind.ResourceKind
-import space.taran.arklib.domain.index.ResourceMeta
+import space.taran.arklib.domain.kind.Metadata
+import space.taran.arklib.domain.index.Resource
 import java.nio.file.attribute.FileTime
 import java.util.Date
 
 object TestData {
-    fun metasById() = mapOf(
-        R1 to ResourceMeta(
+    fun resourceById() = mapOf(
+        R1 to Resource(
             R1,
             "Resource1",
             ".jpg",
             fileTime(),
-            ResourceKind.Image()
+            Metadata.Image()
         ),
-        R2 to ResourceMeta(
+        R2 to Resource(
             R2,
             "Resource2",
             ".jpg",
             fileTime(),
-            ResourceKind.Image()
+            Metadata.Image()
         ),
-        R3 to ResourceMeta(
+        R3 to Resource(
             R3,
             "Resource3",
             ".jpg",
             fileTime(),
-            ResourceKind.Image()
+            Metadata.Image()
         ),
-        R4 to ResourceMeta(
+        R4 to Resource(
             R4,
             "Resource4",
             ".odt",
             fileTime(),
-            ResourceKind.Document()
+            Metadata.Document()
         )
     )
 

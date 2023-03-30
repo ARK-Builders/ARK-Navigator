@@ -2,7 +2,7 @@ package space.taran.arknavigator.mvp.model.repo.stats
 
 import space.taran.arkfilepicker.folders.FoldersRepo
 import space.taran.arkfilepicker.folders.RootAndFav
-import space.taran.arklib.domain.index.ResourcesIndexRepo
+import space.taran.arklib.domain.index.ResourceIndexRepo
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import java.nio.file.Path
@@ -12,7 +12,7 @@ import javax.inject.Singleton
 @Singleton
 class StatsStorageRepo @Inject constructor(
     private val foldersRepo: FoldersRepo,
-    private val indexRepo: ResourcesIndexRepo,
+    private val indexRepo: ResourceIndexRepo,
     private val tagsStorageRepo: TagsStorageRepo,
     private val preferences: Preferences
 ) {

@@ -15,8 +15,8 @@ import space.taran.arkfilepicker.folders.FoldersRepo
 import space.taran.arkfilepicker.folders.RootAndFav
 import space.taran.arklib.ResourceId
 import space.taran.arklib.domain.Message
-import space.taran.arklib.domain.index.ResourcesIndex
-import space.taran.arklib.domain.index.ResourcesIndexRepo
+import space.taran.arklib.domain.index.ResourceIndex
+import space.taran.arklib.domain.index.ResourceIndexRepo
 import space.taran.arklib.domain.preview.PreviewStorage
 import space.taran.arklib.domain.preview.PreviewStorageRepo
 import space.taran.arklib.utils.Constants
@@ -56,7 +56,7 @@ class ResourcesPresenter(
     lateinit var foldersRepo: FoldersRepo
 
     @Inject
-    lateinit var resourcesIndexRepo: ResourcesIndexRepo
+    lateinit var resourcesIndexRepo: ResourceIndexRepo
 
     @Inject
     lateinit var tagsStorageRepo: TagsStorageRepo
@@ -77,7 +77,7 @@ class ResourcesPresenter(
     @Named(Constants.DI.MESSAGE_FLOW_NAME)
     lateinit var messageFlow: MutableSharedFlow<Message>
 
-    lateinit var index: ResourcesIndex
+    lateinit var index: ResourceIndex
         private set
     lateinit var storage: TagsStorage
         private set
@@ -136,7 +136,11 @@ class ResourcesPresenter(
                     )
                 }
             }.launchIn(presenterScope)
-            index.reindex()
+
+            previewStorage = previewStorageRepo.provide(index)
+            initIndexingListener()
+            index.updateAll()
+
             storage = tagsStorageRepo.provide(rootAndFav)
             if (storage.isCorrupted()) {
                 viewState.showCorruptNotificationDialog(
@@ -144,14 +148,14 @@ class ResourcesPresenter(
                 )
                 return@launch
             }
-            previewStorage = previewStorageRepo.provide(rootAndFav)
+            previewStorage = previewStorageRepo.provide(index)
             initIndexingListener()
             statsStorage = statsStorageRepo.provide(rootAndFav)
             scoreStorage = scoreStorageRepo.provide(rootAndFav)
 
             gridPresenter.init(index, storage, router, previewStorage, scoreStorage)
 
-            val resources = index.listResources(rootAndFav.fav)
+            val resources = index.allResources()
             viewState.setProgressVisibility(true, "Sorting")
 
             gridPresenter.resetResources(resources)
@@ -184,10 +188,10 @@ class ResourcesPresenter(
         val resourcesToMove = gridPresenter
             .resources
             .filter { it.isSelected }
-            .map { it.meta.id }
+            .map { it.resource.id }
         val jobs = resourcesToMove.map { id ->
             launch {
-                val path = index.getPath(id)
+                val path = index.getPath(id)!!
                 val newPath = directoryToMove.findNotExistCopyName(path)
                 path.copyTo(newPath)
                 if (path != newPath)
@@ -196,7 +200,7 @@ class ResourcesPresenter(
         }
         jobs.forEach { it.join() }
         migrateTags(resourcesToMove, directoryToMove)
-        index.reindex()
+        index.updateAll()
         tagsStorageRepo.provide(rootAndFav)
         withContext(Dispatchers.Main) {
             onResourcesOrTagsChanged()
@@ -211,10 +215,10 @@ class ResourcesPresenter(
         val resourcesToCopy = gridPresenter
             .resources
             .filter { it.isSelected }
-            .map { it.meta.id }
+            .map { it.resource.id }
         resourcesToCopy.map { id ->
             launch {
-                val path = index.getPath(id)
+                val path = index.getPath(id)!!
                 val newPath = directoryToCopy.findNotExistCopyName(path)
                 path.copyTo(newPath)
             }
@@ -265,7 +269,7 @@ class ResourcesPresenter(
         val selected = gridPresenter
             .resources
             .filter { it.isSelected }
-            .map { index.getPath(it.meta.id) }
+            .map { index.getPath(it.resource.id)!! }
         viewState.shareResources(selected)
         gridPresenter.onSelectingChanged(false)
     }
@@ -277,12 +281,12 @@ class ResourcesPresenter(
         val resourcesToRemove = gridPresenter.resources.filter { it.isSelected }
         val results = resourcesToRemove.map { item ->
             async {
-                val path = index.getPath(item.meta.id)
+                val path = index.getPath(item.resource.id)!!
                 path.deleteIfExists()
             }
         }
         results.forEach { it.await() }
-        index.reindex()
+        index.updateAll()
         tagsStorageRepo.provide(rootAndFav)
         withContext(Dispatchers.Main) {
             onResourcesOrTagsChanged()
@@ -305,7 +309,7 @@ class ResourcesPresenter(
     }
 
     suspend fun onResourcesOrTagsChanged() {
-        gridPresenter.resetResources(index.listResources(rootAndFav.fav))
+        gridPresenter.resetResources(index.allResources())
         tagsSelectorPresenter.calculateTagsAndSelection()
     }
 
@@ -317,7 +321,7 @@ class ResourcesPresenter(
     suspend fun onRemovedResourceDetected() {
         viewState.setProgressVisibility(true, "Indexing")
 
-        index.reindex()
+        index.updateAll()
         // update current tags storage
         tagsStorageRepo.provide(rootAndFav)
 
@@ -331,7 +335,7 @@ class ResourcesPresenter(
     }
 
     private fun initIndexingListener() {
-        previewStorage.indexingFlow.onEach {
+        previewStorage.inProgress.onEach {
             Timber.d("preview generation progress = $it")
             viewState.setPreviewGenerationProgress(it)
         }.launchIn(presenterScope)

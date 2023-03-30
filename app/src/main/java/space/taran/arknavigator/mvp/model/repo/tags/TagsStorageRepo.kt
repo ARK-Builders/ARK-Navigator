@@ -9,14 +9,14 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import space.taran.arkfilepicker.folders.FoldersRepo
 import space.taran.arkfilepicker.folders.RootAndFav
-import space.taran.arklib.domain.index.ResourcesIndexRepo
+import space.taran.arklib.domain.index.ResourceIndexRepo
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.stats.StatsEvent
 import java.nio.file.Path
 
 class TagsStorageRepo(
     private val foldersRepo: FoldersRepo,
-    private val indexRepo: ResourcesIndexRepo,
+    private val indexRepo: ResourceIndexRepo,
     private val preferences: Preferences
 ) {
     private val provideMutex = Mutex()
@@ -34,7 +34,7 @@ class TagsStorageRepo(
         provideMutex.withLock {
             val storageShards = roots.map { root ->
                 val index = indexRepo.provide(root)
-                val resources = index.listAllIds()
+                val resources = index.allIds()
                 if (storageByRoot[root] != null) {
                     val storage = storageByRoot[root]!!
                     storage.checkResources(resources)

@@ -1,11 +1,11 @@
 package space.taran.arknavigator.mvp.presenter.adapter
 
 import androidx.recyclerview.widget.DiffUtil
-import space.taran.arklib.domain.index.ResourceMeta
+import space.taran.arklib.domain.index.Resource
 
-class ResourceMetaDiffUtilCallback(
-    private val oldList: List<ResourceMeta>,
-    private val newList: List<ResourceMeta>
+class ResourceDiffUtilCallback(
+    private val oldList: List<Resource>,
+    private val newList: List<Resource>
 ) : DiffUtil.Callback() {
     override fun getOldListSize(): Int = oldList.size
 

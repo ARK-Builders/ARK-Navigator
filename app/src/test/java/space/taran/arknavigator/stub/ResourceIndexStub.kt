@@ -1,27 +1,22 @@
 package space.taran.arknavigator.stub
 
 import space.taran.arklib.ResourceId
-import space.taran.arklib.domain.index.ResourceMeta
-import space.taran.arklib.domain.index.ResourcesIndex
+import space.taran.arklib.domain.index.Resource
+import space.taran.arklib.domain.index.ResourceIndex
 import java.nio.file.Path
 import kotlin.io.path.Path
 
-class ResourceIndexStub : ResourcesIndex {
-    private val metas = TestData.metasById().toMutableMap()
-
-    override suspend fun listResources(prefix: Path?): Set<ResourceMeta> =
-        metas.values.toSet()
+class ResourceIndexStub : ResourceIndex {
+    private val resources = TestData.resourceById().toMutableMap()
 
     override suspend fun getPath(id: ResourceId): Path =
         Path("")
 
-    override suspend fun getMeta(id: ResourceId): ResourceMeta =
-        metas[id]!!
+    override suspend fun allResources(prefix: Path?): Set<Resource> =
+        resources.values.toSet()
 
-    override suspend fun reindex() {}
+    override suspend fun getResource(id: ResourceId): Resource =
+        resources[id]!!
 
-    override suspend fun remove(id: ResourceId): Path {
-        metas.remove(id)
-        return Path("")
-    }
+    override suspend fun updateAll() {}
 }

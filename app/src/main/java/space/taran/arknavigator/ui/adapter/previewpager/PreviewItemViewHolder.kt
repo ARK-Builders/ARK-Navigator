@@ -9,8 +9,8 @@ import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.ortiz.touchview.OnTouchImageViewListener
 import space.taran.arknavigator.databinding.ItemImageBinding
 import space.taran.arklib.ResourceId
-import space.taran.arklib.domain.index.ResourceMeta
-import space.taran.arklib.domain.kind.ResourceKind
+import space.taran.arklib.domain.index.Resource
+import space.taran.arklib.domain.kind.Metadata
 import space.taran.arklib.domain.preview.PreviewAndThumbnail
 import space.taran.arklib.utils.ImageUtils
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
@@ -42,12 +42,12 @@ class PreviewItemViewHolder(
 
     override fun setSource(
         source: Path,
-        meta: ResourceMeta,
+        resource: Resource,
         previewAndThumbnail: PreviewAndThumbnail?
     ) = with(binding) {
         val placeholder = ImageUtils.iconForExtension(extension(source))
 
-        if (meta.kind is ResourceKind.Video) {
+        if (resource.metadata is Metadata.Video) {
             icPlay.makeVisibleAndSetOnClickListener {
                 presenter.onPlayButtonClick()
             }
@@ -55,7 +55,7 @@ class PreviewItemViewHolder(
             icPlay.isVisible = false
         }
 
-        loadImage(meta.id, previewAndThumbnail?.preview, placeholder)
+        loadImage(resource.id, previewAndThumbnail?.preview, placeholder)
     }
 
     override fun reset() = with(binding) {

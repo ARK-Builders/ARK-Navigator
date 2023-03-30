@@ -2,12 +2,12 @@ package space.taran.arknavigator.ui.extra
 
 import android.widget.TextView
 import space.taran.arknavigator.R
-import space.taran.arklib.domain.kind.ResourceKind
+import space.taran.arklib.domain.kind.Metadata
 import space.taran.arknavigator.utils.extensions.textOrGone
 
 object VideoExtraLoader {
     fun load(
-        video: ResourceKind.Video,
+        video: Metadata.Video,
         resolutionTV: TextView,
         durationTV: TextView
     ) {
@@ -64,7 +64,7 @@ object VideoExtraLoader {
     }
 
     fun loadInfo(
-        video: ResourceKind.Video,
+        video: Metadata.Video,
         txtResolution: TextView,
         txtDuration: TextView
     ) {
