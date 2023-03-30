@@ -118,8 +118,7 @@ class GalleryPresenter(
         super.onFirstViewAttach()
         presenterScope.launch {
             viewState.init()
-            if (!indexRepo.isIndexed(rootAndFav))
-                viewState.setProgressVisibility(true, "Indexing")
+            viewState.setProgressVisibility(true, "Indexing")
 
             index = indexRepo.provide(rootAndFav)
             messageFlow.onEach { message ->
