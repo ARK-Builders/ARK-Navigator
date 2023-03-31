@@ -26,7 +26,9 @@ class RootsScanDialogFragment : MvpBottomSheetDialogFragment(), RootsScanView {
     private val presenter by moxyPresenter {
         RootsScanDialogPresenter()
     }
-    private val defaultRootsFolders = listOf("DCIM/Camera", "Documents", "Pictures", "Downloads")
+    private val defaultRootsFolders =
+        listOf("DCIM/Camera", "Documents", "Pictures", "Downloads")
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -56,7 +58,6 @@ class RootsScanDialogFragment : MvpBottomSheetDialogFragment(), RootsScanView {
         }
         initDefaultRootsInfo(defaultRootsFolders)
     }
-
 
     private fun initDefaultRootsInfo(rootsList: List<String>) {
         rootsList.forEach { root ->
@@ -124,12 +125,12 @@ class RootsScanDialogFragment : MvpBottomSheetDialogFragment(), RootsScanView {
             var foundDefaultFolder = false
             checkedFolders.forEach {
                 val defaultRoot = Paths.get(root.toString() + '/' + it)
-                if(defaultRoot.exists()){
+                if (defaultRoot.exists()) {
                     finalRoots.add(defaultRoot)
                     foundDefaultFolder = true
                 }
             }
-            if(!foundDefaultFolder){
+            if (!foundDefaultFolder) {
                 finalRoots.add(root)
             }
         }

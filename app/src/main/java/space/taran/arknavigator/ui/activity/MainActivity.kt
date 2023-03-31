@@ -43,7 +43,7 @@ class MainActivity : MvpAppCompatActivity(), MainView {
         }
     }
 
-    private val navigator = AppNavigator(this,  R.id.container)
+    private val navigator = AppNavigator(this, R.id.container)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(MAIN, "creating")

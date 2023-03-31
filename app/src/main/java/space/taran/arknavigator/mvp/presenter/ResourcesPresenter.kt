@@ -106,7 +106,6 @@ class ResourcesPresenter(
         Log.d(RESOURCES_SCREEN, "first view attached in ResourcesPresenter")
         super.onFirstViewAttach()
 
-
         presenterScope.launch {
             val ascending = preferences.get(PreferenceKey.IsSortingAscending)
             val sortByScores = preferences.get(PreferenceKey.SortByScores)

@@ -15,6 +15,7 @@ import javax.inject.Inject
 class MainPresenter : MvpPresenter<MainView>() {
     @Inject
     lateinit var router: AppRouter
+
     @Inject
     lateinit var folders: FoldersRepo
 
@@ -41,9 +42,9 @@ class MainPresenter : MvpPresenter<MainView>() {
         Log.d(MAIN, "creating Resources screen")
         presenterScope.launch {
             val folders = folders.provideFolders()
-            if(folders.size < 1){
+            if (folders.size < 1) {
                 viewState.enterResourceFragmentFailed()
-            }else {
+            } else {
                 Log.d(MAIN, "switching to Resources screen")
                 router.newRootScreen(Screens.ResourcesScreen(RootAndFav(null, null)))
             }

@@ -17,7 +17,6 @@ import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.fragments.utils.toast
 import space.taran.arknavigator.utils.LogTags.RESOURCES_SCREEN
 import space.taran.arknavigator.utils.Sorting
-import space.taran.arknavigator.utils.extensions.changeEnabledStatus
 
 class SortDialogFragment : MvpAppCompatDialogFragment(), SortDialogView {
 
