@@ -139,6 +139,7 @@ class GalleryPresenter(
             )
 
             resources = resourcesIds.map { index.getResource(it)!! }.toMutableList()
+
             sortByScores = preferences.get(PreferenceKey.SortByScores)
 
             viewState.updatePagerAdapter()
@@ -176,7 +177,10 @@ class GalleryPresenter(
     fun bindPlainTextView(view: PreviewPlainTextItemView) = presenterScope.launch {
         view.reset()
         val resource = resources[view.pos]
-        val contentResult = readText(index.getPath(resource.id)!!)
+
+        val path = index.getPath(resource.id)!!
+        val contentResult = readText(path)
+
         contentResult.onSuccess {
             view.setContent(it)
         }
@@ -201,6 +205,7 @@ class GalleryPresenter(
 
     fun onInfoFabClick() = presenterScope.launch {
         Log.d(GALLERY_SCREEN, "[info_resource] clicked at position $currentPos")
+
         val path = index.getPath(currentResource.id)!!
         viewState.showInfoAlert(path, currentResource)
     }
@@ -305,7 +310,9 @@ class GalleryPresenter(
             return@launch
         }
 
-        if (path.notExists() || path.getLastModifiedTime() != resource.modified) {
+        if (path == null || path.notExists() ||
+            path.getLastModifiedTime() != resource.modified
+        ) {
             onRemovedOrEditedResourceDetected()
         }
     }
@@ -316,11 +323,9 @@ class GalleryPresenter(
         val path = index.getPath(resource)
 
         Files.delete(path)
-        // todo verify that blocking deletion is fine
-        //        presenterScope.launch(NonCancellable + Dispatchers.IO) {
-        //            Files.delete(path)
-        //        }
         storage.remove(resource)
+
+        index.updateAll()
     }
 
     private suspend fun displayPreview() {

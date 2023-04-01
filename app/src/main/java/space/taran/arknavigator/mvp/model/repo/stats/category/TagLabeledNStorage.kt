@@ -32,7 +32,7 @@ class TagLabeledNStorage(
         } else {
             index.allIds()
                 .associateWith { tagsStorage.getTags(it) }
-                .forEach { (id, tags) ->
+                .forEach { (_, tags) ->
                     tags.forEach { tag ->
                         tagLabeledAmount.merge(tag, 1, Int::plus)
                     }

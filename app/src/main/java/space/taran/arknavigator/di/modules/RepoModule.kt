@@ -35,13 +35,10 @@ class RepoModule {
     @Singleton
     @Provides
     fun resourceIndexRepo(
-        foldersRepo: FoldersRepo,
-        @Named(Constants.DI.MESSAGE_FLOW_NAME)
+        foldersRepo: FoldersRepo
     ): ResourceIndexRepo {
         Log.d(MAIN, "creating ResourceIndexRepo")
-        return ResourceIndexRepo(
-            foldersRepo
-        )
+        return ResourceIndexRepo(foldersRepo)
     }
 
     @Singleton
@@ -59,9 +56,7 @@ class RepoModule {
     fun previewStorageRepo(
         @Named(Constants.DI.APP_SCOPE_NAME)
         appScope: CoroutineScope
-    ) = PreviewStorageRepo(
-        appScope
-    )
+    ) = PreviewStorageRepo(appScope)
 
     @Singleton
     @Provides
