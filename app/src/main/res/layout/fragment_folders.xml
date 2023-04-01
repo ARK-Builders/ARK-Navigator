@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:textSize="20sp"
         android:layout_gravity="top"
-        android:visible='false'
+        android:visibility="invisible"
         android:padding="10dp"
         android:text="@string/toast_add_paths" />
 
