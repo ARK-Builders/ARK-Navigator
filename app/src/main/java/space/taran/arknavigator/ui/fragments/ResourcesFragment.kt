@@ -215,7 +215,7 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
 
     override fun setTagsFilterEnabled(enabled: Boolean) {
         binding.layoutInput.isVisible = enabled
-        binding.cgTagsChecked.isVisible = enabled
+        binding.rvTagsFilter.isVisible = enabled
         if (enabled) {
             binding.etTagsFilter.placeCursorToEnd()
             binding.etTagsFilter.showKeyboard()

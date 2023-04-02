@@ -1,14 +1,21 @@
 package space.taran.arknavigator.ui.adapter
 
+import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import com.google.android.material.chip.Chip
+import com.google.android.flexbox.FlexboxLayoutManager
+import com.mikepenz.fastadapter.FastAdapter
+import com.mikepenz.fastadapter.adapters.ItemAdapter
+import com.mikepenz.fastadapter.binding.AbstractBindingItem
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.FragmentResourcesBinding
+import space.taran.arknavigator.databinding.ItemTagBinding
 import space.taran.arknavigator.databinding.PopupResourcesTagMenuBinding
 import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagItem
 import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagsSelectorPresenter
@@ -24,15 +31,27 @@ class TagsSelectorAdapter(
     @Inject
     lateinit var stringProvider: StringProvider
 
-    private val checkedChipGroup = binding.cgTagsChecked
-    private val chipGroup = binding.tagsCg
+    private val tagsAdapter = ItemAdapter<TagItemView>()
+    private val filterTagsAdapter = ItemAdapter<TagItemView>()
+
     private val clearChip = binding.btnClear
-    private val chipsByTagItems = mutableMapOf<TagItem, Chip>()
+
+    init {
+        binding.rvTags.apply {
+            layoutManager = FlexboxLayoutManager(fragment.requireContext())
+            adapter = FastAdapter.with(tagsAdapter)
+            itemAnimator = null
+        }
+
+        binding.rvTagsFilter.apply {
+            layoutManager = FlexboxLayoutManager(fragment.requireContext())
+            adapter = FastAdapter.with(filterTagsAdapter)
+            itemAnimator = null
+        }
+    }
 
     fun drawTags() {
         drawClearChip()
-        chipGroup.removeAllViews()
-        checkedChipGroup.removeAllViews()
 
         if (checkTagsEmpty()) {
             binding.tvTagsSelectorHint.isVisible = true
@@ -40,10 +59,40 @@ class TagsSelectorAdapter(
         } else
             binding.tvTagsSelectorHint.isVisible = false
 
-        createChips()
-        drawIncludedAndExcludedTags()
-        drawAvailableTags()
-        drawUnavailableTags()
+        val includedTagItemView = presenter.includedTagItems.map {
+            createTagItemView(it, TagSelectType.Included)
+        }
+        val excludedTagItemView = presenter.excludedTagItems.map {
+            createTagItemView(it, TagSelectType.Excluded)
+        }
+        val availableTagItemView = presenter.availableTagsForDisplay.map {
+            createTagItemView(it, TagSelectType.Available)
+        }
+        val unavailableTagItemView = presenter.unavailableTagsForDisplay.map {
+            createTagItemView(it, TagSelectType.Unavailable)
+        }
+
+        val includedAndExcluded = includedTagItemView + excludedTagItemView
+        val includedAndExcludedSorted =
+            presenter.includedAndExcludedTagsForDisplay.map { tagItem ->
+                includedAndExcluded.find { it.tagItem == tagItem }
+                    ?: error("TagsSelectorPresenter: Tag inconsistency detected")
+            }
+
+        if (presenter.filterEnabled) {
+            filterTagsAdapter.set(includedAndExcludedSorted)
+            tagsAdapter.set(
+                availableTagItemView +
+                    unavailableTagItemView
+            )
+        } else {
+            filterTagsAdapter.set(emptyList())
+            tagsAdapter.set(
+                includedAndExcludedSorted +
+                    availableTagItemView +
+                    unavailableTagItemView
+            )
+        }
     }
 
     private fun checkTagsEmpty(): Boolean = with(presenter) {
@@ -51,55 +100,6 @@ class TagsSelectorAdapter(
             excludedTagItems.isEmpty() &&
             availableTagsForDisplay.isEmpty() &&
             unavailableTagsForDisplay.isEmpty()
-    }
-
-    private fun createChips() {
-        chipsByTagItems.clear()
-        presenter.includedTagItems.forEach { tag ->
-            val chip = createDefaultChip(tag)
-            chip.setTextColor(Color.BLUE)
-            chip.isChecked = true
-            chipsByTagItems[tag] = chip
-        }
-        presenter.excludedTagItems.forEach { tag ->
-            val chip = createDefaultChip(tag)
-            chip.setTextColor(Color.RED)
-            chip.isLongClickable = false
-            chipsByTagItems[tag] = chip
-        }
-        presenter.availableTagsForDisplay.forEach { tag ->
-            val chip = createDefaultChip(tag)
-            chipsByTagItems[tag] = chip
-        }
-        presenter.unavailableTagsForDisplay.forEach { tag ->
-            val chip = createDefaultChip(tag)
-            chip.setTextColor(Color.GRAY)
-            chip.isLongClickable = false
-            chip.isClickable = false
-            chip.isCheckable = false
-            chipsByTagItems[tag] = chip
-        }
-    }
-
-    private fun drawIncludedAndExcludedTags() {
-        presenter.includedAndExcludedTagsForDisplay.forEach { tag ->
-            if (presenter.filterEnabled)
-                checkedChipGroup.addView(chipsByTagItems[tag])
-            else
-                chipGroup.addView(chipsByTagItems[tag])
-        }
-    }
-
-    private fun drawAvailableTags() {
-        presenter.availableTagsForDisplay.forEach { tag ->
-            chipGroup.addView(chipsByTagItems[tag])
-        }
-    }
-
-    private fun drawUnavailableTags() {
-        presenter.unavailableTagsForDisplay.forEach { tag ->
-            chipGroup.addView(chipsByTagItems[tag])
-        }
     }
 
     private fun drawClearChip() = clearChip.apply {
@@ -116,37 +116,95 @@ class TagsSelectorAdapter(
         }
     }
 
-    private fun createDefaultChip(item: TagItem) = Chip(chipGroup.context).apply {
+    private fun createTagItemView(tagItem: TagItem, tagType: TagSelectType) =
+        TagItemView(
+            fragment,
+            fragment.requireContext(),
+            presenter,
+            stringProvider,
+            tagItem,
+            tagType
+        )
+}
+
+private enum class TagSelectType {
+    Included, Excluded, Available, Unavailable
+}
+
+private class TagItemView(
+    private val fragment: Fragment,
+    private val ctx: Context,
+    private val presenter: TagsSelectorPresenter,
+    private val stringProvider: StringProvider,
+    val tagItem: TagItem,
+    private val tagType: TagSelectType
+) : AbstractBindingItem<ItemTagBinding>() {
+
+    override val type = R.id.fastadapter_item
+
+    override fun createBinding(
+        inflater: LayoutInflater,
+        parent: ViewGroup?
+    ) = ItemTagBinding.inflate(inflater, parent, false)
+
+    override fun bindView(
+        binding: ItemTagBinding,
+        payloads: List<Any>
+    ) = with(binding.chipTag) {
+
+        resetTagView(binding)
+
+        setOnClickListener {
+            presenter.onTagItemClick(tagItem)
+        }
+
+        setOnLongClickListener {
+            showTagMenuPopup(tagItem, it)
+            true
+        }
+
+        when (tagItem) {
+            is TagItem.PlainTagItem -> {
+                chipBackgroundColor =
+                    ColorStateList.valueOf(
+                        ContextCompat.getColor(ctx, R.color.grayTransparent)
+                    )
+                text = tagItem.tag
+            }
+            is TagItem.KindTagItem -> {
+                chipBackgroundColor =
+                    ColorStateList.valueOf(
+                        ContextCompat.getColor(ctx, R.color.blue)
+                    )
+                text = stringProvider.kindToString(tagItem.kind)
+            }
+        }
+
+        when (tagType) {
+            TagSelectType.Included -> {
+                setTextColor(Color.BLUE)
+                isChecked = true
+            }
+            TagSelectType.Excluded -> {
+                setTextColor(Color.RED)
+                isLongClickable = false
+            }
+            TagSelectType.Available -> {}
+            TagSelectType.Unavailable -> {
+                setTextColor(Color.GRAY)
+                isLongClickable = false
+                isClickable = false
+                isCheckable = false
+            }
+        }
+    }
+
+    private fun resetTagView(binding: ItemTagBinding) = binding.chipTag.apply {
         isClickable = true
         isLongClickable = true
         isCheckable = true
         isChecked = false
         setTextColor(Color.BLACK)
-        when (item) {
-            is TagItem.PlainTagItem -> {
-                chipBackgroundColor =
-                    ColorStateList.valueOf(
-                        ContextCompat.getColor(context, R.color.grayTransparent)
-                    )
-                text = item.tag
-            }
-            is TagItem.KindTagItem -> {
-                chipBackgroundColor =
-                    ColorStateList.valueOf(
-                        ContextCompat.getColor(context, R.color.blue)
-                    )
-                text = stringProvider.kindToString(item.kind)
-            }
-        }
-
-        setOnClickListener {
-            presenter.onTagItemClick(item)
-        }
-
-        setOnLongClickListener {
-            showTagMenuPopup(item, it)
-            true
-        }
     }
 
     private fun showTagMenuPopup(tag: TagItem, tagView: View) {
