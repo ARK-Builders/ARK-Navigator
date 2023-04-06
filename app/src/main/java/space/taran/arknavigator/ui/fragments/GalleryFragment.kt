@@ -55,6 +55,7 @@ import space.taran.arknavigator.utils.extensions.makeGone
 import space.taran.arknavigator.utils.extensions.makeVisible
 import timber.log.Timber
 import java.nio.file.Path
+import kotlin.system.measureTimeMillis
 
 class GalleryFragment : MvpAppCompatFragment(), GalleryView {
 
@@ -121,7 +122,10 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
             fabStartSelect.isVisible = !selectingEnabled
 
             removeResourceFab.setOnLongClickListener {
-                presenter.onRemoveFabClick()
+                val time = measureTimeMillis {
+                    presenter.onRemoveFabClick()
+                }
+                Timber.tag(GALLERY_SCREEN).d("${time / 1000L}s")
                 true
             }
 

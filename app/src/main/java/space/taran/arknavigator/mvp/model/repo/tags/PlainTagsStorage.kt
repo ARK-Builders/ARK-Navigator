@@ -243,7 +243,10 @@ class PlainTagsStorage(
                     val parts = it.split(KEY_VALUE_SEPARATOR)
                     val id = ResourceId.fromString(parts[0])
                     val tags = tagsFromString(parts[1])
-                    isCorrupted = tags.isEmpty()
+                    if (tags.isEmpty()) {
+                        isCorrupted = true
+                        return@map
+                    }
                     result[id] = tags
                 }
             } catch (e: Exception) {
