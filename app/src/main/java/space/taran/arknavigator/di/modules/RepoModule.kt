@@ -3,6 +3,8 @@ package space.taran.arknavigator.di.modules
 import android.util.Log
 import dagger.Module
 import dagger.Provides
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import space.taran.arkfilepicker.folders.FoldersRepo
 import space.taran.arklib.domain.Message
@@ -27,9 +29,13 @@ class RepoModule {
 
     @Singleton
     @Provides
+    @Named(Constants.DI.APP_SCOPE_NAME)
+    fun appScope() = CoroutineScope(Dispatchers.IO)
+
+    @Singleton
+    @Provides
     fun resourcesIndexesRepo(
         foldersRepo: FoldersRepo,
-        previewStorageRepo: PreviewStorageRepo,
         metadataStorageRepo: MetadataStorageRepo,
         @Named(Constants.DI.MESSAGE_FLOW_NAME)
         messageFlow: MutableSharedFlow<Message>,
@@ -37,7 +43,6 @@ class RepoModule {
         Log.d(MAIN, "creating ResourcesIndexesRepo")
         return ResourcesIndexRepo(
             foldersRepo,
-            previewStorageRepo,
             metadataStorageRepo,
             messageFlow
         )
@@ -56,8 +61,15 @@ class RepoModule {
     @Singleton
     @Provides
     fun previewStorageRepo(
-        foldersRepo: FoldersRepo
-    ) = PreviewStorageRepo(foldersRepo)
+        foldersRepo: FoldersRepo,
+        indexRepo: ResourcesIndexRepo,
+        @Named(Constants.DI.APP_SCOPE_NAME)
+        appScope: CoroutineScope
+    ) = PreviewStorageRepo(
+        foldersRepo,
+        indexRepo,
+        appScope
+    )
 
     @Singleton
     @Provides

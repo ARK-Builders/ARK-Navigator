@@ -37,6 +37,7 @@ import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.utils.LogTags.RESOURCES_SCREEN
 import space.taran.arknavigator.utils.Tag
 import space.taran.arknavigator.utils.findNotExistCopyName
+import timber.log.Timber
 import java.nio.file.Path
 import javax.inject.Inject
 import javax.inject.Named
@@ -142,6 +143,7 @@ class ResourcesPresenter(
                 return@launch
             }
             previewStorage = previewStorageRepo.provide(rootAndFav)
+            initIndexingListener()
             statsStorage = statsStorageRepo.provide(rootAndFav)
             scoreStorage = scoreStorageRepo.provide(rootAndFav)
 
@@ -312,6 +314,13 @@ class ResourcesPresenter(
 
     private suspend fun onSelectionChange(selection: Set<ResourceId>) {
         gridPresenter.updateSelection(selection)
+    }
+
+    private fun initIndexingListener() {
+        previewStorage.indexingFlow.onEach {
+            Timber.d("preview generation progress = $it")
+            viewState.setPreviewGenerationProgress(it)
+        }.launchIn(presenterScope)
     }
 
     companion object {

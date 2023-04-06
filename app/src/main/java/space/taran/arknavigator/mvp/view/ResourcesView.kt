@@ -19,6 +19,7 @@ interface ResourcesView : CommonMvpView {
     fun setTagsFilterText(filter: String)
     fun drawTags()
     fun setTagsSortingVisibility(visible: Boolean)
+    fun setPreviewGenerationProgress(isVisible: Boolean)
 
     @StateStrategyType(SkipStrategy::class)
     fun toastResourcesSelected(selected: Int)
