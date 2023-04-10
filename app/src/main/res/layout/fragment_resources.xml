@@ -131,8 +131,8 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/cg_tags_checked"
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_tags_filter"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="10dp"
@@ -145,6 +145,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="10dp"
+                    android:layout_marginBottom="8dp"
                     android:hint="@string/resources_filter_hint"
                     android:visibility="gone"
                     app:startIconDrawable="@drawable/ic_baseline_search_24">
@@ -157,11 +158,11 @@
 
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/tags_cg"
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_tags"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="10dp"
+                    android:paddingHorizontal="10dp"
                     android:visibility="visible" />
             </LinearLayout>
 
