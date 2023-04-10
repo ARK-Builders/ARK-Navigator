@@ -17,7 +17,6 @@ import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.fragments.utils.toast
 import space.taran.arknavigator.utils.LogTags.RESOURCES_SCREEN
 import space.taran.arknavigator.utils.Sorting
-import space.taran.arknavigator.utils.extensions.changeEnabledStatus
 
 class SortDialogFragment : MvpAppCompatDialogFragment(), SortDialogView {
 
@@ -53,22 +52,6 @@ class SortDialogFragment : MvpAppCompatDialogFragment(), SortDialogView {
         selectedSortingBtn.isChecked = true
         selectedSortingBtn.jumpDrawablesToCurrentState()
 
-        if (sorting == Sorting.DEFAULT) {
-            changeSortOrderEnabledStatus(this, false)
-        } else {
-            if (ascending) {
-                rbAscending.isChecked = true
-                rbAscending.jumpDrawablesToCurrentState()
-            } else {
-                rbDescending.isChecked = true
-                rbDescending.jumpDrawablesToCurrentState()
-            }
-        }
-        if (sortByScoresEnabled) {
-            swScores.isChecked = true
-            swScores.jumpDrawablesToCurrentState()
-        }
-
         rgSorting.setOnCheckedChangeListener { _, checkedId ->
 
             val newSorting = sortingCategorySelected(checkedId)
@@ -86,29 +69,6 @@ class SortDialogFragment : MvpAppCompatDialogFragment(), SortDialogView {
 
             presenter.onSortingSelected(newSorting)
         }
-
-        rgSortingDirection.setOnCheckedChangeListener { _, checkedId ->
-            var newAscending = false
-            when (checkedId) {
-                R.id.rb_ascending -> newAscending = true
-                R.id.rb_descending -> newAscending = false
-            }
-
-            Log.d(
-                RESOURCES_SCREEN,
-                "sorting direction changed, ascending = $newAscending"
-            )
-
-            presenter.onAscendingSelected(newAscending)
-        }
-
-        swScores.setOnCheckedChangeListener { _, isChecked ->
-            Log.d(
-                RESOURCES_SCREEN,
-                "sorting by scores ${if (isChecked) "enabled" else "disabled"}"
-            )
-            presenter.onScoresSwitched(isChecked)
-        }
     }
 
     override fun closeDialog() {
@@ -123,17 +83,6 @@ class SortDialogFragment : MvpAppCompatDialogFragment(), SortDialogView {
             R.id.rb_last_modified -> Sorting.LAST_MODIFIED
             R.id.rb_type -> Sorting.TYPE
             else -> Sorting.DEFAULT
-        }
-    }
-
-    private fun changeSortOrderEnabledStatus(
-        dialogBinding: DialogSortBinding,
-        isEnabledStatus: Boolean
-    ) {
-        val childCount = dialogBinding.rgSortingDirection.childCount
-        for (radioButton in 0 until childCount) {
-            dialogBinding.rgSortingDirection.getChildAt(radioButton)
-                .changeEnabledStatus(isEnabledStatus)
         }
     }
 

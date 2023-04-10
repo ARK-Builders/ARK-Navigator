@@ -90,7 +90,7 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
     private var tagsSelectorAdapter: TagsSelectorAdapter? = null
 
     private var isShuffled = false
-
+    private var isAscending = true
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -109,53 +109,66 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         App.instance.appComponent.inject(this)
     }
 
-    override fun init() = with(binding) {
-        Log.d(RESOURCES_SCREEN, "initializing ResourcesFragment")
+    override fun init(ascending: Boolean, sortByScoresEnabled: Boolean) =
+        with(binding) {
+            Log.d(RESOURCES_SCREEN, "initializing ResourcesFragment")
 
-        initResultListeners()
-        initMenuListeners()
-        stackedToasts = StackedToasts(binding.rvToasts, lifecycleScope)
+            initResultListeners()
+            initMenuListeners()
+            stackedToasts = StackedToasts(binding.rvToasts, lifecycleScope)
 
-        FullscreenHelper.setStatusBarVisibility(true, requireActivity().window)
-        (activity as MainActivity).setSelectedTab(R.id.page_tags)
-        (requireActivity() as MainActivity).setBottomNavigationVisibility(true)
+            FullscreenHelper.setStatusBarVisibility(true, requireActivity().window)
+            (activity as MainActivity).setSelectedTab(R.id.page_tags)
+            (requireActivity() as MainActivity).setBottomNavigationVisibility(true)
 
-        resourcesAdapter = ResourcesRVAdapter(presenter.gridPresenter)
-        rvResources.adapter = resourcesAdapter
-        rvResources.setItemViewCacheSize(0)
-        rvResources.layoutManager = GridLayoutManager(context, 3)
-        tagsSelectorAdapter = TagsSelectorAdapter(
-            this@ResourcesFragment,
-            binding,
-            presenter.tagsSelectorPresenter
-        ).also {
-            App.instance.appComponent.inject(it)
-        }
-
-        layoutDragHandler.setOnTouchListener(::dragHandlerTouchListener)
-        etTagsFilter.doAfterTextChanged {
-            presenter.tagsSelectorPresenter.onFilterChanged(it.toString())
-        }
-        switchKind.setOnCheckedChangeListener { _, checked ->
-            presenter.tagsSelectorPresenter.onKindTagsToggle(checked)
-        }
-        btnClear.setOnClickListener {
-            presenter.tagsSelectorPresenter.onClearClick()
-        }
-        btnTagsSorting.setOnClickListener {
-            TagsSortDialogFragment
-                .newInstance(selectorNotEdit = true)
-                .show(childFragmentManager, null)
-        }
-
-        this@ResourcesFragment
-            .requireActivity()
-            .onBackPressedDispatcher
-            .addCallback(this@ResourcesFragment) {
-                presenter.onBackClick()
+            resourcesAdapter = ResourcesRVAdapter(presenter.gridPresenter)
+            rvResources.adapter = resourcesAdapter
+            rvResources.setItemViewCacheSize(0)
+            rvResources.layoutManager = GridLayoutManager(context, 3)
+            tagsSelectorAdapter = TagsSelectorAdapter(
+                this@ResourcesFragment,
+                binding,
+                presenter.tagsSelectorPresenter
+            ).also {
+                App.instance.appComponent.inject(it)
             }
-        return@with
-    }
+
+            layoutDragHandler.setOnTouchListener(::dragHandlerTouchListener)
+            etTagsFilter.doAfterTextChanged {
+                presenter.tagsSelectorPresenter.onFilterChanged(it.toString())
+            }
+            switchKind.setOnCheckedChangeListener { _, checked ->
+                presenter.tagsSelectorPresenter.onKindTagsToggle(checked)
+            }
+            btnClear.setOnClickListener {
+                presenter.tagsSelectorPresenter.onClearClick()
+            }
+            btnTagsSorting.setOnClickListener {
+                TagsSortDialogFragment
+                    .newInstance(selectorNotEdit = true)
+                    .show(childFragmentManager, null)
+            }
+            this@ResourcesFragment.updateOrderBtn(ascending)
+            if (sortByScoresEnabled) {
+                swScores.isChecked = true
+                swScores.jumpDrawablesToCurrentState()
+            }
+            swScores.setOnCheckedChangeListener { _, isChecked ->
+                Log.d(
+                    RESOURCES_SCREEN,
+                    "sorting by scores ${if (isChecked) "enabled" else "disabled"}"
+                )
+                presenter.onScoresSwitched(isChecked)
+            }
+
+            this@ResourcesFragment
+                .requireActivity()
+                .onBackPressedDispatcher
+                .addCallback(this@ResourcesFragment) {
+                    presenter.onBackClick()
+                }
+            return@with
+        }
 
     override fun onResume() {
         Log.d(RESOURCES_SCREEN, "resuming in ResourcesFragment")
@@ -197,6 +210,15 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
             if (queryMode != QueryMode.FOCUS) View.VISIBLE else View.INVISIBLE
         actionBar.btnNormalMode.visibility = normalVisibility
         actionBar.btnFocusMode.visibility = focusVisibility
+        return@with
+    }
+
+    override fun updateOrderBtn(isAscending: Boolean) = with(binding) {
+        this@ResourcesFragment.isAscending = isAscending
+        val drawable =
+            if (isAscending) resources.getDrawable(R.drawable.order_ascending)
+            else resources.getDrawable(R.drawable.order_descending)
+        actionBar.btnOrder.setImageDrawable(drawable)
         return@with
     }
 
@@ -308,10 +330,15 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         actionBar.btnFocusMode.setOnClickListener {
             presenter.tagsSelectorPresenter.onQueryModeChanged(QueryMode.FOCUS)
         }
-
+        actionBar.btnOrder.apply {
+            setOnClickListener {
+                presenter.onAscendingChanged(!isAscending)
+            }
+        }
         actionBar.btnShuffle.apply {
             setOnClickListener {
                 val dice = this.drawable
+
                 @ColorInt
                 val diceColor = resources
                     .getColor(R.color.blue, requireContext().theme)

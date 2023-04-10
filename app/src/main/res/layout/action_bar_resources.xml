@@ -54,9 +54,17 @@
         android:textColor="@color/white"
         android:textSize="18sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@id/btn_shuffle"
+        app:layout_constraintEnd_toStartOf="@id/btn_order"
         app:layout_constraintStart_toStartOf="parent"
         tools:text="Title" />
+    <ImageView
+        android:id="@+id/btn_order"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:background="?selectableItemBackgroundBorderless"
+        android:paddingHorizontal="12dp"
+        android:src="@drawable/order_ascending"
+        app:layout_constraintEnd_toStartOf="@id/btn_shuffle"/>
 
     <ImageView
         android:id="@+id/btn_shuffle"

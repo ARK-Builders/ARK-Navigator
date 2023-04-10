@@ -55,41 +55,5 @@
 
         </RadioGroup>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:layout_marginTop="8dp"
-            android:background="?android:attr/listDivider" />
-
-        <RadioGroup
-            android:id="@+id/rg_sorting_direction"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp">
-
-            <com.google.android.material.radiobutton.MaterialRadioButton
-                android:id="@+id/rb_ascending"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Ascending" />
-
-            <com.google.android.material.radiobutton.MaterialRadioButton
-                android:id="@+id/rb_descending"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Descending" />
-
-        </RadioGroup>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:layout_marginTop="8dp"
-            android:background="?android:attr/listDivider" />
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/sw_scores"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/scores"/>
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

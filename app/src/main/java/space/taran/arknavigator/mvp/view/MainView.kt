@@ -11,4 +11,6 @@ interface MainView : MvpView {
 
     @StateStrategyType(SkipStrategy::class)
     fun requestPerms()
+
+    fun enterResourceFragmentFailed()
 }

@@ -30,11 +30,32 @@
             android:text="@string/root_scanning_description"
             android:textColor="@color/black"
             android:textSize="16sp"
-            app:layout_constraintBottom_toTopOf="@id/btn_scan"
+            app:layout_constraintBottom_toTopOf="@id/tv_default_root"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_header" />
-
+        <TextView
+            android:id="@+id/tv_default_root"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="30dp"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:text="default Root folder"
+            android:textColor="#7A000000"
+            android:textSize="15sp"
+            app:layout_constraintTop_toBottomOf="@id/tv_description"/>
+        <LinearLayout
+            android:id="@+id/layout_default_root"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#fff"
+            android:paddingLeft="30dp"
+            android:paddingRight="16dp"
+            android:orientation="vertical"
+            android:visibility="visible"
+            app:layout_constraintBottom_toTopOf="@+id/btn_skip"
+            app:layout_constraintTop_toBottomOf="@id/tv_default_root"/>
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_skip"
             style="@style/Widget.MaterialComponents.Button.TextButton"
@@ -42,9 +63,8 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="12dp"
             android:text="@string/skip"
-            app:layout_constraintBottom_toBottomOf="@id/btn_scan"
-            app:layout_constraintEnd_toStartOf="@id/btn_scan"
-            app:layout_constraintTop_toTopOf="@id/btn_scan" />
+            app:layout_constraintTop_toBottomOf="@id/layout_default_root"
+            app:layout_constraintEnd_toStartOf="@id/btn_scan" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_scan"
