@@ -231,34 +231,34 @@ class PlainTagsStorage(
             writeStorage()
         }
 
-    private suspend fun readStorage(): Map<ResourceId, Tags> =
+    private suspend fun readStorage(): Result<Map<ResourceId, Tags>> =
         withContext(Dispatchers.IO) {
             val lines = Files.readAllLines(storageFile, StandardCharsets.UTF_8)
             verifyVersion(lines.removeAt(0))
 
-            val result = mutableMapOf<ResourceId, Tags>()
-
             try {
-                lines.map {
+                val tagsById = lines.map {
                     val parts = it.split(KEY_VALUE_SEPARATOR)
                     val id = ResourceId.fromString(parts[0])
                     val tags = tagsFromString(parts[1])
-                    if (tags.isEmpty()) {
-                        isCorrupted = true
-                        return@map
-                    }
-                    result[id] = tags
+                    id to tags
                 }
+
+                if (tagsById.any { (id, tags) -> tags.isEmpty() }) {
+                    isCorrupted = true
+                    return Result.failure(StreamCorruptedException())
+                }
+                if (tagsById.isEmpty()) {
+                    isCorrupted = true
+                    return Result.failure(IllegalArgumentException())
+                }
+
+                Log.d(TAGS_STORAGE, "${tagsById.size} entries has been read")
+                return@withContext tagsById.toMap()
             } catch (e: Exception) {
                 isCorrupted = true
+                return Result.failure(e)
             }
-
-            if (result.isEmpty()) {
-                throw AssertionError("Tags storage must not be empty")
-            }
-
-            Log.d(TAGS_STORAGE, "${result.size} entries has been read")
-            return@withContext result
         }
 
     private suspend fun writeStorage() =
