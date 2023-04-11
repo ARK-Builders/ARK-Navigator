@@ -18,6 +18,7 @@ import space.taran.arknavigator.utils.Converters.Companion.stringFromTags
 import space.taran.arknavigator.utils.Converters.Companion.tagsFromString
 import space.taran.arknavigator.utils.LogTags.TAGS_STORAGE
 import space.taran.arknavigator.utils.Tags
+import java.io.StreamCorruptedException
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
@@ -57,7 +58,9 @@ class PlainTagsStorage(
                     ", last modified at $lastModified"
             )
 
-            result.putAll(readStorage())
+            readStorage().onSuccess {
+                result.putAll(it)
+            }
         } else {
             Log.d(TAGS_STORAGE, "file $storageFile doesn't exist")
         }
@@ -90,7 +93,9 @@ class PlainTagsStorage(
     suspend fun readStorageIfChanged() {
         if (storageFile.notExists()) return
         if (lastModified != storageFile.getLastModifiedTime()) {
-            tagsById.putAll(readStorage())
+            readStorage().onSuccess {
+                tagsById.putAll(it)
+            }
         }
     }
 
@@ -196,39 +201,43 @@ class PlainTagsStorage(
                 // without this, we need to stop all competing devices to remove a tag or a resource
                 // so far, just ensuring that we are not losing additions
 
-                val outside = readStorage()
+                readStorage().onSuccess { outside ->
 
-                for (newId in outside.keys - tagsById.keys) {
-                    Log.d(
-                        TAGS_STORAGE,
-                        "resource $newId got first tags from outside"
-                    )
-                    tagsById[newId] = outside[newId]!!
-                }
-
-                for (sharedId in outside.keys.intersect(tagsById.keys)) {
-                    val theirs = outside[sharedId]
-                    val ours = tagsById[sharedId]
-                    if (theirs != ours) {
+                    for (newId in outside.keys - tagsById.keys) {
                         Log.d(
                             TAGS_STORAGE,
-                            "resource $sharedId got new tags " +
-                                "from outside: ${theirs!! - ours}"
+                            "resource $newId got first tags from outside"
                         )
-                        tagsById[sharedId] = theirs.union(ours!!)
+                        tagsById[newId] = outside[newId]!!
+                    }
+
+                    for (sharedId in outside.keys.intersect(tagsById.keys)) {
+                        val theirs = outside[sharedId]
+                        val ours = tagsById[sharedId]
+                        if (theirs != ours) {
+                            Log.d(
+                                TAGS_STORAGE,
+                                "resource $sharedId got new tags " +
+                                    "from outside: ${theirs!! - ours}"
+                            )
+                            tagsById[sharedId] = theirs.union(ours!!)
+                        }
                     }
                 }
-            }
 
-            if (tagsById.isEmpty() || tagsById.all { it.value.isEmpty() }) {
-                if (exists) {
-                    Log.d(TAGS_STORAGE, "no tagged resources, deleting storage file")
-                    Files.delete(storageFile)
+                if (tagsById.isEmpty() || tagsById.all { it.value.isEmpty() }) {
+                    if (exists) {
+                        Log.d(
+                            TAGS_STORAGE,
+                            "no tagged resources, deleting storage file"
+                        )
+                        Files.delete(storageFile)
+                    }
+                    return@withContext
                 }
-                return@withContext
-            }
 
-            writeStorage()
+                writeStorage()
+            }
         }
 
     private suspend fun readStorage(): Result<Map<ResourceId, Tags>> =
@@ -246,18 +255,19 @@ class PlainTagsStorage(
 
                 if (tagsById.any { (id, tags) -> tags.isEmpty() }) {
                     isCorrupted = true
-                    return Result.failure(StreamCorruptedException())
+                    return@withContext Result.failure(StreamCorruptedException())
                 }
+
                 if (tagsById.isEmpty()) {
                     isCorrupted = true
-                    return Result.failure(IllegalArgumentException())
+                    return@withContext Result.failure(IllegalArgumentException())
                 }
 
                 Log.d(TAGS_STORAGE, "${tagsById.size} entries has been read")
-                return@withContext tagsById.toMap()
+                return@withContext Result.success(tagsById.toMap())
             } catch (e: Exception) {
                 isCorrupted = true
-                return Result.failure(e)
+                return@withContext Result.failure(e)
             }
         }
 
