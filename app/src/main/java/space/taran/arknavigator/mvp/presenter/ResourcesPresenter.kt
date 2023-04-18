@@ -126,8 +126,15 @@ class ResourcesPresenter(
             } else {
                 all.toList()
             }
+
+            val path = (rootAndFav.fav ?: rootAndFav.root)
+            val title = if (path != null) "${path.last()}, " else ""
+
+            viewState.setToolbarTitle("$title${roots.size} of roots chosen")
+
             Log.d(RESOURCES_SCREEN, "using roots $roots")
             index = resourcesIndexRepo.provide(rootAndFav)
+
             messageFlow.onEach { message ->
                 when (message) {
                     is Message.KindDetectFailed -> viewState.toastIndexFailedPath(
@@ -151,25 +158,32 @@ class ResourcesPresenter(
             statsStorage = statsStorageRepo.provide(rootAndFav)
             scoreStorage = scoreStorageRepo.provide(rootAndFav)
 
-            gridPresenter.init(index, tagStorage, router, previewStorage, scoreStorage)
+            gridPresenter.init(
+                index,
+                tagStorage,
+                router,
+                previewStorage,
+                scoreStorage)
 
-            val resources = index.allResources()
             viewState.setProgressVisibility(true, "Sorting")
 
+            val resources = index.allResources()
             gridPresenter.resetResources(resources)
             val kindTagsEnabled = preferences.get(PreferenceKey.ShowKinds)
-            tagsSelectorPresenter.init(index, tagStorage, statsStorage, kindTagsEnabled)
+            tagsSelectorPresenter.init(
+                index,
+                tagStorage,
+                statsStorage,
+                kindTagsEnabled)
+
             viewState.setKindTagsEnabled(kindTagsEnabled)
             externallySelectedTag?.let {
                 tagsSelectorPresenter.onTagExternallySelect(it)
             }
             tagsSelectorPresenter.calculateTagsAndSelection()
 
-            val path = (rootAndFav.fav ?: rootAndFav.root)
-            val title = if (path != null) "${path.last()}, " else ""
-
-            viewState.setToolbarTitle("$title${roots.size} of roots chosen")
             viewState.setProgressVisibility(false)
+
             launch {
                 delay(DELAY_CLEAR_TOASTS)
                 viewState.clearStackedToasts()
