@@ -22,6 +22,7 @@ import space.taran.arklib.domain.meta.MetadataStorage
 import space.taran.arklib.domain.meta.MetadataStorageRepo
 import space.taran.arklib.domain.preview.PreviewStorage
 import space.taran.arklib.domain.preview.PreviewStorageRepo
+import space.taran.arklib.domain.tags.Tags
 import space.taran.arklib.utils.Constants
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
@@ -155,7 +156,12 @@ class GalleryPresenter(
         checkResourceChanges(newPos)
 
         currentPos = newPos
-        displayPreview()
+
+        val resource = resources[currentPos]
+        val tags = storage.getTags(resource.id)
+        val path = index.getPath(resource.id)!!
+        val score = scoreStorage.getScore(resource.id)
+        displayPreview(resource, path, tags, score)
     }
 
     fun onResume() {
@@ -328,12 +334,13 @@ class GalleryPresenter(
         index.updateAll()
     }
 
-    private suspend fun displayPreview() {
-        val resource = resources[currentPos]
-        val tags = storage.getTags(resource.id)
-        val filePath = index.getPath(resource.id)!!
-        val score = scoreStorage.getScore(resource.id)
-        viewState.setupPreview(currentPos, resource, filePath.fileName.toString())
+    private suspend fun displayPreview(
+        resource: Resource,
+        path: Path,
+        tags: Tags,
+        score: Score) {
+
+        viewState.setupPreview(currentPos, resource, path.fileName.toString())
         viewState.displayPreviewTags(resource.id, tags)
         viewState.displayScore(score)
         viewState.displaySelected(
