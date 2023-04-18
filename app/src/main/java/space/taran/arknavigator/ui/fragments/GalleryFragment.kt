@@ -246,7 +246,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
     }
 
     override fun showInfoAlert(path: Path, resource: Resource) {
-        DetailsAlertDialog(path, resourceMeta, requireContext()).show()
+        DetailsAlertDialog(path, resource, requireContext()).show()
     }
 
     override fun viewInExternalApp(resourcePath: Path) {

@@ -79,7 +79,7 @@ class ResourcesPresenter(
 
     lateinit var index: ResourceIndex
         private set
-    lateinit var storage: TagsStorage
+    lateinit var tagStorage: TagsStorage
         private set
     lateinit var previewStorage: PreviewStorage
         private set
@@ -140,26 +140,25 @@ class ResourcesPresenter(
             initIndexingListener()
             index.updateAll()
 
-            storage = tagsStorageRepo.provide(rootAndFav)
-            if (storage.isCorrupted()) {
+            tagStorage = tagsStorageRepo.provide(rootAndFav)
+            if (tagStorage.isCorrupted()) {
                 viewState.showCorruptNotificationDialog(
                     PlainTagsStorage.TYPE
                 )
                 return@launch
             }
-            previewStorage = previewStorageRepo.provide(index)
-            initIndexingListener()
+
             statsStorage = statsStorageRepo.provide(rootAndFav)
             scoreStorage = scoreStorageRepo.provide(rootAndFav)
 
-            gridPresenter.init(index, storage, router, previewStorage, scoreStorage)
+            gridPresenter.init(index, tagStorage, router, previewStorage, scoreStorage)
 
             val resources = index.allResources()
             viewState.setProgressVisibility(true, "Sorting")
 
             gridPresenter.resetResources(resources)
             val kindTagsEnabled = preferences.get(PreferenceKey.ShowKinds)
-            tagsSelectorPresenter.init(index, storage, statsStorage, kindTagsEnabled)
+            tagsSelectorPresenter.init(index, tagStorage, statsStorage, kindTagsEnabled)
             viewState.setKindTagsEnabled(kindTagsEnabled)
             externallySelectedTag?.let {
                 tagsSelectorPresenter.onTagExternallySelect(it)
@@ -299,7 +298,7 @@ class ResourcesPresenter(
         newRoot?.let {
             val newStorage = tagsStorageRepo.provide(it)
             resources
-                .associateWith { storage.getTags(it) }
+                .associateWith { tagStorage.getTags(it) }
                 .forEach { (id, tags) ->
                     newStorage.setTags(id, tags)
                 }
