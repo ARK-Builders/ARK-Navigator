@@ -150,10 +150,10 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
             }
             this@ResourcesFragment.updateOrderBtn(ascending)
             if (sortByScoresEnabled) {
-                swScores.isChecked = true
-                swScores.jumpDrawablesToCurrentState()
+                switchScores.isChecked = true
+                switchScores.jumpDrawablesToCurrentState()
             }
-            swScores.setOnCheckedChangeListener { _, isChecked ->
+            switchScores.setOnCheckedChangeListener { _, isChecked ->
                 Log.d(
                     RESOURCES_SCREEN,
                     "sorting by scores ${if (isChecked) "enabled" else "disabled"}"
