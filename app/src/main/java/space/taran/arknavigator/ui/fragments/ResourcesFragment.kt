@@ -148,7 +148,9 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
                     .newInstance(selectorNotEdit = true)
                     .show(childFragmentManager, null)
             }
+
             this@ResourcesFragment.updateOrderBtn(ascending)
+
             if (sortByScoresEnabled) {
                 switchScores.isChecked = true
                 switchScores.jumpDrawablesToCurrentState()
@@ -214,10 +216,15 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
     }
 
     override fun updateOrderBtn(isAscending: Boolean) = with(binding) {
+        val ctx = requireContext()
         this@ResourcesFragment.isAscending = isAscending
-        val drawable =
-            if (isAscending) resources.getDrawable(R.drawable.order_ascending)
-            else resources.getDrawable(R.drawable.order_descending)
+
+        val drawable = if (isAscending) {
+            ctx.getDrawable(R.drawable.order_ascending)
+        } else {
+            ctx.getDrawable(R.drawable.order_descending)
+        }
+
         actionBar.btnOrder.setImageDrawable(drawable)
         return@with
     }

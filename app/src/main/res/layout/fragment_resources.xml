@@ -36,42 +36,31 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:id="@+id/switch_scores_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Kind"
-            android:textStyle="bold"
+        <androidx.constraintlayout.widget.Placeholder
+            android:id="@+id/left_bound"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/switch_scores"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <space.taran.arknavigator.ui.view.UserSwitchMaterial
             android:id="@+id/switch_scores"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintStart_toStartOf="@id/switch_scores_tv"
-            app:layout_constraintEnd_toEndOf="@id/switch_kind_tv"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/switch_kind_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Kind"
+            android:text="Scores"
             android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="@id/switch_scores"
-            app:layout_constraintEnd_toStartOf="@id/switch_kind"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:textColor="@color/gray"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@id/left_bound"
             app:layout_constraintTop_toTopOf="parent" />
 
         <space.taran.arknavigator.ui.view.UserSwitchMaterial
             android:id="@+id/switch_kind"
+            android:text="Kinds"
+            android:textStyle="bold"
+            android:textColor="@color/gray"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintStart_toStartOf="@id/switch_kind_tv"
-            app:layout_constraintEnd_toEndOf="@id/iv_drag_handler"
+            app:layout_constraintStart_toEndOf="@id/switch_scores"
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
@@ -80,10 +69,26 @@
             android:layout_height="36dp"
             android:src="@drawable/ic_drag_handle"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@id/switch_kind"
+            app:layout_constraintEnd_toStartOf="@id/btn_clear"
             app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/gray" />
+            app:tint="@color/gray"
+            android:visibility="invisible" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/btn_tags_sorting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:chipIcon="@drawable/ic_sort"
+            app:chipIconTint="@color/black"
+            app:layout_constraintEnd_toStartOf="@id/btn_clear"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            app:chipEndPadding="4dp"
+            app:chipStartPadding="4dp"
+            app:textEndPadding="0dp"
+            app:textStartPadding="0dp" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/btn_clear"
@@ -92,30 +97,20 @@
             android:enabled="false"
             app:chipIcon="@drawable/ic_close"
             app:chipIconTint="@color/black"
-            app:layout_constraintStart_toEndOf="@id/iv_drag_handler"
             app:layout_constraintHorizontal_bias="1"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/btn_tags_sorting"
+            app:layout_constraintEnd_toStartOf="@id/right_bound"
             app:layout_constraintTop_toTopOf="parent"
             app:chipEndPadding="4dp"
             app:chipStartPadding="4dp"
             app:textEndPadding="0dp"
             app:textStartPadding="0dp" />
 
-        <com.google.android.material.chip.Chip
-            android:id="@+id/btn_tags_sorting"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:chipIcon="@drawable/ic_sort"
-            app:chipIconTint="@color/black"
+        <androidx.constraintlayout.widget.Placeholder
+            android:id="@+id/right_bound"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            app:chipEndPadding="4dp"
-            app:chipStartPadding="4dp"
-            app:textEndPadding="0dp"
-            app:textStartPadding="0dp" />
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
