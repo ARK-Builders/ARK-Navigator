@@ -37,7 +37,7 @@ interface GalleryView : CommonMvpView {
     fun shareLink(link: String)
 
     @StateStrategyType(SkipStrategy::class)
-    fun showInfoAlert(path: Path, resourceMeta: Resource)
+    fun showInfoAlert(path: Path, resource: Resource)
 
     @StateStrategyType(SkipStrategy::class)
     fun viewInExternalApp(resourcePath: Path)

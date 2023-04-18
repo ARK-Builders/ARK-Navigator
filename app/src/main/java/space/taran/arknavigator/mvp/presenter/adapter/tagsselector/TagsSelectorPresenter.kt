@@ -19,7 +19,6 @@ import space.taran.arknavigator.ui.resource.StringProvider
 import space.taran.arknavigator.utils.LogTags.TAGS_SELECTOR
 import space.taran.arknavigator.utils.Popularity
 import space.taran.arknavigator.utils.Tag
-import java.nio.file.Path
 import javax.inject.Inject
 
 sealed class TagItem {

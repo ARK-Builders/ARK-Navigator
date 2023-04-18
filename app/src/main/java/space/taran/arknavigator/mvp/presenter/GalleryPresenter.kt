@@ -338,8 +338,8 @@ class GalleryPresenter(
         resource: Resource,
         path: Path,
         tags: Tags,
-        score: Score) {
-
+        score: Score
+    ) {
         viewState.setupPreview(currentPos, resource, path.fileName.toString())
         viewState.displayPreviewTags(resource.id, tags)
         viewState.displayScore(score)

@@ -245,7 +245,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
         startActivity(Intent.createChooser(intent, "Share the link with:"))
     }
 
-    override fun showInfoAlert(path: Path, resourceMeta: Resource) {
+    override fun showInfoAlert(path: Path, resource: Resource) {
         DetailsAlertDialog(path, resourceMeta, requireContext()).show()
     }
 
