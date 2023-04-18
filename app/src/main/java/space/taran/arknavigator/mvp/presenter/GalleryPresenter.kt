@@ -29,6 +29,7 @@ import space.taran.arknavigator.mvp.model.repo.scores.ScoreStorage
 import space.taran.arknavigator.mvp.model.repo.scores.ScoreStorageRepo
 import space.taran.arknavigator.mvp.model.repo.stats.StatsStorage
 import space.taran.arknavigator.mvp.model.repo.stats.StatsStorageRepo
+import space.taran.arknavigator.mvp.model.repo.tags.PlainTagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import space.taran.arknavigator.mvp.presenter.adapter.ResourceMetaDiffUtilCallback
@@ -133,6 +134,11 @@ class GalleryPresenter(
             metadataStorage = metadataStorageRepo.provide(rootAndFav)
             statsStorage = statsStorageRepo.provide(rootAndFav)
             scoreStorage = scoreStorageRepo.provide(rootAndFav)
+
+            if (storage.isCorrupted()) viewState.showCorruptNotificationDialog(
+                PlainTagsStorage.TYPE
+            )
+
             resources = resourcesIds.map { index.getMeta(it) }.toMutableList()
             sortByScores = preferences.get(PreferenceKey.SortByScores)
 

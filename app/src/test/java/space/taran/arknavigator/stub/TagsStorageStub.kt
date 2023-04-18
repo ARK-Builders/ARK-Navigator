@@ -35,4 +35,6 @@ class TagsStorageStub : TagsStorage {
     override suspend fun remove(id: ResourceId) {
         tagsById.remove(id)
     }
+
+    override fun isCorrupted() = false
 }

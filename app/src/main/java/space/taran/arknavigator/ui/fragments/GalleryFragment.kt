@@ -49,11 +49,13 @@ import space.taran.arknavigator.utils.Tag
 import space.taran.arknavigator.utils.Tags
 import space.taran.arknavigator.utils.Score
 import space.taran.arklib.utils.extension
+import space.taran.arknavigator.ui.fragments.dialog.StorageCorruptionNotificationDialogFragment
 import space.taran.arknavigator.utils.LogTags.GALLERY_SCREEN
 import space.taran.arknavigator.utils.extensions.makeGone
 import space.taran.arknavigator.utils.extensions.makeVisible
 import timber.log.Timber
 import java.nio.file.Path
+import kotlin.system.measureTimeMillis
 
 class GalleryFragment : MvpAppCompatFragment(), GalleryView {
 
@@ -120,7 +122,10 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
             fabStartSelect.isVisible = !selectingEnabled
 
             removeResourceFab.setOnLongClickListener {
-                presenter.onRemoveFabClick()
+                val time = measureTimeMillis {
+                    presenter.onRemoveFabClick()
+                }
+                Timber.tag(GALLERY_SCREEN).d("${time / 1000L}s")
                 true
             }
 
@@ -256,6 +261,13 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
                 setPageTransformer(DepthPageTransformer())
             }
         }
+    }
+
+    override fun showCorruptNotificationDialog(storageType: String) {
+        StorageCorruptionNotificationDialogFragment.newInstance(storageType).show(
+            childFragmentManager,
+            StorageCorruptionNotificationDialogFragment.TAG
+        )
     }
 
     override fun notifyResourcesChanged() {

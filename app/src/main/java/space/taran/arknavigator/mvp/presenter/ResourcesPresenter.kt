@@ -26,6 +26,7 @@ import space.taran.arknavigator.mvp.model.repo.scores.ScoreStorage
 import space.taran.arknavigator.mvp.model.repo.scores.ScoreStorageRepo
 import space.taran.arknavigator.mvp.model.repo.stats.StatsStorage
 import space.taran.arknavigator.mvp.model.repo.stats.StatsStorageRepo
+import space.taran.arknavigator.mvp.model.repo.tags.PlainTagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import space.taran.arknavigator.mvp.presenter.adapter.ResourcesGridPresenter
@@ -135,10 +136,16 @@ class ResourcesPresenter(
                     )
                 }
             }.launchIn(presenterScope)
-            previewStorage = previewStorageRepo.provide(rootAndFav)
-            initIndexingListener()
             index.reindex()
             storage = tagsStorageRepo.provide(rootAndFav)
+            if (storage.isCorrupted()) {
+                viewState.showCorruptNotificationDialog(
+                    PlainTagsStorage.TYPE
+                )
+                return@launch
+            }
+            previewStorage = previewStorageRepo.provide(rootAndFav)
+            initIndexingListener()
             statsStorage = statsStorageRepo.provide(rootAndFav)
             scoreStorage = scoreStorageRepo.provide(rootAndFav)
 
