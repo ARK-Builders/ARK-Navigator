@@ -96,7 +96,6 @@ class ResourcesPresenter(
     val tagsSelectorPresenter =
         TagsSelectorPresenter(
             viewState,
-            rootAndFav.fav,
             presenterScope,
             ::onSelectionChange
         ).apply {

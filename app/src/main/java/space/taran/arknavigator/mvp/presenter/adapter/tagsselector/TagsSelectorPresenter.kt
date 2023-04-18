@@ -33,7 +33,6 @@ enum class QueryMode {
 
 class TagsSelectorPresenter(
     private val viewState: ResourcesView,
-    private val prefix: Path?,
     private val scope: CoroutineScope,
     private val onSelectionChangeListener: suspend (Set<ResourceId>) -> Unit
 ) {

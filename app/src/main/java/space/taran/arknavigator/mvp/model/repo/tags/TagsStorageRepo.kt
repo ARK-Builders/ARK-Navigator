@@ -19,9 +19,10 @@ class TagsStorageRepo(
     private val indexRepo: ResourceIndexRepo,
     private val preferences: Preferences
 ) {
-    private val provideMutex = Mutex()
+    private val mutex = Mutex()
     private val scope = CoroutineScope(Dispatchers.IO)
     private val storageByRoot = mutableMapOf<Path, PlainTagsStorage>()
+
     private val mutStatsFlow = MutableSharedFlow<StatsEvent>()
     val statsFlow: SharedFlow<StatsEvent>
         get() = mutStatsFlow
@@ -31,10 +32,11 @@ class TagsStorageRepo(
     ): TagsStorage = withContext(Dispatchers.IO) {
         val roots = foldersRepo.resolveRoots(rootAndFav)
 
-        provideMutex.withLock {
-            val storageShards = roots.map { root ->
+        mutex.withLock {
+            val shards = roots.map { root ->
                 val index = indexRepo.provide(root)
                 val resources = index.allIds()
+
                 if (storageByRoot[root] != null) {
                     val storage = storageByRoot[root]!!
                     storage.checkResources(resources)
@@ -55,7 +57,7 @@ class TagsStorageRepo(
                 }
             }
 
-            return@withContext AggregatedTagsStorage(storageShards)
+            return@withContext AggregatedTagsStorage(shards)
         }
     }
 

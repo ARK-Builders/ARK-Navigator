@@ -67,7 +67,6 @@ class TagSelectorPresenterTest {
     fun beforeEach() = runBlocking {
         presenter = TagsSelectorPresenter(
             viewState,
-            null,
             scope,
             ::onSelectionChange
         )
