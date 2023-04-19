@@ -31,6 +31,6 @@ object LinkExtraLoader {
                 )
             )
         }
-        linkTv.textOrGone(linkTv.context.getString(R.string.link_label, link.url))
+        linkTv.textOrGone(linkTv.context.getString(R.string.link_label))
     }
 }

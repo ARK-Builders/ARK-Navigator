@@ -23,6 +23,7 @@ import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.mvp.view.item.FileItemView
 import space.taran.arknavigator.navigation.AppRouter
 import space.taran.arknavigator.navigation.Screens
+import space.taran.arknavigator.utils.LogTags
 import space.taran.arknavigator.utils.LogTags.RESOURCES_SCREEN
 import space.taran.arknavigator.utils.Sorting
 import space.taran.arknavigator.utils.reifySorting
@@ -94,10 +95,16 @@ class ResourcesGridPresenter(
         if (path.notExists())
             scope.launch { resourcesPresenter.onRemovedResourceDetected() }
 
+        val preview = previewStorage
+            .locate(path, item.resource)
+            .onFailure {
+                Log.w(LogTags.GALLERY_SCREEN, "missing thumbnail for ${item.resource.id}")
+            }
+
         view.setIconOrPreview(
             path,
             item.resource,
-            previewStorage.locate(path, item.resource)
+            preview.getOrNull()
         )
     }
 

@@ -177,7 +177,13 @@ class GalleryPresenter(
         view.reset()
         val resource = resources[view.pos]
         val path = index.getPath(resource.id)!!
-        view.setSource(path, resource, previewStorage.locate(path, resource))
+
+        val preview = previewStorage
+            .locate(path, resource)
+            .onFailure {
+                Log.w(GALLERY_SCREEN, "missing thumbnail for ${resource.id}")
+            }
+        view.setSource(path, resource, preview.getOrNull())
     }
 
     fun bindPlainTextView(view: PreviewPlainTextItemView) = presenterScope.launch {
@@ -185,9 +191,9 @@ class GalleryPresenter(
         val resource = resources[view.pos]
 
         val path = index.getPath(resource.id)!!
-        val contentResult = readText(path)
+        val content = readText(path)
 
-        contentResult.onSuccess {
+        content.onSuccess {
             view.setContent(it)
         }
     }
@@ -199,10 +205,10 @@ class GalleryPresenter(
 
     fun onOpenFabClick() = presenterScope.launch {
         Log.d(GALLERY_SCREEN, "[open_resource] clicked at position $currentPos")
-        val meta = currentResource.metadata
-        if (meta is Metadata.Link) {
-            val url = meta.url ?: return@launch
+        if (currentResource.metadata is Metadata.Link) {
+            val url = readText(index.getPath(currentResource.id)!!).getOrThrow()
             viewState.openLink(url)
+
             return@launch
         }
 
@@ -218,9 +224,8 @@ class GalleryPresenter(
 
     fun onShareFabClick() = presenterScope.launch {
         Log.d(GALLERY_SCREEN, "[share_resource] clicked at position $currentPos")
-        val meta = currentResource.metadata
-        if (meta is Metadata.Link) {
-            val url = meta.url ?: return@launch
+        if (currentResource.metadata is Metadata.Link) {
+            val url = readText(index.getPath(currentResource.id)!!).getOrThrow()
             viewState.shareLink(url)
             return@launch
         }

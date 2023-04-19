@@ -60,7 +60,10 @@ class RepoModule {
 
     @Singleton
     @Provides
-    fun metadataStorageRepo() = MetadataStorageRepo()
+    fun metadataStorageRepo(
+        @Named(Constants.DI.APP_SCOPE_NAME)
+        appScope: CoroutineScope
+    ) = MetadataStorageRepo(appScope)
 
     @Singleton
     @Provides
