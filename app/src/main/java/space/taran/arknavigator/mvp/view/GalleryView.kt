@@ -5,6 +5,7 @@ import moxy.viewstate.strategy.SkipStrategy
 import moxy.viewstate.strategy.StateStrategyType
 import space.taran.arklib.ResourceId
 import space.taran.arklib.domain.index.Resource
+import space.taran.arklib.domain.meta.Metadata
 import space.taran.arknavigator.utils.Score
 import space.taran.arknavigator.utils.Tags
 import java.nio.file.Path
@@ -17,7 +18,7 @@ interface GalleryView : CommonMvpView {
     fun setControlsVisibility(visible: Boolean)
     fun exitFullscreen()
     fun setPreviewsScrollingEnabled(enabled: Boolean)
-    fun setupPreview(pos: Int, resource: Resource, filePath: String)
+    fun setupPreview(pos: Int, meta: Metadata)
     fun displayPreviewTags(resource: ResourceId, tags: Tags)
     fun setProgressVisibility(isVisible: Boolean, withText: String = "")
     fun displayScore(score: Score)
@@ -37,7 +38,7 @@ interface GalleryView : CommonMvpView {
     fun shareLink(link: String)
 
     @StateStrategyType(SkipStrategy::class)
-    fun showInfoAlert(path: Path, resource: Resource)
+    fun showInfoAlert(path: Path, resource: Resource, metadata: Metadata)
 
     @StateStrategyType(SkipStrategy::class)
     fun viewInExternalApp(resourcePath: Path)

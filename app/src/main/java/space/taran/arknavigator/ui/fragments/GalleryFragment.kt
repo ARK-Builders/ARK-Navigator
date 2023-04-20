@@ -32,7 +32,7 @@ import space.taran.arknavigator.databinding.FragmentGalleryBinding
 import space.taran.arknavigator.databinding.PopupGalleryTagMenuBinding
 import space.taran.arklib.ResourceId
 import space.taran.arklib.domain.index.Resource
-import space.taran.arklib.domain.kind.Metadata
+import space.taran.arklib.domain.meta.Metadata
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 import space.taran.arknavigator.mvp.view.GalleryView
 import space.taran.arknavigator.ui.App
@@ -180,14 +180,13 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
 
     override fun setupPreview(
         pos: Int,
-        resource: Resource,
-        filePath: String
+        meta: Metadata
     ) {
         lifecycleScope.launch {
             with(binding) {
-                setupOpenEditFABs(resource.metadata)
+                setupOpenEditFABs(meta)
                 ExtraLoader.load(
-                    resource,
+                    meta,
                     listOf(primaryExtra, secondaryExtra),
                     verbose = true
                 )
@@ -245,8 +244,8 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
         startActivity(Intent.createChooser(intent, "Share the link with:"))
     }
 
-    override fun showInfoAlert(path: Path, resource: Resource) {
-        DetailsAlertDialog(path, resource, requireContext()).show()
+    override fun showInfoAlert(path: Path, resource: Resource, metadata: Metadata) {
+        DetailsAlertDialog(path, resource, metadata, requireContext()).show()
     }
 
     override fun viewInExternalApp(resourcePath: Path) {

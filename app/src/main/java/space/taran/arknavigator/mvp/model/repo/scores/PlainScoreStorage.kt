@@ -83,10 +83,10 @@ class PlainScoreStorage(
             return@withContext
         }
 
-    override suspend fun resetScores(resources: List<Resource>) {
+    override suspend fun resetScores(resources: List<ResourceId>) {
         resources.map {
-            if (scoreById.containsKey(it.id)) {
-                scoreById[it.id] = 0
+            if (scoreById.containsKey(it)) {
+                scoreById[it] = 0
             }
         }
         persist()

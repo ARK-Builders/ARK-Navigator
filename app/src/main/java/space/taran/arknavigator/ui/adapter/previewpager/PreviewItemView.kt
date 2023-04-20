@@ -1,16 +1,19 @@
 package space.taran.arknavigator.ui.adapter.previewpager
 
-import space.taran.arklib.domain.index.Resource
-import space.taran.arklib.domain.preview.PreviewAndThumbnail
-import java.nio.file.Path
+import space.taran.arklib.ResourceId
+import space.taran.arklib.domain.meta.Metadata
+import space.taran.arklib.domain.preview.PreviewLocator
 
+//todo do we need this interface?
 interface PreviewItemView {
     var pos: Int
 
     fun reset()
+
     fun setSource(
-        source: Path,
-        resource: Resource,
-        previewAndThumbnail: PreviewAndThumbnail?
+        placeholder: Int,
+        id: ResourceId,
+        meta: Metadata,
+        preview: PreviewLocator
     )
 }

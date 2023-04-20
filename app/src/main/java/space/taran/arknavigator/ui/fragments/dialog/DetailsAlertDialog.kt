@@ -11,6 +11,7 @@ import org.apache.commons.io.FileUtils
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.DialogResourceInfoBinding
 import space.taran.arklib.domain.index.Resource
+import space.taran.arklib.domain.meta.Metadata
 import space.taran.arknavigator.ui.extra.ExtraLoader
 import java.nio.file.Path
 import kotlin.io.path.absolutePathString
@@ -18,6 +19,7 @@ import kotlin.io.path.absolutePathString
 class DetailsAlertDialog(
     val path: Path,
     val resource: Resource,
+    val metadata: Metadata,
     context: Context
 ) : Dialog(context) {
 
@@ -51,9 +53,10 @@ class DetailsAlertDialog(
             R.string.resource_size_label,
             FileUtils.byteCountToDisplaySize(resource.size())
         )
+
         // load specific metadata from specific kind
         ExtraLoader.loadWithLabel(
-            resource,
+            metadata,
             listOf(
                 dialogResourceInfoBinding.resourceResolution,
                 dialogResourceInfoBinding.resourceDuration,

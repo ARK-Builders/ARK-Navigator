@@ -7,7 +7,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import space.taran.arklib.ResourceId
 import space.taran.arklib.domain.index.ResourceIndex
-import space.taran.arklib.domain.kind.KindCode
+import space.taran.arklib.domain.meta.Kind
+import space.taran.arklib.domain.meta.MetadataStorage
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.stats.StatsEvent
@@ -23,7 +24,7 @@ import javax.inject.Inject
 
 sealed class TagItem {
     data class PlainTagItem(val tag: Tag) : TagItem()
-    data class KindTagItem(val kind: KindCode) : TagItem()
+    data class KindTagItem(val kind: Kind) : TagItem()
 }
 
 enum class QueryMode {
@@ -43,9 +44,10 @@ class TagsSelectorPresenter(
 
     val actionsHistory = ArrayDeque<TagsSelectorAction>()
 
-    private var index: ResourceIndex? = null
-    private var storage: TagsStorage? = null
+    private lateinit var index: ResourceIndex
+    private lateinit var tagsStorage: TagsStorage
     private lateinit var statsStorage: StatsStorage
+    private lateinit var metadataStorage: MetadataStorage
     private var filter = ""
 
     var sorting = TagsSorting.POPULARITY
@@ -81,13 +83,15 @@ class TagsSelectorPresenter(
 
     suspend fun init(
         index: ResourceIndex,
-        storage: TagsStorage,
+        tagsStorage: TagsStorage,
         statsStorage: StatsStorage,
+        metadataStorage: MetadataStorage,
         kindTagsEnabled: Boolean,
     ) {
         this.index = index
-        this.storage = storage
+        this.tagsStorage = tagsStorage
         this.statsStorage = statsStorage
+        this.metadataStorage = metadataStorage
         showKindTags = kindTagsEnabled
         sorting =
             TagsSorting.values()[preferences.get(PreferenceKey.TagsSortingSelector)]
@@ -194,7 +198,7 @@ class TagsSelectorPresenter(
 
     suspend fun calculateTagsAndSelection() {
         Log.d(TAGS_SELECTOR, "calculating tags and selection")
-        if (storage == null || index == null)
+        if (tagsStorage == null || index == null)
             return
 
         val tagItemsByResources = provideTagItemsByResources()
@@ -320,10 +324,10 @@ class TagsSelectorPresenter(
             TagsSorting.LABELED_N -> statsStorage.statsTagLabeledAmount()
         } as Map<Tag, Comparable<Any>>
 
-        val kindCodes = KindCode.values().associateBy { it.name }
+        val kinds = Kind.values().associateBy { it.name }
         val tagItemsToCriteria = sortCriteria.map { (tag, criteria) ->
-            val item = if (kindCodes.containsKey(tag))
-                TagItem.KindTagItem(kindCodes[tag]!!)
+            val item = if (kinds.containsKey(tag))
+                TagItem.KindTagItem(kinds[tag]!!)
             else
                 TagItem.PlainTagItem(tag)
             item to criteria
@@ -496,20 +500,20 @@ class TagsSelectorPresenter(
     private suspend fun provideTagItemsByResources(): Map<ResourceId, Set<TagItem>> {
         val resources = index!!.allIds()
         val tagItemsByResources: Map<ResourceId, Set<TagItem>> =
-            storage!!.groupTagsByResources(resources).map {
+            tagsStorage!!.groupTagsByResources(resources).map {
                 it.key to it.value.map { tag -> TagItem.PlainTagItem(tag) }.toSet()
             }.toMap()
 
         if (!showKindTags) return tagItemsByResources
 
         return tagItemsByResources.map { (id, tags) ->
-            var listOfTags = tags
-            val meta = index!!.getResource(id)!!.metadata
-            if (meta != null) {
-                listOfTags =
-                    listOfTags + TagItem.KindTagItem(meta.code)
-            }
-            id to listOfTags
+            val _tags = tags.toMutableSet()
+            metadataStorage
+                .locate(index.getPath(id)!!, id)
+                .onSuccess {
+                    _tags.add(TagItem.KindTagItem(it.kind))
+                }
+            id to _tags
         }.toMap()
     }
 

@@ -13,6 +13,7 @@ import space.taran.arkfilepicker.folders.RootAndFav
 import space.taran.arklib.ResourceId
 import space.taran.arklib.domain.index.Resource
 import space.taran.arklib.domain.index.ResourceIndex
+import space.taran.arklib.domain.meta.MetadataStorage
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arklib.domain.preview.PreviewStorage
@@ -23,7 +24,6 @@ import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.mvp.view.item.FileItemView
 import space.taran.arknavigator.navigation.AppRouter
 import space.taran.arknavigator.navigation.Screens
-import space.taran.arknavigator.utils.LogTags
 import space.taran.arknavigator.utils.LogTags.RESOURCES_SCREEN
 import space.taran.arknavigator.utils.Sorting
 import space.taran.arknavigator.utils.reifySorting
@@ -37,7 +37,9 @@ data class ResourceItem(
     val resource: Resource,
     var isSelected: Boolean = false,
     var isPinned: Boolean = false
-)
+) {
+    fun id(): ResourceId = resource.id
+}
 
 class ResourcesGridPresenter(
     val rootAndFav: RootAndFav,
@@ -52,12 +54,13 @@ class ResourcesGridPresenter(
         private set
     var selection = listOf<ResourceItem>()
         private set
-    val selectedResources: List<Resource>
-        get() = resources.filter { it.isSelected }.map { it.resource }
+    val selectedResources: List<ResourceId>
+        get() = resources.filter { it.isSelected }.map { it.id() }
 
     private lateinit var index: ResourceIndex
     private lateinit var storage: TagsStorage
     private lateinit var router: AppRouter
+    private lateinit var metadataStorage: MetadataStorage
     private lateinit var previewStorage: PreviewStorage
     private lateinit var scoreStorage: ScoreStorage
 
@@ -75,17 +78,17 @@ class ResourcesGridPresenter(
 
     fun bindView(view: FileItemView) = runBlocking {
         val item = selection[view.position()]
-        Log.d(RESOURCES_SCREEN, "binding view for resource ${item.resource.name}")
+        Log.d(RESOURCES_SCREEN, "binding view for resource ${item.id()}")
 
-        val path = index.getPath(item.resource.id)!!
-        val score = scoreStorage.getScore(item.resource.id)
+        val path = index.getPath(item.id())!!
+        val score = scoreStorage.getScore(item.id())
 
         view.reset(selectingEnabled, item.isSelected)
         view.setText(path.fileName.toString(), shortFileNames)
         view.displayScore(sortByScores, score)
         Log.d(
             RESOURCES_SCREEN,
-            "binding score $score for resource ${item.resource.id}"
+            "binding score $score for resource ${item.id()}"
         )
 
         if (Files.isDirectory(path)) {
@@ -95,22 +98,20 @@ class ResourcesGridPresenter(
         if (path.notExists())
             scope.launch { resourcesPresenter.onRemovedResourceDetected() }
 
-        val preview = previewStorage
-            .locate(path, item.resource)
-            .onFailure {
-                Log.w(LogTags.GALLERY_SCREEN, "missing thumbnail for ${item.resource.id}")
-            }
+        val metadata = metadataStorage.locate(path, item.id()).getOrThrow()
+        val preview = previewStorage.locate(path, item.id()).getOrThrow()
 
         view.setIconOrPreview(
             path,
-            item.resource,
-            preview.getOrNull()
+            item.id(),
+            metadata,
+            preview
         )
     }
 
     fun onItemClick(pos: Int) = scope.launch {
         val containsNotExistingResource = selection.any { item ->
-            index.getPath(item.resource.id)!!.notExists()
+            index.getPath(item.id())!!.notExists()
         }
 
         if (containsNotExistingResource) {
@@ -124,7 +125,7 @@ class ResourcesGridPresenter(
         router.navigateToFragmentUsingAdd(
             Screens.GalleryScreen(
                 rootAndFav,
-                selection.map { it.resource.id },
+                selection.map { it.id() },
                 pos
             )
         )
@@ -156,12 +157,14 @@ class ResourcesGridPresenter(
         index: ResourceIndex,
         storage: TagsStorage,
         router: AppRouter,
+        metadataStorage: MetadataStorage,
         previewStorage: PreviewStorage,
         scoreStorage: ScoreStorage
     ) {
         this.index = index
         this.storage = storage
         this.router = router
+        this.metadataStorage = metadataStorage
         this.previewStorage = previewStorage
         this.scoreStorage = scoreStorage
 
@@ -201,7 +204,7 @@ class ResourcesGridPresenter(
         selection: Set<ResourceId>
     ) = withContext(Dispatchers.Default) {
         this@ResourcesGridPresenter.selection = resources
-            .filter { selection.contains(it.resource.id) }
+            .filter { selection.contains(it.id()) }
         withContext(Dispatchers.Main) {
             setProgressVisibility(false)
             viewState.updateAdapter()
@@ -256,7 +259,7 @@ class ResourcesGridPresenter(
 
     fun allowResettingScores() = allowScoring() &&
         selectedResources.all {
-            scoreStorage.getScore(it.id) > 0 || scoreStorage.getScore(it.id) < 0
+            scoreStorage.getScore(it) > 0 || scoreStorage.getScore(it) < 0
         }
 
     fun onScoresChangedExternally() {
@@ -267,7 +270,7 @@ class ResourcesGridPresenter(
     fun onSelectedChangedExternally(selected: List<ResourceId>) =
         scope.launch(Dispatchers.Default) {
             resources.forEach { item ->
-                item.isSelected = item.resource.id in selected
+                item.isSelected = item.id() in selected
             }
             withContext(Dispatchers.Main) {
                 viewState.updateAdapter()
@@ -282,9 +285,9 @@ class ResourcesGridPresenter(
         router.navigateToFragmentUsingAdd(
             Screens.GalleryScreenWithSelected(
                 rootAndFav,
-                selection.map { it.resource.id },
+                selection.map { it.id() },
                 item.position(),
-                selectedResources.map { it.id }
+                selectedResources
             )
         )
     }
@@ -293,8 +296,8 @@ class ResourcesGridPresenter(
         with(selectedResources) {
             if (isNotEmpty()) {
                 this.forEach {
-                    val score = scoreStorage.getScore(it.id)
-                    scoreStorage.setScore(it.id, score + inc)
+                    val score = scoreStorage.getScore(it)
+                    scoreStorage.setScore(it, score + inc)
                 }
             }
         }
@@ -308,8 +311,8 @@ class ResourcesGridPresenter(
     }
 
     private fun compareResourcesByScores() = Comparator<ResourceItem> { a, b ->
-        val aScore = scoreStorage.getScore(a.resource.id)
-        val bScore = scoreStorage.getScore(b.resource.id)
+        val aScore = scoreStorage.getScore(a.id())
+        val bScore = scoreStorage.getScore(b.id())
         aScore.compareTo(bScore)
     }
 
@@ -341,7 +344,7 @@ class ResourcesGridPresenter(
 
         return newResources.map { resource ->
             val selected = resources
-                .find { item -> item.resource == resource }
+                .find { item -> item.id() == resource.id }
                 ?.isSelected ?: false
 
             ResourceItem(resource, selected)

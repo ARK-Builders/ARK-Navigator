@@ -17,6 +17,8 @@ import space.taran.arklib.ResourceId
 import space.taran.arklib.domain.Message
 import space.taran.arklib.domain.index.ResourceIndex
 import space.taran.arklib.domain.index.ResourceIndexRepo
+import space.taran.arklib.domain.meta.MetadataStorage
+import space.taran.arklib.domain.meta.MetadataStorageRepo
 import space.taran.arklib.domain.preview.PreviewStorage
 import space.taran.arklib.domain.preview.PreviewStorageRepo
 import space.taran.arklib.utils.Constants
@@ -65,6 +67,9 @@ class ResourcesPresenter(
     lateinit var preferences: Preferences
 
     @Inject
+    lateinit var metadataStorageRepo: MetadataStorageRepo
+
+    @Inject
     lateinit var previewStorageRepo: PreviewStorageRepo
 
     @Inject
@@ -80,6 +85,8 @@ class ResourcesPresenter(
     lateinit var index: ResourceIndex
         private set
     lateinit var tagStorage: TagsStorage
+        private set
+    lateinit var metadataStorage: MetadataStorage
         private set
     lateinit var previewStorage: PreviewStorage
         private set
@@ -143,6 +150,7 @@ class ResourcesPresenter(
                 }
             }.launchIn(presenterScope)
 
+            metadataStorage = metadataStorageRepo.provide(index)
             previewStorage = previewStorageRepo.provide(index)
             initIndexingListener()
             index.updateAll()
@@ -162,6 +170,7 @@ class ResourcesPresenter(
                 index,
                 tagStorage,
                 router,
+                metadataStorage,
                 previewStorage,
                 scoreStorage)
 
@@ -174,6 +183,7 @@ class ResourcesPresenter(
                 index,
                 tagStorage,
                 statsStorage,
+                metadataStorage,
                 kindTagsEnabled)
 
             viewState.setKindTagsEnabled(kindTagsEnabled)
@@ -200,7 +210,7 @@ class ResourcesPresenter(
         val resourcesToMove = gridPresenter
             .resources
             .filter { it.isSelected }
-            .map { it.resource.id }
+            .map { it.id() }
         val jobs = resourcesToMove.map { id ->
             launch {
                 val path = index.getPath(id)!!
@@ -227,7 +237,7 @@ class ResourcesPresenter(
         val resourcesToCopy = gridPresenter
             .resources
             .filter { it.isSelected }
-            .map { it.resource.id }
+            .map { it.id() }
         resourcesToCopy.map { id ->
             launch {
                 val path = index.getPath(id)!!
@@ -281,7 +291,7 @@ class ResourcesPresenter(
         val selected = gridPresenter
             .resources
             .filter { it.isSelected }
-            .map { index.getPath(it.resource.id)!! }
+            .map { index.getPath(it.id())!! }
         viewState.shareResources(selected)
         gridPresenter.onSelectingChanged(false)
     }
@@ -293,7 +303,7 @@ class ResourcesPresenter(
         val resourcesToRemove = gridPresenter.resources.filter { it.isSelected }
         val results = resourcesToRemove.map { item ->
             async {
-                val path = index.getPath(item.resource.id)!!
+                val path = index.getPath(item.id())!!
                 path.deleteIfExists()
             }
         }

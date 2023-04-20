@@ -12,7 +12,7 @@ interface ScoreStorage {
 
     fun getScore(id: ResourceId): Score
 
-    suspend fun resetScores(resources: List<Resource>)
+    suspend fun resetScores(resources: List<ResourceId>)
 
     suspend fun persist()
 }

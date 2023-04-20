@@ -16,6 +16,7 @@ import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.scores.ScoreStorageRepo
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import space.taran.arknavigator.utils.LogTags.MAIN
+import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -53,17 +54,21 @@ class RepoModule {
 
     @Singleton
     @Provides
-    fun previewStorageRepo(
-        @Named(Constants.DI.APP_SCOPE_NAME)
-        appScope: CoroutineScope
-    ) = PreviewStorageRepo(appScope)
-
-    @Singleton
-    @Provides
     fun metadataStorageRepo(
         @Named(Constants.DI.APP_SCOPE_NAME)
         appScope: CoroutineScope
     ) = MetadataStorageRepo(appScope)
+
+    @Inject
+    lateinit var metadataStorageRepo: MetadataStorageRepo
+    // todo: is it ok?
+
+    @Singleton
+    @Provides
+    fun previewStorageRepo(
+        @Named(Constants.DI.APP_SCOPE_NAME)
+        appScope: CoroutineScope,
+    ) = PreviewStorageRepo(appScope, metadataStorageRepo)
 
     @Singleton
     @Provides

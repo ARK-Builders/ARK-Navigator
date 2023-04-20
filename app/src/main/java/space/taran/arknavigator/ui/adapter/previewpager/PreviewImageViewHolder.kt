@@ -9,9 +9,9 @@ import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.ortiz.touchview.OnTouchImageViewListener
 import space.taran.arknavigator.databinding.ItemImageBinding
 import space.taran.arklib.ResourceId
-import space.taran.arklib.domain.index.Resource
-import space.taran.arklib.domain.kind.Metadata
-import space.taran.arklib.domain.preview.PreviewAndThumbnail
+import space.taran.arklib.domain.meta.Metadata
+import space.taran.arklib.domain.preview.PreviewLocator
+import space.taran.arklib.domain.preview.PreviewStatus
 import space.taran.arklib.utils.ImageUtils
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 import space.taran.arklib.utils.ImageUtils.loadGlideZoomImage
@@ -21,7 +21,7 @@ import space.taran.arknavigator.utils.extensions.makeVisibleAndSetOnClickListene
 import java.nio.file.Path
 
 @SuppressLint("ClickableViewAccessibility")
-class PreviewItemViewHolder(
+class PreviewImageViewHolder(
     private val binding: ItemImageBinding,
     private val presenter: GalleryPresenter,
     private val gestureDetector: GestureDetectorCompat
@@ -41,13 +41,12 @@ class PreviewItemViewHolder(
     override var pos = -1
 
     override fun setSource(
-        source: Path,
-        resource: Resource,
-        previewAndThumbnail: PreviewAndThumbnail?
+        placeholder: Int,
+        id: ResourceId,
+        meta: Metadata,
+        preview: PreviewLocator
     ) = with(binding) {
-        val placeholder = ImageUtils.iconForExtension(extension(source))
-
-        if (resource.metadata is Metadata.Video) {
+        if (meta is Metadata.Video) {
             icPlay.makeVisibleAndSetOnClickListener {
                 presenter.onPlayButtonClick()
             }
@@ -55,7 +54,7 @@ class PreviewItemViewHolder(
             icPlay.isVisible = false
         }
 
-        loadImage(resource.id, previewAndThumbnail?.preview, placeholder)
+        loadImage(id, preview, placeholder)
     }
 
     override fun reset() = with(binding) {
@@ -69,16 +68,23 @@ class PreviewItemViewHolder(
         Glide.with(ivZoom.context).clear(ivZoom)
     }
 
-    private fun loadImage(id: ResourceId, preview: Path?, placeholder: Int) =
+    private fun loadImage(id: ResourceId, locator: PreviewLocator, placeholder: Int) =
         with(binding) {
-            if (preview == null) {
+            val status = locator.check()
+            if (status == PreviewStatus.ABSENT) {
                 ivZoom.isZoomEnabled = false
                 ivZoom.setImageResource(placeholder)
-                return
+                return@with
             }
 
-            loadGlideZoomImage(id, preview, ivZoom)
-            loadSubsamplingImage(preview, ivSubsampling)
+            if (status == PreviewStatus.THUMBNAIL) {
+                //todo: not sure right now
+                throw NotImplementedError()
+            }
+
+            val path = locator.fullscreen()
+            loadGlideZoomImage(id, path, ivZoom)
+            loadSubsamplingImage(path, ivSubsampling)
         }
 
     private fun setZoomImageEventListener() = with(binding) {

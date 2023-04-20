@@ -2,7 +2,7 @@ package space.taran.arknavigator.ui.extra
 
 import android.widget.TextView
 import space.taran.arknavigator.R
-import space.taran.arklib.domain.kind.Metadata
+import space.taran.arklib.domain.meta.Metadata
 import space.taran.arknavigator.utils.extensions.textOrGone
 
 object VideoExtraLoader {

@@ -4,10 +4,12 @@ import android.animation.ValueAnimator
 import android.view.View
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
+import space.taran.arklib.ResourceId
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.ItemFileGridBinding
-import space.taran.arklib.domain.index.Resource
-import space.taran.arklib.domain.preview.PreviewAndThumbnail
+import space.taran.arklib.domain.meta.Metadata
+import space.taran.arklib.domain.preview.PreviewLocator
+import space.taran.arklib.domain.preview.PreviewStatus
 import space.taran.arklib.utils.ImageUtils
 import space.taran.arknavigator.ui.extra.ExtraLoader
 import space.taran.arknavigator.utils.Score
@@ -59,19 +61,24 @@ class FileItemViewHolder(
 
     override fun setIconOrPreview(
         path: Path,
-        resource: Resource,
-        previewAndThumbnail: PreviewAndThumbnail?
+        id: ResourceId,
+        meta: Metadata,
+        preview: PreviewLocator
     ) = with(binding.root) {
         val placeholder = ImageUtils.iconForExtension(extension(path))
 
+        val thumbnail = if (preview.check() != PreviewStatus.ABSENT) {
+            preview.thumbnail()
+        } else null
+
         ImageUtils.loadThumbnailWithPlaceholder(
-            resource.id,
-            previewAndThumbnail?.thumbnail,
+            id,
+            thumbnail,
             placeholder,
             binding.iv
         )
         ExtraLoader.load(
-            resource, listOf(binding.primaryExtra, binding.secondaryExtra),
+            meta, listOf(binding.primaryExtra, binding.secondaryExtra),
             verbose = false
         )
     }

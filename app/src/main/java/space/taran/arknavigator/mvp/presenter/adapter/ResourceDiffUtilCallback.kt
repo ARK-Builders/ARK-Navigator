@@ -1,23 +1,21 @@
 package space.taran.arknavigator.mvp.presenter.adapter
 
 import androidx.recyclerview.widget.DiffUtil
-import space.taran.arklib.domain.index.Resource
+import space.taran.arklib.ResourceId
 
 class ResourceDiffUtilCallback(
-    private val oldList: List<Resource>,
-    private val newList: List<Resource>
-) : DiffUtil.Callback() {
-    override fun getOldListSize(): Int = oldList.size
+    private val oldItems: List<ResourceId>,
+    private val newItems: List<ResourceId>
+): DiffUtil.Callback() {
+    override fun getOldListSize(): Int = oldItems.size
 
-    override fun getNewListSize(): Int = newList.size
+    override fun getNewListSize(): Int = newItems.size
 
-    override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int):
-        Boolean {
-        return oldList[oldItemPosition].id == newList[newItemPosition].id
+    override fun areItemsTheSame(oldPos: Int, newPos: Int): Boolean {
+        return oldItems[oldPos] == newItems[newPos]
     }
 
-    override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int):
-        Boolean {
-        return oldList[oldItemPosition] == newList[newItemPosition]
-    }
+    // due to content-addressing, `id1 = id2` means `content1 = content2`
+    override fun areContentsTheSame(oldPos: Int, newPos: Int): Boolean =
+        areItemsTheSame(oldPos, newPos)
 }

@@ -86,7 +86,7 @@ android {
 }
 
 dependencies {
-    implementation 'space.taran:arklib:0.1.0-SNAPSHOT-df3b64ae18'
+    implementation 'space.taran:arklib:0.1.0-SNAPSHOT-f603085d2c'
     // for local development, you can inject local AAR dependency
     // implementation files('/tmp/arklib-android/lib/build/outputs/aar/lib-debug.aar')
     implementation fileTree(dir: "libs", include: ["*.jar"])
