@@ -59,15 +59,12 @@ class RepoModule {
         appScope: CoroutineScope
     ) = MetadataStorageRepo(appScope)
 
-    @Inject
-    lateinit var metadataStorageRepo: MetadataStorageRepo
-    // todo: is it ok?
-
     @Singleton
     @Provides
     fun previewStorageRepo(
         @Named(Constants.DI.APP_SCOPE_NAME)
         appScope: CoroutineScope,
+        metadataStorageRepo: MetadataStorageRepo
     ) = PreviewStorageRepo(appScope, metadataStorageRepo)
 
     @Singleton
