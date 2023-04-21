@@ -16,7 +16,6 @@ import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.scores.ScoreStorageRepo
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import space.taran.arknavigator.utils.LogTags.MAIN
-import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 

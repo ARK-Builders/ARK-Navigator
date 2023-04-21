@@ -13,16 +13,8 @@ val ROOT_PATH: Path = Paths.get("/")
 
 val ANDROID_DIRECTORY: Path = Paths.get("Android")
 
-typealias Milliseconds = Long
-typealias StringPath = String
-
 enum class Sorting {
     DEFAULT, NAME, SIZE, LAST_MODIFIED, TYPE
-}
-
-fun convertIntToSorting(intValue: Int?): Sorting {
-    return if (intValue == null) Sorting.DEFAULT
-    else Sorting.values()[intValue]
 }
 
 fun listDevices(): List<Path> =
@@ -99,4 +91,3 @@ fun reifySorting(sorting: Sorting): Comparator<ResourceItem>? =
     }
 
 const val KILOBYTE = 1024
-const val MEGABYTE = 1024 * KILOBYTE
