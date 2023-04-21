@@ -32,8 +32,10 @@ class PlainScoreStorage(
         if (Files.exists(storageFile)) {
             lastModified = Files.getLastModifiedTime(storageFile)
 
-            Log.d(SCORES_STORAGE,
-                "file $storageFile exists, last modified at $lastModified")
+            Log.d(
+                SCORES_STORAGE,
+                "file $storageFile exists, last modified at $lastModified"
+            )
             result.putAll(readStorage())
         } else {
             Log.d(SCORES_STORAGE, "file $storageFile doesn't exists")

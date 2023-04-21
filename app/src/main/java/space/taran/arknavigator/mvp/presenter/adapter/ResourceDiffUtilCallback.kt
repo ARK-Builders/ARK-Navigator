@@ -6,7 +6,7 @@ import space.taran.arklib.ResourceId
 class ResourceDiffUtilCallback(
     private val oldItems: List<ResourceId>,
     private val newItems: List<ResourceId>
-): DiffUtil.Callback() {
+) : DiffUtil.Callback() {
     override fun getOldListSize(): Int = oldItems.size
 
     override fun getNewListSize(): Int = newItems.size

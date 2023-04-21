@@ -9,17 +9,13 @@ import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.ortiz.touchview.OnTouchImageViewListener
 import space.taran.arknavigator.databinding.ItemImageBinding
 import space.taran.arklib.ResourceId
-import space.taran.arklib.domain.meta.Kind
 import space.taran.arklib.domain.meta.Metadata
 import space.taran.arklib.domain.preview.PreviewLocator
 import space.taran.arklib.domain.preview.PreviewStatus
-import space.taran.arklib.utils.ImageUtils
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 import space.taran.arklib.utils.ImageUtils.loadGlideZoomImage
 import space.taran.arklib.utils.ImageUtils.loadSubsamplingImage
-import space.taran.arklib.utils.extension
 import space.taran.arknavigator.utils.extensions.makeVisibleAndSetOnClickListener
-import java.nio.file.Path
 
 @SuppressLint("ClickableViewAccessibility")
 class PreviewImageViewHolder(

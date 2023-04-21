@@ -344,7 +344,6 @@ class GalleryPresenter(
 
             val item = galleryItems[pos]
 
-
             val path = index.getPath(item.id())
                 ?: throw IllegalStateException(
                     "Resource ${item.id()} can't be found in the index"

@@ -171,7 +171,8 @@ class ResourcesPresenter(
                 router,
                 metadataStorage,
                 previewStorage,
-                scoreStorage)
+                scoreStorage
+            )
 
             viewState.setProgressVisibility(true, "Sorting resources")
 
@@ -183,7 +184,8 @@ class ResourcesPresenter(
                 tagStorage,
                 statsStorage,
                 metadataStorage,
-                kindTagsEnabled)
+                kindTagsEnabled
+            )
 
             viewState.setKindTagsEnabled(kindTagsEnabled)
             externallySelectedTag?.let {

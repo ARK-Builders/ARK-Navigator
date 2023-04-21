@@ -2,7 +2,6 @@ package space.taran.arknavigator.utils
 
 import space.taran.arknavigator.mvp.presenter.adapter.ResourceItem
 import space.taran.arknavigator.ui.App
-import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.io.path.exists
