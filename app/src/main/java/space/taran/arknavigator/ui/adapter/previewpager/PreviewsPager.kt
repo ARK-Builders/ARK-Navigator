@@ -8,9 +8,9 @@ import android.view.MotionEvent
 import android.view.ViewGroup
 import androidx.core.view.GestureDetectorCompat
 import androidx.recyclerview.widget.RecyclerView
+import space.taran.arklib.domain.meta.Kind
 import space.taran.arknavigator.databinding.ItemImageBinding
 import space.taran.arknavigator.databinding.ItemPreviewPlainTextBinding
-import space.taran.arknavigator.mvp.presenter.GalleryItemType
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 
 class PreviewsPager(
@@ -18,11 +18,11 @@ class PreviewsPager(
     val presenter: GalleryPresenter
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    override fun getItemCount() = presenter.resources.size
+    override fun getItemCount() = presenter.galleryItems.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-        when (viewType) {
-            GalleryItemType.PLAINTEXT.ordinal -> PreviewPlainTextViewHolder(
+        if (viewType == Kind.PLAINTEXT.ordinal) {
+            PreviewPlainTextViewHolder(
                 ItemPreviewPlainTextBinding.inflate(
                     LayoutInflater.from(parent.context),
                     parent,
@@ -30,7 +30,8 @@ class PreviewsPager(
                 ),
                 getGestureDetector()
             )
-            GalleryItemType.OTHER.ordinal -> PreviewItemViewHolder(
+        } else {
+            PreviewImageViewHolder(
                 ItemImageBinding.inflate(
                     LayoutInflater.from(parent.context),
                     parent,
@@ -39,11 +40,10 @@ class PreviewsPager(
                 presenter,
                 getGestureDetector()
             )
-            else -> error("Wrong viewType")
         }
 
     override fun getItemViewType(position: Int) =
-        presenter.detectItemType(position).ordinal
+        presenter.getKind(position).ordinal
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onBindViewHolder(
@@ -55,7 +55,7 @@ class PreviewsPager(
                 holder.pos = position
                 presenter.bindPlainTextView(holder)
             }
-            is PreviewItemViewHolder -> {
+            is PreviewImageViewHolder -> {
                 holder.pos = position
                 presenter.bindView(holder)
             }
@@ -64,7 +64,7 @@ class PreviewsPager(
 
     override fun onViewRecycled(holder: RecyclerView.ViewHolder) {
         super.onViewRecycled(holder)
-        if (holder is PreviewItemViewHolder)
+        if (holder is PreviewImageViewHolder)
             holder.onRecycled()
     }
 

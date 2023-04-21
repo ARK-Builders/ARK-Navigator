@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
-import space.taran.arklib.domain.index.ResourcesIndex
+import space.taran.arklib.domain.index.ResourceIndex
 import space.taran.arknavigator.mvp.model.repo.stats.StatsEvent
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.utils.Tag
@@ -16,7 +16,7 @@ import kotlin.io.path.inputStream
 import kotlin.io.path.writeText
 
 class TagLabeledNStorage(
-    val index: ResourcesIndex,
+    val index: ResourceIndex,
     val tagsStorage: TagsStorage,
     root: Path,
     scope: CoroutineScope
@@ -30,9 +30,9 @@ class TagLabeledNStorage(
             val json = Json.decodeFromStream<JsonTagLabeledN>(storage.inputStream())
             tagLabeledAmount.putAll(json.data)
         } else {
-            index.listAllIds()
+            index.allIds()
                 .associateWith { tagsStorage.getTags(it) }
-                .forEach { (id, tags) ->
+                .forEach { (_, tags) ->
                     tags.forEach { tag ->
                         tagLabeledAmount.merge(tag, 1, Int::plus)
                     }

@@ -1,27 +1,32 @@
 package space.taran.arknavigator.stub
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import space.taran.arklib.ResourceId
-import space.taran.arklib.domain.index.ResourceMeta
-import space.taran.arklib.domain.index.ResourcesIndex
+import space.taran.arklib.domain.index.Resource
+import space.taran.arklib.domain.index.ResourceIndex
+import space.taran.arklib.domain.index.ResourceUpdates
+import space.taran.arklib.domain.index.RootIndex
+
 import java.nio.file.Path
 import kotlin.io.path.Path
 
-class ResourceIndexStub : ResourcesIndex {
-    private val metas = TestData.metasById().toMutableMap()
+class ResourceIndexStub : ResourceIndex {
+    private val resources = TestData.resourceById().toMutableMap()
 
-    override suspend fun listResources(prefix: Path?): Set<ResourceMeta> =
-        metas.values.toSet()
+    override val roots: Set<RootIndex> = setOf()
 
-    override suspend fun getPath(id: ResourceId): Path =
+    override val updates: Flow<ResourceUpdates> =
+        MutableSharedFlow()
+
+    override suspend fun updateAll() {}
+
+    override suspend fun allResources(): Set<Resource> =
+        resources.values.toSet()
+
+    override suspend fun getResource(id: ResourceId): Resource? =
+        resources[id]
+
+    override suspend fun getPath(id: ResourceId): Path? =
         Path("")
-
-    override suspend fun getMeta(id: ResourceId): ResourceMeta =
-        metas[id]!!
-
-    override suspend fun reindex() {}
-
-    override suspend fun remove(id: ResourceId): Path {
-        metas.remove(id)
-        return Path("")
-    }
 }

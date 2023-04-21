@@ -4,64 +4,43 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
-import space.taran.arkfilepicker.folders.FoldersRepo
-import space.taran.arkfilepicker.folders.RootAndFav
-import space.taran.arklib.domain.index.ResourcesIndexRepo
+import space.taran.arklib.domain.index.ResourceIndex
+import space.taran.arklib.domain.index.RootIndex
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.stats.StatsEvent
 import java.nio.file.Path
 
 class TagsStorageRepo(
-    private val foldersRepo: FoldersRepo,
-    private val indexRepo: ResourcesIndexRepo,
     private val preferences: Preferences
 ) {
-    private val provideMutex = Mutex()
     private val scope = CoroutineScope(Dispatchers.IO)
     private val storageByRoot = mutableMapOf<Path, PlainTagsStorage>()
+
     private val mutStatsFlow = MutableSharedFlow<StatsEvent>()
     val statsFlow: SharedFlow<StatsEvent>
         get() = mutStatsFlow
 
-    suspend fun provide(
-        rootAndFav: RootAndFav
-    ): TagsStorage = withContext(Dispatchers.IO) {
-        val roots = foldersRepo.resolveRoots(rootAndFav)
+    suspend fun provide(index: ResourceIndex): TagsStorage {
+        val roots = index.roots
 
-        provideMutex.withLock {
-            val storageShards = roots.map { root ->
-                val index = indexRepo.provide(root)
-                val resources = index.listAllIds()
-                if (storageByRoot[root] != null) {
-                    val storage = storageByRoot[root]!!
-                    storage.checkResources(resources)
-                    storage.readStorageIfChanged()
-                    storage
-                } else {
-                    val fresh = PlainTagsStorage(
-                        root,
-                        resources,
-                        mutStatsFlow,
-                        scope,
-                        preferences
-                    )
-                    fresh.init()
-                    fresh.cleanup(resources)
-                    storageByRoot[root] = fresh
-                    fresh
-                }
-            }
+        return if (roots.size > 1) {
+            val shards = roots.map { provide(it) }
 
-            return@withContext AggregatedTagsStorage(storageShards)
+            AggregatedTagsStorage(shards)
+        } else {
+            val root = roots.iterator().next()
+            provide(root)
         }
     }
 
-    suspend fun provide(
-        root: Path
-    ): TagsStorage = provide(
-        RootAndFav(root.toString(), favString = null)
-    )
+    suspend fun provide(root: RootIndex): PlainTagsStorage =
+        storageByRoot[root.path] ?: PlainTagsStorage(
+            root.path,
+            root.allIds(),
+            mutStatsFlow,
+            scope,
+            preferences
+        ).also {
+            storageByRoot[root.path] = it
+        }
 }

@@ -122,10 +122,6 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
             (activity as MainActivity).setSelectedTab(R.id.page_tags)
             (requireActivity() as MainActivity).setBottomNavigationVisibility(true)
 
-            resourcesAdapter = ResourcesRVAdapter(presenter.gridPresenter)
-            rvResources.adapter = resourcesAdapter
-            rvResources.setItemViewCacheSize(0)
-            rvResources.layoutManager = GridLayoutManager(context, 3)
             tagsSelectorAdapter = TagsSelectorAdapter(
                 this@ResourcesFragment,
                 binding,
@@ -173,6 +169,14 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
             return@with
         }
 
+    override fun initResourcesAdapter() =
+        with(binding) {
+            resourcesAdapter = ResourcesRVAdapter(presenter.gridPresenter)
+            rvResources.adapter = resourcesAdapter
+            rvResources.setItemViewCacheSize(0)
+            rvResources.layoutManager = GridLayoutManager(context, 3)
+        }
+
     override fun onResume() {
         Log.d(RESOURCES_SCREEN, "resuming in ResourcesFragment")
         super.onResume()
@@ -201,7 +205,7 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         }
     }
 
-    override fun updateAdapter() {
+    override fun updateResourcesAdapter() {
         resourcesAdapter?.notifyDataSetChanged()
     }
 
@@ -327,6 +331,10 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
 
     override fun setPreviewGenerationProgress(isVisible: Boolean) {
         binding.progressPreviewGeneration.isVisible = isVisible
+    }
+
+    override fun setMetadataExtractionProgress(isVisible: Boolean) {
+        binding.progressMetadataExtraction.isVisible = isVisible
     }
 
     private fun initMenuListeners() = with(binding) {

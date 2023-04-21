@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import space.taran.arklib.arkFolder
-import space.taran.arklib.arkTagsStorage
+import space.taran.arklib.arkTags
 import space.taran.arklib.ResourceId
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
@@ -37,15 +37,15 @@ class PlainTagsStorage(
     private val preferences: Preferences
 ) : TagsStorage {
 
-    private val storageFile: Path = root.arkFolder().arkTagsStorage()
+    private val storageFile: Path = root.arkFolder().arkTags()
 
     private var lastModified: FileTime = FileTime.fromMillis(0L)
 
-    private lateinit var tagsById: MutableMap<ResourceId, Tags>
+    private var tagsById: MutableMap<ResourceId, Tags>
 
     private var isCorrupted = false
 
-    suspend fun init() = withContext(Dispatchers.IO) {
+    init {
         val result = resources.map { it to NO_TAGS }
             .toMap()
             .toMutableMap()
@@ -102,10 +102,9 @@ class PlainTagsStorage(
     override fun contains(id: ResourceId): Boolean = tagsById.containsKey(id)
 
     // if this id isn't present in storage, then the call is wrong
-    // because the caller always takes this id from ResourcesIndex
+    // because the caller always takes this id from ResourceIndex
     // and the index and storage must be in sync
     override fun getTags(id: ResourceId): Tags = tagsById[id]!!
-    // todo: check the file's modification date and pull external updates
 
     override fun getTags(ids: Iterable<ResourceId>): Tags =
         ids.flatMap { id -> getTags(id) }.toSet()
@@ -197,9 +196,6 @@ class PlainTagsStorage(
 
             if (modified > lastModified) {
                 Log.d(TAGS_STORAGE, "storage file was modified externally, merging")
-                // todo: for real merge we need to track our own changes locally
-                // without this, we need to stop all competing devices to remove a tag or a resource
-                // so far, just ensuring that we are not losing additions
 
                 readStorage().onSuccess { outside ->
 
@@ -240,55 +236,54 @@ class PlainTagsStorage(
             }
         }
 
-    private suspend fun readStorage(): Result<Map<ResourceId, Tags>> =
-        withContext(Dispatchers.IO) {
-            val lines = Files.readAllLines(storageFile, StandardCharsets.UTF_8)
-            verifyVersion(lines.removeAt(0))
+    private fun readStorage(): Result<Map<ResourceId, Tags>> {
+        // better to wrap with coroutine
+        val lines = Files.readAllLines(storageFile, StandardCharsets.UTF_8)
+        verifyVersion(lines.removeAt(0))
 
-            try {
-                val tagsById = lines.map {
-                    val parts = it.split(KEY_VALUE_SEPARATOR)
-                    val id = ResourceId.fromString(parts[0])
-                    val tags = tagsFromString(parts[1])
-                    id to tags
-                }
-
-                if (tagsById.any { (id, tags) -> tags.isEmpty() }) {
-                    isCorrupted = true
-                    return@withContext Result.failure(StreamCorruptedException())
-                }
-
-                if (tagsById.isEmpty()) {
-                    isCorrupted = true
-                    return@withContext Result.failure(IllegalArgumentException())
-                }
-
-                Log.d(TAGS_STORAGE, "${tagsById.size} entries has been read")
-                return@withContext Result.success(tagsById.toMap())
-            } catch (e: Exception) {
-                isCorrupted = true
-                return@withContext Result.failure(e)
+        try {
+            val tagsById = lines.map {
+                val parts = it.split(KEY_VALUE_SEPARATOR)
+                val id = ResourceId.fromString(parts[0])
+                val tags = tagsFromString(parts[1])
+                id to tags
             }
+
+            if (tagsById.any { (id, tags) -> tags.isEmpty() }) {
+                isCorrupted = true
+                return Result.failure(StreamCorruptedException())
+            }
+
+            if (tagsById.isEmpty()) {
+                isCorrupted = true
+                return Result.failure(IllegalArgumentException())
+            }
+
+            Log.d(TAGS_STORAGE, "${tagsById.size} entries has been read")
+            return Result.success(tagsById.toMap())
+        } catch (e: Exception) {
+            isCorrupted = true
+            return Result.failure(e)
         }
+    }
 
-    private suspend fun writeStorage() =
-        withContext(Dispatchers.IO) {
-            val lines = mutableListOf<String>()
-            lines.add("$STORAGE_VERSION_PREFIX$STORAGE_VERSION")
+    private fun writeStorage() {
+        val lines = mutableListOf<String>()
+        lines.add("$STORAGE_VERSION_PREFIX$STORAGE_VERSION")
 
-            val entries = tagsById.filterValues { it.isNotEmpty() }
-            lines.addAll(
-                entries.map { (id, tags) ->
-                    "${id.dataSize}-${id.crc32}$KEY_VALUE_SEPARATOR" +
-                        stringFromTags(tags)
-                }
-            )
+        val entries = tagsById.filterValues { it.isNotEmpty() }
+        lines.addAll(
+            entries.map { (id, tags) ->
+                "${id.dataSize}-${id.crc32}$KEY_VALUE_SEPARATOR" +
+                    stringFromTags(tags)
+            }
+        )
 
-            Files.write(storageFile, lines, StandardCharsets.UTF_8)
-            lastModified = Files.getLastModifiedTime(storageFile)
+        Files.write(storageFile, lines, StandardCharsets.UTF_8)
+        lastModified = Files.getLastModifiedTime(storageFile)
 
-            Log.d(TAGS_STORAGE, "${tagsById.size} entries has been written")
-        }
+        Log.d(TAGS_STORAGE, "${tagsById.size} entries has been written")
+    }
 
     private fun sendStatsEvent(event: StatsEvent) = scope.launch {
         statsFlow.emit(event)

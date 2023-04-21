@@ -47,7 +47,7 @@ fun ResourcesFragment.setupAndShowSelectedResourcesMenu(menuBtn: View) {
             popup.popupWindow.dismiss()
         }
         btnEditTags.setOnClickListener {
-            val selected = presenter.gridPresenter.selectedResources.map { it.id }
+            val selected = presenter.gridPresenter.selectedResources.map { it }
             if (selected.isEmpty()) {
                 toast(R.string.select_at_least_one_resource)
                 popup.popupWindow.dismiss()
@@ -55,10 +55,10 @@ fun ResourcesFragment.setupAndShowSelectedResourcesMenu(menuBtn: View) {
             }
             EditTagsDialogFragment
                 .newInstance(
-                    presenter.rootAndFav,
+                    presenter.folders,
                     selected,
                     presenter.index,
-                    presenter.storage,
+                    presenter.tagStorage,
                     presenter.statsStorage
                 )
                 .show(childFragmentManager, null)

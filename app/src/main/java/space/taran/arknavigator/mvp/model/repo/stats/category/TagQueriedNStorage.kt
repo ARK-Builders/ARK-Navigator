@@ -38,7 +38,7 @@ class TagQueriedNStorage(
             is StatsEvent.PlainTagUsed ->
                 tagQueriedN.merge(event.tag, 1, Int::plus)
             is StatsEvent.KindTagUsed ->
-                tagQueriedN.merge(event.kindCode.name, 1, Int::plus)
+                tagQueriedN.merge(event.kind.name, 1, Int::plus)
             else -> return
         }
         requestFlush()

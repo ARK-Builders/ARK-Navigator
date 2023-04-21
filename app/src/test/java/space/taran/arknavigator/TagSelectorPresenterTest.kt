@@ -19,7 +19,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import space.taran.arklib.ResourceId
-import space.taran.arklib.domain.index.ResourcesIndex
+import space.taran.arklib.domain.index.ResourceIndex
+import space.taran.arklib.domain.meta.MetadataStorage
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
@@ -29,15 +30,16 @@ import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagsSelectorA
 import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagsSelectorPresenter
 import space.taran.arknavigator.mvp.presenter.dialog.TagsSorting
 import space.taran.arknavigator.mvp.view.ResourcesView
+import space.taran.arknavigator.stub.MetadataStorageStub
+import space.taran.arknavigator.stub.ResourceIndexStub
+import space.taran.arknavigator.stub.TagsStorageStub
+import space.taran.arknavigator.stub.StatsStorageStub
+import space.taran.arknavigator.stub.TAG1
+import space.taran.arknavigator.stub.TAG2
 import space.taran.arknavigator.stub.R1
 import space.taran.arknavigator.stub.R2
 import space.taran.arknavigator.stub.R3
 import space.taran.arknavigator.stub.R4
-import space.taran.arknavigator.stub.ResourceIndexStub
-import space.taran.arknavigator.stub.StatsStorageStub
-import space.taran.arknavigator.stub.TAG1
-import space.taran.arknavigator.stub.TAG2
-import space.taran.arknavigator.stub.TagsStorageStub
 
 @ExperimentalCoroutinesApi
 @ExtendWith(MockKExtension::class)
@@ -51,8 +53,9 @@ class TagSelectorPresenterTest {
     private val scope = CoroutineScope(dispatcher)
 
     private lateinit var presenter: TagsSelectorPresenter
-    private lateinit var storage: TagsStorage
-    private lateinit var index: ResourcesIndex
+    private lateinit var tagsStorage: TagsStorage
+    private lateinit var metadataStorage: MetadataStorage
+    private lateinit var index: ResourceIndex
 
     @BeforeAll
     fun beforeAll() {
@@ -67,18 +70,18 @@ class TagSelectorPresenterTest {
     fun beforeEach() = runBlocking {
         presenter = TagsSelectorPresenter(
             viewState,
-            null,
             scope,
             ::onSelectionChange
         )
         index = ResourceIndexStub()
-        storage = TagsStorageStub()
+        tagsStorage = TagsStorageStub()
+        metadataStorage = MetadataStorageStub()
         val preferences = mockk<Preferences>(relaxed = true)
         presenter.preferences = preferences
         coEvery { preferences.get(PreferenceKey.TagsSortingSelector) } returns TagsSorting.POPULARITY.ordinal
         coEvery { preferences.get(PreferenceKey.TagsSortingSelectorAsc) } returns true
         coEvery { preferences.get(PreferenceKey.CollectTagUsageStats) } returns true
-        presenter.init(index, storage, StatsStorageStub(), false)
+        presenter.init(index, tagsStorage, StatsStorageStub(), metadataStorage, false)
     }
 
     @Test
@@ -152,7 +155,7 @@ class TagSelectorPresenterTest {
     fun `removing the selected tag should change the selection`() =
         runTest(dispatcher) {
             presenter.onTagItemClick(TagItem.PlainTagItem(TAG1)).join()
-            storage.setTagsAndPersist(R1, setOf())
+            tagsStorage.setTagsAndPersist(R1, setOf())
             presenter.calculateTagsAndSelection()
             assertEquals(presenter.selection, setOf(R1, R2, R3, R4))
         }
@@ -165,5 +168,5 @@ class TagSelectorPresenterTest {
             assertEquals(presenter.selection, setOf(R1, R2, R3, R4))
         }
 
-    private suspend fun onSelectionChange(resources: Set<ResourceId>) {}
+    private fun onSelectionChange(resources: Set<ResourceId>) {}
 }

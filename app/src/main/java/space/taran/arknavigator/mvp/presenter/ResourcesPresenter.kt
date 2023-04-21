@@ -15,8 +15,10 @@ import space.taran.arkfilepicker.folders.FoldersRepo
 import space.taran.arkfilepicker.folders.RootAndFav
 import space.taran.arklib.ResourceId
 import space.taran.arklib.domain.Message
-import space.taran.arklib.domain.index.ResourcesIndex
-import space.taran.arklib.domain.index.ResourcesIndexRepo
+import space.taran.arklib.domain.index.ResourceIndex
+import space.taran.arklib.domain.index.ResourceIndexRepo
+import space.taran.arklib.domain.meta.MetadataStorage
+import space.taran.arklib.domain.meta.MetadataStorageRepo
 import space.taran.arklib.domain.preview.PreviewStorage
 import space.taran.arklib.domain.preview.PreviewStorageRepo
 import space.taran.arklib.utils.Constants
@@ -45,7 +47,7 @@ import kotlin.io.path.copyTo
 import kotlin.io.path.deleteIfExists
 
 class ResourcesPresenter(
-    val rootAndFav: RootAndFav,
+    val folders: RootAndFav,
     private val externallySelectedTag: Tag? = null
 ) : MvpPresenter<ResourcesView>() {
 
@@ -56,13 +58,16 @@ class ResourcesPresenter(
     lateinit var foldersRepo: FoldersRepo
 
     @Inject
-    lateinit var resourcesIndexRepo: ResourcesIndexRepo
+    lateinit var resourcesIndexRepo: ResourceIndexRepo
 
     @Inject
     lateinit var tagsStorageRepo: TagsStorageRepo
 
     @Inject
     lateinit var preferences: Preferences
+
+    @Inject
+    lateinit var metadataStorageRepo: MetadataStorageRepo
 
     @Inject
     lateinit var previewStorageRepo: PreviewStorageRepo
@@ -77,9 +82,11 @@ class ResourcesPresenter(
     @Named(Constants.DI.MESSAGE_FLOW_NAME)
     lateinit var messageFlow: MutableSharedFlow<Message>
 
-    lateinit var index: ResourcesIndex
+    lateinit var index: ResourceIndex
         private set
-    lateinit var storage: TagsStorage
+    lateinit var tagStorage: TagsStorage
+        private set
+    lateinit var metadataStorage: MetadataStorage
         private set
     lateinit var previewStorage: PreviewStorage
         private set
@@ -89,14 +96,13 @@ class ResourcesPresenter(
         private set
 
     val gridPresenter =
-        ResourcesGridPresenter(rootAndFav, viewState, presenterScope, this)
+        ResourcesGridPresenter(folders, viewState, presenterScope, this)
             .apply {
                 App.instance.appComponent.inject(this)
             }
     val tagsSelectorPresenter =
         TagsSelectorPresenter(
             viewState,
-            rootAndFav.fav,
             presenterScope,
             ::onSelectionChange
         ).apply {
@@ -111,24 +117,26 @@ class ResourcesPresenter(
             val ascending = preferences.get(PreferenceKey.IsSortingAscending)
             val sortByScores = preferences.get(PreferenceKey.SortByScores)
             viewState.init(ascending, sortByScores)
-            viewState.setProgressVisibility(true, "Indexing")
-            val folders = foldersRepo.provideWithMissing()
-            Log.d(RESOURCES_SCREEN, "folders retrieved: $folders")
+            viewState.initResourcesAdapter()
 
-            viewState.toastPathsFailed(folders.failed)
-
-            val all = folders.succeeded.keys
-            val roots: List<Path> = if (rootAndFav.root != null) {
-                if (!all.contains(rootAndFav.root)) {
-                    throw AssertionError("Requested root wasn't found in DB")
+            val root = folders.root
+            val title = if (root != null) {
+                val favorite = folders.fav
+                if (favorite != null) {
+                    "Favorite folder \"${favorite.last()}\" selected"
+                } else {
+                    "Root folder \"${root.last()}\" selected"
                 }
-
-                listOf(rootAndFav.root!!)
             } else {
-                all.toList()
+                "All roots are selected"
             }
-            Log.d(RESOURCES_SCREEN, "using roots $roots")
-            index = resourcesIndexRepo.provide(rootAndFav)
+
+            viewState.setToolbarTitle(title)
+
+            viewState.setProgressVisibility(true, "Indexing resources")
+
+            index = resourcesIndexRepo.provide(folders)
+
             messageFlow.onEach { message ->
                 when (message) {
                     is Message.KindDetectFailed -> viewState.toastIndexFailedPath(
@@ -136,38 +144,57 @@ class ResourcesPresenter(
                     )
                 }
             }.launchIn(presenterScope)
-            index.reindex()
-            storage = tagsStorageRepo.provide(rootAndFav)
-            if (storage.isCorrupted()) {
+
+            viewState.setProgressVisibility(true, "Extracting metadata")
+            metadataStorage = metadataStorageRepo.provide(index)
+
+            viewState.setProgressVisibility(true, "Generating previews")
+            previewStorage = previewStorageRepo.provide(index)
+
+            initIndexingListeners()
+
+            tagStorage = tagsStorageRepo.provide(index)
+
+            if (tagStorage.isCorrupted()) {
                 viewState.showCorruptNotificationDialog(
                     PlainTagsStorage.TYPE
                 )
                 return@launch
             }
-            previewStorage = previewStorageRepo.provide(rootAndFav)
-            initIndexingListener()
-            statsStorage = statsStorageRepo.provide(rootAndFav)
-            scoreStorage = scoreStorageRepo.provide(rootAndFav)
 
-            gridPresenter.init(index, storage, router, previewStorage, scoreStorage)
+            scoreStorage = scoreStorageRepo.provide(index)
+            statsStorage = statsStorageRepo.provide(index)
 
-            val resources = index.listResources(rootAndFav.fav)
-            viewState.setProgressVisibility(true, "Sorting")
+            gridPresenter.init(
+                index,
+                tagStorage,
+                router,
+                metadataStorage,
+                previewStorage,
+                scoreStorage
+            )
 
+            viewState.setProgressVisibility(true, "Sorting resources")
+
+            val resources = index.allResources()
             gridPresenter.resetResources(resources)
             val kindTagsEnabled = preferences.get(PreferenceKey.ShowKinds)
-            tagsSelectorPresenter.init(index, storage, statsStorage, kindTagsEnabled)
+            tagsSelectorPresenter.init(
+                index,
+                tagStorage,
+                statsStorage,
+                metadataStorage,
+                kindTagsEnabled
+            )
+
             viewState.setKindTagsEnabled(kindTagsEnabled)
             externallySelectedTag?.let {
                 tagsSelectorPresenter.onTagExternallySelect(it)
             }
             tagsSelectorPresenter.calculateTagsAndSelection()
 
-            val path = (rootAndFav.fav ?: rootAndFav.root)
-            val title = if (path != null) "${path.last()}, " else ""
-
-            viewState.setToolbarTitle("$title${roots.size} of roots chosen")
             viewState.setProgressVisibility(false)
+
             launch {
                 delay(DELAY_CLEAR_TOASTS)
                 viewState.clearStackedToasts()
@@ -184,10 +211,10 @@ class ResourcesPresenter(
         val resourcesToMove = gridPresenter
             .resources
             .filter { it.isSelected }
-            .map { it.meta.id }
+            .map { it.id() }
         val jobs = resourcesToMove.map { id ->
             launch {
-                val path = index.getPath(id)
+                val path = index.getPath(id)!!
                 val newPath = directoryToMove.findNotExistCopyName(path)
                 path.copyTo(newPath)
                 if (path != newPath)
@@ -196,8 +223,10 @@ class ResourcesPresenter(
         }
         jobs.forEach { it.join() }
         migrateTags(resourcesToMove, directoryToMove)
-        index.reindex()
-        tagsStorageRepo.provide(rootAndFav)
+
+        index.updateAll()
+
+        tagsStorageRepo.provide(index)
         withContext(Dispatchers.Main) {
             onResourcesOrTagsChanged()
             gridPresenter.onSelectingChanged(false)
@@ -211,10 +240,10 @@ class ResourcesPresenter(
         val resourcesToCopy = gridPresenter
             .resources
             .filter { it.isSelected }
-            .map { it.meta.id }
+            .map { it.id() }
         resourcesToCopy.map { id ->
             launch {
-                val path = index.getPath(id)
+                val path = index.getPath(id)!!
                 val newPath = directoryToCopy.findNotExistCopyName(path)
                 path.copyTo(newPath)
             }
@@ -265,7 +294,7 @@ class ResourcesPresenter(
         val selected = gridPresenter
             .resources
             .filter { it.isSelected }
-            .map { index.getPath(it.meta.id) }
+            .map { index.getPath(it.id())!! }
         viewState.shareResources(selected)
         gridPresenter.onSelectingChanged(false)
     }
@@ -277,13 +306,15 @@ class ResourcesPresenter(
         val resourcesToRemove = gridPresenter.resources.filter { it.isSelected }
         val results = resourcesToRemove.map { item ->
             async {
-                val path = index.getPath(item.meta.id)
+                val path = index.getPath(item.id())!!
                 path.deleteIfExists()
             }
         }
         results.forEach { it.await() }
-        index.reindex()
-        tagsStorageRepo.provide(rootAndFav)
+
+        index.updateAll()
+
+        tagsStorageRepo.provide(index)
         withContext(Dispatchers.Main) {
             onResourcesOrTagsChanged()
             gridPresenter.onSelectingChanged(false)
@@ -292,20 +323,17 @@ class ResourcesPresenter(
     }
 
     private suspend fun migrateTags(resources: List<ResourceId>, to: Path) {
-        val newRoot = foldersRepo.findRootByPath(to)
-        newRoot?.let {
-            val newStorage = tagsStorageRepo.provide(it)
-            resources
-                .associateWith { storage.getTags(it) }
-                .forEach { (id, tags) ->
-                    newStorage.setTags(id, tags)
-                }
-            newStorage.persist()
-        }
+        val newStorage = tagsStorageRepo.provide(index)
+        resources
+            .associateWith { tagStorage.getTags(it) }
+            .forEach { (id, tags) ->
+                newStorage.setTags(id, tags)
+            }
+        newStorage.persist()
     }
 
     suspend fun onResourcesOrTagsChanged() {
-        gridPresenter.resetResources(index.listResources(rootAndFav.fav))
+        gridPresenter.resetResources(index.allResources())
         tagsSelectorPresenter.calculateTagsAndSelection()
     }
 
@@ -317,9 +345,9 @@ class ResourcesPresenter(
     suspend fun onRemovedResourceDetected() {
         viewState.setProgressVisibility(true, "Indexing")
 
-        index.reindex()
+        index.updateAll()
         // update current tags storage
-        tagsStorageRepo.provide(rootAndFav)
+        tagsStorageRepo.provide(index)
 
         viewState.setProgressVisibility(true, "Sorting")
         onResourcesOrTagsChanged()
@@ -330,8 +358,13 @@ class ResourcesPresenter(
         gridPresenter.updateSelection(selection)
     }
 
-    private fun initIndexingListener() {
-        previewStorage.indexingFlow.onEach {
+    private fun initIndexingListeners() {
+        metadataStorage.inProgress.onEach {
+            Timber.d("metadata extraction progress = $it")
+            viewState.setPreviewGenerationProgress(it)
+        }.launchIn(presenterScope)
+
+        previewStorage.inProgress.onEach {
             Timber.d("preview generation progress = $it")
             viewState.setPreviewGenerationProgress(it)
         }.launchIn(presenterScope)

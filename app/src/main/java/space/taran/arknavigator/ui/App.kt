@@ -1,6 +1,7 @@
 package space.taran.arknavigator.ui
 
 import android.app.Application
+import android.os.StrictMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -27,6 +28,12 @@ class App : Application() {
     lateinit var appComponent: AppComponent
         private set
 
+    init {
+        if (BuildConfig.DEBUG) {
+            StrictMode.enableDefaults()
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
 
@@ -45,6 +52,7 @@ class App : Application() {
             )
 
         appComponent.arkBackup().backup()
+
         initAcra()
     }
 

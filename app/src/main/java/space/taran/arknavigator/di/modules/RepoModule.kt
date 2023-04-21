@@ -8,7 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import space.taran.arkfilepicker.folders.FoldersRepo
 import space.taran.arklib.domain.Message
-import space.taran.arklib.domain.index.ResourcesIndexRepo
+import space.taran.arklib.domain.index.ResourceIndexRepo
 import space.taran.arklib.domain.meta.MetadataStorageRepo
 import space.taran.arklib.domain.preview.PreviewStorageRepo
 import space.taran.arklib.utils.Constants
@@ -34,55 +34,39 @@ class RepoModule {
 
     @Singleton
     @Provides
-    fun resourcesIndexesRepo(
-        foldersRepo: FoldersRepo,
-        metadataStorageRepo: MetadataStorageRepo,
-        @Named(Constants.DI.MESSAGE_FLOW_NAME)
-        messageFlow: MutableSharedFlow<Message>,
-    ): ResourcesIndexRepo {
-        Log.d(MAIN, "creating ResourcesIndexesRepo")
-        return ResourcesIndexRepo(
-            foldersRepo,
-            metadataStorageRepo,
-            messageFlow
-        )
+    fun resourceIndexRepo(
+        foldersRepo: FoldersRepo
+    ): ResourceIndexRepo {
+        Log.d(MAIN, "creating ResourceIndexRepo")
+        return ResourceIndexRepo(foldersRepo)
     }
 
     @Singleton
     @Provides
     fun tagsStorageRepo(
-        foldersRepo: FoldersRepo,
-        resourcesIndexRepo: ResourcesIndexRepo,
         preferences: Preferences
     ): TagsStorageRepo {
-        return TagsStorageRepo(foldersRepo, resourcesIndexRepo, preferences)
+        return TagsStorageRepo(preferences)
     }
 
     @Singleton
     @Provides
-    fun previewStorageRepo(
-        foldersRepo: FoldersRepo,
-        indexRepo: ResourcesIndexRepo,
+    fun metadataStorageRepo(
         @Named(Constants.DI.APP_SCOPE_NAME)
         appScope: CoroutineScope
-    ) = PreviewStorageRepo(
-        foldersRepo,
-        indexRepo,
-        appScope
-    )
+    ) = MetadataStorageRepo(appScope)
 
     @Singleton
     @Provides
-    fun metadataStorageRepo(
-        foldersRepo: FoldersRepo
-    ) = MetadataStorageRepo(foldersRepo)
+    fun previewStorageRepo(
+        @Named(Constants.DI.APP_SCOPE_NAME)
+        appScope: CoroutineScope,
+        metadataStorageRepo: MetadataStorageRepo
+    ) = PreviewStorageRepo(appScope, metadataStorageRepo)
 
     @Singleton
     @Provides
-    fun scoreStorageRepo(
-        foldersRepo: FoldersRepo,
-        indexRepo: ResourcesIndexRepo
-    ): ScoreStorageRepo {
-        return ScoreStorageRepo(foldersRepo, indexRepo)
+    fun scoreStorageRepo(): ScoreStorageRepo {
+        return ScoreStorageRepo()
     }
 }

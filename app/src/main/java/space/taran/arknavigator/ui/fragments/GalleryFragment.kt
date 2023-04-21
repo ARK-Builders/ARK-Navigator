@@ -31,8 +31,8 @@ import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.FragmentGalleryBinding
 import space.taran.arknavigator.databinding.PopupGalleryTagMenuBinding
 import space.taran.arklib.ResourceId
-import space.taran.arklib.domain.index.ResourceMeta
-import space.taran.arklib.domain.kind.ResourceKind
+import space.taran.arklib.domain.index.Resource
+import space.taran.arklib.domain.meta.Metadata
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 import space.taran.arknavigator.mvp.view.GalleryView
 import space.taran.arknavigator.ui.App
@@ -180,14 +180,13 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
 
     override fun setupPreview(
         pos: Int,
-        resource: ResourceMeta,
-        filePath: String
+        meta: Metadata
     ) {
         lifecycleScope.launch {
             with(binding) {
-                setupOpenEditFABs(resource.kind)
+                setupOpenEditFABs(meta)
                 ExtraLoader.load(
-                    resource,
+                    meta,
                     listOf(primaryExtra, secondaryExtra),
                     verbose = true
                 )
@@ -245,8 +244,8 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
         startActivity(Intent.createChooser(intent, "Share the link with:"))
     }
 
-    override fun showInfoAlert(path: Path, resourceMeta: ResourceMeta) {
-        DetailsAlertDialog(path, resourceMeta, requireContext()).show()
+    override fun showInfoAlert(path: Path, resource: Resource, metadata: Metadata) {
+        DetailsAlertDialog(path, resource, metadata, requireContext()).show()
     }
 
     override fun viewInExternalApp(resourcePath: Path) {
@@ -334,7 +333,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
             requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
             listOf(resource),
             presenter.index,
-            presenter.storage,
+            presenter.tagsStorage,
             presenter.statsStorage
         )
         dialog.show(childFragmentManager, EditTagsDialogFragment.FRAGMENT_TAG)
@@ -476,20 +475,20 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
         }
     }
 
-    private fun setupOpenEditFABs(kind: ResourceKind?) = binding.apply {
+    private fun setupOpenEditFABs(meta: Metadata?) = binding.apply {
         openResourceFab.makeGone()
         editResourceFab.makeGone()
-        when (kind) {
-            is ResourceKind.Video, is ResourceKind.Link, null -> {
+        when (meta) {
+            is Metadata.Video, is Metadata.Link, null -> {
                 // "open" capabilities only
                 openResourceFab.makeVisible()
             }
-            is ResourceKind.Document, is ResourceKind.PlainText -> {
+            is Metadata.Document, is Metadata.PlainText -> {
                 // both "open" and "edit" capabilities
                 editResourceFab.makeVisible()
                 openResourceFab.makeVisible()
             }
-            is ResourceKind.Image -> {
+            is Metadata.Image -> {
                 // "edit" capabilities only
                 editResourceFab.makeVisible()
             }

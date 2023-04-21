@@ -8,7 +8,8 @@ import java.nio.file.Path
 @StateStrategyType(AddToEndSingleStrategy::class)
 interface ResourcesView : CommonMvpView {
     fun init(ascending: Boolean, sortByScoresEnabled: Boolean)
-    fun updateAdapter()
+    fun initResourcesAdapter()
+    fun updateResourcesAdapter()
     fun setProgressVisibility(isVisible: Boolean, withText: String = "")
     fun setToolbarTitle(title: String)
     fun setKindTagsEnabled(enabled: Boolean)
@@ -21,6 +22,7 @@ interface ResourcesView : CommonMvpView {
     fun drawTags()
     fun setTagsSortingVisibility(visible: Boolean)
     fun setPreviewGenerationProgress(isVisible: Boolean)
+    fun setMetadataExtractionProgress(isVisible: Boolean)
 
     @StateStrategyType(SkipStrategy::class)
     fun toastResourcesSelected(selected: Int)

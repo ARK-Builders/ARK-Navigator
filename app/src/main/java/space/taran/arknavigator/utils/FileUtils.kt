@@ -2,7 +2,6 @@ package space.taran.arknavigator.utils
 
 import space.taran.arknavigator.mvp.presenter.adapter.ResourceItem
 import space.taran.arknavigator.ui.App
-import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.io.path.exists
@@ -14,23 +13,13 @@ val ROOT_PATH: Path = Paths.get("/")
 
 val ANDROID_DIRECTORY: Path = Paths.get("Android")
 
-typealias Milliseconds = Long
-typealias StringPath = String
-
 enum class Sorting {
     DEFAULT, NAME, SIZE, LAST_MODIFIED, TYPE
 }
 
-fun convertIntToSorting(intValue: Int?): Sorting {
-    return if (intValue == null) Sorting.DEFAULT
-    else Sorting.values()[intValue]
-}
-
-fun folderExists(path: Path): Boolean =
-    Files.exists(path) || Files.isDirectory(path)
-
 fun listDevices(): List<Path> =
-    App.instance.getExternalFilesDirs(null)
+    App.instance
+        .getExternalFilesDirs(null)
         .toList()
         .filterNotNull()
         .filter { it.exists() }
@@ -94,12 +83,11 @@ fun findLongestCommonPrefix(paths: List<Path>): Path {
 
 fun reifySorting(sorting: Sorting): Comparator<ResourceItem>? =
     when (sorting) {
-        Sorting.NAME -> compareBy(String.CASE_INSENSITIVE_ORDER) { it.meta.name }
-        Sorting.SIZE -> compareBy { it.meta.size() }
-        Sorting.TYPE -> compareBy { it.meta.extension }
-        Sorting.LAST_MODIFIED -> compareBy { it.meta.modified }
+        Sorting.NAME -> compareBy(String.CASE_INSENSITIVE_ORDER) { it.resource.name }
+        Sorting.SIZE -> compareBy { it.resource.size() }
+        Sorting.TYPE -> compareBy { it.resource.extension }
+        Sorting.LAST_MODIFIED -> compareBy { it.resource.modified }
         Sorting.DEFAULT -> null
     }
 
 const val KILOBYTE = 1024
-const val MEGABYTE = 1024 * KILOBYTE

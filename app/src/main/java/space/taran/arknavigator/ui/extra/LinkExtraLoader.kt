@@ -2,17 +2,17 @@ package space.taran.arknavigator.ui.extra
 
 import android.widget.TextView
 import space.taran.arknavigator.R
-import space.taran.arklib.domain.kind.ResourceKind
+import space.taran.arklib.domain.meta.Metadata
 import space.taran.arknavigator.utils.extensions.textOrGone
 
 object LinkExtraLoader {
-    fun load(link: ResourceKind.Link, titleTV: TextView, verbose: Boolean) {
+    fun load(link: Metadata.Link, titleTV: TextView, verbose: Boolean) {
         if (!verbose) return
         titleTV.textOrGone(link.title)
     }
 
     fun loadWithLabel(
-        link: ResourceKind.Link,
+        link: Metadata.Link,
         titleTV: TextView,
         descriptionTV: TextView,
         linkTv: TextView
@@ -31,6 +31,6 @@ object LinkExtraLoader {
                 )
             )
         }
-        linkTv.textOrGone(linkTv.context.getString(R.string.link_label, link.url))
+        linkTv.textOrGone(linkTv.context.getString(R.string.link_label))
     }
 }

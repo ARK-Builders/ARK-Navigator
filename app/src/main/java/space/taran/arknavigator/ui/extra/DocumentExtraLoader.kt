@@ -2,11 +2,11 @@ package space.taran.arknavigator.ui.extra
 
 import android.widget.TextView
 import space.taran.arknavigator.R
-import space.taran.arklib.domain.kind.ResourceKind
+import space.taran.arklib.domain.meta.Metadata
 import space.taran.arknavigator.utils.extensions.textOrGone
 
 object DocumentExtraLoader {
-    fun load(document: ResourceKind.Document, pagesTV: TextView, verbose: Boolean) {
+    fun load(document: Metadata.Document, pagesTV: TextView, verbose: Boolean) {
         val pages = document.pages
         if (pages != null) {
             val label = when {
@@ -21,7 +21,7 @@ object DocumentExtraLoader {
     }
 
     fun loadWithLabel(
-        document: ResourceKind.Document,
+        document: Metadata.Document,
         tvPageNumber: TextView
     ) {
         val pages = document.pages

@@ -21,7 +21,7 @@ import space.taran.arknavigator.mvp.view.item.FileItemViewHolder
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.adapter.TagsSelectorAdapter
-import space.taran.arknavigator.ui.adapter.previewpager.PreviewItemViewHolder
+import space.taran.arknavigator.ui.adapter.previewpager.PreviewImageViewHolder
 import space.taran.arknavigator.ui.fragments.FoldersFragment
 import space.taran.arknavigator.ui.fragments.GalleryFragment
 import space.taran.arknavigator.ui.fragments.ResourcesFragment
@@ -55,7 +55,7 @@ interface AppComponent {
     fun inject(resourcesGridPresenter: ResourcesGridPresenter)
     fun inject(editTagsDialogPresenter: EditTagsDialogPresenter)
     fun inject(fileItemViewHolder: FileItemViewHolder)
-    fun inject(previewItemViewHolder: PreviewItemViewHolder)
+    fun inject(previewImageViewHolder: PreviewImageViewHolder)
     fun inject(sortDialogPresenter: SortDialogPresenter)
     fun inject(tagsSelectorPresenter: TagsSelectorPresenter)
     fun inject(tagsSelectorAdapter: TagsSelectorAdapter)

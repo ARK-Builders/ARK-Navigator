@@ -9,19 +9,16 @@ import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.ortiz.touchview.OnTouchImageViewListener
 import space.taran.arknavigator.databinding.ItemImageBinding
 import space.taran.arklib.ResourceId
-import space.taran.arklib.domain.index.ResourceMeta
-import space.taran.arklib.domain.kind.ResourceKind
-import space.taran.arklib.domain.preview.PreviewAndThumbnail
-import space.taran.arklib.utils.ImageUtils
+import space.taran.arklib.domain.meta.Metadata
+import space.taran.arklib.domain.preview.PreviewLocator
+import space.taran.arklib.domain.preview.PreviewStatus
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 import space.taran.arklib.utils.ImageUtils.loadGlideZoomImage
 import space.taran.arklib.utils.ImageUtils.loadSubsamplingImage
-import space.taran.arklib.utils.extension
 import space.taran.arknavigator.utils.extensions.makeVisibleAndSetOnClickListener
-import java.nio.file.Path
 
 @SuppressLint("ClickableViewAccessibility")
-class PreviewItemViewHolder(
+class PreviewImageViewHolder(
     private val binding: ItemImageBinding,
     private val presenter: GalleryPresenter,
     private val gestureDetector: GestureDetectorCompat
@@ -41,13 +38,12 @@ class PreviewItemViewHolder(
     override var pos = -1
 
     override fun setSource(
-        source: Path,
-        meta: ResourceMeta,
-        previewAndThumbnail: PreviewAndThumbnail?
+        placeholder: Int,
+        id: ResourceId,
+        meta: Metadata,
+        preview: PreviewLocator
     ) = with(binding) {
-        val placeholder = ImageUtils.iconForExtension(extension(source))
-
-        if (meta.kind is ResourceKind.Video) {
+        if (meta is Metadata.Video) {
             icPlay.makeVisibleAndSetOnClickListener {
                 presenter.onPlayButtonClick()
             }
@@ -55,7 +51,16 @@ class PreviewItemViewHolder(
             icPlay.isVisible = false
         }
 
-        loadImage(meta.id, previewAndThumbnail?.preview, placeholder)
+        val status = preview.check()
+        if (status != PreviewStatus.FULLSCREEN) {
+            ivZoom.isZoomEnabled = false
+            ivZoom.setImageResource(placeholder)
+            return@with
+        }
+
+        val path = preview.fullscreen()
+        loadGlideZoomImage(id, path, ivZoom)
+        loadSubsamplingImage(path, ivSubsampling)
     }
 
     override fun reset() = with(binding) {
@@ -68,18 +73,6 @@ class PreviewItemViewHolder(
         ivSubsampling.recycle()
         Glide.with(ivZoom.context).clear(ivZoom)
     }
-
-    private fun loadImage(id: ResourceId, preview: Path?, placeholder: Int) =
-        with(binding) {
-            if (preview == null) {
-                ivZoom.isZoomEnabled = false
-                ivZoom.setImageResource(placeholder)
-                return
-            }
-
-            loadGlideZoomImage(id, preview, ivZoom)
-            loadSubsamplingImage(preview, ivSubsampling)
-        }
 
     private fun setZoomImageEventListener() = with(binding) {
         ivZoom.setOnTouchImageViewListener(object : OnTouchImageViewListener {

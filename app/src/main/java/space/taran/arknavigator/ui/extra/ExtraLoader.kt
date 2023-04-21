@@ -1,29 +1,26 @@
 package space.taran.arknavigator.ui.extra
 
 import android.widget.TextView
-import space.taran.arklib.domain.index.ResourceMeta
-import space.taran.arklib.domain.kind.ResourceKind
+import space.taran.arklib.domain.meta.Metadata
 import space.taran.arknavigator.utils.extensions.makeGone
 
 object ExtraLoader {
-    fun load(meta: ResourceMeta, extraTVs: List<TextView>, verbose: Boolean) {
+    fun load(meta: Metadata, extraTVs: List<TextView>, verbose: Boolean) {
         extraTVs.forEach { it.makeGone() }
 
-        if (meta.kind == null) return
-
-        when (meta.kind) {
-            is ResourceKind.Video -> VideoExtraLoader.load(
-                meta.kind as ResourceKind.Video,
+        when (meta) {
+            is Metadata.Video -> VideoExtraLoader.load(
+                meta,
                 extraTVs[0],
                 extraTVs[1]
             )
-            is ResourceKind.Document -> DocumentExtraLoader.load(
-                meta.kind as ResourceKind.Document,
+            is Metadata.Document -> DocumentExtraLoader.load(
+                meta,
                 extraTVs[0],
                 verbose
             )
-            is ResourceKind.Link -> LinkExtraLoader.load(
-                meta.kind as ResourceKind.Link,
+            is Metadata.Link -> LinkExtraLoader.load(
+                meta,
                 extraTVs[1],
                 verbose
             )
@@ -32,27 +29,25 @@ object ExtraLoader {
     }
 
     fun loadWithLabel(
-        meta: ResourceMeta,
+        meta: Metadata,
         kindPlaceholders: List<TextView>
     ) {
         require(kindPlaceholders.size == 3)
 
         kindPlaceholders.forEach { it.makeGone() }
 
-        if (meta.kind == null) return
-
-        when (meta.kind) {
-            is ResourceKind.Video -> VideoExtraLoader.loadInfo(
-                meta.kind as ResourceKind.Video,
+        when (meta) {
+            is Metadata.Video -> VideoExtraLoader.loadInfo(
+                meta,
                 kindPlaceholders[0],
                 kindPlaceholders[1]
             )
-            is ResourceKind.Document -> DocumentExtraLoader.loadWithLabel(
-                meta.kind as ResourceKind.Document,
+            is Metadata.Document -> DocumentExtraLoader.loadWithLabel(
+                meta,
                 kindPlaceholders[0]
             )
-            is ResourceKind.Link -> LinkExtraLoader.loadWithLabel(
-                meta.kind as ResourceKind.Link,
+            is Metadata.Link -> LinkExtraLoader.loadWithLabel(
+                meta,
                 kindPlaceholders[0],
                 kindPlaceholders[1],
                 kindPlaceholders[2]

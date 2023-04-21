@@ -1,7 +1,6 @@
 package space.taran.arknavigator.mvp.model.repo.scores
 
 import space.taran.arklib.ResourceId
-import space.taran.arklib.domain.index.ResourceMeta
 import space.taran.arknavigator.utils.Score
 
 class AggregatedScoreStorage(
@@ -33,9 +32,9 @@ class AggregatedScoreStorage(
         }
     }
 
-    override suspend fun resetScores(resources: List<ResourceMeta>) {
+    override suspend fun resetScores(ids: List<ResourceId>) {
         shards.forEach {
-            it.resetScores(resources)
+            it.resetScores(ids)
         }
     }
 }

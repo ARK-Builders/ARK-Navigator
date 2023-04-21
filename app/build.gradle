@@ -86,9 +86,15 @@ android {
 }
 
 dependencies {
-    implementation 'space.taran:arklib:0.1.0-SNAPSHOT-df3b64ae18'
-    // for local development, you can inject local AAR dependency
-    // implementation files('libs/lib-debug.aar')
+    implementation 'space.taran:arklib:0.2.0'
+
+    //// For local development, you can inject local AAR dependency:
+    // implementation files('/tmp/arklib-android/lib/build/outputs/aar/lib-debug.aar')
+
+    //// But better to use mavenLocal() repo and push the lib into it,
+    //// this way you will be able to use debugger on the library code.
+    //// See `build.gradle` in the project root.
+
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7"

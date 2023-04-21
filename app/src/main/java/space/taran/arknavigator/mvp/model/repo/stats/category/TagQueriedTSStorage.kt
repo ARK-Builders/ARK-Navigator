@@ -33,7 +33,7 @@ class TagQueriedTSStorage(
             is StatsEvent.PlainTagUsed ->
                 tagQueriedTS[event.tag] = System.currentTimeMillis()
             is StatsEvent.KindTagUsed ->
-                tagQueriedTS[event.kindCode.name] = System.currentTimeMillis()
+                tagQueriedTS[event.kind.name] = System.currentTimeMillis()
             else -> return
         }
         requestFlush()
