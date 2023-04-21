@@ -30,7 +30,16 @@ import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagsSelectorA
 import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagsSelectorPresenter
 import space.taran.arknavigator.mvp.presenter.dialog.TagsSorting
 import space.taran.arknavigator.mvp.view.ResourcesView
-import space.taran.arknavigator.stub.*
+import space.taran.arknavigator.stub.MetadataStorageStub
+import space.taran.arknavigator.stub.ResourceIndexStub
+import space.taran.arknavigator.stub.TagsStorageStub
+import space.taran.arknavigator.stub.StatsStorageStub
+import space.taran.arknavigator.stub.TAG1
+import space.taran.arknavigator.stub.TAG2
+import space.taran.arknavigator.stub.R1
+import space.taran.arknavigator.stub.R2
+import space.taran.arknavigator.stub.R3
+import space.taran.arknavigator.stub.R4
 
 @ExperimentalCoroutinesApi
 @ExtendWith(MockKExtension::class)
@@ -159,5 +168,5 @@ class TagSelectorPresenterTest {
             assertEquals(presenter.selection, setOf(R1, R2, R3, R4))
         }
 
-    private suspend fun onSelectionChange(resources: Set<ResourceId>) {}
+    private fun onSelectionChange(resources: Set<ResourceId>) {}
 }

@@ -8,7 +8,7 @@ import space.taran.arklib.domain.meta.MetadataStorage
 import space.taran.arklib.domain.meta.MetadataUpdate
 import java.nio.file.Path
 
-class MetadataStorageStub: MetadataStorage {
+class MetadataStorageStub : MetadataStorage {
     private val metaById: MutableMap<ResourceId, Metadata> = mapOf(
         R1 to Metadata.PlainText(),
         R2 to Metadata.Image(),
