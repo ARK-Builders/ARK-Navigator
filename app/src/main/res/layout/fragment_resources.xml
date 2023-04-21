@@ -17,6 +17,14 @@
         android:indeterminate="true"
         app:layout_constraintTop_toBottomOf="@id/action_bar"/>
 
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/progress_metadata_extraction"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:indeterminate="true"
+        app:layout_constraintTop_toBottomOf="@id/action_bar"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_resources"
         android:layout_width="match_parent"

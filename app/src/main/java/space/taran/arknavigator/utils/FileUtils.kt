@@ -26,11 +26,9 @@ fun convertIntToSorting(intValue: Int?): Sorting {
     else Sorting.values()[intValue]
 }
 
-fun folderExists(path: Path): Boolean =
-    Files.exists(path) || Files.isDirectory(path)
-
 fun listDevices(): List<Path> =
-    App.instance.getExternalFilesDirs(null)
+    App.instance
+        .getExternalFilesDirs(null)
         .toList()
         .filterNotNull()
         .filter { it.exists() }

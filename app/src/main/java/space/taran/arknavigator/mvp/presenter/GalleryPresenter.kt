@@ -390,24 +390,6 @@ class GalleryPresenter(
         )
     }
 
-    // todo it should be called from somewhere
-    // todo it must receive new resources
-    // todo it must receive deleted resources
-    // todo it must be reworked
-    private suspend fun onRemovedOrEditedResourceDetected() =
-        withContext(Dispatchers.Main) {
-            viewState.setProgressVisibility(true, "Indexing")
-
-            // update current storages with new resources
-            tagsStorageRepo.provide(index)
-            scoreStorageRepo.provide(index)
-
-            invalidateResources()
-            viewState.notifyCurrentItemChanged()
-            viewState.notifyResourcesChanged()
-            viewState.setProgressVisibility(false)
-        }
-
     private suspend fun invalidateResources() {
         val newItems = galleryItems.filter { item ->
             index.allIds().contains(item.resource.id)

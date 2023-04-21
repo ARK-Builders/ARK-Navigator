@@ -4,7 +4,6 @@ import space.taran.arklib.ResourceId
 import space.taran.arklib.domain.meta.Metadata
 import space.taran.arklib.domain.preview.PreviewLocator
 
-//todo do we need this interface?
 interface PreviewItemView {
     var pos: Int
 

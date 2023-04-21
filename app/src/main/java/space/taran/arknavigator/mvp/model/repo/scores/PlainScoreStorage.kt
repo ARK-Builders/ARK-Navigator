@@ -41,17 +41,6 @@ class PlainScoreStorage(
         scoreById = result
     }
 
-    //todo do we need it?
-    fun refresh(resources: Collection<ResourceId>) {
-        Log.d(SCORES_STORAGE,
-            "refreshing score storage with new and edited resources")
-        resources.forEach { id ->
-            scoreById.computeIfAbsent(id) { 0 }
-        }
-        Log.d(SCORES_STORAGE,
-            "${this.scoreById.size} resources available in score storage")
-    }
-
     override fun contains(id: ResourceId) = scoreById.containsKey(id)
 
     override fun setScore(id: ResourceId, score: Score) {
@@ -81,6 +70,7 @@ class PlainScoreStorage(
     }
 
     private fun readStorage(): Map<ResourceId, Score> {
+        // better to wrap with coroutine
         val lines = Files.readAllLines(storageFile, UTF_8)
         val version = lines.removeAt(0)
         verifyVersion(version)

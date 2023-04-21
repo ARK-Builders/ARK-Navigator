@@ -237,6 +237,7 @@ class PlainTagsStorage(
         }
 
     private fun readStorage(): Result<Map<ResourceId, Tags>> {
+        // better to wrap with coroutine
         val lines = Files.readAllLines(storageFile, StandardCharsets.UTF_8)
         verifyVersion(lines.removeAt(0))
 

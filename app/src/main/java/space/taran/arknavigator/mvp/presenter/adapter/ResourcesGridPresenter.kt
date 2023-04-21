@@ -92,14 +92,18 @@ class ResourcesGridPresenter(
         )
 
         if (Files.isDirectory(path)) {
-            throw AssertionError("Resource can't be a directory")
+            throw IllegalArgumentException("Resource can't be a directory")
         }
 
-        if (path.notExists())
-            scope.launch { resourcesPresenter.onRemovedResourceDetected() }
+        if (path.notExists()) {
+            scope.launch {
+                resourcesPresenter.onRemovedResourceDetected()
+            }
+        }
 
-        val metadata = metadataStorage.locate(path, item.id()).getOrThrow()
-        val preview = previewStorage.locate(path, item.id()).getOrThrow()
+        val id = item.id()
+        val metadata = metadataStorage.locate(path, id).getOrThrow()
+        val preview = previewStorage.locate(path, id).getOrThrow()
 
         view.setIconOrPreview(
             path,
@@ -187,7 +191,7 @@ class ResourcesGridPresenter(
         preferences.flow(PreferenceKey.ShortFileNames).onEach {
             if (shortFileNames != it) {
                 shortFileNames = it
-                viewState.updateAdapter()
+                viewState.updateResourcesAdapter()
             }
         }.launchIn(scope)
 
@@ -207,7 +211,7 @@ class ResourcesGridPresenter(
             .filter { selection.contains(it.id()) }
         withContext(Dispatchers.Main) {
             setProgressVisibility(false)
-            viewState.updateAdapter()
+            viewState.updateResourcesAdapter()
         }
     }
 
@@ -228,7 +232,7 @@ class ResourcesGridPresenter(
             "reordering resources randomly"
         )
         withContext(Dispatchers.Main) {
-            viewState.updateAdapter()
+            viewState.updateResourcesAdapter()
         }
     }
 
@@ -273,7 +277,7 @@ class ResourcesGridPresenter(
                 item.isSelected = item.id() in selected
             }
             withContext(Dispatchers.Main) {
-                viewState.updateAdapter()
+                viewState.updateResourcesAdapter()
                 viewState.setSelectingCount(
                     resources.filter { it.isSelected }.size,
                     resources.size
@@ -392,7 +396,7 @@ class ResourcesGridPresenter(
         sortSelection()
         scope.launch(Dispatchers.Main) {
             setProgressVisibility(false)
-            viewState.updateAdapter()
+            viewState.updateResourcesAdapter()
         }
     }
 

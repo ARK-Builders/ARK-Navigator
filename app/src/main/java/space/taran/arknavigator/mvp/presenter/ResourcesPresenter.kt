@@ -117,7 +117,7 @@ class ResourcesPresenter(
             val ascending = preferences.get(PreferenceKey.IsSortingAscending)
             val sortByScores = preferences.get(PreferenceKey.SortByScores)
             viewState.init(ascending, sortByScores)
-            viewState.setProgressVisibility(true, "Indexing")
+            viewState.initResourcesAdapter()
 
             val root = folders.root
             val title = if (root != null) {
@@ -133,6 +133,8 @@ class ResourcesPresenter(
 
             viewState.setToolbarTitle(title)
 
+            viewState.setProgressVisibility(true, "Indexing resources")
+
             index = resourcesIndexRepo.provide(folders)
 
             messageFlow.onEach { message ->
@@ -143,12 +145,16 @@ class ResourcesPresenter(
                 }
             }.launchIn(presenterScope)
 
+            viewState.setProgressVisibility(true, "Extracting metadata")
             metadataStorage = metadataStorageRepo.provide(index)
+
+            viewState.setProgressVisibility(true, "Generating previews")
             previewStorage = previewStorageRepo.provide(index)
-            initIndexingListener()
-            index.updateAll()
+
+            initIndexingListeners()
 
             tagStorage = tagsStorageRepo.provide(index)
+
             if (tagStorage.isCorrupted()) {
                 viewState.showCorruptNotificationDialog(
                     PlainTagsStorage.TYPE
@@ -156,8 +162,8 @@ class ResourcesPresenter(
                 return@launch
             }
 
-            statsStorage = statsStorageRepo.provide(index)
             scoreStorage = scoreStorageRepo.provide(index)
+            statsStorage = statsStorageRepo.provide(index)
 
             gridPresenter.init(
                 index,
@@ -167,7 +173,7 @@ class ResourcesPresenter(
                 previewStorage,
                 scoreStorage)
 
-            viewState.setProgressVisibility(true, "Sorting")
+            viewState.setProgressVisibility(true, "Sorting resources")
 
             val resources = index.allResources()
             gridPresenter.resetResources(resources)
@@ -216,7 +222,6 @@ class ResourcesPresenter(
         jobs.forEach { it.join() }
         migrateTags(resourcesToMove, directoryToMove)
 
-        // todo it should be updateSome
         index.updateAll()
 
         tagsStorageRepo.provide(index)
@@ -305,7 +310,6 @@ class ResourcesPresenter(
         }
         results.forEach { it.await() }
 
-        // todo it should be updateSome
         index.updateAll()
 
         tagsStorageRepo.provide(index)
@@ -336,7 +340,6 @@ class ResourcesPresenter(
             router.exit()
     }
 
-    // todo this is hack, index must detect changes and notify with update
     suspend fun onRemovedResourceDetected() {
         viewState.setProgressVisibility(true, "Indexing")
 
@@ -353,7 +356,12 @@ class ResourcesPresenter(
         gridPresenter.updateSelection(selection)
     }
 
-    private fun initIndexingListener() {
+    private fun initIndexingListeners() {
+        metadataStorage.inProgress.onEach {
+            Timber.d("metadata extraction progress = $it")
+            viewState.setPreviewGenerationProgress(it)
+        }.launchIn(presenterScope)
+
         previewStorage.inProgress.onEach {
             Timber.d("preview generation progress = $it")
             viewState.setPreviewGenerationProgress(it)
