@@ -28,6 +28,8 @@ allprojects {
     apply plugin: "org.jlleitschuh.gradle.ktlint"
     repositories {
         google()
+        //// Uncomment this repo for easier library development:
+        // mavenLocal()
         mavenCentral()
         maven {
             name = "GitHubPackages"

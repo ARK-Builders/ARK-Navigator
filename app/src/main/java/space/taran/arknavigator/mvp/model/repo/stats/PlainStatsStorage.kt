@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import space.taran.arklib.arkFolder
 import space.taran.arklib.arkStats
-import space.taran.arklib.domain.index.ResourceIndex
+import space.taran.arklib.domain.index.RootIndex
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.stats.category.StatsCategoryStorage
@@ -20,16 +20,17 @@ import space.taran.arknavigator.mvp.model.repo.stats.category.TagQueriedNStorage
 import space.taran.arknavigator.mvp.model.repo.stats.category.TagQueriedTSStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import timber.log.Timber
-import java.nio.file.Path
 import kotlin.io.path.createDirectories
 
 class PlainStatsStorage(
-    private val root: Path,
-    private val index: ResourceIndex,
+    private val index: RootIndex,
     private val tagsStorage: TagsStorage,
     private val preferences: Preferences,
     private val statsFlow: SharedFlow<StatsEvent>
 ) : StatsStorage {
+
+    private val root = index.path
+
     private val scope = CoroutineScope(Dispatchers.IO)
     private val categoryStorages = mutableListOf<StatsCategoryStorage<Any>>()
     private val tagLabeledTS =

@@ -333,7 +333,7 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
             requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
             listOf(resource),
             presenter.index,
-            presenter.storage,
+            presenter.tagsStorage,
             presenter.statsStorage
         )
         dialog.show(childFragmentManager, EditTagsDialogFragment.FRAGMENT_TAG)

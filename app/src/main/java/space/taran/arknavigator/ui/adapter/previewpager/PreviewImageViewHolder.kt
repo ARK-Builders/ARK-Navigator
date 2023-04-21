@@ -9,6 +9,7 @@ import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.ortiz.touchview.OnTouchImageViewListener
 import space.taran.arknavigator.databinding.ItemImageBinding
 import space.taran.arklib.ResourceId
+import space.taran.arklib.domain.meta.Kind
 import space.taran.arklib.domain.meta.Metadata
 import space.taran.arklib.domain.preview.PreviewLocator
 import space.taran.arklib.domain.preview.PreviewStatus
@@ -54,7 +55,16 @@ class PreviewImageViewHolder(
             icPlay.isVisible = false
         }
 
-        loadImage(id, preview, placeholder)
+        val status = preview.check()
+        if (status != PreviewStatus.FULLSCREEN) {
+            ivZoom.isZoomEnabled = false
+            ivZoom.setImageResource(placeholder)
+            return@with
+        }
+
+        val path = preview.fullscreen()
+        loadGlideZoomImage(id, path, ivZoom)
+        loadSubsamplingImage(path, ivSubsampling)
     }
 
     override fun reset() = with(binding) {
@@ -67,25 +77,6 @@ class PreviewImageViewHolder(
         ivSubsampling.recycle()
         Glide.with(ivZoom.context).clear(ivZoom)
     }
-
-    private fun loadImage(id: ResourceId, locator: PreviewLocator, placeholder: Int) =
-        with(binding) {
-            val status = locator.check()
-            if (status == PreviewStatus.ABSENT) {
-                ivZoom.isZoomEnabled = false
-                ivZoom.setImageResource(placeholder)
-                return@with
-            }
-
-            if (status == PreviewStatus.THUMBNAIL) {
-                //todo: not sure right now
-                throw NotImplementedError()
-            }
-
-            val path = locator.fullscreen()
-            loadGlideZoomImage(id, path, ivZoom)
-            loadSubsamplingImage(path, ivSubsampling)
-        }
 
     private fun setZoomImageEventListener() = with(binding) {
         ivZoom.setOnTouchImageViewListener(object : OnTouchImageViewListener {

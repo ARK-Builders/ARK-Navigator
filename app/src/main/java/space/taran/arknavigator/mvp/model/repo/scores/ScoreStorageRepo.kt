@@ -1,44 +1,30 @@
 package space.taran.arknavigator.mvp.model.repo.scores
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
-import space.taran.arkfilepicker.folders.FoldersRepo
-import space.taran.arkfilepicker.folders.RootAndFav
-import space.taran.arklib.domain.index.ResourceIndexRepo
+import space.taran.arklib.domain.index.ResourceIndex
+import space.taran.arklib.domain.index.RootIndex
 import java.nio.file.Path
 
-class ScoreStorageRepo(
-    private val foldersRepo: FoldersRepo,
-    private val indexRepo: ResourceIndexRepo
-) {
-    private val provideMutex = Mutex()
+class ScoreStorageRepo {
     private val storageByRoot = mutableMapOf<Path, PlainScoreStorage>()
 
-    suspend fun provide(rootAndFav: RootAndFav): ScoreStorage =
-        withContext(Dispatchers.IO) {
-            val roots = foldersRepo.resolveRoots(rootAndFav)
+    suspend fun provide(index: ResourceIndex): ScoreStorage {
+        val roots = index.roots
 
-            provideMutex.withLock {
-                val storageShards = roots.map { root ->
-                    val index = indexRepo.provide(root)
-                    val resources = index.allIds()
-                    if (storageByRoot[root] != null) {
-                        storageByRoot[root]?.refresh(resources)
-                        storageByRoot[root]!!
-                    } else {
-                        val scoreStorage = PlainScoreStorage(root, resources)
-                        scoreStorage.init()
-                        storageByRoot[root] = scoreStorage
-                        scoreStorage
-                    }
-                }
-                return@withContext AggregatedScoreStorage(storageShards)
-            }
+        return if (roots.size > 1) {
+            val shards = roots.map { provide(it) }
+
+            AggregatedScoreStorage(shards)
+        } else {
+            val root = roots.iterator().next()
+            provide(root)
         }
+    }
 
-    suspend fun provide(root: Path) = provide(
-        RootAndFav(root.toString(), favString = null)
-    )
+    suspend fun provide(root: RootIndex): PlainScoreStorage =
+        storageByRoot[root.path] ?: PlainScoreStorage(
+            root.path,
+            root.allIds(),
+        ).also {
+            storageByRoot[root.path] = it
+        }
 }

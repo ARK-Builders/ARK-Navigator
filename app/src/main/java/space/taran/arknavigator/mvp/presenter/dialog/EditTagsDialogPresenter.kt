@@ -90,8 +90,8 @@ class EditTagsDialogPresenter(
                 init()
             } else {
                 index = indexRepo.provide(rootAndFav)
-                storage = tagsStorageRepo.provide(rootAndFav)
-                statsStorage = statsStorageRepo.provide(rootAndFav)
+                storage = tagsStorageRepo.provide(index)
+                statsStorage = statsStorageRepo.provide(index)
                 init()
             }
         }

@@ -55,7 +55,7 @@ fun ResourcesFragment.setupAndShowSelectedResourcesMenu(menuBtn: View) {
             }
             EditTagsDialogFragment
                 .newInstance(
-                    presenter.rootAndFav,
+                    presenter.folders,
                     selected,
                     presenter.index,
                     presenter.tagStorage,

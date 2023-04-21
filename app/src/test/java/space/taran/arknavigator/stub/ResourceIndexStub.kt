@@ -17,7 +17,7 @@ class ResourceIndexStub : ResourceIndex {
     override val roots: Set<RootIndex> = setOf()
 
     override val updates: Flow<ResourceUpdates> =
-        MutableSharedFlow<ResourceUpdates>()
+        MutableSharedFlow()
 
     override suspend fun updateAll() {}
 

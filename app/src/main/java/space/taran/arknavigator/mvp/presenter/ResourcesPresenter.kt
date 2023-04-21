@@ -47,7 +47,7 @@ import kotlin.io.path.copyTo
 import kotlin.io.path.deleteIfExists
 
 class ResourcesPresenter(
-    val rootAndFav: RootAndFav,
+    val folders: RootAndFav,
     private val externallySelectedTag: Tag? = null
 ) : MvpPresenter<ResourcesView>() {
 
@@ -96,7 +96,7 @@ class ResourcesPresenter(
         private set
 
     val gridPresenter =
-        ResourcesGridPresenter(rootAndFav, viewState, presenterScope, this)
+        ResourcesGridPresenter(folders, viewState, presenterScope, this)
             .apply {
                 App.instance.appComponent.inject(this)
             }
@@ -118,29 +118,22 @@ class ResourcesPresenter(
             val sortByScores = preferences.get(PreferenceKey.SortByScores)
             viewState.init(ascending, sortByScores)
             viewState.setProgressVisibility(true, "Indexing")
-            val folders = foldersRepo.provideWithMissing()
-            Log.d(RESOURCES_SCREEN, "folders retrieved: $folders")
 
-            viewState.toastPathsFailed(folders.failed)
-
-            val all = folders.succeeded.keys
-            val roots: List<Path> = if (rootAndFav.root != null) {
-                if (!all.contains(rootAndFav.root)) {
-                    throw AssertionError("Requested root wasn't found in DB")
+            val root = folders.root
+            val title = if (root != null) {
+                val favorite = folders.fav
+                if (favorite != null) {
+                    "Favorite folder \"${favorite.last()}\" selected"
+                } else {
+                    "Root folder \"${root.last()}\" selected"
                 }
-
-                listOf(rootAndFav.root!!)
             } else {
-                all.toList()
+                "All roots are selected"
             }
 
-            val path = (rootAndFav.fav ?: rootAndFav.root)
-            val title = if (path != null) "${path.last()}, " else ""
+            viewState.setToolbarTitle(title)
 
-            viewState.setToolbarTitle("$title${roots.size} of roots chosen")
-
-            Log.d(RESOURCES_SCREEN, "using roots $roots")
-            index = resourcesIndexRepo.provide(rootAndFav)
+            index = resourcesIndexRepo.provide(folders)
 
             messageFlow.onEach { message ->
                 when (message) {
@@ -155,7 +148,7 @@ class ResourcesPresenter(
             initIndexingListener()
             index.updateAll()
 
-            tagStorage = tagsStorageRepo.provide(rootAndFav)
+            tagStorage = tagsStorageRepo.provide(index)
             if (tagStorage.isCorrupted()) {
                 viewState.showCorruptNotificationDialog(
                     PlainTagsStorage.TYPE
@@ -163,8 +156,8 @@ class ResourcesPresenter(
                 return@launch
             }
 
-            statsStorage = statsStorageRepo.provide(rootAndFav)
-            scoreStorage = scoreStorageRepo.provide(rootAndFav)
+            statsStorage = statsStorageRepo.provide(index)
+            scoreStorage = scoreStorageRepo.provide(index)
 
             gridPresenter.init(
                 index,
@@ -222,8 +215,11 @@ class ResourcesPresenter(
         }
         jobs.forEach { it.join() }
         migrateTags(resourcesToMove, directoryToMove)
+
+        // todo it should be updateSome
         index.updateAll()
-        tagsStorageRepo.provide(rootAndFav)
+
+        tagsStorageRepo.provide(index)
         withContext(Dispatchers.Main) {
             onResourcesOrTagsChanged()
             gridPresenter.onSelectingChanged(false)
@@ -308,8 +304,11 @@ class ResourcesPresenter(
             }
         }
         results.forEach { it.await() }
+
+        // todo it should be updateSome
         index.updateAll()
-        tagsStorageRepo.provide(rootAndFav)
+
+        tagsStorageRepo.provide(index)
         withContext(Dispatchers.Main) {
             onResourcesOrTagsChanged()
             gridPresenter.onSelectingChanged(false)
@@ -318,16 +317,13 @@ class ResourcesPresenter(
     }
 
     private suspend fun migrateTags(resources: List<ResourceId>, to: Path) {
-        val newRoot = foldersRepo.findRootByPath(to)
-        newRoot?.let {
-            val newStorage = tagsStorageRepo.provide(it)
-            resources
-                .associateWith { tagStorage.getTags(it) }
-                .forEach { (id, tags) ->
-                    newStorage.setTags(id, tags)
-                }
-            newStorage.persist()
-        }
+        val newStorage = tagsStorageRepo.provide(index)
+        resources
+            .associateWith { tagStorage.getTags(it) }
+            .forEach { (id, tags) ->
+                newStorage.setTags(id, tags)
+            }
+        newStorage.persist()
     }
 
     suspend fun onResourcesOrTagsChanged() {
@@ -340,12 +336,13 @@ class ResourcesPresenter(
             router.exit()
     }
 
+    // todo this is hack, index must detect changes and notify with update
     suspend fun onRemovedResourceDetected() {
         viewState.setProgressVisibility(true, "Indexing")
 
         index.updateAll()
         // update current tags storage
-        tagsStorageRepo.provide(rootAndFav)
+        tagsStorageRepo.provide(index)
 
         viewState.setProgressVisibility(true, "Sorting")
         onResourcesOrTagsChanged()

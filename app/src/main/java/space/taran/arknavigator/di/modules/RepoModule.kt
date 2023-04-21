@@ -45,11 +45,9 @@ class RepoModule {
     @Singleton
     @Provides
     fun tagsStorageRepo(
-        foldersRepo: FoldersRepo,
-        resourceIndexRepo: ResourceIndexRepo,
         preferences: Preferences
     ): TagsStorageRepo {
-        return TagsStorageRepo(foldersRepo, resourceIndexRepo, preferences)
+        return TagsStorageRepo(preferences)
     }
 
     @Singleton
@@ -69,10 +67,7 @@ class RepoModule {
 
     @Singleton
     @Provides
-    fun scoreStorageRepo(
-        foldersRepo: FoldersRepo,
-        indexRepo: ResourceIndexRepo
-    ): ScoreStorageRepo {
-        return ScoreStorageRepo(foldersRepo, indexRepo)
+    fun scoreStorageRepo(): ScoreStorageRepo {
+        return ScoreStorageRepo()
     }
 }

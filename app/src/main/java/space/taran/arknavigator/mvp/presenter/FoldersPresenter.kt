@@ -210,10 +210,9 @@ class FoldersPresenter(
         viewState.toastIndexingCanTakeMinutes()
 
         viewState.setProgressVisibility(true, "Indexing")
+        // any valid root folder must contain `.ark` subfolder
         val index = resourcesIndexRepo.provide(root)
-        previewsStorageRepo.provide(index)
         index.updateAll()
-
         viewState.setProgressVisibility(false)
 
         viewState.updateFoldersTree(devices, foldersRepo.provideFolders())

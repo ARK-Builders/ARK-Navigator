@@ -6,7 +6,6 @@ import kotlinx.coroutines.withContext
 import space.taran.arklib.arkFolder
 import space.taran.arklib.arkScores
 import space.taran.arklib.ResourceId
-import space.taran.arklib.domain.index.Resource
 import space.taran.arknavigator.utils.LogTags.SCORES_STORAGE
 import space.taran.arknavigator.utils.Score
 import java.nio.charset.StandardCharsets.UTF_8
@@ -23,9 +22,9 @@ class PlainScoreStorage(
 
     private var lastModified = FileTime.fromMillis(0L)
 
-    private lateinit var scoreById: MutableMap<ResourceId, Score>
+    private var scoreById: MutableMap<ResourceId, Score>
 
-    suspend fun init() = withContext(Dispatchers.IO) {
+    init {
         val result = resources.associateWith {
             0
         }.toMutableMap()
@@ -33,33 +32,24 @@ class PlainScoreStorage(
         if (Files.exists(storageFile)) {
             lastModified = Files.getLastModifiedTime(storageFile)
 
-            Log.d(
-                SCORES_STORAGE,
-                "file $storageFile exists" +
-                    ", last modified at $lastModified"
-            )
+            Log.d(SCORES_STORAGE,
+                "file $storageFile exists, last modified at $lastModified")
             result.putAll(readStorage())
         } else {
-            Log.d(
-                SCORES_STORAGE,
-                "file $storageFile doesn't exists"
-            )
+            Log.d(SCORES_STORAGE, "file $storageFile doesn't exists")
         }
         scoreById = result
     }
 
+    //todo do we need it?
     fun refresh(resources: Collection<ResourceId>) {
-        Log.d(
-            SCORES_STORAGE,
-            "refreshing score storage with new and edited resources"
-        )
+        Log.d(SCORES_STORAGE,
+            "refreshing score storage with new and edited resources")
         resources.forEach { id ->
             scoreById.computeIfAbsent(id) { 0 }
         }
-        Log.d(
-            SCORES_STORAGE,
-            "${this.scoreById.size} resources available in score storage"
-        )
+        Log.d(SCORES_STORAGE,
+            "${this.scoreById.size} resources available in score storage")
     }
 
     override fun contains(id: ResourceId) = scoreById.containsKey(id)
@@ -68,10 +58,7 @@ class PlainScoreStorage(
         if (!scoreById.containsKey(id))
             error("Storage isn't aware of this resource id")
 
-        Log.d(
-            SCORES_STORAGE,
-            "new score for resource $id: $score"
-        )
+        Log.d(SCORES_STORAGE, "new score for resource $id: $score")
         scoreById[id] = score
     }
 
@@ -90,35 +77,29 @@ class PlainScoreStorage(
             }
         }
         persist()
-        Log.d(
-            SCORES_STORAGE,
-            "${resources.size} score(s) erased"
-        )
+        Log.d(SCORES_STORAGE, "${resources.size} score(s) erased")
     }
 
-    private suspend fun readStorage(): Map<ResourceId, Score> =
-        withContext(Dispatchers.IO) {
-            val lines = Files.readAllLines(storageFile, UTF_8)
-            val version = lines.removeAt(0)
-            verifyVersion(version)
-            val result = lines.map {
-                val parts = it.split(KEY_VALUE_SEPARATOR)
-                val id = ResourceId.fromString(parts[0])
-                val score = parts[1].toInt()
+    private fun readStorage(): Map<ResourceId, Score> {
+        val lines = Files.readAllLines(storageFile, UTF_8)
+        val version = lines.removeAt(0)
+        verifyVersion(version)
+        val result = lines.map {
+            val parts = it.split(KEY_VALUE_SEPARATOR)
+            val id = ResourceId.fromString(parts[0])
+            val score = parts[1].toInt()
 
-                if (score == 0)
-                    throw AssertionError(
-                        "score storage must have contained un-scored resources"
-                    )
-                id to score
-            }.toMap()
+            if (score == 0)
+                throw AssertionError(
+                    "score storage must have contained un-scored resources"
+                )
+            id to score
+        }.toMap()
 
-            Log.d("all scores", "$result")
+        return result
+    }
 
-            return@withContext result
-        }
-
-    private suspend fun writeStorage() = withContext(Dispatchers.IO) {
+    private fun writeStorage() {
         val lines = mutableListOf<String>()
 
         lines.add("$STORAGE_VERSION_PREFIX$STORAGE_VERSION")

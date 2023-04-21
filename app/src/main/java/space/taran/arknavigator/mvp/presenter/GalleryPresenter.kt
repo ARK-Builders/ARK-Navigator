@@ -46,7 +46,6 @@ import space.taran.arknavigator.ui.adapter.previewpager.PreviewPlainTextItemView
 import space.taran.arknavigator.utils.LogTags.GALLERY_SCREEN
 import space.taran.arknavigator.utils.Score
 import space.taran.arknavigator.utils.Tag
-import timber.log.Timber
 import java.io.FileNotFoundException
 import java.io.FileReader
 import java.lang.IllegalStateException
@@ -67,7 +66,7 @@ class GalleryPresenter(
 
     lateinit var index: ResourceIndex
         private set
-    lateinit var storage: TagsStorage
+    lateinit var tagsStorage: TagsStorage
         private set
     lateinit var previewStorage: PreviewStorage
         private set
@@ -143,13 +142,13 @@ class GalleryPresenter(
                     )
                 }
             }.launchIn(presenterScope)
-            storage = tagsStorageRepo.provide(rootAndFav)
+            tagsStorage = tagsStorageRepo.provide(index)
             previewStorage = previewStorageRepo.provide(index)
             metadataStorage = metadataStorageRepo.provide(index)
-            statsStorage = statsStorageRepo.provide(rootAndFav)
-            scoreStorage = scoreStorageRepo.provide(rootAndFav)
+            statsStorage = statsStorageRepo.provide(index)
+            scoreStorage = scoreStorageRepo.provide(index)
 
-            if (storage.isCorrupted()) viewState.showCorruptNotificationDialog(
+            if (tagsStorage.isCorrupted()) viewState.showCorruptNotificationDialog(
                 PlainTagsStorage.TYPE
             )
 
@@ -180,7 +179,7 @@ class GalleryPresenter(
         currentPos = newPos
 
         val id = currentItem.id()
-        val tags = storage.getTags(id)
+        val tags = tagsStorage.getTags(id)
         val score = scoreStorage.getScore(id)
         displayPreview(id, currentItem.metadata, tags, score)
     }
@@ -214,7 +213,7 @@ class GalleryPresenter(
     }
 
     fun onTagsChanged() {
-        val tags = storage.getTags(currentItem.id())
+        val tags = tagsStorage.getTags(currentItem.id())
         viewState.displayPreviewTags(currentItem.id(), tags)
     }
 
@@ -285,14 +284,14 @@ class GalleryPresenter(
     fun onTagRemove(tag: Tag) = presenterScope.launch(NonCancellable) {
         val id = currentItem.id()
 
-        val tags = storage.getTags(id)
+        val tags = tagsStorage.getTags(id)
         val newTags = tags - tag
 
         viewState.displayPreviewTags(id, newTags)
 
         Log.d(GALLERY_SCREEN, "setting new tags $newTags to $currentItem")
 
-        storage.setTagsAndPersist(id, newTags)
+        tagsStorage.setTagsAndPersist(id, newTags)
         viewState.notifyTagsChanged()
     }
 
@@ -369,7 +368,7 @@ class GalleryPresenter(
         val path = index.getPath(resource)
 
         Files.delete(path)
-        storage.remove(resource)
+        tagsStorage.remove(resource)
 
         index.updateAll()
     }
@@ -391,14 +390,17 @@ class GalleryPresenter(
         )
     }
 
+    // todo it should be called from somewhere
+    // todo it must receive new resources
+    // todo it must receive deleted resources
+    // todo it must be reworked
     private suspend fun onRemovedOrEditedResourceDetected() =
         withContext(Dispatchers.Main) {
             viewState.setProgressVisibility(true, "Indexing")
 
-            index.updateAll()
             // update current storages with new resources
-            tagsStorageRepo.provide(rootAndFav)
-            scoreStorageRepo.provide(rootAndFav)
+            tagsStorageRepo.provide(index)
+            scoreStorageRepo.provide(index)
 
             invalidateResources()
             viewState.notifyCurrentItemChanged()

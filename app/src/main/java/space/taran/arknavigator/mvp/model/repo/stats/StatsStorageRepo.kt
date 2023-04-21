@@ -1,9 +1,9 @@
 package space.taran.arknavigator.mvp.model.repo.stats
 
-import space.taran.arkfilepicker.folders.FoldersRepo
-import space.taran.arkfilepicker.folders.RootAndFav
-import space.taran.arklib.domain.index.ResourceIndexRepo
+import space.taran.arklib.domain.index.ResourceIndex
+import space.taran.arklib.domain.index.RootIndex
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
+import space.taran.arknavigator.mvp.model.repo.tags.PlainTagsStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import java.nio.file.Path
 import javax.inject.Inject
@@ -11,34 +11,38 @@ import javax.inject.Singleton
 
 @Singleton
 class StatsStorageRepo @Inject constructor(
-    private val foldersRepo: FoldersRepo,
-    private val indexRepo: ResourceIndexRepo,
     private val tagsStorageRepo: TagsStorageRepo,
     private val preferences: Preferences
 ) {
-    private val storageByRoot = mutableMapOf<Path, StatsStorage>()
+    private val storageByRoot = mutableMapOf<Path, PlainStatsStorage>()
 
-    suspend fun provide(rootAndFav: RootAndFav): StatsStorage {
-        val roots = foldersRepo.resolveRoots(rootAndFav)
+    suspend fun provide(index: ResourceIndex): StatsStorage {
+        val roots = index.roots
 
-        val shards = roots.map { root ->
-            storageByRoot[root]?.let { return@map it }
+        return if (roots.size > 1) {
+            val shards = roots.map {
+                val tagsStorage = tagsStorageRepo.provide(it)
+                provide(it, tagsStorage)
+            }
 
-            val storage = PlainStatsStorage(
-                root,
-                indexRepo.provide(root),
-                tagsStorageRepo.provide(root),
-                preferences,
-                tagsStorageRepo.statsFlow
-            )
-            storageByRoot[root] = storage
-            storage.init()
-            storage
+            AggregatedStatsStorage(shards)
+        } else {
+            val root = roots.iterator().next()
+            val tagsStorage = tagsStorageRepo.provide(root)
+            provide(root, tagsStorage)
         }
-
-        return AggregatedStatsStorage(shards)
     }
 
-    suspend fun provide(root: Path): StatsStorage =
-        provide(RootAndFav(root.toString(), null))
+    fun provide(
+        root: RootIndex,
+        tagsStorage: PlainTagsStorage
+    ): PlainStatsStorage =
+        storageByRoot[root.path] ?: PlainStatsStorage(
+            root,
+            tagsStorage,
+            preferences,
+            tagsStorageRepo.statsFlow
+        ).also {
+            storageByRoot[root.path] = it
+        }
 }

@@ -45,7 +45,9 @@ class App : Application() {
             )
 
         appComponent.arkBackup().backup()
-        initAcra()
+
+        //todo
+        //initAcra()
     }
 
     private fun initAcra() = CoroutineScope(Dispatchers.IO).launch {

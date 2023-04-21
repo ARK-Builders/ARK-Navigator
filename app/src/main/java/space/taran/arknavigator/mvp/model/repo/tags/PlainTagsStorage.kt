@@ -41,11 +41,11 @@ class PlainTagsStorage(
 
     private var lastModified: FileTime = FileTime.fromMillis(0L)
 
-    private lateinit var tagsById: MutableMap<ResourceId, Tags>
+    private var tagsById: MutableMap<ResourceId, Tags>
 
     private var isCorrupted = false
 
-    suspend fun init() = withContext(Dispatchers.IO) {
+    init {
         val result = resources.map { it to NO_TAGS }
             .toMap()
             .toMutableMap()
@@ -236,55 +236,53 @@ class PlainTagsStorage(
             }
         }
 
-    private suspend fun readStorage(): Result<Map<ResourceId, Tags>> =
-        withContext(Dispatchers.IO) {
-            val lines = Files.readAllLines(storageFile, StandardCharsets.UTF_8)
-            verifyVersion(lines.removeAt(0))
+    private fun readStorage(): Result<Map<ResourceId, Tags>> {
+        val lines = Files.readAllLines(storageFile, StandardCharsets.UTF_8)
+        verifyVersion(lines.removeAt(0))
 
-            try {
-                val tagsById = lines.map {
-                    val parts = it.split(KEY_VALUE_SEPARATOR)
-                    val id = ResourceId.fromString(parts[0])
-                    val tags = tagsFromString(parts[1])
-                    id to tags
-                }
-
-                if (tagsById.any { (id, tags) -> tags.isEmpty() }) {
-                    isCorrupted = true
-                    return@withContext Result.failure(StreamCorruptedException())
-                }
-
-                if (tagsById.isEmpty()) {
-                    isCorrupted = true
-                    return@withContext Result.failure(IllegalArgumentException())
-                }
-
-                Log.d(TAGS_STORAGE, "${tagsById.size} entries has been read")
-                return@withContext Result.success(tagsById.toMap())
-            } catch (e: Exception) {
-                isCorrupted = true
-                return@withContext Result.failure(e)
+        try {
+            val tagsById = lines.map {
+                val parts = it.split(KEY_VALUE_SEPARATOR)
+                val id = ResourceId.fromString(parts[0])
+                val tags = tagsFromString(parts[1])
+                id to tags
             }
+
+            if (tagsById.any { (id, tags) -> tags.isEmpty() }) {
+                isCorrupted = true
+                return Result.failure(StreamCorruptedException())
+            }
+
+            if (tagsById.isEmpty()) {
+                isCorrupted = true
+                return Result.failure(IllegalArgumentException())
+            }
+
+            Log.d(TAGS_STORAGE, "${tagsById.size} entries has been read")
+            return Result.success(tagsById.toMap())
+        } catch (e: Exception) {
+            isCorrupted = true
+            return Result.failure(e)
         }
+    }
 
-    private suspend fun writeStorage() =
-        withContext(Dispatchers.IO) {
-            val lines = mutableListOf<String>()
-            lines.add("$STORAGE_VERSION_PREFIX$STORAGE_VERSION")
+    private fun writeStorage() {
+        val lines = mutableListOf<String>()
+        lines.add("$STORAGE_VERSION_PREFIX$STORAGE_VERSION")
 
-            val entries = tagsById.filterValues { it.isNotEmpty() }
-            lines.addAll(
-                entries.map { (id, tags) ->
-                    "${id.dataSize}-${id.crc32}$KEY_VALUE_SEPARATOR" +
-                        stringFromTags(tags)
-                }
-            )
+        val entries = tagsById.filterValues { it.isNotEmpty() }
+        lines.addAll(
+            entries.map { (id, tags) ->
+                "${id.dataSize}-${id.crc32}$KEY_VALUE_SEPARATOR" +
+                    stringFromTags(tags)
+            }
+        )
 
-            Files.write(storageFile, lines, StandardCharsets.UTF_8)
-            lastModified = Files.getLastModifiedTime(storageFile)
+        Files.write(storageFile, lines, StandardCharsets.UTF_8)
+        lastModified = Files.getLastModifiedTime(storageFile)
 
-            Log.d(TAGS_STORAGE, "${tagsById.size} entries has been written")
-        }
+        Log.d(TAGS_STORAGE, "${tagsById.size} entries has been written")
+    }
 
     private fun sendStatsEvent(event: StatsEvent) = scope.launch {
         statsFlow.emit(event)
