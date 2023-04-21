@@ -7,9 +7,9 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import space.taran.arklib.ResourceId
 import space.taran.arklib.arkFolder
 import space.taran.arklib.arkTags
-import space.taran.arklib.ResourceId
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.stats.StatsEvent
@@ -220,20 +220,20 @@ class PlainTagsStorage(
                         }
                     }
                 }
-
-                if (tagsById.isEmpty() || tagsById.all { it.value.isEmpty() }) {
-                    if (exists) {
-                        Log.d(
-                            TAGS_STORAGE,
-                            "no tagged resources, deleting storage file"
-                        )
-                        Files.delete(storageFile)
-                    }
-                    return@withContext
-                }
-
-                writeStorage()
             }
+
+            if (tagsById.isEmpty() || tagsById.all { it.value.isEmpty() }) {
+                if (exists) {
+                    Log.d(
+                        TAGS_STORAGE,
+                        "no tagged resources, deleting storage file"
+                    )
+                    Files.delete(storageFile)
+                }
+                return@withContext
+            }
+
+            writeStorage()
         }
 
     private fun readStorage(): Result<Map<ResourceId, Tags>> {
