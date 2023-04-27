@@ -86,7 +86,9 @@ android {
 }
 
 dependencies {
-    implementation 'space.taran:arklib:0.2.0'
+    def arklibVersion = '0.1.0-SNAPSHOT-f81e34a657'
+    releaseImplementation "space.taran:arklib:$arklibVersion"
+    debugImplementation "space.taran:arklib-debug:$arklibVersion"
 
     //// For local development, you can inject local AAR dependency:
     // implementation files('/tmp/arklib-android/lib/build/outputs/aar/lib-debug.aar')

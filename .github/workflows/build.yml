@@ -45,6 +45,27 @@ jobs:
           name: ark-navigator-universal-apk
           path: ./app/build/outputs/apk/release/ark-navigator-universal-release.apk
 
+    - name: Build Debug APK
+      run: ./gradlew assembleDebug
+
+    - name: Upload Debug arm64-v8a APK
+      uses: actions/upload-artifact@v3
+      with:
+          name: ark-navigator-arm64-v8a-debug-apk
+          path: ./app/build/outputs/apk/debug/ark-navigator-arm64-v8a-debug.apk
+
+    - name: Upload Debug armeabi-v7a APK
+      uses: actions/upload-artifact@v3
+      with:
+          name: ark-navigator-armeabi-v7a-debug-apk
+          path: ./app/build/outputs/apk/debug/ark-navigator-armeabi-v7a-debug.apk
+
+    - name: Upload Debug universal APK
+      uses: actions/upload-artifact@v3
+      with:
+          name: ark-navigator-universal-debug-apk
+          path: ./app/build/outputs/apk/debug/ark-navigator-universal-debug.apk
+
   test:
     needs: build
     environment: Development
