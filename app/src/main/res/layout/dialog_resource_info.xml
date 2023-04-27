@@ -76,6 +76,19 @@
             app:layout_constraintStart_toStartOf="@+id/resource_name"
             app:layout_constraintTop_toBottomOf="@id/resource_path"
             tools:text="Size\n108 MB" />
+        <TextView
+            android:id="@+id/resource_duplicates"
+            style="@style/RegularTextStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:lineSpacingMultiplier="1.15"
+            android:textSize="18sp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="@+id/resource_size"
+            app:layout_constraintStart_toStartOf="@+id/resource_size"
+            app:layout_constraintTop_toBottomOf="@id/resource_size"
+            tools:text="Duplicates\n0" />
 
         <TextView
             android:id="@+id/resource_resolution"
@@ -87,7 +100,7 @@
             android:textSize="18sp"
             app:layout_constraintEnd_toEndOf="@+id/resource_name"
             app:layout_constraintStart_toStartOf="@+id/resource_name"
-            app:layout_constraintTop_toBottomOf="@id/resource_size"
+            app:layout_constraintTop_toBottomOf="@id/resource_duplicates"
             tools:text="Resolution\n100*100" />
 
         <TextView

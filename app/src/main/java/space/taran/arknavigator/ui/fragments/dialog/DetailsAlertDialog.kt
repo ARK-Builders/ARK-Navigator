@@ -7,6 +7,7 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.InsetDrawable
 import android.os.Bundle
 import android.view.WindowManager
+import androidx.core.view.isVisible
 import org.apache.commons.io.FileUtils
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.DialogResourceInfoBinding
@@ -18,6 +19,7 @@ import kotlin.io.path.absolutePathString
 class DetailsAlertDialog(
     val path: Path,
     val resourceMeta: ResourceMeta,
+    val resourceDuplicates: Int,
     context: Context
 ) : Dialog(context) {
 
@@ -51,6 +53,16 @@ class DetailsAlertDialog(
             R.string.resource_size_label,
             FileUtils.byteCountToDisplaySize(resourceMeta.size())
         )
+        if (resourceDuplicates > 0) {
+            dialogResourceInfoBinding.resourceDuplicates.apply {
+                isVisible = true
+                text =
+                    context.getString(
+                        R.string.resource_duplicate_label,
+                        resourceDuplicates
+                    )
+            }
+        }
         // load specific metadata from specific kind
         ExtraLoader.loadWithLabel(
             resourceMeta,

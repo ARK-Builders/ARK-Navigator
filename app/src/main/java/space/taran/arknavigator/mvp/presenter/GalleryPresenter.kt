@@ -57,6 +57,7 @@ enum class GalleryItemType {
 class GalleryPresenter(
     private val rootAndFav: RootAndFav,
     private val resourcesIds: List<ResourceId>,
+    private val resourcesWithDuplicates: List<ResourceId>,
     private val startAt: Int,
     var selectingEnabled: Boolean,
     private val selectedResources: MutableList<ResourceId>
@@ -66,6 +67,10 @@ class GalleryPresenter(
     private var currentPos = startAt
     private val currentResource: ResourceMeta
         get() = resources[currentPos]
+    private val currentResourceDuplicates: Int
+        get() = resourcesWithDuplicates.count {
+            currentResource.id == it
+        } - 1
 
     lateinit var index: ResourcesIndex
         private set
@@ -139,7 +144,9 @@ class GalleryPresenter(
                 PlainTagsStorage.TYPE
             )
 
-            resources = resourcesIds.map { index.getMeta(it) }.toMutableList()
+            resources = resourcesIds
+                .map { index.getMeta(it) }.toMutableList()
+
             sortByScores = preferences.get(PreferenceKey.SortByScores)
 
             viewState.updatePagerAdapter()
@@ -203,7 +210,11 @@ class GalleryPresenter(
 
     fun onInfoFabClick() = presenterScope.launch {
         Log.d(GALLERY_SCREEN, "[info_resource] clicked at position $currentPos")
-        viewState.showInfoAlert(index.getPath(currentResource.id), currentResource)
+        viewState.showInfoAlert(
+            index.getPath(currentResource.id),
+            currentResource,
+            currentResourceDuplicates
+        )
     }
 
     fun onShareFabClick() = presenterScope.launch {

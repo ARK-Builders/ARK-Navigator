@@ -130,4 +130,5 @@
     <string name="close">Close</string>
     <string name="corrupted_storage">Corrupted Storage</string>
     <string name="storage_corrupt_info">%1$s storage is corrupted. \nOpening the folder isn\'t safe</string>
+    <string name="resource_duplicate_label">Duplicates\n%d</string>
 </resources>

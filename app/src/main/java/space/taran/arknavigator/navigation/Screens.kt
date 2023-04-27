@@ -34,15 +34,22 @@ class Screens {
     class GalleryScreen(
         val rootAndFav: RootAndFav,
         val resources: List<ResourceId>,
+        val resourcesWithDuplicates: List<ResourceId>,
         val startAt: Int
     ) : SupportAppScreen() {
         override fun getFragment() =
-            GalleryFragment.newInstance(rootAndFav, resources, startAt)
+            GalleryFragment.newInstance(
+                rootAndFav,
+                resources,
+                resourcesWithDuplicates,
+                startAt
+            )
     }
 
     class GalleryScreenWithSelected(
         val rootAndFav: RootAndFav,
         val resources: List<ResourceId>,
+        val resourcesWithDuplicates: List<ResourceId>,
         val startAt: Int,
         val selectedResources: List<ResourceId>
     ) : SupportAppScreen() {
@@ -50,6 +57,7 @@ class Screens {
             GalleryFragment.newInstance(
                 rootAndFav,
                 resources,
+                resourcesWithDuplicates,
                 startAt,
                 true,
                 selectedResources

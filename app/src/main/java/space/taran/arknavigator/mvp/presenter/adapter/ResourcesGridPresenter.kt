@@ -35,7 +35,7 @@ import kotlin.system.measureTimeMillis
 data class ResourceItem(
     val meta: ResourceMeta,
     var isSelected: Boolean = false,
-    var isPinned: Boolean = false
+    var isPinned: Boolean = false,
 )
 
 class ResourcesGridPresenter(
@@ -50,6 +50,8 @@ class ResourcesGridPresenter(
     var resources = listOf<ResourceItem>()
         private set
     var selection = listOf<ResourceItem>()
+        private set
+    var selectionWithDuplicates = listOf<ResourceItem>()
         private set
     val selectedResources: List<ResourceMeta>
         get() = resources.filter { it.isSelected }.map { it.meta }
@@ -118,6 +120,7 @@ class ResourcesGridPresenter(
             Screens.GalleryScreen(
                 rootAndFav,
                 selection.map { it.meta.id },
+                selectionWithDuplicates.map { it.meta.id },
                 pos
             )
         )
@@ -193,8 +196,14 @@ class ResourcesGridPresenter(
     suspend fun updateSelection(
         selection: Set<ResourceId>
     ) = withContext(Dispatchers.Default) {
-        this@ResourcesGridPresenter.selection = resources
-            .filter { selection.contains(it.meta.id) }
+        selectionWithDuplicates = this@ResourcesGridPresenter.resources
+            .filter {
+                selection.contains(it.meta.id)
+            }
+        this@ResourcesGridPresenter.selection = selectionWithDuplicates.distinctBy {
+            it.meta.id
+        }
+
         withContext(Dispatchers.Main) {
             setProgressVisibility(false)
             viewState.updateAdapter()
@@ -276,6 +285,7 @@ class ResourcesGridPresenter(
             Screens.GalleryScreenWithSelected(
                 rootAndFav,
                 selection.map { it.meta.id },
+                selectionWithDuplicates.map { it.meta.id },
                 item.position(),
                 selectedResources.map { it.id }
             )

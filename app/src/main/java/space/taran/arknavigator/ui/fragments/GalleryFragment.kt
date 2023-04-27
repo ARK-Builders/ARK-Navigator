@@ -66,6 +66,8 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
             requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
             requireArguments().getParcelableArray(RESOURCES_KEY)!!.toList()
                 as List<ResourceId>,
+            requireArguments().getParcelableArray(RESOURCES_WITH_DUPLICATES_KEY)!!
+                .toList() as List<ResourceId>,
             requireArguments().getInt(START_AT_KEY),
             requireArguments().getBoolean(SELECTING_ENABLED_KEY),
             (
@@ -245,8 +247,13 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
         startActivity(Intent.createChooser(intent, "Share the link with:"))
     }
 
-    override fun showInfoAlert(path: Path, resourceMeta: ResourceMeta) {
-        DetailsAlertDialog(path, resourceMeta, requireContext()).show()
+    override fun showInfoAlert(
+        path: Path,
+        resourceMeta: ResourceMeta,
+        resourceDuplicates: Int
+    ) {
+        DetailsAlertDialog(path, resourceMeta, resourceDuplicates, requireContext())
+            .show()
     }
 
     override fun viewInExternalApp(resourcePath: Path) {
@@ -590,10 +597,12 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
         const val REQUEST_RESOURCES_CHANGED_KEY = "resourcesChangedGallery"
         const val SCORES_CHANGED_KEY = "scoresChangedInGallery"
         const val SELECTED_CHANGED_KEY = "selectedChanged"
+        const val RESOURCES_WITH_DUPLICATES_KEY = "resources with duplicates"
 
         fun newInstance(
             rootAndFav: RootAndFav,
             resources: List<ResourceId>,
+            resourcesWithDuplicates: List<ResourceId>,
             startAt: Int,
             selectingEnabled: Boolean = false,
             selectedResources: List<ResourceId> = emptyList(),
@@ -601,6 +610,10 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
             arguments = Bundle().apply {
                 putParcelable(ROOT_AND_FAV_KEY, rootAndFav)
                 putParcelableArray(RESOURCES_KEY, resources.toTypedArray())
+                putParcelableArray(
+                    RESOURCES_WITH_DUPLICATES_KEY,
+                    resourcesWithDuplicates.toTypedArray()
+                )
                 putInt(START_AT_KEY, startAt)
                 putBoolean(SELECTING_ENABLED_KEY, selectingEnabled)
                 putParcelableArray(
