@@ -12,6 +12,7 @@ import org.acra.ktx.initAcra
 import org.acra.sender.HttpSender
 import space.taran.arkfilepicker.folders.FoldersRepo
 import space.taran.arklib.initArkLib
+import space.taran.arklib.initRustLogger
 import space.taran.arknavigator.BuildConfig
 import space.taran.arknavigator.R
 import space.taran.arknavigator.di.AppComponent
@@ -37,8 +38,10 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
 
+        System.loadLibrary("arklib")
         FoldersRepo.init(this)
         initArkLib()
+        initRustLogger()
         Timber.plant(Timber.DebugTree())
 
         instance = this
