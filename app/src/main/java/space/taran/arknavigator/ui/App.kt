@@ -31,7 +31,7 @@ class App : Application() {
 
     init {
         if (BuildConfig.DEBUG) {
-            StrictMode.enableDefaults()
+//            StrictMode.enableDefaults() //todo
         }
     }
 
@@ -56,7 +56,7 @@ class App : Application() {
 
         appComponent.arkBackup().backup()
 
-        initAcra()
+//        initAcra()
     }
 
     private fun initAcra() = CoroutineScope(Dispatchers.IO).launch {

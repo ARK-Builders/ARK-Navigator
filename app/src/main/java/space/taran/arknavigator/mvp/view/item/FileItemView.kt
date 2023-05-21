@@ -16,7 +16,7 @@ interface FileItemView {
     fun reset(isSelectingEnabled: Boolean, isItemSelected: Boolean)
     fun setSelected(isItemSelected: Boolean)
 
-    fun setIconOrPreview(
+    fun setThumbnail(
         path: Path,
         id: ResourceId,
         meta: Metadata,

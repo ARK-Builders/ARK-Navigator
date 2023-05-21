@@ -59,7 +59,7 @@ class FileItemViewHolder(
             return@with
         }
 
-    override fun setIconOrPreview(
+    override fun setThumbnail(
         path: Path,
         id: ResourceId,
         meta: Metadata,
@@ -69,7 +69,9 @@ class FileItemViewHolder(
 
         val thumbnail = if (preview.check() != PreviewStatus.ABSENT) {
             preview.thumbnail()
-        } else null
+        } else {
+            null
+        }
 
         ImageUtils.loadThumbnailWithPlaceholder(
             id,

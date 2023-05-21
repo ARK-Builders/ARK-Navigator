@@ -20,7 +20,7 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import space.taran.arklib.ResourceId
 import space.taran.arklib.domain.index.ResourceIndex
-import space.taran.arklib.domain.meta.MetadataStorage
+import space.taran.arklib.domain.meta.MetadataProcessor
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
@@ -30,7 +30,7 @@ import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagsSelectorA
 import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagsSelectorPresenter
 import space.taran.arknavigator.mvp.presenter.dialog.TagsSorting
 import space.taran.arknavigator.mvp.view.ResourcesView
-import space.taran.arknavigator.stub.MetadataStorageStub
+import space.taran.arknavigator.stub.MetadataProcessorStub
 import space.taran.arknavigator.stub.ResourceIndexStub
 import space.taran.arknavigator.stub.TagsStorageStub
 import space.taran.arknavigator.stub.StatsStorageStub
@@ -54,7 +54,7 @@ class TagSelectorPresenterTest {
 
     private lateinit var presenter: TagsSelectorPresenter
     private lateinit var tagsStorage: TagsStorage
-    private lateinit var metadataStorage: MetadataStorage
+    private lateinit var metadataStorage: MetadataProcessor
     private lateinit var index: ResourceIndex
 
     @BeforeAll
@@ -75,7 +75,7 @@ class TagSelectorPresenterTest {
         )
         index = ResourceIndexStub()
         tagsStorage = TagsStorageStub()
-        metadataStorage = MetadataStorageStub()
+        metadataStorage = MetadataProcessorStub()
         val preferences = mockk<Preferences>(relaxed = true)
         presenter.preferences = preferences
         coEvery { preferences.get(PreferenceKey.TagsSortingSelector) } returns TagsSorting.POPULARITY.ordinal

@@ -16,8 +16,8 @@ import space.taran.arkfilepicker.presentation.folderstree.FolderNode
 import space.taran.arkfilepicker.presentation.folderstree.RootNode
 import space.taran.arklib.domain.Message
 import space.taran.arklib.domain.index.ResourceIndexRepo
-import space.taran.arklib.domain.preview.PreviewStorageRepo
-import space.taran.arklib.utils.Constants
+import space.taran.arklib.domain.preview.PreviewProcessorRepo
+import space.taran.arknavigator.di.modules.RepoModule.Companion.MESSAGE_FLOW_NAME
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.view.FoldersView
@@ -44,7 +44,7 @@ class FoldersPresenter(
     lateinit var resourcesIndexRepo: ResourceIndexRepo
 
     @Inject
-    lateinit var previewsStorageRepo: PreviewStorageRepo
+    lateinit var previewsStorageRepo: PreviewProcessorRepo
 
     @Inject
     lateinit var stringProvider: StringProvider
@@ -53,7 +53,7 @@ class FoldersPresenter(
     lateinit var preferences: Preferences
 
     @Inject
-    @Named(Constants.DI.MESSAGE_FLOW_NAME)
+    @Named(MESSAGE_FLOW_NAME)
     lateinit var messageFlow: MutableSharedFlow<Message>
 
     private lateinit var devices: List<Path>

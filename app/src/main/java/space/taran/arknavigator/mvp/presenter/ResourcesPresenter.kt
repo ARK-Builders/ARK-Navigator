@@ -17,11 +17,11 @@ import space.taran.arklib.ResourceId
 import space.taran.arklib.domain.Message
 import space.taran.arklib.domain.index.ResourceIndex
 import space.taran.arklib.domain.index.ResourceIndexRepo
-import space.taran.arklib.domain.meta.MetadataStorage
-import space.taran.arklib.domain.meta.MetadataStorageRepo
-import space.taran.arklib.domain.preview.PreviewStorage
-import space.taran.arklib.domain.preview.PreviewStorageRepo
-import space.taran.arklib.utils.Constants
+import space.taran.arklib.domain.meta.MetadataProcessor
+import space.taran.arklib.domain.meta.MetadataProcessorRepo
+import space.taran.arklib.domain.preview.PreviewProcessor
+import space.taran.arklib.domain.preview.PreviewProcessorRepo
+import space.taran.arknavigator.di.modules.RepoModule.Companion.MESSAGE_FLOW_NAME
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.scores.ScoreStorage
@@ -67,10 +67,10 @@ class ResourcesPresenter(
     lateinit var preferences: Preferences
 
     @Inject
-    lateinit var metadataStorageRepo: MetadataStorageRepo
+    lateinit var metadataProcessorRepo: MetadataProcessorRepo
 
     @Inject
-    lateinit var previewStorageRepo: PreviewStorageRepo
+    lateinit var previewProcessorRepo: PreviewProcessorRepo
 
     @Inject
     lateinit var statsStorageRepo: StatsStorageRepo
@@ -79,16 +79,16 @@ class ResourcesPresenter(
     lateinit var scoreStorageRepo: ScoreStorageRepo
 
     @Inject
-    @Named(Constants.DI.MESSAGE_FLOW_NAME)
+    @Named(MESSAGE_FLOW_NAME)
     lateinit var messageFlow: MutableSharedFlow<Message>
 
     lateinit var index: ResourceIndex
         private set
     lateinit var tagStorage: TagsStorage
         private set
-    lateinit var metadataStorage: MetadataStorage
+    lateinit var metadataProcessor: MetadataProcessor
         private set
-    lateinit var previewStorage: PreviewStorage
+    lateinit var previewProcessor: PreviewProcessor
         private set
     lateinit var statsStorage: StatsStorage
         private set
@@ -146,10 +146,10 @@ class ResourcesPresenter(
             }.launchIn(presenterScope)
 
             viewState.setProgressVisibility(true, "Extracting metadata")
-            metadataStorage = metadataStorageRepo.provide(index)
+            metadataProcessor = metadataProcessorRepo.provide(index)
 
             viewState.setProgressVisibility(true, "Generating previews")
-            previewStorage = previewStorageRepo.provide(index)
+            previewProcessor = previewProcessorRepo.provide(index)
 
             initIndexingListeners()
 
@@ -169,8 +169,8 @@ class ResourcesPresenter(
                 index,
                 tagStorage,
                 router,
-                metadataStorage,
-                previewStorage,
+                metadataProcessor,
+                previewProcessor,
                 scoreStorage
             )
 
@@ -183,7 +183,7 @@ class ResourcesPresenter(
                 index,
                 tagStorage,
                 statsStorage,
-                metadataStorage,
+                metadataProcessor,
                 kindTagsEnabled
             )
 
@@ -359,12 +359,12 @@ class ResourcesPresenter(
     }
 
     private fun initIndexingListeners() {
-        metadataStorage.inProgress.onEach {
+        metadataProcessor.busy.onEach {
             Timber.d("metadata extraction progress = $it")
             viewState.setPreviewGenerationProgress(it)
         }.launchIn(presenterScope)
 
-        previewStorage.inProgress.onEach {
+        previewProcessor.busy.onEach {
             Timber.d("preview generation progress = $it")
             viewState.setPreviewGenerationProgress(it)
         }.launchIn(presenterScope)

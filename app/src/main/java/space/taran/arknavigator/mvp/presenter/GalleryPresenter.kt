@@ -19,15 +19,15 @@ import space.taran.arklib.domain.index.ResourceIndex
 import space.taran.arklib.domain.index.ResourceIndexRepo
 import space.taran.arklib.domain.meta.Kind
 import space.taran.arklib.domain.meta.Metadata
-import space.taran.arklib.domain.meta.MetadataStorage
-import space.taran.arklib.domain.meta.MetadataStorageRepo
+import space.taran.arklib.domain.meta.MetadataProcessor
+import space.taran.arklib.domain.meta.MetadataProcessorRepo
 import space.taran.arklib.domain.preview.PreviewLocator
-import space.taran.arklib.domain.preview.PreviewStorage
-import space.taran.arklib.domain.preview.PreviewStorageRepo
+import space.taran.arklib.domain.preview.PreviewProcessor
+import space.taran.arklib.domain.preview.PreviewProcessorRepo
 import space.taran.arklib.domain.tags.Tags
-import space.taran.arklib.utils.Constants
 import space.taran.arklib.utils.ImageUtils
 import space.taran.arklib.utils.extension
+import space.taran.arknavigator.di.modules.RepoModule.Companion.MESSAGE_FLOW_NAME
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.scores.ScoreStorage
@@ -68,9 +68,9 @@ class GalleryPresenter(
         private set
     lateinit var tagsStorage: TagsStorage
         private set
-    lateinit var previewStorage: PreviewStorage
+    lateinit var previewStorage: PreviewProcessor
         private set
-    lateinit var metadataStorage: MetadataStorage
+    lateinit var metadataStorage: MetadataProcessor
         private set
     lateinit var statsStorage: StatsStorage
         private set
@@ -109,10 +109,10 @@ class GalleryPresenter(
     lateinit var indexRepo: ResourceIndexRepo
 
     @Inject
-    lateinit var previewStorageRepo: PreviewStorageRepo
+    lateinit var previewStorageRepo: PreviewProcessorRepo
 
     @Inject
-    lateinit var metadataStorageRepo: MetadataStorageRepo
+    lateinit var metadataStorageRepo: MetadataProcessorRepo
 
     @Inject
     lateinit var tagsStorageRepo: TagsStorageRepo
@@ -124,7 +124,7 @@ class GalleryPresenter(
     lateinit var scoreStorageRepo: ScoreStorageRepo
 
     @Inject
-    @Named(Constants.DI.MESSAGE_FLOW_NAME)
+    @Named(MESSAGE_FLOW_NAME)
     lateinit var messageFlow: MutableSharedFlow<Message>
 
     override fun onFirstViewAttach() {
@@ -153,12 +153,10 @@ class GalleryPresenter(
             )
 
             galleryItems = resourcesIds.map { id ->
+                val preview = previewStorage.retrieve(id).getOrThrow()
+                val metadata = metadataStorage.retrieve(id).getOrThrow()
+
                 val resource = index.getResource(id)!!
-                val path = index.getPath(id)!!
-
-                val preview = previewStorage.locate(path, id).getOrThrow()
-                val metadata = metadataStorage.locate(path, id).getOrThrow()
-
                 GalleryItem(resource, preview, metadata)
             }.toMutableList()
 

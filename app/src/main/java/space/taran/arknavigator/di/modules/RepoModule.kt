@@ -9,9 +9,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import space.taran.arkfilepicker.folders.FoldersRepo
 import space.taran.arklib.domain.Message
 import space.taran.arklib.domain.index.ResourceIndexRepo
-import space.taran.arklib.domain.meta.MetadataStorageRepo
-import space.taran.arklib.domain.preview.PreviewStorageRepo
-import space.taran.arklib.utils.Constants
+import space.taran.arklib.domain.meta.MetadataProcessorRepo
+import space.taran.arklib.domain.preview.PreviewProcessorRepo
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.scores.ScoreStorageRepo
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
@@ -24,12 +23,12 @@ class RepoModule {
 
     @Singleton
     @Provides
-    @Named(Constants.DI.MESSAGE_FLOW_NAME)
+    @Named(MESSAGE_FLOW_NAME)
     fun mutableMessageFlow(): MutableSharedFlow<Message> = MutableSharedFlow()
 
     @Singleton
     @Provides
-    @Named(Constants.DI.APP_SCOPE_NAME)
+    @Named(APP_SCOPE_NAME)
     fun appScope() = CoroutineScope(Dispatchers.IO)
 
     @Singleton
@@ -52,21 +51,27 @@ class RepoModule {
     @Singleton
     @Provides
     fun metadataStorageRepo(
-        @Named(Constants.DI.APP_SCOPE_NAME)
+        @Named(APP_SCOPE_NAME)
         appScope: CoroutineScope
-    ) = MetadataStorageRepo(appScope)
+    ) = MetadataProcessorRepo(appScope)
 
     @Singleton
     @Provides
     fun previewStorageRepo(
-        @Named(Constants.DI.APP_SCOPE_NAME)
+        @Named(APP_SCOPE_NAME)
         appScope: CoroutineScope,
-        metadataStorageRepo: MetadataStorageRepo
-    ) = PreviewStorageRepo(appScope, metadataStorageRepo)
+        metadataStorageRepo: MetadataProcessorRepo
+    ) = PreviewProcessorRepo(appScope, metadataStorageRepo)
 
     @Singleton
     @Provides
     fun scoreStorageRepo(): ScoreStorageRepo {
         return ScoreStorageRepo()
+    }
+
+    companion object {
+        const val MESSAGE_FLOW_NAME = "messageFlow"
+
+        const val APP_SCOPE_NAME = "appScope"
     }
 }

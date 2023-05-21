@@ -13,10 +13,10 @@ import space.taran.arkfilepicker.folders.RootAndFav
 import space.taran.arklib.ResourceId
 import space.taran.arklib.domain.index.Resource
 import space.taran.arklib.domain.index.ResourceIndex
-import space.taran.arklib.domain.meta.MetadataStorage
+import space.taran.arklib.domain.meta.MetadataProcessor
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
-import space.taran.arklib.domain.preview.PreviewStorage
+import space.taran.arklib.domain.preview.PreviewProcessor
 import space.taran.arknavigator.mvp.model.repo.scores.ScoreStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.presenter.ResourcesPresenter
@@ -60,8 +60,8 @@ class ResourcesGridPresenter(
     private lateinit var index: ResourceIndex
     private lateinit var storage: TagsStorage
     private lateinit var router: AppRouter
-    private lateinit var metadataStorage: MetadataStorage
-    private lateinit var previewStorage: PreviewStorage
+    private lateinit var metadataProcessor: MetadataProcessor
+    private lateinit var previewProcessor: PreviewProcessor
     private lateinit var scoreStorage: ScoreStorage
 
     var sorting = Sorting.DEFAULT
@@ -102,10 +102,10 @@ class ResourcesGridPresenter(
         }
 
         val id = item.id()
-        val metadata = metadataStorage.locate(path, id).getOrThrow()
-        val preview = previewStorage.locate(path, id).getOrThrow()
+        val metadata = metadataProcessor.retrieve(id).getOrThrow()
+        val preview = previewProcessor.retrieve(id).getOrThrow()
 
-        view.setIconOrPreview(
+        view.setThumbnail(
             path,
             item.id(),
             metadata,
@@ -161,15 +161,15 @@ class ResourcesGridPresenter(
         index: ResourceIndex,
         storage: TagsStorage,
         router: AppRouter,
-        metadataStorage: MetadataStorage,
-        previewStorage: PreviewStorage,
+        metadataProcessor: MetadataProcessor,
+        previewProcessor: PreviewProcessor,
         scoreStorage: ScoreStorage
     ) {
         this.index = index
         this.storage = storage
         this.router = router
-        this.metadataStorage = metadataStorage
-        this.previewStorage = previewStorage
+        this.metadataProcessor = metadataProcessor
+        this.previewProcessor = previewProcessor
         this.scoreStorage = scoreStorage
 
         sorting = Sorting.values()[preferences.get(PreferenceKey.Sorting)]

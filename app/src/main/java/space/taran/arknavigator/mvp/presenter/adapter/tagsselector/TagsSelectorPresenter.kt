@@ -8,7 +8,7 @@ import kotlinx.coroutines.launch
 import space.taran.arklib.ResourceId
 import space.taran.arklib.domain.index.ResourceIndex
 import space.taran.arklib.domain.meta.Kind
-import space.taran.arklib.domain.meta.MetadataStorage
+import space.taran.arklib.domain.meta.MetadataProcessor
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.stats.StatsEvent
@@ -47,7 +47,7 @@ class TagsSelectorPresenter(
     private lateinit var index: ResourceIndex
     private lateinit var tagsStorage: TagsStorage
     private lateinit var statsStorage: StatsStorage
-    private lateinit var metadataStorage: MetadataStorage
+    private lateinit var metadataStorage: MetadataProcessor
     private var filter = ""
 
     var sorting = TagsSorting.POPULARITY
@@ -85,7 +85,7 @@ class TagsSelectorPresenter(
         index: ResourceIndex,
         tagsStorage: TagsStorage,
         statsStorage: StatsStorage,
-        metadataStorage: MetadataStorage,
+        metadataStorage: MetadataProcessor,
         kindTagsEnabled: Boolean,
     ) {
         this.index = index
@@ -509,7 +509,7 @@ class TagsSelectorPresenter(
         return tagItemsByResources.map { (id, tags) ->
             val _tags = tags.toMutableSet()
             metadataStorage
-                .locate(index.getPath(id)!!, id)
+                .retrieve(id)
                 .onSuccess {
                     _tags.add(TagItem.KindTagItem(it.kind))
                 }
