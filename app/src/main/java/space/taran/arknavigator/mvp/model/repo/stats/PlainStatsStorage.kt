@@ -42,7 +42,7 @@ class PlainStatsStorage(
     private var collectingTagEvents = true
 
     init {
- //       statsFlow.onEach(::handleEvent).launchIn(scope)
+        //       statsFlow.onEach(::handleEvent).launchIn(scope)
         scope.launch {
             collectingTagEvents = preferences.get(PreferenceKey.CollectTagUsageStats)
             preferences.flow(PreferenceKey.CollectTagUsageStats).onEach { new ->
@@ -75,7 +75,7 @@ class PlainStatsStorage(
     override fun statsTagLabeledTS() = tagLabeledTS.provideData()
 
     override fun statsTagLabeledAmount() = statsTagQueriedAmount()
-        // tagLabeledN.provideData()
+    // tagLabeledN.provideData()
 
     override fun statsTagQueriedTS() = tagQueriedTS.provideData()
 
@@ -86,7 +86,8 @@ class PlainStatsStorage(
 
         return when (this) {
             is StatsEvent.TagsChanged -> ids.contains(resource)
-            is StatsEvent.PlainTagUsed -> false //tagsStorage.getTags(ids).contains(tag)
+            is StatsEvent.PlainTagUsed -> false
+            // tagsStorage.getTags(ids).contains(tag)
             is StatsEvent.KindTagUsed -> true
         }
     }

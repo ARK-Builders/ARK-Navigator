@@ -1,18 +1,7 @@
 package space.taran.arknavigator.mvp.model.repo.stats.category
 
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.decodeFromStream
-import space.taran.arklib.domain.index.ResourceIndex
-import space.taran.arknavigator.mvp.model.repo.stats.StatsEvent
 import space.taran.arknavigator.utils.Tag
-import timber.log.Timber
-import java.nio.file.Path
-import kotlin.io.path.exists
-import kotlin.io.path.inputStream
-import kotlin.io.path.writeText
 
 //class TagLabeledNStorage(
 //    val index: ResourceIndex,
