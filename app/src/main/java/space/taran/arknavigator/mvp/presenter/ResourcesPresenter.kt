@@ -361,12 +361,12 @@ class ResourcesPresenter(
     private fun initIndexingListeners() {
         metadataProcessor.busy.onEach {
             Timber.d("metadata extraction progress = $it")
-            viewState.setPreviewGenerationProgress(it)
+            viewState.setPreviewGenerationProgress(it || previewProcessor.busy.value)
         }.launchIn(presenterScope)
 
         previewProcessor.busy.onEach {
             Timber.d("preview generation progress = $it")
-            viewState.setPreviewGenerationProgress(it)
+            viewState.setPreviewGenerationProgress(it || metadataProcessor.busy.value)
         }.launchIn(presenterScope)
     }
 

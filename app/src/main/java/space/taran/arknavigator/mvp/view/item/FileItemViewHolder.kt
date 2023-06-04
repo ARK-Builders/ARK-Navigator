@@ -5,16 +5,16 @@ import android.view.View
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import space.taran.arklib.ResourceId
-import space.taran.arknavigator.R
-import space.taran.arknavigator.databinding.ItemFileGridBinding
 import space.taran.arklib.domain.meta.Metadata
 import space.taran.arklib.domain.preview.PreviewLocator
 import space.taran.arklib.domain.preview.PreviewStatus
 import space.taran.arklib.utils.ImageUtils
+import space.taran.arklib.utils.extension
+import space.taran.arknavigator.R
+import space.taran.arknavigator.databinding.ItemFileGridBinding
 import space.taran.arknavigator.ui.extra.ExtraLoader
 import space.taran.arknavigator.utils.Score
 import space.taran.arknavigator.utils.dpToPx
-import space.taran.arklib.utils.extension
 import java.nio.file.Path
 
 class FileItemViewHolder(
@@ -62,27 +62,34 @@ class FileItemViewHolder(
     override fun setThumbnail(
         path: Path,
         id: ResourceId,
-        meta: Metadata,
-        preview: PreviewLocator
+        meta: Metadata?,
+        preview: PreviewLocator?
     ) = with(binding.root) {
         val placeholder = ImageUtils.iconForExtension(extension(path))
 
-        val thumbnail = if (preview.check() != PreviewStatus.ABSENT) {
-            preview.thumbnail()
-        } else {
-            null
+        meta?.let {
+            ExtraLoader.load(
+                meta, listOf(binding.primaryExtra, binding.secondaryExtra),
+                verbose = false
+            )
         }
 
-        ImageUtils.loadThumbnailWithPlaceholder(
-            id,
-            thumbnail,
-            placeholder,
-            binding.iv
-        )
-        ExtraLoader.load(
-            meta, listOf(binding.primaryExtra, binding.secondaryExtra),
-            verbose = false
-        )
+        preview?.let {
+            val thumbnail = if (preview.check() != PreviewStatus.ABSENT) {
+                preview.thumbnail()
+            } else {
+                null
+            }
+
+            ImageUtils.loadThumbnailWithPlaceholder(
+                id,
+                thumbnail,
+                placeholder,
+                binding.iv
+            )
+        } ?: let {
+            binding.iv.setImageResource(R.drawable.ic_file)
+        }
     }
 
     override fun setText(title: String, shortName: Boolean) = with(binding) {

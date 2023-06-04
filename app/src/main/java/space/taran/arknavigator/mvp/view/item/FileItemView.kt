@@ -19,8 +19,8 @@ interface FileItemView {
     fun setThumbnail(
         path: Path,
         id: ResourceId,
-        meta: Metadata,
-        preview: PreviewLocator
+        meta: Metadata?,
+        preview: PreviewLocator?
     )
 
     fun setText(title: String, shortName: Boolean = false)

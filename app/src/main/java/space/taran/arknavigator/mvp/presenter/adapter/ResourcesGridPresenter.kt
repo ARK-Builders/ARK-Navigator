@@ -14,9 +14,9 @@ import space.taran.arklib.ResourceId
 import space.taran.arklib.domain.index.Resource
 import space.taran.arklib.domain.index.ResourceIndex
 import space.taran.arklib.domain.meta.MetadataProcessor
+import space.taran.arklib.domain.preview.PreviewProcessor
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
-import space.taran.arklib.domain.preview.PreviewProcessor
 import space.taran.arknavigator.mvp.model.repo.scores.ScoreStorage
 import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.presenter.ResourcesPresenter
@@ -102,8 +102,8 @@ class ResourcesGridPresenter(
         }
 
         val id = item.id()
-        val metadata = metadataProcessor.retrieve(id).getOrThrow()
-        val preview = previewProcessor.retrieve(id).getOrThrow()
+        val metadata = metadataProcessor.retrieve(id).getOrNull()
+        val preview = previewProcessor.retrieve(id).getOrNull()
 
         view.setThumbnail(
             path,
