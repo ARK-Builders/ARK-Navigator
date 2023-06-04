@@ -21,16 +21,15 @@ import space.taran.arklib.domain.meta.MetadataProcessor
 import space.taran.arklib.domain.meta.MetadataProcessorRepo
 import space.taran.arklib.domain.preview.PreviewProcessor
 import space.taran.arklib.domain.preview.PreviewProcessorRepo
+import space.taran.arklib.domain.score.ScoreStorage
+import space.taran.arklib.domain.score.ScoreStorageRepo
+import space.taran.arklib.domain.tags.TagStorage
+import space.taran.arklib.domain.tags.TagsStorageRepo
 import space.taran.arknavigator.di.modules.RepoModule.Companion.MESSAGE_FLOW_NAME
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
-import space.taran.arknavigator.mvp.model.repo.scores.ScoreStorage
-import space.taran.arknavigator.mvp.model.repo.scores.ScoreStorageRepo
 import space.taran.arknavigator.mvp.model.repo.stats.StatsStorage
 import space.taran.arknavigator.mvp.model.repo.stats.StatsStorageRepo
-import space.taran.arknavigator.mvp.model.repo.tags.PlainTagsStorage
-import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
-import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import space.taran.arknavigator.mvp.presenter.adapter.ResourcesGridPresenter
 import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagsSelectorPresenter
 import space.taran.arknavigator.mvp.view.ResourcesView
@@ -84,7 +83,7 @@ class ResourcesPresenter(
 
     lateinit var index: ResourceIndex
         private set
-    lateinit var tagStorage: TagsStorage
+    lateinit var tagStorage: TagStorage
         private set
     lateinit var metadataProcessor: MetadataProcessor
         private set
@@ -155,12 +154,12 @@ class ResourcesPresenter(
 
             tagStorage = tagsStorageRepo.provide(index)
 
-            if (tagStorage.isCorrupted()) {
-                viewState.showCorruptNotificationDialog(
-                    PlainTagsStorage.TYPE
-                )
-                return@launch
-            }
+//            if (tagStorage.isCorrupted()) {
+//                viewState.showCorruptNotificationDialog(
+//                    PlainTagsStorage.TYPE
+//                )
+//                return@launch
+//            }
 
             scoreStorage = scoreStorageRepo.provide(index)
             statsStorage = statsStorageRepo.provide(index)
@@ -361,12 +360,16 @@ class ResourcesPresenter(
     private fun initIndexingListeners() {
         metadataProcessor.busy.onEach {
             Timber.d("metadata extraction progress = $it")
-            viewState.setPreviewGenerationProgress(it || previewProcessor.busy.value)
+            viewState.setPreviewGenerationProgress(
+                it || previewProcessor.busy.value
+            )
         }.launchIn(presenterScope)
 
         previewProcessor.busy.onEach {
             Timber.d("preview generation progress = $it")
-            viewState.setPreviewGenerationProgress(it || metadataProcessor.busy.value)
+            viewState.setPreviewGenerationProgress(
+                it || metadataProcessor.busy.value
+            )
         }.launchIn(presenterScope)
     }
 

@@ -24,19 +24,18 @@ import space.taran.arklib.domain.meta.MetadataProcessorRepo
 import space.taran.arklib.domain.preview.PreviewLocator
 import space.taran.arklib.domain.preview.PreviewProcessor
 import space.taran.arklib.domain.preview.PreviewProcessorRepo
+import space.taran.arklib.domain.score.ScoreStorage
+import space.taran.arklib.domain.score.ScoreStorageRepo
+import space.taran.arklib.domain.tags.TagStorage
 import space.taran.arklib.domain.tags.Tags
+import space.taran.arklib.domain.tags.TagsStorageRepo
 import space.taran.arklib.utils.ImageUtils
 import space.taran.arklib.utils.extension
 import space.taran.arknavigator.di.modules.RepoModule.Companion.MESSAGE_FLOW_NAME
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
-import space.taran.arknavigator.mvp.model.repo.scores.ScoreStorage
-import space.taran.arknavigator.mvp.model.repo.scores.ScoreStorageRepo
 import space.taran.arknavigator.mvp.model.repo.stats.StatsStorage
 import space.taran.arknavigator.mvp.model.repo.stats.StatsStorageRepo
-import space.taran.arknavigator.mvp.model.repo.tags.PlainTagsStorage
-import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
-import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import space.taran.arknavigator.mvp.presenter.adapter.ResourceDiffUtilCallback
 import space.taran.arknavigator.mvp.view.GalleryView
 import space.taran.arknavigator.navigation.AppRouter
@@ -48,7 +47,6 @@ import space.taran.arknavigator.utils.Score
 import space.taran.arknavigator.utils.Tag
 import java.io.FileNotFoundException
 import java.io.FileReader
-import java.lang.IllegalStateException
 import java.nio.file.Files
 import java.nio.file.Path
 import javax.inject.Inject
@@ -66,7 +64,7 @@ class GalleryPresenter(
 
     lateinit var index: ResourceIndex
         private set
-    lateinit var tagsStorage: TagsStorage
+    lateinit var tagsStorage: TagStorage
         private set
     lateinit var previewStorage: PreviewProcessor
         private set
@@ -148,9 +146,9 @@ class GalleryPresenter(
             statsStorage = statsStorageRepo.provide(index)
             scoreStorage = scoreStorageRepo.provide(index)
 
-            if (tagsStorage.isCorrupted()) viewState.showCorruptNotificationDialog(
-                PlainTagsStorage.TYPE
-            )
+//            if (tagsStorage.isCorrupted()) viewState.showCorruptNotificationDialog(
+//                PlainTagsStorage.TYPE
+//            )
 
             galleryItems = resourcesIds.map { id ->
                 val preview = previewStorage.retrieve(id).getOrThrow()
@@ -289,7 +287,8 @@ class GalleryPresenter(
 
         Log.d(GALLERY_SCREEN, "setting new tags $newTags to $currentItem")
 
-        tagsStorage.setTagsAndPersist(id, newTags)
+        tagsStorage.setTags(id, newTags)
+        tagsStorage.persist()
         viewState.notifyTagsChanged()
     }
 
