@@ -20,12 +20,12 @@ import kotlinx.coroutines.launch
 import moxy.MvpAppCompatDialogFragment
 import moxy.ktx.moxyPresenter
 import space.taran.arkfilepicker.folders.RootAndFav
-import space.taran.arknavigator.R
-import space.taran.arknavigator.databinding.DialogEditTagsBinding
 import space.taran.arklib.ResourceId
 import space.taran.arklib.domain.index.ResourceIndex
+import space.taran.arklib.domain.tags.TagStorage
+import space.taran.arknavigator.R
+import space.taran.arknavigator.databinding.DialogEditTagsBinding
 import space.taran.arknavigator.mvp.model.repo.stats.StatsStorage
-import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.presenter.dialog.EditTagsDialogPresenter
 import space.taran.arknavigator.mvp.view.dialog.EditTagsDialogView
 import space.taran.arknavigator.ui.App
@@ -36,7 +36,7 @@ import space.taran.arknavigator.utils.extensions.showKeyboard
 
 class EditTagsDialogFragment(
     private val index: ResourceIndex? = null,
-    private val storage: TagsStorage? = null,
+    private val storage: TagStorage? = null,
     private val statsStorage: StatsStorage? = null
 ) : MvpAppCompatDialogFragment(), EditTagsDialogView {
     private lateinit var binding: DialogEditTagsBinding
@@ -210,7 +210,7 @@ class EditTagsDialogFragment(
             rootAndFav: RootAndFav,
             resources: List<ResourceId>,
             index: ResourceIndex,
-            storage: TagsStorage,
+            storage: TagStorage,
             statsStorage: StatsStorage
         ) =
             EditTagsDialogFragment(index, storage, statsStorage).apply {

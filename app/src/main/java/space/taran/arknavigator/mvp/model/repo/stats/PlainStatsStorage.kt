@@ -2,7 +2,6 @@ package space.taran.arknavigator.mvp.model.repo.stats
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.joinAll
@@ -14,19 +13,17 @@ import space.taran.arklib.domain.index.RootIndex
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.stats.category.StatsCategoryStorage
-import space.taran.arknavigator.mvp.model.repo.stats.category.TagLabeledNStorage
 import space.taran.arknavigator.mvp.model.repo.stats.category.TagLabeledTSStorage
 import space.taran.arknavigator.mvp.model.repo.stats.category.TagQueriedNStorage
 import space.taran.arknavigator.mvp.model.repo.stats.category.TagQueriedTSStorage
-import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import timber.log.Timber
 import kotlin.io.path.createDirectories
 
 class PlainStatsStorage(
     private val index: RootIndex,
-    private val tagsStorage: TagsStorage,
+//    private val tagsStorage: TagsStorage,
     private val preferences: Preferences,
-    private val statsFlow: SharedFlow<StatsEvent>
+//    private val statsFlow: SharedFlow<StatsEvent>
 ) : StatsStorage {
 
     private val root = index.path
@@ -35,8 +32,8 @@ class PlainStatsStorage(
     private val categoryStorages = mutableListOf<StatsCategoryStorage<Any>>()
     private val tagLabeledTS =
         TagLabeledTSStorage(root, scope).also { categoryStorages.add(it) }
-    private val tagLabeledN =
-        TagLabeledNStorage(index, tagsStorage, root, scope)
+//    private val tagLabeledN =
+//        TagLabeledNStorage(index, tagsStorage, root, scope)
             .also { categoryStorages.add(it) }
     private val tagQueriedTS =
         TagQueriedTSStorage(root, scope).also { categoryStorages.add(it) }
@@ -45,7 +42,7 @@ class PlainStatsStorage(
     private var collectingTagEvents = true
 
     init {
-        statsFlow.onEach(::handleEvent).launchIn(scope)
+ //       statsFlow.onEach(::handleEvent).launchIn(scope)
         scope.launch {
             collectingTagEvents = preferences.get(PreferenceKey.CollectTagUsageStats)
             preferences.flow(PreferenceKey.CollectTagUsageStats).onEach { new ->
@@ -77,7 +74,8 @@ class PlainStatsStorage(
 
     override fun statsTagLabeledTS() = tagLabeledTS.provideData()
 
-    override fun statsTagLabeledAmount() = tagLabeledN.provideData()
+    override fun statsTagLabeledAmount() = statsTagQueriedAmount()
+        // tagLabeledN.provideData()
 
     override fun statsTagQueriedTS() = tagQueriedTS.provideData()
 
@@ -88,7 +86,7 @@ class PlainStatsStorage(
 
         return when (this) {
             is StatsEvent.TagsChanged -> ids.contains(resource)
-            is StatsEvent.PlainTagUsed -> tagsStorage.getTags(ids).contains(tag)
+            is StatsEvent.PlainTagUsed -> false //tagsStorage.getTags(ids).contains(tag)
             is StatsEvent.KindTagUsed -> true
         }
     }

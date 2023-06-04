@@ -15,10 +15,10 @@ import space.taran.arklib.domain.index.Resource
 import space.taran.arklib.domain.index.ResourceIndex
 import space.taran.arklib.domain.meta.MetadataProcessor
 import space.taran.arklib.domain.preview.PreviewProcessor
+import space.taran.arklib.domain.score.ScoreStorage
+import space.taran.arklib.domain.tags.TagStorage
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
-import space.taran.arknavigator.mvp.model.repo.scores.ScoreStorage
-import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.presenter.ResourcesPresenter
 import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.mvp.view.item.FileItemView
@@ -58,7 +58,7 @@ class ResourcesGridPresenter(
         get() = resources.filter { it.isSelected }.map { it.id() }
 
     private lateinit var index: ResourceIndex
-    private lateinit var storage: TagsStorage
+    private lateinit var storage: TagStorage
     private lateinit var router: AppRouter
     private lateinit var metadataProcessor: MetadataProcessor
     private lateinit var previewProcessor: PreviewProcessor
@@ -159,7 +159,7 @@ class ResourcesGridPresenter(
 
     suspend fun init(
         index: ResourceIndex,
-        storage: TagsStorage,
+        storage: TagStorage,
         router: AppRouter,
         metadataProcessor: MetadataProcessor,
         previewProcessor: PreviewProcessor,

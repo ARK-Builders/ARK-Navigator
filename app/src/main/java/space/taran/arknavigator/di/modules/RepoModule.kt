@@ -11,9 +11,8 @@ import space.taran.arklib.domain.Message
 import space.taran.arklib.domain.index.ResourceIndexRepo
 import space.taran.arklib.domain.meta.MetadataProcessorRepo
 import space.taran.arklib.domain.preview.PreviewProcessorRepo
-import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
-import space.taran.arknavigator.mvp.model.repo.scores.ScoreStorageRepo
-import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
+import space.taran.arklib.domain.score.ScoreStorageRepo
+import space.taran.arklib.domain.tags.TagsStorageRepo
 import space.taran.arknavigator.utils.LogTags.MAIN
 import javax.inject.Named
 import javax.inject.Singleton
@@ -43,9 +42,10 @@ class RepoModule {
     @Singleton
     @Provides
     fun tagsStorageRepo(
-        preferences: Preferences
+        @Named(APP_SCOPE_NAME)
+        appScope: CoroutineScope,
     ): TagsStorageRepo {
-        return TagsStorageRepo(preferences)
+        return TagsStorageRepo(appScope)
     }
 
     @Singleton
@@ -65,9 +65,10 @@ class RepoModule {
 
     @Singleton
     @Provides
-    fun scoreStorageRepo(): ScoreStorageRepo {
-        return ScoreStorageRepo()
-    }
+    fun scoreStorageRepo(
+        @Named(APP_SCOPE_NAME)
+        appScope: CoroutineScope,
+    ) = ScoreStorageRepo(appScope)
 
     companion object {
         const val MESSAGE_FLOW_NAME = "messageFlow"

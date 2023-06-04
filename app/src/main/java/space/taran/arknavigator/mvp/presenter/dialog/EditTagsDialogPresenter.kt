@@ -12,12 +12,12 @@ import space.taran.arkfilepicker.folders.RootAndFav
 import space.taran.arklib.ResourceId
 import space.taran.arklib.domain.index.ResourceIndex
 import space.taran.arklib.domain.index.ResourceIndexRepo
+import space.taran.arklib.domain.tags.TagStorage
+import space.taran.arklib.domain.tags.TagsStorageRepo
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.stats.StatsStorage
 import space.taran.arknavigator.mvp.model.repo.stats.StatsStorageRepo
-import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
-import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
 import space.taran.arknavigator.mvp.view.dialog.EditTagsDialogView
 import space.taran.arknavigator.utils.Popularity
 import space.taran.arknavigator.utils.Tag
@@ -37,12 +37,12 @@ class EditTagsDialogPresenter(
     private val rootAndFav: RootAndFav,
     val resources: List<ResourceId>,
     private val _index: ResourceIndex?,
-    private val _storage: TagsStorage?,
+    private val _storage: TagStorage?,
     private val _statsStorage: StatsStorage?
 ) : MvpPresenter<EditTagsDialogView>() {
 
     private lateinit var index: ResourceIndex
-    private lateinit var storage: TagsStorage
+    private lateinit var storage: TagStorage
     private lateinit var statsStorage: StatsStorage
 
     @Inject
