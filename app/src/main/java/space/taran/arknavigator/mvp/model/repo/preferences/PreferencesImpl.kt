@@ -8,10 +8,9 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import javax.inject.Inject
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences as ArkPreferences
 
-class PreferencesImpl @Inject constructor(val context: Context) : ArkPreferences {
+class PreferencesImpl(val context: Context) : ArkPreferences {
     private val SHARED_PREFERENCES_KEY = "user_preferences"
 
     private val Context.preferencesDatastore by preferencesDataStore(

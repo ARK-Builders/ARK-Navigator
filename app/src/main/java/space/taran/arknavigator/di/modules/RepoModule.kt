@@ -12,7 +12,10 @@ import space.taran.arklib.domain.index.ResourceIndexRepo
 import space.taran.arklib.domain.meta.MetadataProcessorRepo
 import space.taran.arklib.domain.preview.PreviewProcessorRepo
 import space.taran.arklib.domain.score.ScoreStorageRepo
+import space.taran.arklib.domain.stats.StatsEvent
 import space.taran.arklib.domain.tags.TagsStorageRepo
+import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
+import space.taran.arknavigator.mvp.model.repo.stats.StatsStorageRepo
 import space.taran.arknavigator.utils.LogTags.MAIN
 import javax.inject.Named
 import javax.inject.Singleton
@@ -32,6 +35,11 @@ class RepoModule {
 
     @Singleton
     @Provides
+    @Named(STATS_FLOW_NAME)
+    fun statsFlow(): MutableSharedFlow<StatsEvent> = MutableSharedFlow()
+
+    @Singleton
+    @Provides
     fun resourceIndexRepo(
         foldersRepo: FoldersRepo
     ): ResourceIndexRepo {
@@ -44,8 +52,10 @@ class RepoModule {
     fun tagsStorageRepo(
         @Named(APP_SCOPE_NAME)
         appScope: CoroutineScope,
+        @Named(STATS_FLOW_NAME)
+        statsFlow: MutableSharedFlow<StatsEvent>,
     ): TagsStorageRepo {
-        return TagsStorageRepo(appScope)
+        return TagsStorageRepo(appScope, statsFlow)
     }
 
     @Singleton
@@ -70,8 +80,18 @@ class RepoModule {
         appScope: CoroutineScope,
     ) = ScoreStorageRepo(appScope)
 
+    @Singleton
+    @Provides
+    fun statsStorageRepo(
+        tagsStorageRepo: TagsStorageRepo,
+        prefs: Preferences,
+        @Named(STATS_FLOW_NAME)
+        statsFlow: MutableSharedFlow<StatsEvent>
+    ) = StatsStorageRepo(tagsStorageRepo, prefs, statsFlow)
+
     companion object {
         const val MESSAGE_FLOW_NAME = "messageFlow"
+        const val STATS_FLOW_NAME = "statsFLow"
 
         const val APP_SCOPE_NAME = "appScope"
     }

@@ -9,10 +9,10 @@ import space.taran.arklib.ResourceId
 import space.taran.arklib.domain.index.ResourceIndex
 import space.taran.arklib.domain.meta.Kind
 import space.taran.arklib.domain.meta.MetadataProcessor
+import space.taran.arklib.domain.stats.StatsEvent
 import space.taran.arklib.domain.tags.TagStorage
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
-import space.taran.arknavigator.mvp.model.repo.stats.StatsEvent
 import space.taran.arknavigator.mvp.model.repo.stats.StatsStorage
 import space.taran.arknavigator.mvp.presenter.dialog.TagsSorting
 import space.taran.arknavigator.mvp.view.ResourcesView

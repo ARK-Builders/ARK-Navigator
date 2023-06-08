@@ -2,6 +2,7 @@ package space.taran.arknavigator.mvp.model.repo.stats
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.joinAll
@@ -10,9 +11,12 @@ import kotlinx.coroutines.withContext
 import space.taran.arklib.arkFolder
 import space.taran.arklib.arkStats
 import space.taran.arklib.domain.index.RootIndex
+import space.taran.arklib.domain.stats.StatsEvent
+import space.taran.arklib.domain.tags.RootTagsStorage
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.stats.category.StatsCategoryStorage
+import space.taran.arknavigator.mvp.model.repo.stats.category.TagLabeledNStorage
 import space.taran.arknavigator.mvp.model.repo.stats.category.TagLabeledTSStorage
 import space.taran.arknavigator.mvp.model.repo.stats.category.TagQueriedNStorage
 import space.taran.arknavigator.mvp.model.repo.stats.category.TagQueriedTSStorage
@@ -21,9 +25,9 @@ import kotlin.io.path.createDirectories
 
 class PlainStatsStorage(
     private val index: RootIndex,
-//    private val tagsStorage: TagsStorage,
     private val preferences: Preferences,
-//    private val statsFlow: SharedFlow<StatsEvent>
+    private val tagStorage: RootTagsStorage,
+    private val statsFlow: SharedFlow<StatsEvent>
 ) : StatsStorage {
 
     private val root = index.path
@@ -32,9 +36,8 @@ class PlainStatsStorage(
     private val categoryStorages = mutableListOf<StatsCategoryStorage<Any>>()
     private val tagLabeledTS =
         TagLabeledTSStorage(root, scope).also { categoryStorages.add(it) }
-//    private val tagLabeledN =
-//        TagLabeledNStorage(index, tagsStorage, root, scope)
-            .also { categoryStorages.add(it) }
+    private val tagLabeledN = TagLabeledNStorage(index, tagStorage, root, scope)
+        .also { categoryStorages.add(it) }
     private val tagQueriedTS =
         TagQueriedTSStorage(root, scope).also { categoryStorages.add(it) }
     private val tagQueriedN =
@@ -42,7 +45,7 @@ class PlainStatsStorage(
     private var collectingTagEvents = true
 
     init {
-        //       statsFlow.onEach(::handleEvent).launchIn(scope)
+        statsFlow.onEach(::handleEvent).launchIn(scope)
         scope.launch {
             collectingTagEvents = preferences.get(PreferenceKey.CollectTagUsageStats)
             preferences.flow(PreferenceKey.CollectTagUsageStats).onEach { new ->
@@ -74,8 +77,7 @@ class PlainStatsStorage(
 
     override fun statsTagLabeledTS() = tagLabeledTS.provideData()
 
-    override fun statsTagLabeledAmount() = statsTagQueriedAmount()
-    // tagLabeledN.provideData()
+    override fun statsTagLabeledAmount() = tagLabeledN.provideData()
 
     override fun statsTagQueriedTS() = tagQueriedTS.provideData()
 
@@ -86,8 +88,7 @@ class PlainStatsStorage(
 
         return when (this) {
             is StatsEvent.TagsChanged -> ids.contains(resource)
-            is StatsEvent.PlainTagUsed -> false
-            // tagsStorage.getTags(ids).contains(tag)
+            is StatsEvent.PlainTagUsed -> tagStorage.getTags(ids).contains(tag)
             is StatsEvent.KindTagUsed -> true
         }
     }
