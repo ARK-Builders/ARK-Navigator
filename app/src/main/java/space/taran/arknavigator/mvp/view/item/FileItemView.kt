@@ -19,7 +19,7 @@ interface FileItemView {
     fun setThumbnail(
         path: Path,
         id: ResourceId,
-        meta: Metadata?,
+        meta: Metadata,
         preview: PreviewLocator?
     )
 

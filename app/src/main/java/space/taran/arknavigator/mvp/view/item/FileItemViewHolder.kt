@@ -62,17 +62,15 @@ class FileItemViewHolder(
     override fun setThumbnail(
         path: Path,
         id: ResourceId,
-        meta: Metadata?,
+        meta: Metadata,
         preview: PreviewLocator?
     ) = with(binding.root) {
         val placeholder = ImageUtils.iconForExtension(extension(path))
 
-        meta?.let {
-            ExtraLoader.load(
-                meta, listOf(binding.primaryExtra, binding.secondaryExtra),
-                verbose = false
-            )
-        }
+        ExtraLoader.load(
+            meta, listOf(binding.primaryExtra, binding.secondaryExtra),
+            verbose = false
+        )
 
         preview?.let {
             val thumbnail = if (preview.check() != PreviewStatus.ABSENT) {
