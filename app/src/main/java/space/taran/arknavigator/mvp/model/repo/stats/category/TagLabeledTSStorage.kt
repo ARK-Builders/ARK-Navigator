@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
-import space.taran.arknavigator.mvp.model.repo.stats.StatsEvent
+import space.taran.arklib.domain.stats.StatsEvent
 import space.taran.arknavigator.utils.Tag
 import timber.log.Timber
 import java.nio.file.Path

@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import space.taran.arklib.arkFolder
 import space.taran.arklib.arkStats
-import space.taran.arknavigator.mvp.model.repo.stats.StatsEvent
+import space.taran.arklib.domain.stats.StatsEvent
 import timber.log.Timber
 import java.nio.file.Path
 
