@@ -102,7 +102,7 @@ class ResourcesGridPresenter(
         }
 
         val id = item.id()
-        val metadata = metadataProcessor.retrieve(id).getOrNull()
+        val metadata = metadataProcessor.retrieve(id).getOrThrow()
         val preview = previewProcessor.retrieve(id).getOrNull()
 
         view.setThumbnail(
