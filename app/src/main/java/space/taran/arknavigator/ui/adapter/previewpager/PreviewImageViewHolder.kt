@@ -41,7 +41,7 @@ class PreviewImageViewHolder(
         placeholder: Int,
         id: ResourceId,
         meta: Metadata,
-        preview: PreviewLocator?
+        preview: PreviewLocator
     ) = with(binding) {
         if (meta is Metadata.Video) {
             icPlay.makeVisibleAndSetOnClickListener {
@@ -49,12 +49,6 @@ class PreviewImageViewHolder(
             }
         } else {
             icPlay.isVisible = false
-        }
-
-        preview ?: let {
-            ivZoom.isZoomEnabled = false
-            ivZoom.setImageResource(placeholder)
-            return@with
         }
 
         val status = preview.check()

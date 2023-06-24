@@ -13,6 +13,6 @@ interface PreviewItemView {
         placeholder: Int,
         id: ResourceId,
         meta: Metadata,
-        preview: PreviewLocator?
+        preview: PreviewLocator
     )
 }
