@@ -20,7 +20,7 @@ interface FileItemView {
         path: Path,
         id: ResourceId,
         meta: Metadata,
-        preview: PreviewLocator
+        preview: PreviewLocator?
     )
 
     fun setText(title: String, shortName: Boolean = false)
