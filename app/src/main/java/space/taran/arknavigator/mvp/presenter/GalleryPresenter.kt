@@ -77,7 +77,7 @@ class GalleryPresenter(
 
     data class GalleryItem(
         val resource: Resource,
-        val preview: PreviewLocator?,
+        val preview: PreviewLocator,
         val metadata: Metadata
     ) {
         fun id() = resource.id
@@ -151,7 +151,7 @@ class GalleryPresenter(
 //            )
 
             galleryItems = resourcesIds.map { id ->
-                val preview = previewStorage.retrieve(id).getOrNull()
+                val preview = previewStorage.retrieve(id).getOrThrow()
                 val metadata = metadataStorage.retrieve(id).getOrThrow()
 
                 val resource = index.getResource(id)!!

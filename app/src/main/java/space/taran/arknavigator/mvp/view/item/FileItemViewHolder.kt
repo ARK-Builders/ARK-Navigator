@@ -63,7 +63,7 @@ class FileItemViewHolder(
         path: Path,
         id: ResourceId,
         meta: Metadata,
-        preview: PreviewLocator?
+        preview: PreviewLocator
     ) = with(binding.root) {
         val placeholder = ImageUtils.iconForExtension(extension(path))
 
@@ -72,22 +72,18 @@ class FileItemViewHolder(
             verbose = false
         )
 
-        preview?.let {
-            val thumbnail = if (preview.check() != PreviewStatus.ABSENT) {
-                preview.thumbnail()
-            } else {
-                null
-            }
-
-            ImageUtils.loadThumbnailWithPlaceholder(
-                id,
-                thumbnail,
-                placeholder,
-                binding.iv
-            )
-        } ?: let {
-            binding.iv.setImageResource(R.drawable.ic_file)
+        val thumbnail = if (preview.check() != PreviewStatus.ABSENT) {
+            preview.thumbnail()
+        } else {
+            null
         }
+
+        ImageUtils.loadThumbnailWithPlaceholder(
+            id,
+            thumbnail,
+            placeholder,
+            binding.iv
+        )
     }
 
     override fun setText(title: String, shortName: Boolean) = with(binding) {
