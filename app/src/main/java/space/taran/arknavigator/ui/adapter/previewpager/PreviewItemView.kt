@@ -9,10 +9,10 @@ interface PreviewItemView {
 
     fun reset()
 
-    fun setSource(
+    suspend fun setSource(
         placeholder: Int,
         id: ResourceId,
         meta: Metadata,
-        preview: PreviewLocator
+        locator: PreviewLocator
     )
 }
