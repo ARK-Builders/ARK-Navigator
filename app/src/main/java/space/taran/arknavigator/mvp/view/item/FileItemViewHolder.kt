@@ -4,6 +4,12 @@ import android.animation.ValueAnimator
 import android.view.View
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import space.taran.arklib.ResourceId
 import space.taran.arklib.domain.meta.Metadata
 import space.taran.arklib.domain.preview.PreviewLocator
@@ -15,11 +21,14 @@ import space.taran.arknavigator.databinding.ItemFileGridBinding
 import space.taran.arknavigator.ui.extra.ExtraLoader
 import space.taran.arknavigator.utils.Score
 import space.taran.arknavigator.utils.dpToPx
+import timber.log.Timber
 import java.nio.file.Path
 
 class FileItemViewHolder(
     val binding: ItemFileGridBinding
 ) : RecyclerView.ViewHolder(binding.root), FileItemView {
+
+    private var joinThumbnailJob: Job? = null
 
     override fun position(): Int = this.layoutPosition
 
@@ -35,6 +44,8 @@ class FileItemViewHolder(
         isSelectingEnabled: Boolean,
         isItemSelected: Boolean
     ) = with(binding) {
+        iv.isVisible = true
+        progressIv.isVisible = false
         cbSelected.isVisible = isSelectingEnabled
         cbSelected.isChecked = isItemSelected
         val elevation = if (isSelectingEnabled && isItemSelected)
@@ -63,26 +74,53 @@ class FileItemViewHolder(
         path: Path,
         id: ResourceId,
         meta: Metadata,
-        preview: PreviewLocator
-    ) = with(binding.root) {
-        val placeholder = ImageUtils.iconForExtension(extension(path))
+        locator: PreviewLocator,
+        presenterScope: CoroutineScope
+    ) = with(binding) {
+        joinThumbnailJob?.cancel()
 
         ExtraLoader.load(
-            meta, listOf(binding.primaryExtra, binding.secondaryExtra),
+            meta, listOf(primaryExtra, secondaryExtra),
             verbose = false
         )
 
-        val thumbnail = if (preview.check() != PreviewStatus.ABSENT) {
-            preview.thumbnail()
+        if (!locator.isGenerated()) {
+            progressIv.isVisible = true
+            Timber.d("join preview generation for $id")
+            joinThumbnailJob = presenterScope.launch {
+                locator.join()
+
+                if (!isActive) return@launch
+
+                withContext(Dispatchers.Main) {
+                    progressIv.isVisible = false
+                    onThumbnailReady(path, id, locator)
+                }
+            }
+            return
+        }
+
+        onThumbnailReady(path, id, locator)
+    }
+
+    private fun onThumbnailReady(
+        path: Path,
+        id: ResourceId,
+        locator: PreviewLocator,
+    ) = with(binding) {
+        val thumbnail = if (locator.check() != PreviewStatus.ABSENT) {
+            locator.thumbnail()
         } else {
             null
         }
+
+        val placeholder = ImageUtils.iconForExtension(extension(path))
 
         ImageUtils.loadThumbnailWithPlaceholder(
             id,
             thumbnail,
             placeholder,
-            binding.iv
+            iv
         )
     }
 

@@ -16,6 +16,7 @@ import space.taran.arklib.utils.ImageUtils.loadSubsamplingImage
 import space.taran.arknavigator.databinding.ItemImageBinding
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 import space.taran.arknavigator.utils.extensions.makeVisibleAndSetOnClickListener
+import timber.log.Timber
 
 @SuppressLint("ClickableViewAccessibility")
 class PreviewImageViewHolder(
@@ -37,11 +38,11 @@ class PreviewImageViewHolder(
 
     override var pos = -1
 
-    override fun setSource(
+    override suspend fun setSource(
         placeholder: Int,
         id: ResourceId,
         meta: Metadata,
-        preview: PreviewLocator
+        locator: PreviewLocator
     ) = with(binding) {
         if (meta is Metadata.Video) {
             icPlay.makeVisibleAndSetOnClickListener {
@@ -51,14 +52,21 @@ class PreviewImageViewHolder(
             icPlay.isVisible = false
         }
 
-        val status = preview.check()
+        if (!locator.isGenerated()) {
+            progress.isVisible = true
+            Timber.d("join preview generation for $id")
+            locator.join()
+            progress.isVisible = false
+        }
+
+        val status = locator.check()
         if (status != PreviewStatus.FULLSCREEN) {
             ivZoom.isZoomEnabled = false
             ivZoom.setImageResource(placeholder)
             return@with
         }
 
-        val path = preview.fullscreen()
+        val path = locator.fullscreen()
         loadGlideZoomImage(id, path, ivZoom)
         loadSubsamplingImage(path, ivSubsampling)
     }

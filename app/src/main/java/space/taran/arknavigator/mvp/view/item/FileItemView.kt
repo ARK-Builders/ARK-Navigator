@@ -1,5 +1,6 @@
 package space.taran.arknavigator.mvp.view.item
 
+import kotlinx.coroutines.CoroutineScope
 import space.taran.arklib.ResourceId
 import space.taran.arklib.domain.meta.Metadata
 import space.taran.arklib.domain.preview.PreviewLocator
@@ -20,7 +21,8 @@ interface FileItemView {
         path: Path,
         id: ResourceId,
         meta: Metadata,
-        preview: PreviewLocator
+        locator: PreviewLocator,
+        presenterScope: CoroutineScope
     )
 
     fun setText(title: String, shortName: Boolean = false)

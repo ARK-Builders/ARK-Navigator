@@ -109,7 +109,8 @@ class ResourcesGridPresenter(
             path,
             item.id(),
             metadata,
-            preview
+            preview,
+            scope
         )
     }
 
