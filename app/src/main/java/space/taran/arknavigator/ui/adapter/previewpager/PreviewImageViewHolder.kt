@@ -7,6 +7,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.ortiz.touchview.OnTouchImageViewListener
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import moxy.presenterScope
 import space.taran.arklib.ResourceId
 import space.taran.arklib.domain.meta.Metadata
 import space.taran.arklib.domain.preview.PreviewLocator
@@ -24,6 +30,8 @@ class PreviewImageViewHolder(
     private val presenter: GalleryPresenter,
     private val gestureDetector: GestureDetectorCompat
 ) : RecyclerView.ViewHolder(binding.root), PreviewItemView {
+
+    private var joinPreviewJob: Job? = null
 
     init {
         binding.ivSubsampling.setOnTouchListener { view, motionEvent ->
@@ -44,6 +52,8 @@ class PreviewImageViewHolder(
         meta: Metadata,
         locator: PreviewLocator
     ) = with(binding) {
+        joinPreviewJob?.cancel()
+
         if (meta is Metadata.Video) {
             icPlay.makeVisibleAndSetOnClickListener {
                 presenter.onPlayButtonClick()
@@ -55,10 +65,28 @@ class PreviewImageViewHolder(
         if (!locator.isGenerated()) {
             progress.isVisible = true
             Timber.d("join preview generation for $id")
-            locator.join()
-            progress.isVisible = false
+            joinPreviewJob = presenter.presenterScope.launch {
+                locator.join()
+
+                if (!isActive) return@launch
+
+                withContext(Dispatchers.Main) {
+                    progress.isVisible = false
+                    onPreviewReady(placeholder, id, meta, locator)
+                }
+            }
+            return@with
         }
 
+        onPreviewReady(placeholder, id, meta, locator)
+    }
+
+    private fun onPreviewReady(
+        placeholder: Int,
+        id: ResourceId,
+        meta: Metadata,
+        locator: PreviewLocator
+    ) = with(binding) {
         val status = locator.check()
         if (status != PreviewStatus.FULLSCREEN) {
             ivZoom.isZoomEnabled = false
