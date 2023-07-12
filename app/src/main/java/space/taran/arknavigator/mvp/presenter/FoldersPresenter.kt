@@ -64,7 +64,7 @@ class FoldersPresenter(
 
         viewState.init()
         presenterScope.launch {
-            viewState.setProgressVisibility(true, "Loading")
+            viewState.setProgressVisibility(true, "Loading folders list")
             val folders = foldersRepo.provideWithMissing()
             devices = listDevices()
 
@@ -157,7 +157,7 @@ class FoldersPresenter(
 
     fun onForgetRoot(root: Path, deleteFromMemory: Boolean) =
         presenterScope.launch(NonCancellable) {
-            viewState.setProgressVisibility(true, "Forgetting root")
+            viewState.setProgressVisibility(true, "Forgetting root folder")
             if (deleteFromMemory) {
                 Log.d(
                     FOLDERS_TREE,
@@ -177,7 +177,7 @@ class FoldersPresenter(
 
     fun onForgetFavorite(root: Path, favorite: Path, deleteFromMemory: Boolean) =
         presenterScope.launch(NonCancellable) {
-            viewState.setProgressVisibility(true, "Forgetting favorite")
+            viewState.setProgressVisibility(true, "Forgetting favorite folder")
             if (deleteFromMemory) {
                 Log.d(
                     FOLDERS_TREE,
@@ -196,7 +196,7 @@ class FoldersPresenter(
         }
 
     private suspend fun addRoot(root: Path) {
-        viewState.setProgressVisibility(true, "Adding folder")
+        viewState.setProgressVisibility(true, "Adding root folder")
         Log.d(FOLDERS_SCREEN, "root $root added in RootsPresenter")
         val path = root.toRealPath()
         val folders = foldersRepo.provideFolders()
@@ -209,7 +209,7 @@ class FoldersPresenter(
 
         viewState.toastIndexingCanTakeMinutes()
 
-        viewState.setProgressVisibility(true, "Indexing")
+        viewState.setProgressVisibility(true, "Providing root index")
         // any valid root folder must contain `.ark` subfolder
         val index = resourcesIndexRepo.provide(root)
         index.updateAll()
@@ -220,7 +220,7 @@ class FoldersPresenter(
 
     private fun addFavorite(favorite: Path) =
         presenterScope.launch(NonCancellable) {
-            viewState.setProgressVisibility(true, "Adding folder")
+            viewState.setProgressVisibility(true, "Adding favorite folder")
             Log.d(FOLDERS_SCREEN, "favorite $favorite added in RootsPresenter")
             val path = favorite.toRealPath()
             val folders = foldersRepo.provideFolders()

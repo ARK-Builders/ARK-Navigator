@@ -130,7 +130,7 @@ class GalleryPresenter(
         super.onFirstViewAttach()
         presenterScope.launch {
             viewState.init()
-            viewState.setProgressVisibility(true, "Indexing")
+            viewState.setProgressVisibility(true, "Providing root index")
 
             index = indexRepo.provide(rootAndFav)
             messageFlow.onEach { message ->
@@ -140,9 +140,16 @@ class GalleryPresenter(
                     )
                 }
             }.launchIn(presenterScope)
-            tagsStorage = tagsStorageRepo.provide(index)
-            previewStorage = previewStorageRepo.provide(index)
+
+            viewState.setProgressVisibility(true, "Providing metadata storage")
             metadataStorage = metadataStorageRepo.provide(index)
+
+            viewState.setProgressVisibility(true, "Providing previews storage")
+            previewStorage = previewStorageRepo.provide(index)
+
+            viewState.setProgressVisibility(true, "Proviging data storages")
+
+            tagsStorage = tagsStorageRepo.provide(index)
             statsStorage = statsStorageRepo.provide(index)
             scoreStorage = scoreStorageRepo.provide(index)
 

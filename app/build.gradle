@@ -86,7 +86,9 @@ android {
 }
 
 dependencies {
-    def arklibVersion = '0.1.0-SNAPSHOT-f81e34a657'
+    //def arklibVersion = '0.1.0-SNAPSHOT-f81e34a657'
+    def arklibVersion = '999'
+
     releaseImplementation "space.taran:arklib:$arklibVersion"
     debugImplementation "space.taran:arklib-debug:$arklibVersion"
 
