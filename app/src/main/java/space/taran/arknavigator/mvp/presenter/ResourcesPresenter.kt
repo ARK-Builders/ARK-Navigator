@@ -132,7 +132,7 @@ class ResourcesPresenter(
 
             viewState.setToolbarTitle(title)
 
-            viewState.setProgressVisibility(true, "Indexing resources")
+            viewState.setProgressVisibility(true, "Providing root index")
 
             index = resourcesIndexRepo.provide(folders)
 
@@ -205,7 +205,7 @@ class ResourcesPresenter(
         directoryToMove: Path
     ) = presenterScope.launch(Dispatchers.IO) {
         withContext(Dispatchers.Main) {
-            viewState.setProgressVisibility(true, "Moving")
+            viewState.setProgressVisibility(true, "Moving selected resources")
         }
         val resourcesToMove = gridPresenter
             .resources
@@ -300,7 +300,7 @@ class ResourcesPresenter(
 
     fun onRemoveSelectedResourcesClicked() = presenterScope.launch(Dispatchers.IO) {
         withContext(Dispatchers.Main) {
-            viewState.setProgressVisibility(true, "Removing")
+            viewState.setProgressVisibility(true, "Removing selected resources")
         }
         val resourcesToRemove = gridPresenter.resources.filter { it.isSelected }
         val results = resourcesToRemove.map { item ->
@@ -342,13 +342,13 @@ class ResourcesPresenter(
     }
 
     suspend fun onRemovedResourceDetected() {
-        viewState.setProgressVisibility(true, "Indexing")
+        viewState.setProgressVisibility(true, "Updating root index")
 
         index.updateAll()
         // update current tags storage
         tagsStorageRepo.provide(index)
 
-        viewState.setProgressVisibility(true, "Sorting")
+        viewState.setProgressVisibility(true, "Sorting resources")
         onResourcesOrTagsChanged()
         viewState.setProgressVisibility(false)
     }
