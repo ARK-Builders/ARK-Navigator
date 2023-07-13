@@ -36,7 +36,7 @@ import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.adapter.ResourcesRVAdapter
 import space.taran.arknavigator.ui.adapter.TagsSelectorAdapter
 import space.taran.arknavigator.ui.fragments.dialog.ConfirmationDialogFragment
-import space.taran.arknavigator.ui.fragments.dialog.StorageCorruptionNotificationDialogFragment
+import space.taran.arknavigator.ui.fragments.dialog.StorageExceptionDialogFragment
 import space.taran.arknavigator.ui.fragments.dialog.SortDialogFragment
 import space.taran.arknavigator.ui.fragments.dialog.TagsSortDialogFragment
 import space.taran.arknavigator.ui.fragments.utils.toast
@@ -321,11 +321,11 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         )
     }
 
-    override fun showCorruptNotificationDialog(storageType: String) {
-        StorageCorruptionNotificationDialogFragment.newInstance(storageType)
+    override fun displayStorageException(label: String, msg: String) {
+        StorageExceptionDialogFragment.newInstance(label, msg)
             .show(
                 childFragmentManager,
-                StorageCorruptionNotificationDialogFragment.TAG
+                StorageExceptionDialogFragment.TAG
             )
     }
 
@@ -473,7 +473,7 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         }
 
         childFragmentManager.setFragmentResultListener(
-            StorageCorruptionNotificationDialogFragment.STORAGE_CORRUPTION_DETECTED,
+            StorageExceptionDialogFragment.STORAGE_CORRUPTION_DETECTED,
             this
         ) { _, _ ->
             presenter.onBackClick()

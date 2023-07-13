@@ -23,6 +23,7 @@ import space.taran.arklib.domain.preview.PreviewProcessor
 import space.taran.arklib.domain.preview.PreviewProcessorRepo
 import space.taran.arklib.domain.score.ScoreStorage
 import space.taran.arklib.domain.score.ScoreStorageRepo
+import space.taran.arklib.domain.storage.StorageException
 import space.taran.arklib.domain.tags.TagStorage
 import space.taran.arklib.domain.tags.TagsStorageRepo
 import space.taran.arknavigator.di.modules.RepoModule.Companion.MESSAGE_FLOW_NAME
@@ -152,16 +153,17 @@ class ResourcesPresenter(
 
             initIndexingListeners()
 
-            tagStorage = tagsStorageRepo.provide(index)
+            try {
+                tagStorage = tagsStorageRepo.provide(index)
+                scoreStorage = scoreStorageRepo.provide(index)
+            } catch (e: StorageException) {
+                viewState.displayStorageException(
+                    e.label,
+                    e.msg
+                )
+                return@launch
+            }
 
-//            if (tagStorage.isCorrupted()) {
-//                viewState.showCorruptNotificationDialog(
-//                    PlainTagsStorage.TYPE
-//                )
-//                return@launch
-//            }
-
-            scoreStorage = scoreStorageRepo.provide(index)
             statsStorage = statsStorageRepo.provide(index)
 
             gridPresenter.init(

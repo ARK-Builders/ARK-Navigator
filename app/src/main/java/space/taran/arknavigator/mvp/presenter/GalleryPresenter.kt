@@ -24,6 +24,7 @@ import space.taran.arklib.domain.meta.MetadataProcessorRepo
 import space.taran.arklib.domain.preview.PreviewLocator
 import space.taran.arklib.domain.preview.PreviewProcessor
 import space.taran.arklib.domain.preview.PreviewProcessorRepo
+import space.taran.arklib.domain.storage.StorageException
 import space.taran.arklib.domain.score.ScoreStorage
 import space.taran.arklib.domain.score.ScoreStorageRepo
 import space.taran.arklib.domain.tags.TagStorage
@@ -149,13 +150,17 @@ class GalleryPresenter(
 
             viewState.setProgressVisibility(true, "Proviging data storages")
 
-            tagsStorage = tagsStorageRepo.provide(index)
-            statsStorage = statsStorageRepo.provide(index)
-            scoreStorage = scoreStorageRepo.provide(index)
+            try {
+                tagsStorage = tagsStorageRepo.provide(index)
+                scoreStorage = scoreStorageRepo.provide(index)
+            } catch (e: StorageException) {
+                viewState.displayStorageException(
+                    e.label,
+                    e.msg
+                )
+            }
 
-//            if (tagsStorage.isCorrupted()) viewState.showCorruptNotificationDialog(
-//                PlainTagsStorage.TYPE
-//            )
+            statsStorage = statsStorageRepo.provide(index)
 
             galleryItems = resourcesIds.map { id ->
                 val preview = previewStorage.retrieve(id).getOrThrow()
