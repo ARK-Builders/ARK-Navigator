@@ -37,5 +37,5 @@ interface ResourcesView : CommonMvpView {
     @StateStrategyType(SkipStrategy::class)
     fun shareResources(resources: List<Path>)
     @StateStrategyType(SkipStrategy::class)
-    fun showCorruptNotificationDialog(storageType: String)
+    fun displayStorageException(label: String, msg: String)
 }

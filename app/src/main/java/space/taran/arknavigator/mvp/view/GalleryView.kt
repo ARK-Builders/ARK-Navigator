@@ -74,5 +74,5 @@ interface GalleryView : CommonMvpView {
     fun notifySelectedChanged(selected: List<ResourceId>)
 
     @StateStrategyType(SkipStrategy::class)
-    fun showCorruptNotificationDialog(storageType: String)
+    fun displayStorageException(label: String, msg: String)
 }

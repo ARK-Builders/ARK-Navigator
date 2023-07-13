@@ -49,7 +49,7 @@ import space.taran.arknavigator.utils.Tag
 import space.taran.arknavigator.utils.Tags
 import space.taran.arknavigator.utils.Score
 import space.taran.arklib.utils.extension
-import space.taran.arknavigator.ui.fragments.dialog.StorageCorruptionNotificationDialogFragment
+import space.taran.arknavigator.ui.fragments.dialog.StorageExceptionDialogFragment
 import space.taran.arknavigator.utils.LogTags.GALLERY_SCREEN
 import space.taran.arknavigator.utils.extensions.makeGone
 import space.taran.arknavigator.utils.extensions.makeVisible
@@ -262,10 +262,10 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
         }
     }
 
-    override fun showCorruptNotificationDialog(storageType: String) {
-        StorageCorruptionNotificationDialogFragment.newInstance(storageType).show(
+    override fun displayStorageException(label: String, msg: String) {
+        StorageExceptionDialogFragment.newInstance(label, msg).show(
             childFragmentManager,
-            StorageCorruptionNotificationDialogFragment.TAG
+            StorageExceptionDialogFragment.TAG
         )
     }
 

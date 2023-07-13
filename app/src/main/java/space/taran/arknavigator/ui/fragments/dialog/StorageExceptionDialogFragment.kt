@@ -12,7 +12,7 @@ import androidx.fragment.app.setFragmentResult
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.DialogNotificationBinding
 
-class StorageCorruptionNotificationDialogFragment : DialogFragment() {
+class StorageExceptionDialogFragment : DialogFragment() {
 
     private lateinit var binding: DialogNotificationBinding
 
@@ -29,6 +29,7 @@ class StorageCorruptionNotificationDialogFragment : DialogFragment() {
 
         val args = requireArguments()
         val storageType = args.getString(STORAGE_TYPE_KEY)
+        val messageText = args.getString(MESSAGE_TEXT)
 
         binding.apply {
             titleTV.text = getString(R.string.corrupted_storage)
@@ -51,13 +52,16 @@ class StorageCorruptionNotificationDialogFragment : DialogFragment() {
     companion object {
         const val TAG = "corrupt notification dialog"
         const val STORAGE_TYPE_KEY = "storage type key"
+        const val MESSAGE_TEXT = "message text"
         const val STORAGE_CORRUPTION_DETECTED = "storage corruption detected"
 
         fun newInstance(
             storageType: String,
-        ) = StorageCorruptionNotificationDialogFragment().also {
+            messageText: String,
+        ) = StorageExceptionDialogFragment().also {
             it.arguments = bundleOf().apply {
                 putString(STORAGE_TYPE_KEY, storageType)
+                putString(MESSAGE_TEXT, messageText)
             }
         }
     }
