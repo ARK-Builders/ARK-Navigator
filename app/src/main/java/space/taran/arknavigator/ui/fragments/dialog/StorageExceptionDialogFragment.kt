@@ -35,7 +35,8 @@ class StorageExceptionDialogFragment : DialogFragment() {
             titleTV.text = getString(R.string.corrupted_storage)
             infoTV.text = getString(
                 R.string.storage_corrupt_info,
-                storageType
+                storageType,
+                messageText
             )
             closeBtn.setOnClickListener {
                 setFragmentResult(

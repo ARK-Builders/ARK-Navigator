@@ -26,31 +26,32 @@ import kotlinx.coroutines.launch
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import space.taran.arkfilepicker.folders.RootAndFav
+import space.taran.arklib.ResourceId
+import space.taran.arklib.domain.index.Resource
+import space.taran.arklib.domain.meta.Metadata
+import space.taran.arklib.utils.extension
 import space.taran.arknavigator.BuildConfig
 import space.taran.arknavigator.R
 import space.taran.arknavigator.databinding.FragmentGalleryBinding
 import space.taran.arknavigator.databinding.PopupGalleryTagMenuBinding
-import space.taran.arklib.ResourceId
-import space.taran.arklib.domain.index.Resource
-import space.taran.arklib.domain.meta.Metadata
 import space.taran.arknavigator.mvp.presenter.GalleryPresenter
 import space.taran.arknavigator.mvp.view.GalleryView
+import space.taran.arknavigator.navigation.Screens
 import space.taran.arknavigator.ui.App
 import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.adapter.previewpager.PreviewsPager
 import space.taran.arknavigator.ui.extra.ExtraLoader
 import space.taran.arknavigator.ui.fragments.dialog.DetailsAlertDialog
 import space.taran.arknavigator.ui.fragments.dialog.EditTagsDialogFragment
+import space.taran.arknavigator.ui.fragments.dialog.StorageExceptionDialogFragment
 import space.taran.arknavigator.ui.view.DefaultPopup
 import space.taran.arknavigator.ui.view.DepthPageTransformer
 import space.taran.arknavigator.ui.view.StackedToasts
 import space.taran.arknavigator.utils.FullscreenHelper
+import space.taran.arknavigator.utils.LogTags.GALLERY_SCREEN
+import space.taran.arknavigator.utils.Score
 import space.taran.arknavigator.utils.Tag
 import space.taran.arknavigator.utils.Tags
-import space.taran.arknavigator.utils.Score
-import space.taran.arklib.utils.extension
-import space.taran.arknavigator.ui.fragments.dialog.StorageExceptionDialogFragment
-import space.taran.arknavigator.utils.LogTags.GALLERY_SCREEN
 import space.taran.arknavigator.utils.extensions.makeGone
 import space.taran.arknavigator.utils.extensions.makeVisible
 import timber.log.Timber
@@ -465,6 +466,13 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
         ) { _, _ ->
             setFragmentResult(REQUEST_TAGS_CHANGED_KEY, bundleOf())
             presenter.onTagsChanged()
+        }
+
+        childFragmentManager.setFragmentResultListener(
+            StorageExceptionDialogFragment.STORAGE_CORRUPTION_DETECTED,
+            this
+        ) { _, _ ->
+            presenter.router.newRootScreen(Screens.FoldersScreen())
         }
     }
 
