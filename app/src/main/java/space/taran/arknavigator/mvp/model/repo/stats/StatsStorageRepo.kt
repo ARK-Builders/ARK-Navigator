@@ -33,7 +33,7 @@ class StatsStorageRepo(
         }
     }
 
-    fun provide(
+    suspend fun provide(
         root: RootIndex,
         tagsStorage: RootTagsStorage
     ): PlainStatsStorage =
@@ -43,6 +43,7 @@ class StatsStorageRepo(
             tagsStorage,
             statsFlow
         ).also {
+            it.init()
             storageByRoot[root.path] = it
         }
 }
