@@ -21,9 +21,9 @@ import org.junit.jupiter.api.extension.ExtendWith
 import space.taran.arklib.ResourceId
 import space.taran.arklib.domain.index.ResourceIndex
 import space.taran.arklib.domain.meta.MetadataProcessor
+import space.taran.arklib.domain.tags.TagStorage
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
-import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
 import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.QueryMode
 import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagItem
 import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagsSelectorAction
@@ -31,15 +31,15 @@ import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagsSelectorP
 import space.taran.arknavigator.mvp.presenter.dialog.TagsSorting
 import space.taran.arknavigator.mvp.view.ResourcesView
 import space.taran.arknavigator.stub.MetadataProcessorStub
-import space.taran.arknavigator.stub.ResourceIndexStub
-import space.taran.arknavigator.stub.TagsStorageStub
-import space.taran.arknavigator.stub.StatsStorageStub
-import space.taran.arknavigator.stub.TAG1
-import space.taran.arknavigator.stub.TAG2
 import space.taran.arknavigator.stub.R1
 import space.taran.arknavigator.stub.R2
 import space.taran.arknavigator.stub.R3
 import space.taran.arknavigator.stub.R4
+import space.taran.arknavigator.stub.ResourceIndexStub
+import space.taran.arknavigator.stub.StatsStorageStub
+import space.taran.arknavigator.stub.TAG1
+import space.taran.arknavigator.stub.TAG2
+import space.taran.arknavigator.stub.TagsStorageStub
 
 @ExperimentalCoroutinesApi
 @ExtendWith(MockKExtension::class)
@@ -53,7 +53,7 @@ class TagSelectorPresenterTest {
     private val scope = CoroutineScope(dispatcher)
 
     private lateinit var presenter: TagsSelectorPresenter
-    private lateinit var tagsStorage: TagsStorage
+    private lateinit var tagsStorage: TagStorage
     private lateinit var metadataStorage: MetadataProcessor
     private lateinit var index: ResourceIndex
 
@@ -155,7 +155,7 @@ class TagSelectorPresenterTest {
     fun `removing the selected tag should change the selection`() =
         runTest(dispatcher) {
             presenter.onTagItemClick(TagItem.PlainTagItem(TAG1)).join()
-            tagsStorage.setTagsAndPersist(R1, setOf())
+            tagsStorage.setTags(R1, setOf())
             presenter.calculateTagsAndSelection()
             assertEquals(presenter.selection, setOf(R1, R2, R3, R4))
         }

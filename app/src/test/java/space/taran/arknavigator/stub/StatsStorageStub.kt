@@ -1,6 +1,6 @@
 package space.taran.arknavigator.stub
 
-import space.taran.arknavigator.mvp.model.repo.stats.StatsEvent
+import space.taran.arklib.domain.stats.StatsEvent
 import space.taran.arknavigator.mvp.model.repo.stats.StatsStorage
 import space.taran.arknavigator.utils.Tag
 

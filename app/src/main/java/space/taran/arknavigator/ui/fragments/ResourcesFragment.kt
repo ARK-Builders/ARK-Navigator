@@ -36,8 +36,8 @@ import space.taran.arknavigator.ui.activity.MainActivity
 import space.taran.arknavigator.ui.adapter.ResourcesRVAdapter
 import space.taran.arknavigator.ui.adapter.TagsSelectorAdapter
 import space.taran.arknavigator.ui.fragments.dialog.ConfirmationDialogFragment
-import space.taran.arknavigator.ui.fragments.dialog.StorageExceptionDialogFragment
 import space.taran.arknavigator.ui.fragments.dialog.SortDialogFragment
+import space.taran.arknavigator.ui.fragments.dialog.StorageExceptionDialogFragment
 import space.taran.arknavigator.ui.fragments.dialog.TagsSortDialogFragment
 import space.taran.arknavigator.ui.fragments.utils.toast
 import space.taran.arknavigator.ui.fragments.utils.toastFailedPaths
@@ -429,7 +429,7 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         ) { _, _ ->
             presenter.apply {
                 presenterScope.launch {
-                    onResourcesOrTagsChanged()
+                    onTagsChanged()
                 }
             }
         }
