@@ -13,6 +13,8 @@ class MetadataProcessorStub : RootProcessor<Metadata, MetadataUpdate>() {
         R4 to Metadata.Archive()
     ).toMutableMap()
 
+    override suspend fun init() {}
+
     override fun retrieve(id: ResourceId): Result<Metadata> =
         metaById.mapValues { Result.success(it.value) }
             .getOrDefault(id, Result.failure(IllegalArgumentException()))
