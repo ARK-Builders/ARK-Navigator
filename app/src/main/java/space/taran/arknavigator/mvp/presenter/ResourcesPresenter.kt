@@ -335,6 +335,10 @@ class ResourcesPresenter(
 
     suspend fun onResourcesOrTagsChanged() {
         gridPresenter.resetResources(index.allResources())
+        onTagsChanged()
+    }
+
+    suspend fun onTagsChanged() {
         tagsSelectorPresenter.calculateTagsAndSelection()
     }
 
