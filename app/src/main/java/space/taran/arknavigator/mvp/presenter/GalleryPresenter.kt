@@ -27,6 +27,7 @@ import space.taran.arklib.domain.preview.PreviewProcessorRepo
 import space.taran.arklib.domain.storage.StorageException
 import space.taran.arklib.domain.score.ScoreStorage
 import space.taran.arklib.domain.score.ScoreStorageRepo
+import space.taran.arklib.domain.stats.StatsEvent
 import space.taran.arklib.domain.tags.TagStorage
 import space.taran.arklib.domain.tags.Tags
 import space.taran.arklib.domain.tags.TagsStorageRepo
@@ -296,6 +297,11 @@ class GalleryPresenter(
         val newTags = tags - tag
 
         viewState.displayPreviewTags(id, newTags)
+        statsStorage.handleEvent(
+            StatsEvent.TagsChanged(
+                id, tags, newTags
+            )
+        )
 
         Log.d(GALLERY_SCREEN, "setting new tags $newTags to $currentItem")
 
@@ -379,6 +385,7 @@ class GalleryPresenter(
         tagsStorage.remove(resource)
 
         index.updateAll()
+        viewState.notifyResourcesChanged()
     }
 
     private fun displayPreview(

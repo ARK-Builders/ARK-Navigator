@@ -12,6 +12,7 @@ import space.taran.arkfilepicker.folders.RootAndFav
 import space.taran.arklib.ResourceId
 import space.taran.arklib.domain.index.ResourceIndex
 import space.taran.arklib.domain.index.ResourceIndexRepo
+import space.taran.arklib.domain.stats.StatsEvent
 import space.taran.arklib.domain.tags.TagStorage
 import space.taran.arklib.domain.tags.TagsStorageRepo
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
@@ -197,8 +198,14 @@ class EditTagsDialogPresenter(
         if (input.isNotEmpty())
             addTag(input)
 
-        tagsByResources.forEach { entry ->
-            storage.setTags(entry.key, entry.value)
+        val oldTags = tagsByResources.map { (id, _) ->
+            id to storage.getTags(id)
+        }.toMap()
+        tagsByResources.forEach { (id, tags) ->
+            storage.setTags(id, tags)
+            statsStorage.handleEvent(
+                StatsEvent.TagsChanged(id, oldTags[id]!!, tags)
+            )
         }
         launch { storage.persist() }
         viewState.dismissDialog()
