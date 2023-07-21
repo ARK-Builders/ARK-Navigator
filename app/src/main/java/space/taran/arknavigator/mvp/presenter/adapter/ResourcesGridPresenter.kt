@@ -64,7 +64,7 @@ class ResourcesGridPresenter(
 
     var sorting = Sorting.DEFAULT
         private set
-    var ascending: Boolean = false
+    var ascending: Boolean = true
         private set
     var selectingEnabled: Boolean = false
 
