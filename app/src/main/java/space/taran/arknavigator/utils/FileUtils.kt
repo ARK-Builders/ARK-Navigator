@@ -1,6 +1,5 @@
 package space.taran.arknavigator.utils
 
-import space.taran.arknavigator.mvp.presenter.adapter.ResourceItem
 import space.taran.arknavigator.ui.App
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -80,14 +79,3 @@ fun findLongestCommonPrefix(paths: List<Path>): Path {
 
     return tailrec(ROOT_PATH, paths).first
 }
-
-fun reifySorting(sorting: Sorting): Comparator<ResourceItem>? =
-    when (sorting) {
-        Sorting.NAME -> compareBy(String.CASE_INSENSITIVE_ORDER) { it.resource.name }
-        Sorting.SIZE -> compareBy { it.resource.size() }
-        Sorting.TYPE -> compareBy { it.resource.extension }
-        Sorting.LAST_MODIFIED -> compareBy { it.resource.modified }
-        Sorting.DEFAULT -> null
-    }
-
-const val KILOBYTE = 1024
