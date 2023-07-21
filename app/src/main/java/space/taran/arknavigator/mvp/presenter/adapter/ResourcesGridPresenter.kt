@@ -26,8 +26,6 @@ import space.taran.arknavigator.navigation.AppRouter
 import space.taran.arknavigator.navigation.Screens
 import space.taran.arknavigator.utils.LogTags.RESOURCES_SCREEN
 import space.taran.arknavigator.utils.Sorting
-import space.taran.arknavigator.utils.reifySorting
-import space.taran.arknavigator.utils.unequalCompareBy
 import java.nio.file.Files
 import javax.inject.Inject
 import kotlin.io.path.notExists
@@ -66,7 +64,7 @@ class ResourcesGridPresenter(
 
     var sorting = Sorting.DEFAULT
         private set
-    var ascending: Boolean = true
+    var ascending: Boolean = false
         private set
     var selectingEnabled: Boolean = false
 
@@ -315,12 +313,6 @@ class ResourcesGridPresenter(
         }
     }
 
-    private fun compareResourcesByScores() = Comparator<ResourceItem> { a, b ->
-        val aScore = scoreStorage.getScore(a.id())
-        val bScore = scoreStorage.getScore(b.id())
-        aScore.compareTo(bScore)
-    }
-
     private fun updateSorting(sorting: Sorting) {
         scope.launch(Dispatchers.Default) {
             setProgressVisibility(true, "Sorting")
@@ -358,25 +350,23 @@ class ResourcesGridPresenter(
 
     private fun sortAllResources() {
         val sortTime = measureTimeMillis {
-            val comparator = reifySorting(sorting)
-            if (comparator != null) {
-                resources = resources.map { it to it }
-                    .toMap()
-                    .toSortedMap(
-                        unequalCompareBy(
-                            if (sortByScores)
-                                compareResourcesByScores()
-                                    .then(comparator)
-                            else comparator
-                        )
-                    )
-                    .values
-                    .toList()
-            } else resources = resources.sortedWith(
-                unequalCompareBy(
-                    compareResourcesByScores()
-                )
-            )
+            val bySorting = resourceComparator(sorting)
+            val byScores = scoreComparator()
+
+            if (bySorting == null && byScores == null) {
+                return
+            }
+
+            val comparator = if (bySorting != null && byScores != null) {
+                byScores.then(bySorting)
+            } else if (byScores == null) {
+                bySorting!!
+            } else {
+                byScores
+            }
+
+            resources = resources.sortedWith(comparator)
+
             if (sorting != Sorting.DEFAULT && !ascending) {
                 resources = resources.reversed()
             }
@@ -407,5 +397,25 @@ class ResourcesGridPresenter(
     ) =
         withContext(Dispatchers.Main) {
             viewState.setProgressVisibility(isVisible, withText)
+        }
+
+    private fun resourceComparator(sorting: Sorting): Comparator<ResourceItem>? =
+        when (sorting) {
+            Sorting.NAME -> compareBy(String.CASE_INSENSITIVE_ORDER) { it.resource.name }
+            Sorting.SIZE -> compareBy { it.resource.size() }
+            Sorting.TYPE -> compareBy { it.resource.extension }
+            Sorting.LAST_MODIFIED -> compareBy { it.resource.modified }
+            Sorting.DEFAULT -> null
+        }
+
+    private fun scoreComparator(): Comparator<ResourceItem>? =
+        if (sortByScores) {
+            Comparator<ResourceItem> { a, b ->
+                val aScore = scoreStorage.getScore(a.id())
+                val bScore = scoreStorage.getScore(b.id())
+                aScore.compareTo(bScore)
+            }
+        } else {
+            null
         }
 }
