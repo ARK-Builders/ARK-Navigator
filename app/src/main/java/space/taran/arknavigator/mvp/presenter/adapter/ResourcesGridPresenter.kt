@@ -113,8 +113,9 @@ class ResourcesGridPresenter(
     }
 
     fun onItemClick(pos: Int) = scope.launch {
+        val allPaths = index.allPaths()
         val containsNotExistingResource = selection.any { item ->
-            index.getPath(item.id())!!.notExists()
+            allPaths[item.id()]!!.notExists()
         }
 
         if (containsNotExistingResource) {

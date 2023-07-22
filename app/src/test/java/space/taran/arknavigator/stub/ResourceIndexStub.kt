@@ -21,11 +21,14 @@ class ResourceIndexStub : ResourceIndex {
 
     override suspend fun updateAll() {}
 
-    override suspend fun allResources(): Set<Resource> =
-        resources.values.toSet()
+    override suspend fun allResources(): Map<ResourceId, Resource> =
+        resources.toMap()
 
     override suspend fun getResource(id: ResourceId): Resource? =
         resources[id]
+
+    override suspend fun allPaths(): Map<ResourceId, Path> =
+        resources.mapValues { Path("") }
 
     override suspend fun getPath(id: ResourceId): Path? =
         Path("")

@@ -24,10 +24,10 @@ import space.taran.arklib.domain.meta.MetadataProcessorRepo
 import space.taran.arklib.domain.preview.PreviewLocator
 import space.taran.arklib.domain.preview.PreviewProcessor
 import space.taran.arklib.domain.preview.PreviewProcessorRepo
-import space.taran.arklib.domain.storage.StorageException
 import space.taran.arklib.domain.score.ScoreStorage
 import space.taran.arklib.domain.score.ScoreStorageRepo
 import space.taran.arklib.domain.stats.StatsEvent
+import space.taran.arklib.domain.storage.StorageException
 import space.taran.arklib.domain.tags.TagStorage
 import space.taran.arklib.domain.tags.Tags
 import space.taran.arklib.domain.tags.TagsStorageRepo
@@ -163,11 +163,12 @@ class GalleryPresenter(
 
             statsStorage = statsStorageRepo.provide(index)
 
+            val allResources = index.allResources()
             galleryItems = resourcesIds.map { id ->
                 val preview = previewStorage.retrieve(id).getOrThrow()
                 val metadata = metadataStorage.retrieve(id).getOrThrow()
 
-                val resource = index.getResource(id)!!
+                val resource = allResources[id]!!
                 GalleryItem(resource, preview, metadata)
             }.toMutableList()
 
