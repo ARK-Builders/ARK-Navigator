@@ -169,10 +169,15 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
 
     override fun updatePagerAdapter() {
         pagerAdapter.notifyDataSetChanged()
-        binding.viewPager.setCurrentItem(
-            requireArguments().getInt(START_AT_KEY),
-            false
-        )
+        binding.viewPager.adapter?.itemCount?.let { count ->
+            val startAt = requireArguments().getInt(START_AT_KEY)
+            if (startAt < count) {
+                binding.viewPager.setCurrentItem(
+                    startAt,
+                    false
+                )
+            }
+        }
     }
 
     override fun updatePagerAdapterWithDiff() {

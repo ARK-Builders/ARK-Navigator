@@ -178,7 +178,7 @@ class ResourcesPresenter(
             viewState.setProgressVisibility(true, "Sorting resources")
 
             val resources = index.allResources()
-            gridPresenter.resetResources(resources)
+            gridPresenter.resetResources(resources.values.toSet())
             val kindTagsEnabled = preferences.get(PreferenceKey.ShowKinds)
             tagsSelectorPresenter.init(
                 index,
@@ -334,7 +334,7 @@ class ResourcesPresenter(
     }
 
     suspend fun onResourcesOrTagsChanged() {
-        gridPresenter.resetResources(index.allResources())
+        gridPresenter.resetResources(index.allResources().values.toSet())
         onTagsChanged()
     }
 

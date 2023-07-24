@@ -34,6 +34,7 @@ import space.taran.arklib.domain.tags.TagsStorageRepo
 import space.taran.arklib.utils.ImageUtils
 import space.taran.arklib.utils.extension
 import space.taran.arknavigator.di.modules.RepoModule.Companion.MESSAGE_FLOW_NAME
+import space.taran.arknavigator.domain.HandleGalleryExternalChangesUseCase
 import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
 import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
 import space.taran.arknavigator.mvp.model.repo.stats.StatsStorage
@@ -47,7 +48,7 @@ import space.taran.arknavigator.ui.adapter.previewpager.PreviewPlainTextItemView
 import space.taran.arknavigator.utils.LogTags.GALLERY_SCREEN
 import space.taran.arknavigator.utils.Score
 import space.taran.arknavigator.utils.Tag
-import java.io.FileNotFoundException
+import timber.log.Timber
 import java.io.FileReader
 import java.nio.file.Files
 import java.nio.file.Path
@@ -127,6 +128,10 @@ class GalleryPresenter(
     @Named(MESSAGE_FLOW_NAME)
     lateinit var messageFlow: MutableSharedFlow<Message>
 
+    @Inject
+    lateinit var handleGalleryExternalChangesUseCase:
+        HandleGalleryExternalChangesUseCase
+
     override fun onFirstViewAttach() {
         Log.d(GALLERY_SCREEN, "first view attached in GalleryPresenter")
         super.onFirstViewAttach()
@@ -163,14 +168,7 @@ class GalleryPresenter(
 
             statsStorage = statsStorageRepo.provide(index)
 
-            val allResources = index.allResources()
-            galleryItems = resourcesIds.map { id ->
-                val preview = previewStorage.retrieve(id).getOrThrow()
-                val metadata = metadataStorage.retrieve(id).getOrThrow()
-
-                val resource = allResources[id]!!
-                GalleryItem(resource, preview, metadata)
-            }.toMutableList()
+            fillGalleryItems()
 
             sortByScores = preferences.get(PreferenceKey.SortByScores)
 
@@ -361,19 +359,22 @@ class GalleryPresenter(
             val item = galleryItems[pos]
 
             val path = index.getPath(item.id())
-                ?: throw IllegalStateException(
-                    "Resource ${item.id()} can't be found in the index"
-                )
+                ?: let {
+                    Timber.d("Resource ${item.id()} can't be found in the index")
+                    handleGalleryExternalChangesUseCase(this@GalleryPresenter)
+                    return@launch
+                }
 
             if (path.notExists()) {
-                throw FileNotFoundException(
-                    "Resource ${item.id()} isn't stored by path $path"
-                )
+                Timber.d("Resource ${item.id()} isn't stored by path $path")
+                handleGalleryExternalChangesUseCase(this@GalleryPresenter)
+                return@launch
             }
+
             if (path.getLastModifiedTime() != item.resource.modified) {
-                throw IllegalStateException(
-                    "Index is not up-to-date regarding path $path"
-                )
+                Timber.d("Index is not up-to-date regarding path $path")
+                handleGalleryExternalChangesUseCase(this@GalleryPresenter)
+                return@launch
             }
         }
 
@@ -383,7 +384,6 @@ class GalleryPresenter(
         val path = index.getPath(resource)
 
         Files.delete(path)
-        tagsStorage.remove(resource)
 
         index.updateAll()
         viewState.notifyResourcesChanged()
@@ -450,6 +450,20 @@ class GalleryPresenter(
         viewState.notifySelectedChanged(selectedResources)
         viewState.exitFullscreen()
         router.exit()
+    }
+
+    suspend fun fillGalleryItems() {
+        val allResources = index.allResources()
+
+        galleryItems = resourcesIds
+            .filter { allResources.keys.contains(it) }
+            .map { id ->
+                val preview = previewStorage.retrieve(id).getOrThrow()
+                val metadata = metadataStorage.retrieve(id).getOrThrow()
+
+                val resource = allResources[id]!!
+                GalleryItem(resource, preview, metadata)
+            }.toMutableList()
     }
 
     private suspend fun readText(source: Path): Result<String> =
