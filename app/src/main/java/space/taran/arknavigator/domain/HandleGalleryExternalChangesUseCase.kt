@@ -26,13 +26,6 @@ class HandleGalleryExternalChangesUseCase @Inject constructor() {
                 }
             }.join()
 
-            presenterScope.launch {
-                previewStorage.busy.collect { busy ->
-                    if (!busy)
-                        cancel()
-                }
-            }.join()
-
             fillGalleryItems()
             withContext(Dispatchers.Main) {
                 viewState.notifyResourcesChanged()

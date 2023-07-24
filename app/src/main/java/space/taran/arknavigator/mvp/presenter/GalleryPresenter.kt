@@ -452,7 +452,7 @@ class GalleryPresenter(
         router.exit()
     }
 
-    suspend fun fillGalleryItems() {
+    fun fillGalleryItems() {
         val allResources = index.allResources()
 
         galleryItems = resourcesIds
