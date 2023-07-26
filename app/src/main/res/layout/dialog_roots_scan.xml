@@ -65,7 +65,7 @@
         android:layout_height="match_parent"
         android:visibility="invisible">
 
-        <space.taran.arknavigator.ui.view.LoadingTextView
+        <dev.arkbuilders.navigator.ui.view.LoadingTextView
             android:id="@+id/tv_scanning"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

@@ -1,9 +1,9 @@
-package space.taran.arknavigator.mvp.model.repo.stats
+package dev.arkbuilders.navigator.mvp.model.repo.stats
 
 import space.taran.arklib.ResourceId
 import space.taran.arklib.domain.meta.Kind
-import space.taran.arknavigator.utils.Tag
-import space.taran.arknavigator.utils.Tags
+import dev.arkbuilders.navigator.utils.Tag
+import dev.arkbuilders.navigator.utils.Tags
 
 sealed class StatsEvent {
     data class TagsChanged(

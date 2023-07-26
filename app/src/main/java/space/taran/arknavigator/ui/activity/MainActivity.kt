@@ -1,4 +1,4 @@
-package space.taran.arknavigator.ui.activity
+package dev.arkbuilders.navigator.ui.activity
 
 import android.Manifest
 import android.content.Intent
@@ -17,16 +17,16 @@ import androidx.core.view.isVisible
 import moxy.MvpAppCompatActivity
 import moxy.ktx.moxyPresenter
 import ru.terrakok.cicerone.NavigatorHolder
-import space.taran.arknavigator.BuildConfig
-import space.taran.arknavigator.R
-import space.taran.arknavigator.databinding.ActivityMainBinding
-import space.taran.arknavigator.mvp.presenter.MainPresenter
-import space.taran.arknavigator.mvp.view.MainView
-import space.taran.arknavigator.navigation.AppNavigator
-import space.taran.arknavigator.ui.App
-import space.taran.arknavigator.ui.fragments.utils.toast
-import space.taran.arknavigator.utils.LogTags.MAIN
-import space.taran.arknavigator.utils.LogTags.PERMISSIONS
+import dev.arkbuilders.navigator.BuildConfig
+import dev.arkbuilders.navigator.R
+import dev.arkbuilders.navigator.databinding.ActivityMainBinding
+import dev.arkbuilders.navigator.mvp.presenter.MainPresenter
+import dev.arkbuilders.navigator.mvp.view.MainView
+import dev.arkbuilders.navigator.navigation.AppNavigator
+import dev.arkbuilders.navigator.ui.App
+import dev.arkbuilders.navigator.ui.fragments.utils.toast
+import dev.arkbuilders.navigator.utils.LogTags.MAIN
+import dev.arkbuilders.navigator.utils.LogTags.PERMISSIONS
 import javax.inject.Inject
 
 class MainActivity : MvpAppCompatActivity(), MainView {

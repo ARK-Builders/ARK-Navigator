@@ -1,4 +1,4 @@
-package space.taran.arknavigator.mvp.model.repo.tags
+package dev.arkbuilders.navigator.mvp.model.repo.tags
 
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
@@ -10,14 +10,14 @@ import kotlinx.coroutines.withContext
 import space.taran.arklib.ResourceId
 import space.taran.arklib.arkFolder
 import space.taran.arklib.arkTags
-import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
-import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
-import space.taran.arknavigator.mvp.model.repo.stats.StatsEvent
-import space.taran.arknavigator.utils.Constants.Companion.NO_TAGS
-import space.taran.arknavigator.utils.Converters.Companion.stringFromTags
-import space.taran.arknavigator.utils.Converters.Companion.tagsFromString
-import space.taran.arknavigator.utils.LogTags.TAGS_STORAGE
-import space.taran.arknavigator.utils.Tags
+import dev.arkbuilders.navigator.mvp.model.repo.preferences.PreferenceKey
+import dev.arkbuilders.navigator.mvp.model.repo.preferences.Preferences
+import dev.arkbuilders.navigator.mvp.model.repo.stats.StatsEvent
+import dev.arkbuilders.navigator.utils.Constants.Companion.NO_TAGS
+import dev.arkbuilders.navigator.utils.Converters.Companion.stringFromTags
+import dev.arkbuilders.navigator.utils.Converters.Companion.tagsFromString
+import dev.arkbuilders.navigator.utils.LogTags.TAGS_STORAGE
+import dev.arkbuilders.navigator.utils.Tags
 import java.io.StreamCorruptedException
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files

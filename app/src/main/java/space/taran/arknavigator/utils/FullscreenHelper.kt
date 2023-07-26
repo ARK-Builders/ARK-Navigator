@@ -1,4 +1,4 @@
-package space.taran.arknavigator.utils
+package dev.arkbuilders.navigator.utils
 
 import android.os.Build
 import android.view.Window

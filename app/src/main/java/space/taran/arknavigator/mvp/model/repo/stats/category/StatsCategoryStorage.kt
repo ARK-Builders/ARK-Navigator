@@ -1,4 +1,4 @@
-package space.taran.arknavigator.mvp.model.repo.stats.category
+package dev.arkbuilders.navigator.mvp.model.repo.stats.category
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import space.taran.arklib.arkFolder
 import space.taran.arklib.arkStats
-import space.taran.arknavigator.mvp.model.repo.stats.StatsEvent
+import dev.arkbuilders.navigator.mvp.model.repo.stats.StatsEvent
 import timber.log.Timber
 import java.nio.file.Path
 

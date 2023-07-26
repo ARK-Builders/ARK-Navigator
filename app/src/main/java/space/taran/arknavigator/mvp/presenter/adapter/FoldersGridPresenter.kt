@@ -1,8 +1,8 @@
-package space.taran.arknavigator.mvp.presenter.adapter
+package dev.arkbuilders.navigator.mvp.presenter.adapter
 
-import space.taran.arknavigator.mvp.view.dialog.FolderPickerDialogView
-import space.taran.arknavigator.mvp.view.item.FileItemView
-import space.taran.arknavigator.utils.findLongestCommonPrefix
+import dev.arkbuilders.navigator.mvp.view.dialog.FolderPickerDialogView
+import dev.arkbuilders.navigator.mvp.view.item.FileItemView
+import dev.arkbuilders.navigator.utils.findLongestCommonPrefix
 import space.taran.arklib.utils.listChildren
 import java.nio.file.Files
 import java.nio.file.Path

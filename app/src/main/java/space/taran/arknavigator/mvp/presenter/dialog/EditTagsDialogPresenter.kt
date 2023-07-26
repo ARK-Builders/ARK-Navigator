@@ -1,4 +1,4 @@
-package space.taran.arknavigator.mvp.presenter.dialog
+package dev.arkbuilders.navigator.mvp.presenter.dialog
 
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -12,16 +12,16 @@ import space.taran.arkfilepicker.folders.RootAndFav
 import space.taran.arklib.ResourceId
 import space.taran.arklib.domain.index.ResourceIndex
 import space.taran.arklib.domain.index.ResourceIndexRepo
-import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
-import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
-import space.taran.arknavigator.mvp.model.repo.stats.StatsStorage
-import space.taran.arknavigator.mvp.model.repo.stats.StatsStorageRepo
-import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
-import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
-import space.taran.arknavigator.mvp.view.dialog.EditTagsDialogView
-import space.taran.arknavigator.utils.Popularity
-import space.taran.arknavigator.utils.Tag
-import space.taran.arknavigator.utils.TagUtils
+import dev.arkbuilders.navigator.mvp.model.repo.preferences.PreferenceKey
+import dev.arkbuilders.navigator.mvp.model.repo.preferences.Preferences
+import dev.arkbuilders.navigator.mvp.model.repo.stats.StatsStorage
+import dev.arkbuilders.navigator.mvp.model.repo.stats.StatsStorageRepo
+import dev.arkbuilders.navigator.mvp.model.repo.tags.TagsStorage
+import dev.arkbuilders.navigator.mvp.model.repo.tags.TagsStorageRepo
+import dev.arkbuilders.navigator.mvp.view.dialog.EditTagsDialogView
+import dev.arkbuilders.navigator.utils.Popularity
+import dev.arkbuilders.navigator.utils.Tag
+import dev.arkbuilders.navigator.utils.TagUtils
 import javax.inject.Inject
 
 sealed class EditTagsAction {

@@ -1,10 +1,10 @@
-package space.taran.arknavigator.mvp.model.repo.stats
+package dev.arkbuilders.navigator.mvp.model.repo.stats
 
 import space.taran.arklib.domain.index.ResourceIndex
 import space.taran.arklib.domain.index.RootIndex
-import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
-import space.taran.arknavigator.mvp.model.repo.tags.PlainTagsStorage
-import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
+import dev.arkbuilders.navigator.mvp.model.repo.preferences.Preferences
+import dev.arkbuilders.navigator.mvp.model.repo.tags.PlainTagsStorage
+import dev.arkbuilders.navigator.mvp.model.repo.tags.TagsStorageRepo
 import java.nio.file.Path
 import javax.inject.Inject
 import javax.inject.Singleton

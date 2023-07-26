@@ -1,4 +1,4 @@
-package space.taran.arknavigator.mvp.presenter
+package dev.arkbuilders.navigator.mvp.presenter
 
 import android.util.Log
 import kotlinx.coroutines.launch
@@ -6,10 +6,10 @@ import moxy.MvpPresenter
 import moxy.presenterScope
 import space.taran.arkfilepicker.folders.FoldersRepo
 import space.taran.arkfilepicker.folders.RootAndFav
-import space.taran.arknavigator.mvp.view.MainView
-import space.taran.arknavigator.navigation.AppRouter
-import space.taran.arknavigator.navigation.Screens
-import space.taran.arknavigator.utils.LogTags.MAIN
+import dev.arkbuilders.navigator.mvp.view.MainView
+import dev.arkbuilders.navigator.navigation.AppRouter
+import dev.arkbuilders.navigator.navigation.Screens
+import dev.arkbuilders.navigator.utils.LogTags.MAIN
 import javax.inject.Inject
 
 class MainPresenter : MvpPresenter<MainView>() {

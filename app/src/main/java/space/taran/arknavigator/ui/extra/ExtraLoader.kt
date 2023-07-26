@@ -1,8 +1,8 @@
-package space.taran.arknavigator.ui.extra
+package dev.arkbuilders.navigator.ui.extra
 
 import android.widget.TextView
 import space.taran.arklib.domain.meta.Metadata
-import space.taran.arknavigator.utils.extensions.makeGone
+import dev.arkbuilders.navigator.utils.extensions.makeGone
 
 object ExtraLoader {
     fun load(meta: Metadata, extraTVs: List<TextView>, verbose: Boolean) {

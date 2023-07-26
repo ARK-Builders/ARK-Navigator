@@ -1,4 +1,4 @@
-package space.taran.arknavigator.ui.fragments
+package dev.arkbuilders.navigator.ui.fragments
 
 import android.content.Context
 import android.os.Bundle
@@ -17,19 +17,19 @@ import com.mikepenz.fastadapter.adapters.ItemAdapter
 import com.mikepenz.fastadapter.binding.AbstractBindingItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import space.taran.arknavigator.R
-import space.taran.arknavigator.databinding.FragmentSettingsBinding
-import space.taran.arknavigator.databinding.ItemBooleanPreferenceBinding
-import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
-import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
-import space.taran.arknavigator.navigation.AppRouter
-import space.taran.arknavigator.navigation.Screens
-import space.taran.arknavigator.ui.App
-import space.taran.arknavigator.ui.activity.MainActivity
-import space.taran.arknavigator.ui.fragments.dialog.ConfirmationDialogFragment
-import space.taran.arknavigator.ui.fragments.dialog.InfoDialogFragment
-import space.taran.arknavigator.ui.fragments.utils.toast
-import space.taran.arknavigator.utils.LogTags.SETTINGS_SCREEN
+import dev.arkbuilders.navigator.R
+import dev.arkbuilders.navigator.databinding.FragmentSettingsBinding
+import dev.arkbuilders.navigator.databinding.ItemBooleanPreferenceBinding
+import dev.arkbuilders.navigator.mvp.model.repo.preferences.PreferenceKey
+import dev.arkbuilders.navigator.mvp.model.repo.preferences.Preferences
+import dev.arkbuilders.navigator.navigation.AppRouter
+import dev.arkbuilders.navigator.navigation.Screens
+import dev.arkbuilders.navigator.ui.App
+import dev.arkbuilders.navigator.ui.activity.MainActivity
+import dev.arkbuilders.navigator.ui.fragments.dialog.ConfirmationDialogFragment
+import dev.arkbuilders.navigator.ui.fragments.dialog.InfoDialogFragment
+import dev.arkbuilders.navigator.ui.fragments.utils.toast
+import dev.arkbuilders.navigator.utils.LogTags.SETTINGS_SCREEN
 import javax.inject.Inject
 
 class SettingsFragment : Fragment(R.layout.fragment_settings) {

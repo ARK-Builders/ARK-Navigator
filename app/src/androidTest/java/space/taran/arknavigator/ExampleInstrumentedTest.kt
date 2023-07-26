@@ -1,4 +1,4 @@
-package space.taran.arknavigator
+package dev.arkbuilders.navigator
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -17,6 +17,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("space.taran.arknavigator", appContext.packageName)
+        assertEquals("dev.arkbuilders.navigator", appContext.packageName)
     }
 }

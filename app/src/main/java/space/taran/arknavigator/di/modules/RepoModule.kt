@@ -1,4 +1,4 @@
-package space.taran.arknavigator.di.modules
+package dev.arkbuilders.navigator.di.modules
 
 import android.util.Log
 import dagger.Module
@@ -12,10 +12,10 @@ import space.taran.arklib.domain.index.ResourceIndexRepo
 import space.taran.arklib.domain.meta.MetadataStorageRepo
 import space.taran.arklib.domain.preview.PreviewStorageRepo
 import space.taran.arklib.utils.Constants
-import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
-import space.taran.arknavigator.mvp.model.repo.scores.ScoreStorageRepo
-import space.taran.arknavigator.mvp.model.repo.tags.TagsStorageRepo
-import space.taran.arknavigator.utils.LogTags.MAIN
+import dev.arkbuilders.navigator.mvp.model.repo.preferences.Preferences
+import dev.arkbuilders.navigator.mvp.model.repo.scores.ScoreStorageRepo
+import dev.arkbuilders.navigator.mvp.model.repo.tags.TagsStorageRepo
+import dev.arkbuilders.navigator.utils.LogTags.MAIN
 import javax.inject.Named
 import javax.inject.Singleton
 

@@ -1,12 +1,12 @@
-package space.taran.arknavigator.mvp.presenter.dialog
+package dev.arkbuilders.navigator.mvp.presenter.dialog
 
 import kotlinx.coroutines.launch
 import moxy.MvpPresenter
 import moxy.presenterScope
-import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
-import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
-import space.taran.arknavigator.mvp.view.dialog.SortDialogView
-import space.taran.arknavigator.utils.Sorting
+import dev.arkbuilders.navigator.mvp.model.repo.preferences.PreferenceKey
+import dev.arkbuilders.navigator.mvp.model.repo.preferences.Preferences
+import dev.arkbuilders.navigator.mvp.view.dialog.SortDialogView
+import dev.arkbuilders.navigator.utils.Sorting
 import javax.inject.Inject
 
 class SortDialogPresenter : MvpPresenter<SortDialogView>() {

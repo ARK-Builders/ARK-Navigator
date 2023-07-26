@@ -1,4 +1,4 @@
-package space.taran.arknavigator.ui.view
+package dev.arkbuilders.navigator.ui.view
 
 import android.content.Context
 import android.util.AttributeSet

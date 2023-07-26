@@ -1,4 +1,4 @@
-package space.taran.arknavigator.ui.adapter
+package dev.arkbuilders.navigator.ui.adapter
 
 import android.content.Context
 import android.content.res.ColorStateList
@@ -13,14 +13,14 @@ import com.google.android.flexbox.FlexboxLayoutManager
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ItemAdapter
 import com.mikepenz.fastadapter.binding.AbstractBindingItem
-import space.taran.arknavigator.R
-import space.taran.arknavigator.databinding.FragmentResourcesBinding
-import space.taran.arknavigator.databinding.ItemTagBinding
-import space.taran.arknavigator.databinding.PopupResourcesTagMenuBinding
-import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagItem
-import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagsSelectorPresenter
-import space.taran.arknavigator.ui.resource.StringProvider
-import space.taran.arknavigator.ui.view.DefaultPopup
+import dev.arkbuilders.navigator.R
+import dev.arkbuilders.navigator.databinding.FragmentResourcesBinding
+import dev.arkbuilders.navigator.databinding.ItemTagBinding
+import dev.arkbuilders.navigator.databinding.PopupResourcesTagMenuBinding
+import dev.arkbuilders.navigator.mvp.presenter.adapter.tagsselector.TagItem
+import dev.arkbuilders.navigator.mvp.presenter.adapter.tagsselector.TagsSelectorPresenter
+import dev.arkbuilders.navigator.ui.resource.StringProvider
+import dev.arkbuilders.navigator.ui.view.DefaultPopup
 import javax.inject.Inject
 
 class TagsSelectorAdapter(

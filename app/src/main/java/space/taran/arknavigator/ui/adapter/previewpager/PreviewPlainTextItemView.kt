@@ -1,4 +1,4 @@
-package space.taran.arknavigator.ui.adapter.previewpager
+package dev.arkbuilders.navigator.ui.adapter.previewpager
 
 interface PreviewPlainTextItemView {
     var pos: Int

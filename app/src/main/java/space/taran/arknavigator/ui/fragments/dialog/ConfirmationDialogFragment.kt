@@ -1,4 +1,4 @@
-package space.taran.arknavigator.ui.fragments.dialog
+package dev.arkbuilders.navigator.ui.fragments.dialog
 
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -13,8 +13,8 @@ import androidx.fragment.app.setFragmentResult
 import space.taran.arkfilepicker.folders.FoldersRepo.Companion.DELETE_FOLDER_KEY
 import space.taran.arkfilepicker.folders.FoldersRepo.Companion.FORGET_FAVORITE_KEY
 import space.taran.arkfilepicker.folders.FoldersRepo.Companion.FORGET_ROOT_KEY
-import space.taran.arknavigator.databinding.DialogInfoBinding
-import space.taran.arknavigator.utils.extensions.textOrGone
+import dev.arkbuilders.navigator.databinding.DialogInfoBinding
+import dev.arkbuilders.navigator.utils.extensions.textOrGone
 
 class ConfirmationDialogFragment : DialogFragment() {
 

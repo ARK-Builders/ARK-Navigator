@@ -1,4 +1,4 @@
-package space.taran.arknavigator.ui.view
+package dev.arkbuilders.navigator.ui.view
 
 import android.graphics.Rect
 import android.view.Gravity
@@ -9,7 +9,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StyleRes
 import androidx.core.content.res.ResourcesCompat
 import androidx.viewbinding.ViewBinding
-import space.taran.arknavigator.utils.dpToPx
+import dev.arkbuilders.navigator.utils.dpToPx
 
 class DefaultPopup(
     val binding: ViewBinding,

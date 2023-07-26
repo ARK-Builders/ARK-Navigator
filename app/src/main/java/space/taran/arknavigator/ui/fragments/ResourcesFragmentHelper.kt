@@ -1,16 +1,16 @@
-package space.taran.arknavigator.ui.fragments
+package dev.arkbuilders.navigator.ui.fragments
 
 import android.view.View
 import androidx.core.view.isVisible
 import space.taran.arkfilepicker.ArkFilePickerConfig
 import space.taran.arkfilepicker.presentation.filepicker.ArkFilePickerFragment
 import space.taran.arkfilepicker.presentation.filepicker.ArkFilePickerMode
-import space.taran.arknavigator.R
-import space.taran.arknavigator.databinding.PopupSelectedResourcesActionsBinding
-import space.taran.arknavigator.ui.fragments.dialog.ConfirmationDialogFragment
-import space.taran.arknavigator.ui.fragments.dialog.EditTagsDialogFragment
-import space.taran.arknavigator.ui.fragments.utils.toast
-import space.taran.arknavigator.ui.view.DefaultPopup
+import dev.arkbuilders.navigator.R
+import dev.arkbuilders.navigator.databinding.PopupSelectedResourcesActionsBinding
+import dev.arkbuilders.navigator.ui.fragments.dialog.ConfirmationDialogFragment
+import dev.arkbuilders.navigator.ui.fragments.dialog.EditTagsDialogFragment
+import dev.arkbuilders.navigator.ui.fragments.utils.toast
+import dev.arkbuilders.navigator.ui.view.DefaultPopup
 
 fun ResourcesFragment.setupAndShowSelectedResourcesMenu(menuBtn: View) {
     val menuBinding = PopupSelectedResourcesActionsBinding

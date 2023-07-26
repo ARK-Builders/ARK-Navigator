@@ -1,4 +1,4 @@
-package space.taran.arknavigator.utils
+package dev.arkbuilders.navigator.utils
 
 // can be used with `toSortedMap` method which glues together values if they have equal keys
 // this method mocks makes comparators to return 0 only if objects are referentially equal

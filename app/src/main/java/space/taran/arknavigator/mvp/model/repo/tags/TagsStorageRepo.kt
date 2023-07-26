@@ -1,4 +1,4 @@
-package space.taran.arknavigator.mvp.model.repo.tags
+package dev.arkbuilders.navigator.mvp.model.repo.tags
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -6,8 +6,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import space.taran.arklib.domain.index.ResourceIndex
 import space.taran.arklib.domain.index.RootIndex
-import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
-import space.taran.arknavigator.mvp.model.repo.stats.StatsEvent
+import dev.arkbuilders.navigator.mvp.model.repo.preferences.Preferences
+import dev.arkbuilders.navigator.mvp.model.repo.stats.StatsEvent
 import java.nio.file.Path
 
 class TagsStorageRepo(

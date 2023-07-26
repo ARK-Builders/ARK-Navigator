@@ -1,19 +1,19 @@
-package space.taran.arknavigator.mvp.view.item
+package dev.arkbuilders.navigator.mvp.view.item
 
 import android.animation.ValueAnimator
 import android.view.View
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import space.taran.arklib.ResourceId
-import space.taran.arknavigator.R
-import space.taran.arknavigator.databinding.ItemFileGridBinding
+import dev.arkbuilders.navigator.R
+import dev.arkbuilders.navigator.databinding.ItemFileGridBinding
 import space.taran.arklib.domain.meta.Metadata
 import space.taran.arklib.domain.preview.PreviewLocator
 import space.taran.arklib.domain.preview.PreviewStatus
 import space.taran.arklib.utils.ImageUtils
-import space.taran.arknavigator.ui.extra.ExtraLoader
-import space.taran.arknavigator.utils.Score
-import space.taran.arknavigator.utils.dpToPx
+import dev.arkbuilders.navigator.ui.extra.ExtraLoader
+import dev.arkbuilders.navigator.utils.Score
+import dev.arkbuilders.navigator.utils.dpToPx
 import space.taran.arklib.utils.extension
 import java.nio.file.Path
 

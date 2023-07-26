@@ -250,7 +250,7 @@
         layout="@layout/layout_progress"
         android:visibility="gone" />
 
-    <space.taran.arknavigator.ui.view.StackedToastsRecyclerView
+    <dev.arkbuilders.navigator.ui.view.StackedToastsRecyclerView
         android:id="@+id/rv_toasts"
         android:elevation="20dp"
         android:layout_width="match_parent"

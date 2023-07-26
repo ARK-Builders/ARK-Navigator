@@ -1,4 +1,4 @@
-package space.taran.arknavigator.ui.adapter.previewpager
+package dev.arkbuilders.navigator.ui.adapter.previewpager
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -9,9 +9,9 @@ import android.view.ViewGroup
 import androidx.core.view.GestureDetectorCompat
 import androidx.recyclerview.widget.RecyclerView
 import space.taran.arklib.domain.meta.Kind
-import space.taran.arknavigator.databinding.ItemImageBinding
-import space.taran.arknavigator.databinding.ItemPreviewPlainTextBinding
-import space.taran.arknavigator.mvp.presenter.GalleryPresenter
+import dev.arkbuilders.navigator.databinding.ItemImageBinding
+import dev.arkbuilders.navigator.databinding.ItemPreviewPlainTextBinding
+import dev.arkbuilders.navigator.mvp.presenter.GalleryPresenter
 
 class PreviewsPager(
     val context: Context,

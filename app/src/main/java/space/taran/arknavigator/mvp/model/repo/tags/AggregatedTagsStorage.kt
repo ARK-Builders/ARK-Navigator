@@ -1,7 +1,7 @@
-package space.taran.arknavigator.mvp.model.repo.tags
+package dev.arkbuilders.navigator.mvp.model.repo.tags
 
 import space.taran.arklib.ResourceId
-import space.taran.arknavigator.utils.Tags
+import dev.arkbuilders.navigator.utils.Tags
 
 class AggregatedTagsStorage(
     val shards: Collection<TagsStorage>

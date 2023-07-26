@@ -1,4 +1,4 @@
-package space.taran.arknavigator.ui.view
+package dev.arkbuilders.navigator.ui.view
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -19,8 +19,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import space.taran.arknavigator.R
-import space.taran.arknavigator.databinding.ItemToastBinding
+import dev.arkbuilders.navigator.R
+import dev.arkbuilders.navigator.databinding.ItemToastBinding
 import space.taran.arklib.utils.tickerFlow
 import space.taran.arklib.utils.tryUnlock
 import java.nio.file.Path

@@ -1,4 +1,4 @@
-package space.taran.arknavigator.mvp.presenter.dialog
+package dev.arkbuilders.navigator.mvp.presenter.dialog
 
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
@@ -8,9 +8,9 @@ import kotlinx.coroutines.withContext
 import moxy.MvpPresenter
 import moxy.presenterScope
 import space.taran.arklib.arkFolder
-import space.taran.arknavigator.mvp.view.dialog.RootsScanView
-import space.taran.arknavigator.utils.LogTags
-import space.taran.arknavigator.utils.listDevices
+import dev.arkbuilders.navigator.mvp.view.dialog.RootsScanView
+import dev.arkbuilders.navigator.utils.LogTags
+import dev.arkbuilders.navigator.utils.listDevices
 import java.nio.file.Path
 import java.util.LinkedList
 import java.util.Queue

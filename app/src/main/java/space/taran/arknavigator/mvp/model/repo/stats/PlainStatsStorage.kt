@@ -1,4 +1,4 @@
-package space.taran.arknavigator.mvp.model.repo.stats
+package dev.arkbuilders.navigator.mvp.model.repo.stats
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -11,14 +11,14 @@ import kotlinx.coroutines.withContext
 import space.taran.arklib.arkFolder
 import space.taran.arklib.arkStats
 import space.taran.arklib.domain.index.RootIndex
-import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
-import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
-import space.taran.arknavigator.mvp.model.repo.stats.category.StatsCategoryStorage
-import space.taran.arknavigator.mvp.model.repo.stats.category.TagLabeledNStorage
-import space.taran.arknavigator.mvp.model.repo.stats.category.TagLabeledTSStorage
-import space.taran.arknavigator.mvp.model.repo.stats.category.TagQueriedNStorage
-import space.taran.arknavigator.mvp.model.repo.stats.category.TagQueriedTSStorage
-import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
+import dev.arkbuilders.navigator.mvp.model.repo.preferences.PreferenceKey
+import dev.arkbuilders.navigator.mvp.model.repo.preferences.Preferences
+import dev.arkbuilders.navigator.mvp.model.repo.stats.category.StatsCategoryStorage
+import dev.arkbuilders.navigator.mvp.model.repo.stats.category.TagLabeledNStorage
+import dev.arkbuilders.navigator.mvp.model.repo.stats.category.TagLabeledTSStorage
+import dev.arkbuilders.navigator.mvp.model.repo.stats.category.TagQueriedNStorage
+import dev.arkbuilders.navigator.mvp.model.repo.stats.category.TagQueriedTSStorage
+import dev.arkbuilders.navigator.mvp.model.repo.tags.TagsStorage
 import timber.log.Timber
 import kotlin.io.path.createDirectories
 

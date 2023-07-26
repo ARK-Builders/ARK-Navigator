@@ -1,4 +1,4 @@
-package space.taran.arknavigator.navigation
+package dev.arkbuilders.navigator.navigation
 
 import android.content.Intent
 import android.os.Bundle

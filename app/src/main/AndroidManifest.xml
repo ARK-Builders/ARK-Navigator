@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="space.taran.arknavigator">
+    package="dev.arkbuilders.navigator">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -11,7 +11,7 @@
         tools:ignore="ScopedStorage" />
 
     <application
-        android:name="space.taran.arknavigator.ui.App"
+        android:name="dev.arkbuilders.navigator.ui.App"
         android:allowBackup="true"
         android:icon="${appIcon}"
         android:label="${appLabel}"
@@ -22,7 +22,7 @@
         android:usesCleartextTraffic="true"
         tools:replace="android:label">
         <activity
-            android:name="space.taran.arknavigator.ui.activity.MainActivity"
+            android:name="dev.arkbuilders.navigator.ui.activity.MainActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
@@ -32,7 +32,7 @@
         </activity>
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="space.taran.arknavigator.provider"
+            android:authorities="dev.arkbuilders.navigator.provider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

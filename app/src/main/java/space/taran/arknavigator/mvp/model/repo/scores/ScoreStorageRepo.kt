@@ -1,4 +1,4 @@
-package space.taran.arknavigator.mvp.model.repo.scores
+package dev.arkbuilders.navigator.mvp.model.repo.scores
 
 import space.taran.arklib.domain.index.ResourceIndex
 import space.taran.arklib.domain.index.RootIndex

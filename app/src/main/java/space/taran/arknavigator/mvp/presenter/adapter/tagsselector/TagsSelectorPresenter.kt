@@ -1,4 +1,4 @@
-package space.taran.arknavigator.mvp.presenter.adapter.tagsselector
+package dev.arkbuilders.navigator.mvp.presenter.adapter.tagsselector
 
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
@@ -9,17 +9,17 @@ import space.taran.arklib.ResourceId
 import space.taran.arklib.domain.index.ResourceIndex
 import space.taran.arklib.domain.meta.Kind
 import space.taran.arklib.domain.meta.MetadataStorage
-import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
-import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
-import space.taran.arknavigator.mvp.model.repo.stats.StatsEvent
-import space.taran.arknavigator.mvp.model.repo.stats.StatsStorage
-import space.taran.arknavigator.mvp.model.repo.tags.TagsStorage
-import space.taran.arknavigator.mvp.presenter.dialog.TagsSorting
-import space.taran.arknavigator.mvp.view.ResourcesView
-import space.taran.arknavigator.ui.resource.StringProvider
-import space.taran.arknavigator.utils.LogTags.TAGS_SELECTOR
-import space.taran.arknavigator.utils.Popularity
-import space.taran.arknavigator.utils.Tag
+import dev.arkbuilders.navigator.mvp.model.repo.preferences.PreferenceKey
+import dev.arkbuilders.navigator.mvp.model.repo.preferences.Preferences
+import dev.arkbuilders.navigator.mvp.model.repo.stats.StatsEvent
+import dev.arkbuilders.navigator.mvp.model.repo.stats.StatsStorage
+import dev.arkbuilders.navigator.mvp.model.repo.tags.TagsStorage
+import dev.arkbuilders.navigator.mvp.presenter.dialog.TagsSorting
+import dev.arkbuilders.navigator.mvp.view.ResourcesView
+import dev.arkbuilders.navigator.ui.resource.StringProvider
+import dev.arkbuilders.navigator.utils.LogTags.TAGS_SELECTOR
+import dev.arkbuilders.navigator.utils.Popularity
+import dev.arkbuilders.navigator.utils.Tag
 import javax.inject.Inject
 
 sealed class TagItem {

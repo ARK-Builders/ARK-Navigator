@@ -1,4 +1,4 @@
-package space.taran.arknavigator.stub
+package dev.arkbuilders.navigator.stub
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow

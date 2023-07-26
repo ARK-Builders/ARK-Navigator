@@ -1,4 +1,4 @@
-package space.taran.arknavigator.utils.extensions
+package dev.arkbuilders.navigator.utils.extensions
 
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText

@@ -1,4 +1,4 @@
-package space.taran.arknavigator.ui.fragments.dialog
+package dev.arkbuilders.navigator.ui.fragments.dialog
 
 import android.app.Dialog
 import android.content.Context
@@ -8,11 +8,11 @@ import android.graphics.drawable.InsetDrawable
 import android.os.Bundle
 import android.view.WindowManager
 import org.apache.commons.io.FileUtils
-import space.taran.arknavigator.R
-import space.taran.arknavigator.databinding.DialogResourceInfoBinding
+import dev.arkbuilders.navigator.R
+import dev.arkbuilders.navigator.databinding.DialogResourceInfoBinding
 import space.taran.arklib.domain.index.Resource
 import space.taran.arklib.domain.meta.Metadata
-import space.taran.arknavigator.ui.extra.ExtraLoader
+import dev.arkbuilders.navigator.ui.extra.ExtraLoader
 import java.nio.file.Path
 import kotlin.io.path.absolutePathString
 

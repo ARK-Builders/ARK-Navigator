@@ -1,4 +1,4 @@
-package space.taran.arknavigator.mvp.model.repo.scores
+package dev.arkbuilders.navigator.mvp.model.repo.scores
 
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
@@ -6,8 +6,8 @@ import kotlinx.coroutines.withContext
 import space.taran.arklib.arkFolder
 import space.taran.arklib.arkScores
 import space.taran.arklib.ResourceId
-import space.taran.arknavigator.utils.LogTags.SCORES_STORAGE
-import space.taran.arknavigator.utils.Score
+import dev.arkbuilders.navigator.utils.LogTags.SCORES_STORAGE
+import dev.arkbuilders.navigator.utils.Score
 import java.nio.charset.StandardCharsets.UTF_8
 import java.nio.file.Files
 import java.nio.file.Path
