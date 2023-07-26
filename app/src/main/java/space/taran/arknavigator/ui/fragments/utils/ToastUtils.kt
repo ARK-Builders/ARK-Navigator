@@ -1,10 +1,10 @@
-package space.taran.arknavigator.ui.fragments.utils
+package dev.arkbuilders.navigator.ui.fragments.utils
 
 import android.content.Context
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
-import space.taran.arknavigator.R
+import dev.arkbuilders.navigator.R
 import java.nio.file.Path
 
 fun Context.toast(

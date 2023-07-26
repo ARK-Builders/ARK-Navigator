@@ -1,6 +1,6 @@
-package space.taran.arknavigator.utils
+package dev.arkbuilders.navigator.utils
 
-import space.taran.arknavigator.ui.App
+import dev.arkbuilders.navigator.ui.App
 import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.io.path.exists

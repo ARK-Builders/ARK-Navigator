@@ -1,4 +1,4 @@
-package space.taran.arknavigator.navigation
+package dev.arkbuilders.navigator.navigation
 
 import ru.terrakok.cicerone.Router
 import ru.terrakok.cicerone.Screen

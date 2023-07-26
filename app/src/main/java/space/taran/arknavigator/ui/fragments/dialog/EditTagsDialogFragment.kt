@@ -1,4 +1,4 @@
-package space.taran.arknavigator.ui.fragments.dialog
+package dev.arkbuilders.navigator.ui.fragments.dialog
 
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -23,16 +23,16 @@ import space.taran.arkfilepicker.folders.RootAndFav
 import space.taran.arklib.ResourceId
 import space.taran.arklib.domain.index.ResourceIndex
 import space.taran.arklib.domain.tags.TagStorage
-import space.taran.arknavigator.R
-import space.taran.arknavigator.databinding.DialogEditTagsBinding
-import space.taran.arknavigator.mvp.model.repo.stats.StatsStorage
-import space.taran.arknavigator.mvp.presenter.dialog.EditTagsDialogPresenter
-import space.taran.arknavigator.mvp.view.dialog.EditTagsDialogView
-import space.taran.arknavigator.ui.App
-import space.taran.arknavigator.utils.Tag
-import space.taran.arknavigator.utils.Tags
-import space.taran.arknavigator.utils.extensions.placeCursorToEnd
-import space.taran.arknavigator.utils.extensions.showKeyboard
+import dev.arkbuilders.navigator.R
+import dev.arkbuilders.navigator.databinding.DialogEditTagsBinding
+import dev.arkbuilders.navigator.mvp.model.repo.stats.StatsStorage
+import dev.arkbuilders.navigator.mvp.presenter.dialog.EditTagsDialogPresenter
+import dev.arkbuilders.navigator.mvp.view.dialog.EditTagsDialogView
+import dev.arkbuilders.navigator.ui.App
+import dev.arkbuilders.navigator.utils.Tag
+import dev.arkbuilders.navigator.utils.Tags
+import dev.arkbuilders.navigator.utils.extensions.placeCursorToEnd
+import dev.arkbuilders.navigator.utils.extensions.showKeyboard
 
 class EditTagsDialogFragment(
     private val index: ResourceIndex? = null,

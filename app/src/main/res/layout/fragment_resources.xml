@@ -51,7 +51,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <space.taran.arknavigator.ui.view.UserSwitchMaterial
+        <dev.arkbuilders.navigator.ui.view.UserSwitchMaterial
             android:id="@+id/switch_scores"
             android:text="Scores"
             android:textStyle="bold"
@@ -61,7 +61,7 @@
             app:layout_constraintStart_toEndOf="@id/left_bound"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <space.taran.arknavigator.ui.view.UserSwitchMaterial
+        <dev.arkbuilders.navigator.ui.view.UserSwitchMaterial
             android:id="@+id/switch_kind"
             android:text="Kinds"
             android:textStyle="bold"
@@ -195,7 +195,7 @@
         android:id="@+id/layoutProgress"
         layout="@layout/layout_progress" />
 
-    <space.taran.arknavigator.ui.view.StackedToastsRecyclerView
+    <dev.arkbuilders.navigator.ui.view.StackedToastsRecyclerView
         android:id="@+id/rv_toasts"
         android:elevation="20dp"
         android:layout_width="match_parent"

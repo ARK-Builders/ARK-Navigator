@@ -1,4 +1,4 @@
-package space.taran.arknavigator.ui
+package dev.arkbuilders.navigator.ui
 
 import android.app.Application
 import android.os.StrictMode
@@ -13,11 +13,11 @@ import org.acra.sender.HttpSender
 import space.taran.arkfilepicker.folders.FoldersRepo
 import space.taran.arklib.initArkLib
 import space.taran.arklib.initRustLogger
-import space.taran.arknavigator.BuildConfig
-import space.taran.arknavigator.R
-import space.taran.arknavigator.di.AppComponent
-import space.taran.arknavigator.di.DaggerAppComponent
-import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
+import dev.arkbuilders.navigator.BuildConfig
+import dev.arkbuilders.navigator.R
+import dev.arkbuilders.navigator.di.AppComponent
+import dev.arkbuilders.navigator.di.DaggerAppComponent
+import dev.arkbuilders.navigator.mvp.model.repo.preferences.PreferenceKey
 import timber.log.Timber
 
 class App : Application() {

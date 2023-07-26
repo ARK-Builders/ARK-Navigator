@@ -28,7 +28,7 @@ android {
         def password = System.getenv("ACRA_PASS") ?: ""
         def uri = System.getenv("ACRA_URI") ?: ""
         def appVersionName = System.getenv("BRANCH_NAME") ?: "1.0"
-        applicationId "space.taran.arknavigator"
+        applicationId "dev.arkbuilders.navigator"
         minSdkVersion 26
         targetSdkVersion 32
         versionCode 1

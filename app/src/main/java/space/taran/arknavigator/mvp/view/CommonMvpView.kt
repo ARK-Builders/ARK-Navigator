@@ -1,4 +1,4 @@
-package space.taran.arknavigator.mvp.view
+package dev.arkbuilders.navigator.mvp.view
 
 import java.nio.file.Path
 import moxy.MvpView

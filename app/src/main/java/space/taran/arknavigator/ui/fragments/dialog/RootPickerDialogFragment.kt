@@ -1,4 +1,4 @@
-package space.taran.arknavigator.ui.fragments.dialog
+package dev.arkbuilders.navigator.ui.fragments.dialog
 
 import android.content.Context
 import androidx.core.os.bundleOf
@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import space.taran.arkfilepicker.ArkFilePickerConfig
 import space.taran.arkfilepicker.folders.FoldersRepo
 import space.taran.arkfilepicker.presentation.filepicker.ArkFilePickerFragment
-import space.taran.arknavigator.ui.App
+import dev.arkbuilders.navigator.ui.App
 import java.nio.file.Path
 import javax.inject.Inject
 import kotlin.io.path.Path

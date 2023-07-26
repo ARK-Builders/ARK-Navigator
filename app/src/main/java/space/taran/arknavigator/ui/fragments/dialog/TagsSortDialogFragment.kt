@@ -1,4 +1,4 @@
-package space.taran.arknavigator.ui.fragments.dialog
+package dev.arkbuilders.navigator.ui.fragments.dialog
 
 import android.content.Context
 import android.graphics.Color
@@ -11,14 +11,14 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import org.orbitmvi.orbit.viewmodel.observe
-import space.taran.arknavigator.R
-import space.taran.arknavigator.databinding.DialogTagsSortBinding
-import space.taran.arknavigator.mvp.presenter.dialog.TagsSortSideEffect
-import space.taran.arknavigator.mvp.presenter.dialog.TagsSortState
-import space.taran.arknavigator.mvp.presenter.dialog.TagsSortViewModel
-import space.taran.arknavigator.mvp.presenter.dialog.TagsSortViewModelFactory
-import space.taran.arknavigator.mvp.presenter.dialog.TagsSorting
-import space.taran.arknavigator.ui.App
+import dev.arkbuilders.navigator.R
+import dev.arkbuilders.navigator.databinding.DialogTagsSortBinding
+import dev.arkbuilders.navigator.mvp.presenter.dialog.TagsSortSideEffect
+import dev.arkbuilders.navigator.mvp.presenter.dialog.TagsSortState
+import dev.arkbuilders.navigator.mvp.presenter.dialog.TagsSortViewModel
+import dev.arkbuilders.navigator.mvp.presenter.dialog.TagsSortViewModelFactory
+import dev.arkbuilders.navigator.mvp.presenter.dialog.TagsSorting
+import dev.arkbuilders.navigator.ui.App
 import javax.inject.Inject
 
 class TagsSortDialogFragment : DialogFragment(R.layout.dialog_tags_sort) {

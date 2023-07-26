@@ -1,10 +1,10 @@
-package space.taran.arknavigator.mvp.view.item
+package dev.arkbuilders.navigator.mvp.view.item
 
 import kotlinx.coroutines.CoroutineScope
 import space.taran.arklib.ResourceId
 import space.taran.arklib.domain.meta.Metadata
 import space.taran.arklib.domain.preview.PreviewLocator
-import space.taran.arknavigator.utils.Score
+import dev.arkbuilders.navigator.utils.Score
 import java.nio.file.Path
 
 interface FileItemView {

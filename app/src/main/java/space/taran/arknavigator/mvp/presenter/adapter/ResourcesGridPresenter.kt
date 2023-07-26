@@ -1,4 +1,4 @@
-package space.taran.arknavigator.mvp.presenter.adapter
+package dev.arkbuilders.navigator.mvp.presenter.adapter
 
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
@@ -17,15 +17,15 @@ import space.taran.arklib.domain.meta.MetadataProcessor
 import space.taran.arklib.domain.preview.PreviewProcessor
 import space.taran.arklib.domain.score.ScoreStorage
 import space.taran.arklib.domain.tags.TagStorage
-import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
-import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
-import space.taran.arknavigator.mvp.presenter.ResourcesPresenter
-import space.taran.arknavigator.mvp.view.ResourcesView
-import space.taran.arknavigator.mvp.view.item.FileItemView
-import space.taran.arknavigator.navigation.AppRouter
-import space.taran.arknavigator.navigation.Screens
-import space.taran.arknavigator.utils.LogTags.RESOURCES_SCREEN
-import space.taran.arknavigator.utils.Sorting
+import dev.arkbuilders.navigator.mvp.model.repo.preferences.PreferenceKey
+import dev.arkbuilders.navigator.mvp.model.repo.preferences.Preferences
+import dev.arkbuilders.navigator.mvp.presenter.ResourcesPresenter
+import dev.arkbuilders.navigator.mvp.view.ResourcesView
+import dev.arkbuilders.navigator.mvp.view.item.FileItemView
+import dev.arkbuilders.navigator.navigation.AppRouter
+import dev.arkbuilders.navigator.navigation.Screens
+import dev.arkbuilders.navigator.utils.LogTags.RESOURCES_SCREEN
+import dev.arkbuilders.navigator.utils.Sorting
 import java.nio.file.Files
 import javax.inject.Inject
 import kotlin.io.path.notExists

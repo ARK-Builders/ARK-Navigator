@@ -1,4 +1,4 @@
-package space.taran.arknavigator.mvp.view
+package dev.arkbuilders.navigator.mvp.view
 
 import moxy.viewstate.strategy.AddToEndSingleStrategy
 import moxy.viewstate.strategy.SkipStrategy

@@ -1,4 +1,4 @@
-package space.taran.arknavigator.ui.fragments.dialog
+package dev.arkbuilders.navigator.ui.fragments.dialog
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,11 +7,11 @@ import android.view.ViewGroup
 import androidx.fragment.app.setFragmentResult
 import moxy.MvpBottomSheetDialogFragment
 import moxy.ktx.moxyPresenter
-import space.taran.arknavigator.R
-import space.taran.arknavigator.databinding.DialogRootsScanBinding
-import space.taran.arknavigator.mvp.presenter.dialog.RootsScanDialogPresenter
-import space.taran.arknavigator.mvp.view.dialog.RootsScanView
-import space.taran.arknavigator.ui.fragments.utils.toast
+import dev.arkbuilders.navigator.R
+import dev.arkbuilders.navigator.databinding.DialogRootsScanBinding
+import dev.arkbuilders.navigator.mvp.presenter.dialog.RootsScanDialogPresenter
+import dev.arkbuilders.navigator.mvp.view.dialog.RootsScanView
+import dev.arkbuilders.navigator.ui.fragments.utils.toast
 import java.nio.file.Path
 
 class RootsScanDialogFragment : MvpBottomSheetDialogFragment(), RootsScanView {

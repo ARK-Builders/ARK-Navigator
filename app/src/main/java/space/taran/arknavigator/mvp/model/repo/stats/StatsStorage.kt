@@ -1,7 +1,7 @@
-package space.taran.arknavigator.mvp.model.repo.stats
+package dev.arkbuilders.navigator.mvp.model.repo.stats
 
 import space.taran.arklib.domain.stats.StatsEvent
-import space.taran.arknavigator.utils.Tag
+import dev.arkbuilders.navigator.utils.Tag
 
 interface StatsStorage {
     suspend fun init()

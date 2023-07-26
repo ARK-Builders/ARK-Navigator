@@ -1,4 +1,4 @@
-package space.taran.arknavigator.ui.adapter.previewpager
+package dev.arkbuilders.navigator.ui.adapter.previewpager
 
 import android.annotation.SuppressLint
 import androidx.core.view.GestureDetectorCompat
@@ -19,9 +19,9 @@ import space.taran.arklib.domain.preview.PreviewLocator
 import space.taran.arklib.domain.preview.PreviewStatus
 import space.taran.arklib.utils.ImageUtils.loadGlideZoomImage
 import space.taran.arklib.utils.ImageUtils.loadSubsamplingImage
-import space.taran.arknavigator.databinding.ItemImageBinding
-import space.taran.arknavigator.mvp.presenter.GalleryPresenter
-import space.taran.arknavigator.utils.extensions.makeVisibleAndSetOnClickListener
+import dev.arkbuilders.navigator.databinding.ItemImageBinding
+import dev.arkbuilders.navigator.mvp.presenter.GalleryPresenter
+import dev.arkbuilders.navigator.utils.extensions.makeVisibleAndSetOnClickListener
 import timber.log.Timber
 
 @SuppressLint("ClickableViewAccessibility")

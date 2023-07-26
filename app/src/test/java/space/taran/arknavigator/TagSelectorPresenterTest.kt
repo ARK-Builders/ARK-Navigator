@@ -1,4 +1,4 @@
-package space.taran.arknavigator
+package dev.arkbuilders.navigator
 
 import android.util.Log
 import io.mockk.coEvery
@@ -22,24 +22,24 @@ import space.taran.arklib.ResourceId
 import space.taran.arklib.domain.index.ResourceIndex
 import space.taran.arklib.domain.meta.MetadataProcessor
 import space.taran.arklib.domain.tags.TagStorage
-import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
-import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
-import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.QueryMode
-import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagItem
-import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagsSelectorAction
-import space.taran.arknavigator.mvp.presenter.adapter.tagsselector.TagsSelectorPresenter
-import space.taran.arknavigator.mvp.presenter.dialog.TagsSorting
-import space.taran.arknavigator.mvp.view.ResourcesView
-import space.taran.arknavigator.stub.MetadataProcessorStub
-import space.taran.arknavigator.stub.R1
-import space.taran.arknavigator.stub.R2
-import space.taran.arknavigator.stub.R3
-import space.taran.arknavigator.stub.R4
-import space.taran.arknavigator.stub.ResourceIndexStub
-import space.taran.arknavigator.stub.StatsStorageStub
-import space.taran.arknavigator.stub.TAG1
-import space.taran.arknavigator.stub.TAG2
-import space.taran.arknavigator.stub.TagsStorageStub
+import dev.arkbuilders.navigator.mvp.model.repo.preferences.PreferenceKey
+import dev.arkbuilders.navigator.mvp.model.repo.preferences.Preferences
+import dev.arkbuilders.navigator.mvp.presenter.adapter.tagsselector.QueryMode
+import dev.arkbuilders.navigator.mvp.presenter.adapter.tagsselector.TagItem
+import dev.arkbuilders.navigator.mvp.presenter.adapter.tagsselector.TagsSelectorAction
+import dev.arkbuilders.navigator.mvp.presenter.adapter.tagsselector.TagsSelectorPresenter
+import dev.arkbuilders.navigator.mvp.presenter.dialog.TagsSorting
+import dev.arkbuilders.navigator.mvp.view.ResourcesView
+import dev.arkbuilders.navigator.stub.MetadataProcessorStub
+import dev.arkbuilders.navigator.stub.R1
+import dev.arkbuilders.navigator.stub.R2
+import dev.arkbuilders.navigator.stub.R3
+import dev.arkbuilders.navigator.stub.R4
+import dev.arkbuilders.navigator.stub.ResourceIndexStub
+import dev.arkbuilders.navigator.stub.StatsStorageStub
+import dev.arkbuilders.navigator.stub.TAG1
+import dev.arkbuilders.navigator.stub.TAG2
+import dev.arkbuilders.navigator.stub.TagsStorageStub
 
 @ExperimentalCoroutinesApi
 @ExtendWith(MockKExtension::class)

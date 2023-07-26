@@ -1,4 +1,4 @@
-package space.taran.arknavigator.mvp.model.repo.stats.category
+package dev.arkbuilders.navigator.mvp.model.repo.stats.category
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.Serializable
@@ -8,7 +8,7 @@ import kotlinx.serialization.json.decodeFromStream
 import space.taran.arklib.domain.index.ResourceIndex
 import space.taran.arklib.domain.stats.StatsEvent
 import space.taran.arklib.domain.tags.TagStorage
-import space.taran.arknavigator.utils.Tag
+import dev.arkbuilders.navigator.utils.Tag
 import timber.log.Timber
 import java.nio.file.Path
 import kotlin.io.path.exists

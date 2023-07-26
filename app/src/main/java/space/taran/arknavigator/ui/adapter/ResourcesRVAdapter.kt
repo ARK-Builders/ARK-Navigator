@@ -1,12 +1,12 @@
-package space.taran.arknavigator.ui.adapter
+package dev.arkbuilders.navigator.ui.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import space.taran.arknavigator.databinding.ItemFileGridBinding
-import space.taran.arknavigator.mvp.presenter.adapter.ResourcesGridPresenter
-import space.taran.arknavigator.mvp.view.item.FileItemViewHolder
-import space.taran.arknavigator.ui.App
+import dev.arkbuilders.navigator.databinding.ItemFileGridBinding
+import dev.arkbuilders.navigator.mvp.presenter.adapter.ResourcesGridPresenter
+import dev.arkbuilders.navigator.mvp.view.item.FileItemViewHolder
+import dev.arkbuilders.navigator.ui.App
 
 class ResourcesRVAdapter(
     private val presenter: ResourcesGridPresenter

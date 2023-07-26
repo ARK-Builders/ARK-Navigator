@@ -1,4 +1,4 @@
-package space.taran.arknavigator.ui.adapter.previewpager
+package dev.arkbuilders.navigator.ui.adapter.previewpager
 
 import space.taran.arklib.ResourceId
 import space.taran.arklib.domain.meta.Metadata

@@ -1,4 +1,4 @@
-package space.taran.arknavigator.mvp.model.repo.preferences
+package dev.arkbuilders.navigator.mvp.model.repo.preferences
 
 import android.content.Context
 import androidx.datastore.preferences.core.Preferences
@@ -8,7 +8,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import space.taran.arknavigator.mvp.model.repo.preferences.Preferences as ArkPreferences
+import dev.arkbuilders.navigator.mvp.model.repo.preferences.Preferences as ArkPreferences
 
 class PreferencesImpl(val context: Context) : ArkPreferences {
     private val SHARED_PREFERENCES_KEY = "user_preferences"

@@ -1,13 +1,13 @@
-package space.taran.arknavigator.navigation
+package dev.arkbuilders.navigator.navigation
 
 import ru.terrakok.cicerone.android.support.SupportAppScreen
 import space.taran.arkfilepicker.folders.RootAndFav
 import space.taran.arklib.ResourceId
-import space.taran.arknavigator.ui.fragments.FoldersFragment
-import space.taran.arknavigator.ui.fragments.GalleryFragment
-import space.taran.arknavigator.ui.fragments.ResourcesFragment
-import space.taran.arknavigator.ui.fragments.SettingsFragment
-import space.taran.arknavigator.utils.Tag
+import dev.arkbuilders.navigator.ui.fragments.FoldersFragment
+import dev.arkbuilders.navigator.ui.fragments.GalleryFragment
+import dev.arkbuilders.navigator.ui.fragments.ResourcesFragment
+import dev.arkbuilders.navigator.ui.fragments.SettingsFragment
+import dev.arkbuilders.navigator.utils.Tag
 
 class Screens {
     class FoldersScreen : SupportAppScreen() {

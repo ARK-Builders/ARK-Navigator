@@ -1,4 +1,4 @@
-package space.taran.arknavigator.utils.extensions
+package dev.arkbuilders.navigator.utils.extensions
 
 import android.view.View
 import android.widget.TextView
@@ -10,7 +10,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import space.taran.arknavigator.R
+import dev.arkbuilders.navigator.R
 
 fun View.changeEnabledStatus(isEnabledStatus: Boolean) {
     isEnabled = isEnabledStatus

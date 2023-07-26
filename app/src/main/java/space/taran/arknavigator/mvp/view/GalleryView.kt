@@ -1,4 +1,4 @@
-package space.taran.arknavigator.mvp.view
+package dev.arkbuilders.navigator.mvp.view
 
 import moxy.viewstate.strategy.AddToEndSingleStrategy
 import moxy.viewstate.strategy.SkipStrategy
@@ -6,8 +6,8 @@ import moxy.viewstate.strategy.StateStrategyType
 import space.taran.arklib.ResourceId
 import space.taran.arklib.domain.index.Resource
 import space.taran.arklib.domain.meta.Metadata
-import space.taran.arknavigator.utils.Score
-import space.taran.arknavigator.utils.Tags
+import dev.arkbuilders.navigator.utils.Score
+import dev.arkbuilders.navigator.utils.Tags
 import java.nio.file.Path
 
 @StateStrategyType(AddToEndSingleStrategy::class)

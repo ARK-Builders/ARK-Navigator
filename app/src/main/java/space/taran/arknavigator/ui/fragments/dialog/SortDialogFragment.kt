@@ -1,4 +1,4 @@
-package space.taran.arknavigator.ui.fragments.dialog
+package dev.arkbuilders.navigator.ui.fragments.dialog
 
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -9,14 +9,14 @@ import android.view.View
 import android.view.ViewGroup
 import moxy.MvpAppCompatDialogFragment
 import moxy.ktx.moxyPresenter
-import space.taran.arknavigator.R
-import space.taran.arknavigator.databinding.DialogSortBinding
-import space.taran.arknavigator.mvp.presenter.dialog.SortDialogPresenter
-import space.taran.arknavigator.mvp.view.dialog.SortDialogView
-import space.taran.arknavigator.ui.App
-import space.taran.arknavigator.ui.fragments.utils.toast
-import space.taran.arknavigator.utils.LogTags.RESOURCES_SCREEN
-import space.taran.arknavigator.utils.Sorting
+import dev.arkbuilders.navigator.R
+import dev.arkbuilders.navigator.databinding.DialogSortBinding
+import dev.arkbuilders.navigator.mvp.presenter.dialog.SortDialogPresenter
+import dev.arkbuilders.navigator.mvp.view.dialog.SortDialogView
+import dev.arkbuilders.navigator.ui.App
+import dev.arkbuilders.navigator.ui.fragments.utils.toast
+import dev.arkbuilders.navigator.utils.LogTags.RESOURCES_SCREEN
+import dev.arkbuilders.navigator.utils.Sorting
 
 class SortDialogFragment : MvpAppCompatDialogFragment(), SortDialogView {
 

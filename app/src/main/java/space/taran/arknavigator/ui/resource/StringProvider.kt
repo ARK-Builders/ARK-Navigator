@@ -1,9 +1,9 @@
-package space.taran.arknavigator.ui.resource
+package dev.arkbuilders.navigator.ui.resource
 
 import android.content.Context
 import androidx.annotation.StringRes
 import space.taran.arklib.domain.meta.Kind
-import space.taran.arknavigator.R
+import dev.arkbuilders.navigator.R
 
 class StringProvider(private val context: Context) {
     fun getString(@StringRes stringResId: Int): String {

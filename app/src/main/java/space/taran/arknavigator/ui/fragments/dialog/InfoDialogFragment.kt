@@ -1,4 +1,4 @@
-package space.taran.arknavigator.ui.fragments.dialog
+package dev.arkbuilders.navigator.ui.fragments.dialog
 
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -8,7 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
-import space.taran.arknavigator.databinding.DialogInfoBinding
+import dev.arkbuilders.navigator.databinding.DialogInfoBinding
 
 class InfoDialogFragment : DialogFragment() {
 

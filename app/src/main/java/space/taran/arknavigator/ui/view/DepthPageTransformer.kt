@@ -1,4 +1,4 @@
-package space.taran.arknavigator.ui.view
+package dev.arkbuilders.navigator.ui.view
 
 import android.view.View
 import androidx.viewpager2.widget.ViewPager2

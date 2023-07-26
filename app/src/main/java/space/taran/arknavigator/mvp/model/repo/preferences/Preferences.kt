@@ -1,4 +1,4 @@
-package space.taran.arknavigator.mvp.model.repo.preferences
+package dev.arkbuilders.navigator.mvp.model.repo.preferences
 
 import kotlinx.coroutines.flow.Flow
 

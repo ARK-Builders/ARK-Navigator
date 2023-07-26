@@ -1,9 +1,9 @@
-package space.taran.arknavigator.mvp.view.dialog
+package dev.arkbuilders.navigator.mvp.view.dialog
 
 import moxy.MvpView
 import moxy.viewstate.strategy.AddToEndSingleStrategy
 import moxy.viewstate.strategy.StateStrategyType
-import space.taran.arknavigator.utils.Sorting
+import dev.arkbuilders.navigator.utils.Sorting
 
 @StateStrategyType(AddToEndSingleStrategy::class)
 interface SortDialogView : MvpView {

@@ -1,11 +1,11 @@
-package space.taran.arknavigator.ui.view
+package dev.arkbuilders.navigator.ui.view
 
 import android.content.Context
 import android.util.AttributeSet
 import android.util.Log
 import android.widget.CompoundButton
 import com.google.android.material.switchmaterial.SwitchMaterial
-import space.taran.arknavigator.utils.LogTags.SETTINGS_SCREEN
+import dev.arkbuilders.navigator.utils.LogTags.SETTINGS_SCREEN
 
 class UserSwitchMaterial(
     context: Context,

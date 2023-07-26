@@ -1,11 +1,11 @@
-package space.taran.arknavigator.domain
+package dev.arkbuilders.navigator.domain
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import moxy.presenterScope
-import space.taran.arknavigator.mvp.presenter.GalleryPresenter
+import dev.arkbuilders.navigator.mvp.presenter.GalleryPresenter
 import javax.inject.Inject
 
 class HandleGalleryExternalChangesUseCase @Inject constructor() {

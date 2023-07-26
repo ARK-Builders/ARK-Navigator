@@ -1,11 +1,11 @@
-package space.taran.arknavigator.di.modules
+package dev.arkbuilders.navigator.di.modules
 
 import android.content.Context
 import dagger.Module
 import dagger.Provides
-import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
-import space.taran.arknavigator.mvp.model.repo.preferences.PreferencesImpl
-import space.taran.arknavigator.ui.resource.StringProvider
+import dev.arkbuilders.navigator.mvp.model.repo.preferences.Preferences
+import dev.arkbuilders.navigator.mvp.model.repo.preferences.PreferencesImpl
+import dev.arkbuilders.navigator.ui.resource.StringProvider
 import javax.inject.Singleton
 
 @Module

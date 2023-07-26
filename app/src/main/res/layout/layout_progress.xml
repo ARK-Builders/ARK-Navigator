@@ -16,7 +16,7 @@
         android:layout_height="wrap_content"
         android:indeterminate="true" />
 
-    <space.taran.arknavigator.ui.view.LoadingTextView
+    <dev.arkbuilders.navigator.ui.view.LoadingTextView
         android:id="@+id/progress_text"
         style="@style/BoldWhiteText"
         android:layout_marginTop="8dp"

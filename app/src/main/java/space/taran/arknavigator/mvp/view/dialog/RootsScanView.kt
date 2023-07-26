@@ -1,4 +1,4 @@
-package space.taran.arknavigator.mvp.view.dialog
+package dev.arkbuilders.navigator.mvp.view.dialog
 
 import moxy.MvpView
 import moxy.viewstate.strategy.AddToEndSingleStrategy

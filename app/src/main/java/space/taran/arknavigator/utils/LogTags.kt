@@ -1,4 +1,4 @@
-package space.taran.arknavigator.utils
+package dev.arkbuilders.navigator.utils
 
 object LogTags {
     const val MAIN: String = "main"

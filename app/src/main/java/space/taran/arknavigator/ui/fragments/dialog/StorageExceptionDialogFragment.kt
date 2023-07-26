@@ -1,4 +1,4 @@
-package space.taran.arknavigator.ui.fragments.dialog
+package dev.arkbuilders.navigator.ui.fragments.dialog
 
 import android.graphics.Color.TRANSPARENT
 import android.graphics.drawable.ColorDrawable
@@ -9,8 +9,8 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.setFragmentResult
-import space.taran.arknavigator.R
-import space.taran.arknavigator.databinding.DialogNotificationBinding
+import dev.arkbuilders.navigator.R
+import dev.arkbuilders.navigator.databinding.DialogNotificationBinding
 
 class StorageExceptionDialogFragment : DialogFragment() {
 

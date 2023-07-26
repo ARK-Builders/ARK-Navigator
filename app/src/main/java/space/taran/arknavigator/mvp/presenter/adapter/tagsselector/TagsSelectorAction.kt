@@ -1,4 +1,4 @@
-package space.taran.arknavigator.mvp.presenter.adapter.tagsselector
+package dev.arkbuilders.navigator.mvp.presenter.adapter.tagsselector
 
 sealed class TagsSelectorAction {
     data class Include(val item: TagItem) : TagsSelectorAction()

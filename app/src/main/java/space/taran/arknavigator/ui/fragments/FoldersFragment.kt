@@ -1,4 +1,4 @@
-package space.taran.arknavigator.ui.fragments
+package dev.arkbuilders.navigator.ui.fragments
 
 import android.os.Bundle
 import android.util.Log
@@ -22,21 +22,21 @@ import space.taran.arkfilepicker.presentation.folderstree.DeviceNode
 import space.taran.arkfilepicker.presentation.folderstree.RootNode
 import space.taran.arkfilepicker.presentation.folderstree.FavoriteNode
 import space.taran.arkfilepicker.presentation.folderstree.FolderTreeView
-import space.taran.arknavigator.R
-import space.taran.arknavigator.databinding.FragmentFoldersBinding
-import space.taran.arknavigator.mvp.presenter.FoldersPresenter
-import space.taran.arknavigator.mvp.view.FoldersView
-import space.taran.arknavigator.ui.App
-import space.taran.arknavigator.ui.activity.MainActivity
-import space.taran.arknavigator.ui.fragments.dialog.ConfirmationDialogFragment
-import space.taran.arknavigator.ui.fragments.dialog.RootPickerDialogFragment
-import space.taran.arknavigator.ui.fragments.dialog.RootsScanDialogFragment
-import space.taran.arknavigator.ui.fragments.dialog.onRootOrFavPicked
-import space.taran.arknavigator.ui.fragments.utils.toast
-import space.taran.arknavigator.ui.fragments.utils.toastFailedPaths
-import space.taran.arknavigator.ui.view.StackedToasts
-import space.taran.arknavigator.utils.FullscreenHelper
-import space.taran.arknavigator.utils.LogTags.FOLDERS_SCREEN
+import dev.arkbuilders.navigator.R
+import dev.arkbuilders.navigator.databinding.FragmentFoldersBinding
+import dev.arkbuilders.navigator.mvp.presenter.FoldersPresenter
+import dev.arkbuilders.navigator.mvp.view.FoldersView
+import dev.arkbuilders.navigator.ui.App
+import dev.arkbuilders.navigator.ui.activity.MainActivity
+import dev.arkbuilders.navigator.ui.fragments.dialog.ConfirmationDialogFragment
+import dev.arkbuilders.navigator.ui.fragments.dialog.RootPickerDialogFragment
+import dev.arkbuilders.navigator.ui.fragments.dialog.RootsScanDialogFragment
+import dev.arkbuilders.navigator.ui.fragments.dialog.onRootOrFavPicked
+import dev.arkbuilders.navigator.ui.fragments.utils.toast
+import dev.arkbuilders.navigator.ui.fragments.utils.toastFailedPaths
+import dev.arkbuilders.navigator.ui.view.StackedToasts
+import dev.arkbuilders.navigator.utils.FullscreenHelper
+import dev.arkbuilders.navigator.utils.LogTags.FOLDERS_SCREEN
 import java.nio.file.Path
 import kotlin.io.path.Path
 

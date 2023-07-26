@@ -1,4 +1,4 @@
-package space.taran.arknavigator.mvp.presenter
+package dev.arkbuilders.navigator.mvp.presenter
 
 import android.util.Log
 import kotlinx.coroutines.NonCancellable
@@ -17,16 +17,16 @@ import space.taran.arkfilepicker.presentation.folderstree.RootNode
 import space.taran.arklib.domain.Message
 import space.taran.arklib.domain.index.ResourceIndexRepo
 import space.taran.arklib.domain.preview.PreviewProcessorRepo
-import space.taran.arknavigator.di.modules.RepoModule.Companion.MESSAGE_FLOW_NAME
-import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
-import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
-import space.taran.arknavigator.mvp.view.FoldersView
-import space.taran.arknavigator.navigation.AppRouter
-import space.taran.arknavigator.navigation.Screens
-import space.taran.arknavigator.ui.resource.StringProvider
-import space.taran.arknavigator.utils.LogTags.FOLDERS_SCREEN
-import space.taran.arknavigator.utils.LogTags.FOLDERS_TREE
-import space.taran.arknavigator.utils.listDevices
+import dev.arkbuilders.navigator.di.modules.RepoModule.Companion.MESSAGE_FLOW_NAME
+import dev.arkbuilders.navigator.mvp.model.repo.preferences.PreferenceKey
+import dev.arkbuilders.navigator.mvp.model.repo.preferences.Preferences
+import dev.arkbuilders.navigator.mvp.view.FoldersView
+import dev.arkbuilders.navigator.navigation.AppRouter
+import dev.arkbuilders.navigator.navigation.Screens
+import dev.arkbuilders.navigator.ui.resource.StringProvider
+import dev.arkbuilders.navigator.utils.LogTags.FOLDERS_SCREEN
+import dev.arkbuilders.navigator.utils.LogTags.FOLDERS_TREE
+import dev.arkbuilders.navigator.utils.listDevices
 import java.nio.file.Path
 import javax.inject.Inject
 import javax.inject.Named

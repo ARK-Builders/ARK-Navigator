@@ -1,4 +1,4 @@
-package space.taran.arknavigator.mvp.presenter.adapter
+package dev.arkbuilders.navigator.mvp.presenter.adapter
 
 import androidx.recyclerview.widget.DiffUtil
 import space.taran.arklib.ResourceId

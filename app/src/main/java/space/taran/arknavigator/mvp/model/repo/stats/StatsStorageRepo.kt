@@ -1,4 +1,4 @@
-package space.taran.arknavigator.mvp.model.repo.stats
+package dev.arkbuilders.navigator.mvp.model.repo.stats
 
 import kotlinx.coroutines.flow.SharedFlow
 import space.taran.arklib.domain.index.ResourceIndex
@@ -6,7 +6,7 @@ import space.taran.arklib.domain.index.RootIndex
 import space.taran.arklib.domain.stats.StatsEvent
 import space.taran.arklib.domain.tags.RootTagsStorage
 import space.taran.arklib.domain.tags.TagsStorageRepo
-import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
+import dev.arkbuilders.navigator.mvp.model.repo.preferences.Preferences
 import java.nio.file.Path
 
 class StatsStorageRepo(

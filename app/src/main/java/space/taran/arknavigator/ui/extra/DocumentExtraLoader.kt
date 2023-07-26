@@ -1,9 +1,9 @@
-package space.taran.arknavigator.ui.extra
+package dev.arkbuilders.navigator.ui.extra
 
 import android.widget.TextView
-import space.taran.arknavigator.R
+import dev.arkbuilders.navigator.R
 import space.taran.arklib.domain.meta.Metadata
-import space.taran.arknavigator.utils.extensions.textOrGone
+import dev.arkbuilders.navigator.utils.extensions.textOrGone
 
 object DocumentExtraLoader {
     fun load(document: Metadata.Document, pagesTV: TextView, verbose: Boolean) {

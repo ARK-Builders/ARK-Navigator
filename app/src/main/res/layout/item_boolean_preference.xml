@@ -32,7 +32,7 @@
             android:textSize="18sp"
             android:textStyle="bold" />
 
-        <space.taran.arknavigator.ui.view.UserSwitchMaterial
+        <dev.arkbuilders.navigator.ui.view.UserSwitchMaterial
             android:id="@+id/switch_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

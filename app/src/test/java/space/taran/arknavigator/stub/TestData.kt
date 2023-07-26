@@ -1,4 +1,4 @@
-package space.taran.arknavigator.stub
+package dev.arkbuilders.navigator.stub
 
 import space.taran.arklib.ResourceId
 import space.taran.arklib.domain.index.Resource

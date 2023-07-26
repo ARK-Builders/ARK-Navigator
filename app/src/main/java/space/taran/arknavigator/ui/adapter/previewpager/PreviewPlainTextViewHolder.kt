@@ -1,9 +1,9 @@
-package space.taran.arknavigator.ui.adapter.previewpager
+package dev.arkbuilders.navigator.ui.adapter.previewpager
 
 import android.annotation.SuppressLint
 import androidx.core.view.GestureDetectorCompat
 import androidx.recyclerview.widget.RecyclerView
-import space.taran.arknavigator.databinding.ItemPreviewPlainTextBinding
+import dev.arkbuilders.navigator.databinding.ItemPreviewPlainTextBinding
 
 @SuppressLint("ClickableViewAccessibility")
 class PreviewPlainTextViewHolder(

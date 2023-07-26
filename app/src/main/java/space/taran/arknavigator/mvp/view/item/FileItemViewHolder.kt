@@ -1,4 +1,4 @@
-package space.taran.arknavigator.mvp.view.item
+package dev.arkbuilders.navigator.mvp.view.item
 
 import android.animation.ValueAnimator
 import android.view.View
@@ -16,11 +16,11 @@ import space.taran.arklib.domain.preview.PreviewLocator
 import space.taran.arklib.domain.preview.PreviewStatus
 import space.taran.arklib.utils.ImageUtils
 import space.taran.arklib.utils.extension
-import space.taran.arknavigator.R
-import space.taran.arknavigator.databinding.ItemFileGridBinding
-import space.taran.arknavigator.ui.extra.ExtraLoader
-import space.taran.arknavigator.utils.Score
-import space.taran.arknavigator.utils.dpToPx
+import dev.arkbuilders.navigator.R
+import dev.arkbuilders.navigator.databinding.ItemFileGridBinding
+import dev.arkbuilders.navigator.ui.extra.ExtraLoader
+import dev.arkbuilders.navigator.utils.Score
+import dev.arkbuilders.navigator.utils.dpToPx
 import timber.log.Timber
 import java.nio.file.Path
 

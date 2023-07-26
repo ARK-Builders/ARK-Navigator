@@ -1,4 +1,4 @@
-package space.taran.arknavigator.mvp.presenter.dialog
+package dev.arkbuilders.navigator.mvp.presenter.dialog
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -14,8 +14,8 @@ import org.orbitmvi.orbit.syntax.simple.intent
 import org.orbitmvi.orbit.syntax.simple.postSideEffect
 import org.orbitmvi.orbit.syntax.simple.reduce
 import org.orbitmvi.orbit.viewmodel.container
-import space.taran.arknavigator.mvp.model.repo.preferences.PreferenceKey
-import space.taran.arknavigator.mvp.model.repo.preferences.Preferences
+import dev.arkbuilders.navigator.mvp.model.repo.preferences.PreferenceKey
+import dev.arkbuilders.navigator.mvp.model.repo.preferences.Preferences
 
 sealed class TagsSortState {
     object Loading : TagsSortState()
