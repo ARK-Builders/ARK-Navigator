@@ -1,8 +1,8 @@
 package dev.arkbuilders.navigator.stub
 
 import space.taran.arklib.domain.stats.StatsEvent
-import dev.arkbuilders.navigator.mvp.model.repo.stats.StatsStorage
-import dev.arkbuilders.navigator.utils.Tag
+import dev.arkbuilders.navigator.data.stats.StatsStorage
+import space.taran.arklib.domain.tags.Tag
 
 class StatsStorageStub : StatsStorage {
     override suspend fun init() {}

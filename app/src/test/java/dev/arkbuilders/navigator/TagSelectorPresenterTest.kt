@@ -1,6 +1,24 @@
 package dev.arkbuilders.navigator
 
 import android.util.Log
+import dev.arkbuilders.navigator.data.preferences.PreferenceKey
+import dev.arkbuilders.navigator.data.preferences.Preferences
+import dev.arkbuilders.navigator.presentation.screen.resources.tagsselector.QueryMode
+import dev.arkbuilders.navigator.presentation.screen.resources.tagsselector.TagItem
+import dev.arkbuilders.navigator.presentation.screen.resources.tagsselector.TagsSelectorAction
+import dev.arkbuilders.navigator.presentation.screen.resources.tagsselector.TagsSelectorPresenter
+import dev.arkbuilders.navigator.presentation.dialog.tagssort.TagsSorting
+import dev.arkbuilders.navigator.presentation.screen.resources.ResourcesView
+import dev.arkbuilders.navigator.stub.MetadataProcessorStub
+import dev.arkbuilders.navigator.stub.R1
+import dev.arkbuilders.navigator.stub.R2
+import dev.arkbuilders.navigator.stub.R3
+import dev.arkbuilders.navigator.stub.R4
+import dev.arkbuilders.navigator.stub.ResourceIndexStub
+import dev.arkbuilders.navigator.stub.StatsStorageStub
+import dev.arkbuilders.navigator.stub.TAG1
+import dev.arkbuilders.navigator.stub.TAG2
+import dev.arkbuilders.navigator.stub.TagsStorageStub
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
@@ -22,24 +40,6 @@ import space.taran.arklib.ResourceId
 import space.taran.arklib.domain.index.ResourceIndex
 import space.taran.arklib.domain.meta.MetadataProcessor
 import space.taran.arklib.domain.tags.TagStorage
-import dev.arkbuilders.navigator.mvp.model.repo.preferences.PreferenceKey
-import dev.arkbuilders.navigator.mvp.model.repo.preferences.Preferences
-import dev.arkbuilders.navigator.mvp.presenter.adapter.tagsselector.QueryMode
-import dev.arkbuilders.navigator.mvp.presenter.adapter.tagsselector.TagItem
-import dev.arkbuilders.navigator.mvp.presenter.adapter.tagsselector.TagsSelectorAction
-import dev.arkbuilders.navigator.mvp.presenter.adapter.tagsselector.TagsSelectorPresenter
-import dev.arkbuilders.navigator.mvp.presenter.dialog.TagsSorting
-import dev.arkbuilders.navigator.mvp.view.ResourcesView
-import dev.arkbuilders.navigator.stub.MetadataProcessorStub
-import dev.arkbuilders.navigator.stub.R1
-import dev.arkbuilders.navigator.stub.R2
-import dev.arkbuilders.navigator.stub.R3
-import dev.arkbuilders.navigator.stub.R4
-import dev.arkbuilders.navigator.stub.ResourceIndexStub
-import dev.arkbuilders.navigator.stub.StatsStorageStub
-import dev.arkbuilders.navigator.stub.TAG1
-import dev.arkbuilders.navigator.stub.TAG2
-import dev.arkbuilders.navigator.stub.TagsStorageStub
 
 @ExperimentalCoroutinesApi
 @ExtendWith(MockKExtension::class)
