@@ -14,9 +14,9 @@ import space.taran.arklib.domain.preview.PreviewProcessorRepo
 import space.taran.arklib.domain.score.ScoreStorageRepo
 import space.taran.arklib.domain.stats.StatsEvent
 import space.taran.arklib.domain.tags.TagsStorageRepo
-import dev.arkbuilders.navigator.mvp.model.repo.preferences.Preferences
-import dev.arkbuilders.navigator.mvp.model.repo.stats.StatsStorageRepo
-import dev.arkbuilders.navigator.utils.LogTags.MAIN
+import dev.arkbuilders.navigator.data.preferences.Preferences
+import dev.arkbuilders.navigator.data.stats.StatsStorageRepo
+import dev.arkbuilders.navigator.data.utils.LogTags.MAIN
 import javax.inject.Named
 import javax.inject.Singleton
 

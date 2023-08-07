@@ -1,6 +1,6 @@
 package dev.arkbuilders.navigator.domain
 
-import dev.arkbuilders.navigator.mvp.presenter.GalleryPresenter
+import dev.arkbuilders.navigator.presentation.screen.gallery.GalleryPresenter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch

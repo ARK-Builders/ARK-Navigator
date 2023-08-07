@@ -5,7 +5,7 @@ import dagger.Provides
 import javax.inject.Singleton
 import ru.terrakok.cicerone.Cicerone
 import ru.terrakok.cicerone.NavigatorHolder
-import dev.arkbuilders.navigator.navigation.AppRouter
+import dev.arkbuilders.navigator.presentation.navigation.AppRouter
 
 @Module
 class CiceroneModule {
