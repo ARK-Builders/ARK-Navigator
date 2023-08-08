@@ -3,31 +3,30 @@ package dev.arkbuilders.navigator.di
 import android.content.Context
 import dagger.BindsInstance
 import dagger.Component
-import space.taran.arkfilepicker.folders.FoldersRepo
+import dev.arkbuilders.navigator.data.StorageBackup
+import dev.arkbuilders.navigator.data.preferences.Preferences
 import dev.arkbuilders.navigator.di.modules.AppModule
 import dev.arkbuilders.navigator.di.modules.CiceroneModule
 import dev.arkbuilders.navigator.di.modules.RepoModule
-import dev.arkbuilders.navigator.data.StorageBackup
-import dev.arkbuilders.navigator.data.preferences.Preferences
-import dev.arkbuilders.navigator.presentation.screen.folders.FoldersPresenter
-import dev.arkbuilders.navigator.presentation.screen.gallery.GalleryPresenter
-import dev.arkbuilders.navigator.presentation.screen.main.MainPresenter
-import dev.arkbuilders.navigator.presentation.screen.resources.ResourcesPresenter
-import dev.arkbuilders.navigator.presentation.screen.resources.adapter.ResourcesGridPresenter
-import dev.arkbuilders.navigator.presentation.screen.resources.tagsselector.TagsSelectorPresenter
+import dev.arkbuilders.navigator.presentation.App
+import dev.arkbuilders.navigator.presentation.dialog.RootPickerDialogFragment
 import dev.arkbuilders.navigator.presentation.dialog.edittags.EditTagsDialogPresenter
 import dev.arkbuilders.navigator.presentation.dialog.sort.SortDialogPresenter
-import dev.arkbuilders.navigator.presentation.screen.resources.adapter.FileItemViewHolder
-import dev.arkbuilders.navigator.presentation.App
-import dev.arkbuilders.navigator.presentation.screen.main.MainActivity
-import dev.arkbuilders.navigator.presentation.screen.resources.tagsselector.TagsSelectorAdapter
-import dev.arkbuilders.navigator.presentation.screen.gallery.previewpager.PreviewImageViewHolder
+import dev.arkbuilders.navigator.presentation.dialog.tagssort.TagsSortDialogFragment
 import dev.arkbuilders.navigator.presentation.screen.folders.FoldersFragment
 import dev.arkbuilders.navigator.presentation.screen.gallery.GalleryFragment
+import dev.arkbuilders.navigator.presentation.screen.gallery.GalleryPresenter
+import dev.arkbuilders.navigator.presentation.screen.gallery.previewpager.PreviewImageViewHolder
+import dev.arkbuilders.navigator.presentation.screen.main.MainActivity
+import dev.arkbuilders.navigator.presentation.screen.main.MainPresenter
 import dev.arkbuilders.navigator.presentation.screen.resources.ResourcesFragment
+import dev.arkbuilders.navigator.presentation.screen.resources.ResourcesPresenter
+import dev.arkbuilders.navigator.presentation.screen.resources.adapter.FileItemViewHolder
+import dev.arkbuilders.navigator.presentation.screen.resources.adapter.ResourcesGridPresenter
+import dev.arkbuilders.navigator.presentation.screen.resources.tagsselector.TagsSelectorAdapter
+import dev.arkbuilders.navigator.presentation.screen.resources.tagsselector.TagsSelectorPresenter
 import dev.arkbuilders.navigator.presentation.screen.settings.SettingsFragment
-import dev.arkbuilders.navigator.presentation.dialog.RootPickerDialogFragment
-import dev.arkbuilders.navigator.presentation.dialog.tagssort.TagsSortDialogFragment
+import space.taran.arkfilepicker.folders.FoldersRepo
 import javax.inject.Singleton
 
 @Singleton
@@ -45,7 +44,6 @@ interface AppComponent {
 
     fun inject(mainActivity: MainActivity)
     fun inject(mainPresenter: MainPresenter)
-    fun inject(foldersPresenter: FoldersPresenter)
     fun inject(foldersFragment: FoldersFragment)
     fun inject(resourcesPresenter: ResourcesPresenter)
     fun inject(resourcesFragment: ResourcesFragment)

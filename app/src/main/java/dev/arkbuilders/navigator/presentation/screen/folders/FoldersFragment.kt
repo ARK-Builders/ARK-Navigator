@@ -1,99 +1,130 @@
 package dev.arkbuilders.navigator.presentation.screen.folders
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import moxy.MvpAppCompatFragment
-import moxy.ktx.moxyPresenter
+import by.kirich1409.viewbindingdelegate.viewBinding
+import dev.arkbuilders.navigator.R
+import dev.arkbuilders.navigator.data.utils.LogTags.FOLDERS_SCREEN
+import dev.arkbuilders.navigator.databinding.FragmentFoldersBinding
+import dev.arkbuilders.navigator.presentation.App
+import dev.arkbuilders.navigator.presentation.dialog.ConfirmationDialogFragment
+import dev.arkbuilders.navigator.presentation.dialog.RootPickerDialogFragment
+import dev.arkbuilders.navigator.presentation.dialog.onRootOrFavPicked
+import dev.arkbuilders.navigator.presentation.dialog.rootsscan.RootsScanDialogFragment
+import dev.arkbuilders.navigator.presentation.navigation.AppRouter
+import dev.arkbuilders.navigator.presentation.navigation.Screens
+import dev.arkbuilders.navigator.presentation.screen.main.MainActivity
+import dev.arkbuilders.navigator.presentation.utils.FullscreenHelper
+import dev.arkbuilders.navigator.presentation.utils.toast
+import dev.arkbuilders.navigator.presentation.utils.toastFailedPaths
+import dev.arkbuilders.navigator.presentation.view.StackedToasts
+import org.orbitmvi.orbit.viewmodel.observe
 import space.taran.arkfilepicker.folders.FoldersRepo.Companion.DELETE_FOLDER_KEY
 import space.taran.arkfilepicker.folders.FoldersRepo.Companion.FAVORITE_KEY
 import space.taran.arkfilepicker.folders.FoldersRepo.Companion.FORGET_FAVORITE_KEY
 import space.taran.arkfilepicker.folders.FoldersRepo.Companion.FORGET_ROOT_KEY
 import space.taran.arkfilepicker.folders.FoldersRepo.Companion.ROOT_KEY
-import space.taran.arkfilepicker.presentation.folderstree.FolderNode
+import space.taran.arkfilepicker.folders.RootAndFav
 import space.taran.arkfilepicker.presentation.folderstree.DeviceNode
-import space.taran.arkfilepicker.presentation.folderstree.RootNode
 import space.taran.arkfilepicker.presentation.folderstree.FavoriteNode
+import space.taran.arkfilepicker.presentation.folderstree.FolderNode
 import space.taran.arkfilepicker.presentation.folderstree.FolderTreeView
-import dev.arkbuilders.navigator.R
-import dev.arkbuilders.navigator.databinding.FragmentFoldersBinding
-import dev.arkbuilders.navigator.presentation.App
-import dev.arkbuilders.navigator.presentation.screen.main.MainActivity
-import dev.arkbuilders.navigator.presentation.dialog.ConfirmationDialogFragment
-import dev.arkbuilders.navigator.presentation.dialog.RootPickerDialogFragment
-import dev.arkbuilders.navigator.presentation.dialog.rootsscan.RootsScanDialogFragment
-import dev.arkbuilders.navigator.presentation.dialog.onRootOrFavPicked
-import dev.arkbuilders.navigator.presentation.utils.toast
-import dev.arkbuilders.navigator.presentation.utils.toastFailedPaths
-import dev.arkbuilders.navigator.presentation.view.StackedToasts
-import dev.arkbuilders.navigator.presentation.utils.FullscreenHelper
-import dev.arkbuilders.navigator.data.utils.LogTags.FOLDERS_SCREEN
+import space.taran.arkfilepicker.presentation.folderstree.RootNode
 import java.nio.file.Path
+import javax.inject.Inject
 import kotlin.io.path.Path
 
-class FoldersFragment : MvpAppCompatFragment(), FoldersView {
+class FoldersFragment : Fragment(R.layout.fragment_folders) {
 
-    private lateinit var binding: FragmentFoldersBinding
-    private val presenter by moxyPresenter {
-        FoldersPresenter(
-            requireArguments().getBoolean(RESCAN_ROOTS_BUNDLE_KEY, false)
-        ).apply {
-            Log.d(FOLDERS_SCREEN, "RootsPresenter created")
-            App.instance.appComponent.inject(this)
-        }
+    private val binding by viewBinding(FragmentFoldersBinding::bind)
+
+    @Inject
+    lateinit var factory: FoldersViewModelFactory.Factory
+    private val viewModel: FoldersViewModel by viewModels {
+        factory.create(requireArguments().getBoolean(RESCAN_ROOTS_BUNDLE_KEY, false))
     }
+
+    @Inject
+    lateinit var router: AppRouter
+
     private lateinit var stackedToasts: StackedToasts
     private var foldersTree: FolderTreeView? = null
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        Log.d(FOLDERS_SCREEN, "inflating layout for FoldersFragment")
-        binding = FragmentFoldersBinding.inflate(inflater, container, false)
-        FullscreenHelper.setStatusBarVisibility(true, requireActivity().window)
-        return binding.root
+    override fun onAttach(context: Context) {
+        App.instance.appComponent.inject(this)
+        super.onAttach(context)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         Log.d(FOLDERS_SCREEN, "view created in FoldersFragment")
         super.onViewCreated(view, savedInstanceState)
-        App.instance.appComponent.inject(this)
+        FullscreenHelper.setStatusBarVisibility(true, requireActivity().window)
+
+        init()
+        viewModel.observe(this, ::render, ::handleSideEffect)
     }
 
-    override fun init() {
+    fun init() {
         Log.d(FOLDERS_SCREEN, "initializing FoldersFragment")
         (activity as MainActivity).setSelectedTab(R.id.page_roots)
         stackedToasts = StackedToasts(binding.rvToasts, lifecycleScope)
         binding.rvRoots.layoutManager = LinearLayoutManager(context)
         foldersTree = FolderTreeView(
             binding.rvRoots,
-            onNavigateClick = presenter::onNavigateBtnClick,
-            onAddClick = { presenter.onFoldersTreeAddFavoriteBtnClick(it) },
-            onForgetClick = presenter::onForgetBtnClick,
+            onNavigateClick = { onFoldersTreeNavigateBtnClick(it) },
+            onAddClick = { openRootPickerDialog(it.path) },
+            onForgetClick = { openConfirmForgetFolderDialog(it) },
             showOptions = true
         )
 
         initResultListeners()
 
         requireActivity().onBackPressedDispatcher.addCallback(this) {
-            presenter.onBackClick()
+            Log.d(FOLDERS_SCREEN, "[back] clicked")
+            router.exit()
         }
 
         binding.fabAddRoots.setOnClickListener {
-            presenter.onAddRootBtnClick()
+            openRootPickerDialog(null)
         }
     }
 
-    override fun setProgressVisibility(isVisible: Boolean, withText: String) {
+    private fun render(state: FoldersState) = with(state) {
+        binding.noFolderHint.isVisible = folders.isEmpty()
+        foldersTree?.set(devices, folders)
+        setProgressVisibility(
+            progressWithText.enabled,
+            progressWithText.text
+        )
+    }
+
+    private fun handleSideEffect(effect: FoldersSideEffect) = when (effect) {
+        FoldersSideEffect.OpenRootsScanDialog ->
+            RootsScanDialogFragment.newInstance().show(childFragmentManager, null)
+
+        is FoldersSideEffect.ToastFailedPaths ->
+            toastFailedPaths(effect.failedPaths)
+
+        FoldersSideEffect.ToastRootIsAlreadyPicked ->
+            toast(R.string.folders_root_is_already_picked)
+
+        FoldersSideEffect.ToastFavoriteIsAlreadyPicked ->
+            toast(R.string.folders_favorite_is_already_picked)
+
+        FoldersSideEffect.ToastIndexingCanTakeMinutes ->
+            toast(R.string.toast_indexing_can_take_minutes)
+    }
+
+    fun setProgressVisibility(isVisible: Boolean, withText: String) {
         binding.layoutProgress.apply {
             root.isVisible = isVisible
             (activity as MainActivity).setBottomNavigationEnabled(!isVisible)
@@ -105,21 +136,11 @@ class FoldersFragment : MvpAppCompatFragment(), FoldersView {
         }
     }
 
-    override fun updateFoldersTree(
-        devices: List<Path>,
-        rootsWithFavs: Map<Path, List<Path>>
-    ) {
-        if (rootsWithFavs.size < 1) {
-            binding.noFolderHint.setVisibility(View.VISIBLE)
-        } else binding.noFolderHint.setVisibility(View.INVISIBLE)
-        foldersTree?.set(devices, rootsWithFavs)
-    }
-
-    override fun openRootPickerDialog(path: Path?) =
+    private fun openRootPickerDialog(path: Path?) =
         RootPickerDialogFragment.newInstance(path)
             .show(childFragmentManager, null)
 
-    override fun openConfirmForgetFolderDialog(node: FolderNode) {
+    private fun openConfirmForgetFolderDialog(node: FolderNode) {
         val bundle = bundleOf()
         var positiveRequestKey = FORGET_ROOT_KEY
         when (node) {
@@ -127,6 +148,7 @@ class FoldersFragment : MvpAppCompatFragment(), FoldersView {
             is RootNode -> {
                 bundle.putString(ROOT_KEY, node.path.toString())
             }
+
             is FavoriteNode -> {
                 bundle.putString(ROOT_KEY, node.root.toString())
                 bundle.putString(FAVORITE_KEY, node.path.toString())
@@ -143,29 +165,31 @@ class FoldersFragment : MvpAppCompatFragment(), FoldersView {
         ).show(childFragmentManager, null)
     }
 
-    override fun toastFailedPath(failedPaths: List<Path>) =
-        toastFailedPaths(failedPaths)
+    private fun onFoldersTreeNavigateBtnClick(node: FolderNode) {
+        when (node) {
+            is DeviceNode -> {}
+            is RootNode -> {
+                router.navigateTo(
+                    Screens.ResourcesScreen(
+                        RootAndFav(node.path.toString(), null)
+                    )
+                )
+            }
 
-    override fun openRootsScanDialog() =
-        RootsScanDialogFragment.newInstance().show(childFragmentManager, null)
-
-    override fun toastRootIsAlreadyPicked() =
-        toast(R.string.folders_root_is_already_picked)
-
-    override fun toastFavoriteIsAlreadyPicked() =
-        toast(R.string.folders_favorite_is_already_picked)
-
-    override fun toastIndexingCanTakeMinutes() =
-        toast(R.string.toast_indexing_can_take_minutes)
-
-    override fun toastIndexFailedPath(path: Path) {
-        stackedToasts.toast(path)
+            is FavoriteNode -> {
+                router.navigateTo(
+                    Screens.ResourcesScreen(
+                        RootAndFav(node.root.toString(), node.path.toString())
+                    )
+                )
+            }
+        }
     }
 
     private fun initResultListeners() {
         childFragmentManager
             .onRootOrFavPicked(this) { path, rootNotFavorite ->
-                presenter.onPickRootBtnClick(path, rootNotFavorite)
+                viewModel.onPickRootBtnClick(path, rootNotFavorite)
             }
 
         childFragmentManager.setFragmentResultListener(
@@ -178,14 +202,14 @@ class FoldersFragment : MvpAppCompatFragment(), FoldersView {
                         Path(it)
                     } ?: return@setFragmentResultListener
 
-            presenter.onRootsFound(roots)
+            viewModel.onRootsFound(roots)
         }
 
         childFragmentManager.setFragmentResultListener(
             FORGET_ROOT_KEY,
             this
         ) { _, bundle ->
-            presenter.onForgetRoot(
+            viewModel.onForgetRoot(
                 Path(bundle.getString(ROOT_KEY, "")),
                 bundle.getBoolean(DELETE_FOLDER_KEY)
             )
@@ -195,7 +219,7 @@ class FoldersFragment : MvpAppCompatFragment(), FoldersView {
             FORGET_FAVORITE_KEY,
             this
         ) { _, bundle ->
-            presenter.onForgetFavorite(
+            viewModel.onForgetFavorite(
                 Path(bundle.getString(ROOT_KEY, "")),
                 Path(bundle.getString(FAVORITE_KEY, "")),
                 bundle.getBoolean(DELETE_FOLDER_KEY)
