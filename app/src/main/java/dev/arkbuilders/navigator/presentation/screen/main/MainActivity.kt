@@ -8,10 +8,10 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
 import dev.arkbuilders.navigator.R
+import dev.arkbuilders.navigator.data.PermissionsHelper
 import dev.arkbuilders.navigator.data.utils.LogTags.MAIN
 import dev.arkbuilders.navigator.databinding.ActivityMainBinding
 import dev.arkbuilders.navigator.presentation.App
-import dev.arkbuilders.navigator.data.PermissionsHelper
 import dev.arkbuilders.navigator.presentation.navigation.AppNavigator
 import dev.arkbuilders.navigator.presentation.navigation.AppRouter
 import dev.arkbuilders.navigator.presentation.navigation.Screens
@@ -97,7 +97,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
         binding.bottomNavigation.setOnItemReselectedListener {}
     }
-
 
     private fun enterResourceFragmentFailed() {
         toast(R.string.toast_add_paths)

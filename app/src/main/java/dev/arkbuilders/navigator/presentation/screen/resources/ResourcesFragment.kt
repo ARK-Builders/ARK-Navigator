@@ -4,10 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.SystemClock
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.annotation.ColorInt
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -18,6 +16,28 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
+import by.kirich1409.viewbindingdelegate.viewBinding
+import dev.arkbuilders.navigator.BuildConfig
+import dev.arkbuilders.navigator.R
+import dev.arkbuilders.navigator.data.utils.LogTags.RESOURCES_SCREEN
+import dev.arkbuilders.navigator.databinding.FragmentResourcesBinding
+import dev.arkbuilders.navigator.presentation.App
+import dev.arkbuilders.navigator.presentation.dialog.ConfirmationDialogFragment
+import dev.arkbuilders.navigator.presentation.dialog.StorageExceptionDialogFragment
+import dev.arkbuilders.navigator.presentation.dialog.sort.SortDialogFragment
+import dev.arkbuilders.navigator.presentation.dialog.tagssort.TagsSortDialogFragment
+import dev.arkbuilders.navigator.presentation.screen.gallery.GalleryFragment
+import dev.arkbuilders.navigator.presentation.screen.main.MainActivity
+import dev.arkbuilders.navigator.presentation.screen.resources.adapter.ResourcesRVAdapter
+import dev.arkbuilders.navigator.presentation.screen.resources.tagsselector.QueryMode
+import dev.arkbuilders.navigator.presentation.screen.resources.tagsselector.TagsSelectorAdapter
+import dev.arkbuilders.navigator.presentation.utils.FullscreenHelper
+import dev.arkbuilders.navigator.presentation.utils.closeKeyboard
+import dev.arkbuilders.navigator.presentation.utils.placeCursorToEnd
+import dev.arkbuilders.navigator.presentation.utils.showKeyboard
+import dev.arkbuilders.navigator.presentation.utils.toast
+import dev.arkbuilders.navigator.presentation.utils.toastFailedPaths
+import dev.arkbuilders.navigator.presentation.view.StackedToasts
 import kotlinx.coroutines.launch
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
@@ -25,28 +45,7 @@ import moxy.presenterScope
 import space.taran.arkfilepicker.folders.RootAndFav
 import space.taran.arkfilepicker.presentation.onArkPathPicked
 import space.taran.arklib.ResourceId
-import dev.arkbuilders.navigator.BuildConfig
-import dev.arkbuilders.navigator.R
-import dev.arkbuilders.navigator.databinding.FragmentResourcesBinding
-import dev.arkbuilders.navigator.presentation.screen.resources.tagsselector.QueryMode
-import dev.arkbuilders.navigator.presentation.App
-import dev.arkbuilders.navigator.presentation.screen.main.MainActivity
-import dev.arkbuilders.navigator.presentation.screen.resources.adapter.ResourcesRVAdapter
-import dev.arkbuilders.navigator.presentation.screen.resources.tagsselector.TagsSelectorAdapter
-import dev.arkbuilders.navigator.presentation.screen.gallery.GalleryFragment
-import dev.arkbuilders.navigator.presentation.dialog.ConfirmationDialogFragment
-import dev.arkbuilders.navigator.presentation.dialog.sort.SortDialogFragment
-import dev.arkbuilders.navigator.presentation.dialog.StorageExceptionDialogFragment
-import dev.arkbuilders.navigator.presentation.dialog.tagssort.TagsSortDialogFragment
-import dev.arkbuilders.navigator.presentation.utils.toast
-import dev.arkbuilders.navigator.presentation.utils.toastFailedPaths
-import dev.arkbuilders.navigator.presentation.view.StackedToasts
-import dev.arkbuilders.navigator.presentation.utils.FullscreenHelper
-import dev.arkbuilders.navigator.data.utils.LogTags.RESOURCES_SCREEN
 import space.taran.arklib.domain.tags.Tag
-import dev.arkbuilders.navigator.presentation.utils.closeKeyboard
-import dev.arkbuilders.navigator.presentation.utils.placeCursorToEnd
-import dev.arkbuilders.navigator.presentation.utils.showKeyboard
 import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.math.abs
@@ -59,7 +58,10 @@ import kotlin.math.abs
 // `path` is used for filtering resources' paths
 //       if it is `null`, then no filtering is performed
 //       (recommended instead of passing same value for `path` and `root)
-class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
+class ResourcesFragment :
+    MvpAppCompatFragment(R.layout.fragment_resources), ResourcesView {
+
+    private val binding by viewBinding(FragmentResourcesBinding::bind)
 
     val presenter by moxyPresenter {
         ResourcesPresenter(
@@ -71,7 +73,6 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
         }
     }
 
-    private lateinit var binding: FragmentResourcesBinding
     private var resourcesAdapter: ResourcesRVAdapter? = null
     private lateinit var stackedToasts: StackedToasts
 
@@ -91,16 +92,6 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
 
     private var isShuffled = false
     private var isAscending = true
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-
-        Log.d(RESOURCES_SCREEN, "inflating layout for ResourcesFragment")
-        binding = FragmentResourcesBinding.inflate(inflater, container, false)
-        return binding.root
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         Log.d(RESOURCES_SCREEN, "view created in ResourcesFragment")
@@ -487,6 +478,7 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
                 selectorDragStartBias = layoutParams.verticalBias
                 selectorDragStartTime = SystemClock.uptimeMillis()
             }
+
             MotionEvent.ACTION_UP -> {
                 view.performClick()
 
@@ -516,6 +508,7 @@ class ResourcesFragment : MvpAppCompatFragment(), ResourcesView {
                     updateDragHandlerBias()
                 }
             }
+
             MotionEvent.ACTION_MOVE -> {
                 val distanceFromTop = event.rawY - frameTop
                 selectorHeight = if (distanceFromTop < 0f) {

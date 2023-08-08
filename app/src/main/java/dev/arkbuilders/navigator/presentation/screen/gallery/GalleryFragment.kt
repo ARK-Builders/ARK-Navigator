@@ -7,9 +7,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.core.content.FileProvider
@@ -21,7 +19,27 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import androidx.viewpager2.widget.ViewPager2
+import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.chip.Chip
+import dev.arkbuilders.navigator.BuildConfig
+import dev.arkbuilders.navigator.R
+import dev.arkbuilders.navigator.data.utils.LogTags.GALLERY_SCREEN
+import dev.arkbuilders.navigator.databinding.FragmentGalleryBinding
+import dev.arkbuilders.navigator.databinding.PopupGalleryTagMenuBinding
+import dev.arkbuilders.navigator.presentation.App
+import dev.arkbuilders.navigator.presentation.dialog.DetailsAlertDialog
+import dev.arkbuilders.navigator.presentation.dialog.StorageExceptionDialogFragment
+import dev.arkbuilders.navigator.presentation.dialog.edittags.EditTagsDialogFragment
+import dev.arkbuilders.navigator.presentation.navigation.Screens
+import dev.arkbuilders.navigator.presentation.screen.gallery.previewpager.PreviewsPager
+import dev.arkbuilders.navigator.presentation.screen.main.MainActivity
+import dev.arkbuilders.navigator.presentation.utils.FullscreenHelper
+import dev.arkbuilders.navigator.presentation.utils.extra.ExtraLoader
+import dev.arkbuilders.navigator.presentation.utils.makeGone
+import dev.arkbuilders.navigator.presentation.utils.makeVisible
+import dev.arkbuilders.navigator.presentation.view.DefaultPopup
+import dev.arkbuilders.navigator.presentation.view.DepthPageTransformer
+import dev.arkbuilders.navigator.presentation.view.StackedToasts
 import kotlinx.coroutines.launch
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
@@ -29,36 +47,18 @@ import space.taran.arkfilepicker.folders.RootAndFav
 import space.taran.arklib.ResourceId
 import space.taran.arklib.domain.index.Resource
 import space.taran.arklib.domain.meta.Metadata
-import space.taran.arklib.utils.extension
-import dev.arkbuilders.navigator.BuildConfig
-import dev.arkbuilders.navigator.R
-import dev.arkbuilders.navigator.databinding.FragmentGalleryBinding
-import dev.arkbuilders.navigator.databinding.PopupGalleryTagMenuBinding
-import dev.arkbuilders.navigator.presentation.navigation.Screens
-import dev.arkbuilders.navigator.presentation.App
-import dev.arkbuilders.navigator.presentation.screen.main.MainActivity
-import dev.arkbuilders.navigator.presentation.screen.gallery.previewpager.PreviewsPager
-import dev.arkbuilders.navigator.presentation.utils.extra.ExtraLoader
-import dev.arkbuilders.navigator.presentation.dialog.DetailsAlertDialog
-import dev.arkbuilders.navigator.presentation.dialog.edittags.EditTagsDialogFragment
-import dev.arkbuilders.navigator.presentation.dialog.StorageExceptionDialogFragment
-import dev.arkbuilders.navigator.presentation.view.DefaultPopup
-import dev.arkbuilders.navigator.presentation.view.DepthPageTransformer
-import dev.arkbuilders.navigator.presentation.view.StackedToasts
-import dev.arkbuilders.navigator.presentation.utils.FullscreenHelper
-import dev.arkbuilders.navigator.data.utils.LogTags.GALLERY_SCREEN
-import dev.arkbuilders.navigator.presentation.utils.makeGone
-import dev.arkbuilders.navigator.presentation.utils.makeVisible
 import space.taran.arklib.domain.score.Score
 import space.taran.arklib.domain.tags.Tag
 import space.taran.arklib.domain.tags.Tags
+import space.taran.arklib.utils.extension
 import timber.log.Timber
 import java.nio.file.Path
 import kotlin.system.measureTimeMillis
 
-class GalleryFragment : MvpAppCompatFragment(), GalleryView {
+class GalleryFragment :
+    MvpAppCompatFragment(R.layout.fragment_gallery), GalleryView {
 
-    private lateinit var binding: FragmentGalleryBinding
+    private val binding by viewBinding(FragmentGalleryBinding::bind)
 
     private val presenter by moxyPresenter {
         GalleryPresenter(
@@ -79,16 +79,6 @@ class GalleryFragment : MvpAppCompatFragment(), GalleryView {
     }
     private lateinit var stackedToasts: StackedToasts
     private lateinit var pagerAdapter: PreviewsPager
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentGalleryBinding.inflate(inflater, container, false)
-        Log.d(GALLERY_SCREEN, "inflating layout for GalleryFragment")
-        return binding.root
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         Log.d(GALLERY_SCREEN, "view created in GalleryFragment")
