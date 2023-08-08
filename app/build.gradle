@@ -128,6 +128,7 @@ dependencies {
     implementation "org.orbit-mvi:orbit-viewmodel:4.3.2"
 
     implementation 'com.jakewharton.timber:timber:5.0.1'
+    implementation "com.airbnb.android:lottie:3.4.0"
 
     implementation "com.github.moxy-community:moxy:2.2.2"
     implementation "com.github.moxy-community:moxy-androidx:2.2.2"

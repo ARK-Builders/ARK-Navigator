@@ -3,9 +3,11 @@ package dev.arkbuilders.navigator.presentation.screen.folders
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import dev.arkbuilders.navigator.data.PermissionsHelper
 import dev.arkbuilders.navigator.data.preferences.PreferenceKey
 import dev.arkbuilders.navigator.data.preferences.Preferences
 import dev.arkbuilders.navigator.data.utils.LogTags
@@ -35,6 +37,7 @@ data class FoldersState private constructor(
 
 sealed class FoldersSideEffect {
     object OpenRootsScanDialog : FoldersSideEffect()
+    object ShowExplainPermsDialog : FoldersSideEffect()
     class ToastFailedPaths(val failedPaths: List<Path>) : FoldersSideEffect()
     object ToastRootIsAlreadyPicked : FoldersSideEffect()
     object ToastFavoriteIsAlreadyPicked : FoldersSideEffect()
@@ -45,7 +48,8 @@ class FoldersViewModel(
     private val rescanRoots: Boolean,
     private val foldersRepo: FoldersRepo,
     private val resourcesIndexRepo: ResourceIndexRepo,
-    private val preferences: Preferences
+    private val preferences: Preferences,
+    private val permsHelper: PermissionsHelper,
 ) : ViewModel(), ContainerHost<FoldersState, FoldersSideEffect> {
 
     override val container: Container<FoldersState, FoldersSideEffect> = container(
@@ -56,6 +60,16 @@ class FoldersViewModel(
 
     init {
         intent {
+            if (!permsHelper.isWritePermissionGranted()) {
+                var granted =
+                    permsHelper.askForWritePermissionsAndAwait(viewModelScope)
+                while (!granted) {
+                    granted = permsHelper.customAskAndAwait(viewModelScope) {
+                        postSideEffect(FoldersSideEffect.ShowExplainPermsDialog)
+                    }
+                }
+            }
+
             reduce {
                 state.copy(
                     progressWithText =
@@ -260,14 +274,16 @@ class FoldersViewModelFactory @AssistedInject constructor(
     @Assisted private val rescanRoots: Boolean,
     private val foldersRepo: FoldersRepo,
     private val resourcesIndexRepo: ResourceIndexRepo,
-    private val preferences: Preferences
+    private val preferences: Preferences,
+    private val permsHelper: PermissionsHelper,
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return FoldersViewModel(
             rescanRoots,
             foldersRepo,
             resourcesIndexRepo,
-            preferences
+            preferences,
+            permsHelper
         ) as T
     }
 
