@@ -9,6 +9,7 @@ import dev.arkbuilders.navigator.di.modules.AppModule
 import dev.arkbuilders.navigator.di.modules.CiceroneModule
 import dev.arkbuilders.navigator.di.modules.RepoModule
 import dev.arkbuilders.navigator.presentation.App
+import dev.arkbuilders.navigator.presentation.dialog.ExplainPermsDialog
 import dev.arkbuilders.navigator.presentation.dialog.RootPickerDialogFragment
 import dev.arkbuilders.navigator.presentation.dialog.edittags.EditTagsDialogPresenter
 import dev.arkbuilders.navigator.presentation.dialog.sort.SortDialogPresenter
@@ -18,7 +19,6 @@ import dev.arkbuilders.navigator.presentation.screen.gallery.GalleryFragment
 import dev.arkbuilders.navigator.presentation.screen.gallery.GalleryPresenter
 import dev.arkbuilders.navigator.presentation.screen.gallery.previewpager.PreviewImageViewHolder
 import dev.arkbuilders.navigator.presentation.screen.main.MainActivity
-import dev.arkbuilders.navigator.presentation.screen.main.MainPresenter
 import dev.arkbuilders.navigator.presentation.screen.resources.ResourcesFragment
 import dev.arkbuilders.navigator.presentation.screen.resources.ResourcesPresenter
 import dev.arkbuilders.navigator.presentation.screen.resources.adapter.FileItemViewHolder
@@ -43,7 +43,6 @@ interface AppComponent {
     fun preferences(): Preferences
 
     fun inject(mainActivity: MainActivity)
-    fun inject(mainPresenter: MainPresenter)
     fun inject(foldersFragment: FoldersFragment)
     fun inject(resourcesPresenter: ResourcesPresenter)
     fun inject(resourcesFragment: ResourcesFragment)
@@ -59,6 +58,7 @@ interface AppComponent {
     fun inject(tagsSelectorAdapter: TagsSelectorAdapter)
     fun inject(tagsSortDialogFragment: TagsSortDialogFragment)
     fun inject(rootPickerDialogFragment: RootPickerDialogFragment)
+    fun inject(explainPermsDialog: ExplainPermsDialog)
 
     @Component.Factory
     interface Factory {

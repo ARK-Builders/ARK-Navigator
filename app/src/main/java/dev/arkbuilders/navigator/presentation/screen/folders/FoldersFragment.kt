@@ -17,6 +17,7 @@ import dev.arkbuilders.navigator.data.utils.LogTags.FOLDERS_SCREEN
 import dev.arkbuilders.navigator.databinding.FragmentFoldersBinding
 import dev.arkbuilders.navigator.presentation.App
 import dev.arkbuilders.navigator.presentation.dialog.ConfirmationDialogFragment
+import dev.arkbuilders.navigator.presentation.dialog.ExplainPermsDialog
 import dev.arkbuilders.navigator.presentation.dialog.RootPickerDialogFragment
 import dev.arkbuilders.navigator.presentation.dialog.onRootOrFavPicked
 import dev.arkbuilders.navigator.presentation.dialog.rootsscan.RootsScanDialogFragment
@@ -122,6 +123,10 @@ class FoldersFragment : Fragment(R.layout.fragment_folders) {
 
         FoldersSideEffect.ToastIndexingCanTakeMinutes ->
             toast(R.string.toast_indexing_can_take_minutes)
+
+        FoldersSideEffect.ShowExplainPermsDialog ->
+            ExplainPermsDialog.newInstance(requireContext())
+                .show(childFragmentManager, null)
     }
 
     fun setProgressVisibility(isVisible: Boolean, withText: String) {

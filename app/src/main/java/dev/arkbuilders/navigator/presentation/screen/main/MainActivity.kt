@@ -1,76 +1,93 @@
 package dev.arkbuilders.navigator.presentation.screen.main
 
-import android.Manifest
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.Environment
-import android.provider.Settings
 import android.util.Log
-import androidx.annotation.RequiresApi
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.forEach
 import androidx.core.view.isVisible
-import moxy.MvpAppCompatActivity
-import moxy.ktx.moxyPresenter
-import ru.terrakok.cicerone.NavigatorHolder
-import dev.arkbuilders.navigator.BuildConfig
+import androidx.lifecycle.lifecycleScope
+import by.kirich1409.viewbindingdelegate.viewBinding
 import dev.arkbuilders.navigator.R
-import dev.arkbuilders.navigator.databinding.ActivityMainBinding
-import dev.arkbuilders.navigator.presentation.navigation.AppNavigator
-import dev.arkbuilders.navigator.presentation.App
-import dev.arkbuilders.navigator.presentation.utils.toast
 import dev.arkbuilders.navigator.data.utils.LogTags.MAIN
-import dev.arkbuilders.navigator.data.utils.LogTags.PERMISSIONS
+import dev.arkbuilders.navigator.databinding.ActivityMainBinding
+import dev.arkbuilders.navigator.presentation.App
+import dev.arkbuilders.navigator.data.PermissionsHelper
+import dev.arkbuilders.navigator.presentation.navigation.AppNavigator
+import dev.arkbuilders.navigator.presentation.navigation.AppRouter
+import dev.arkbuilders.navigator.presentation.navigation.Screens
+import dev.arkbuilders.navigator.presentation.utils.toast
+import kotlinx.coroutines.launch
+import ru.terrakok.cicerone.NavigatorHolder
+import space.taran.arkfilepicker.folders.FoldersRepo
+import space.taran.arkfilepicker.folders.RootAndFav
 import javax.inject.Inject
 
-class MainActivity : MvpAppCompatActivity(), MainView {
+class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     @Inject
     lateinit var navigatorHolder: NavigatorHolder
 
-    private lateinit var binding: ActivityMainBinding
+    @Inject
+    lateinit var foldersRepo: FoldersRepo
 
-    private val presenter by moxyPresenter {
-        MainPresenter().apply {
-            Log.d(MAIN, "creating MainPresenter")
-            App.instance.appComponent.inject(this)
-        }
-    }
+    @Inject
+    lateinit var router: AppRouter
+
+    @Inject
+    lateinit var permsHelper: PermissionsHelper
+
+    private val binding by viewBinding(ActivityMainBinding::bind)
 
     private val navigator = AppNavigator(this, R.id.container)
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        Log.d(MAIN, "creating")
-        super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
         App.instance.appComponent.inject(this)
+        super.onCreate(savedInstanceState)
+        permsHelper.registerActivity(this)
+        if (savedInstanceState == null)
+            router.replaceScreen(Screens.FoldersScreen())
+        init()
     }
 
-    override fun init() {
+    fun init() {
         Log.d(MAIN, "initializing")
         binding.bottomNavigation.setOnApplyWindowInsetsListener(null)
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.page_settings -> {
                     Log.d(MAIN, "switching to Settings screen")
-                    presenter.goToSettingsScreen()
+                    router.newRootScreen(Screens.SettingsScreen())
                     true
                 }
+
                 R.id.page_roots -> {
                     Log.d(MAIN, "switching to Folders screen")
-                    presenter.goToFoldersScreen()
+                    router.replaceScreen(Screens.FoldersScreen())
                     true
                 }
+
                 R.id.page_tags -> {
                     Log.d(MAIN, "switching to Resources screen")
-                    presenter.goToResourcesScreen()
+                    lifecycleScope.launch {
+                        val folders = foldersRepo.provideFolders()
+                        if (folders.isEmpty()) {
+                            enterResourceFragmentFailed()
+                        } else {
+                            Log.d(MAIN, "switching to Resources screen")
+                            router.newRootScreen(
+                                Screens.ResourcesScreen(
+                                    RootAndFav(
+                                        null,
+                                        null
+                                    )
+                                )
+                            )
+                        }
+                        true
+                    }
                     true
                 }
+
                 else -> {
                     Log.w(MAIN, "no handler found")
                     true
@@ -81,85 +98,8 @@ class MainActivity : MvpAppCompatActivity(), MainView {
         binding.bottomNavigation.setOnItemReselectedListener {}
     }
 
-    override fun requestPerms() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            if (!Environment.isExternalStorageManager()) {
-                val packageUri =
-                    Uri.parse("package:" + BuildConfig.APPLICATION_ID)
-                val intent =
-                    Intent(
-                        Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
-                        packageUri
-                    )
-                startActivityForResult(intent, REQUEST_CODE_ALL_FILES_ACCESS)
-            } else
-                presenter.permsGranted(isActiveScreenExists())
-        } else {
-            val writePermission = ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            )
-            val readPermission = ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.READ_EXTERNAL_STORAGE
-            )
 
-            if (writePermission == PackageManager.PERMISSION_GRANTED &&
-                readPermission == PackageManager.PERMISSION_GRANTED
-            ) {
-                Log.d(PERMISSIONS, "already granted")
-                presenter.permsGranted(isActiveScreenExists())
-            } else {
-                val permissions = arrayOf(
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                )
-
-                Log.d(PERMISSIONS, "requesting $permissions")
-                ActivityCompat.requestPermissions(
-                    this,
-                    permissions,
-                    REQUEST_CODE_PERMISSIONS
-                )
-            }
-        }
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        granted: IntArray
-    ) {
-
-        if (requestCode == REQUEST_CODE_PERMISSIONS) {
-            Log.d(PERMISSIONS, "granted $granted")
-
-            if (granted.size == permissions.size) {
-                val denied = permissions
-                    .zip(granted.toList())
-                    .filter { (_, result) ->
-                        result == PackageManager.PERMISSION_DENIED
-                    }
-                    .map { (permission, _) -> permission }
-
-                if (denied.isEmpty()) {
-                    Log.d(PERMISSIONS, "all necessary permissions granted")
-                    presenter.permsGranted(isActiveScreenExists())
-                } else {
-                    Log.e(PERMISSIONS, "denied $denied")
-                }
-            } else {
-                Log.e(PERMISSIONS, "less permissions granted than expected")
-                throw AssertionError("Failed to request permissions")
-            }
-        } else {
-            Log.d(PERMISSIONS, "unknown permissions result received")
-        }
-
-        super.onRequestPermissionsResult(requestCode, permissions, granted)
-    }
-
-    override fun enterResourceFragmentFailed() {
+    private fun enterResourceFragmentFailed() {
         toast(R.string.toast_add_paths)
         binding.bottomNavigation.selectedItemId = R.id.page_roots
     }
@@ -185,36 +125,6 @@ class MainActivity : MvpAppCompatActivity(), MainView {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.R)
-    override fun onActivityResult(
-        requestCode: Int,
-        resultCode: Int,
-        intent: Intent?
-    ) {
-        when (requestCode) {
-            REQUEST_CODE_SD_CARD_URI -> {
-                Log.d(
-                    MAIN,
-                    "sdcard uri request resulted, code $resultCode, intent: $intent"
-                )
-
-                val treeUri = intent!!.data!!
-                contentResolver.takePersistableUriPermission(
-                    treeUri,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION or
-                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                )
-            }
-            REQUEST_CODE_ALL_FILES_ACCESS -> {
-                if (Environment.isExternalStorageManager())
-                    presenter.permsGranted(isActiveScreenExists())
-            }
-            else -> Log.d(MAIN, "unknown activity result received")
-        }
-
-        super.onActivityResult(requestCode, resultCode, intent)
-    }
-
     override fun onResumeFragments() {
         Log.d(MAIN, "resuming fragments in MainActivity")
         super.onResumeFragments()
@@ -225,17 +135,5 @@ class MainActivity : MvpAppCompatActivity(), MainView {
         Log.d(MAIN, "pausing MainActivity")
         super.onPause()
         navigatorHolder.removeNavigator()
-    }
-
-    private fun isActiveScreenExists(): Boolean {
-        val fragmentsBackStackSize = supportFragmentManager.backStackEntryCount
-        Log.d(MAIN, "Fragments back stack size: $fragmentsBackStackSize")
-        return fragmentsBackStackSize > 0
-    }
-
-    companion object {
-        const val REQUEST_CODE_PERMISSIONS: Int = 1
-        const val REQUEST_CODE_SD_CARD_URI: Int = 2
-        const val REQUEST_CODE_ALL_FILES_ACCESS = 3
     }
 }
