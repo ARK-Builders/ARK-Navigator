@@ -13,7 +13,6 @@ import dev.arkbuilders.navigator.presentation.navigation.AppRouter
 import dev.arkbuilders.navigator.presentation.navigation.Screens
 import dev.arkbuilders.navigator.presentation.screen.gallery.previewpager.PreviewImageViewHolder
 import dev.arkbuilders.navigator.presentation.screen.gallery.previewpager.PreviewPlainTextViewHolder
-import dev.arkbuilders.navigator.presentation.screen.resources.adapter.ResourceDiffUtilCallback
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -86,10 +85,8 @@ class GalleryPresenter(
     }
 
     var galleryItems: MutableList<GalleryItem> = mutableListOf()
-        private set
 
     var diffResult: DiffUtil.DiffResult? = null
-        private set
 
     private var currentPos = startAt
 
@@ -167,7 +164,7 @@ class GalleryPresenter(
 
             statsStorage = statsStorageRepo.provide(index)
 
-            fillGalleryItems()
+            galleryItems = provideGalleryItems().toMutableList()
 
             sortByScores = preferences.get(PreferenceKey.SortByScores)
 
@@ -405,27 +402,6 @@ class GalleryPresenter(
         )
     }
 
-    private suspend fun invalidateResources() {
-        val newItems = galleryItems.filter { item ->
-            index.allIds().contains(item.resource.id)
-        }.toMutableList()
-
-        if (newItems.isEmpty()) {
-            onBackClick()
-            return
-        }
-
-        diffResult = DiffUtil.calculateDiff(
-            ResourceDiffUtilCallback(
-                galleryItems.map { it.resource.id },
-                newItems.map { it.resource.id }
-            )
-        )
-        galleryItems = newItems
-
-        viewState.updatePagerAdapterWithDiff()
-    }
-
     fun onPreviewsItemClick() {
         isControlsVisible = !isControlsVisible
         viewState.setControlsVisibility(isControlsVisible)
@@ -451,10 +427,10 @@ class GalleryPresenter(
         router.exit()
     }
 
-    fun fillGalleryItems() {
+    fun provideGalleryItems(): List<GalleryItem> {
         val allResources = index.allResources()
 
-        galleryItems = resourcesIds
+        return resourcesIds
             .filter { allResources.keys.contains(it) }
             .map { id ->
                 val preview = previewStorage.retrieve(id).getOrThrow()
