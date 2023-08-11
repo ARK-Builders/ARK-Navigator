@@ -361,7 +361,9 @@ class GalleryFragment :
     }
 
     override fun notifyCurrentItemChanged() {
-        pagerAdapter.notifyItemChanged(binding.viewPager.currentItem)
+        binding.viewPager.post {
+            pagerAdapter.notifyItemChanged(binding.viewPager.currentItem)
+        }
     }
 
     override fun displaySelected(

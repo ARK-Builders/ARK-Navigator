@@ -1,6 +1,8 @@
 package dev.arkbuilders.navigator.domain
 
+import androidx.recyclerview.widget.DiffUtil
 import dev.arkbuilders.navigator.presentation.screen.gallery.GalleryPresenter
+import dev.arkbuilders.navigator.presentation.screen.resources.adapter.ResourceDiffUtilCallback
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
@@ -19,6 +21,10 @@ class HandleGalleryExternalChangesUseCase @Inject constructor() {
 
             index.updateAll()
 
+            withContext(Dispatchers.Main) {
+                viewState.notifyResourcesChanged()
+            }
+
             presenterScope.launch {
                 metadataStorage.busy.collect { busy ->
                     if (!busy)
@@ -26,10 +32,24 @@ class HandleGalleryExternalChangesUseCase @Inject constructor() {
                 }
             }.join()
 
-            fillGalleryItems()
+            val newItems = provideGalleryItems()
+            if (newItems.isEmpty()) {
+                onBackClick()
+                return@launch
+            }
+
+            diffResult = DiffUtil.calculateDiff(
+                ResourceDiffUtilCallback(
+                    galleryItems.map { it.resource.id },
+                    newItems.map { it.resource.id }
+                )
+            )
+
+            galleryItems = newItems.toMutableList()
+
             withContext(Dispatchers.Main) {
-                viewState.notifyResourcesChanged()
-                viewState.updatePagerAdapter()
+                viewState.updatePagerAdapterWithDiff()
+                viewState.notifyCurrentItemChanged()
                 viewState.setProgressVisibility(false)
             }
         }
