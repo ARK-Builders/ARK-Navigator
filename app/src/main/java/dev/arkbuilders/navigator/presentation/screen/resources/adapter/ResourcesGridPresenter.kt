@@ -3,12 +3,12 @@ package dev.arkbuilders.navigator.presentation.screen.resources.adapter
 import android.util.Log
 import dev.arkbuilders.navigator.data.preferences.PreferenceKey
 import dev.arkbuilders.navigator.data.preferences.Preferences
+import dev.arkbuilders.navigator.data.utils.LogTags.RESOURCES_SCREEN
+import dev.arkbuilders.navigator.data.utils.Sorting
 import dev.arkbuilders.navigator.presentation.navigation.AppRouter
 import dev.arkbuilders.navigator.presentation.navigation.Screens
 import dev.arkbuilders.navigator.presentation.screen.resources.ResourcesPresenter
 import dev.arkbuilders.navigator.presentation.screen.resources.ResourcesView
-import dev.arkbuilders.navigator.data.utils.LogTags.RESOURCES_SCREEN
-import dev.arkbuilders.navigator.data.utils.Sorting
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
@@ -205,13 +205,11 @@ class ResourcesGridPresenter(
 
     suspend fun updateSelection(
         selection: Set<ResourceId>
-    ) = withContext(Dispatchers.Default) {
+    ) = withContext(Dispatchers.Main) {
         this@ResourcesGridPresenter.selection = resources
             .filter { selection.contains(it.id()) }
-        withContext(Dispatchers.Main) {
-            setProgressVisibility(false)
-            viewState.updateResourcesAdapter()
-        }
+        setProgressVisibility(false)
+        viewState.updateResourcesAdapter()
     }
 
     suspend fun resetResources(
@@ -378,14 +376,9 @@ class ResourcesGridPresenter(
         )
     }
 
-    private fun sortSelection() {
-        val selection = this.selection.toSet()
-        this.selection = resources.filter { selection.contains(it) }
-    }
-
     private fun sortSelectionAndUpdateAdapter() {
-        sortSelection()
         scope.launch(Dispatchers.Main) {
+            selection = resources.filter { selection.contains(it) }
             setProgressVisibility(false)
             viewState.updateResourcesAdapter()
         }
@@ -404,6 +397,7 @@ class ResourcesGridPresenter(
             Sorting.NAME -> compareBy(String.CASE_INSENSITIVE_ORDER) {
                 it.resource.name
             }
+
             Sorting.SIZE -> compareBy { it.resource.size() }
             Sorting.TYPE -> compareBy { it.resource.extension }
             Sorting.LAST_MODIFIED -> compareBy { it.resource.modified }
