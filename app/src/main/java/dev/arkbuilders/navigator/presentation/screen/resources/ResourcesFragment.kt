@@ -163,8 +163,7 @@ class ResourcesFragment :
         with(binding) {
             resourcesAdapter = ResourcesRVAdapter(presenter.gridPresenter)
             rvResources.adapter = resourcesAdapter
-            rvResources.setItemViewCacheSize(0)
-            rvResources.layoutManager = GridLayoutManager(context, 3)
+            rvResources.layoutManager = GridLayoutManager(requireContext(), 3)
         }
 
     override fun onResume() {
@@ -286,7 +285,6 @@ class ResourcesFragment :
     }
 
     override fun onSelectingChanged(enabled: Boolean) {
-        binding.rvResources.recycledViewPool.clear()
         resourcesAdapter?.onSelectingChanged(enabled)
     }
 
