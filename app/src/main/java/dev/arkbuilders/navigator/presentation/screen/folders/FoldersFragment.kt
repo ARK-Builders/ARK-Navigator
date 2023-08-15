@@ -71,7 +71,7 @@ class FoldersFragment : Fragment(R.layout.fragment_folders) {
         FullscreenHelper.setStatusBarVisibility(true, requireActivity().window)
 
         init()
-        viewModel.observe(this, ::render, ::handleSideEffect)
+        viewModel.observe(this, state = ::render, sideEffect = ::handleSideEffect)
     }
 
     fun init() {

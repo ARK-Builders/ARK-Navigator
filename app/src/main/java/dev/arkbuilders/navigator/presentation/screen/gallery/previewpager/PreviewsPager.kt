@@ -70,7 +70,7 @@ class PreviewsPager(
 
     private fun getGestureDetector(): GestureDetectorCompat {
         val listener = object : GestureDetector.SimpleOnGestureListener() {
-            override fun onSingleTapConfirmed(e: MotionEvent?): Boolean {
+            override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
                 presenter.onPreviewsItemClick()
                 return true
             }

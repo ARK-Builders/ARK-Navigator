@@ -40,6 +40,8 @@ import dev.arkbuilders.navigator.presentation.utils.makeVisible
 import dev.arkbuilders.navigator.presentation.view.DefaultPopup
 import dev.arkbuilders.navigator.presentation.view.DepthPageTransformer
 import dev.arkbuilders.navigator.presentation.view.StackedToasts
+import dev.arkbuilders.scorewidget.ScoreWidget
+import dev.arkbuilders.scorewidget.databinding.ScoreWidgetBinding
 import kotlinx.coroutines.launch
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
@@ -47,7 +49,6 @@ import space.taran.arkfilepicker.folders.RootAndFav
 import space.taran.arklib.ResourceId
 import space.taran.arklib.domain.index.Resource
 import space.taran.arklib.domain.meta.Metadata
-import space.taran.arklib.domain.score.Score
 import space.taran.arklib.domain.tags.Tag
 import space.taran.arklib.domain.tags.Tags
 import space.taran.arklib.utils.extension
@@ -79,11 +80,19 @@ class GalleryFragment :
     }
     private lateinit var stackedToasts: StackedToasts
     private lateinit var pagerAdapter: PreviewsPager
+    private val scoreWidget by lazy {
+        ScoreWidget(presenter.scoreWidgetController, viewLifecycleOwner)
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         Log.d(GALLERY_SCREEN, "view created in GalleryFragment")
         super.onViewCreated(view, savedInstanceState)
         App.instance.appComponent.inject(this)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        scoreWidget.onDestroyView()
     }
 
     override fun init() {
@@ -103,6 +112,7 @@ class GalleryFragment :
         pagerAdapter = PreviewsPager(requireContext(), presenter)
 
         initViewPager()
+        scoreWidget.init(ScoreWidgetBinding.bind(binding.scoreWidget))
 
         binding.apply {
             val selectingEnabled =
@@ -143,14 +153,6 @@ class GalleryFragment :
             layoutSelected.setOnLongClickListener {
                 presenter.onSelectingChanged()
                 return@setOnLongClickListener true
-            }
-
-            increaseScore.setOnClickListener {
-                presenter.onIncreaseScore()
-            }
-
-            decreaseScore.setOnClickListener {
-                presenter.onDecreaseScore()
             }
         }
     }
@@ -379,22 +381,6 @@ class GalleryFragment :
         tvSelectedOf.text = "$selectedCount/$itemCount"
 
         return@with
-    }
-
-    override fun displayScore(score: Score) {
-        binding.scoreValue.apply {
-            text = if (score == 0) null
-            else score.toString()
-        }
-    }
-
-    override fun setScoringControlsVisibility(isVisible: Boolean) {
-        with(binding) {
-            increaseScore.isVisible = isVisible
-            decreaseScore.isVisible = isVisible
-            scoreValue.isVisible = isVisible
-            starIcon.isVisible = isVisible
-        }
     }
 
     override fun onResume() {
