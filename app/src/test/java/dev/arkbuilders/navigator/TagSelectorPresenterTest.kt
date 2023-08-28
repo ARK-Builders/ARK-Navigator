@@ -5,7 +5,6 @@ import dev.arkbuilders.navigator.data.preferences.PreferenceKey
 import dev.arkbuilders.navigator.data.preferences.Preferences
 import dev.arkbuilders.navigator.presentation.screen.resources.tagsselector.QueryMode
 import dev.arkbuilders.navigator.presentation.screen.resources.tagsselector.TagItem
-import dev.arkbuilders.navigator.presentation.screen.resources.tagsselector.TagsSelectorAction
 import dev.arkbuilders.navigator.presentation.screen.resources.tagsselector.TagsSelectorPresenter
 import dev.arkbuilders.navigator.presentation.dialog.tagssort.TagsSorting
 import dev.arkbuilders.navigator.presentation.screen.resources.ResourcesView

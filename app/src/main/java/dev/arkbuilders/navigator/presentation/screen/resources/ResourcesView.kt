@@ -1,5 +1,6 @@
 package dev.arkbuilders.navigator.presentation.screen.resources
 
+import dev.arkbuilders.components.tagselector.QueryMode
 import dev.arkbuilders.navigator.presentation.common.CommonMvpView
 import moxy.viewstate.strategy.AddToEndSingleStrategy
 import moxy.viewstate.strategy.SkipStrategy
@@ -13,15 +14,10 @@ interface ResourcesView : CommonMvpView {
     fun updateResourcesAdapter()
     fun setProgressVisibility(isVisible: Boolean, withText: String = "")
     fun setToolbarTitle(title: String)
-    fun setKindTagsEnabled(enabled: Boolean)
-    fun updateMenu()
+    fun updateMenu(queryMode: QueryMode)
     fun updateOrderBtn(isAscending: Boolean)
     fun setSelectingEnabled(enabled: Boolean)
     fun setSelectingCount(selected: Int, all: Int)
-    fun setTagsFilterEnabled(enabled: Boolean)
-    fun setTagsFilterText(filter: String)
-    fun drawTags()
-    fun setTagsSortingVisibility(visible: Boolean)
     fun setPreviewGenerationProgress(isVisible: Boolean)
     fun setMetadataExtractionProgress(isVisible: Boolean)
 

@@ -121,6 +121,9 @@ dependencies {
     implementation 'com.davemorrissey.labs:subsampling-scale-image-view-androidx:3.10.0'
     implementation 'com.github.MikeOrtiz:TouchImageView:3.1.1'
     implementation 'com.github.ARK-Builders:ark-filepicker:c6d66141c1'
+    implementation('dev.arkbuilders:components:999'){
+        exclude group: "space.taran", module: "arklib"
+    }
 
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2"
 

@@ -7,23 +7,23 @@
 
     <include
         android:id="@+id/action_bar"
-        layout="@layout/action_bar_resources"/>
+        layout="@layout/action_bar_resources" />
 
     <com.google.android.material.progressindicator.LinearProgressIndicator
         android:id="@+id/progress_preview_generation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="gone"
         android:indeterminate="true"
-        app:layout_constraintTop_toBottomOf="@id/action_bar"/>
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/action_bar" />
 
     <com.google.android.material.progressindicator.LinearProgressIndicator
         android:id="@+id/progress_metadata_extraction"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="gone"
         android:indeterminate="true"
-        app:layout_constraintTop_toBottomOf="@id/action_bar"/>
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/action_bar" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_resources"
@@ -34,162 +34,21 @@
         app:layout_constraintBottom_toTopOf="@+id/layout_drag_handler"
         app:layout_constraintTop_toBottomOf="@id/progress_preview_generation" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <include
         android:id="@+id/layout_drag_handler"
+        layout="@layout/tag_selector_drag_handler"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/bg_rounded_top_24dp"
-        android:clipToPadding="false"
-        android:elevation="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <androidx.constraintlayout.widget.Placeholder
-            android:id="@+id/left_bound"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <dev.arkbuilders.navigator.presentation.view.UserSwitchMaterial
-            android:id="@+id/switch_scores"
-            android:text="Scores"
-            android:textStyle="bold"
-            android:textColor="@color/gray"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintStart_toEndOf="@id/left_bound"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <dev.arkbuilders.navigator.presentation.view.UserSwitchMaterial
-            android:id="@+id/switch_kind"
-            android:text="Kinds"
-            android:textStyle="bold"
-            android:textColor="@color/gray"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintStart_toEndOf="@id/switch_scores"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <ImageView
-            android:id="@+id/iv_drag_handler"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:src="@drawable/ic_drag_handle"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@id/switch_kind"
-            app:layout_constraintEnd_toStartOf="@id/btn_clear"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/gray"
-            android:visibility="invisible" />
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/btn_tags_sorting"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:chipIcon="@drawable/ic_sort"
-            app:chipIconTint="@color/black"
-            app:layout_constraintEnd_toStartOf="@id/btn_clear"
-            app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            app:chipEndPadding="4dp"
-            app:chipStartPadding="4dp"
-            app:textEndPadding="0dp"
-            app:textStartPadding="0dp" />
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/btn_clear"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:enabled="false"
-            app:chipIcon="@drawable/ic_close"
-            app:chipIconTint="@color/black"
-            app:layout_constraintHorizontal_bias="1"
-            app:layout_constraintEnd_toStartOf="@id/right_bound"
-            app:layout_constraintTop_toTopOf="parent"
-            app:chipEndPadding="4dp"
-            app:chipStartPadding="4dp"
-            app:textEndPadding="0dp"
-            app:textStartPadding="0dp" />
-
-        <androidx.constraintlayout.widget.Placeholder
-            android:id="@+id/right_bound"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <LinearLayout
+    <include
         android:id="@+id/layout_tags"
+        layout="@layout/tag_selector_tags_layout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="@color/white"
-        android:clipToPadding="false"
-        android:elevation="16dp"
-        android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/layout_drag_handler">
-
-        <TextView
-            android:id="@+id/tv_tags_selector_hint"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:gravity="center"
-            android:text="@string/resources_tags_selector_hint"
-            android:textSize="18sp"
-            android:visibility="gone" />
-
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rv_tags_filter"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="10dp"
-                    android:visibility="gone" />
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/layout_input"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginEnd="10dp"
-                    android:layout_marginBottom="8dp"
-                    android:hint="@string/resources_filter_hint"
-                    android:visibility="gone"
-                    app:startIconDrawable="@drawable/ic_baseline_search_24">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/et_tags_filter"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:imeOptions="flagNoExtractUi" />
-
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rv_tags"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingHorizontal="10dp"
-                    android:visibility="visible" />
-            </LinearLayout>
-
-        </ScrollView>
-
-    </LinearLayout>
+        app:layout_constraintTop_toBottomOf="@+id/layout_drag_handler" />
 
     <include
         android:id="@+id/layoutProgress"
@@ -197,8 +56,8 @@
 
     <dev.arkbuilders.navigator.presentation.view.StackedToastsRecyclerView
         android:id="@+id/rv_toasts"
-        android:elevation="20dp"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:elevation="20dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
