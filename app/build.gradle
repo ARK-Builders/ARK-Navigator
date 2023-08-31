@@ -92,7 +92,7 @@ dependencies {
 
     releaseImplementation "space.taran:arklib:$arklibVersion"
     debugImplementation "space.taran:arklib-debug:$arklibVersion"
-    implementation("dev.arkbuilders:scorewidget:999") {
+    implementation("dev.arkbuilders:components:0.0.3") {
         exclude group: "space.taran", module: "arklib"
     }
 
