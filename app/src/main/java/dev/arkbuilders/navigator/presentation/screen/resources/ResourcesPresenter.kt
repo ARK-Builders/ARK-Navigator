@@ -121,19 +121,19 @@ class ResourcesPresenter(
                     TagsSorting.LABELED_N -> statsStorage.statsTagLabeledAmount()
                 } as Map<Tag, Comparable<Any>>
             },
-            onSelectionChangeListener = { queryMode, normalSelection, focusSelection ->
+            onSelectionChangeListener = { queryMode, normal, focus ->
                 presenterScope.launch(Dispatchers.Main) {
                     when (queryMode) {
                         QueryMode.NORMAL -> {
-                            onSelectionChange(normalSelection)
-                            viewState.toastResourcesSelected(normalSelection.size)
+                            onSelectionChange(normal)
+                            viewState.toastResourcesSelected(normal.size)
                         }
 
                         QueryMode.FOCUS -> {
-                            onSelectionChange(focusSelection!!)
+                            onSelectionChange(focus!!)
                             viewState.toastResourcesSelectedFocusMode(
-                                focusSelection.size,
-                                normalSelection.size - focusSelection.size
+                                focus.size,
+                                normal.size - focus.size
                             )
                         }
                     }
