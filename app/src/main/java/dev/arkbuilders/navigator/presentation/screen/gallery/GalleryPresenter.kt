@@ -2,6 +2,7 @@ package dev.arkbuilders.navigator.presentation.screen.gallery
 
 import android.util.Log
 import androidx.recyclerview.widget.DiffUtil
+import dev.arkbuilders.components.scorewidget.ScoreWidgetController
 import dev.arkbuilders.navigator.data.preferences.PreferenceKey
 import dev.arkbuilders.navigator.data.preferences.Preferences
 import dev.arkbuilders.navigator.data.stats.StatsStorage
@@ -13,7 +14,6 @@ import dev.arkbuilders.navigator.presentation.navigation.AppRouter
 import dev.arkbuilders.navigator.presentation.navigation.Screens
 import dev.arkbuilders.navigator.presentation.screen.gallery.previewpager.PreviewImageViewHolder
 import dev.arkbuilders.navigator.presentation.screen.gallery.previewpager.PreviewPlainTextViewHolder
-import dev.arkbuilders.scorewidget.ScoreWidgetController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableSharedFlow

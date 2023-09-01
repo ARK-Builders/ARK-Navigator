@@ -21,6 +21,8 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import androidx.viewpager2.widget.ViewPager2
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.chip.Chip
+import dev.arkbuilders.components.databinding.ScoreWidgetBinding
+import dev.arkbuilders.components.scorewidget.ScoreWidget
 import dev.arkbuilders.navigator.BuildConfig
 import dev.arkbuilders.navigator.R
 import dev.arkbuilders.navigator.data.utils.LogTags.GALLERY_SCREEN
@@ -40,8 +42,6 @@ import dev.arkbuilders.navigator.presentation.utils.makeVisible
 import dev.arkbuilders.navigator.presentation.view.DefaultPopup
 import dev.arkbuilders.navigator.presentation.view.DepthPageTransformer
 import dev.arkbuilders.navigator.presentation.view.StackedToasts
-import dev.arkbuilders.scorewidget.ScoreWidget
-import dev.arkbuilders.scorewidget.databinding.ScoreWidgetBinding
 import kotlinx.coroutines.launch
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
