@@ -1,11 +1,26 @@
 package dev.arkbuilders.navigator.presentation.screen.resources
 
 import android.util.Log
+import dev.arkbuilders.components.tagselector.QueryMode
+import dev.arkbuilders.components.tagselector.TagSelectorController
+import dev.arkbuilders.components.tagselector.TagsSorting
+import dev.arkbuilders.navigator.data.preferences.PreferenceKey
+import dev.arkbuilders.navigator.data.preferences.Preferences
+import dev.arkbuilders.navigator.data.stats.StatsStorage
+import dev.arkbuilders.navigator.data.stats.StatsStorageRepo
+import dev.arkbuilders.navigator.data.utils.LogTags.RESOURCES_SCREEN
+import dev.arkbuilders.navigator.data.utils.findNotExistCopyName
+import dev.arkbuilders.navigator.di.modules.RepoModule.Companion.MESSAGE_FLOW_NAME
+import dev.arkbuilders.navigator.presentation.App
+import dev.arkbuilders.navigator.presentation.navigation.AppRouter
+import dev.arkbuilders.navigator.presentation.screen.resources.adapter.ResourcesGridPresenter
+import dev.arkbuilders.navigator.presentation.utils.StringProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -24,20 +39,9 @@ import space.taran.arklib.domain.preview.PreviewProcessorRepo
 import space.taran.arklib.domain.score.ScoreStorage
 import space.taran.arklib.domain.score.ScoreStorageRepo
 import space.taran.arklib.domain.storage.StorageException
+import space.taran.arklib.domain.tags.Tag
 import space.taran.arklib.domain.tags.TagStorage
 import space.taran.arklib.domain.tags.TagsStorageRepo
-import dev.arkbuilders.navigator.di.modules.RepoModule.Companion.MESSAGE_FLOW_NAME
-import dev.arkbuilders.navigator.data.preferences.PreferenceKey
-import dev.arkbuilders.navigator.data.preferences.Preferences
-import dev.arkbuilders.navigator.data.stats.StatsStorage
-import dev.arkbuilders.navigator.data.stats.StatsStorageRepo
-import dev.arkbuilders.navigator.presentation.screen.resources.tagsselector.TagsSelectorPresenter
-import dev.arkbuilders.navigator.presentation.navigation.AppRouter
-import dev.arkbuilders.navigator.presentation.App
-import dev.arkbuilders.navigator.presentation.screen.resources.adapter.ResourcesGridPresenter
-import dev.arkbuilders.navigator.data.utils.LogTags.RESOURCES_SCREEN
-import space.taran.arklib.domain.tags.Tag
-import dev.arkbuilders.navigator.data.utils.findNotExistCopyName
 import timber.log.Timber
 import java.nio.file.Path
 import javax.inject.Inject
@@ -78,6 +82,9 @@ class ResourcesPresenter(
     lateinit var scoreStorageRepo: ScoreStorageRepo
 
     @Inject
+    lateinit var stringProvider: StringProvider
+
+    @Inject
     @Named(MESSAGE_FLOW_NAME)
     lateinit var messageFlow: MutableSharedFlow<Message>
 
@@ -99,14 +106,51 @@ class ResourcesPresenter(
             .apply {
                 App.instance.appComponent.inject(this)
             }
-    val tagsSelectorPresenter =
-        TagsSelectorPresenter(
-            viewState,
+    val tagsSelectorController =
+        TagSelectorController(
             presenterScope,
-            ::onSelectionChange
-        ).apply {
-            App.instance.appComponent.inject(this)
-        }
+            kindToString = { stringProvider.kindToString(it) },
+            tagSortCriteria = { tagsSorting ->
+                when (tagsSorting) {
+                    TagsSorting.POPULARITY ->
+                        error("TagsSorting.POPULARITY must be handled before")
+
+                    TagsSorting.QUERIED_TS -> statsStorage.statsTagQueriedTS()
+                    TagsSorting.QUERIED_N -> statsStorage.statsTagQueriedAmount()
+                    TagsSorting.LABELED_TS -> statsStorage.statsTagLabeledTS()
+                    TagsSorting.LABELED_N -> statsStorage.statsTagLabeledAmount()
+                } as Map<Tag, Comparable<Any>>
+            },
+            onSelectionChangeListener = { queryMode, normal, focus ->
+                presenterScope.launch(Dispatchers.Main) {
+                    when (queryMode) {
+                        QueryMode.NORMAL -> {
+                            onSelectionChange(normal)
+                            viewState.toastResourcesSelected(normal.size)
+                        }
+
+                        QueryMode.FOCUS -> {
+                            onSelectionChange(focus!!)
+                            viewState.toastResourcesSelectedFocusMode(
+                                focus.size,
+                                normal.size - focus.size
+                            )
+                        }
+                    }
+                }
+            },
+            onStatsEvent = {
+                statsStorage.handleEvent(it)
+            },
+            onKindTagsChanged = {
+                preferences.set(PreferenceKey.ShowKinds, it)
+            },
+            onQueryModeChangedCB = {
+                presenterScope.launch(Dispatchers.Main) {
+                    viewState.updateMenu(it)
+                }
+            }
+        )
 
     override fun onFirstViewAttach() {
         Log.d(RESOURCES_SCREEN, "first view attached in ResourcesPresenter")
@@ -178,20 +222,26 @@ class ResourcesPresenter(
 
             val resources = index.allResources()
             gridPresenter.resetResources(resources.values.toSet())
-            val kindTagsEnabled = preferences.get(PreferenceKey.ShowKinds)
-            tagsSelectorPresenter.init(
+            tagsSelectorController.init(
                 index,
                 tagStorage,
-                statsStorage,
                 metadataProcessor,
-                kindTagsEnabled
+                preferences.get(PreferenceKey.ShowKinds),
+                TagsSorting.values()[
+                    preferences.get(PreferenceKey.TagsSortingSelector)
+                ],
+                preferences.get(PreferenceKey.TagsSortingSelectorAsc),
+                preferences.get(PreferenceKey.CollectTagUsageStats),
+                preferences.flow(PreferenceKey.TagsSortingSelector).map {
+                    TagsSorting.values()[it]
+                },
+                preferences.flow(PreferenceKey.TagsSortingSelectorAsc)
             )
 
-            viewState.setKindTagsEnabled(kindTagsEnabled)
             externallySelectedTag?.let {
-                tagsSelectorPresenter.onTagExternallySelect(it)
+                tagsSelectorController.onTagExternallySelect(it)
             }
-            tagsSelectorPresenter.calculateTagsAndSelection()
+            tagsSelectorController.calculateTagsAndSelection()
 
             viewState.setProgressVisibility(false)
 
@@ -338,11 +388,11 @@ class ResourcesPresenter(
     }
 
     suspend fun onTagsChanged() {
-        tagsSelectorPresenter.calculateTagsAndSelection()
+        tagsSelectorController.calculateTagsAndSelection()
     }
 
     fun onBackClick() = presenterScope.launch {
-        if (!tagsSelectorPresenter.onBackClick())
+        if (!tagsSelectorController.onBackClick())
             router.exit()
     }
 

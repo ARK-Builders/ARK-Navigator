@@ -12,11 +12,14 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.FileProvider
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
-import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import by.kirich1409.viewbindingdelegate.viewBinding
+import dev.arkbuilders.components.databinding.TagSelectorDragHandlerBinding
+import dev.arkbuilders.components.databinding.TagSelectorTagsLayoutBinding
+import dev.arkbuilders.components.tagselector.QueryMode
+import dev.arkbuilders.components.tagselector.TagSelector
 import dev.arkbuilders.navigator.BuildConfig
 import dev.arkbuilders.navigator.R
 import dev.arkbuilders.navigator.data.utils.LogTags.RESOURCES_SCREEN
@@ -29,12 +32,8 @@ import dev.arkbuilders.navigator.presentation.dialog.tagssort.TagsSortDialogFrag
 import dev.arkbuilders.navigator.presentation.screen.gallery.GalleryFragment
 import dev.arkbuilders.navigator.presentation.screen.main.MainActivity
 import dev.arkbuilders.navigator.presentation.screen.resources.adapter.ResourcesRVAdapter
-import dev.arkbuilders.navigator.presentation.screen.resources.tagsselector.QueryMode
-import dev.arkbuilders.navigator.presentation.screen.resources.tagsselector.TagsSelectorAdapter
 import dev.arkbuilders.navigator.presentation.utils.FullscreenHelper
-import dev.arkbuilders.navigator.presentation.utils.closeKeyboard
-import dev.arkbuilders.navigator.presentation.utils.placeCursorToEnd
-import dev.arkbuilders.navigator.presentation.utils.showKeyboard
+import dev.arkbuilders.navigator.presentation.utils.StringProvider
 import dev.arkbuilders.navigator.presentation.utils.toast
 import dev.arkbuilders.navigator.presentation.utils.toastFailedPaths
 import dev.arkbuilders.navigator.presentation.view.StackedToasts
@@ -47,6 +46,7 @@ import space.taran.arkfilepicker.presentation.onArkPathPicked
 import space.taran.arklib.ResourceId
 import space.taran.arklib.domain.tags.Tag
 import java.nio.file.Path
+import javax.inject.Inject
 import kotlin.io.path.Path
 import kotlin.math.abs
 
@@ -62,6 +62,8 @@ class ResourcesFragment :
     MvpAppCompatFragment(R.layout.fragment_resources), ResourcesView {
 
     private val binding by viewBinding(FragmentResourcesBinding::bind)
+    private lateinit var tagsLayoutBinding: TagSelectorTagsLayoutBinding
+    private lateinit var dragHandlerBinding: TagSelectorDragHandlerBinding
 
     val presenter by moxyPresenter {
         ResourcesPresenter(
@@ -88,7 +90,17 @@ class ResourcesFragment :
     private var selectorDragStartBias: Float = -1f
     private var selectorDragStartTime: Long = -1
 
-    private var tagsSelectorAdapter: TagsSelectorAdapter? = null
+    @Inject
+    lateinit var stringProvider: StringProvider
+
+    private val tagSelector by lazy {
+        TagSelector(
+            requireContext(),
+            presenter.tagsSelectorController,
+            viewLifecycleOwner,
+            kindToString = { stringProvider.kindToString(it) }
+        )
+    }
 
     private var isShuffled = false
     private var isAscending = true
@@ -96,8 +108,16 @@ class ResourcesFragment :
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         Log.d(RESOURCES_SCREEN, "view created in ResourcesFragment")
         super.onViewCreated(view, savedInstanceState)
+        tagsLayoutBinding = TagSelectorTagsLayoutBinding.bind(binding.layoutTags)
+        dragHandlerBinding =
+            TagSelectorDragHandlerBinding.bind(binding.layoutDragHandler)
 
         App.instance.appComponent.inject(this)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        tagSelector.onDestroyView()
     }
 
     override fun init(ascending: Boolean, sortByScoresEnabled: Boolean) =
@@ -112,43 +132,33 @@ class ResourcesFragment :
             (activity as MainActivity).setSelectedTab(R.id.page_tags)
             (requireActivity() as MainActivity).setBottomNavigationVisibility(true)
 
-            tagsSelectorAdapter = TagsSelectorAdapter(
-                this@ResourcesFragment,
-                binding,
-                presenter.tagsSelectorPresenter
-            ).also {
-                App.instance.appComponent.inject(it)
-            }
+            tagSelector.init(
+                dragHandlerBinding,
+                tagsLayoutBinding
+            )
 
             layoutDragHandler.setOnTouchListener(::dragHandlerTouchListener)
-            etTagsFilter.doAfterTextChanged {
-                presenter.tagsSelectorPresenter.onFilterChanged(it.toString())
-            }
-            switchKind.setOnCheckedChangeListener { _, checked ->
-                presenter.tagsSelectorPresenter.onKindTagsToggle(checked)
-            }
-            btnClear.setOnClickListener {
-                presenter.tagsSelectorPresenter.onClearClick()
-            }
-            btnTagsSorting.setOnClickListener {
+            dragHandlerBinding.btnTagsSorting.setOnClickListener {
                 TagsSortDialogFragment
                     .newInstance(selectorNotEdit = true)
                     .show(childFragmentManager, null)
             }
 
-            this@ResourcesFragment.updateOrderBtn(ascending)
-
             if (sortByScoresEnabled) {
-                switchScores.isChecked = true
-                switchScores.jumpDrawablesToCurrentState()
+                dragHandlerBinding.switchScores.isChecked = true
+                dragHandlerBinding.switchScores.jumpDrawablesToCurrentState()
             }
-            switchScores.setOnCheckedChangeListener { _, isChecked ->
-                Log.d(
-                    RESOURCES_SCREEN,
-                    "sorting by scores ${if (isChecked) "enabled" else "disabled"}"
-                )
-                presenter.onScoresSwitched(isChecked)
-            }
+            dragHandlerBinding
+                .switchScores.setOnCheckedChangeListener { _, isChecked ->
+                    Log.d(
+                        RESOURCES_SCREEN,
+                        "sorting by scores " +
+                            "${if (isChecked) "enabled" else "disabled"}"
+                    )
+                    presenter.onScoresSwitched(isChecked)
+                }
+
+            this@ResourcesFragment.updateOrderBtn(ascending)
 
             this@ResourcesFragment
                 .requireActivity()
@@ -176,10 +186,6 @@ class ResourcesFragment :
         binding.actionBar.tvTitle.text = title
     }
 
-    override fun setKindTagsEnabled(enabled: Boolean) {
-        binding.switchKind.toggleSwitchSilent(enabled)
-    }
-
     override fun setProgressVisibility(isVisible: Boolean, withText: String) {
         binding.layoutProgress.apply {
             root.isVisible = isVisible
@@ -198,8 +204,7 @@ class ResourcesFragment :
         resourcesAdapter?.notifyDataSetChanged()
     }
 
-    override fun updateMenu() = with(binding) {
-        val queryMode = presenter.tagsSelectorPresenter.queryMode
+    override fun updateMenu(queryMode: QueryMode) = with(binding) {
         val normalVisibility =
             if (queryMode != QueryMode.NORMAL) View.VISIBLE else View.INVISIBLE
         val focusVisibility =
@@ -234,33 +239,6 @@ class ResourcesFragment :
 
     override fun setSelectingCount(selected: Int, all: Int) {
         binding.actionBar.tvSelectedOf.text = "$selected of $all"
-    }
-
-    override fun setTagsFilterEnabled(enabled: Boolean) {
-        binding.layoutInput.isVisible = enabled
-        binding.rvTagsFilter.isVisible = enabled
-        if (enabled) {
-            binding.etTagsFilter.placeCursorToEnd()
-            binding.etTagsFilter.showKeyboard()
-        } else
-            binding.etTagsFilter.closeKeyboard()
-    }
-
-    override fun setTagsFilterText(filter: String) {
-        binding.etTagsFilter.setText(filter)
-    }
-
-    override fun setTagsSortingVisibility(
-        visible: Boolean
-    ) {
-        binding.btnTagsSorting.isVisible = visible
-        val params = binding.btnClear.layoutParams as ConstraintLayout.LayoutParams
-        params.horizontalBias = if (visible) 1f else 0.5f
-        binding.btnClear.layoutParams = params
-    }
-
-    override fun drawTags() {
-        tagsSelectorAdapter?.drawTags()
     }
 
     override fun toastResourcesSelected(selected: Int) {
@@ -337,10 +315,10 @@ class ResourcesFragment :
             dialog.show(childFragmentManager, null)
         }
         actionBar.btnNormalMode.setOnClickListener {
-            presenter.tagsSelectorPresenter.onQueryModeChanged(QueryMode.NORMAL)
+            presenter.tagsSelectorController.onQueryModeChanged(QueryMode.NORMAL)
         }
         actionBar.btnFocusMode.setOnClickListener {
-            presenter.tagsSelectorPresenter.onQueryModeChanged(QueryMode.FOCUS)
+            presenter.tagsSelectorController.onQueryModeChanged(QueryMode.FOCUS)
         }
         actionBar.btnOrder.apply {
             setOnClickListener {
@@ -471,7 +449,7 @@ class ResourcesFragment :
     private fun dragHandlerTouchListener(view: View, event: MotionEvent): Boolean {
         when (event.action and MotionEvent.ACTION_MASK) {
             MotionEvent.ACTION_DOWN -> {
-                val layoutParams = binding.ivDragHandler.layoutParams
+                val layoutParams = dragHandlerBinding.ivDragHandler.layoutParams
                     as ConstraintLayout.LayoutParams
                 selectorDragStartBias = layoutParams.verticalBias
                 selectorDragStartTime = SystemClock.uptimeMillis()
@@ -497,10 +475,10 @@ class ResourcesFragment :
                     abs(travelSpeed) > DRAG_TRAVEL_SPEED_THRESHOLD
                 ) {
                     selectorHeight = if (travelDelta > 0f) {
-                        presenter.tagsSelectorPresenter.onFilterToggle(true)
+                        presenter.tagsSelectorController.onFilterToggle(true)
                         1f
                     } else {
-                        presenter.tagsSelectorPresenter.onFilterToggle(false)
+                        presenter.tagsSelectorController.onFilterToggle(false)
                         0f
                     }
                     updateDragHandlerBias()
@@ -510,12 +488,12 @@ class ResourcesFragment :
             MotionEvent.ACTION_MOVE -> {
                 val distanceFromTop = event.rawY - frameTop
                 selectorHeight = if (distanceFromTop < 0f) {
-                    presenter.tagsSelectorPresenter.onFilterToggle(true)
+                    presenter.tagsSelectorController.onFilterToggle(true)
                     1f
                 } else if (distanceFromTop > frameHeight) {
                     0f
                 } else {
-                    presenter.tagsSelectorPresenter.onFilterToggle(false)
+                    presenter.tagsSelectorController.onFilterToggle(false)
                     1f - distanceFromTop / frameHeight
                 }
 

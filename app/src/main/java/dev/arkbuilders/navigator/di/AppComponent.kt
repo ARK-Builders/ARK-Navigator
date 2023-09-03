@@ -23,8 +23,6 @@ import dev.arkbuilders.navigator.presentation.screen.resources.ResourcesFragment
 import dev.arkbuilders.navigator.presentation.screen.resources.ResourcesPresenter
 import dev.arkbuilders.navigator.presentation.screen.resources.adapter.FileItemViewHolder
 import dev.arkbuilders.navigator.presentation.screen.resources.adapter.ResourcesGridPresenter
-import dev.arkbuilders.navigator.presentation.screen.resources.tagsselector.TagsSelectorAdapter
-import dev.arkbuilders.navigator.presentation.screen.resources.tagsselector.TagsSelectorPresenter
 import dev.arkbuilders.navigator.presentation.screen.settings.SettingsFragment
 import space.taran.arkfilepicker.folders.FoldersRepo
 import javax.inject.Singleton
@@ -54,8 +52,6 @@ interface AppComponent {
     fun inject(fileItemViewHolder: FileItemViewHolder)
     fun inject(previewImageViewHolder: PreviewImageViewHolder)
     fun inject(sortDialogPresenter: SortDialogPresenter)
-    fun inject(tagsSelectorPresenter: TagsSelectorPresenter)
-    fun inject(tagsSelectorAdapter: TagsSelectorAdapter)
     fun inject(tagsSortDialogFragment: TagsSortDialogFragment)
     fun inject(rootPickerDialogFragment: RootPickerDialogFragment)
     fun inject(explainPermsDialog: ExplainPermsDialog)
