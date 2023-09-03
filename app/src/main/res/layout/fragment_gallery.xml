@@ -143,47 +143,13 @@
             app:elevation="6dp"
             app:tint="@color/white" />
 
-        <ImageView
-            android:id="@+id/increaseScore"
+        <include
+            android:id="@+id/score_widget"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:visibility="gone"
-            app:layout_constraintEnd_toEndOf="@+id/remove_resource_fab"
-            app:layout_constraintStart_toStartOf="@+id/remove_resource_fab"
-            app:layout_constraintTop_toBottomOf="@+id/remove_resource_fab"
-            app:srcCompat="@drawable/ic_arrow_up" />
-
-        <ImageView
-            android:id="@+id/starIcon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            app:layout_constraintEnd_toEndOf="@+id/remove_resource_fab"
-            app:layout_constraintStart_toStartOf="@+id/remove_resource_fab"
-            app:layout_constraintTop_toBottomOf="@+id/increaseScore"
-            app:srcCompat="@drawable/ic_star" />
-
-        <TextView
-            android:id="@+id/scoreValue"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/white"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="@+id/starIcon"
-            app:layout_constraintEnd_toEndOf="@+id/starIcon"
-            app:layout_constraintStart_toStartOf="@+id/starIcon"
-            app:layout_constraintTop_toBottomOf="@+id/increaseScore" />
-
-        <ImageView
-            android:id="@+id/decreaseScore"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            app:layout_constraintEnd_toEndOf="@+id/remove_resource_fab"
-            app:layout_constraintStart_toStartOf="@+id/remove_resource_fab"
-            app:layout_constraintTop_toBottomOf="@+id/starIcon"
-            app:srcCompat="@drawable/ic_arrow_down" />
+            app:layout_constraintTop_toBottomOf="@id/remove_resource_fab"
+            app:layout_constraintStart_toStartOf="@id/remove_resource_fab"
+            layout="@layout/score_widget" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/info_resource_fab"

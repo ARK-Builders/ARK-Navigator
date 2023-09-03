@@ -2,6 +2,7 @@ package dev.arkbuilders.navigator.presentation.screen.gallery
 
 import android.util.Log
 import androidx.recyclerview.widget.DiffUtil
+import dev.arkbuilders.components.scorewidget.ScoreWidgetController
 import dev.arkbuilders.navigator.data.preferences.PreferenceKey
 import dev.arkbuilders.navigator.data.preferences.Preferences
 import dev.arkbuilders.navigator.data.stats.StatsStorage
@@ -35,7 +36,6 @@ import space.taran.arklib.domain.meta.MetadataProcessorRepo
 import space.taran.arklib.domain.preview.PreviewLocator
 import space.taran.arklib.domain.preview.PreviewProcessor
 import space.taran.arklib.domain.preview.PreviewProcessorRepo
-import space.taran.arklib.domain.score.Score
 import space.taran.arklib.domain.score.ScoreStorage
 import space.taran.arklib.domain.score.ScoreStorageRepo
 import space.taran.arklib.domain.stats.StatsEvent
@@ -62,6 +62,12 @@ class GalleryPresenter(
     var selectingEnabled: Boolean,
     private val selectedResources: MutableList<ResourceId>
 ) : MvpPresenter<GalleryView>() {
+
+    val scoreWidgetController = ScoreWidgetController(
+        presenterScope,
+        getCurrentId = { currentItem.id() },
+        onScoreChanged = { viewState.notifyResourceScoresChanged() }
+    )
 
     lateinit var index: ResourceIndex
         private set
@@ -163,6 +169,7 @@ class GalleryPresenter(
             }
 
             statsStorage = statsStorageRepo.provide(index)
+            scoreWidgetController.init(scoreStorage)
 
             galleryItems = provideGalleryItems().toMutableList()
 
@@ -170,7 +177,7 @@ class GalleryPresenter(
 
             viewState.updatePagerAdapter()
             viewState.setProgressVisibility(false)
-            viewState.setScoringControlsVisibility(sortByScores)
+            scoreWidgetController.setVisible(sortByScores)
         }
     }
 
@@ -184,8 +191,7 @@ class GalleryPresenter(
 
         val id = currentItem.id()
         val tags = tagsStorage.getTags(id)
-        val score = scoreStorage.getScore(id)
-        displayPreview(id, currentItem.metadata, tags, score)
+        displayPreview(id, currentItem.metadata, tags)
     }
 
     fun onResume() {
@@ -327,25 +333,6 @@ class GalleryPresenter(
         viewState.showEditTagsDialog(currentItem.id())
     }
 
-    fun onIncreaseScore() = changeScore(1)
-
-    fun onDecreaseScore() = changeScore(-1)
-
-    private fun changeScore(inc: Score) =
-        presenterScope.launch {
-            val id = currentItem.id()
-            val score = scoreStorage.getScore(id) + inc
-
-            scoreStorage.setScore(id, score)
-            withContext(Dispatchers.IO) {
-                scoreStorage.persist()
-            }
-            withContext(Dispatchers.Main) {
-                viewState.displayScore(score)
-            }
-            viewState.notifyResourceScoresChanged()
-        }
-
     private fun checkResourceChanges(pos: Int) =
         presenterScope.launch(Dispatchers.IO) {
             if (galleryItems.isEmpty()) {
@@ -388,12 +375,11 @@ class GalleryPresenter(
     private fun displayPreview(
         id: ResourceId,
         meta: Metadata,
-        tags: Tags,
-        score: Score
+        tags: Tags
     ) {
         viewState.setupPreview(currentPos, meta)
         viewState.displayPreviewTags(id, tags)
-        viewState.displayScore(score)
+        scoreWidgetController.displayScore()
         viewState.displaySelected(
             id in selectedResources,
             showAnim = false,

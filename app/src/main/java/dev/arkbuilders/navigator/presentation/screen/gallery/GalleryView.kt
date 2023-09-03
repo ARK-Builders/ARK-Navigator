@@ -7,7 +7,6 @@ import moxy.viewstate.strategy.StateStrategyType
 import space.taran.arklib.ResourceId
 import space.taran.arklib.domain.index.Resource
 import space.taran.arklib.domain.meta.Metadata
-import space.taran.arklib.domain.score.Score
 import space.taran.arklib.domain.tags.Tags
 import java.nio.file.Path
 
@@ -22,15 +21,12 @@ interface GalleryView : CommonMvpView {
     fun setupPreview(pos: Int, meta: Metadata)
     fun displayPreviewTags(resource: ResourceId, tags: Tags)
     fun setProgressVisibility(isVisible: Boolean, withText: String = "")
-    fun displayScore(score: Score)
     fun displaySelected(
         selected: Boolean,
         showAnim: Boolean,
         selectedCount: Int,
         itemCount: Int
     )
-
-    fun setScoringControlsVisibility(isVisible: Boolean)
 
     @StateStrategyType(SkipStrategy::class)
     fun openLink(link: String)

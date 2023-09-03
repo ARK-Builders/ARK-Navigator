@@ -10,10 +10,10 @@ import androidx.core.view.children
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
-import org.orbitmvi.orbit.viewmodel.observe
 import dev.arkbuilders.navigator.R
 import dev.arkbuilders.navigator.databinding.DialogTagsSortBinding
 import dev.arkbuilders.navigator.presentation.App
+import org.orbitmvi.orbit.viewmodel.observe
 import javax.inject.Inject
 
 class TagsSortDialogFragment : DialogFragment(R.layout.dialog_tags_sort) {
@@ -33,7 +33,7 @@ class TagsSortDialogFragment : DialogFragment(R.layout.dialog_tags_sort) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initUI()
-        viewModel.observe(this, ::render, ::handleSideEffect)
+        viewModel.observe(this, state = ::render, sideEffect = ::handleSideEffect)
     }
 
     private fun initUI() = with(binding) {
