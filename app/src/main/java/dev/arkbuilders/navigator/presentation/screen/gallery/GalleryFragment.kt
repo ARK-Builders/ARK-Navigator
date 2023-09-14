@@ -120,6 +120,14 @@ class GalleryFragment :
             layoutSelected.isVisible = selectingEnabled
             fabStartSelect.isVisible = !selectingEnabled
 
+            removeResourceFab.setOnClickListener {
+                Toast.makeText(
+                    requireContext(),
+                    "Press and Hold to Delete",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+
             removeResourceFab.setOnLongClickListener {
                 val time = measureTimeMillis {
                     presenter.onRemoveFabClick()
