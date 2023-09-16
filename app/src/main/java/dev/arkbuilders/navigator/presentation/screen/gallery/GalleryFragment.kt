@@ -123,7 +123,7 @@ class GalleryFragment :
             removeResourceFab.setOnClickListener {
                 Toast.makeText(
                     requireContext(),
-                    "Press and Hold to Delete",
+                    "Press and hold to delete",
                     Toast.LENGTH_SHORT
                 ).show()
             }
