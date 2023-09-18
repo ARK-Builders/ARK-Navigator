@@ -1,13 +1,13 @@
 package dev.arkbuilders.navigator.data
 
+import dev.arkbuilders.arklib.ArkFiles
+import dev.arkbuilders.arklib.arkFolder
+import dev.arkbuilders.navigator.data.preferences.PreferenceKey
+import dev.arkbuilders.navigator.data.preferences.Preferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import space.taran.arkfilepicker.folders.FoldersRepo
-import space.taran.arklib.ArkFiles
-import space.taran.arklib.arkFolder
-import dev.arkbuilders.navigator.data.preferences.PreferenceKey
-import dev.arkbuilders.navigator.data.preferences.Preferences
 import java.nio.file.Path
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
@@ -33,8 +33,8 @@ class StorageBackup @Inject constructor(
     private val today: String = keepDates[0]
 
     private val foldersToIgnore = listOf(
-        ArkFiles.PREVIEWS_FOLDER,
-        ArkFiles.THUMBNAILS_FOLDER
+        ArkFiles.PREVIEWS_STORAGE_FOLDER,
+        ArkFiles.THUMBNAILS_STORAGE_FOLDER
     )
     private val filesToIgnore = listOf<String>()
 
