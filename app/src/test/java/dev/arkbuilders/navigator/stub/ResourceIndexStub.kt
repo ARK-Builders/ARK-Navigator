@@ -2,11 +2,11 @@ package dev.arkbuilders.navigator.stub
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import space.taran.arklib.ResourceId
-import space.taran.arklib.domain.index.Resource
-import space.taran.arklib.domain.index.ResourceIndex
-import space.taran.arklib.domain.index.ResourceUpdates
-import space.taran.arklib.domain.index.RootIndex
+import dev.arkbuilders.arklib.ResourceId
+import dev.arkbuilders.arklib.data.index.Resource
+import dev.arkbuilders.arklib.data.index.ResourceIndex
+import dev.arkbuilders.arklib.data.index.ResourceUpdates
+import dev.arkbuilders.arklib.data.index.RootIndex
 
 import java.nio.file.Path
 import kotlin.io.path.Path
