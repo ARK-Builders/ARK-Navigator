@@ -87,8 +87,8 @@ android {
 
 dependencies {
     //For local developments of arklib-android:
-    //def arklibVersion = '999'
-    def arklibVersion = '0.3.1'
+    def arklibVersion = '999'
+    //def arklibVersion = '0.3.1'
 
     releaseImplementation "dev.arkbuilders:arklib:$arklibVersion"
     debugImplementation "dev.arkbuilders:arklib-debug:$arklibVersion"

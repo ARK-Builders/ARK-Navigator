@@ -1,7 +1,6 @@
 package dev.arkbuilders.navigator.presentation.screen.gallery
 
 import android.util.Log
-import androidx.recyclerview.widget.DiffUtil
 import dev.arkbuilders.arklib.ResourceId
 import dev.arkbuilders.arklib.data.Message
 import dev.arkbuilders.arklib.data.index.Resource
@@ -57,7 +56,7 @@ import kotlin.io.path.notExists
 
 class GalleryPresenter(
     private val rootAndFav: RootAndFav,
-    private val resourcesIds: List<ResourceId>,
+    var resourcesIds: List<ResourceId>,
     private val startAt: Int,
     var selectingEnabled: Boolean,
     private val selectedResources: MutableList<ResourceId>
@@ -91,8 +90,6 @@ class GalleryPresenter(
     }
 
     var galleryItems: MutableList<GalleryItem> = mutableListOf()
-
-    var diffResult: DiffUtil.DiffResult? = null
 
     private var currentPos = startAt
 
@@ -342,21 +339,25 @@ class GalleryPresenter(
             val item = galleryItems[pos]
 
             val path = index.getPath(item.id())
-                ?: let {
-                    Timber.d("Resource ${item.id()} can't be found in the index")
-                    handleGalleryExternalChangesUseCase(this@GalleryPresenter)
-                    return@launch
-                }
+                ?: error("Resource ${item.id()} can't be found in the index")
 
             if (path.notExists()) {
                 Timber.d("Resource ${item.id()} isn't stored by path $path")
-                handleGalleryExternalChangesUseCase(this@GalleryPresenter)
+                handleGalleryExternalChangesUseCase(
+                    path,
+                    item.id(),
+                    this@GalleryPresenter
+                )
                 return@launch
             }
 
             if (path.getLastModifiedTime() != item.resource.modified) {
                 Timber.d("Index is not up-to-date regarding path $path")
-                handleGalleryExternalChangesUseCase(this@GalleryPresenter)
+                handleGalleryExternalChangesUseCase(
+                    path,
+                    item.id(),
+                    this@GalleryPresenter
+                )
                 return@launch
             }
         }

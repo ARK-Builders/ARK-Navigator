@@ -1,20 +1,19 @@
 package dev.arkbuilders.navigator.presentation.screen.gallery
 
-import dev.arkbuilders.navigator.presentation.common.CommonMvpView
-import moxy.viewstate.strategy.AddToEndSingleStrategy
-import moxy.viewstate.strategy.SkipStrategy
-import moxy.viewstate.strategy.StateStrategyType
 import dev.arkbuilders.arklib.ResourceId
 import dev.arkbuilders.arklib.data.index.Resource
 import dev.arkbuilders.arklib.data.meta.Metadata
 import dev.arkbuilders.arklib.user.tags.Tags
+import dev.arkbuilders.navigator.presentation.common.CommonMvpView
+import moxy.viewstate.strategy.AddToEndSingleStrategy
+import moxy.viewstate.strategy.SkipStrategy
+import moxy.viewstate.strategy.StateStrategyType
 import java.nio.file.Path
 
 @StateStrategyType(AddToEndSingleStrategy::class)
 interface GalleryView : CommonMvpView {
     fun init()
     fun updatePagerAdapter()
-    fun updatePagerAdapterWithDiff()
     fun setControlsVisibility(visible: Boolean)
     fun exitFullscreen()
     fun setPreviewsScrollingEnabled(enabled: Boolean)
