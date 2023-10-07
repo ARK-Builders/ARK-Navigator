@@ -1,6 +1,7 @@
 package dev.arkbuilders.navigator.presentation.dialog.rootsscan
 
 import android.util.Log
+import dev.arkbuilders.navigator.data.utils.DevicePathsExtractor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
@@ -9,15 +10,18 @@ import moxy.MvpPresenter
 import moxy.presenterScope
 import space.taran.arklib.arkFolder
 import dev.arkbuilders.navigator.data.utils.LogTags
-import dev.arkbuilders.navigator.data.utils.listDevices
 import java.nio.file.Path
 import java.util.LinkedList
 import java.util.Queue
+import javax.inject.Inject
 import kotlin.io.path.exists
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
 
 class RootsScanDialogPresenter : MvpPresenter<RootsScanView>() {
+
+    @Inject
+    lateinit var devicePathsExtractor: DevicePathsExtractor
 
     private val roots = mutableListOf<Path>()
     private val queue: Queue<Path> = LinkedList()
@@ -37,7 +41,7 @@ class RootsScanDialogPresenter : MvpPresenter<RootsScanView>() {
     }
 
     private fun scan() = presenterScope.launch(Dispatchers.IO) {
-        queue.addAll(listDevices())
+        queue.addAll(devicePathsExtractor.listDevices())
 
         while (queue.isNotEmpty()) {
             ensureActive()
