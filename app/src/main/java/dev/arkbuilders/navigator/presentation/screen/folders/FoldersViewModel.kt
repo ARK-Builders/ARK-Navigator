@@ -10,8 +10,8 @@ import dagger.assisted.AssistedInject
 import dev.arkbuilders.navigator.data.PermissionsHelper
 import dev.arkbuilders.navigator.data.preferences.PreferenceKey
 import dev.arkbuilders.navigator.data.preferences.Preferences
+import dev.arkbuilders.navigator.data.utils.DevicePathsExtractor
 import dev.arkbuilders.navigator.data.utils.LogTags
-import dev.arkbuilders.navigator.data.utils.listDevices
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.syntax.simple.intent
@@ -50,6 +50,7 @@ class FoldersViewModel(
     private val resourcesIndexRepo: ResourceIndexRepo,
     private val preferences: Preferences,
     private val permsHelper: PermissionsHelper,
+    private val devicePathsExtractor: DevicePathsExtractor
 ) : ViewModel(), ContainerHost<FoldersState, FoldersSideEffect> {
 
     override val container: Container<FoldersState, FoldersSideEffect> = container(
@@ -77,7 +78,7 @@ class FoldersViewModel(
                 )
             }
             val folders = foldersRepo.provideWithMissing()
-            devices = listDevices()
+            devices = devicePathsExtractor.listDevices()
 
             postSideEffect(FoldersSideEffect.ToastFailedPaths(folders.failed))
 
@@ -276,6 +277,7 @@ class FoldersViewModelFactory @AssistedInject constructor(
     private val resourcesIndexRepo: ResourceIndexRepo,
     private val preferences: Preferences,
     private val permsHelper: PermissionsHelper,
+    private val devicePathsExtractor: DevicePathsExtractor
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return FoldersViewModel(
@@ -283,7 +285,8 @@ class FoldersViewModelFactory @AssistedInject constructor(
             foldersRepo,
             resourcesIndexRepo,
             preferences,
-            permsHelper
+            permsHelper,
+            devicePathsExtractor
         ) as T
     }
 

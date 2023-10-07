@@ -5,9 +5,9 @@ import java.nio.file.Path
 import javax.inject.Inject
 
 
-class FileUtilsImpl @Inject constructor(
+class DevicePathsExtractorImpl @Inject constructor(
     private val appInstance: App
-) : FileUtils {
+) : DevicePathsExtractor {
 
     override fun listDevices(): List<Path> =
         appInstance
