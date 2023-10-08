@@ -4,7 +4,6 @@ import dev.arkbuilders.navigator.presentation.App
 import java.nio.file.Path
 import javax.inject.Inject
 
-
 class DevicePathsExtractorImpl @Inject constructor(
     private val appInstance: App
 ) : DevicePathsExtractor {
