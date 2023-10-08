@@ -1,6 +1,5 @@
 package dev.arkbuilders.navigator.data.utils
 
-
 import dev.arkbuilders.navigator.presentation.App
 import io.mockk.every
 import io.mockk.mockk
@@ -12,7 +11,6 @@ import org.mockito.junit.MockitoJUnitRunner
 import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
-
 
 @RunWith(MockitoJUnitRunner::class)
 class DevicePathsExtractorTest {

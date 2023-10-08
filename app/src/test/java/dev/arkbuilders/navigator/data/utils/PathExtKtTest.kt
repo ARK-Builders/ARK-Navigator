@@ -2,7 +2,8 @@ package dev.arkbuilders.navigator.data.utils
 
 import io.mockk.every
 import io.mockk.mockk
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.runner.RunWith
@@ -53,7 +54,6 @@ class PathExtKtTest {
         assertThrows(IllegalArgumentException::class.java) {
             findLongestCommonPrefix(emptyList())
         }
-
     }
 
     @Test
@@ -75,7 +75,7 @@ class PathExtKtTest {
 
     @Test
     fun whenFindLongestCommonPrefixAndOnePrefixGroup_thenReturnFirstRelativePairOfPrefixAndPath() {
-        //TODO: Temporary test for unused method. Need to be improved for the method
+        // TODO: Temporary test for unused method. Need to be improved for the method
         assertThrows(IllegalArgumentException::class.java) {
             findLongestCommonPrefix(
                 listOf(
@@ -85,5 +85,4 @@ class PathExtKtTest {
             )
         }
     }
-
 }
