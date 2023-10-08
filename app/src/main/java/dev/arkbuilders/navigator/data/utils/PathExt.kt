@@ -18,13 +18,13 @@ fun Path.findNotExistCopyName(name: Path): Path {
 
     var filesCounter = 1
 
-    fun formatNameWithCounter() =
+    val formatNameWithCounter =
         "${name.nameWithoutExtension}_$filesCounter.${name.extension}"
 
-    var newPath = this.resolve(formatNameWithCounter())
+    var newPath = this.resolve(formatNameWithCounter)
 
     while (newPath.exists()) {
-        newPath = this.resolve(formatNameWithCounter())
+        newPath = this.resolve(formatNameWithCounter)
         filesCounter++
     }
     return newPath
@@ -41,18 +41,18 @@ fun findLongestCommonPrefix(paths: List<Path>): Path {
         return paths.first()
     }
 
-    fun tailrec(_prefix: Path, paths: List<Path>): Pair<Path, List<Path>> {
-        val grouped = paths.groupBy { it.getName(0) }
-        if (grouped.size > 1) {
-            return _prefix to paths
-        }
+    return tailrec(ROOT_PATH, paths).first
+}
 
-        val prefix = _prefix.resolve(grouped.keys.first())
-        val shortened = grouped.values.first()
-            .map { prefix.relativize(it) }
-
-        return tailrec(prefix, shortened)
+private fun tailrec(_prefix: Path, paths: List<Path>): Pair<Path, List<Path>> {
+    val grouped = paths.groupBy { it.getName(0) }
+    if (grouped.size > 1) {
+        return _prefix to paths
     }
 
-    return tailrec(ROOT_PATH, paths).first
+    val prefix = _prefix.resolve(grouped.keys.first())
+    val shortened = grouped.values.first()
+        .map { prefix.relativize(it) }
+
+    return tailrec(prefix, shortened)
 }
