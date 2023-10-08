@@ -1,9 +1,9 @@
 package dev.arkbuilders.navigator.stub
 
-import space.taran.arklib.ResourceId
-import space.taran.arklib.domain.meta.Metadata
-import space.taran.arklib.domain.meta.MetadataUpdate
-import space.taran.arklib.domain.processor.RootProcessor
+import dev.arkbuilders.arklib.ResourceId
+import dev.arkbuilders.arklib.domain.meta.Metadata
+import dev.arkbuilders.arklib.domain.meta.MetadataUpdate
+import dev.arkbuilders.arklib.domain.processor.RootProcessor
 
 class MetadataProcessorStub : RootProcessor<Metadata, MetadataUpdate>() {
     private val metaById: MutableMap<ResourceId, Metadata> = mapOf(

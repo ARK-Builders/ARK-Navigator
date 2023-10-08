@@ -3,9 +3,9 @@ package dev.arkbuilders.navigator.data
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import space.taran.arkfilepicker.folders.FoldersRepo
-import space.taran.arklib.ArkFiles
-import space.taran.arklib.arkFolder
+import dev.arkbuilders.arkfilepicker.folders.FoldersRepo
+import dev.arkbuilders.arklib.ArkFiles
+import dev.arkbuilders.arklib.arkFolder
 import dev.arkbuilders.navigator.data.preferences.PreferenceKey
 import dev.arkbuilders.navigator.data.preferences.Preferences
 import java.nio.file.Path

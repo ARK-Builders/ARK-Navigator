@@ -18,8 +18,8 @@ import dev.arkbuilders.navigator.presentation.navigation.Screens
 import dev.arkbuilders.navigator.presentation.utils.toast
 import kotlinx.coroutines.launch
 import ru.terrakok.cicerone.NavigatorHolder
-import space.taran.arkfilepicker.folders.FoldersRepo
-import space.taran.arkfilepicker.folders.RootAndFav
+import dev.arkbuilders.arkfilepicker.folders.FoldersRepo
+import dev.arkbuilders.arkfilepicker.folders.RootAndFav
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {

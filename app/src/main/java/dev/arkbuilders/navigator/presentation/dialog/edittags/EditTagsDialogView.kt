@@ -4,8 +4,8 @@ import moxy.MvpView
 import moxy.viewstate.strategy.AddToEndSingleStrategy
 import moxy.viewstate.strategy.SkipStrategy
 import moxy.viewstate.strategy.StateStrategyType
-import space.taran.arklib.domain.tags.Tag
-import space.taran.arklib.domain.tags.Tags
+import dev.arkbuilders.arklib.domain.tags.Tag
+import dev.arkbuilders.arklib.domain.tags.Tags
 
 @StateStrategyType(AddToEndSingleStrategy::class)
 interface EditTagsDialogView : MvpView {

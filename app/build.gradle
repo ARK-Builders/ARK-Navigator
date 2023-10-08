@@ -90,10 +90,10 @@ dependencies {
     //def arklibVersion = '999'
     def arklibVersion = '0.2.6'
 
-    releaseImplementation "space.taran:arklib:$arklibVersion"
-    debugImplementation "space.taran:arklib-debug:$arklibVersion"
+    releaseImplementation "dev.arkbuilders:arklib:$arklibVersion"
+    debugImplementation "dev.arkbuilders:arklib-debug:$arklibVersion"
     implementation("dev.arkbuilders:components:0.0.3") {
-        exclude group: "space.taran", module: "arklib"
+        exclude group: "dev.arkbuilders", module: "arklib"
     }
 
     //// For local development, you can inject local AAR dependency:

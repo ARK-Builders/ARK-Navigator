@@ -1,7 +1,7 @@
 package dev.arkbuilders.navigator.data.stats
 
-import space.taran.arklib.domain.stats.StatsEvent
-import space.taran.arklib.domain.tags.Tag
+import dev.arkbuilders.arklib.domain.stats.StatsEvent
+import dev.arkbuilders.arklib.domain.tags.Tag
 
 interface StatsStorage {
     suspend fun init()

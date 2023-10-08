@@ -8,11 +8,11 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import space.taran.arklib.arkFolder
-import space.taran.arklib.arkStats
-import space.taran.arklib.domain.index.RootIndex
-import space.taran.arklib.domain.stats.StatsEvent
-import space.taran.arklib.domain.tags.RootTagsStorage
+import dev.arkbuilders.arklib.arkFolder
+import dev.arkbuilders.arklib.arkStats
+import dev.arkbuilders.arklib.domain.index.RootIndex
+import dev.arkbuilders.arklib.domain.stats.StatsEvent
+import dev.arkbuilders.arklib.domain.tags.RootTagsStorage
 import dev.arkbuilders.navigator.data.preferences.PreferenceKey
 import dev.arkbuilders.navigator.data.preferences.Preferences
 import dev.arkbuilders.navigator.data.stats.category.StatsCategoryStorage

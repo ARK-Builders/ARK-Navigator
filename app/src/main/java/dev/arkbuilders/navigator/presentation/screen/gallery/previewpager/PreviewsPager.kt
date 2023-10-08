@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import dev.arkbuilders.navigator.databinding.ItemImageBinding
 import dev.arkbuilders.navigator.databinding.ItemPreviewPlainTextBinding
 import dev.arkbuilders.navigator.presentation.screen.gallery.GalleryPresenter
-import space.taran.arklib.domain.meta.Kind
+import dev.arkbuilders.arklib.domain.meta.Kind
 
 class PreviewsPager(
     val context: Context,

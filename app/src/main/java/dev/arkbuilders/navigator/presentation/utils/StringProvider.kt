@@ -2,7 +2,7 @@ package dev.arkbuilders.navigator.presentation.utils
 
 import android.content.Context
 import androidx.annotation.StringRes
-import space.taran.arklib.domain.meta.Kind
+import dev.arkbuilders.arklib.domain.meta.Kind
 import dev.arkbuilders.navigator.R
 
 class StringProvider(private val context: Context) {
