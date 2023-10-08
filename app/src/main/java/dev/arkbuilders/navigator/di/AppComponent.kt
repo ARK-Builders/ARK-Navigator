@@ -24,7 +24,7 @@ import dev.arkbuilders.navigator.presentation.screen.resources.ResourcesPresente
 import dev.arkbuilders.navigator.presentation.screen.resources.adapter.FileItemViewHolder
 import dev.arkbuilders.navigator.presentation.screen.resources.adapter.ResourcesGridPresenter
 import dev.arkbuilders.navigator.presentation.screen.settings.SettingsFragment
-import space.taran.arkfilepicker.folders.FoldersRepo
+import dev.arkbuilders.arkfilepicker.folders.FoldersRepo
 import javax.inject.Singleton
 
 @Singleton

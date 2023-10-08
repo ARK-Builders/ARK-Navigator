@@ -41,10 +41,10 @@ import kotlinx.coroutines.launch
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import moxy.presenterScope
-import space.taran.arkfilepicker.folders.RootAndFav
-import space.taran.arkfilepicker.presentation.onArkPathPicked
-import space.taran.arklib.ResourceId
-import space.taran.arklib.domain.tags.Tag
+import dev.arkbuilders.arkfilepicker.folders.RootAndFav
+import dev.arkbuilders.arkfilepicker.presentation.onArkPathPicked
+import dev.arkbuilders.arklib.ResourceId
+import dev.arkbuilders.arklib.user.tags.Tag
 import java.nio.file.Path
 import javax.inject.Inject
 import kotlin.io.path.Path

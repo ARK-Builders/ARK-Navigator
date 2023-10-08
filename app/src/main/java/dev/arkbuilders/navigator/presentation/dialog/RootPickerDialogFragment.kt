@@ -8,9 +8,9 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import dev.arkbuilders.navigator.presentation.App
 import kotlinx.coroutines.launch
-import space.taran.arkfilepicker.ArkFilePickerConfig
-import space.taran.arkfilepicker.folders.FoldersRepo
-import space.taran.arkfilepicker.presentation.filepicker.ArkFilePickerFragment
+import dev.arkbuilders.arkfilepicker.ArkFilePickerConfig
+import dev.arkbuilders.arkfilepicker.folders.FoldersRepo
+import dev.arkbuilders.arkfilepicker.presentation.filepicker.ArkFilePickerFragment
 import java.nio.file.Path
 import javax.inject.Inject
 import kotlin.io.path.Path

@@ -19,17 +19,17 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import moxy.MvpAppCompatDialogFragment
 import moxy.ktx.moxyPresenter
-import space.taran.arkfilepicker.folders.RootAndFav
-import space.taran.arklib.ResourceId
-import space.taran.arklib.domain.index.ResourceIndex
-import space.taran.arklib.domain.tags.TagStorage
+import dev.arkbuilders.arkfilepicker.folders.RootAndFav
+import dev.arkbuilders.arklib.ResourceId
+import dev.arkbuilders.arklib.data.index.ResourceIndex
+import dev.arkbuilders.arklib.user.tags.TagStorage
 import dev.arkbuilders.navigator.R
 import dev.arkbuilders.navigator.databinding.DialogEditTagsBinding
 import dev.arkbuilders.navigator.data.stats.StatsStorage
 import dev.arkbuilders.navigator.presentation.App
 import dev.arkbuilders.navigator.presentation.dialog.tagssort.TagsSortDialogFragment
-import space.taran.arklib.domain.tags.Tag
-import space.taran.arklib.domain.tags.Tags
+import dev.arkbuilders.arklib.user.tags.Tag
+import dev.arkbuilders.arklib.user.tags.Tags
 import dev.arkbuilders.navigator.presentation.utils.placeCursorToEnd
 import dev.arkbuilders.navigator.presentation.utils.showKeyboard
 

@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import dev.arkbuilders.navigator.databinding.ItemImageBinding
 import dev.arkbuilders.navigator.databinding.ItemPreviewPlainTextBinding
 import dev.arkbuilders.navigator.presentation.screen.gallery.GalleryPresenter
-import space.taran.arklib.domain.meta.Kind
+import dev.arkbuilders.arklib.data.meta.Kind
 
 class PreviewsPager(
     val context: Context,
@@ -43,7 +43,7 @@ class PreviewsPager(
         }
 
     override fun getItemViewType(position: Int) =
-        presenter.getKind(position).ordinal
+        presenter.getKind(position)
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onBindViewHolder(

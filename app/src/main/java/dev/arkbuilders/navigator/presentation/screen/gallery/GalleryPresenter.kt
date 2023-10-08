@@ -23,29 +23,28 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import moxy.MvpPresenter
 import moxy.presenterScope
-import space.taran.arkfilepicker.folders.RootAndFav
-import space.taran.arklib.ResourceId
-import space.taran.arklib.domain.Message
-import space.taran.arklib.domain.index.Resource
-import space.taran.arklib.domain.index.ResourceIndex
-import space.taran.arklib.domain.index.ResourceIndexRepo
-import space.taran.arklib.domain.meta.Kind
-import space.taran.arklib.domain.meta.Metadata
-import space.taran.arklib.domain.meta.MetadataProcessor
-import space.taran.arklib.domain.meta.MetadataProcessorRepo
-import space.taran.arklib.domain.preview.PreviewLocator
-import space.taran.arklib.domain.preview.PreviewProcessor
-import space.taran.arklib.domain.preview.PreviewProcessorRepo
-import space.taran.arklib.domain.score.ScoreStorage
-import space.taran.arklib.domain.score.ScoreStorageRepo
-import space.taran.arklib.domain.stats.StatsEvent
-import space.taran.arklib.domain.storage.StorageException
-import space.taran.arklib.domain.tags.Tag
-import space.taran.arklib.domain.tags.TagStorage
-import space.taran.arklib.domain.tags.Tags
-import space.taran.arklib.domain.tags.TagsStorageRepo
-import space.taran.arklib.utils.ImageUtils
-import space.taran.arklib.utils.extension
+import dev.arkbuilders.arkfilepicker.folders.RootAndFav
+import dev.arkbuilders.arklib.ResourceId
+import dev.arkbuilders.arklib.data.Message
+import dev.arkbuilders.arklib.data.index.Resource
+import dev.arkbuilders.arklib.data.index.ResourceIndex
+import dev.arkbuilders.arklib.data.index.ResourceIndexRepo
+import dev.arkbuilders.arklib.data.meta.Metadata
+import dev.arkbuilders.arklib.data.meta.MetadataProcessor
+import dev.arkbuilders.arklib.data.meta.MetadataProcessorRepo
+import dev.arkbuilders.arklib.data.preview.PreviewLocator
+import dev.arkbuilders.arklib.data.preview.PreviewProcessor
+import dev.arkbuilders.arklib.data.preview.PreviewProcessorRepo
+import dev.arkbuilders.arklib.data.stats.StatsEvent
+import dev.arkbuilders.arklib.data.storage.StorageException
+import dev.arkbuilders.arklib.user.score.ScoreStorage
+import dev.arkbuilders.arklib.user.score.ScoreStorageRepo
+import dev.arkbuilders.arklib.user.tags.Tag
+import dev.arkbuilders.arklib.user.tags.TagStorage
+import dev.arkbuilders.arklib.user.tags.Tags
+import dev.arkbuilders.arklib.user.tags.TagsStorageRepo
+import dev.arkbuilders.arklib.utils.ImageUtils
+import dev.arkbuilders.arklib.utils.extension
 import timber.log.Timber
 import java.io.FileReader
 import java.nio.file.Files
@@ -198,8 +197,8 @@ class GalleryPresenter(
         checkResourceChanges(currentPos)
     }
 
-    fun getKind(pos: Int): Kind =
-        galleryItems[pos].metadata.kind
+    fun getKind(pos: Int): Int =
+        galleryItems[pos].metadata.kind.ordinal
 
     fun bindView(view: PreviewImageViewHolder) = presenterScope.launch {
         view.reset()
