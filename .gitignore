@@ -12,3 +12,4 @@
 *.tab
 *.tab.values.at
 misc.xml
+/htmlReport
