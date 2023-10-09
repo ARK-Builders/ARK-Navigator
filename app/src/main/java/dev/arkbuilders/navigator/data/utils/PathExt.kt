@@ -44,15 +44,15 @@ fun findLongestCommonPrefix(paths: List<Path>): Path {
     return tailrec(ROOT_PATH, paths).first
 }
 
-private fun tailrec(_prefix: Path, paths: List<Path>): Pair<Path, List<Path>> {
+private fun tailrec(prefix: Path, paths: List<Path>): Pair<Path, List<Path>> {
     val grouped = paths.groupBy { it.getName(0) }
     if (grouped.size > 1) {
-        return _prefix to paths
+        return prefix to paths
     }
 
-    val prefix = _prefix.resolve(grouped.keys.first())
+    val resolvedPrefix = prefix.resolve(grouped.keys.first())
     val shortened = grouped.values.first()
-        .map { prefix.relativize(it) }
+        .map { resolvedPrefix.relativize(it) }
 
-    return tailrec(prefix, shortened)
+    return tailrec(resolvedPrefix, shortened)
 }
