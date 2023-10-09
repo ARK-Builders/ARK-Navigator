@@ -20,7 +20,7 @@ class PathExtKtTest {
 
     @BeforeEach
     fun setUp() {
-        testee = Paths.get("notAndroid")
+        testee = Paths.get("PATH")
     }
 
     @Test
@@ -28,15 +28,15 @@ class PathExtKtTest {
         val sourcePath = mockk<Path>()
         val destPath = mockk<Path>()
 
-        every { destPath.fileName } returns Paths.get("notAndroid")
-        every { sourcePath.resolve(Paths.get("notAndroid")) } returns Paths.get("notAndroid")
-        every { sourcePath.resolve(Paths.get("notAndroid")).notExists() } returns false
+        every { destPath.fileName } returns Paths.get("PATH")
+        every { sourcePath.resolve(Paths.get("PATH")) } returns Paths.get("PATH")
+        every { sourcePath.resolve(Paths.get("PATH")).notExists() } returns false
 
-        every { sourcePath.resolve("notAndroid_1.") } returns Paths.get("notAndroid_1.")
+        every { sourcePath.resolve("PATH_1.") } returns Paths.get("PATH_1.")
 
         val result = sourcePath.findNotExistCopyName(destPath)
 
-        assertEquals("notAndroid_1.", result.name)
+        assertEquals("PATH_1.", result.name)
     }
 
     @Test
@@ -44,9 +44,9 @@ class PathExtKtTest {
         val mockedPath = mockk<Path>()
         every { mockedPath.notExists() } returns true
 
-        val result = testee.findNotExistCopyName(Paths.get("notAndroid"))
+        val result = testee.findNotExistCopyName(Paths.get("PATH"))
 
-        assertEquals("notAndroid", result.name)
+        assertEquals("PATH", result.name)
     }
 
     @Test
@@ -58,16 +58,16 @@ class PathExtKtTest {
 
     @Test
     fun whenFindLongestCommonPrefixAndOneItem_thenReturnFirstItem() {
-        val result = findLongestCommonPrefix(listOf(Paths.get("item")))
-        assertEquals("item", result.name)
+        val result = findLongestCommonPrefix(listOf(Paths.get("PATH")))
+        assertEquals("PATH", result.name)
     }
 
     @Test
     fun whenFindLongestCommonPrefixAndMoreThanOnePrefixGroup_thenReturnFirstPairOfPrefixAndPath() {
         val result = findLongestCommonPrefix(
             listOf(
-                Paths.get("item"),
-                Paths.get("item2")
+                Paths.get("PATH"),
+                Paths.get("PATH2")
             )
         )
         assertEquals("/", result.toString())
@@ -79,8 +79,8 @@ class PathExtKtTest {
         assertThrows(IllegalArgumentException::class.java) {
             findLongestCommonPrefix(
                 listOf(
-                    Paths.get("/item/"),
-                    Paths.get("/item"),
+                    Paths.get("/PATH/"),
+                    Paths.get("/PATH"),
                 )
             )
         }

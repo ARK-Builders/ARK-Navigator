@@ -38,7 +38,7 @@ class DevicePathsExtractorTest {
         every { mockedPath.toRealPath() } returns mockedPath
 
         val directoryIterator: MutableIterator<Path> = arrayListOf(
-            Paths.get("notAndroid")
+            Paths.get("PATH")
 
         ).iterator()
         every { mockedPath.iterator() } returns directoryIterator
