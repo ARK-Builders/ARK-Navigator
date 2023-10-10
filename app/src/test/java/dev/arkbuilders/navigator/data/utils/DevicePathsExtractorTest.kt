@@ -45,6 +45,6 @@ class DevicePathsExtractorTest {
 
         testee.listDevices()
 
-        verify { mockedApplication.getExternalFilesDirs(null).toList() }
+        verify { mockedApplication.getExternalFilesDirs(null) }
     }
 }
