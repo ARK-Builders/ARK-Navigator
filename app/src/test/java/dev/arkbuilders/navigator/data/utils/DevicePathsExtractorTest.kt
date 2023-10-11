@@ -4,6 +4,7 @@ import dev.arkbuilders.navigator.presentation.App
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.runner.RunWith
@@ -11,6 +12,7 @@ import org.mockito.junit.MockitoJUnitRunner
 import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
+import kotlin.io.path.name
 
 @RunWith(MockitoJUnitRunner::class)
 class DevicePathsExtractorTest {
@@ -39,12 +41,14 @@ class DevicePathsExtractorTest {
 
         val directoryIterator: MutableIterator<Path> = arrayListOf(
             Paths.get("PATH")
-
         ).iterator()
         every { mockedPath.iterator() } returns directoryIterator
 
-        testee.listDevices()
+        val result = testee.listDevices()
 
         verify { mockedApplication.getExternalFilesDirs(null) }
+        assertEquals(1, result.size)
+        assertEquals("PATH", result[0].name)
     }
+
 }
