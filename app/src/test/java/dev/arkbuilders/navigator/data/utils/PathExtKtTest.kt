@@ -25,15 +25,10 @@ class PathExtKtTest {
 
     @Test
     fun givenPath_whenFindNotExistCopyNameFalse_thenReturnNewPath() {
-        val sourcePath = mockk<Path>()
+        val sourcePath = kotlin.io.path.createTempFile("PATH")
         val destPath = mockk<Path>()
 
         every { destPath.fileName } returns Paths.get("PATH")
-        every { sourcePath.resolve(Paths.get("PATH")) } returns Paths.get("PATH")
-        every { sourcePath.resolve(Paths.get("PATH")).notExists() } returns false
-
-        every { sourcePath.resolve("PATH_1.") } returns Paths.get("PATH_1.")
-
         val result = sourcePath.findNotExistCopyName(destPath)
 
         assertEquals("PATH_1.", result.name)
