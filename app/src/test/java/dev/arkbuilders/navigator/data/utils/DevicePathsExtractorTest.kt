@@ -50,5 +50,4 @@ class DevicePathsExtractorTest {
         assertEquals(1, result.size)
         assertEquals("PATH", result[0].name)
     }
-
 }
