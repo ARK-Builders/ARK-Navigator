@@ -70,7 +70,6 @@ class PathExtKtTest {
 
     @Test
     fun whenFindLongestCommonPrefixAndOnePrefixGroup_thenReturnFirstRelativePairOfPrefixAndPath() {
-        // TODO: Temporary test for unused method. Need to be improved for the method
         assertThrows(IllegalArgumentException::class.java) {
             findLongestCommonPrefix(
                 listOf(
