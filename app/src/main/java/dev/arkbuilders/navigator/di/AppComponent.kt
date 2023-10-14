@@ -12,6 +12,7 @@ import dev.arkbuilders.navigator.presentation.App
 import dev.arkbuilders.navigator.presentation.dialog.ExplainPermsDialog
 import dev.arkbuilders.navigator.presentation.dialog.RootPickerDialogFragment
 import dev.arkbuilders.navigator.presentation.dialog.edittags.EditTagsDialogPresenter
+import dev.arkbuilders.navigator.presentation.dialog.rootsscan.RootsScanDialogPresenter
 import dev.arkbuilders.navigator.presentation.dialog.sort.SortDialogPresenter
 import dev.arkbuilders.navigator.presentation.dialog.tagssort.TagsSortDialogFragment
 import dev.arkbuilders.navigator.presentation.screen.folders.FoldersFragment
@@ -55,6 +56,7 @@ interface AppComponent {
     fun inject(tagsSortDialogFragment: TagsSortDialogFragment)
     fun inject(rootPickerDialogFragment: RootPickerDialogFragment)
     fun inject(explainPermsDialog: ExplainPermsDialog)
+    fun inject(rootsScanDialogPresenter: RootsScanDialogPresenter)
 
     @Component.Factory
     interface Factory {

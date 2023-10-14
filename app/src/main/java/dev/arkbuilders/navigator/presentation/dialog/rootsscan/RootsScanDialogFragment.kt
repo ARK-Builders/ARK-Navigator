@@ -9,13 +9,16 @@ import moxy.MvpBottomSheetDialogFragment
 import moxy.ktx.moxyPresenter
 import dev.arkbuilders.navigator.R
 import dev.arkbuilders.navigator.databinding.DialogRootsScanBinding
+import dev.arkbuilders.navigator.presentation.App
 import dev.arkbuilders.navigator.presentation.utils.toast
 import java.nio.file.Path
 
 class RootsScanDialogFragment : MvpBottomSheetDialogFragment(), RootsScanView {
     private lateinit var binding: DialogRootsScanBinding
     private val presenter by moxyPresenter {
-        RootsScanDialogPresenter()
+        RootsScanDialogPresenter().apply {
+            App.instance.appComponent.inject(this)
+        }
     }
 
     override fun onCreateView(
