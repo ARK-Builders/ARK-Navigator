@@ -1,7 +1,7 @@
 package dev.arkbuilders.navigator.stub
 
-import space.taran.arklib.ResourceId
-import space.taran.arklib.domain.index.Resource
+import dev.arkbuilders.arklib.ResourceId
+import dev.arkbuilders.arklib.data.index.Resource
 import java.nio.file.attribute.FileTime
 import java.util.Date
 

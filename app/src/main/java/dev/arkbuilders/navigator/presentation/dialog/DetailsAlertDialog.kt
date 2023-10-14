@@ -7,11 +7,12 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.InsetDrawable
 import android.os.Bundle
 import android.view.WindowManager
+import dev.arkbuilders.arklib.data.index.Resource
 import org.apache.commons.io.FileUtils
 import dev.arkbuilders.navigator.R
 import dev.arkbuilders.navigator.databinding.DialogResourceInfoBinding
-import space.taran.arklib.domain.index.Resource
-import space.taran.arklib.domain.meta.Metadata
+import dev.arkbuilders.arklib.data.meta.Metadata
+
 import dev.arkbuilders.navigator.presentation.utils.extra.ExtraLoader
 import java.nio.file.Path
 import kotlin.io.path.absolutePathString

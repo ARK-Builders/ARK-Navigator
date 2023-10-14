@@ -1,17 +1,17 @@
 package dev.arkbuilders.navigator.stub
 
-import space.taran.arklib.ResourceId
-import space.taran.arklib.domain.meta.Metadata
-import space.taran.arklib.domain.meta.MetadataUpdate
-import space.taran.arklib.domain.processor.RootProcessor
+import dev.arkbuilders.arklib.ResourceId
+import dev.arkbuilders.arklib.data.meta.MetadataUpdate
+import dev.arkbuilders.arklib.data.processor.RootProcessor
+import dev.arkbuilders.arklib.data.meta.Metadata
 
 class MetadataProcessorStub : RootProcessor<Metadata, MetadataUpdate>() {
-    private val metaById: MutableMap<ResourceId, Metadata> = mapOf(
+    private val metaById: MutableMap<ResourceId, Metadata> = mutableMapOf(
         R1 to Metadata.PlainText(),
         R2 to Metadata.Image(),
         R3 to Metadata.Video(1, 1, 10),
         R4 to Metadata.Archive()
-    ).toMutableMap()
+    )
 
     override suspend fun init() {}
 

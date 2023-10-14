@@ -1,11 +1,11 @@
 package dev.arkbuilders.navigator.presentation.dialog.edittags
 
+import dev.arkbuilders.arklib.user.tags.Tag
+import dev.arkbuilders.arklib.user.tags.Tags
 import moxy.MvpView
 import moxy.viewstate.strategy.AddToEndSingleStrategy
 import moxy.viewstate.strategy.SkipStrategy
 import moxy.viewstate.strategy.StateStrategyType
-import space.taran.arklib.domain.tags.Tag
-import space.taran.arklib.domain.tags.Tags
 
 @StateStrategyType(AddToEndSingleStrategy::class)
 interface EditTagsDialogView : MvpView {

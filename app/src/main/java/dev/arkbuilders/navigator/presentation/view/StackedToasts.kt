@@ -9,6 +9,10 @@ import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ItemAdapter
 import com.mikepenz.fastadapter.binding.AbstractBindingItem
 import com.mikepenz.fastadapter.diff.FastAdapterDiffUtil
+import dev.arkbuilders.arklib.utils.tickerFlow
+import dev.arkbuilders.arklib.utils.tryUnlock
+import dev.arkbuilders.navigator.R
+import dev.arkbuilders.navigator.databinding.ItemToastBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.currentCoroutineContext
@@ -19,10 +23,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import dev.arkbuilders.navigator.R
-import dev.arkbuilders.navigator.databinding.ItemToastBinding
-import space.taran.arklib.utils.tickerFlow
-import space.taran.arklib.utils.tryUnlock
 import java.nio.file.Path
 import kotlin.io.path.absolutePathString
 

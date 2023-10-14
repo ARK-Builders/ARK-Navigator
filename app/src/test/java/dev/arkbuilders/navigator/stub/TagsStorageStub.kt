@@ -1,8 +1,8 @@
 package dev.arkbuilders.navigator.stub
 
-import space.taran.arklib.ResourceId
-import space.taran.arklib.domain.tags.TagStorage
-import space.taran.arklib.domain.tags.Tags
+import dev.arkbuilders.arklib.ResourceId
+import dev.arkbuilders.arklib.user.tags.TagStorage
+import dev.arkbuilders.arklib.user.tags.Tags
 
 class TagsStorageStub : TagStorage {
     private val tagsById = TestData.tagsById().toMutableMap()

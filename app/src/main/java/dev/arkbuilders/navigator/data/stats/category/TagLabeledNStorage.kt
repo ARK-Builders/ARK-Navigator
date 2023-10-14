@@ -1,14 +1,14 @@
 package dev.arkbuilders.navigator.data.stats.category
 
+import dev.arkbuilders.arklib.data.index.ResourceIndex
+import dev.arkbuilders.arklib.data.stats.StatsEvent
+import dev.arkbuilders.arklib.user.tags.Tag
+import dev.arkbuilders.arklib.user.tags.TagStorage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
-import space.taran.arklib.domain.index.ResourceIndex
-import space.taran.arklib.domain.stats.StatsEvent
-import space.taran.arklib.domain.tags.TagStorage
-import space.taran.arklib.domain.tags.Tag
 import timber.log.Timber
 import java.nio.file.Path
 import kotlin.io.path.exists

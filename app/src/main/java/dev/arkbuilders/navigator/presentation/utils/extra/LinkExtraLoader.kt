@@ -2,8 +2,8 @@ package dev.arkbuilders.navigator.presentation.utils.extra
 
 import android.widget.TextView
 import dev.arkbuilders.navigator.R
-import space.taran.arklib.domain.meta.Metadata
 import dev.arkbuilders.navigator.presentation.utils.textOrGone
+import dev.arkbuilders.arklib.data.meta.Metadata
 
 object LinkExtraLoader {
     fun load(link: Metadata.Link, titleTV: TextView, verbose: Boolean) {

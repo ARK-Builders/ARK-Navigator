@@ -1,6 +1,13 @@
 package dev.arkbuilders.navigator.presentation.screen.resources.adapter
 
 import android.util.Log
+import dev.arkbuilders.arklib.ResourceId
+import dev.arkbuilders.arklib.data.index.Resource
+import dev.arkbuilders.arklib.data.index.ResourceIndex
+import dev.arkbuilders.arklib.data.meta.MetadataProcessor
+import dev.arkbuilders.arklib.data.preview.PreviewProcessor
+import dev.arkbuilders.arklib.user.score.ScoreStorage
+import dev.arkbuilders.arklib.user.tags.TagStorage
 import dev.arkbuilders.navigator.data.preferences.PreferenceKey
 import dev.arkbuilders.navigator.data.preferences.Preferences
 import dev.arkbuilders.navigator.data.utils.LogTags.RESOURCES_SCREEN
@@ -18,13 +25,6 @@ import kotlinx.coroutines.plus
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import space.taran.arkfilepicker.folders.RootAndFav
-import space.taran.arklib.ResourceId
-import space.taran.arklib.domain.index.Resource
-import space.taran.arklib.domain.index.ResourceIndex
-import space.taran.arklib.domain.meta.MetadataProcessor
-import space.taran.arklib.domain.preview.PreviewProcessor
-import space.taran.arklib.domain.score.ScoreStorage
-import space.taran.arklib.domain.tags.TagStorage
 import java.nio.file.Files
 import javax.inject.Inject
 import kotlin.io.path.notExists

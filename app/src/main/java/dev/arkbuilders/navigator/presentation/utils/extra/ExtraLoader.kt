@@ -1,9 +1,8 @@
 package dev.arkbuilders.navigator.presentation.utils.extra
 
 import android.widget.TextView
-import space.taran.arklib.domain.meta.Metadata
 import dev.arkbuilders.navigator.presentation.utils.makeGone
-
+import dev.arkbuilders.arklib.data.meta.Metadata
 object ExtraLoader {
     fun load(meta: Metadata, extraTVs: List<TextView>, verbose: Boolean) {
         extraTVs.forEach { it.makeGone() }

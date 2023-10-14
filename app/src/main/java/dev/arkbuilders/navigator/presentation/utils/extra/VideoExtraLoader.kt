@@ -2,7 +2,7 @@ package dev.arkbuilders.navigator.presentation.utils.extra
 
 import android.widget.TextView
 import dev.arkbuilders.navigator.R
-import space.taran.arklib.domain.meta.Metadata
+import dev.arkbuilders.arklib.data.meta.Metadata
 import dev.arkbuilders.navigator.presentation.utils.textOrGone
 
 object VideoExtraLoader {
@@ -28,6 +28,7 @@ object VideoExtraLoader {
             durationTV.textOrGone(durationTextCode(duration))
         }
     }
+
     private fun durationTextCode(millis: Long): String {
         // use `Duration.ofMillis(timeMillis).secondsPart()` in API 31
 

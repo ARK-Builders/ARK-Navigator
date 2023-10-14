@@ -1,11 +1,11 @@
 package dev.arkbuilders.navigator.data.stats
 
+import dev.arkbuilders.arklib.data.stats.StatsEvent
+import dev.arkbuilders.arklib.user.tags.Tag
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import space.taran.arklib.domain.stats.StatsEvent
-import space.taran.arklib.domain.tags.Tag
 
 class AggregatedStatsStorage(val shards: List<StatsStorage>) : StatsStorage {
 

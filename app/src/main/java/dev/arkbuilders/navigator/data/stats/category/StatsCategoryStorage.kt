@@ -1,14 +1,14 @@
 package dev.arkbuilders.navigator.data.stats.category
 
+import dev.arkbuilders.arklib.arkFolder
+import dev.arkbuilders.arklib.arkStats
+import dev.arkbuilders.arklib.data.stats.StatsEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import space.taran.arklib.arkFolder
-import space.taran.arklib.arkStats
-import space.taran.arklib.domain.stats.StatsEvent
 import timber.log.Timber
 import java.nio.file.Path
 
