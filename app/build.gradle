@@ -23,6 +23,17 @@ android {
         freeCompilerArgs=['-Xjvm-default=all']
     }
 
+    testOptions {
+        unitTests.all {
+            testLogging {
+                outputs.upToDateWhen { false }
+                events "passed", "failed", "skipped", "standardError"
+                showCauses true
+                showExceptions true
+            }
+        }
+    }
+
     defaultConfig {
         def login = System.getenv("ACRA_LOGIN") ?: ""
         def password = System.getenv("ACRA_PASS") ?: ""
