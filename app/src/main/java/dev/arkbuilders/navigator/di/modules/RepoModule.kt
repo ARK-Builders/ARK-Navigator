@@ -6,7 +6,7 @@ import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
-import space.taran.arkfilepicker.folders.FoldersRepo
+import dev.arkbuilders.arkfilepicker.folders.FoldersRepo
 import dev.arkbuilders.arklib.data.Message
 import dev.arkbuilders.arklib.data.index.ResourceIndexRepo
 import dev.arkbuilders.arklib.data.meta.MetadataProcessorRepo

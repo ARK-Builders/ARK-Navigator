@@ -7,7 +7,7 @@ import dev.arkbuilders.navigator.data.preferences.Preferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import space.taran.arkfilepicker.folders.FoldersRepo
+import dev.arkbuilders.arkfilepicker.folders.FoldersRepo
 import java.nio.file.Path
 import java.time.OffsetDateTime
 import java.time.ZoneOffset

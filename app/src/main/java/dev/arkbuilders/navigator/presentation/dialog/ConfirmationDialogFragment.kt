@@ -10,9 +10,9 @@ import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.setFragmentResult
-import space.taran.arkfilepicker.folders.FoldersRepo.Companion.DELETE_FOLDER_KEY
-import space.taran.arkfilepicker.folders.FoldersRepo.Companion.FORGET_FAVORITE_KEY
-import space.taran.arkfilepicker.folders.FoldersRepo.Companion.FORGET_ROOT_KEY
+import dev.arkbuilders.arkfilepicker.folders.FoldersRepo.Companion.DELETE_FOLDER_KEY
+import dev.arkbuilders.arkfilepicker.folders.FoldersRepo.Companion.FORGET_FAVORITE_KEY
+import dev.arkbuilders.arkfilepicker.folders.FoldersRepo.Companion.FORGET_ROOT_KEY
 import dev.arkbuilders.navigator.databinding.DialogInfoBinding
 import dev.arkbuilders.navigator.presentation.utils.textOrGone
 

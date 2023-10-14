@@ -21,6 +21,13 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import androidx.viewpager2.widget.ViewPager2
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.chip.Chip
+import dev.arkbuilders.arkfilepicker.folders.RootAndFav
+import dev.arkbuilders.arklib.ResourceId
+import dev.arkbuilders.arklib.data.index.Resource
+import dev.arkbuilders.arklib.data.meta.Metadata
+import dev.arkbuilders.arklib.user.tags.Tag
+import dev.arkbuilders.arklib.user.tags.Tags
+import dev.arkbuilders.arklib.utils.extension
 import dev.arkbuilders.components.databinding.ScoreWidgetBinding
 import dev.arkbuilders.components.scorewidget.ScoreWidget
 import dev.arkbuilders.navigator.BuildConfig
@@ -45,13 +52,6 @@ import dev.arkbuilders.navigator.presentation.view.StackedToasts
 import kotlinx.coroutines.launch
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
-import space.taran.arkfilepicker.folders.RootAndFav
-import dev.arkbuilders.arklib.ResourceId
-import dev.arkbuilders.arklib.data.index.Resource
-import dev.arkbuilders.arklib.data.meta.Metadata
-import dev.arkbuilders.arklib.user.tags.Tag
-import dev.arkbuilders.arklib.user.tags.Tags
-import dev.arkbuilders.arklib.utils.extension
 import timber.log.Timber
 import java.nio.file.Path
 import kotlin.system.measureTimeMillis
