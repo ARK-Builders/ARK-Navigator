@@ -2,6 +2,7 @@ package dev.arkbuilders.navigator.presentation.screen.gallery
 
 import android.util.Log
 import androidx.recyclerview.widget.DiffUtil
+import dev.arkbuilders.arkfilepicker.folders.RootAndFav
 import dev.arkbuilders.arklib.ResourceId
 import dev.arkbuilders.arklib.data.Message
 import dev.arkbuilders.arklib.data.index.Resource
@@ -45,7 +46,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import moxy.MvpPresenter
 import moxy.presenterScope
-import space.taran.arkfilepicker.folders.RootAndFav
 import timber.log.Timber
 import java.io.FileReader
 import java.nio.file.Files

@@ -1,6 +1,7 @@
 package dev.arkbuilders.navigator.presentation.screen.resources.adapter
 
 import android.util.Log
+import dev.arkbuilders.arkfilepicker.folders.RootAndFav
 import dev.arkbuilders.arklib.ResourceId
 import dev.arkbuilders.arklib.data.index.Resource
 import dev.arkbuilders.arklib.data.index.ResourceIndex
@@ -24,7 +25,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import space.taran.arkfilepicker.folders.RootAndFav
 import java.nio.file.Files
 import javax.inject.Inject
 import kotlin.io.path.notExists

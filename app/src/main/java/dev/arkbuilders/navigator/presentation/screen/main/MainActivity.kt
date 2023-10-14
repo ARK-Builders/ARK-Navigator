@@ -7,6 +7,8 @@ import androidx.core.view.forEach
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
+import dev.arkbuilders.arkfilepicker.folders.FoldersRepo
+import dev.arkbuilders.arkfilepicker.folders.RootAndFav
 import dev.arkbuilders.navigator.R
 import dev.arkbuilders.navigator.data.PermissionsHelper
 import dev.arkbuilders.navigator.data.utils.LogTags.MAIN
@@ -18,8 +20,6 @@ import dev.arkbuilders.navigator.presentation.navigation.Screens
 import dev.arkbuilders.navigator.presentation.utils.toast
 import kotlinx.coroutines.launch
 import ru.terrakok.cicerone.NavigatorHolder
-import space.taran.arkfilepicker.folders.FoldersRepo
-import space.taran.arkfilepicker.folders.RootAndFav
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {

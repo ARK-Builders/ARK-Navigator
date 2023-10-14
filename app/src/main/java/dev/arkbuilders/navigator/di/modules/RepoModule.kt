@@ -3,6 +3,7 @@ package dev.arkbuilders.navigator.di.modules
 import android.util.Log
 import dagger.Module
 import dagger.Provides
+import dev.arkbuilders.arkfilepicker.folders.FoldersRepo
 import dev.arkbuilders.arklib.data.Message
 import dev.arkbuilders.arklib.data.index.ResourceIndexRepo
 import dev.arkbuilders.arklib.data.meta.MetadataProcessorRepo
@@ -13,7 +14,6 @@ import dev.arkbuilders.arklib.user.tags.TagsStorageRepo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
-import space.taran.arkfilepicker.folders.FoldersRepo
 import dev.arkbuilders.navigator.data.preferences.Preferences
 import dev.arkbuilders.navigator.data.stats.StatsStorageRepo
 import dev.arkbuilders.navigator.data.utils.LogTags.MAIN

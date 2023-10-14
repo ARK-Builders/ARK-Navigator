@@ -3,6 +3,7 @@ package dev.arkbuilders.navigator.di
 import android.content.Context
 import dagger.BindsInstance
 import dagger.Component
+import dev.arkbuilders.arkfilepicker.folders.FoldersRepo
 import dev.arkbuilders.navigator.data.StorageBackup
 import dev.arkbuilders.navigator.data.preferences.Preferences
 import dev.arkbuilders.navigator.di.modules.AppModule
@@ -25,7 +26,6 @@ import dev.arkbuilders.navigator.presentation.screen.resources.ResourcesPresente
 import dev.arkbuilders.navigator.presentation.screen.resources.adapter.FileItemViewHolder
 import dev.arkbuilders.navigator.presentation.screen.resources.adapter.ResourcesGridPresenter
 import dev.arkbuilders.navigator.presentation.screen.settings.SettingsFragment
-import space.taran.arkfilepicker.folders.FoldersRepo
 import javax.inject.Singleton
 
 @Singleton

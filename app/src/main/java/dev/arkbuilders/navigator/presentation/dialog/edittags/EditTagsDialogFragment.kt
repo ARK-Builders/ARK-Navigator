@@ -15,6 +15,7 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.chip.Chip
+import dev.arkbuilders.arkfilepicker.folders.RootAndFav
 import dev.arkbuilders.arklib.ResourceId
 import dev.arkbuilders.arklib.data.index.ResourceIndex
 import dev.arkbuilders.arklib.user.tags.Tag
@@ -31,7 +32,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import moxy.MvpAppCompatDialogFragment
 import moxy.ktx.moxyPresenter
-import space.taran.arkfilepicker.folders.RootAndFav
 
 class EditTagsDialogFragment(
     private val index: ResourceIndex? = null,

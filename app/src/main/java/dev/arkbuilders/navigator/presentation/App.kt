@@ -2,6 +2,7 @@ package dev.arkbuilders.navigator.presentation
 
 import android.app.Application
 import android.os.StrictMode
+import dev.arkbuilders.arkfilepicker.folders.FoldersRepo
 import dev.arkbuilders.arklib.initArkLib
 import dev.arkbuilders.arklib.initRustLogger
 import dev.arkbuilders.navigator.BuildConfig
@@ -17,7 +18,6 @@ import org.acra.config.httpSender
 import org.acra.data.StringFormat
 import org.acra.ktx.initAcra
 import org.acra.sender.HttpSender
-import space.taran.arkfilepicker.folders.FoldersRepo
 import timber.log.Timber
 
 class App : Application() {
