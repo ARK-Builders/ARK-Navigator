@@ -6,7 +6,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import dev.arkbuilders.navigator.databinding.ItemFileGridBinding
 import dev.arkbuilders.navigator.presentation.utils.extra.ExtraLoader
-import dev.arkbuilders.arklib.domain.score.Score
+import dev.arkbuilders.arklib.user.score.Score
 import dev.arkbuilders.navigator.presentation.utils.dpToPx
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -15,9 +15,9 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import dev.arkbuilders.arklib.ResourceId
-import dev.arkbuilders.arklib.domain.meta.Metadata
-import dev.arkbuilders.arklib.domain.preview.PreviewLocator
-import dev.arkbuilders.arklib.domain.preview.PreviewStatus
+import dev.arkbuilders.arklib.data.meta.Metadata
+import dev.arkbuilders.arklib.data.preview.PreviewLocator
+import dev.arkbuilders.arklib.data.preview.PreviewStatus
 import dev.arkbuilders.arklib.utils.ImageUtils
 import dev.arkbuilders.arklib.utils.extension
 import timber.log.Timber

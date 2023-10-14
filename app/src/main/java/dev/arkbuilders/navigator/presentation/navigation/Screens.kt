@@ -7,7 +7,7 @@ import dev.arkbuilders.navigator.presentation.screen.folders.FoldersFragment
 import dev.arkbuilders.navigator.presentation.screen.gallery.GalleryFragment
 import dev.arkbuilders.navigator.presentation.screen.resources.ResourcesFragment
 import dev.arkbuilders.navigator.presentation.screen.settings.SettingsFragment
-import dev.arkbuilders.arklib.domain.tags.Tag
+import dev.arkbuilders.arklib.user.tags.Tag
 
 class Screens {
     class FoldersScreen : SupportAppScreen() {

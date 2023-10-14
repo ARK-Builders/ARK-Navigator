@@ -1,11 +1,11 @@
 package dev.arkbuilders.navigator.data.stats
 
 import kotlinx.coroutines.flow.SharedFlow
-import dev.arkbuilders.arklib.domain.index.ResourceIndex
-import dev.arkbuilders.arklib.domain.index.RootIndex
-import dev.arkbuilders.arklib.domain.stats.StatsEvent
-import dev.arkbuilders.arklib.domain.tags.RootTagsStorage
-import dev.arkbuilders.arklib.domain.tags.TagsStorageRepo
+import dev.arkbuilders.arklib.data.index.ResourceIndex
+import dev.arkbuilders.arklib.data.index.RootIndex
+import dev.arkbuilders.arklib.data.stats.StatsEvent
+import dev.arkbuilders.arklib.user.tags.RootTagsStorage
+import dev.arkbuilders.arklib.user.tags.TagsStorageRepo
 import dev.arkbuilders.navigator.data.preferences.Preferences
 import java.nio.file.Path
 

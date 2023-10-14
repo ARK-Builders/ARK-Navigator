@@ -16,13 +16,13 @@ import moxy.MvpPresenter
 import moxy.presenterScope
 import dev.arkbuilders.arkfilepicker.folders.RootAndFav
 import dev.arkbuilders.arklib.ResourceId
-import dev.arkbuilders.arklib.domain.index.ResourceIndex
-import dev.arkbuilders.arklib.domain.index.ResourceIndexRepo
-import dev.arkbuilders.arklib.domain.stats.StatsEvent
-import dev.arkbuilders.arklib.domain.tags.Tag
-import dev.arkbuilders.arklib.domain.tags.TagStorage
-import dev.arkbuilders.arklib.domain.tags.TagUtils
-import dev.arkbuilders.arklib.domain.tags.TagsStorageRepo
+import dev.arkbuilders.arklib.data.index.ResourceIndex
+import dev.arkbuilders.arklib.data.index.ResourceIndexRepo
+import dev.arkbuilders.arklib.data.stats.StatsEvent
+import dev.arkbuilders.arklib.user.tags.Tag
+import dev.arkbuilders.arklib.user.tags.TagStorage
+import dev.arkbuilders.arklib.user.tags.TagUtils
+import dev.arkbuilders.arklib.user.tags.TagsStorageRepo
 import javax.inject.Inject
 
 sealed class EditTagsAction {

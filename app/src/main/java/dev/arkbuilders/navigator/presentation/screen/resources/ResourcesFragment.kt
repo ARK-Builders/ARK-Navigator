@@ -44,7 +44,7 @@ import moxy.presenterScope
 import dev.arkbuilders.arkfilepicker.folders.RootAndFav
 import dev.arkbuilders.arkfilepicker.presentation.onArkPathPicked
 import dev.arkbuilders.arklib.ResourceId
-import dev.arkbuilders.arklib.domain.tags.Tag
+import dev.arkbuilders.arklib.user.tags.Tag
 import java.nio.file.Path
 import javax.inject.Inject
 import kotlin.io.path.Path

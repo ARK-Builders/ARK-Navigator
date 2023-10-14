@@ -5,10 +5,10 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
-import dev.arkbuilders.arklib.domain.index.ResourceIndex
-import dev.arkbuilders.arklib.domain.stats.StatsEvent
-import dev.arkbuilders.arklib.domain.tags.TagStorage
-import dev.arkbuilders.arklib.domain.tags.Tag
+import dev.arkbuilders.arklib.data.index.ResourceIndex
+import dev.arkbuilders.arklib.data.stats.StatsEvent
+import dev.arkbuilders.arklib.user.tags.TagStorage
+import dev.arkbuilders.arklib.user.tags.Tag
 import timber.log.Timber
 import java.nio.file.Path
 import kotlin.io.path.exists

@@ -88,11 +88,11 @@ android {
 dependencies {
     //For local developments of arklib-android:
     //def arklibVersion = '999'
-    def arklibVersion = '0.3.2'
+    def arklibVersion = '0.3.3'
 
     releaseImplementation "dev.arkbuilders:arklib:$arklibVersion"
     debugImplementation "dev.arkbuilders:arklib-debug:$arklibVersion"
-    implementation("dev.arkbuilders:components:0.0.3") {
+    implementation("dev.arkbuilders:components:0.0.6") {
         exclude group: "dev.arkbuilders", module: "arklib"
     }
 
@@ -120,6 +120,8 @@ dependencies {
 
     implementation 'com.davemorrissey.labs:subsampling-scale-image-view-androidx:3.10.0'
     implementation 'com.github.MikeOrtiz:TouchImageView:3.1.1'
+
+    implementation 'dev.arkbuilders:arkfilepicker:0.1.1'
 
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2"
 

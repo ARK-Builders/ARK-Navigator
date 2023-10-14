@@ -47,10 +47,10 @@ import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import dev.arkbuilders.arkfilepicker.folders.RootAndFav
 import dev.arkbuilders.arklib.ResourceId
-import dev.arkbuilders.arklib.domain.index.Resource
-import dev.arkbuilders.arklib.domain.meta.Metadata
-import dev.arkbuilders.arklib.domain.tags.Tag
-import dev.arkbuilders.arklib.domain.tags.Tags
+import dev.arkbuilders.arklib.data.index.Resource
+import dev.arkbuilders.arklib.data.meta.Metadata
+import dev.arkbuilders.arklib.user.tags.Tag
+import dev.arkbuilders.arklib.user.tags.Tags
 import dev.arkbuilders.arklib.utils.extension
 import timber.log.Timber
 import java.nio.file.Path

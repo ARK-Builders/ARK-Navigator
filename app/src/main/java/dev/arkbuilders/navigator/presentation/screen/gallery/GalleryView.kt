@@ -5,9 +5,9 @@ import moxy.viewstate.strategy.AddToEndSingleStrategy
 import moxy.viewstate.strategy.SkipStrategy
 import moxy.viewstate.strategy.StateStrategyType
 import dev.arkbuilders.arklib.ResourceId
-import dev.arkbuilders.arklib.domain.index.Resource
-import dev.arkbuilders.arklib.domain.meta.Metadata
-import dev.arkbuilders.arklib.domain.tags.Tags
+import dev.arkbuilders.arklib.data.index.Resource
+import dev.arkbuilders.arklib.data.meta.Metadata
+import dev.arkbuilders.arklib.user.tags.Tags
 import java.nio.file.Path
 
 @StateStrategyType(AddToEndSingleStrategy::class)

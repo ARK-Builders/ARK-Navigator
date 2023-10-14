@@ -19,7 +19,7 @@ import org.orbitmvi.orbit.syntax.simple.postSideEffect
 import org.orbitmvi.orbit.syntax.simple.reduce
 import org.orbitmvi.orbit.viewmodel.container
 import dev.arkbuilders.arkfilepicker.folders.FoldersRepo
-import dev.arkbuilders.arklib.domain.index.ResourceIndexRepo
+import dev.arkbuilders.arklib.data.index.ResourceIndexRepo
 import java.nio.file.Path
 
 class ProgressWithText(val enabled: Boolean, val text: String = "")

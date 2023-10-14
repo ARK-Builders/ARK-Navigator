@@ -17,9 +17,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import moxy.presenterScope
 import dev.arkbuilders.arklib.ResourceId
-import dev.arkbuilders.arklib.domain.meta.Metadata
-import dev.arkbuilders.arklib.domain.preview.PreviewLocator
-import dev.arkbuilders.arklib.domain.preview.PreviewStatus
+import dev.arkbuilders.arklib.data.meta.Metadata
+import dev.arkbuilders.arklib.data.preview.PreviewLocator
+import dev.arkbuilders.arklib.data.preview.PreviewStatus
 import dev.arkbuilders.arklib.utils.ImageUtils.loadGlideZoomImage
 import dev.arkbuilders.arklib.utils.ImageUtils.loadSubsamplingImage
 import timber.log.Timber

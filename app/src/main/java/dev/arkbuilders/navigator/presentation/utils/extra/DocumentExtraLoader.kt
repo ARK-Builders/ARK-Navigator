@@ -2,7 +2,7 @@ package dev.arkbuilders.navigator.presentation.utils.extra
 
 import android.widget.TextView
 import dev.arkbuilders.navigator.R
-import dev.arkbuilders.arklib.domain.meta.Metadata
+import dev.arkbuilders.arklib.data.meta.Metadata
 import dev.arkbuilders.navigator.presentation.utils.textOrGone
 
 object DocumentExtraLoader {

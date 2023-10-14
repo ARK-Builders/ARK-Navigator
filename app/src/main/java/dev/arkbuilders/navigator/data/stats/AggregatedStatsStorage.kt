@@ -4,8 +4,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import dev.arkbuilders.arklib.domain.stats.StatsEvent
-import dev.arkbuilders.arklib.domain.tags.Tag
+import dev.arkbuilders.arklib.data.stats.StatsEvent
+import dev.arkbuilders.arklib.user.tags.Tag
 
 class AggregatedStatsStorage(val shards: List<StatsStorage>) : StatsStorage {
 

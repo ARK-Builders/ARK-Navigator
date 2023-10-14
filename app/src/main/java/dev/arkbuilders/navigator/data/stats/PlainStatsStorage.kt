@@ -10,9 +10,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import dev.arkbuilders.arklib.arkFolder
 import dev.arkbuilders.arklib.arkStats
-import dev.arkbuilders.arklib.domain.index.RootIndex
-import dev.arkbuilders.arklib.domain.stats.StatsEvent
-import dev.arkbuilders.arklib.domain.tags.RootTagsStorage
+import dev.arkbuilders.arklib.data.index.RootIndex
+import dev.arkbuilders.arklib.data.stats.StatsEvent
+import dev.arkbuilders.arklib.user.tags.RootTagsStorage
 import dev.arkbuilders.navigator.data.preferences.PreferenceKey
 import dev.arkbuilders.navigator.data.preferences.Preferences
 import dev.arkbuilders.navigator.data.stats.category.StatsCategoryStorage

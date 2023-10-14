@@ -25,25 +25,24 @@ import moxy.MvpPresenter
 import moxy.presenterScope
 import dev.arkbuilders.arkfilepicker.folders.RootAndFav
 import dev.arkbuilders.arklib.ResourceId
-import dev.arkbuilders.arklib.domain.Message
-import dev.arkbuilders.arklib.domain.index.Resource
-import dev.arkbuilders.arklib.domain.index.ResourceIndex
-import dev.arkbuilders.arklib.domain.index.ResourceIndexRepo
-import dev.arkbuilders.arklib.domain.meta.Kind
-import dev.arkbuilders.arklib.domain.meta.Metadata
-import dev.arkbuilders.arklib.domain.meta.MetadataProcessor
-import dev.arkbuilders.arklib.domain.meta.MetadataProcessorRepo
-import dev.arkbuilders.arklib.domain.preview.PreviewLocator
-import dev.arkbuilders.arklib.domain.preview.PreviewProcessor
-import dev.arkbuilders.arklib.domain.preview.PreviewProcessorRepo
-import dev.arkbuilders.arklib.domain.score.ScoreStorage
-import dev.arkbuilders.arklib.domain.score.ScoreStorageRepo
-import dev.arkbuilders.arklib.domain.stats.StatsEvent
-import dev.arkbuilders.arklib.domain.storage.StorageException
-import dev.arkbuilders.arklib.domain.tags.Tag
-import dev.arkbuilders.arklib.domain.tags.TagStorage
-import dev.arkbuilders.arklib.domain.tags.Tags
-import dev.arkbuilders.arklib.domain.tags.TagsStorageRepo
+import dev.arkbuilders.arklib.data.Message
+import dev.arkbuilders.arklib.data.index.Resource
+import dev.arkbuilders.arklib.data.index.ResourceIndex
+import dev.arkbuilders.arklib.data.index.ResourceIndexRepo
+import dev.arkbuilders.arklib.data.meta.Metadata
+import dev.arkbuilders.arklib.data.meta.MetadataProcessor
+import dev.arkbuilders.arklib.data.meta.MetadataProcessorRepo
+import dev.arkbuilders.arklib.data.preview.PreviewLocator
+import dev.arkbuilders.arklib.data.preview.PreviewProcessor
+import dev.arkbuilders.arklib.data.preview.PreviewProcessorRepo
+import dev.arkbuilders.arklib.data.stats.StatsEvent
+import dev.arkbuilders.arklib.data.storage.StorageException
+import dev.arkbuilders.arklib.user.score.ScoreStorage
+import dev.arkbuilders.arklib.user.score.ScoreStorageRepo
+import dev.arkbuilders.arklib.user.tags.Tag
+import dev.arkbuilders.arklib.user.tags.TagStorage
+import dev.arkbuilders.arklib.user.tags.Tags
+import dev.arkbuilders.arklib.user.tags.TagsStorageRepo
 import dev.arkbuilders.arklib.utils.ImageUtils
 import dev.arkbuilders.arklib.utils.extension
 import timber.log.Timber
@@ -198,8 +197,8 @@ class GalleryPresenter(
         checkResourceChanges(currentPos)
     }
 
-    fun getKind(pos: Int): Kind =
-        galleryItems[pos].metadata.kind
+    fun getKind(pos: Int): Int =
+        galleryItems[pos].metadata.kind.ordinal
 
     fun bindView(view: PreviewImageViewHolder) = presenterScope.launch {
         view.reset()

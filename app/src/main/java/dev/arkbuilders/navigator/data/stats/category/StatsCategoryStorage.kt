@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import dev.arkbuilders.arklib.arkFolder
 import dev.arkbuilders.arklib.arkStats
-import dev.arkbuilders.arklib.domain.stats.StatsEvent
+import dev.arkbuilders.arklib.data.stats.StatsEvent
 import timber.log.Timber
 import java.nio.file.Path
 
