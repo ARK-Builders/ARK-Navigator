@@ -7,6 +7,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.ortiz.touchview.OnTouchImageViewListener
+import dev.arkbuilders.arklib.ResourceId
+import dev.arkbuilders.arklib.data.meta.Metadata
+import dev.arkbuilders.arklib.data.preview.PreviewLocator
+import dev.arkbuilders.arklib.data.preview.PreviewStatus
+import dev.arkbuilders.arklib.utils.ImageUtils.loadGlideZoomImage
+import dev.arkbuilders.arklib.utils.ImageUtils.loadSubsamplingImage
 import dev.arkbuilders.navigator.databinding.ItemImageBinding
 import dev.arkbuilders.navigator.presentation.screen.gallery.GalleryPresenter
 import dev.arkbuilders.navigator.presentation.utils.makeVisibleAndSetOnClickListener
@@ -16,12 +22,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import moxy.presenterScope
-import space.taran.arklib.ResourceId
-import space.taran.arklib.domain.meta.Metadata
-import space.taran.arklib.domain.preview.PreviewLocator
-import space.taran.arklib.domain.preview.PreviewStatus
-import space.taran.arklib.utils.ImageUtils.loadGlideZoomImage
-import space.taran.arklib.utils.ImageUtils.loadSubsamplingImage
 import timber.log.Timber
 
 @SuppressLint("ClickableViewAccessibility")

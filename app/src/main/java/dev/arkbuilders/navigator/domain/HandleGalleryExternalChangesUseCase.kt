@@ -1,17 +1,19 @@
 package dev.arkbuilders.navigator.domain
 
-import androidx.recyclerview.widget.DiffUtil
+import dev.arkbuilders.arklib.ResourceId
 import dev.arkbuilders.navigator.presentation.screen.gallery.GalleryPresenter
-import dev.arkbuilders.navigator.presentation.screen.resources.adapter.ResourceDiffUtilCallback
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import moxy.presenterScope
+import java.nio.file.Path
 import javax.inject.Inject
 
 class HandleGalleryExternalChangesUseCase @Inject constructor() {
     operator fun invoke(
+        resourcePath: Path,
+        oldId: ResourceId,
         presenter: GalleryPresenter
     ) = with(presenter) {
         presenterScope.launch {
@@ -19,36 +21,37 @@ class HandleGalleryExternalChangesUseCase @Inject constructor() {
                 viewState.setProgressVisibility(true, "Changes detected, indexing")
             }
 
-            index.updateAll()
+            val update = index.updateOne(resourcePath, oldId)
+            val newId = update.added.keys.firstOrNull()
 
             withContext(Dispatchers.Main) {
                 viewState.notifyResourcesChanged()
             }
 
-            presenterScope.launch {
-                metadataStorage.busy.collect { busy ->
-                    if (!busy)
-                        cancel()
-                }
-            }.join()
+            newId?.let {
+                presenterScope.launch {
+                    metadataStorage.busy.collect { busy ->
+                        if (!busy)
+                            cancel()
+                    }
+                }.join()
+            }
 
-            val newItems = provideGalleryItems()
-            if (newItems.isEmpty()) {
+            val newResourceIds = presenter.resourcesIds.toMutableList()
+            newResourceIds.apply {
+                val oldIdIndex = indexOf(oldId)
+                removeAt(oldIdIndex)
+                newId?.let { add(oldIdIndex, newId) }
+            }
+            presenter.resourcesIds = newResourceIds
+
+            galleryItems = provideGalleryItems().toMutableList()
+            if (galleryItems.isEmpty()) {
                 onBackClick()
                 return@launch
             }
 
-            diffResult = DiffUtil.calculateDiff(
-                ResourceDiffUtilCallback(
-                    galleryItems.map { it.resource.id },
-                    newItems.map { it.resource.id }
-                )
-            )
-
-            galleryItems = newItems.toMutableList()
-
             withContext(Dispatchers.Main) {
-                viewState.updatePagerAdapterWithDiff()
                 viewState.notifyCurrentItemChanged()
                 viewState.setProgressVisibility(false)
             }

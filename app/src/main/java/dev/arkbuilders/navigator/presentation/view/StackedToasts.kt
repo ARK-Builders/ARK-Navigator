@@ -21,8 +21,8 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import dev.arkbuilders.navigator.R
 import dev.arkbuilders.navigator.databinding.ItemToastBinding
-import space.taran.arklib.utils.tickerFlow
-import space.taran.arklib.utils.tryUnlock
+import dev.arkbuilders.arklib.utils.tickerFlow
+import dev.arkbuilders.arklib.utils.tryUnlock
 import java.nio.file.Path
 import kotlin.io.path.absolutePathString
 

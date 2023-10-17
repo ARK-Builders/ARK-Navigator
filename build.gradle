@@ -29,7 +29,7 @@ allprojects {
     repositories {
         google()
         //// Uncomment this repo for easier library development:
-        //mavenLocal()
+        mavenLocal()
 
         //// This is how you can push the library into local repo:
         //// ./gradlew --info lib:publishToMavenLocal

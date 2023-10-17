@@ -98,13 +98,13 @@ android {
 
 dependencies {
     //For local developments of arklib-android:
-    //def arklibVersion = '999'
-    def arklibVersion = '0.2.6'
+    def arklibVersion = '999'
+    //def arklibVersion = '0.3.1'
 
-    releaseImplementation "space.taran:arklib:$arklibVersion"
-    debugImplementation "space.taran:arklib-debug:$arklibVersion"
-    implementation("dev.arkbuilders:components:0.0.3") {
-        exclude group: "space.taran", module: "arklib"
+    releaseImplementation "dev.arkbuilders:arklib:$arklibVersion"
+    debugImplementation "dev.arkbuilders:arklib-debug:$arklibVersion"
+    implementation("dev.arkbuilders:components:0.0.5") {
+        exclude group: "dev.arkbuilders", module: "arklib"
     }
 
     //// For local development, you can inject local AAR dependency:

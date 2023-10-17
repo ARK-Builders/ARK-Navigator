@@ -1,7 +1,7 @@
 package dev.arkbuilders.navigator.presentation.screen.resources.adapter
 
 import androidx.recyclerview.widget.DiffUtil
-import space.taran.arklib.ResourceId
+import dev.arkbuilders.arklib.ResourceId
 
 class ResourceDiffUtilCallback(
     private val oldItems: List<ResourceId>,

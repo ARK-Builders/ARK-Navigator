@@ -1,7 +1,28 @@
 package dev.arkbuilders.navigator.presentation.screen.gallery
 
 import android.util.Log
-import androidx.recyclerview.widget.DiffUtil
+import dev.arkbuilders.arklib.ResourceId
+import dev.arkbuilders.arklib.data.Message
+import dev.arkbuilders.arklib.data.index.Resource
+import dev.arkbuilders.arklib.data.index.ResourceIndex
+import dev.arkbuilders.arklib.data.index.ResourceIndexRepo
+import dev.arkbuilders.arklib.data.meta.Kind
+import dev.arkbuilders.arklib.data.meta.Metadata
+import dev.arkbuilders.arklib.data.meta.MetadataProcessor
+import dev.arkbuilders.arklib.data.meta.MetadataProcessorRepo
+import dev.arkbuilders.arklib.data.preview.PreviewLocator
+import dev.arkbuilders.arklib.data.preview.PreviewProcessor
+import dev.arkbuilders.arklib.data.preview.PreviewProcessorRepo
+import dev.arkbuilders.arklib.data.stats.StatsEvent
+import dev.arkbuilders.arklib.data.storage.StorageException
+import dev.arkbuilders.arklib.user.score.ScoreStorage
+import dev.arkbuilders.arklib.user.score.ScoreStorageRepo
+import dev.arkbuilders.arklib.user.tags.Tag
+import dev.arkbuilders.arklib.user.tags.TagStorage
+import dev.arkbuilders.arklib.user.tags.Tags
+import dev.arkbuilders.arklib.user.tags.TagsStorageRepo
+import dev.arkbuilders.arklib.utils.ImageUtils
+import dev.arkbuilders.arklib.utils.extension
 import dev.arkbuilders.components.scorewidget.ScoreWidgetController
 import dev.arkbuilders.navigator.data.preferences.PreferenceKey
 import dev.arkbuilders.navigator.data.preferences.Preferences
@@ -24,28 +45,6 @@ import kotlinx.coroutines.withContext
 import moxy.MvpPresenter
 import moxy.presenterScope
 import space.taran.arkfilepicker.folders.RootAndFav
-import space.taran.arklib.ResourceId
-import space.taran.arklib.domain.Message
-import space.taran.arklib.domain.index.Resource
-import space.taran.arklib.domain.index.ResourceIndex
-import space.taran.arklib.domain.index.ResourceIndexRepo
-import space.taran.arklib.domain.meta.Kind
-import space.taran.arklib.domain.meta.Metadata
-import space.taran.arklib.domain.meta.MetadataProcessor
-import space.taran.arklib.domain.meta.MetadataProcessorRepo
-import space.taran.arklib.domain.preview.PreviewLocator
-import space.taran.arklib.domain.preview.PreviewProcessor
-import space.taran.arklib.domain.preview.PreviewProcessorRepo
-import space.taran.arklib.domain.score.ScoreStorage
-import space.taran.arklib.domain.score.ScoreStorageRepo
-import space.taran.arklib.domain.stats.StatsEvent
-import space.taran.arklib.domain.storage.StorageException
-import space.taran.arklib.domain.tags.Tag
-import space.taran.arklib.domain.tags.TagStorage
-import space.taran.arklib.domain.tags.Tags
-import space.taran.arklib.domain.tags.TagsStorageRepo
-import space.taran.arklib.utils.ImageUtils
-import space.taran.arklib.utils.extension
 import timber.log.Timber
 import java.io.FileReader
 import java.nio.file.Files
@@ -57,7 +56,7 @@ import kotlin.io.path.notExists
 
 class GalleryPresenter(
     private val rootAndFav: RootAndFav,
-    private val resourcesIds: List<ResourceId>,
+    var resourcesIds: List<ResourceId>,
     private val startAt: Int,
     var selectingEnabled: Boolean,
     private val selectedResources: MutableList<ResourceId>
@@ -91,8 +90,6 @@ class GalleryPresenter(
     }
 
     var galleryItems: MutableList<GalleryItem> = mutableListOf()
-
-    var diffResult: DiffUtil.DiffResult? = null
 
     private var currentPos = startAt
 
@@ -342,21 +339,25 @@ class GalleryPresenter(
             val item = galleryItems[pos]
 
             val path = index.getPath(item.id())
-                ?: let {
-                    Timber.d("Resource ${item.id()} can't be found in the index")
-                    handleGalleryExternalChangesUseCase(this@GalleryPresenter)
-                    return@launch
-                }
+                ?: error("Resource ${item.id()} can't be found in the index")
 
             if (path.notExists()) {
                 Timber.d("Resource ${item.id()} isn't stored by path $path")
-                handleGalleryExternalChangesUseCase(this@GalleryPresenter)
+                handleGalleryExternalChangesUseCase(
+                    path,
+                    item.id(),
+                    this@GalleryPresenter
+                )
                 return@launch
             }
 
             if (path.getLastModifiedTime() != item.resource.modified) {
                 Timber.d("Index is not up-to-date regarding path $path")
-                handleGalleryExternalChangesUseCase(this@GalleryPresenter)
+                handleGalleryExternalChangesUseCase(
+                    path,
+                    item.id(),
+                    this@GalleryPresenter
+                )
                 return@launch
             }
         }

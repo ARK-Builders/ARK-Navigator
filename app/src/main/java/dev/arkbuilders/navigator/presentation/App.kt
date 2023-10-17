@@ -1,12 +1,13 @@
 package dev.arkbuilders.navigator.presentation
 
 import android.app.Application
-import android.os.StrictMode
+import dev.arkbuilders.arklib.initArkLib
+import dev.arkbuilders.arklib.initRustLogger
 import dev.arkbuilders.navigator.BuildConfig
 import dev.arkbuilders.navigator.R
+import dev.arkbuilders.navigator.data.preferences.PreferenceKey
 import dev.arkbuilders.navigator.di.AppComponent
 import dev.arkbuilders.navigator.di.DaggerAppComponent
-import dev.arkbuilders.navigator.data.preferences.PreferenceKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -16,8 +17,6 @@ import org.acra.data.StringFormat
 import org.acra.ktx.initAcra
 import org.acra.sender.HttpSender
 import space.taran.arkfilepicker.folders.FoldersRepo
-import space.taran.arklib.initArkLib
-import space.taran.arklib.initRustLogger
 import timber.log.Timber
 
 class App : Application() {
@@ -28,12 +27,6 @@ class App : Application() {
 
     lateinit var appComponent: AppComponent
         private set
-
-    init {
-        if (BuildConfig.DEBUG) {
-            StrictMode.enableDefaults()
-        }
-    }
 
     override fun onCreate() {
         super.onCreate()
