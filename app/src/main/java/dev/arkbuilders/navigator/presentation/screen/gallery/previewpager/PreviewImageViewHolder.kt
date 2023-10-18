@@ -7,6 +7,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.ortiz.touchview.OnTouchImageViewListener
+import dev.arkbuilders.arklib.ResourceId
+import dev.arkbuilders.arklib.data.meta.Metadata
+import dev.arkbuilders.arklib.data.preview.PreviewLocator
+import dev.arkbuilders.arklib.data.preview.PreviewStatus
+import dev.arkbuilders.arklib.utils.ImageUtils
+import dev.arkbuilders.arklib.utils.ImageUtils.loadSubsamplingImage
 import dev.arkbuilders.navigator.databinding.ItemImageBinding
 import dev.arkbuilders.navigator.presentation.screen.gallery.GalleryPresenter
 import dev.arkbuilders.navigator.presentation.utils.makeVisibleAndSetOnClickListener
@@ -16,12 +22,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import moxy.presenterScope
-import dev.arkbuilders.arklib.ResourceId
-import dev.arkbuilders.arklib.data.meta.Metadata
-import dev.arkbuilders.arklib.data.preview.PreviewLocator
-import dev.arkbuilders.arklib.data.preview.PreviewStatus
-import dev.arkbuilders.arklib.utils.ImageUtils.loadGlideZoomImage
-import dev.arkbuilders.arklib.utils.ImageUtils.loadSubsamplingImage
 import timber.log.Timber
 
 @SuppressLint("ClickableViewAccessibility")
@@ -32,6 +32,7 @@ class PreviewImageViewHolder(
 ) : RecyclerView.ViewHolder(binding.root) {
 
     private var joinPreviewJob: Job? = null
+    private var subsamplingImageLoadFailed = false
 
     init {
         binding.ivSubsampling.setOnTouchListener { view, motionEvent ->
@@ -95,7 +96,7 @@ class PreviewImageViewHolder(
         }
 
         val path = locator.fullscreen()
-        loadGlideZoomImage(id, path, ivZoom)
+        ImageUtils.loadImage(id, path, ivZoom, limitSize = true)
         loadSubsamplingImage(path, ivSubsampling)
     }
 
@@ -103,6 +104,7 @@ class PreviewImageViewHolder(
         progress.isVisible = false
         ivZoom.isVisible = true
         ivZoom.isZoomEnabled = true
+        subsamplingImageLoadFailed = false
     }
 
     fun onRecycled() = with(binding) {
@@ -113,10 +115,12 @@ class PreviewImageViewHolder(
     private fun setZoomImageEventListener() = with(binding) {
         ivZoom.setOnTouchImageViewListener(object : OnTouchImageViewListener {
             override fun onMove() {
-                if (ivZoom.isZoomed) {
-                    progress.isVisible = true
-                    ivZoom.isZoomEnabled = false
-                    ivZoom.resetZoom()
+                if (!subsamplingImageLoadFailed) {
+                    if (ivZoom.isZoomed) {
+                        progress.isVisible = true
+                        ivZoom.isZoomEnabled = false
+                        ivZoom.resetZoom()
+                    }
                 }
             }
         })
@@ -131,7 +135,10 @@ class PreviewImageViewHolder(
                     ivZoom.setImageDrawable(null)
                 }
 
-                override fun onImageLoadError(e: Exception?) {}
+                override fun onImageLoadError(e: Exception?) {
+                    subsamplingImageLoadFailed = true
+                    progress.isVisible = false
+                }
 
                 override fun onPreviewLoadError(e: Exception?) {}
 
