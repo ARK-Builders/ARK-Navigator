@@ -15,9 +15,9 @@ import org.acra.config.httpSender
 import org.acra.data.StringFormat
 import org.acra.ktx.initAcra
 import org.acra.sender.HttpSender
-import space.taran.arkfilepicker.folders.FoldersRepo
-import space.taran.arklib.initArkLib
-import space.taran.arklib.initRustLogger
+import dev.arkbuilders.arkfilepicker.folders.FoldersRepo
+import dev.arkbuilders.arklib.initArkLib
+import dev.arkbuilders.arklib.initRustLogger
 import timber.log.Timber
 
 class App : Application() {
