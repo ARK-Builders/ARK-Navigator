@@ -4,7 +4,6 @@ Issue:
 
 ## :framed_picture: Screenshots:
 Provide screenshots to make it visible to reviewer if possible (Optional)
-Ex:
 
 | Before | After |
 | :---: | :---: |
