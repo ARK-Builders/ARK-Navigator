@@ -11,6 +11,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.OnScrollListener
 import by.kirich1409.viewbindingdelegate.viewBinding
 import dev.arkbuilders.navigator.R
 import dev.arkbuilders.navigator.data.utils.LogTags.FOLDERS_SCREEN
@@ -97,6 +99,27 @@ class FoldersFragment : Fragment(R.layout.fragment_folders) {
         binding.fabAddRoots.setOnClickListener {
             openRootPickerDialog(null)
         }
+
+        binding.rvRoots.addOnScrollListener(object : OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+
+                // Hide the Add FAB when scrolling down
+                if (dy > 10 && binding.fabAddRoots.isShown) {
+                    binding.fabAddRoots.hide()
+                }
+
+                // Show the Add FAB when scrolling up
+                if (dy < -10 && !binding.fabAddRoots.isShown) {
+                    binding.fabAddRoots.show()
+                }
+
+                // Always show the Add FAB when being on top of the list
+                if (!recyclerView.canScrollVertically(-1)) {
+                    binding.fabAddRoots.show()
+                }
+            }
+        })
     }
 
     private fun render(state: FoldersState) = with(state) {
