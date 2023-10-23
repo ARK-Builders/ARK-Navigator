@@ -198,3 +198,5 @@ tasks.register('installGitHook', Copy) {
     rename("pre-commit-$suffix", 'pre-commit')
     fileMode 0775
 }
+
+build.dependsOn installGitHook
