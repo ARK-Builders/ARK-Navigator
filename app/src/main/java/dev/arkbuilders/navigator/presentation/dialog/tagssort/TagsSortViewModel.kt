@@ -34,7 +34,7 @@ sealed class TagsSortSideEffect {
 }
 
 class TagsSortViewModel(
-    private val selectorNotEdit: Boolean,
+    selectorNotEdit: Boolean,
     private val preferences: Preferences
 ) : ViewModel(), ContainerHost<TagsSortState, TagsSortSideEffect> {
     override val container: Container<TagsSortState, TagsSortSideEffect> =

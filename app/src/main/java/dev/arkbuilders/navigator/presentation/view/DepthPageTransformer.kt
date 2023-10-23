@@ -2,6 +2,7 @@ package dev.arkbuilders.navigator.presentation.view
 
 import android.view.View
 import androidx.viewpager2.widget.ViewPager2
+import kotlin.math.abs
 
 private const val MIN_SCALE = 0.75f
 
@@ -28,7 +29,7 @@ class DepthPageTransformer() : ViewPager2.PageTransformer {
                     translationZ = -1f
 
                     val scaleFactor =
-                        (MIN_SCALE + (1 - MIN_SCALE) * (1 - Math.abs(position)))
+                        (MIN_SCALE + (1 - MIN_SCALE) * (1 - abs(position)))
                     scaleX = scaleFactor
                     scaleY = scaleFactor
                 }

@@ -92,14 +92,11 @@ class ResourcesPresenter(
         private set
     lateinit var tagStorage: TagStorage
         private set
-    lateinit var metadataProcessor: MetadataProcessor
-        private set
-    lateinit var previewProcessor: PreviewProcessor
-        private set
+    private lateinit var metadataProcessor: MetadataProcessor
+    private lateinit var previewProcessor: PreviewProcessor
     lateinit var statsStorage: StatsStorage
         private set
-    lateinit var scoreStorage: ScoreStorage
-        private set
+    private lateinit var scoreStorage: ScoreStorage
 
     val gridPresenter =
         ResourcesGridPresenter(folders, viewState, presenterScope, this)

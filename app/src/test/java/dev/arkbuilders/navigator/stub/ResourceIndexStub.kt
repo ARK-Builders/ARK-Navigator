@@ -30,6 +30,6 @@ class ResourceIndexStub : ResourceIndex {
     override fun allPaths(): Map<ResourceId, Path> =
         resources.mapValues { Path("") }
 
-    override fun getPath(id: ResourceId): Path? =
+    override fun getPath(id: ResourceId): Path =
         Path("")
 }

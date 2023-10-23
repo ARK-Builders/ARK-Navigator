@@ -19,7 +19,7 @@ class RootPickerDialogFragment : ArkFilePickerFragment() {
     @Inject
     lateinit var foldersRepo: FoldersRepo
 
-    var rootNotFavorite = false
+    private var rootNotFavorite = false
 
     override fun onAttach(context: Context) {
         App.instance.appComponent.inject(this)

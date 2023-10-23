@@ -7,19 +7,21 @@ import androidx.lifecycle.viewModelScope
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import dev.arkbuilders.arkfilepicker.folders.FoldersRepo
+import dev.arkbuilders.arklib.data.index.ResourceIndexRepo
 import dev.arkbuilders.navigator.data.PermissionsHelper
 import dev.arkbuilders.navigator.data.preferences.PreferenceKey
 import dev.arkbuilders.navigator.data.preferences.Preferences
 import dev.arkbuilders.navigator.data.utils.DevicePathsExtractor
 import dev.arkbuilders.navigator.data.utils.LogTags
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.syntax.simple.intent
 import org.orbitmvi.orbit.syntax.simple.postSideEffect
 import org.orbitmvi.orbit.syntax.simple.reduce
 import org.orbitmvi.orbit.viewmodel.container
-import dev.arkbuilders.arkfilepicker.folders.FoldersRepo
-import dev.arkbuilders.arklib.data.index.ResourceIndexRepo
 import java.nio.file.Path
 
 class ProgressWithText(val enabled: Boolean, val text: String = "")
@@ -83,7 +85,11 @@ class FoldersViewModel(
             postSideEffect(FoldersSideEffect.ToastFailedPaths(folders.failed))
 
             reduce {
-                state.copy(devices, folders.succeeded, ProgressWithText(false))
+                state.copy(
+                    devices = devices,
+                    folders = folders.succeeded,
+                    progressWithText = ProgressWithText(false)
+                )
             }
 
             showRootsScanIfNeeded()
@@ -190,7 +196,9 @@ class FoldersViewModel(
         }
 
         Log.d(LogTags.FOLDERS_SCREEN, "root $root added in RootsPresenter")
-        val path = root.toRealPath()
+        val path = withContext(Dispatchers.IO) {
+            root.toRealPath()
+        }
         var folders = foldersRepo.provideFolders()
 
         if (folders.containsKey(path)) {
@@ -231,7 +239,9 @@ class FoldersViewModel(
             LogTags.FOLDERS_SCREEN,
             "favorite $favorite added in RootsPresenter"
         )
-        val path = favorite.toRealPath()
+        val path = withContext(Dispatchers.IO) {
+            favorite.toRealPath()
+        }
         var folders = foldersRepo.provideFolders()
 
         val root = folders.keys.find { path.startsWith(it) }

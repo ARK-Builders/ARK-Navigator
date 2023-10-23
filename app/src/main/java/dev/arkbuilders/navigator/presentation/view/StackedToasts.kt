@@ -27,8 +27,8 @@ import java.nio.file.Path
 import kotlin.io.path.absolutePathString
 
 class StackedToasts(
-    val rv: RecyclerView,
-    val lifecycleScope: CoroutineScope
+    private val rv: RecyclerView,
+    private val lifecycleScope: CoroutineScope
 ) {
     private val adapter = ItemAdapter<ToastItem>()
     private val toasts = mutableListOf<ToastItem>()

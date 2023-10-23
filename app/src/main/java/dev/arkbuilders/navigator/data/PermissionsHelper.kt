@@ -26,17 +26,17 @@ import javax.inject.Singleton
 
 @Singleton
 class PermissionsHelper @Inject constructor(private val appContext: Context) {
-    val permissionResultFlow = MutableSharedFlow<Boolean>()
+    private val permissionResultFlow = MutableSharedFlow<Boolean>()
     private var writePermLauncher: ActivityResultLauncher<String>? = null
     private var writePermUsingSettingsLauncher: ActivityResultLauncher<String>? =
         null
-    private var writePermLauncher_R: ActivityResultLauncher<String>? = null
+    private var writePermLauncherR: ActivityResultLauncher<String>? = null
 
     fun registerActivity(activity: AppCompatActivity) {
         writePermLauncher = buildWritePermLauncher(activity)
         writePermUsingSettingsLauncher =
             buildWritePermsUsingSettingsLauncher(activity)
-        writePermLauncher_R = buildWritePermLauncher_R(activity)
+        writePermLauncherR = buildWritePermLauncherR(activity)
     }
 
     fun isWritePermissionGranted(): Boolean {
@@ -56,7 +56,7 @@ class PermissionsHelper @Inject constructor(private val appContext: Context) {
     ) {
         val packageUri = "package:" + BuildConfig.APPLICATION_ID
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            writePermLauncher_R!!.launch(packageUri)
+            writePermLauncherR!!.launch(packageUri)
         } else {
             val rationale =
                 fragment?.shouldShowRequestPermissionRationale(
@@ -120,7 +120,7 @@ class PermissionsHelper @Inject constructor(private val appContext: Context) {
             }
         }
 
-    private fun buildWritePermLauncher_R(
+    private fun buildWritePermLauncherR(
         activity: AppCompatActivity
     ) =
         activity.registerForActivityResult(

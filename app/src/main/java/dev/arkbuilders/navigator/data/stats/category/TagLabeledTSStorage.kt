@@ -47,7 +47,7 @@ class TagLabeledTSStorage(
 
     override fun flush() {
         val data = Json.encodeToString(JsonTagLabeledTS(tagLabeledTS))
-        locateStorage().writeText(data)
+        locateStorage()?.writeText(data)
         Timber.i("flushed with $tagLabeledTS")
     }
 }
