@@ -27,13 +27,19 @@ import java.nio.file.Path
 class ProgressWithText(val enabled: Boolean, val text: String = "")
 
 data class FoldersState private constructor(
+    val initialized: Boolean,
     val devices: List<Path>,
     val folders: Map<Path, List<Path>>,
     val progressWithText: ProgressWithText
 ) {
     companion object {
         fun initial() =
-            FoldersState(emptyList(), emptyMap(), ProgressWithText(false))
+            FoldersState(
+                initialized = false,
+                devices = emptyList(),
+                folders = emptyMap(),
+                progressWithText = ProgressWithText(false)
+            )
     }
 }
 
@@ -86,6 +92,7 @@ class FoldersViewModel(
 
             reduce {
                 state.copy(
+                    initialized = true,
                     devices = devices,
                     folders = folders.succeeded,
                     progressWithText = ProgressWithText(false)
