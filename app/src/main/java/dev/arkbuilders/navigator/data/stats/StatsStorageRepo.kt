@@ -33,7 +33,7 @@ class StatsStorageRepo(
         }
     }
 
-    suspend fun provide(
+    private suspend fun provide(
         root: RootIndex,
         tagsStorage: RootTagsStorage
     ): PlainStatsStorage =

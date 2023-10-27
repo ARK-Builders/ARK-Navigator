@@ -7,7 +7,7 @@ import kotlinx.coroutines.withContext
 import dev.arkbuilders.arklib.data.stats.StatsEvent
 import dev.arkbuilders.arklib.user.tags.Tag
 
-class AggregatedStatsStorage(val shards: List<StatsStorage>) : StatsStorage {
+class AggregatedStatsStorage(private val shards: List<StatsStorage>) : StatsStorage {
 
     override suspend fun init() = withContext(Dispatchers.IO) {
         shards.map { launch { it.init() } }.joinAll()

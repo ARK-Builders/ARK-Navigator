@@ -39,18 +39,17 @@ data class ResourceItem(
 }
 
 class ResourcesGridPresenter(
-    val rootAndFav: RootAndFav,
-    val viewState: ResourcesView,
-    val scope: CoroutineScope,
-    val resourcesPresenter: ResourcesPresenter
+    private val rootAndFav: RootAndFav,
+    private val viewState: ResourcesView,
+    private val scope: CoroutineScope,
+    private val resourcesPresenter: ResourcesPresenter
 ) {
     @Inject
     lateinit var preferences: Preferences
 
     var resources = listOf<ResourceItem>()
         private set
-    var selection = listOf<ResourceItem>()
-        private set
+    private var selection = listOf<ResourceItem>()
     val selectedResources: List<ResourceId>
         get() = resources.filter { it.isSelected }.map { it.id() }
 
@@ -357,11 +356,7 @@ class ResourcesGridPresenter(
 
             val comparator = if (bySorting != null && byScores != null) {
                 byScores.then(bySorting)
-            } else if (byScores == null) {
-                bySorting!!
-            } else {
-                byScores
-            }
+            } else byScores ?: bySorting!!
 
             resources = resources.sortedWith(comparator)
 
@@ -406,7 +401,7 @@ class ResourcesGridPresenter(
 
     private fun scoreComparator(): Comparator<ResourceItem>? =
         if (sortByScores) {
-            Comparator<ResourceItem> { a, b ->
+            Comparator { a, b ->
                 val aScore = scoreStorage.getScore(a.id())
                 val bScore = scoreStorage.getScore(b.id())
                 aScore.compareTo(bScore)

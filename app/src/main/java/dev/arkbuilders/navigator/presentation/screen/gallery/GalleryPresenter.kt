@@ -2,27 +2,6 @@ package dev.arkbuilders.navigator.presentation.screen.gallery
 
 import android.util.Log
 import androidx.recyclerview.widget.DiffUtil
-import dev.arkbuilders.components.scorewidget.ScoreWidgetController
-import dev.arkbuilders.navigator.data.preferences.PreferenceKey
-import dev.arkbuilders.navigator.data.preferences.Preferences
-import dev.arkbuilders.navigator.data.stats.StatsStorage
-import dev.arkbuilders.navigator.data.stats.StatsStorageRepo
-import dev.arkbuilders.navigator.data.utils.LogTags.GALLERY_SCREEN
-import dev.arkbuilders.navigator.di.modules.RepoModule.Companion.MESSAGE_FLOW_NAME
-import dev.arkbuilders.navigator.domain.HandleGalleryExternalChangesUseCase
-import dev.arkbuilders.navigator.presentation.navigation.AppRouter
-import dev.arkbuilders.navigator.presentation.navigation.Screens
-import dev.arkbuilders.navigator.presentation.screen.gallery.previewpager.PreviewImageViewHolder
-import dev.arkbuilders.navigator.presentation.screen.gallery.previewpager.PreviewPlainTextViewHolder
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import moxy.MvpPresenter
-import moxy.presenterScope
 import dev.arkbuilders.arkfilepicker.folders.RootAndFav
 import dev.arkbuilders.arklib.ResourceId
 import dev.arkbuilders.arklib.data.Message
@@ -45,6 +24,27 @@ import dev.arkbuilders.arklib.user.tags.Tags
 import dev.arkbuilders.arklib.user.tags.TagsStorageRepo
 import dev.arkbuilders.arklib.utils.ImageUtils
 import dev.arkbuilders.arklib.utils.extension
+import dev.arkbuilders.components.scorewidget.ScoreWidgetController
+import dev.arkbuilders.navigator.data.preferences.PreferenceKey
+import dev.arkbuilders.navigator.data.preferences.Preferences
+import dev.arkbuilders.navigator.data.stats.StatsStorage
+import dev.arkbuilders.navigator.data.stats.StatsStorageRepo
+import dev.arkbuilders.navigator.data.utils.LogTags.GALLERY_SCREEN
+import dev.arkbuilders.navigator.di.modules.RepoModule.Companion.MESSAGE_FLOW_NAME
+import dev.arkbuilders.navigator.domain.HandleGalleryExternalChangesUseCase
+import dev.arkbuilders.navigator.presentation.navigation.AppRouter
+import dev.arkbuilders.navigator.presentation.navigation.Screens
+import dev.arkbuilders.navigator.presentation.screen.gallery.previewpager.PreviewImageViewHolder
+import dev.arkbuilders.navigator.presentation.screen.gallery.previewpager.PreviewPlainTextViewHolder
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import moxy.MvpPresenter
+import moxy.presenterScope
 import timber.log.Timber
 import java.io.FileReader
 import java.nio.file.Files
@@ -57,8 +57,8 @@ import kotlin.io.path.notExists
 class GalleryPresenter(
     private val rootAndFav: RootAndFav,
     private val resourcesIds: List<ResourceId>,
-    private val startAt: Int,
-    var selectingEnabled: Boolean,
+    startAt: Int,
+    private var selectingEnabled: Boolean,
     private val selectedResources: MutableList<ResourceId>
 ) : MvpPresenter<GalleryView>() {
 
@@ -72,14 +72,12 @@ class GalleryPresenter(
         private set
     lateinit var tagsStorage: TagStorage
         private set
-    lateinit var previewStorage: PreviewProcessor
-        private set
+    private lateinit var previewStorage: PreviewProcessor
     lateinit var metadataStorage: MetadataProcessor
         private set
     lateinit var statsStorage: StatsStorage
         private set
-    lateinit var scoreStorage: ScoreStorage
-        private set
+    private lateinit var scoreStorage: ScoreStorage
 
     data class GalleryItem(
         val resource: Resource,
@@ -365,7 +363,9 @@ class GalleryPresenter(
 
         val path = index.getPath(resource)
 
-        Files.delete(path)
+        withContext(Dispatchers.IO) {
+            Files.delete(path)
+        }
 
         index.updateAll()
         viewState.notifyResourcesChanged()

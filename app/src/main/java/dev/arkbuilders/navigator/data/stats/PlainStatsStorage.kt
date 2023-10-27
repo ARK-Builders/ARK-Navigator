@@ -27,7 +27,7 @@ class PlainStatsStorage(
     private val index: RootIndex,
     private val preferences: Preferences,
     private val tagStorage: RootTagsStorage,
-    private val statsFlow: SharedFlow<StatsEvent>
+    statsFlow: SharedFlow<StatsEvent>
 ) : StatsStorage {
 
     private val root = index.path

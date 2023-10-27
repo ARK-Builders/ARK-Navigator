@@ -553,7 +553,7 @@ class GalleryFragment :
         return TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP,
             dpValue,
-            getResources().displayMetrics
+            resources.displayMetrics
         )
     }
 

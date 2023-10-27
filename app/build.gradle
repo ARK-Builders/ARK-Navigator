@@ -1,3 +1,4 @@
+//file:noinspection GroovyConstructorNamedArguments
 import org.apache.tools.ant.taskdefs.condition.Os
 
 plugins {
@@ -11,7 +12,7 @@ apply plugin: 'kotlin-parcelize'
 apply plugin: "de.mannodermaus.android-junit5"
 
 android {
-    compileSdkVersion 33
+    compileSdk 33
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
@@ -187,7 +188,7 @@ dependencies {
     implementation 'com.airbnb.android:lottie:6.1.0'
 }
 
-task installGitHook(type: Copy) {
+tasks.register('installGitHook', Copy) {
     def suffix = "linux"
     if (Os.isFamily(Os.FAMILY_WINDOWS)) {
         suffix = "windows"

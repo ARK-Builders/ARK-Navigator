@@ -16,7 +16,7 @@ private const val FLUSH_INTERVAL = 10_000L
 
 abstract class StatsCategoryStorage<out T>(
     val root: Path,
-    val scope: CoroutineScope
+    private val scope: CoroutineScope
 ) {
     abstract val fileName: String
     private val flushFlow = MutableSharedFlow<Unit>().also { flow ->
@@ -36,7 +36,7 @@ abstract class StatsCategoryStorage<out T>(
     abstract fun provideData(): T
     protected abstract fun flush()
 
-    fun locateStorage() = root.arkFolder().arkStats().resolve(fileName)
+    fun locateStorage(): Path? = root.arkFolder().arkStats().resolve(fileName)
 
     protected fun requestFlush() = scope.launch {
         flushFlow.emit(Unit)

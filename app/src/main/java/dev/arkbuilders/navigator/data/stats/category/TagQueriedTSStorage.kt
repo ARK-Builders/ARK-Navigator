@@ -22,9 +22,11 @@ class TagQueriedTSStorage(
 
     override suspend fun init() {
         val storage = locateStorage()
-        if (storage.notExists()) return
-        val json = Json.decodeFromStream<JsonTagQueriedTS>(storage.inputStream())
-        tagQueriedTS.putAll(json.data)
+        if (storage?.notExists() == true) return
+        val json = storage?.let {
+            Json.decodeFromStream<JsonTagQueriedTS>(it.inputStream())
+        }
+        json?.let { tagQueriedTS.putAll(it.data) }
         Timber.i("initialized with $tagQueriedTS")
     }
 
@@ -43,7 +45,7 @@ class TagQueriedTSStorage(
 
     override fun flush() {
         val data = Json.encodeToString(JsonTagQueriedTS(tagQueriedTS))
-        locateStorage().writeText(data)
+        locateStorage()?.writeText(data)
         Timber.i("flushed with $tagQueriedTS")
     }
 }

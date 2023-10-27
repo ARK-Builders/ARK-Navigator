@@ -48,7 +48,7 @@ class TagQueriedNStorage(
 
     override fun flush() {
         val data = Json.encodeToString(JsonTagQueriedN(tagQueriedN))
-        locateStorage().writeText(data)
+        locateStorage()?.writeText(data)
         Timber.i("flushed with $tagQueriedN")
     }
 }

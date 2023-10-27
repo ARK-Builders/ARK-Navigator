@@ -17,7 +17,7 @@ import kotlin.io.path.writeText
 
 class TagLabeledNStorage(
     val index: ResourceIndex,
-    val tagsStorage: TagStorage,
+    private val tagsStorage: TagStorage,
     root: Path,
     scope: CoroutineScope
 ) : StatsCategoryStorage<Map<Tag, Int>>(root, scope) {
@@ -26,7 +26,7 @@ class TagLabeledNStorage(
 
     override suspend fun init() {
         val storage = locateStorage()
-        if (storage.exists()) {
+        if (storage?.exists() == true) {
             val json = Json.decodeFromStream<JsonTagLabeledN>(storage.inputStream())
             tagLabeledAmount.putAll(json.data)
         } else {
@@ -64,7 +64,7 @@ class TagLabeledNStorage(
 
     override fun flush() {
         val data = Json.encodeToString(JsonTagLabeledN(tagLabeledAmount))
-        locateStorage().writeText(data)
+        locateStorage()?.writeText(data)
         Timber.i("flushed with $tagLabeledAmount")
     }
 }

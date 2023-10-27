@@ -5,6 +5,7 @@
 root = true
 
 
+# noinspection EditorConfigKeyCorrectness
 [*]
 
 indent_style = space

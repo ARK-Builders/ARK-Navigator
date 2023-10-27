@@ -15,7 +15,7 @@ class DefaultPopup(
     val binding: ViewBinding,
     @StyleRes val animationId: Int? = null,
     @DrawableRes val bgId: Int? = null,
-    val elevation: Float = 0f,
+    private val elevation: Float = 0f,
 ) {
     lateinit var popupWindow: PopupWindow
 
