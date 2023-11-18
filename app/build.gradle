@@ -10,6 +10,16 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-parcelize'
 apply plugin: "de.mannodermaus.android-junit5"
+apply plugin: "org.sonarqube"
+
+sonarqube {
+    properties {
+        property "sonar.projectName", "ARK-Navigator"
+        property "sonar.projectKey", "ARK-Builders_ARK-Navigator"
+        property "sonar.organization", "ark-builders"
+        property "sonar.host.url", "https://sonarcloud.io"
+    }
+}
 
 android {
     compileSdk 33
