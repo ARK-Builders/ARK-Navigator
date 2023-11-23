@@ -22,6 +22,7 @@ sonarqube {
 }
 
 android {
+    namespace "dev.arkbuilders.navigator"
     compileSdk 33
 
     compileOptions {
