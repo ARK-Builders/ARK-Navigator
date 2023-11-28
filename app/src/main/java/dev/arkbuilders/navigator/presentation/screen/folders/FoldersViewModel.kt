@@ -260,7 +260,7 @@ class FoldersViewModel @Inject constructor(
             )
 
         val relative = root.relativize(path)
-        if (folders[root]!!.contains(relative)) {
+        if (folders[root]?.contains(relative) == true) {
             throw AssertionError("Path must be checked in RootPicker")
         }
 

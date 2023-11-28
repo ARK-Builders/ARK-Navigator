@@ -48,6 +48,7 @@ import moxy.MvpPresenter
 import moxy.presenterScope
 import timber.log.Timber
 import java.io.FileReader
+import java.lang.NullPointerException
 import java.nio.file.Files
 import java.nio.file.Path
 import javax.inject.Inject
@@ -414,19 +415,24 @@ class GalleryPresenter(
         router.exit()
     }
 
-    fun provideGalleryItems(): List<GalleryItem> {
-        val allResources = index.allResources()
+    fun provideGalleryItems(): List<GalleryItem> =
+        try {
+            val allResources = index.allResources()
+            resourcesIds
+                .filter { allResources.keys.contains(it) }
+                .map { id ->
+                    val preview = previewStorage.retrieve(id).getOrThrow()
+                    val metadata = metadataStorage.retrieve(id).getOrThrow()
+                    val resource = allResources.getOrElse(id) {
+                        throw NullPointerException("Resource not exist")
+                    }
+                    GalleryItem(resource, preview, metadata)
+                }.toMutableList()
+        } catch (e: Exception) {
+            Timber.d("Can't provide gallery items")
+            emptyList()
+        }
 
-        return resourcesIds
-            .filter { allResources.keys.contains(it) }
-            .map { id ->
-                val preview = previewStorage.retrieve(id).getOrThrow()
-                val metadata = metadataStorage.retrieve(id).getOrThrow()
-
-                val resource = allResources[id]!!
-                GalleryItem(resource, preview, metadata)
-            }.toMutableList()
-    }
 
     private suspend fun readText(source: Path): Result<String> =
         withContext(defaultDispatcher) {
