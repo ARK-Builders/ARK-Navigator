@@ -80,7 +80,7 @@ class AppNavigator(
         // Start activity
         if (activityIntent != null) {
             val options = createStartActivityOptions()
-            checkAndStartActivity(screen, activityIntent, options)
+            checkAndStartActivity(activityIntent, options)
         } else {
             fragmentForward(command)
         }
@@ -128,7 +128,7 @@ class AppNavigator(
         // Replace activity
         if (activityIntent != null) {
             val options = createStartActivityOptions()
-            checkAndStartActivity(screen, activityIntent, options)
+            checkAndStartActivity(activityIntent, options)
             activity.finish()
         } else {
             fragmentReplace(command)
@@ -193,7 +193,6 @@ class AppNavigator(
     }
 
     private fun checkAndStartActivity(
-        screen: SupportAppScreen,
         activityIntent: Intent,
         options: Bundle?
     ) {
