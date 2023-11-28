@@ -11,6 +11,7 @@
 
     <application
         android:name="dev.arkbuilders.navigator.presentation.App"
+        android:fullBackupContent="@xml/backup_rules"
         android:icon="${appIcon}"
         android:label="${appLabel}"
         android:largeHeap="true"
