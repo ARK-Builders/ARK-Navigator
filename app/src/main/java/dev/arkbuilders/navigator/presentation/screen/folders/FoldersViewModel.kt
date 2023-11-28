@@ -14,6 +14,7 @@ import dev.arkbuilders.navigator.data.preferences.PreferenceKey
 import dev.arkbuilders.navigator.data.preferences.Preferences
 import dev.arkbuilders.navigator.data.utils.DevicePathsExtractor
 import dev.arkbuilders.navigator.data.utils.LogTags
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.orbitmvi.orbit.Container
@@ -23,6 +24,7 @@ import org.orbitmvi.orbit.syntax.simple.postSideEffect
 import org.orbitmvi.orbit.syntax.simple.reduce
 import org.orbitmvi.orbit.viewmodel.container
 import java.nio.file.Path
+import javax.inject.Inject
 
 class ProgressWithText(val enabled: Boolean, val text: String = "")
 
@@ -52,13 +54,14 @@ sealed class FoldersSideEffect {
     object ToastIndexingCanTakeMinutes : FoldersSideEffect()
 }
 
-class FoldersViewModel(
+class FoldersViewModel @Inject constructor(
     private val rescanRoots: Boolean,
     private val foldersRepo: FoldersRepo,
     private val resourcesIndexRepo: ResourceIndexRepo,
     private val preferences: Preferences,
     private val permsHelper: PermissionsHelper,
-    private val devicePathsExtractor: DevicePathsExtractor
+    private val devicePathsExtractor: DevicePathsExtractor,
+    private val defaultDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel(), ContainerHost<FoldersState, FoldersSideEffect> {
 
     override val container: Container<FoldersState, FoldersSideEffect> = container(
@@ -203,7 +206,7 @@ class FoldersViewModel(
         }
 
         Log.d(LogTags.FOLDERS_SCREEN, "root $root added in RootsPresenter")
-        val path = withContext(Dispatchers.IO) {
+        val path = withContext(defaultDispatcher) {
             root.toRealPath()
         }
         var folders = foldersRepo.provideFolders()
@@ -246,7 +249,7 @@ class FoldersViewModel(
             LogTags.FOLDERS_SCREEN,
             "favorite $favorite added in RootsPresenter"
         )
-        val path = withContext(Dispatchers.IO) {
+        val path = withContext(defaultDispatcher) {
             favorite.toRealPath()
         }
         var folders = foldersRepo.provideFolders()

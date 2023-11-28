@@ -36,6 +36,7 @@ import dev.arkbuilders.navigator.presentation.navigation.AppRouter
 import dev.arkbuilders.navigator.presentation.navigation.Screens
 import dev.arkbuilders.navigator.presentation.screen.gallery.previewpager.PreviewImageViewHolder
 import dev.arkbuilders.navigator.presentation.screen.gallery.previewpager.PreviewPlainTextViewHolder
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -59,7 +60,8 @@ class GalleryPresenter(
     private val resourcesIds: List<ResourceId>,
     startAt: Int,
     private var selectingEnabled: Boolean,
-    private val selectedResources: MutableList<ResourceId>
+    private val selectedResources: MutableList<ResourceId>,
+    private val defaultDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : MvpPresenter<GalleryView>() {
 
     val scoreWidgetController = ScoreWidgetController(
@@ -331,7 +333,7 @@ class GalleryPresenter(
     }
 
     private fun checkResourceChanges(pos: Int) =
-        presenterScope.launch(Dispatchers.IO) {
+        presenterScope.launch(defaultDispatcher) {
             if (galleryItems.isEmpty()) {
                 return@launch
             }
@@ -363,7 +365,7 @@ class GalleryPresenter(
 
         val path = index.getPath(resource)
 
-        withContext(Dispatchers.IO) {
+        withContext(defaultDispatcher) {
             Files.delete(path)
         }
 
@@ -427,7 +429,7 @@ class GalleryPresenter(
     }
 
     private suspend fun readText(source: Path): Result<String> =
-        withContext(Dispatchers.IO) {
+        withContext(defaultDispatcher) {
             try {
                 val content = FileReader(source.toFile()).readText()
                 Result.success(content)

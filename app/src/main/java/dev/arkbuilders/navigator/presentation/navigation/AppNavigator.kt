@@ -171,7 +171,7 @@ class AppNavigator(
                 }
                 fragmentManager.popBackStack(key, 0)
             } else {
-                backToUnexisting(command.screen as SupportAppScreen)
+                backToUnexisting()
             }
         }
     }
@@ -226,7 +226,7 @@ class AppNavigator(
      *
      * @param screen screen
      */
-    private fun backToUnexisting(screen: SupportAppScreen?) {
+    private fun backToUnexisting() {
         backToRoot()
     }
 
