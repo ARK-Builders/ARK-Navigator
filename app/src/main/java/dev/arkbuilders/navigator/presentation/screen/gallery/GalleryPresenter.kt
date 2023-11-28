@@ -30,7 +30,6 @@ import dev.arkbuilders.navigator.data.preferences.Preferences
 import dev.arkbuilders.navigator.data.stats.StatsStorage
 import dev.arkbuilders.navigator.data.stats.StatsStorageRepo
 import dev.arkbuilders.navigator.data.utils.LogTags.GALLERY_SCREEN
-import dev.arkbuilders.navigator.di.modules.RepoModule.Companion.MESSAGE_FLOW_NAME
 import dev.arkbuilders.navigator.domain.HandleGalleryExternalChangesUseCase
 import dev.arkbuilders.navigator.presentation.navigation.AppRouter
 import dev.arkbuilders.navigator.presentation.navigation.Screens
