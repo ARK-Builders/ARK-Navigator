@@ -47,11 +47,9 @@ import moxy.MvpPresenter
 import moxy.presenterScope
 import timber.log.Timber
 import java.io.FileReader
-import java.lang.NullPointerException
 import java.nio.file.Files
 import java.nio.file.Path
 import javax.inject.Inject
-import javax.inject.Named
 import kotlin.io.path.getLastModifiedTime
 import kotlin.io.path.notExists
 

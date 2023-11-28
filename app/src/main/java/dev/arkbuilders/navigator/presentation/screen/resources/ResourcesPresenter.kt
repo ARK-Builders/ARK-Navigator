@@ -331,11 +331,11 @@ class ResourcesPresenter(
         gridPresenter.unShuffleResources()
     }
 
-    fun onIncreaseScoreClicked() = presenterScope.launch(defaultDispatcher) {
+    fun onIncreaseScoreClicked() = presenterScope.launch {
         gridPresenter.increaseScore()
     }
 
-    fun onDecreaseScoreClicked() = presenterScope.launch(defaultDispatcher) {
+    fun onDecreaseScoreClicked() = presenterScope.launch {
         gridPresenter.decreaseScore()
     }
 
