@@ -14,13 +14,15 @@
     <application
         android:name="dev.arkbuilders.navigator.presentation.App"
         android:allowBackup="true"
+        android:fullBackupContent="@xml/backup.xml"
         android:icon="${appIcon}"
         android:label="${appLabel}"
         android:largeHeap="true"
         android:requestLegacyExternalStorage="true"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        tools:replace="android:label">
+        tools:replace="android:label"
+        android:dataExtractionRules="@xml/data_extraction_rules">
         <activity
             android:name="dev.arkbuilders.navigator.presentation.screen.main.MainActivity"
             android:exported="true"
