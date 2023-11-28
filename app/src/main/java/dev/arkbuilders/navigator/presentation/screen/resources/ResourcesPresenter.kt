@@ -84,9 +84,7 @@ class ResourcesPresenter(
     @Inject
     lateinit var stringProvider: StringProvider
 
-    @Inject
-    @Named(MESSAGE_FLOW_NAME)
-    lateinit var messageFlow: MutableSharedFlow<Message>
+    private val messageFlow: MutableSharedFlow<Message> = MutableSharedFlow()
 
     lateinit var index: ResourceIndex
         private set

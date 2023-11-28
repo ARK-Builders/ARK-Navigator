@@ -126,9 +126,7 @@ class GalleryPresenter(
     @Inject
     lateinit var scoreStorageRepo: ScoreStorageRepo
 
-    @Inject
-    @Named(MESSAGE_FLOW_NAME)
-    lateinit var messageFlow: MutableSharedFlow<Message>
+    private val messageFlow: MutableSharedFlow<Message> = MutableSharedFlow()
 
     @Inject
     lateinit var handleGalleryExternalChangesUseCase:

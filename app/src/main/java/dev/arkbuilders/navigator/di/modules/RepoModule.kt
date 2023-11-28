@@ -25,11 +25,6 @@ class RepoModule {
 
     @Singleton
     @Provides
-    @Named(MESSAGE_FLOW_NAME)
-    fun mutableMessageFlow(): MutableSharedFlow<Message> = MutableSharedFlow()
-
-    @Singleton
-    @Provides
     @Named(APP_SCOPE_NAME)
     fun appScope() = CoroutineScope(Dispatchers.IO)
 
