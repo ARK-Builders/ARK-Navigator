@@ -3,6 +3,16 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission
+        android:requiredFeature="@string/ark_file_picker_pick"
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28"
+        tools:ignore="ScopedStorage" />
+    <uses-permission
+        android:requiredFeature="@string/ark_file_picker_pick"
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28"
+        tools:ignore="ScopedStorage" />
 
     <uses-permission
         android:requiredFeature="@string/ark_file_picker_pick"
@@ -12,6 +22,7 @@
     <application
         android:name="dev.arkbuilders.navigator.presentation.App"
         android:allowBackup="true"
+        android:fullBackupContent="@xml/backup.xml"
         android:icon="${appIcon}"
         android:label="${appLabel}"
         android:largeHeap="true"
@@ -19,7 +30,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="false"
-        tools:replace="android:label">
+        tools:replace="android:label"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        tools:targetApi="s"
+        tools:ignore="DataExtractionRules">
         <activity
             android:name="dev.arkbuilders.navigator.presentation.screen.main.MainActivity"
             android:exported="true"
