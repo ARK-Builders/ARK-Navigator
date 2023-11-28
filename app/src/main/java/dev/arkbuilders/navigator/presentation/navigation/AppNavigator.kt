@@ -79,7 +79,7 @@ class AppNavigator(
 
         // Start activity
         if (activityIntent != null) {
-            val options = createStartActivityOptions(command, activityIntent)
+            val options = createStartActivityOptions()
             checkAndStartActivity(screen, activityIntent, options)
         } else {
             fragmentForward(command)
@@ -109,7 +109,7 @@ class AppNavigator(
     }
 
     private fun fragmentBack() {
-        if (localStackCopy!!.size > 0) {
+        if (localStackCopy?.isNotEmpty() == true) {
             fragmentManager.popBackStack()
             localStackCopy!!.removeLast()
         } else {
@@ -127,7 +127,7 @@ class AppNavigator(
 
         // Replace activity
         if (activityIntent != null) {
-            val options = createStartActivityOptions(command, activityIntent)
+            val options = createStartActivityOptions()
             checkAndStartActivity(screen, activityIntent, options)
             activity.finish()
         } else {
@@ -138,7 +138,7 @@ class AppNavigator(
     private fun fragmentReplace(command: Replace) {
         val screen = command.screen as SupportAppScreen
         val fragment = createFragment(screen)
-        if (localStackCopy!!.size > 0) {
+        if (localStackCopy?.isNotEmpty() == true) {
             fragmentManager.popBackStack()
             localStackCopy!!.removeLast()
             val fragmentTransaction = fragmentManager.beginTransaction()
@@ -188,10 +188,7 @@ class AppNavigator(
      * @param activityIntent activity intent
      * @return transition options
      */
-    private fun createStartActivityOptions(
-        command: Command?,
-        activityIntent: Intent?
-    ): Bundle? {
+    private fun createStartActivityOptions(): Bundle? {
         return null
     }
 
