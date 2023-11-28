@@ -1,30 +1,6 @@
 package dev.arkbuilders.navigator.presentation.screen.resources
 
 import android.util.Log
-import dev.arkbuilders.components.tagselector.QueryMode
-import dev.arkbuilders.components.tagselector.TagSelectorController
-import dev.arkbuilders.components.tagselector.TagsSorting
-import dev.arkbuilders.navigator.data.preferences.PreferenceKey
-import dev.arkbuilders.navigator.data.preferences.Preferences
-import dev.arkbuilders.navigator.data.stats.StatsStorage
-import dev.arkbuilders.navigator.data.stats.StatsStorageRepo
-import dev.arkbuilders.navigator.data.utils.LogTags.RESOURCES_SCREEN
-import dev.arkbuilders.navigator.data.utils.findNotExistCopyName
-import dev.arkbuilders.navigator.presentation.App
-import dev.arkbuilders.navigator.presentation.navigation.AppRouter
-import dev.arkbuilders.navigator.presentation.screen.resources.adapter.ResourcesGridPresenter
-import dev.arkbuilders.navigator.presentation.utils.StringProvider
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import moxy.MvpPresenter
-import moxy.presenterScope
 import dev.arkbuilders.arkfilepicker.folders.FoldersRepo
 import dev.arkbuilders.arkfilepicker.folders.RootAndFav
 import dev.arkbuilders.arklib.ResourceId
@@ -41,6 +17,33 @@ import dev.arkbuilders.arklib.user.score.ScoreStorageRepo
 import dev.arkbuilders.arklib.user.tags.Tag
 import dev.arkbuilders.arklib.user.tags.TagStorage
 import dev.arkbuilders.arklib.user.tags.TagsStorageRepo
+import dev.arkbuilders.components.tagselector.QueryMode
+import dev.arkbuilders.components.tagselector.TagSelectorController
+import dev.arkbuilders.components.tagselector.TagsSorting
+import dev.arkbuilders.navigator.data.preferences.PreferenceKey
+import dev.arkbuilders.navigator.data.preferences.Preferences
+import dev.arkbuilders.navigator.data.stats.StatsStorage
+import dev.arkbuilders.navigator.data.stats.StatsStorageRepo
+import dev.arkbuilders.navigator.data.utils.LogTags.RESOURCES_SCREEN
+import dev.arkbuilders.navigator.data.utils.findNotExistCopyName
+import dev.arkbuilders.navigator.di.modules.DefaultDispatcher
+import dev.arkbuilders.navigator.di.modules.IoDispatcher
+import dev.arkbuilders.navigator.di.modules.MainDispatcher
+import dev.arkbuilders.navigator.presentation.App
+import dev.arkbuilders.navigator.presentation.navigation.AppRouter
+import dev.arkbuilders.navigator.presentation.screen.resources.adapter.ResourcesGridPresenter
+import dev.arkbuilders.navigator.presentation.utils.StringProvider
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import moxy.MvpPresenter
+import moxy.presenterScope
 import timber.log.Timber
 import java.nio.file.Path
 import javax.inject.Inject
@@ -82,10 +85,19 @@ class ResourcesPresenter(
     @Inject
     lateinit var stringProvider: StringProvider
 
+    @Inject
+    @MainDispatcher
+    lateinit var mainDispatcher: CoroutineDispatcher
+
+    @Inject
+    @IoDispatcher
+    lateinit var ioDispatcher: CoroutineDispatcher
+
+    @Inject
+    @DefaultDispatcher
+    lateinit var defaultDispatcher: CoroutineDispatcher
+
     private val messageFlow: MutableSharedFlow<Message> = MutableSharedFlow()
-    private val mainDispatcher = Dispatchers.Main
-    private val ioDispatcher = Dispatchers.IO
-    private val defaultDispatcher = Dispatchers.Default
 
     lateinit var index: ResourceIndex
         private set

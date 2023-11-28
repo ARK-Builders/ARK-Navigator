@@ -297,7 +297,7 @@ class FoldersViewModelFactory @AssistedInject constructor(
     private val resourcesIndexRepo: ResourceIndexRepo,
     private val preferences: Preferences,
     private val permsHelper: PermissionsHelper,
-    private val devicePathsExtractor: DevicePathsExtractor
+    private val devicePathsExtractor: DevicePathsExtractor,
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return FoldersViewModel(

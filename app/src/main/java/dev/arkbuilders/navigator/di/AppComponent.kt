@@ -26,6 +26,7 @@ import dev.arkbuilders.navigator.presentation.screen.resources.adapter.FileItemV
 import dev.arkbuilders.navigator.presentation.screen.resources.adapter.ResourcesGridPresenter
 import dev.arkbuilders.navigator.presentation.screen.settings.SettingsFragment
 import dev.arkbuilders.arkfilepicker.folders.FoldersRepo
+import dev.arkbuilders.navigator.di.modules.DispatcherModule
 import javax.inject.Singleton
 
 @Singleton
@@ -33,7 +34,8 @@ import javax.inject.Singleton
     modules = [
         AppModule::class,
         CiceroneModule::class,
-        RepoModule::class
+        RepoModule::class,
+        DispatcherModule::class,
     ]
 )
 
@@ -63,7 +65,7 @@ interface AppComponent {
         fun create(
             @BindsInstance app: App,
             @BindsInstance context: Context,
-            @BindsInstance foldersRepo: FoldersRepo
+            @BindsInstance foldersRepo: FoldersRepo,
         ): AppComponent
     }
 }
