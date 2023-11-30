@@ -427,7 +427,7 @@ class GalleryPresenter(
             Timber.d("Can't provide gallery items")
             emptyList()
         }
-    
+
     private suspend fun readText(source: Path): Result<String> =
         withContext(defaultDispatcher) {
             try {
