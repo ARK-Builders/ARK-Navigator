@@ -26,7 +26,7 @@ buildscript {
         timber_version = "5.0.1"
         lottie_version = "6.1.0"
         moxy_version = "2.2.2"
-        dagger_version = "2.42"
+        dagger_version = "2.49"
         material_version = "1.4.0"
         glide_version = "4.11.0"
         cicerone_version = "v5.0.0"
