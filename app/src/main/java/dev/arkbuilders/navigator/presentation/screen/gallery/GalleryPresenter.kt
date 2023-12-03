@@ -30,12 +30,12 @@ import dev.arkbuilders.navigator.data.preferences.Preferences
 import dev.arkbuilders.navigator.data.stats.StatsStorage
 import dev.arkbuilders.navigator.data.stats.StatsStorageRepo
 import dev.arkbuilders.navigator.data.utils.LogTags.GALLERY_SCREEN
-import dev.arkbuilders.navigator.di.modules.RepoModule.Companion.MESSAGE_FLOW_NAME
 import dev.arkbuilders.navigator.domain.HandleGalleryExternalChangesUseCase
 import dev.arkbuilders.navigator.presentation.navigation.AppRouter
 import dev.arkbuilders.navigator.presentation.navigation.Screens
 import dev.arkbuilders.navigator.presentation.screen.gallery.previewpager.PreviewImageViewHolder
 import dev.arkbuilders.navigator.presentation.screen.gallery.previewpager.PreviewPlainTextViewHolder
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -50,7 +50,6 @@ import java.io.FileReader
 import java.nio.file.Files
 import java.nio.file.Path
 import javax.inject.Inject
-import javax.inject.Named
 import kotlin.io.path.getLastModifiedTime
 import kotlin.io.path.notExists
 
@@ -59,7 +58,8 @@ class GalleryPresenter(
     private val resourcesIds: List<ResourceId>,
     startAt: Int,
     private var selectingEnabled: Boolean,
-    private val selectedResources: MutableList<ResourceId>
+    private val selectedResources: MutableList<ResourceId>,
+    private val defaultDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : MvpPresenter<GalleryView>() {
 
     val scoreWidgetController = ScoreWidgetController(
@@ -123,9 +123,7 @@ class GalleryPresenter(
     @Inject
     lateinit var scoreStorageRepo: ScoreStorageRepo
 
-    @Inject
-    @Named(MESSAGE_FLOW_NAME)
-    lateinit var messageFlow: MutableSharedFlow<Message>
+    private val messageFlow: MutableSharedFlow<Message> = MutableSharedFlow()
 
     @Inject
     lateinit var handleGalleryExternalChangesUseCase:
@@ -331,7 +329,7 @@ class GalleryPresenter(
     }
 
     private fun checkResourceChanges(pos: Int) =
-        presenterScope.launch(Dispatchers.IO) {
+        presenterScope.launch(defaultDispatcher) {
             if (galleryItems.isEmpty()) {
                 return@launch
             }
@@ -363,7 +361,7 @@ class GalleryPresenter(
 
         val path = index.getPath(resource)
 
-        withContext(Dispatchers.IO) {
+        withContext(defaultDispatcher) {
             Files.delete(path)
         }
 
@@ -412,22 +410,26 @@ class GalleryPresenter(
         router.exit()
     }
 
-    fun provideGalleryItems(): List<GalleryItem> {
-        val allResources = index.allResources()
-
-        return resourcesIds
-            .filter { allResources.keys.contains(it) }
-            .map { id ->
-                val preview = previewStorage.retrieve(id).getOrThrow()
-                val metadata = metadataStorage.retrieve(id).getOrThrow()
-
-                val resource = allResources[id]!!
-                GalleryItem(resource, preview, metadata)
-            }.toMutableList()
-    }
+    fun provideGalleryItems(): List<GalleryItem> =
+        try {
+            val allResources = index.allResources()
+            resourcesIds
+                .filter { allResources.keys.contains(it) }
+                .map { id ->
+                    val preview = previewStorage.retrieve(id).getOrThrow()
+                    val metadata = metadataStorage.retrieve(id).getOrThrow()
+                    val resource = allResources.getOrElse(id) {
+                        throw NullPointerException("Resource not exist")
+                    }
+                    GalleryItem(resource, preview, metadata)
+                }.toMutableList()
+        } catch (e: Exception) {
+            Timber.d("Can't provide gallery items")
+            emptyList()
+        }
 
     private suspend fun readText(source: Path): Result<String> =
-        withContext(Dispatchers.IO) {
+        withContext(defaultDispatcher) {
             try {
                 val content = FileReader(source.toFile()).readText()
                 Result.success(content)

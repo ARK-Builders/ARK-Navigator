@@ -25,6 +25,10 @@ import dev.arkbuilders.arklib.data.meta.MetadataProcessor
 import dev.arkbuilders.arklib.data.preview.PreviewProcessor
 import dev.arkbuilders.arklib.user.score.ScoreStorage
 import dev.arkbuilders.arklib.user.tags.TagStorage
+import dev.arkbuilders.navigator.di.modules.DefaultDispatcher
+import dev.arkbuilders.navigator.di.modules.IoDispatcher
+import dev.arkbuilders.navigator.di.modules.MainDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 import java.nio.file.Files
 import javax.inject.Inject
 import kotlin.io.path.notExists
@@ -46,6 +50,18 @@ class ResourcesGridPresenter(
 ) {
     @Inject
     lateinit var preferences: Preferences
+
+    @Inject
+    @IoDispatcher
+    lateinit var ioDispatcher: CoroutineDispatcher
+
+    @Inject
+    @MainDispatcher
+    lateinit var mainDispatcher: CoroutineDispatcher
+
+    @Inject
+    @DefaultDispatcher
+    lateinit var defaultDispatcher: CoroutineDispatcher
 
     var resources = listOf<ResourceItem>()
         private set
@@ -87,8 +103,8 @@ class ResourcesGridPresenter(
             "binding score $score for resource ${item.id()}"
         )
 
-        if (Files.isDirectory(path)) {
-            throw IllegalArgumentException("Resource can't be a directory")
+        require(!Files.isDirectory(path)) {
+            "Resource can't be a directory"
         }
 
         if (path.notExists()) {
@@ -113,7 +129,7 @@ class ResourcesGridPresenter(
     fun onItemClick(pos: Int) = scope.launch {
         val allPaths = index.allPaths()
         val containsNotExistingResource = selection.any { item ->
-            allPaths[item.id()]!!.notExists()
+            allPaths[item.id()]?.notExists() == true
         }
 
         if (containsNotExistingResource) {
@@ -199,12 +215,12 @@ class ResourcesGridPresenter(
                 sortAllResources()
                 sortSelectionAndUpdateAdapter()
             }
-        }.launchIn(scope + Dispatchers.IO)
+        }.launchIn(scope + ioDispatcher)
     }
 
     suspend fun updateSelection(
         selection: Set<ResourceId>
-    ) = withContext(Dispatchers.Main) {
+    ) = withContext(mainDispatcher) {
         this@ResourcesGridPresenter.selection = resources
             .filter { selection.contains(it.id()) }
         setProgressVisibility(false)
@@ -213,26 +229,24 @@ class ResourcesGridPresenter(
 
     suspend fun resetResources(
         resources: Set<Resource>
-    ) = withContext(Dispatchers.Default) {
+    ) {
         this@ResourcesGridPresenter.resources = mapNewResources(resources)
         sortAllResources()
-        withContext(Dispatchers.Main) {
-            setProgressVisibility(false)
-        }
+        setProgressVisibility(false)
     }
 
-    suspend fun shuffleResources() = withContext(Dispatchers.Default) {
+    suspend fun shuffleResources() = withContext(defaultDispatcher) {
         selection = selection.shuffled()
         Log.d(
             RESOURCES_SCREEN,
             "reordering resources randomly"
         )
-        withContext(Dispatchers.Main) {
+        withContext(mainDispatcher) {
             viewState.updateResourcesAdapter()
         }
     }
 
-    suspend fun unShuffleResources() = withContext(Dispatchers.Default) {
+    suspend fun unShuffleResources() = withContext(defaultDispatcher) {
         sortAllResources()
         sortSelectionAndUpdateAdapter()
         Log.d(
@@ -245,9 +259,9 @@ class ResourcesGridPresenter(
 
     suspend fun decreaseScore() = changeScore(-1)
 
-    suspend fun resetScores() = withContext(Dispatchers.IO) {
+    suspend fun resetScores() = withContext(ioDispatcher) {
         scoreStorage.resetScores(selectedResources)
-        withContext(Dispatchers.Main) {
+        withContext(mainDispatcher) {
             sortAllResources()
             sortSelectionAndUpdateAdapter()
             onSelectingChanged(false)
@@ -268,11 +282,11 @@ class ResourcesGridPresenter(
     }
 
     fun onSelectedChangedExternally(selected: List<ResourceId>) =
-        scope.launch(Dispatchers.Default) {
+        scope.launch(defaultDispatcher) {
             resources.forEach { item ->
                 item.isSelected = item.id() in selected
             }
-            withContext(Dispatchers.Main) {
+            withContext(mainDispatcher) {
                 viewState.updateResourcesAdapter()
                 viewState.setSelectingCount(
                     resources.filter { it.isSelected }.size,
@@ -292,7 +306,7 @@ class ResourcesGridPresenter(
         )
     }
 
-    private suspend fun changeScore(inc: Int) = withContext(Dispatchers.Default) {
+    private suspend fun changeScore(inc: Int) = withContext(defaultDispatcher) {
         with(selectedResources) {
             if (isNotEmpty()) {
                 this.forEach {
@@ -301,17 +315,15 @@ class ResourcesGridPresenter(
                 }
             }
         }
-        withContext(Dispatchers.IO) {
-            scoreStorage.persist()
-        }
-        withContext(Dispatchers.Main) {
+        scoreStorage.persist()
+        withContext(mainDispatcher) {
             sortAllResources()
             sortSelectionAndUpdateAdapter()
         }
     }
 
     private fun updateSorting(sorting: Sorting) {
-        scope.launch(Dispatchers.Default) {
+        scope.launch(defaultDispatcher) {
             setProgressVisibility(true, "Sorting")
             this@ResourcesGridPresenter.sorting = sorting
             sortAllResources()
@@ -320,7 +332,7 @@ class ResourcesGridPresenter(
     }
 
     private fun updateAscending(ascending: Boolean) {
-        scope.launch(Dispatchers.Default) {
+        scope.launch(defaultDispatcher) {
             setProgressVisibility(true, "Sorting")
             this@ResourcesGridPresenter.ascending = ascending
             sortAllResources()
@@ -372,7 +384,7 @@ class ResourcesGridPresenter(
     }
 
     private fun sortSelectionAndUpdateAdapter() {
-        scope.launch(Dispatchers.Main) {
+        scope.launch(mainDispatcher) {
             selection = resources.filter { selection.contains(it) }
             setProgressVisibility(false)
             viewState.updateResourcesAdapter()
@@ -383,7 +395,7 @@ class ResourcesGridPresenter(
         isVisible: Boolean,
         withText: String = ""
     ) =
-        withContext(Dispatchers.Main) {
+        withContext(mainDispatcher) {
             viewState.setProgressVisibility(isVisible, withText)
         }
 

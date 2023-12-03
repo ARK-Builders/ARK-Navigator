@@ -1,31 +1,6 @@
 package dev.arkbuilders.navigator.presentation.screen.resources
 
 import android.util.Log
-import dev.arkbuilders.components.tagselector.QueryMode
-import dev.arkbuilders.components.tagselector.TagSelectorController
-import dev.arkbuilders.components.tagselector.TagsSorting
-import dev.arkbuilders.navigator.data.preferences.PreferenceKey
-import dev.arkbuilders.navigator.data.preferences.Preferences
-import dev.arkbuilders.navigator.data.stats.StatsStorage
-import dev.arkbuilders.navigator.data.stats.StatsStorageRepo
-import dev.arkbuilders.navigator.data.utils.LogTags.RESOURCES_SCREEN
-import dev.arkbuilders.navigator.data.utils.findNotExistCopyName
-import dev.arkbuilders.navigator.di.modules.RepoModule.Companion.MESSAGE_FLOW_NAME
-import dev.arkbuilders.navigator.presentation.App
-import dev.arkbuilders.navigator.presentation.navigation.AppRouter
-import dev.arkbuilders.navigator.presentation.screen.resources.adapter.ResourcesGridPresenter
-import dev.arkbuilders.navigator.presentation.utils.StringProvider
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import moxy.MvpPresenter
-import moxy.presenterScope
 import dev.arkbuilders.arkfilepicker.folders.FoldersRepo
 import dev.arkbuilders.arkfilepicker.folders.RootAndFav
 import dev.arkbuilders.arklib.ResourceId
@@ -42,10 +17,36 @@ import dev.arkbuilders.arklib.user.score.ScoreStorageRepo
 import dev.arkbuilders.arklib.user.tags.Tag
 import dev.arkbuilders.arklib.user.tags.TagStorage
 import dev.arkbuilders.arklib.user.tags.TagsStorageRepo
+import dev.arkbuilders.components.tagselector.QueryMode
+import dev.arkbuilders.components.tagselector.TagSelectorController
+import dev.arkbuilders.components.tagselector.TagsSorting
+import dev.arkbuilders.navigator.data.preferences.PreferenceKey
+import dev.arkbuilders.navigator.data.preferences.Preferences
+import dev.arkbuilders.navigator.data.stats.StatsStorage
+import dev.arkbuilders.navigator.data.stats.StatsStorageRepo
+import dev.arkbuilders.navigator.data.utils.LogTags.RESOURCES_SCREEN
+import dev.arkbuilders.navigator.data.utils.findNotExistCopyName
+import dev.arkbuilders.navigator.di.modules.DefaultDispatcher
+import dev.arkbuilders.navigator.di.modules.IoDispatcher
+import dev.arkbuilders.navigator.di.modules.MainDispatcher
+import dev.arkbuilders.navigator.presentation.App
+import dev.arkbuilders.navigator.presentation.navigation.AppRouter
+import dev.arkbuilders.navigator.presentation.screen.resources.adapter.ResourcesGridPresenter
+import dev.arkbuilders.navigator.presentation.utils.StringProvider
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import moxy.MvpPresenter
+import moxy.presenterScope
 import timber.log.Timber
 import java.nio.file.Path
 import javax.inject.Inject
-import javax.inject.Named
 import kotlin.io.path.copyTo
 import kotlin.io.path.deleteIfExists
 
@@ -85,8 +86,18 @@ class ResourcesPresenter(
     lateinit var stringProvider: StringProvider
 
     @Inject
-    @Named(MESSAGE_FLOW_NAME)
-    lateinit var messageFlow: MutableSharedFlow<Message>
+    @MainDispatcher
+    lateinit var mainDispatcher: CoroutineDispatcher
+
+    @Inject
+    @IoDispatcher
+    lateinit var ioDispatcher: CoroutineDispatcher
+
+    @Inject
+    @DefaultDispatcher
+    lateinit var defaultDispatcher: CoroutineDispatcher
+
+    private val messageFlow: MutableSharedFlow<Message> = MutableSharedFlow()
 
     lateinit var index: ResourceIndex
         private set
@@ -111,7 +122,6 @@ class ResourcesPresenter(
                 when (tagsSorting) {
                     TagsSorting.POPULARITY ->
                         error("TagsSorting.POPULARITY must be handled before")
-
                     TagsSorting.QUERIED_TS -> statsStorage.statsTagQueriedTS()
                     TagsSorting.QUERIED_N -> statsStorage.statsTagQueriedAmount()
                     TagsSorting.LABELED_TS -> statsStorage.statsTagLabeledTS()
@@ -119,7 +129,7 @@ class ResourcesPresenter(
                 } as Map<Tag, Comparable<Any>>
             },
             onSelectionChangeListener = { queryMode, normal, focus ->
-                presenterScope.launch(Dispatchers.Main) {
+                presenterScope.launch(mainDispatcher) {
                     when (queryMode) {
                         QueryMode.NORMAL -> {
                             onSelectionChange(normal)
@@ -143,7 +153,7 @@ class ResourcesPresenter(
                 preferences.set(PreferenceKey.ShowKinds, it)
             },
             onQueryModeChangedCB = {
-                presenterScope.launch(Dispatchers.Main) {
+                presenterScope.launch(mainDispatcher) {
                     viewState.updateMenu(it)
                 }
             }
@@ -251,8 +261,8 @@ class ResourcesPresenter(
 
     fun onMoveSelectedResourcesClicked(
         directoryToMove: Path
-    ) = presenterScope.launch(Dispatchers.IO) {
-        withContext(Dispatchers.Main) {
+    ) = presenterScope.launch(ioDispatcher) {
+        withContext(mainDispatcher) {
             viewState.setProgressVisibility(true, "Moving selected resources")
         }
         val resourcesToMove = gridPresenter
@@ -274,7 +284,7 @@ class ResourcesPresenter(
         index.updateAll()
 
         tagsStorageRepo.provide(index)
-        withContext(Dispatchers.Main) {
+        withContext(mainDispatcher) {
             onResourcesOrTagsChanged()
             gridPresenter.onSelectingChanged(false)
             viewState.setProgressVisibility(false)
@@ -283,7 +293,7 @@ class ResourcesPresenter(
 
     fun onCopySelectedResourcesClicked(
         directoryToCopy: Path
-    ) = presenterScope.launch(Dispatchers.IO) {
+    ) = presenterScope.launch(mainDispatcher) {
         val resourcesToCopy = gridPresenter
             .resources
             .filter { it.isSelected }
@@ -295,7 +305,7 @@ class ResourcesPresenter(
                 path.copyTo(newPath)
             }
         }
-        withContext(Dispatchers.Main) {
+        withContext(mainDispatcher) {
             gridPresenter.onSelectingChanged(false)
         }
         migrateTags(resourcesToCopy, directoryToCopy)
@@ -313,7 +323,7 @@ class ResourcesPresenter(
         preferences.set(PreferenceKey.SortByScores, enabled)
     }
 
-    fun onShuffleSwitchedOn() = presenterScope.launch(Dispatchers.Default) {
+    fun onShuffleSwitchedOn() = presenterScope.launch(defaultDispatcher) {
         gridPresenter.shuffleResources()
     }
 
@@ -321,15 +331,15 @@ class ResourcesPresenter(
         gridPresenter.unShuffleResources()
     }
 
-    fun onIncreaseScoreClicked() = presenterScope.launch(Dispatchers.Default) {
+    fun onIncreaseScoreClicked() = presenterScope.launch {
         gridPresenter.increaseScore()
     }
 
-    fun onDecreaseScoreClicked() = presenterScope.launch(Dispatchers.Default) {
+    fun onDecreaseScoreClicked() = presenterScope.launch {
         gridPresenter.decreaseScore()
     }
 
-    fun onResetScoresClicked() = presenterScope.launch(Dispatchers.IO) {
+    fun onResetScoresClicked() = presenterScope.launch(ioDispatcher) {
         gridPresenter.resetScores()
     }
 
@@ -346,8 +356,8 @@ class ResourcesPresenter(
         gridPresenter.onSelectingChanged(false)
     }
 
-    fun onRemoveSelectedResourcesClicked() = presenterScope.launch(Dispatchers.IO) {
-        withContext(Dispatchers.Main) {
+    fun onRemoveSelectedResourcesClicked() = presenterScope.launch(ioDispatcher) {
+        withContext(mainDispatcher) {
             viewState.setProgressVisibility(true, "Removing selected resources")
         }
         val resourcesToRemove = gridPresenter.resources.filter { it.isSelected }
@@ -362,7 +372,7 @@ class ResourcesPresenter(
         index.updateAll()
 
         tagsStorageRepo.provide(index)
-        withContext(Dispatchers.Main) {
+        withContext(mainDispatcher) {
             onResourcesOrTagsChanged()
             gridPresenter.onSelectingChanged(false)
             viewState.setProgressVisibility(false)

@@ -7,7 +7,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import dev.arkbuilders.arkfilepicker.folders.FoldersRepo
-import dev.arkbuilders.arklib.data.Message
 import dev.arkbuilders.arklib.data.index.ResourceIndexRepo
 import dev.arkbuilders.arklib.data.meta.MetadataProcessorRepo
 import dev.arkbuilders.arklib.data.preview.PreviewProcessorRepo
@@ -22,11 +21,6 @@ import javax.inject.Singleton
 
 @Module
 class RepoModule {
-
-    @Singleton
-    @Provides
-    @Named(MESSAGE_FLOW_NAME)
-    fun mutableMessageFlow(): MutableSharedFlow<Message> = MutableSharedFlow()
 
     @Singleton
     @Provides
