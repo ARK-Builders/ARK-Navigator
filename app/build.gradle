@@ -17,6 +17,7 @@ sonarqube {
         property "sonar.projectKey", "ARK-Builders_ARK-Navigator"
         property "sonar.organization", "ark-builders"
         property "sonar.host.url", "https://sonarcloud.io"
+        property "sonar.host.url", "**/src/**"
     }
 }
 
