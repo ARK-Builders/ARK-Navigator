@@ -1,6 +1,5 @@
 package dev.arkbuilders.navigator.presentation.dialog.rootsscan
 
-import android.util.Log
 import dev.arkbuilders.navigator.data.utils.DevicePathsExtractor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
@@ -10,6 +9,7 @@ import moxy.MvpPresenter
 import moxy.presenterScope
 import dev.arkbuilders.arklib.arkFolder
 import dev.arkbuilders.navigator.data.utils.LogTags
+import timber.log.Timber
 import java.nio.file.Path
 import java.util.LinkedList
 import java.util.Queue
@@ -61,7 +61,7 @@ class RootsScanDialogPresenter : MvpPresenter<RootsScanView>() {
         } else
             queue.addAll(folder.listDirectoryEntries().filter(Path::isDirectory))
     } catch (e: Exception) {
-        Log.w(LogTags.FILES, "Can't scan $folder due to $e")
+        Timber.w(LogTags.FILES, "Can't scan $folder due to $e")
         withContext(Dispatchers.Main) {
             viewState.toastFolderSkip(folder)
         }

@@ -1,6 +1,5 @@
 package dev.arkbuilders.navigator.di.modules
 
-import android.util.Log
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
@@ -16,6 +15,7 @@ import dev.arkbuilders.arklib.user.tags.TagsStorageRepo
 import dev.arkbuilders.navigator.data.preferences.Preferences
 import dev.arkbuilders.navigator.data.stats.StatsStorageRepo
 import dev.arkbuilders.navigator.data.utils.LogTags.MAIN
+import timber.log.Timber
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -37,7 +37,7 @@ class RepoModule {
     fun resourceIndexRepo(
         foldersRepo: FoldersRepo
     ): ResourceIndexRepo {
-        Log.d(MAIN, "creating ResourceIndexRepo")
+        Timber.d(MAIN, "creating ResourceIndexRepo")
         return ResourceIndexRepo(foldersRepo)
     }
 
