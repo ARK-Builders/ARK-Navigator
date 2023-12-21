@@ -5,7 +5,6 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import android.widget.Toast
@@ -74,7 +73,7 @@ class GalleryFragment :
                 )
                 .toMutableList(),
         ).apply {
-            Log.d(GALLERY_SCREEN, "creating GalleryPresenter")
+            Timber.d(GALLERY_SCREEN, "creating GalleryPresenter")
             App.instance.appComponent.inject(this)
         }
     }
@@ -85,7 +84,7 @@ class GalleryFragment :
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        Log.d(GALLERY_SCREEN, "view created in GalleryFragment")
+        Timber.d(GALLERY_SCREEN, "view created in GalleryFragment")
         super.onViewCreated(view, savedInstanceState)
         App.instance.appComponent.inject(this)
     }
@@ -96,7 +95,7 @@ class GalleryFragment :
     }
 
     override fun init() {
-        Log.d(GALLERY_SCREEN, "currentItem = ${binding.viewPager.currentItem}")
+        Timber.d(GALLERY_SCREEN, "currentItem = ${binding.viewPager.currentItem}")
 
         animatePagerAppearance()
         initResultListener()
@@ -306,7 +305,7 @@ class GalleryFragment :
 
     override fun displayPreviewTags(resource: ResourceId, tags: Tags) {
         lifecycleScope.launch {
-            Log.d(
+            Timber.d(
                 GALLERY_SCREEN,
                 "displaying tags of resource $resource for preview"
             )
@@ -329,7 +328,7 @@ class GalleryFragment :
     override fun showEditTagsDialog(
         resource: ResourceId
     ) {
-        Log.d(
+        Timber.d(
             GALLERY_SCREEN,
             "showing [edit-tags] dialog for resource $resource"
         )
@@ -501,9 +500,10 @@ class GalleryFragment :
         actionType: String,
         detachProcess: Boolean
     ) {
-        Log.i(GALLERY_SCREEN, "Opening resource in an external application")
-        Log.i(GALLERY_SCREEN, "path: $resourcePath")
-        Log.i(GALLERY_SCREEN, "action: $actionType")
+        Timber.i(GALLERY_SCREEN, "Opening resource in an external application " +
+            "path: $resourcePath" +
+            "action: $actionType"
+        )
 
         val intent = getExternalAppIntent(resourcePath, actionType, detachProcess)
         val title = when (actionType) {
@@ -544,8 +544,10 @@ class GalleryFragment :
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
         }
-        Log.d(GALLERY_SCREEN, "URI: ${intent.data}")
-        Log.d(GALLERY_SCREEN, "MIME: ${intent.type}")
+        Timber.d(
+            GALLERY_SCREEN, "URI: ${intent.data}" +
+                "MIME: ${intent.type}"
+        )
         return intent
     }
 
@@ -570,7 +572,7 @@ class GalleryFragment :
 
                 setOnClickListener {
                     val position = binding.viewPager.currentItem
-                    Log.d(
+                    Timber.d(
                         GALLERY_SCREEN,
                         "[edit_tags] clicked at position $position"
                     )
