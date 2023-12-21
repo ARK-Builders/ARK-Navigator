@@ -2,7 +2,6 @@ package dev.arkbuilders.navigator.presentation.screen.folders
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.activity.addCallback
 import androidx.core.os.bundleOf
@@ -42,6 +41,7 @@ import dev.arkbuilders.navigator.presentation.utils.toast
 import dev.arkbuilders.navigator.presentation.utils.toastFailedPaths
 import dev.arkbuilders.navigator.presentation.view.StackedToasts
 import org.orbitmvi.orbit.viewmodel.observe
+import timber.log.Timber
 import java.nio.file.Path
 import javax.inject.Inject
 import kotlin.io.path.Path
@@ -68,7 +68,7 @@ class FoldersFragment : Fragment(R.layout.fragment_folders) {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        Log.d(FOLDERS_SCREEN, "view created in FoldersFragment")
+        Timber.d(FOLDERS_SCREEN, "view created in FoldersFragment")
         super.onViewCreated(view, savedInstanceState)
         FullscreenHelper.setStatusBarVisibility(true, requireActivity().window)
 
@@ -77,7 +77,7 @@ class FoldersFragment : Fragment(R.layout.fragment_folders) {
     }
 
     fun init() {
-        Log.d(FOLDERS_SCREEN, "initializing FoldersFragment")
+        Timber.d(FOLDERS_SCREEN, "initializing FoldersFragment")
         (activity as MainActivity).setSelectedTab(R.id.page_roots)
         stackedToasts = StackedToasts(binding.rvToasts, lifecycleScope)
         binding.rvRoots.layoutManager = LinearLayoutManager(context)
@@ -92,7 +92,7 @@ class FoldersFragment : Fragment(R.layout.fragment_folders) {
         initResultListeners()
 
         requireActivity().onBackPressedDispatcher.addCallback(this) {
-            Log.d(FOLDERS_SCREEN, "[back] clicked")
+            Timber.d(FOLDERS_SCREEN, "[back] clicked")
             router.exit()
         }
 

@@ -3,7 +3,6 @@ package dev.arkbuilders.navigator.presentation.dialog.sort
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,6 +14,7 @@ import dev.arkbuilders.navigator.data.utils.LogTags.RESOURCES_SCREEN
 import dev.arkbuilders.navigator.data.utils.Sorting
 import moxy.MvpAppCompatDialogFragment
 import moxy.ktx.moxyPresenter
+import timber.log.Timber
 
 class SortDialogFragment : MvpAppCompatDialogFragment(), SortDialogView {
 
@@ -54,7 +54,7 @@ class SortDialogFragment : MvpAppCompatDialogFragment(), SortDialogView {
 
             val newSorting = sortingCategorySelected(checkedId)
 
-            Log.d(
+            Timber.d(
                 RESOURCES_SCREEN,
                 "sorting criteria changed, sorting = $newSorting"
             )
