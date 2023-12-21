@@ -1,6 +1,5 @@
 package dev.arkbuilders.navigator.presentation.screen.resources.adapter
 
-import android.util.Log
 import dev.arkbuilders.navigator.data.preferences.PreferenceKey
 import dev.arkbuilders.navigator.data.preferences.Preferences
 import dev.arkbuilders.navigator.data.utils.LogTags.RESOURCES_SCREEN
@@ -29,6 +28,7 @@ import dev.arkbuilders.navigator.di.modules.DefaultDispatcher
 import dev.arkbuilders.navigator.di.modules.IoDispatcher
 import dev.arkbuilders.navigator.di.modules.MainDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
+import timber.log.Timber
 import java.nio.file.Files
 import javax.inject.Inject
 import kotlin.io.path.notExists
@@ -90,7 +90,7 @@ class ResourcesGridPresenter(
 
     fun bindView(view: FileItemViewHolder) = runBlocking {
         val item = selection[view.position()]
-        Log.d(RESOURCES_SCREEN, "binding view for resource ${item.id()}")
+        Timber.d(RESOURCES_SCREEN, "binding view for resource ${item.id()}")
 
         val path = index.getPath(item.id())!!
         val score = scoreStorage.getScore(item.id())
@@ -98,7 +98,7 @@ class ResourcesGridPresenter(
         view.reset(selectingEnabled, item.isSelected)
         view.setText(path.fileName.toString(), shortFileNames)
         view.displayScore(sortByScores, score)
-        Log.d(
+        Timber.d(
             RESOURCES_SCREEN,
             "binding score $score for resource ${item.id()}"
         )
@@ -237,7 +237,7 @@ class ResourcesGridPresenter(
 
     suspend fun shuffleResources() = withContext(defaultDispatcher) {
         selection = selection.shuffled()
-        Log.d(
+        Timber.d(
             RESOURCES_SCREEN,
             "reordering resources randomly"
         )
@@ -249,7 +249,7 @@ class ResourcesGridPresenter(
     suspend fun unShuffleResources() = withContext(defaultDispatcher) {
         sortAllResources()
         sortSelectionAndUpdateAdapter()
-        Log.d(
+        Timber.d(
             RESOURCES_SCREEN,
             "reordering resources back from random order"
         )
@@ -376,7 +376,7 @@ class ResourcesGridPresenter(
                 resources = resources.reversed()
             }
         }
-        Log.d(
+        Timber.d(
             RESOURCES_SCREEN,
             "sorting by $sorting of ${resources.size} " +
                 "resources took $sortTime milliseconds"

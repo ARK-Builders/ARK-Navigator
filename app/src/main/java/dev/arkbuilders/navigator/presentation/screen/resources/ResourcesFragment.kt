@@ -3,7 +3,6 @@ package dev.arkbuilders.navigator.presentation.screen.resources
 import android.content.Intent
 import android.os.Bundle
 import android.os.SystemClock
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import androidx.activity.addCallback
@@ -45,6 +44,7 @@ import dev.arkbuilders.arkfilepicker.folders.RootAndFav
 import dev.arkbuilders.arkfilepicker.presentation.onArkPathPicked
 import dev.arkbuilders.arklib.ResourceId
 import dev.arkbuilders.arklib.user.tags.Tag
+import timber.log.Timber
 import java.nio.file.Path
 import javax.inject.Inject
 import kotlin.io.path.Path
@@ -70,7 +70,7 @@ class ResourcesFragment :
             requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
             requireArguments().getString(SELECTED_TAG_KEY)
         ).apply {
-            Log.d(RESOURCES_SCREEN, "creating ResourcesPresenter")
+            Timber.d(RESOURCES_SCREEN, "creating ResourcesPresenter")
             App.instance.appComponent.inject(this)
         }
     }
@@ -106,7 +106,7 @@ class ResourcesFragment :
     private var isAscending = true
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        Log.d(RESOURCES_SCREEN, "view created in ResourcesFragment")
+        Timber.d(RESOURCES_SCREEN, "view created in ResourcesFragment")
         super.onViewCreated(view, savedInstanceState)
         tagsLayoutBinding = TagSelectorTagsLayoutBinding.bind(binding.layoutTags)
         dragHandlerBinding =
@@ -122,7 +122,7 @@ class ResourcesFragment :
 
     override fun init(ascending: Boolean, sortByScoresEnabled: Boolean) =
         with(binding) {
-            Log.d(RESOURCES_SCREEN, "initializing ResourcesFragment")
+            Timber.d(RESOURCES_SCREEN, "initializing ResourcesFragment")
 
             initResultListeners()
             initMenuListeners()
@@ -150,7 +150,7 @@ class ResourcesFragment :
             }
             dragHandlerBinding
                 .switchScores.setOnCheckedChangeListener { _, isChecked ->
-                    Log.d(
+                    Timber.d(
                         RESOURCES_SCREEN,
                         "sorting by scores " +
                             "${if (isChecked) "enabled" else "disabled"}"
@@ -177,7 +177,7 @@ class ResourcesFragment :
         }
 
     override fun onResume() {
-        Log.d(RESOURCES_SCREEN, "resuming in ResourcesFragment")
+        Timber.d(RESOURCES_SCREEN, "resuming in ResourcesFragment")
         super.onResume()
         updateDragHandlerBias()
     }
@@ -462,13 +462,13 @@ class ResourcesFragment :
                     SystemClock.uptimeMillis() - selectorDragStartTime
                 val travelDelta = selectorDragStartBias - (1f - selectorHeight)
                 val travelSpeed = 100f * travelDelta / (travelTime / 1000f)
-                Log.d(
+                Timber.d(
                     RESOURCES_SCREEN,
-                    "draggable bar of tags selector was moved:"
+                    "draggable bar of tags selector was moved:\n" +
+                        "delta=${100f * travelDelta}%" +
+                        "time=${travelTime}ms" +
+                        "speed=$travelSpeed%/sec"
                 )
-                Log.d(RESOURCES_SCREEN, "delta=${100f * travelDelta}%")
-                Log.d(RESOURCES_SCREEN, "time=${travelTime}ms")
-                Log.d(RESOURCES_SCREEN, "speed=$travelSpeed%/sec")
 
                 if (travelTime > DRAG_TRAVEL_TIME_THRESHOLD &&
                     abs(travelDelta) > DRAG_TRAVEL_DELTA_THRESHOLD &&

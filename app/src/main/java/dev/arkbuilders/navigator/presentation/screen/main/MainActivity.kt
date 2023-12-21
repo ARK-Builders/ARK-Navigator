@@ -1,7 +1,6 @@
 package dev.arkbuilders.navigator.presentation.screen.main
 
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.forEach
 import androidx.core.view.isVisible
@@ -20,6 +19,7 @@ import kotlinx.coroutines.launch
 import ru.terrakok.cicerone.NavigatorHolder
 import dev.arkbuilders.arkfilepicker.folders.FoldersRepo
 import dev.arkbuilders.arkfilepicker.folders.RootAndFav
+import timber.log.Timber
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
@@ -50,30 +50,30 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     }
 
     fun init() {
-        Log.d(MAIN, "initializing")
+        Timber.d(MAIN, "initializing")
         binding.bottomNavigation.setOnApplyWindowInsetsListener(null)
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.page_settings -> {
-                    Log.d(MAIN, "switching to Settings screen")
+                    Timber.d(MAIN, "switching to Settings screen")
                     router.newRootScreen(Screens.SettingsScreen())
                     true
                 }
 
                 R.id.page_roots -> {
-                    Log.d(MAIN, "switching to Folders screen")
+                    Timber.d(MAIN, "switching to Folders screen")
                     router.replaceScreen(Screens.FoldersScreen())
                     true
                 }
 
                 R.id.page_tags -> {
-                    Log.d(MAIN, "switching to Resources screen")
+                    Timber.d(MAIN, "switching to Resources screen")
                     lifecycleScope.launch {
                         val folders = foldersRepo.provideFolders()
                         if (folders.isEmpty()) {
                             enterResourceFragmentFailed()
                         } else {
-                            Log.d(MAIN, "switching to Resources screen")
+                            Timber.d(MAIN, "switching to Resources screen")
                             router.newRootScreen(
                                 Screens.ResourcesScreen(
                                     RootAndFav(
@@ -89,7 +89,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 }
 
                 else -> {
-                    Log.w(MAIN, "no handler found")
+                    Timber.w(MAIN, "no handler found")
                     true
                 }
             }
@@ -109,7 +109,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     fun setSelectedTab(menuItemID: Int) {
         binding.bottomNavigation.apply {
-            Log.d(
+            Timber.d(
                 MAIN,
                 "tab with id $menuItemID selected," +
                     "title: ${menu.findItem(menuItemID).title}"
@@ -125,13 +125,13 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     }
 
     override fun onResumeFragments() {
-        Log.d(MAIN, "resuming fragments in MainActivity")
+        Timber.d(MAIN, "resuming fragments in MainActivity")
         super.onResumeFragments()
         navigatorHolder.setNavigator(navigator)
     }
 
     override fun onPause() {
-        Log.d(MAIN, "pausing MainActivity")
+        Timber.d(MAIN, "pausing MainActivity")
         super.onPause()
         navigatorHolder.removeNavigator()
     }

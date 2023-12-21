@@ -2,7 +2,6 @@ package dev.arkbuilders.navigator.presentation.screen.settings
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -30,6 +29,7 @@ import dev.arkbuilders.navigator.presentation.utils.toast
 import dev.arkbuilders.navigator.data.utils.LogTags.SETTINGS_SCREEN
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 class SettingsFragment : Fragment(R.layout.fragment_settings) {
@@ -164,7 +164,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     companion object {
         fun newInstance() =
             SettingsFragment().apply {
-                Log.d(SETTINGS_SCREEN, "creating new instance")
+                Timber.d(SETTINGS_SCREEN, "creating new instance")
             }
     }
 }

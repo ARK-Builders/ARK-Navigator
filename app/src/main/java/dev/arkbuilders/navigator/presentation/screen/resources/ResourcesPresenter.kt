@@ -1,6 +1,5 @@
 package dev.arkbuilders.navigator.presentation.screen.resources
 
-import android.util.Log
 import dev.arkbuilders.arkfilepicker.folders.FoldersRepo
 import dev.arkbuilders.arkfilepicker.folders.RootAndFav
 import dev.arkbuilders.arklib.ResourceId
@@ -160,7 +159,7 @@ class ResourcesPresenter(
         )
 
     override fun onFirstViewAttach() {
-        Log.d(RESOURCES_SCREEN, "first view attached in ResourcesPresenter")
+        Timber.d(RESOURCES_SCREEN, "first view attached in ResourcesPresenter")
         super.onFirstViewAttach()
 
         presenterScope.launch {
