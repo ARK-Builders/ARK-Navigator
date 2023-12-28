@@ -500,7 +500,9 @@ class GalleryFragment :
         actionType: String,
         detachProcess: Boolean
     ) {
-        Timber.i(GALLERY_SCREEN, "Opening resource in an external application " +
+        Timber.i(
+            GALLERY_SCREEN,
+            "Opening resource in an external application " +
             "path: $resourcePath" +
             "action: $actionType"
         )
@@ -545,8 +547,8 @@ class GalleryFragment :
             }
         }
         Timber.d(
-            GALLERY_SCREEN, "URI: ${intent.data}" +
-                "MIME: ${intent.type}"
+            GALLERY_SCREEN,
+            "URI: ${intent.data}" + "MIME: ${intent.type}"
         )
         return intent
     }
