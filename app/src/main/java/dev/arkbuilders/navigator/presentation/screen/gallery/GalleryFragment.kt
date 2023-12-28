@@ -503,8 +503,8 @@ class GalleryFragment :
         Timber.i(
             GALLERY_SCREEN,
             "Opening resource in an external application " +
-            "path: $resourcePath" +
-            "action: $actionType"
+                "path: $resourcePath" +
+                "action: $actionType"
         )
 
         val intent = getExternalAppIntent(resourcePath, actionType, detachProcess)
