@@ -2,7 +2,7 @@
 buildscript {
     ext {
         //region ARK lib
-        ark_lib_version = "0.3.3"
+        ark_lib_version = "0.3.4"
         ark_components_version = "0.0.6"
         //endregion ARK lib
         kotlin_version = "1.7.10"
