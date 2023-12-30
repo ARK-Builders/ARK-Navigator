@@ -187,6 +187,7 @@ dependencies {
     androidTestImplementation "androidx.test:rules:$test_rule_version"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_core_version"
     implementation "com.github.wseemann:FFmpegMediaMetadataRetriever:$ffmeg_media_retriever_version"
+    implementation "com.github.matomo-org:matomo-sdk-android:$matomo_analytics_version"
 
     implementation "org.apache.tika:tika-core:$tika_core"
     implementation "com.airbnb.android:lottie:$lottie_version"

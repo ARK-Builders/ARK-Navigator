@@ -40,6 +40,8 @@ import dev.arkbuilders.navigator.presentation.utils.FullscreenHelper
 import dev.arkbuilders.navigator.presentation.utils.toast
 import dev.arkbuilders.navigator.presentation.utils.toastFailedPaths
 import dev.arkbuilders.navigator.presentation.view.StackedToasts
+import org.matomo.sdk.Tracker
+import org.matomo.sdk.extra.TrackHelper
 import org.orbitmvi.orbit.viewmodel.observe
 import timber.log.Timber
 import java.nio.file.Path
@@ -59,6 +61,10 @@ class FoldersFragment : Fragment(R.layout.fragment_folders) {
     @Inject
     lateinit var router: AppRouter
 
+
+    @Inject
+    lateinit var analytics: Tracker
+
     private lateinit var stackedToasts: StackedToasts
     private var foldersTree: FolderTreeView? = null
 
@@ -74,6 +80,9 @@ class FoldersFragment : Fragment(R.layout.fragment_folders) {
 
         init()
         viewModel.observe(this, state = ::render, sideEffect = ::handleSideEffect)
+
+        TrackHelper.track().screen(requireActivity())
+            .title("Folders management").with(analytics)
     }
 
     fun init() {
