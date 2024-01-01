@@ -25,6 +25,7 @@ import dev.arkbuilders.arkfilepicker.presentation.folderstree.FolderNode
 import dev.arkbuilders.arkfilepicker.presentation.folderstree.FolderTreeView
 import dev.arkbuilders.arkfilepicker.presentation.folderstree.RootNode
 import dev.arkbuilders.navigator.R
+import dev.arkbuilders.navigator.analytics.folders.FoldersAnalytics
 import dev.arkbuilders.navigator.data.utils.LogTags.FOLDERS_SCREEN
 import dev.arkbuilders.navigator.databinding.FragmentFoldersBinding
 import dev.arkbuilders.navigator.presentation.App
@@ -61,9 +62,8 @@ class FoldersFragment : Fragment(R.layout.fragment_folders) {
     @Inject
     lateinit var router: AppRouter
 
-
     @Inject
-    lateinit var analytics: Tracker
+    lateinit var folderAnalytics: FoldersAnalytics
 
     private lateinit var stackedToasts: StackedToasts
     private var foldersTree: FolderTreeView? = null
@@ -81,14 +81,11 @@ class FoldersFragment : Fragment(R.layout.fragment_folders) {
         init()
         viewModel.observe(this, state = ::render, sideEffect = ::handleSideEffect)
 
-        TrackHelper.track().screen("Folders").title("Folders management").with(analytics)
-        TrackHelper.track().event("folder screen", "view sceen")
-            .name("label").value(1000f).with(analytics)
-
     }
 
     fun init() {
         Timber.d(FOLDERS_SCREEN, "initializing FoldersFragment")
+        folderAnalytics.trackAction()
         (activity as MainActivity).setSelectedTab(R.id.page_roots)
         stackedToasts = StackedToasts(binding.rvToasts, lifecycleScope)
         binding.rvRoots.layoutManager = LinearLayoutManager(context)
