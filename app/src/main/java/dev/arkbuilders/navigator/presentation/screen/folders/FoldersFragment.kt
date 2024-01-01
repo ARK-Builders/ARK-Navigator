@@ -81,8 +81,10 @@ class FoldersFragment : Fragment(R.layout.fragment_folders) {
         init()
         viewModel.observe(this, state = ::render, sideEffect = ::handleSideEffect)
 
-        TrackHelper.track().screen(requireActivity())
-            .title("Folders management").with(analytics)
+        TrackHelper.track().screen("Folders").title("Folders management").with(analytics)
+        TrackHelper.track().event("folder screen", "view sceen")
+            .name("label").value(1000f).with(analytics)
+
     }
 
     fun init() {

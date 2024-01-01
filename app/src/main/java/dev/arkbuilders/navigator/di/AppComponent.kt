@@ -26,6 +26,7 @@ import dev.arkbuilders.navigator.presentation.screen.resources.adapter.FileItemV
 import dev.arkbuilders.navigator.presentation.screen.resources.adapter.ResourcesGridPresenter
 import dev.arkbuilders.navigator.presentation.screen.settings.SettingsFragment
 import dev.arkbuilders.arkfilepicker.folders.FoldersRepo
+import dev.arkbuilders.navigator.analytics.AnalyticsModule
 import dev.arkbuilders.navigator.di.modules.DispatcherModule
 import javax.inject.Singleton
 
@@ -36,6 +37,7 @@ import javax.inject.Singleton
         CiceroneModule::class,
         RepoModule::class,
         DispatcherModule::class,
+        AnalyticsModule::class,
     ]
 )
 
