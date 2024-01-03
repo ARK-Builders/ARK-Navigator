@@ -1,4 +1,4 @@
-name: Build
+name: Analyze the app
 
 on:
   # Trigger analysis when pushing in master or pull requests, and when creating
