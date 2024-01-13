@@ -41,8 +41,6 @@ import dev.arkbuilders.navigator.presentation.utils.FullscreenHelper
 import dev.arkbuilders.navigator.presentation.utils.toast
 import dev.arkbuilders.navigator.presentation.utils.toastFailedPaths
 import dev.arkbuilders.navigator.presentation.view.StackedToasts
-import org.matomo.sdk.Tracker
-import org.matomo.sdk.extra.TrackHelper
 import org.orbitmvi.orbit.viewmodel.observe
 import timber.log.Timber
 import java.nio.file.Path
@@ -85,7 +83,7 @@ class FoldersFragment : Fragment(R.layout.fragment_folders) {
 
     fun init() {
         Timber.d(FOLDERS_SCREEN, "initializing FoldersFragment")
-        folderAnalytics.trackAction()
+        folderAnalytics.trackScreen()
         (activity as MainActivity).setSelectedTab(R.id.page_roots)
         stackedToasts = StackedToasts(binding.rvToasts, lifecycleScope)
         binding.rvRoots.layoutManager = LinearLayoutManager(context)

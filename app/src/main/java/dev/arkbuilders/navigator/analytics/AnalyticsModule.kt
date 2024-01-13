@@ -1,5 +1,6 @@
 package dev.arkbuilders.navigator.analytics
 
+import android.content.Context
 import dagger.Module
 import dagger.Provides
 import dev.arkbuilders.navigator.analytics.folders.FoldersAnalytics
@@ -12,6 +13,9 @@ class AnalyticsModule {
 
     @Singleton
     @Provides
-    fun provideFolderAnalytics(matomoTracker: Tracker): FoldersAnalytics =
-        FoldersAnalyticsImpl(matomoTracker)
+    fun provideFolderAnalytics(
+        matomoTracker: Tracker,
+        context: Context
+    ): FoldersAnalytics =
+        FoldersAnalyticsImpl(matomoTracker = matomoTracker, context = context)
 }

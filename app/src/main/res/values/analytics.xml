@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<!--    Folder feature analytics-->
+    <string name="folders_screen_state">folders_screen</string>
+    <string name="folders_create_button_click">folders_create_button_clicked</string>
+
+</resources>

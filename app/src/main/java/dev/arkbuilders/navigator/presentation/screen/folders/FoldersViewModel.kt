@@ -8,6 +8,7 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dev.arkbuilders.arkfilepicker.folders.FoldersRepo
 import dev.arkbuilders.arklib.data.index.ResourceIndexRepo
+import dev.arkbuilders.navigator.analytics.folders.FoldersAnalytics
 import dev.arkbuilders.navigator.data.PermissionsHelper
 import dev.arkbuilders.navigator.data.preferences.PreferenceKey
 import dev.arkbuilders.navigator.data.preferences.Preferences
@@ -61,7 +62,8 @@ class FoldersViewModel @Inject constructor(
     private val preferences: Preferences,
     private val permsHelper: PermissionsHelper,
     private val devicePathsExtractor: DevicePathsExtractor,
-    private val defaultDispatcher: CoroutineDispatcher = Dispatchers.IO
+    private val defaultDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val foldersAnalytics: FoldersAnalytics,
 ) : ViewModel(), ContainerHost<FoldersState, FoldersSideEffect> {
 
     override val container: Container<FoldersState, FoldersSideEffect> = container(
@@ -71,6 +73,7 @@ class FoldersViewModel @Inject constructor(
     private lateinit var devices: List<Path>
 
     init {
+        foldersAnalytics.trackScreen()
         intent {
             if (!permsHelper.isWritePermissionGranted()) {
                 var granted =
@@ -298,15 +301,17 @@ class FoldersViewModelFactory @AssistedInject constructor(
     private val preferences: Preferences,
     private val permsHelper: PermissionsHelper,
     private val devicePathsExtractor: DevicePathsExtractor,
+    private val foldersAnalytics: FoldersAnalytics
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return FoldersViewModel(
-            rescanRoots,
-            foldersRepo,
-            resourcesIndexRepo,
-            preferences,
-            permsHelper,
-            devicePathsExtractor
+            rescanRoots = rescanRoots,
+            foldersRepo = foldersRepo,
+            resourcesIndexRepo = resourcesIndexRepo,
+            preferences = preferences,
+            permsHelper = permsHelper,
+            devicePathsExtractor = devicePathsExtractor,
+            foldersAnalytics = foldersAnalytics,
         ) as T
     }
 

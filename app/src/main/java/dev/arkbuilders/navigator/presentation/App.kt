@@ -18,6 +18,9 @@ import org.acra.sender.HttpSender
 import dev.arkbuilders.arkfilepicker.folders.FoldersRepo
 import dev.arkbuilders.arklib.initArkLib
 import dev.arkbuilders.arklib.initRustLogger
+import org.matomo.sdk.Matomo
+import org.matomo.sdk.TrackerBuilder
+import org.matomo.sdk.extra.TrackHelper
 import timber.log.Timber
 
 class App : Application() {
@@ -37,7 +40,6 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
-
         System.loadLibrary("arklib")
         FoldersRepo.init(this)
         initArkLib()
