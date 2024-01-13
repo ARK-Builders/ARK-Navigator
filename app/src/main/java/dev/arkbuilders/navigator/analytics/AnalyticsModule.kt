@@ -4,7 +4,7 @@ import android.content.Context
 import dagger.Module
 import dagger.Provides
 import dev.arkbuilders.navigator.analytics.folders.FoldersAnalytics
-import dev.arkbuilders.navigator.analytics.folders.FoldersAnalyticsImpl
+import dev.arkbuilders.navigator.analytics.folders.impl.FoldersAnalyticsImpl
 import org.matomo.sdk.Tracker
 import javax.inject.Singleton
 
