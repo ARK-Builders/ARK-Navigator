@@ -28,6 +28,11 @@ jobs:
     - name: Validate Gradle wrapper
       uses: gradle/wrapper-validation-action@v1.0.5
 
+    - name: Decrypt the keystore for signing
+      run: |
+        echo "${{ secrets.KEYSTORE_ENCRYPTED }}" > keystore.asc
+        gpg -d --passphrase "${{ secrets.KEYSTORE_PASSWORD }}" --batch keystore.asc > keystore.jks
+
     - name: Build Release APK
       run: ./gradlew assembleRelease
 

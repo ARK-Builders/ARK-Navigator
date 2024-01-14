@@ -67,10 +67,10 @@ android {
 
     signingConfigs {
         testRelease {
-            storeFile project.rootProject.file('./testRelease.jks')
-            storePassword "navigator"
-            keyAlias "key0"
-            keyPassword "navigator"
+            storeFile project.rootProject.file('./keystore.jks')
+            storePassword "sw0rdf1sh"
+            keyAlias "ark-builders-test"
+            keyPassword "rybamech"
             v1SigningEnabled true
             v2SigningEnabled true
         }
