@@ -114,7 +114,6 @@ jobs:
       run: ./gradlew testDebugUnitTest
 
   lint:
-    needs: test
     environment: Development
     runs-on: ubuntu-latest
     steps:
@@ -135,7 +134,6 @@ jobs:
         path: ./app/build/reports/lint-results-debug.html
 
   ktlint:
-    needs: test
     environment: Development
     runs-on: ubuntu-latest
     steps:
