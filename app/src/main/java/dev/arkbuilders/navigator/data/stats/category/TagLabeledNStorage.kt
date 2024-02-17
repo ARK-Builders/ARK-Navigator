@@ -27,8 +27,14 @@ class TagLabeledNStorage(
     override suspend fun init() {
         val storage = locateStorage()
         if (storage?.exists() == true) {
-            val json = Json.decodeFromStream<JsonTagLabeledN>(storage.inputStream())
-            tagLabeledAmount.putAll(json.data)
+            try {
+                val json = Json.decodeFromStream<JsonTagLabeledN>(
+                    storage.inputStream()
+                )
+                tagLabeledAmount.putAll(json.data)
+            } catch (exception: Exception) {
+                Timber.e("TagLabeledNStorage.init exception: " + exception.message)
+            }
         } else {
             index.allIds()
                 .associateWith { tagsStorage.getTags(it) }
