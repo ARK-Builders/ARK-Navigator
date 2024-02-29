@@ -2,7 +2,7 @@
 buildscript {
     ext {
         //region ARK lib
-        ark_lib_version = "0.3.4"
+        ark_lib_version = "0.3.4-blake3"
         ark_components_version = "0.0.7"
         dev_ark_picker_file_version = "0.1.2"
         //endregion ARK lib

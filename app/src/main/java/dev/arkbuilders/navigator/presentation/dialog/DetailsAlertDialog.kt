@@ -39,7 +39,7 @@ class DetailsAlertDialog(
         // common resources for all file type
         dialogResourceInfoBinding.resourceId.text = context.getString(
             R.string.resource_id_label,
-            resource.id.crc32
+            resource.id.blake3
         )
         dialogResourceInfoBinding.resourceName.text = context.getString(
             R.string.resource_name_label,
@@ -49,10 +49,7 @@ class DetailsAlertDialog(
             R.string.resource_path_label,
             path.absolutePathString()
         )
-        dialogResourceInfoBinding.resourceSize.text = context.getString(
-            R.string.resource_size_label,
-            FileUtils.byteCountToDisplaySize(resource.size())
-        )
+        dialogResourceInfoBinding.resourceSize.text = "test"
 
         // load specific metadata from specific kind
         ExtraLoader.loadWithLabel(
