@@ -218,6 +218,7 @@ class FoldersViewModel @Inject constructor(
             throw AssertionError("Path must be checked in RootPicker")
         }
 
+        foldersAnalytics.trackRootAdded()
         foldersRepo.addRoot(path)
 
         postSideEffect(FoldersSideEffect.ToastIndexingCanTakeMinutes)
@@ -267,6 +268,7 @@ class FoldersViewModel @Inject constructor(
             throw AssertionError("Path must be checked in RootPicker")
         }
 
+        foldersAnalytics.trackFavAdded()
         foldersRepo.addFavorite(root, relative)
         folders = foldersRepo.provideFolders()
         reduce {

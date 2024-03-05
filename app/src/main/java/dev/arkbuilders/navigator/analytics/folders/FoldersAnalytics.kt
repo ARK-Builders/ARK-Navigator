@@ -2,5 +2,8 @@ package dev.arkbuilders.navigator.analytics.folders
 
 interface FoldersAnalytics {
     fun trackScreen()
-    fun trackAction()
+    fun trackRootOpen()
+    fun trackFavOpen()
+    fun trackRootAdded()
+    fun trackFavAdded()
 }

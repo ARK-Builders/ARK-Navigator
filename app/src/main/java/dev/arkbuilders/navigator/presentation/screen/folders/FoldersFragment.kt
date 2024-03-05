@@ -78,12 +78,10 @@ class FoldersFragment : Fragment(R.layout.fragment_folders) {
 
         init()
         viewModel.observe(this, state = ::render, sideEffect = ::handleSideEffect)
-
     }
 
     fun init() {
         Timber.d(FOLDERS_SCREEN, "initializing FoldersFragment")
-        folderAnalytics.trackScreen()
         (activity as MainActivity).setSelectedTab(R.id.page_roots)
         stackedToasts = StackedToasts(binding.rvToasts, lifecycleScope)
         binding.rvRoots.layoutManager = LinearLayoutManager(context)
@@ -208,6 +206,7 @@ class FoldersFragment : Fragment(R.layout.fragment_folders) {
                         RootAndFav(node.path.toString(), null)
                     )
                 )
+                folderAnalytics.trackRootOpen()
             }
 
             is FavoriteNode -> {
@@ -216,6 +215,7 @@ class FoldersFragment : Fragment(R.layout.fragment_folders) {
                         RootAndFav(node.root.toString(), node.path.toString())
                     )
                 )
+                folderAnalytics.trackFavOpen()
             }
         }
     }

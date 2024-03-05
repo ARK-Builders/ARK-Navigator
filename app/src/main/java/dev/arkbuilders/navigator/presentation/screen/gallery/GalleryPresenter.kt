@@ -24,6 +24,7 @@ import dev.arkbuilders.arklib.user.tags.TagsStorageRepo
 import dev.arkbuilders.arklib.utils.ImageUtils
 import dev.arkbuilders.arklib.utils.extension
 import dev.arkbuilders.components.scorewidget.ScoreWidgetController
+import dev.arkbuilders.navigator.analytics.gallery.GalleryAnalytics
 import dev.arkbuilders.navigator.data.preferences.PreferenceKey
 import dev.arkbuilders.navigator.data.preferences.Preferences
 import dev.arkbuilders.navigator.data.stats.StatsStorage
@@ -58,7 +59,7 @@ class GalleryPresenter(
     startAt: Int,
     private var selectingEnabled: Boolean,
     private val selectedResources: MutableList<ResourceId>,
-    private val defaultDispatcher: CoroutineDispatcher = Dispatchers.IO
+    private val defaultDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : MvpPresenter<GalleryView>() {
 
     val scoreWidgetController = ScoreWidgetController(
@@ -128,7 +129,11 @@ class GalleryPresenter(
     lateinit var handleGalleryExternalChangesUseCase:
         HandleGalleryExternalChangesUseCase
 
+    @Inject
+    lateinit var analytics: GalleryAnalytics
+
     override fun onFirstViewAttach() {
+        analytics.trackScreen()
         Timber.d(GALLERY_SCREEN, "first view attached in GalleryPresenter")
         super.onFirstViewAttach()
         presenterScope.launch {
@@ -222,6 +227,7 @@ class GalleryPresenter(
     }
 
     fun onOpenFabClick() = presenterScope.launch {
+        analytics.trackResOpen()
         Timber.d(GALLERY_SCREEN, "[open_resource] clicked at position $currentPos")
 
         val id = currentItem.id()
@@ -238,6 +244,7 @@ class GalleryPresenter(
     }
 
     fun onInfoFabClick() = presenterScope.launch {
+        analytics.trackResInfo()
         Timber.d(GALLERY_SCREEN, "[info_resource] clicked at position $currentPos")
 
         val path = index.getPath(currentItem.id())!!
@@ -245,6 +252,7 @@ class GalleryPresenter(
     }
 
     fun onShareFabClick() = presenterScope.launch {
+        analytics.trackResShare()
         Timber.d(GALLERY_SCREEN, "[share_resource] clicked at position $currentPos")
         val path = index.getPath(currentItem.id())!!
 
@@ -258,12 +266,14 @@ class GalleryPresenter(
     }
 
     fun onEditFabClick() = presenterScope.launch {
+        analytics.trackResEdit()
         Timber.d(GALLERY_SCREEN, "[edit_resource] clicked at position $currentPos")
         val path = index.getPath(currentItem.id())!!
         viewState.editResource(path)
     }
 
     fun onRemoveFabClick() = presenterScope.launch(NonCancellable) {
+        analytics.trackResRemove()
         Timber.d(GALLERY_SCREEN, "[remove_resource] clicked at position $currentPos")
         deleteResource(currentItem.id())
         galleryItems.removeAt(currentPos)
@@ -278,6 +288,7 @@ class GalleryPresenter(
     }
 
     fun onTagSelected(tag: Tag) {
+        analytics.trackTagSelect()
         router.navigateTo(
             Screens.ResourcesScreenWithSelectedTag(
                 rootAndFav, tag
@@ -286,6 +297,7 @@ class GalleryPresenter(
     }
 
     fun onTagRemove(tag: Tag) = presenterScope.launch(NonCancellable) {
+        analytics.trackTagRemove()
         val id = currentItem.id()
 
         val tags = tagsStorage.getTags(id)
@@ -324,6 +336,7 @@ class GalleryPresenter(
     }
 
     fun onEditTagsDialogBtnClick() {
+        analytics.trackTagsEdit()
         viewState.showEditTagsDialog(currentItem.id())
     }
 
