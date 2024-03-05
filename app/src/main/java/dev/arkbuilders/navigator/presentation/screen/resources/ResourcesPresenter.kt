@@ -19,6 +19,7 @@ import dev.arkbuilders.arklib.user.tags.TagsStorageRepo
 import dev.arkbuilders.components.tagselector.QueryMode
 import dev.arkbuilders.components.tagselector.TagSelectorController
 import dev.arkbuilders.components.tagselector.TagsSorting
+import dev.arkbuilders.navigator.analytics.resources.ResourcesAnalytics
 import dev.arkbuilders.navigator.data.preferences.PreferenceKey
 import dev.arkbuilders.navigator.data.preferences.Preferences
 import dev.arkbuilders.navigator.data.stats.StatsStorage
@@ -96,6 +97,9 @@ class ResourcesPresenter(
     @DefaultDispatcher
     lateinit var defaultDispatcher: CoroutineDispatcher
 
+    @Inject
+    lateinit var analytics: ResourcesAnalytics
+
     private val messageFlow: MutableSharedFlow<Message> = MutableSharedFlow()
 
     lateinit var index: ResourceIndex
@@ -118,6 +122,7 @@ class ResourcesPresenter(
             presenterScope,
             kindToString = { stringProvider.kindToString(it) },
             tagSortCriteria = { tagsSorting ->
+                analytics.trackTagSortCriteria(tagsSorting)
                 when (tagsSorting) {
                     TagsSorting.POPULARITY ->
                         error("TagsSorting.POPULARITY must be handled before")
@@ -152,6 +157,7 @@ class ResourcesPresenter(
                 preferences.set(PreferenceKey.ShowKinds, it)
             },
             onQueryModeChangedCB = {
+                analytics.trackQueryModeChanged(it)
                 presenterScope.launch(mainDispatcher) {
                     viewState.updateMenu(it)
                 }
@@ -159,6 +165,7 @@ class ResourcesPresenter(
         )
 
     override fun onFirstViewAttach() {
+        analytics.trackScreen()
         Timber.d(RESOURCES_SCREEN, "first view attached in ResourcesPresenter")
         super.onFirstViewAttach()
 
@@ -206,6 +213,7 @@ class ResourcesPresenter(
                 tagStorage = tagsStorageRepo.provide(index)
                 scoreStorage = scoreStorageRepo.provide(index)
             } catch (e: StorageException) {
+                analytics.trackStorageProvideException(e)
                 viewState.displayStorageException(
                     e.label,
                     e.msg
@@ -261,6 +269,7 @@ class ResourcesPresenter(
     fun onMoveSelectedResourcesClicked(
         directoryToMove: Path
     ) = presenterScope.launch(ioDispatcher) {
+        analytics.trackMoveSelectedRes()
         withContext(mainDispatcher) {
             viewState.setProgressVisibility(true, "Moving selected resources")
         }
@@ -293,6 +302,7 @@ class ResourcesPresenter(
     fun onCopySelectedResourcesClicked(
         directoryToCopy: Path
     ) = presenterScope.launch(mainDispatcher) {
+        analytics.trackCopySelectedRes()
         val resourcesToCopy = gridPresenter
             .resources
             .filter { it.isSelected }
@@ -323,6 +333,7 @@ class ResourcesPresenter(
     }
 
     fun onShuffleSwitchedOn() = presenterScope.launch(defaultDispatcher) {
+        analytics.trackResShuffle()
         gridPresenter.shuffleResources()
     }
 
@@ -347,6 +358,7 @@ class ResourcesPresenter(
     fun allowResettingScores() = gridPresenter.allowResettingScores()
 
     fun onShareSelectedResourcesClicked() = presenterScope.launch {
+        analytics.trackShareSelectedRes()
         val selected = gridPresenter
             .resources
             .filter { it.isSelected }
@@ -356,6 +368,7 @@ class ResourcesPresenter(
     }
 
     fun onRemoveSelectedResourcesClicked() = presenterScope.launch(ioDispatcher) {
+        analytics.trackRemoveSelectedRes()
         withContext(mainDispatcher) {
             viewState.setProgressVisibility(true, "Removing selected resources")
         }

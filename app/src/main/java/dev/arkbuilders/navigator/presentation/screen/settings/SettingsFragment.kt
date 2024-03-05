@@ -15,18 +15,19 @@ import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ItemAdapter
 import com.mikepenz.fastadapter.binding.AbstractBindingItem
 import dev.arkbuilders.navigator.R
-import dev.arkbuilders.navigator.databinding.FragmentSettingsBinding
-import dev.arkbuilders.navigator.databinding.ItemBooleanPreferenceBinding
+import dev.arkbuilders.navigator.analytics.settings.SettingsAnalytics
 import dev.arkbuilders.navigator.data.preferences.PreferenceKey
 import dev.arkbuilders.navigator.data.preferences.Preferences
+import dev.arkbuilders.navigator.data.utils.LogTags.SETTINGS_SCREEN
+import dev.arkbuilders.navigator.databinding.FragmentSettingsBinding
+import dev.arkbuilders.navigator.databinding.ItemBooleanPreferenceBinding
 import dev.arkbuilders.navigator.presentation.App
-import dev.arkbuilders.navigator.presentation.screen.main.MainActivity
-import dev.arkbuilders.navigator.presentation.navigation.AppRouter
-import dev.arkbuilders.navigator.presentation.navigation.Screens
 import dev.arkbuilders.navigator.presentation.dialog.ConfirmationDialogFragment
 import dev.arkbuilders.navigator.presentation.dialog.InfoDialogFragment
+import dev.arkbuilders.navigator.presentation.navigation.AppRouter
+import dev.arkbuilders.navigator.presentation.navigation.Screens
+import dev.arkbuilders.navigator.presentation.screen.main.MainActivity
 import dev.arkbuilders.navigator.presentation.utils.toast
-import dev.arkbuilders.navigator.data.utils.LogTags.SETTINGS_SCREEN
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -42,6 +43,9 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
 
     @Inject
     lateinit var router: AppRouter
+
+    @Inject
+    lateinit var settingsAnalytics: SettingsAnalytics
 
     //region booleanPreferenceModels
 
@@ -113,6 +117,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        settingsAnalytics.trackScreen()
         (activity as MainActivity).setSelectedTab(R.id.page_settings)
         (requireActivity() as MainActivity).setBottomNavigationVisibility(true)
 
@@ -128,7 +133,8 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
                     requireContext(),
                     childFragmentManager,
                     lifecycleScope,
-                    preferences
+                    preferences,
+                    settingsAnalytics
                 )
             }
         )
@@ -183,7 +189,8 @@ private class BooleanPreferenceItem(
     val ctx: Context,
     val fragmentManager: FragmentManager,
     val lifecycleScope: CoroutineScope,
-    val preferences: Preferences
+    val preferences: Preferences,
+    val settingsAnalytics: SettingsAnalytics
 ) : AbstractBindingItem<ItemBooleanPreferenceBinding>() {
     override val type = R.id.fastadapter_item
     private var preferenceEnabled = false
@@ -219,6 +226,10 @@ private class BooleanPreferenceItem(
             ctx.toast(
                 if (preferenceEnabled) model.toastEnabled
                 else model.toastDisabled
+            )
+            settingsAnalytics.trackBooleanPref(
+                ctx.getString(model.name),
+                preferenceEnabled
             )
             lifecycleScope.launch {
                 preferences.set(model.key, preferenceEnabled)

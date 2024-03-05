@@ -6,41 +6,29 @@ import org.matomo.sdk.Tracker
 
 class GalleryAnalyticsImpl(
     private val matomoTracker: Tracker
-): GalleryAnalytics {
+) : GalleryAnalytics {
     override fun trackScreen() = matomoTracker.trackScreen {
         screen(SCREEN_NAME)
     }
 
-    override fun trackResOpen() = matomoTracker.trackEvent {
-        event(SCREEN_NAME, "Resource open")
-    }
+    override fun trackResOpen() = matomoTracker.trackScreenEvent("Resource open")
 
-    override fun trackResShare() = matomoTracker.trackEvent {
-        event(SCREEN_NAME, "Resource share")
-    }
+    override fun trackResShare() = matomoTracker.trackScreenEvent("Resource share")
 
-    override fun trackResInfo() = matomoTracker.trackEvent {
-        event(SCREEN_NAME, "Resource info")
-    }
+    override fun trackResInfo() = matomoTracker.trackScreenEvent("Resource info")
 
-    override fun trackResEdit() = matomoTracker.trackEvent {
-        event(SCREEN_NAME, "Resource edit")
-    }
+    override fun trackResEdit() = matomoTracker.trackScreenEvent("Resource edit")
 
-    override fun trackResRemove() = matomoTracker.trackEvent {
-        event(SCREEN_NAME, "Resource remove")
-    }
+    override fun trackResRemove() = matomoTracker.trackScreenEvent("Resource remove")
 
-    override fun trackTagSelect() = matomoTracker.trackEvent {
-        event(SCREEN_NAME, "Tag select")
-    }
+    override fun trackTagSelect() = matomoTracker.trackScreenEvent("Tag select")
 
-    override fun trackTagRemove() = matomoTracker.trackEvent {
-        event(SCREEN_NAME, "Tag remove")
-    }
+    override fun trackTagRemove() = matomoTracker.trackScreenEvent("Tag remove")
 
-    override fun trackTagsEdit() = matomoTracker.trackEvent {
-        event(SCREEN_NAME, "Tags edit")
+    override fun trackTagsEdit() = matomoTracker.trackScreenEvent("Tags edit")
+
+    private fun Tracker.trackScreenEvent(action: String) = this.trackEvent {
+        event(SCREEN_NAME, action)
     }
 
     companion object {

@@ -14,20 +14,16 @@ class FoldersAnalyticsImpl @Inject constructor(
     override fun trackScreen() = matomoTracker
         .trackScreen { screen(SCREEN_NAME) }
 
-    override fun trackRootOpen() = matomoTracker.trackEvent {
-        event(SCREEN_NAME, "Root opened")
-    }
+    override fun trackRootOpen() = matomoTracker.trackScreenEvent("Root opened")
 
-    override fun trackFavOpen() = matomoTracker.trackEvent {
-        event(SCREEN_NAME, "Fav opened")
-    }
+    override fun trackFavOpen() = matomoTracker.trackScreenEvent("Fav opened")
 
-    override fun trackRootAdded() = matomoTracker.trackEvent {
-        event(SCREEN_NAME, "Root added")
-    }
+    override fun trackRootAdded() = matomoTracker.trackScreenEvent("Root added")
 
-    override fun trackFavAdded() = matomoTracker.trackEvent {
-        event(SCREEN_NAME, "Fav added")
+    override fun trackFavAdded() = matomoTracker.trackScreenEvent("Fav added")
+
+    private fun Tracker.trackScreenEvent(action: String) = this.trackEvent {
+        event(SCREEN_NAME, action)
     }
 
     companion object {

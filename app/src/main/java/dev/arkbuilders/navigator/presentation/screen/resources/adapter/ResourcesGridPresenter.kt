@@ -1,21 +1,5 @@
 package dev.arkbuilders.navigator.presentation.screen.resources.adapter
 
-import dev.arkbuilders.navigator.data.preferences.PreferenceKey
-import dev.arkbuilders.navigator.data.preferences.Preferences
-import dev.arkbuilders.navigator.data.utils.LogTags.RESOURCES_SCREEN
-import dev.arkbuilders.navigator.data.utils.Sorting
-import dev.arkbuilders.navigator.presentation.navigation.AppRouter
-import dev.arkbuilders.navigator.presentation.navigation.Screens
-import dev.arkbuilders.navigator.presentation.screen.resources.ResourcesPresenter
-import dev.arkbuilders.navigator.presentation.screen.resources.ResourcesView
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.plus
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import dev.arkbuilders.arkfilepicker.folders.RootAndFav
 import dev.arkbuilders.arklib.ResourceId
 import dev.arkbuilders.arklib.data.index.Resource
@@ -24,10 +8,27 @@ import dev.arkbuilders.arklib.data.meta.MetadataProcessor
 import dev.arkbuilders.arklib.data.preview.PreviewProcessor
 import dev.arkbuilders.arklib.user.score.ScoreStorage
 import dev.arkbuilders.arklib.user.tags.TagStorage
+import dev.arkbuilders.navigator.analytics.resources.ResourcesAnalytics
+import dev.arkbuilders.navigator.data.preferences.PreferenceKey
+import dev.arkbuilders.navigator.data.preferences.Preferences
+import dev.arkbuilders.navigator.data.utils.LogTags.RESOURCES_SCREEN
+import dev.arkbuilders.navigator.data.utils.Sorting
 import dev.arkbuilders.navigator.di.modules.DefaultDispatcher
 import dev.arkbuilders.navigator.di.modules.IoDispatcher
 import dev.arkbuilders.navigator.di.modules.MainDispatcher
+import dev.arkbuilders.navigator.presentation.navigation.AppRouter
+import dev.arkbuilders.navigator.presentation.navigation.Screens
+import dev.arkbuilders.navigator.presentation.screen.resources.ResourcesPresenter
+import dev.arkbuilders.navigator.presentation.screen.resources.ResourcesView
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.nio.file.Files
 import javax.inject.Inject
@@ -62,6 +63,9 @@ class ResourcesGridPresenter(
     @Inject
     @DefaultDispatcher
     lateinit var defaultDispatcher: CoroutineDispatcher
+
+    @Inject
+    lateinit var analytics: ResourcesAnalytics
 
     var resources = listOf<ResourceItem>()
         private set
@@ -127,6 +131,7 @@ class ResourcesGridPresenter(
     }
 
     fun onItemClick(pos: Int) = scope.launch {
+        analytics.trackResClick()
         val allPaths = index.allPaths()
         val containsNotExistingResource = selection.any { item ->
             allPaths[item.id()]?.notExists() == true
@@ -193,6 +198,7 @@ class ResourcesGridPresenter(
 
         preferences.flow(PreferenceKey.Sorting).onEach { intSorting ->
             val newSorting = Sorting.values()[intSorting]
+            analytics.trackResSortCriteria(newSorting)
             if (sorting != newSorting)
                 updateSorting(newSorting)
         }.launchIn(scope + Dispatchers.IO)
