@@ -18,5 +18,4 @@ class SettingsAnalyticsImpl(
     companion object {
         private const val SCREEN_NAME = "Settings screen"
     }
-
 }
