@@ -6,7 +6,7 @@ import org.matomo.sdk.Tracker
 
 class SettingsAnalyticsImpl(
     private val matomoTracker: Tracker
-): SettingsAnalytics {
+) : SettingsAnalytics {
     override fun trackScreen() = matomoTracker.trackScreen { screen(SCREEN_NAME) }
 
     override fun trackBooleanPref(name: String, enabled: Boolean) {
