@@ -1,6 +1,5 @@
 package dev.arkbuilders.navigator.presentation.screen.folders
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -9,6 +8,7 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dev.arkbuilders.arkfilepicker.folders.FoldersRepo
 import dev.arkbuilders.arklib.data.index.ResourceIndexRepo
+import dev.arkbuilders.navigator.analytics.folders.FoldersAnalytics
 import dev.arkbuilders.navigator.data.PermissionsHelper
 import dev.arkbuilders.navigator.data.preferences.PreferenceKey
 import dev.arkbuilders.navigator.data.preferences.Preferences
@@ -23,6 +23,7 @@ import org.orbitmvi.orbit.syntax.simple.intent
 import org.orbitmvi.orbit.syntax.simple.postSideEffect
 import org.orbitmvi.orbit.syntax.simple.reduce
 import org.orbitmvi.orbit.viewmodel.container
+import timber.log.Timber
 import java.nio.file.Path
 import javax.inject.Inject
 
@@ -61,7 +62,8 @@ class FoldersViewModel @Inject constructor(
     private val preferences: Preferences,
     private val permsHelper: PermissionsHelper,
     private val devicePathsExtractor: DevicePathsExtractor,
-    private val defaultDispatcher: CoroutineDispatcher = Dispatchers.IO
+    private val defaultDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val foldersAnalytics: FoldersAnalytics,
 ) : ViewModel(), ContainerHost<FoldersState, FoldersSideEffect> {
 
     override val container: Container<FoldersState, FoldersSideEffect> = container(
@@ -71,6 +73,7 @@ class FoldersViewModel @Inject constructor(
     private lateinit var devices: List<Path>
 
     init {
+        foldersAnalytics.trackScreen()
         intent {
             if (!permsHelper.isWritePermissionGranted()) {
                 var granted =
@@ -125,13 +128,13 @@ class FoldersViewModel @Inject constructor(
         }
 
         if (deleteFromMemory) {
-            Log.d(
+            Timber.d(
                 LogTags.FOLDERS_TREE,
                 "forgetting and deleting root folder $root"
             )
             foldersRepo.deleteRoot(root)
         } else {
-            Log.d(
+            Timber.d(
                 LogTags.FOLDERS_TREE,
                 "forgetting root folder $root"
             )
@@ -158,13 +161,13 @@ class FoldersViewModel @Inject constructor(
             )
         }
         if (deleteFromMemory) {
-            Log.d(
+            Timber.d(
                 LogTags.FOLDERS_TREE,
                 "forgetting and deleting favorite $favorite"
             )
             foldersRepo.deleteFavorite(root, favorite)
         } else {
-            Log.d(
+            Timber.d(
                 LogTags.FOLDERS_TREE,
                 "forgetting favorite $favorite"
             )
@@ -205,7 +208,7 @@ class FoldersViewModel @Inject constructor(
             )
         }
 
-        Log.d(LogTags.FOLDERS_SCREEN, "root $root added in RootsPresenter")
+        Timber.d(LogTags.FOLDERS_SCREEN, "root $root added in RootsPresenter")
         val path = withContext(defaultDispatcher) {
             root.toRealPath()
         }
@@ -215,6 +218,7 @@ class FoldersViewModel @Inject constructor(
             throw AssertionError("Path must be checked in RootPicker")
         }
 
+        foldersAnalytics.trackRootAdded()
         foldersRepo.addRoot(path)
 
         postSideEffect(FoldersSideEffect.ToastIndexingCanTakeMinutes)
@@ -245,7 +249,7 @@ class FoldersViewModel @Inject constructor(
                 ProgressWithText(true, "Adding favorite folder")
             )
         }
-        Log.d(
+        Timber.d(
             LogTags.FOLDERS_SCREEN,
             "favorite $favorite added in RootsPresenter"
         )
@@ -264,6 +268,7 @@ class FoldersViewModel @Inject constructor(
             throw AssertionError("Path must be checked in RootPicker")
         }
 
+        foldersAnalytics.trackFavAdded()
         foldersRepo.addFavorite(root, relative)
         folders = foldersRepo.provideFolders()
         reduce {
@@ -298,15 +303,17 @@ class FoldersViewModelFactory @AssistedInject constructor(
     private val preferences: Preferences,
     private val permsHelper: PermissionsHelper,
     private val devicePathsExtractor: DevicePathsExtractor,
+    private val foldersAnalytics: FoldersAnalytics
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return FoldersViewModel(
-            rescanRoots,
-            foldersRepo,
-            resourcesIndexRepo,
-            preferences,
-            permsHelper,
-            devicePathsExtractor
+            rescanRoots = rescanRoots,
+            foldersRepo = foldersRepo,
+            resourcesIndexRepo = resourcesIndexRepo,
+            preferences = preferences,
+            permsHelper = permsHelper,
+            devicePathsExtractor = devicePathsExtractor,
+            foldersAnalytics = foldersAnalytics,
         ) as T
     }
 

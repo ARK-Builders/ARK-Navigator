@@ -2,10 +2,10 @@ package dev.arkbuilders.navigator.presentation.view
 
 import android.content.Context
 import android.util.AttributeSet
-import android.util.Log
 import android.widget.CompoundButton
 import com.google.android.material.switchmaterial.SwitchMaterial
 import dev.arkbuilders.navigator.data.utils.LogTags.SETTINGS_SCREEN
+import timber.log.Timber
 
 class UserSwitchMaterial(
     context: Context,
@@ -17,7 +17,7 @@ class UserSwitchMaterial(
     fun setOnUserCheckedChangeListener(
         callback: (isChecked: Boolean) -> Unit
     ) {
-        Log.d(
+        Timber.d(
             SETTINGS_SCREEN,
             "setOnUserCheckedChangeListener: ${this.id}, " + "$isChecked"
         )
