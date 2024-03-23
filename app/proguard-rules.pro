@@ -22,3 +22,7 @@
 
 -dontwarn org.slf4j.impl.StaticLoggerBinder
 -dontwarn javax.xml.stream.XMLResolver
+
+-keep class dev.arkbuilders.arklib.** { *; }
+-keep class wseemann.media.FFmpegMediaMetadataRetriever.** { *; }
+-keep @kotlinx.serialization.Serializable class * {*;}
