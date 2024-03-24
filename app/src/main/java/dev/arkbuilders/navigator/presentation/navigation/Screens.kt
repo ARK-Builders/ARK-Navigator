@@ -1,7 +1,7 @@
 package dev.arkbuilders.navigator.presentation.navigation
 
 import ru.terrakok.cicerone.android.support.SupportAppScreen
-import dev.arkbuilders.arkfilepicker.folders.RootAndFav
+import dev.arkbuilders.arklib.data.folders.RootAndFav
 import dev.arkbuilders.arklib.ResourceId
 import dev.arkbuilders.navigator.presentation.screen.folders.FoldersFragment
 import dev.arkbuilders.navigator.presentation.screen.gallery.GalleryFragment

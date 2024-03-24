@@ -1,7 +1,7 @@
 package dev.arkbuilders.navigator.presentation.screen.resources
 
-import dev.arkbuilders.arkfilepicker.folders.FoldersRepo
-import dev.arkbuilders.arkfilepicker.folders.RootAndFav
+import dev.arkbuilders.arklib.data.folders.FoldersRepo
+import dev.arkbuilders.arklib.data.folders.RootAndFav
 import dev.arkbuilders.arklib.ResourceId
 import dev.arkbuilders.arklib.data.Message
 import dev.arkbuilders.arklib.data.index.ResourceIndex

@@ -15,8 +15,6 @@ import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import by.kirich1409.viewbindingdelegate.viewBinding
-import dev.arkbuilders.components.databinding.TagSelectorDragHandlerBinding
-import dev.arkbuilders.components.databinding.TagSelectorTagsLayoutBinding
 import dev.arkbuilders.components.tagselector.QueryMode
 import dev.arkbuilders.components.tagselector.TagSelector
 import dev.arkbuilders.navigator.BuildConfig
@@ -40,10 +38,12 @@ import kotlinx.coroutines.launch
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import moxy.presenterScope
-import dev.arkbuilders.arkfilepicker.folders.RootAndFav
-import dev.arkbuilders.arkfilepicker.presentation.onArkPathPicked
+import dev.arkbuilders.arklib.data.folders.RootAndFav
 import dev.arkbuilders.arklib.ResourceId
 import dev.arkbuilders.arklib.user.tags.Tag
+import dev.arkbuilders.components.filepicker.onArkPathPicked
+import dev.arkbuilders.components.tagselector.databinding.TagSelectorDragHandlerBinding
+import dev.arkbuilders.components.tagselector.databinding.TagSelectorTagsLayoutBinding
 import timber.log.Timber
 import java.nio.file.Path
 import javax.inject.Inject

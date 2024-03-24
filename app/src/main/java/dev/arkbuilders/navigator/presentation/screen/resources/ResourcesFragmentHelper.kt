@@ -2,9 +2,9 @@ package dev.arkbuilders.navigator.presentation.screen.resources
 
 import android.view.View
 import androidx.core.view.isVisible
-import dev.arkbuilders.arkfilepicker.ArkFilePickerConfig
-import dev.arkbuilders.arkfilepicker.presentation.filepicker.ArkFilePickerFragment
-import dev.arkbuilders.arkfilepicker.presentation.filepicker.ArkFilePickerMode
+import dev.arkbuilders.components.filepicker.ArkFilePickerConfig
+import dev.arkbuilders.components.filepicker.ArkFilePickerFragment
+import dev.arkbuilders.components.filepicker.ArkFilePickerMode
 import dev.arkbuilders.navigator.R
 import dev.arkbuilders.navigator.databinding.PopupSelectedResourcesActionsBinding
 import dev.arkbuilders.navigator.presentation.dialog.ConfirmationDialogFragment

@@ -17,8 +17,8 @@ import dev.arkbuilders.navigator.presentation.navigation.Screens
 import dev.arkbuilders.navigator.presentation.utils.toast
 import kotlinx.coroutines.launch
 import ru.terrakok.cicerone.NavigatorHolder
-import dev.arkbuilders.arkfilepicker.folders.FoldersRepo
-import dev.arkbuilders.arkfilepicker.folders.RootAndFav
+import dev.arkbuilders.arklib.data.folders.FoldersRepo
+import dev.arkbuilders.arklib.data.folders.RootAndFav
 import timber.log.Timber
 import javax.inject.Inject
 

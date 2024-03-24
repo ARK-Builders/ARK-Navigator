@@ -2,7 +2,7 @@
 buildscript {
     ext {
         //region ARK lib
-        ark_lib_version = "0.3.4"
+        ark_lib_version = "0.3.5"
         ark_components_version = "0.0.11"
         dev_ark_picker_file_version = "0.1.2"
         //endregion ARK lib
@@ -51,6 +51,7 @@ buildscript {
 
         maven { url "https://plugins.gradle.org/m2/" }
         gradlePluginPortal()
+        mavenLocal()
     }
     dependencies {
         classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:4.4.1.3373"
@@ -73,7 +74,7 @@ allprojects {
     repositories {
         google()
         //// Uncomment this repo for easier library development:
-        //mavenLocal()
+        mavenLocal()
 
         //// This is how you can push the library into local repo:
         //// ./gradlew --info lib:publishToMavenLocal
