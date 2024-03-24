@@ -2,7 +2,7 @@ package dev.arkbuilders.navigator.presentation
 
 import android.app.Application
 import android.os.StrictMode
-import dev.arkbuilders.arkfilepicker.folders.FoldersRepo
+import dev.arkbuilders.arklib.data.folders.FoldersRepo
 import dev.arkbuilders.arklib.initArkLib
 import dev.arkbuilders.arklib.initRustLogger
 import dev.arkbuilders.navigator.BuildConfig
