@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.util.TypedValue
 import android.view.View
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.core.content.FileProvider
 import androidx.core.os.bundleOf
 import androidx.core.view.doOnNextLayout
@@ -15,7 +16,9 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import androidx.viewpager2.widget.ViewPager2
@@ -28,6 +31,7 @@ import dev.arkbuilders.arklib.data.meta.Metadata
 import dev.arkbuilders.arklib.user.tags.Tag
 import dev.arkbuilders.arklib.user.tags.Tags
 import dev.arkbuilders.arklib.utils.extension
+import dev.arkbuilders.components.databinding.ScoreWidgetBinding
 import dev.arkbuilders.components.scorewidget.ScoreWidget
 import dev.arkbuilders.navigator.BuildConfig
 import dev.arkbuilders.navigator.R
@@ -52,7 +56,7 @@ import dev.arkbuilders.navigator.presentation.view.StackedToasts
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.nio.file.Path
-
+import kotlin.system.measureTimeMillis
 
 class GalleryUpliftFragment : Fragment() {
     private val binding by viewBinding(FragmentGalleryBinding::bind)
@@ -63,16 +67,104 @@ class GalleryUpliftFragment : Fragment() {
         ScoreWidget(viewModel.scoreWidgetController, viewLifecycleOwner)
     }
 
+    private fun onBackClick() {
+        Timber.d(LogTags.GALLERY_SCREEN, "quitting from GalleryPresenter")
+        notifySelectedChanged(viewModel.selectedResources)
+        exitFullscreen()
+        viewModel.router.exit()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         Timber.d(LogTags.GALLERY_SCREEN, "view created in GalleryFragment")
-//        viewModel = GalleryUpliftViewModel()
         super.onViewCreated(view, savedInstanceState)
         App.instance.appComponent.inject(this)
+
+        Timber.d(
+            LogTags.GALLERY_SCREEN,
+            "currentItem = ${binding.viewPager.currentItem}"
+        )
+        collectState()
+
+        animatePagerAppearance()
+        initResultListener()
+        stackedToasts = StackedToasts(binding.rvToasts, lifecycleScope)
+
+        FullscreenHelper.setStatusBarVisibility(false, requireActivity().window)
+        (requireActivity() as MainActivity).setBottomNavigationVisibility(false)
+
+        requireActivity().onBackPressedDispatcher.addCallback(this) {
+            onBackClick()
+        }
+
+
+//        pagerAdapter = PreviewsPager(requireContext(), presenter)
+
+        initViewPager()
+        scoreWidget.init(ScoreWidgetBinding.bind(binding.scoreWidget))
+
+        binding.apply {
+            val selectingEnabled =
+                requireArguments().getBoolean(GalleryFragment.SELECTING_ENABLED_KEY)
+            layoutSelected.isVisible = selectingEnabled
+            fabStartSelect.isVisible = !selectingEnabled
+
+            removeResourceFab.setOnClickListener {
+                Toast.makeText(
+                    requireContext(),
+                    "Press and hold to delete",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+
+            removeResourceFab.setOnLongClickListener {
+                val time = measureTimeMillis {
+                    viewModel.onRemoveFabClick()
+                }
+                Timber.tag(LogTags.GALLERY_SCREEN).d("${time / 1000L}s")
+                true
+            }
+
+            infoResourceFab.setOnClickListener {
+                viewModel.onInfoFabClick()
+            }
+            shareResourceFab.setOnClickListener {
+                viewModel.onShareFabClick()
+            }
+            fabStartSelect.setOnClickListener {
+                viewModel.onSelectingChanged()
+            }
+
+            openResourceFab.setOnClickListener {
+                viewModel.onOpenFabClick()
+            }
+
+            editResourceFab.setOnClickListener {
+                viewModel.onEditFabClick()
+            }
+
+            layoutSelected.setOnClickListener {
+                viewModel.onSelectBtnClick()
+            }
+
+            layoutSelected.setOnLongClickListener {
+                viewModel.onSelectingChanged()
+                return@setOnLongClickListener true
+            }
+        }
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
         scoreWidget.onDestroyView()
+    }
+    private fun collectState() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                }
+            }
+        }
     }
 
     fun updatePagerAdapter() {
