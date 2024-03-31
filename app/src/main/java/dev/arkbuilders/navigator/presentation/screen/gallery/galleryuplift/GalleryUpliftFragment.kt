@@ -53,6 +53,7 @@ import dev.arkbuilders.navigator.presentation.utils.makeVisible
 import dev.arkbuilders.navigator.presentation.view.DefaultPopup
 import dev.arkbuilders.navigator.presentation.view.DepthPageTransformer
 import dev.arkbuilders.navigator.presentation.view.StackedToasts
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.nio.file.Path
@@ -158,10 +159,57 @@ class GalleryUpliftFragment : Fragment() {
         super.onDestroyView()
         scoreWidget.onDestroyView()
     }
+
     private fun collectState() {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
+                    viewModel.showInfoAlert.collect { data ->
+                        data?.let {
+                            showInfoAlert(it.path, it.resource, it.metadata)
+                        }
+                    }
+                }
+                launch {
+                    viewModel.shareLink.collect {
+                        shareLink(it)
+                    }
+                }
+                launch {
+                    viewModel.shareResource.collect { path ->
+                        path?.let {
+                            shareResource(path)
+                        }
+                    }
+                }
+                launch {
+                    viewModel.toggleSelect.collect {
+                        toggleSelecting(it)
+                    }
+                }
+                launch {
+                    viewModel.openLink.collect {
+
+                    }
+                }
+                launch {
+                    viewModel.openLink.collect {
+                        openLink(it)
+                    }
+                }
+                launch {
+                    viewModel.viewInExternalApp.collect { path ->
+                        path?.let {
+                            viewInExternalApp(it)
+                        }
+                    }
+                }
+                launch {
+                    viewModel.editResource.collect { path ->
+                        path?.let {
+                            editResource(it)
+                        }
+                    }
                 }
             }
         }
