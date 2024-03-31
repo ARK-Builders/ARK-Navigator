@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.DiffUtil
 import dev.arkbuilders.arklib.ResourceId
 import dev.arkbuilders.arklib.data.Message
+import dev.arkbuilders.arklib.data.index.Resource
 import dev.arkbuilders.arklib.data.index.ResourceIndex
 import dev.arkbuilders.arklib.data.index.ResourceIndexRepo
 import dev.arkbuilders.arklib.data.meta.Metadata
@@ -111,8 +112,15 @@ class GalleryUpliftViewModel @Inject constructor(
     }
 
 
-    private val _showInfoAlert: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val showInfoAlert: StateFlow<Boolean> = _showInfoAlert
+    private val _showInfoAlert: MutableStateFlow<ShowInfoData?> = MutableStateFlow(null)
+    val showInfoAlert: StateFlow<ShowInfoData?> = _showInfoAlert
+
+    data class ShowInfoData(
+        val path: Path,
+        val resource: Resource,
+        val metadata: Metadata
+    )
+
     fun onInfoFabClick() = viewModelScope.launch {
         analytics.trackResInfo()
         Timber.d(
@@ -122,17 +130,22 @@ class GalleryUpliftViewModel @Inject constructor(
 
         val path = index.getPath(currentItem.id())!!
         //TODO Trigger showInfoAlert
-        _showInfoAlert.emit(true)
+        val data = ShowInfoData(
+            path = path,
+            resource = currentItem.resource,
+            metadata = currentItem.metadata
+        )
+        _showInfoAlert.emit(data)
 //        viewState.showInfoAlert(path, currentItem.resource, currentItem.metadata)
     }
 
 
-    private val _shareLink: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val shareLink: StateFlow<Boolean> = _shareLink
+    private val _shareLink: MutableStateFlow<String> = MutableStateFlow("")
+    val shareLink: StateFlow<String> = _shareLink
 
 
-    private val _shareResource: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val shareResource: StateFlow<Boolean> = _shareResource
+    private val _shareResource: MutableStateFlow<Path?> = MutableStateFlow(null)
+    val shareResource: StateFlow<Path?> = _shareResource
     fun onShareFabClick() = viewModelScope.launch {
         analytics.trackResShare()
         Timber.d(
@@ -145,13 +158,12 @@ class GalleryUpliftViewModel @Inject constructor(
             val url = readText(path).getOrThrow()
             //TODO Trigger sharelink
 //            viewState.shareLink(url)
-            _shareLink.emit(true)
+            _shareLink.emit(url)
             return@launch
         }
         //TODO Trigger shareResource
 //        viewState.shareResource(path)
-        _shareResource.emit(true)
-
+        _shareResource.emit(path)
     }
 
     private var selectingEnabled: Boolean = false
@@ -171,12 +183,13 @@ class GalleryUpliftViewModel @Inject constructor(
         }
     }
 
-    private val _openLink: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val openLink: StateFlow<Boolean> = _openLink
+    private val _openLink: MutableStateFlow<String> = MutableStateFlow("")
+    val openLink: StateFlow<String> = _openLink
 
 
-    private val _viewInExternalApp: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val viewInExternalApp: StateFlow<Boolean> = _viewInExternalApp
+    private val _viewInExternalApp: MutableStateFlow<Path?> =
+        MutableStateFlow(null)
+    val viewInExternalApp: StateFlow<Path?> = _viewInExternalApp
     fun onOpenFabClick() = viewModelScope.launch {
         analytics.trackResOpen()
         Timber.d(
@@ -191,19 +204,19 @@ class GalleryUpliftViewModel @Inject constructor(
             val url = readText(path).getOrThrow()
             //TODO Trigger openLink
 //            viewState.openLink(url)
-            _openLink.emit(true)
+            _openLink.emit(url)
             return@launch
         }
 
         //TODO Trigger viewInExternalApp
 //        viewState.viewInExternalApp(path)
-        _viewInExternalApp.emit(true)
+        _viewInExternalApp.emit(path)
 
     }
 
 
-    private val _editResource: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val editResource: StateFlow<Boolean> = _editResource
+    private val _editResource: MutableStateFlow<Path?> = MutableStateFlow(null)
+    val editResource: StateFlow<Path?> = _editResource
     fun onEditFabClick() = viewModelScope.launch {
         analytics.trackResEdit()
         Timber.d(
@@ -213,7 +226,7 @@ class GalleryUpliftViewModel @Inject constructor(
         val path = index.getPath(currentItem.id())!!
         //TODO Trigger editResource
 //        viewState.editResource(path)
-        _editResource.emit(true)
+        _editResource.emit(path)
     }
 
 
