@@ -211,6 +211,18 @@ class GalleryUpliftFragment : Fragment() {
                         }
                     }
                 }
+                launch {
+                    viewModel.notifyResourceChange.collect {
+                        notifyResourcesChanged()
+                    }
+                }
+                launch {
+                    viewModel.notifyResourceChange.collect {
+                        viewModel.showProgress.collect {
+                            setProgressVisibility(it, "Changes detected, indexing")
+                        }
+                    }
+                }
             }
         }
     }

@@ -17,6 +17,7 @@ import dev.arkbuilders.arklib.user.score.ScoreStorage
 import dev.arkbuilders.arklib.user.score.ScoreStorageRepo
 import dev.arkbuilders.arklib.user.tags.Tag
 import dev.arkbuilders.arklib.user.tags.TagStorage
+import dev.arkbuilders.arklib.user.tags.Tags
 import dev.arkbuilders.arklib.user.tags.TagsStorageRepo
 import dev.arkbuilders.components.scorewidget.ScoreWidgetController
 import dev.arkbuilders.navigator.analytics.gallery.GalleryAnalytics
@@ -27,6 +28,7 @@ import dev.arkbuilders.navigator.data.utils.LogTags
 import dev.arkbuilders.navigator.domain.HandleGalleryExternalChangesUseCase
 import dev.arkbuilders.navigator.presentation.navigation.AppRouter
 import dev.arkbuilders.navigator.presentation.screen.gallery.GalleryPresenter
+import dev.arkbuilders.navigator.presentation.screen.resources.adapter.ResourceDiffUtilCallback
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -34,11 +36,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import moxy.presenterScope
 import timber.log.Timber
 import java.io.FileReader
 import java.nio.file.Path
 import javax.inject.Inject
+import kotlin.io.path.getLastModifiedTime
+import kotlin.io.path.notExists
 
 class GalleryUpliftViewModel @Inject constructor(
     val preferences: Preferences,
@@ -111,8 +114,10 @@ class GalleryUpliftViewModel @Inject constructor(
 
     }
 
+    private val resourcesIds: List<ResourceId> = listOf()
 
-    private val _showInfoAlert: MutableStateFlow<ShowInfoData?> = MutableStateFlow(null)
+    private val _showInfoAlert: MutableStateFlow<ShowInfoData?> =
+        MutableStateFlow(null)
     val showInfoAlert: StateFlow<ShowInfoData?> = _showInfoAlert
 
     data class ShowInfoData(
@@ -233,11 +238,151 @@ class GalleryUpliftViewModel @Inject constructor(
     fun onSelectBtnClick() {}
     fun onResume() {}
     fun onTagsChanged() {}
-    fun onPageChanged(postion: Int) {}
+    fun onPageChanged(newPos: Int) = viewModelScope.launch {
+        if (galleryItems.isEmpty())
+            return@launch
+
+        checkResourceChanges(newPos)
+
+        currentPos = newPos
+
+        val id = currentItem.id()
+        val tags = tagsStorage.getTags(id)
+        displayPreview(id, currentItem.metadata, tags)
+    }
+
     fun onTagSelected(tag: Tag) {}
     fun onTagRemove(tag: Tag) {}
     fun onEditTagsDialogBtnClick() {}
 
+    private fun displayPreview(
+        id: ResourceId,
+        meta: Metadata,
+        tags: Tags
+    ) {
+        // TODO Trigger setupPreview
+//        viewState.setupPreview(currentPos, meta)
+
+        // TODO Trigger displayPreviewTags
+//        viewState.displayPreviewTags(id, tags)
+        scoreWidgetController.displayScore()
+
+        // TODO Trigger displaySelected
+//        viewState.displaySelected(
+//            id in selectedResources,
+//            showAnim = false,
+//            selectedResources.size,
+//            galleryItems.size
+//        )
+    }
+    private fun checkResourceChanges(pos: Int) =
+        viewModelScope.launch {
+            if (galleryItems.isEmpty()) {
+                return@launch
+            }
+
+            val item = galleryItems[pos]
+
+            val path = index.getPath(item.id())
+                ?: let {
+                    Timber.d("Resource ${item.id()} can't be found in the index")
+                    invokeHandleGalleryExternalChangesUseCase()
+//                    handleGalleryExternalChangesUseCase(this@GalleryPresenter)
+                    return@launch
+                }
+
+            if (path.notExists()) {
+                Timber.d("Resource ${item.id()} isn't stored by path $path")
+                invokeHandleGalleryExternalChangesUseCase()
+//                handleGalleryExternalChangesUseCase(this@GalleryPresenter)
+                return@launch
+            }
+
+            if (path.getLastModifiedTime() != item.resource.modified) {
+                Timber.d("Index is not up-to-date regarding path $path")
+                invokeHandleGalleryExternalChangesUseCase()
+//                handleGalleryExternalChangesUseCase(this@GalleryPresenter)
+                return@launch
+            }
+        }
+
+    fun provideGalleryItems(): List<GalleryPresenter.GalleryItem> =
+        try {
+            val allResources = index.allResources()
+            resourcesIds
+                .filter { allResources.keys.contains(it) }
+                .map { id ->
+                    val preview = previewStorage.retrieve(id).getOrThrow()
+                    val metadata = metadataStorage.retrieve(id).getOrThrow()
+                    val resource = allResources.getOrElse(id) {
+                        throw NullPointerException("Resource not exist")
+                    }
+                    GalleryPresenter.GalleryItem(resource, preview, metadata)
+                }.toMutableList()
+        } catch (e: Exception) {
+            Timber.d("Can't provide gallery items")
+            emptyList()
+        }
+
+    private val _notifyResourceChange: MutableStateFlow<Boolean> =
+        MutableStateFlow(false)
+    val notifyResourceChange: StateFlow<Boolean> = _notifyResourceChange
+
+    private val _showProgress: MutableStateFlow<Boolean> =
+        MutableStateFlow(false)
+    val showProgress: StateFlow<Boolean> = _showProgress
+    private fun invokeHandleGalleryExternalChangesUseCase(
+    ) {
+        viewModelScope.launch {
+            withContext(Dispatchers.Main) {
+                // trigger show setProgressVisibility
+                _showProgress.value = true
+//                viewState.setProgressVisibility(true, "Changes detected, indexing")
+            }
+
+            index.updateAll()
+
+            withContext(Dispatchers.Main) {
+                _notifyResourceChange.value = true
+                // TODO Trigger notifyResourcesChanged
+//                viewState.notifyResourcesChanged()
+            }
+
+            // TODO: Investigate more
+//            viewModelScope.launch {
+//                metadataStorage.busy.collect { busy -> if (!busy) cancel()
+//                }
+//            }.join()
+
+            val newItems = provideGalleryItems()
+            if (newItems.isEmpty()) {
+                _onNavigateBack.value = true
+                return@launch
+
+            }
+
+
+            diffResult = DiffUtil.calculateDiff(
+                ResourceDiffUtilCallback(
+                    galleryItems.map { it.resource.id },
+                    newItems.map { it.resource.id }
+                )
+            )
+
+            galleryItems = newItems.toMutableList()
+
+            viewModelScope.launch {
+                // TODO trigger updatePagerAdapterWithDiff
+//                viewState.updatePagerAdapterWithDiff()
+
+                // TODO trigger updatePagerAdapterWithDiff
+//                viewState.notifyCurrentItemChanged()
+
+                // TODO trigger show setProgressVisibility
+//                viewState.setProgressVisibility(true, "Changes detected, indexing")            }
+            }
+        }
+    }
 
     private suspend fun readText(source: Path): Result<String> =
         withContext(Dispatchers.IO) {
