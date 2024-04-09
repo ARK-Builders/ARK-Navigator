@@ -63,7 +63,7 @@ class GalleryUpliftFragment : Fragment() {
     private val binding by viewBinding(FragmentGalleryBinding::bind)
     val viewModel: GalleryUpliftViewModel by viewModels()
     private lateinit var stackedToasts: StackedToasts
-    private lateinit var pagerAdapter: PreviewsPager
+    private lateinit var pagerAdapter: PreviewsPagerUplift
     private val scoreWidget by lazy {
         ScoreWidget(viewModel.scoreWidgetController, viewLifecycleOwner)
     }
@@ -79,13 +79,13 @@ class GalleryUpliftFragment : Fragment() {
         Timber.d(LogTags.GALLERY_SCREEN, "view created in GalleryFragment")
         super.onViewCreated(view, savedInstanceState)
         App.instance.appComponent.inject(this)
+        viewModel.onFirstViewAttach()
 
         Timber.d(
             LogTags.GALLERY_SCREEN,
             "currentItem = ${binding.viewPager.currentItem}"
         )
         collectState()
-
         animatePagerAppearance()
         initResultListener()
         stackedToasts = StackedToasts(binding.rvToasts, lifecycleScope)
@@ -98,7 +98,7 @@ class GalleryUpliftFragment : Fragment() {
         }
 
 
-//        pagerAdapter = PreviewsPager(requireContext(), presenter)
+        pagerAdapter = PreviewsPagerUplift(requireContext(), viewModel)
 
         initViewPager()
         scoreWidget.init(ScoreWidgetBinding.bind(binding.scoreWidget))
@@ -223,6 +223,83 @@ class GalleryUpliftFragment : Fragment() {
                         }
                     }
                 }
+                launch {
+                    viewModel.displayPreviewTags.collect {
+                        if (it != null) {
+                            displayPreviewTags(it.resourceId, it.tags)
+                        }
+                    }
+                }
+                launch {
+                    viewModel.notifyCurrentItemChange.collect {
+                        notifyCurrentItemChanged()
+                    }
+                }
+                launch {
+                    viewModel.updatePagerAdapterWithDiff.collect {
+                        updatePagerAdapterWithDiff()
+                    }
+                }
+                launch {
+                    viewModel.displaySelected.collect {
+                        it?.let {
+                            displaySelected(
+                                it.selected,
+                                it.showAnim,
+                                selectedCount = it.selectedCount,
+                                itemCount = viewModel.galleryItems.size
+                            )
+                        }
+                    }
+                }
+                launch {
+                    viewModel.toastIndexFailedPath.collect {
+                        it?.let {
+                            toastIndexFailedPath(it)
+                        }
+                    }
+                }
+                launch {
+                    viewModel.notifyResourceScoresChanged.collect {
+                        notifyResourceScoresChanged()
+                    }
+                }
+                launch {
+                    viewModel.updatePagerAdapter.collect {
+                        updatePagerAdapter()
+                    }
+                }
+                launch {
+                    viewModel.setControlsVisibility.collect {
+                        setControlsVisibility(it)
+                    }
+                }
+                launch {
+                    viewModel.onNavigateBack.collect {
+                        onBackClick()
+                    }
+                }
+                launch {
+                    viewModel.deleteResource.collect {
+                        it?.let {
+                            deleteResource(it)
+                        }
+                    }
+                }
+                launch {
+                    viewModel.setUpPreview.collect {
+                        it?.let {
+                            setupPreview(it.position, it.meta)
+                        }
+                    }
+                }
+                launch {
+                    viewModel.showEditTagsDialog.collect {
+                        it?.let {
+                            showEditTagsDialog(it)
+                        }
+                    }
+                }
             }
         }
     }
@@ -261,9 +338,9 @@ class GalleryUpliftFragment : Fragment() {
         }
     }
 
-    fun setPreviewsScrollingEnabled(enabled: Boolean) {
-        binding.viewPager.isUserInputEnabled = enabled
-    }
+//    fun setPreviewsScrollingEnabled(enabled: Boolean) {
+//        binding.viewPager.isUserInputEnabled = enabled
+//    }
 
     fun setControlsVisibility(visible: Boolean) {
         binding.previewControls.isVisible = visible
