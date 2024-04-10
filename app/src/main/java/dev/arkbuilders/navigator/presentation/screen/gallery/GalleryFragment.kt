@@ -62,12 +62,12 @@ class GalleryFragment :
 
     private val presenter by moxyPresenter {
         GalleryPresenter(
-            requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
-            requireArguments().getParcelableArray(RESOURCES_KEY)!!.toList()
+            rootAndFav = requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
+            resourcesIds = requireArguments().getParcelableArray(RESOURCES_KEY)!!.toList()
                 as List<ResourceId>,
-            requireArguments().getInt(START_AT_KEY),
-            requireArguments().getBoolean(SELECTING_ENABLED_KEY),
-            (
+            startAt = requireArguments().getInt(START_AT_KEY),
+            selectingEnabled = requireArguments().getBoolean(SELECTING_ENABLED_KEY),
+            selectedResources = (
                 requireArguments().getParcelableArray(SELECTED_RESOURCES_KEY)!!
                     .toList() as List<ResourceId>
                 )
