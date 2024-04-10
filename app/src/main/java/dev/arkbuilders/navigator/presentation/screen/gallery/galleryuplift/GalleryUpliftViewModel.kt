@@ -1,8 +1,13 @@
 package dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.DiffUtil
+import dagger.Provides
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dev.arkbuilders.arkfilepicker.folders.RootAndFav
 import dev.arkbuilders.arklib.ResourceId
 import dev.arkbuilders.arklib.data.Message
@@ -32,6 +37,7 @@ import dev.arkbuilders.navigator.data.stats.StatsStorage
 import dev.arkbuilders.navigator.data.stats.StatsStorageRepo
 import dev.arkbuilders.navigator.data.utils.LogTags
 import dev.arkbuilders.navigator.domain.HandleGalleryExternalChangesUseCase
+import dev.arkbuilders.navigator.presentation.dialog.tagssort.TagsSortViewModel
 import dev.arkbuilders.navigator.presentation.navigation.AppRouter
 import dev.arkbuilders.navigator.presentation.navigation.Screens
 import dev.arkbuilders.navigator.presentation.screen.gallery.GalleryPresenter
@@ -54,6 +60,7 @@ import kotlin.io.path.getLastModifiedTime
 import kotlin.io.path.notExists
 
 class GalleryUpliftViewModel @Inject constructor(
+    selectorNotEdit: Boolean,
     val preferences: Preferences,
     val router: AppRouter,
     val indexRepo: ResourceIndexRepo,
@@ -62,15 +69,9 @@ class GalleryUpliftViewModel @Inject constructor(
     val tagsStorageRepo: TagsStorageRepo,
     val statsStorageRepo: StatsStorageRepo,
     val scoreStorageRepo: ScoreStorageRepo,
-    private val messageFlow: MutableSharedFlow<Message> = MutableSharedFlow(),
-    val handleGalleryExternalChangesUseCase: HandleGalleryExternalChangesUseCase,
-    private val resourcesIndexRepo: ResourceIndexRepo,
-    private val metadataProcessorRepo: MetadataProcessorRepo,
-    private val previewProcessorRepo: PreviewProcessorRepo,
     val analytics: GalleryAnalytics,
-    private val rootAndFav: RootAndFav,
-    val folders: RootAndFav,
 ) : ViewModel() {
+    private val messageFlow: MutableSharedFlow<Message> = MutableSharedFlow()
     lateinit var index: ResourceIndex
         private set
     lateinit var tagsStorage: TagStorage
@@ -92,6 +93,8 @@ class GalleryUpliftViewModel @Inject constructor(
     private lateinit var previewProcessor: PreviewProcessor
 
 
+    lateinit var  rootAndFav: RootAndFav
+    lateinit var  resourcesIds: List<ResourceId>
     private val currentItem: GalleryPresenter.GalleryItem
         get() = galleryItems[currentPos]
 
@@ -99,6 +102,10 @@ class GalleryUpliftViewModel @Inject constructor(
         MutableStateFlow(false)
     val notifyResourceScoresChanged: StateFlow<Boolean> =
         _notifyResourceScoresChanged
+
+    init {
+        val a = 5
+    }
 
     fun bindPlainTextView(view: PreviewPlainTextViewHolderUplift) =
         viewModelScope.launch {
@@ -198,8 +205,6 @@ class GalleryUpliftViewModel @Inject constructor(
     private val _toastIndexFailedPath: MutableStateFlow<Path?> =
         MutableStateFlow(null)
     val toastIndexFailedPath: StateFlow<Path?> = _toastIndexFailedPath
-
-    private val resourcesIds: List<ResourceId> = listOf()
 
     private val _showInfoAlert: MutableStateFlow<ShowInfoData?> =
         MutableStateFlow(null)
@@ -642,6 +647,8 @@ class GalleryUpliftViewModel @Inject constructor(
                 Result.failure(e)
             }
         }
+
+
 }
 
 data class ResourceIdTagsPreview(val resourceId: ResourceId, val tags: Set<String>)
@@ -652,3 +659,46 @@ data class DisplaySelected(
     val selectedCount: Int,
     val itemCount: Int,
 )
+
+class GalleryUpliftViewModelFactory @AssistedInject constructor(
+    @Assisted val selectorNotEdit: Boolean,
+    val preferences: Preferences,
+    val router: AppRouter,
+    val indexRepo: ResourceIndexRepo,
+    val previewStorageRepo: PreviewProcessorRepo,
+    val metadataStorageRepo: MetadataProcessorRepo,
+    val tagsStorageRepo: TagsStorageRepo,
+    val statsStorageRepo: StatsStorageRepo,
+    val scoreStorageRepo: ScoreStorageRepo,
+    val analytics: GalleryAnalytics,
+) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        return GalleryUpliftViewModel(
+            selectorNotEdit = selectorNotEdit,
+            preferences = preferences,
+            router = router,
+            indexRepo = indexRepo,
+            previewStorageRepo = previewStorageRepo,
+            metadataStorageRepo = metadataStorageRepo,
+            tagsStorageRepo = tagsStorageRepo,
+            statsStorageRepo = statsStorageRepo,
+            scoreStorageRepo = scoreStorageRepo,
+            analytics = analytics,
+        ) as T
+    }
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            @Assisted selectorNotEdit: Boolean,
+//            preferences: Preferences,
+//            router: AppRouter,
+//            indexRepo: ResourceIndexRepo,
+//            previewStorageRepo: PreviewProcessorRepo,
+//            metadataStorageRepo: MetadataProcessorRepo,
+//            tagsStorageRepo: TagsStorageRepo,
+//            statsStorageRepo: StatsStorageRepo,
+//            scoreStorageRepo: ScoreStorageRepo,
+//            analytics: GalleryAnalytics,
+        ): GalleryUpliftViewModelFactory
+    }
+}

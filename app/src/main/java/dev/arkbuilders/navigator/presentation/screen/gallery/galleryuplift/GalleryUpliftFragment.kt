@@ -26,25 +26,35 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.chip.Chip
 import dev.arkbuilders.arkfilepicker.folders.RootAndFav
 import dev.arkbuilders.arklib.ResourceId
+import dev.arkbuilders.arklib.data.Message
 import dev.arkbuilders.arklib.data.index.Resource
+import dev.arkbuilders.arklib.data.index.ResourceIndexRepo
 import dev.arkbuilders.arklib.data.meta.Metadata
+import dev.arkbuilders.arklib.data.meta.MetadataProcessorRepo
+import dev.arkbuilders.arklib.data.preview.PreviewProcessorRepo
+import dev.arkbuilders.arklib.user.score.ScoreStorageRepo
 import dev.arkbuilders.arklib.user.tags.Tag
 import dev.arkbuilders.arklib.user.tags.Tags
+import dev.arkbuilders.arklib.user.tags.TagsStorageRepo
 import dev.arkbuilders.arklib.utils.extension
 import dev.arkbuilders.components.databinding.ScoreWidgetBinding
 import dev.arkbuilders.components.scorewidget.ScoreWidget
 import dev.arkbuilders.navigator.BuildConfig
 import dev.arkbuilders.navigator.R
+import dev.arkbuilders.navigator.analytics.gallery.GalleryAnalytics
+import dev.arkbuilders.navigator.data.preferences.Preferences
+import dev.arkbuilders.navigator.data.stats.StatsStorageRepo
 import dev.arkbuilders.navigator.data.utils.LogTags
 import dev.arkbuilders.navigator.databinding.FragmentGalleryBinding
 import dev.arkbuilders.navigator.databinding.PopupGalleryTagMenuBinding
+import dev.arkbuilders.navigator.domain.HandleGalleryExternalChangesUseCase
 import dev.arkbuilders.navigator.presentation.App
 import dev.arkbuilders.navigator.presentation.dialog.DetailsAlertDialog
 import dev.arkbuilders.navigator.presentation.dialog.StorageExceptionDialogFragment
 import dev.arkbuilders.navigator.presentation.dialog.edittags.EditTagsDialogFragment
+import dev.arkbuilders.navigator.presentation.navigation.AppRouter
 import dev.arkbuilders.navigator.presentation.navigation.Screens
 import dev.arkbuilders.navigator.presentation.screen.gallery.GalleryFragment
-import dev.arkbuilders.navigator.presentation.screen.gallery.previewpager.PreviewsPager
 import dev.arkbuilders.navigator.presentation.screen.main.MainActivity
 import dev.arkbuilders.navigator.presentation.utils.FullscreenHelper
 import dev.arkbuilders.navigator.presentation.utils.extra.ExtraLoader
@@ -53,15 +63,68 @@ import dev.arkbuilders.navigator.presentation.utils.makeVisible
 import dev.arkbuilders.navigator.presentation.view.DefaultPopup
 import dev.arkbuilders.navigator.presentation.view.DepthPageTransformer
 import dev.arkbuilders.navigator.presentation.view.StackedToasts
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.nio.file.Path
+import javax.inject.Inject
 import kotlin.system.measureTimeMillis
+
 
 class GalleryUpliftFragment : Fragment() {
     private val binding by viewBinding(FragmentGalleryBinding::bind)
-    val viewModel: GalleryUpliftViewModel by viewModels()
+
+    @Inject
+    lateinit var preferences: Preferences
+
+    @Inject
+    lateinit var router: AppRouter
+
+    @Inject
+    lateinit var indexRepo: ResourceIndexRepo
+
+    @Inject
+    lateinit var previewStorageRepo: PreviewProcessorRepo
+
+    @Inject
+    lateinit var metadataStorageRepo: MetadataProcessorRepo
+
+    @Inject
+    lateinit var tagsStorageRepo: TagsStorageRepo
+
+    @Inject
+    lateinit var statsStorageRepo: StatsStorageRepo
+
+    @Inject
+    lateinit var scoreStorageRepo: ScoreStorageRepo
+
+    private val messageFlow: MutableSharedFlow<Message> = MutableSharedFlow()
+
+    @Inject
+    lateinit var handleGalleryExternalChangesUseCase:
+        HandleGalleryExternalChangesUseCase
+
+    @Inject
+    lateinit var analytics: GalleryAnalytics
+
+    @Inject
+    lateinit var factory: GalleryUpliftViewModelFactory.Factory
+
+    private val viewModel: GalleryUpliftViewModel by viewModels {
+        factory.create(
+            selectorNotEdit = false,
+//            preferences = preferences,
+//            router = router,
+//            indexRepo = indexRepo,
+//            previewStorageRepo = previewStorageRepo,
+//            metadataStorageRepo = metadataStorageRepo,
+//            tagsStorageRepo = tagsStorageRepo,
+//            statsStorageRepo = statsStorageRepo,
+//            scoreStorageRepo = scoreStorageRepo,
+//            analytics = analytics
+        )
+    }
+
     private lateinit var stackedToasts: StackedToasts
     private lateinit var pagerAdapter: PreviewsPagerUplift
     private val scoreWidget by lazy {
@@ -80,7 +143,11 @@ class GalleryUpliftFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         App.instance.appComponent.inject(this)
         viewModel.onFirstViewAttach()
-
+        viewModel.apply {
+            rootAndFav = requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav
+            resourcesIds = requireArguments().getParcelableArray(RESOURCES_KEY)!!
+                .toList() as List<ResourceId>
+        }
         Timber.d(
             LogTags.GALLERY_SCREEN,
             "currentItem = ${binding.viewPager.currentItem}"
@@ -414,15 +481,15 @@ class GalleryUpliftFragment : Fragment() {
     }
 
     fun notifyResourcesChanged() {
-        setFragmentResult(GalleryFragment.REQUEST_RESOURCES_CHANGED_KEY, bundleOf())
+        setFragmentResult(REQUEST_RESOURCES_CHANGED_KEY, bundleOf())
     }
 
     fun notifyTagsChanged() {
-        setFragmentResult(GalleryFragment.REQUEST_TAGS_CHANGED_KEY, bundleOf())
+        setFragmentResult(REQUEST_TAGS_CHANGED_KEY, bundleOf())
     }
 
     fun notifyResourceScoresChanged() {
-        setFragmentResult(GalleryFragment.SCORES_CHANGED_KEY, bundleOf())
+        setFragmentResult(SCORES_CHANGED_KEY, bundleOf())
     }
 
     fun notifySelectedChanged(
@@ -588,7 +655,7 @@ class GalleryUpliftFragment : Fragment() {
             EditTagsDialogFragment.REQUEST_TAGS_CHANGED_KEY,
             this
         ) { _, _ ->
-            setFragmentResult(GalleryFragment.REQUEST_TAGS_CHANGED_KEY, bundleOf())
+            setFragmentResult(REQUEST_TAGS_CHANGED_KEY, bundleOf())
             viewModel.onTagsChanged()
         }
 
@@ -750,7 +817,7 @@ class GalleryUpliftFragment : Fragment() {
             startAt: Int,
             selectingEnabled: Boolean = false,
             selectedResources: List<ResourceId> = emptyList(),
-        ) = GalleryFragment().apply {
+        ) = GalleryUpliftFragment().apply {
             arguments = Bundle().apply {
                 putParcelable(ROOT_AND_FAV_KEY, rootAndFav)
                 putParcelableArray(RESOURCES_KEY, resources.toTypedArray())
