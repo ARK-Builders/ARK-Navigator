@@ -6,7 +6,9 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.TypedValue
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.core.content.FileProvider
@@ -26,7 +28,6 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.chip.Chip
 import dev.arkbuilders.arkfilepicker.folders.RootAndFav
 import dev.arkbuilders.arklib.ResourceId
-import dev.arkbuilders.arklib.data.Message
 import dev.arkbuilders.arklib.data.index.Resource
 import dev.arkbuilders.arklib.data.index.ResourceIndexRepo
 import dev.arkbuilders.arklib.data.meta.Metadata
@@ -63,7 +64,6 @@ import dev.arkbuilders.navigator.presentation.utils.makeVisible
 import dev.arkbuilders.navigator.presentation.view.DefaultPopup
 import dev.arkbuilders.navigator.presentation.view.DepthPageTransformer
 import dev.arkbuilders.navigator.presentation.view.StackedToasts
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.nio.file.Path
@@ -98,8 +98,6 @@ class GalleryUpliftFragment : Fragment() {
     @Inject
     lateinit var scoreStorageRepo: ScoreStorageRepo
 
-    private val messageFlow: MutableSharedFlow<Message> = MutableSharedFlow()
-
     @Inject
     lateinit var handleGalleryExternalChangesUseCase:
         HandleGalleryExternalChangesUseCase
@@ -130,7 +128,6 @@ class GalleryUpliftFragment : Fragment() {
     private val scoreWidget by lazy {
         ScoreWidget(viewModel.scoreWidgetController, viewLifecycleOwner)
     }
-
     private fun onBackClick() {
         Timber.d(LogTags.GALLERY_SCREEN, "quitting from GalleryPresenter")
         notifySelectedChanged(viewModel.selectedResources)
@@ -138,10 +135,18 @@ class GalleryUpliftFragment : Fragment() {
         viewModel.router.exit()
     }
 
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_gallery, container, false);
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         Timber.d(LogTags.GALLERY_SCREEN, "view created in GalleryFragment")
-        super.onViewCreated(view, savedInstanceState)
         App.instance.appComponent.inject(this)
+        super.onViewCreated(view, savedInstanceState)
         viewModel.onFirstViewAttach()
         viewModel.apply {
             rootAndFav = requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav

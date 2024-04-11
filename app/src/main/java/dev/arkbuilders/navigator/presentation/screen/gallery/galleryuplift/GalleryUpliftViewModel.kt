@@ -59,7 +59,7 @@ import javax.inject.Inject
 import kotlin.io.path.getLastModifiedTime
 import kotlin.io.path.notExists
 
-class GalleryUpliftViewModel @Inject constructor(
+class GalleryUpliftViewModel constructor(
     selectorNotEdit: Boolean,
     val preferences: Preferences,
     val router: AppRouter,
