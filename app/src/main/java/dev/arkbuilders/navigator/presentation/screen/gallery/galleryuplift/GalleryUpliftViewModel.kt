@@ -70,23 +70,32 @@ class GalleryUpliftViewModel(
     val scoreStorageRepo: ScoreStorageRepo,
     val analytics: GalleryAnalytics,
 ) : ViewModel() {
-    private val messageFlow: MutableSharedFlow<Message> = MutableSharedFlow()
     private lateinit var index: ResourceIndex
     private lateinit var tagsStorage: TagStorage
     private lateinit var previewStorage: PreviewProcessor
     private lateinit var metadataStorage: MetadataProcessor
     private lateinit var statsStorage: StatsStorage
     private lateinit var scoreStorage: ScoreStorage
-
-    var galleryItems: MutableList<GalleryPresenter.GalleryItem> = mutableListOf()
-
-    var diffResult: DiffUtil.DiffResult? = null
-
-    private var currentPos = 0
-    val selectedResources: MutableList<ResourceId> = mutableListOf()
-
     private lateinit var rootAndFav: RootAndFav
     private lateinit var resourcesIds: List<ResourceId>
+
+    var galleryItems: MutableList<GalleryPresenter.GalleryItem> = mutableListOf()
+    var diffResult: DiffUtil.DiffResult? = null
+
+    val selectedResources: MutableList<ResourceId> = mutableListOf()
+    val scoreWidgetController = ScoreWidgetController(
+        scope = viewModelScope,
+        getCurrentId = { currentItem.id() },
+        onScoreChanged = {
+            _notifyResourceScoresChanged.value = true
+        }
+    )
+
+    private var currentPos = 0
+    private var sortByScores = false
+    private var selectingEnabled: Boolean = false
+
+    private val messageFlow: MutableSharedFlow<Message> = MutableSharedFlow()
     private val currentItem: GalleryPresenter.GalleryItem
         get() = galleryItems[currentPos]
 
@@ -105,17 +114,6 @@ class GalleryUpliftViewModel(
 
     private val _deleteResource: MutableStateFlow<Int?> = MutableStateFlow(null)
     val deleteResource: StateFlow<Int?> = _deleteResource
-
-    val scoreWidgetController = ScoreWidgetController(
-        scope = viewModelScope,
-        getCurrentId = { currentItem.id() },
-        onScoreChanged = {
-            _notifyResourceScoresChanged.value = true
-        }
-    )
-
-    private var sortByScores = false
-    private var selectingEnabled: Boolean = false
 
     private val _toastIndexFailedPath: MutableStateFlow<Path?> =
         MutableStateFlow(null)
