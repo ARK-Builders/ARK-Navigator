@@ -74,6 +74,7 @@ class GalleryUpliftFragment : Fragment() {
             selectorNotEdit = false
         )
     }
+
     private val scoreWidget by lazy {
         ScoreWidget(viewModel.scoreWidgetController, viewLifecycleOwner)
     }

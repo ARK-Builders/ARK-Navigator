@@ -82,7 +82,9 @@ class GalleryUpliftViewModel(
     var galleryItems: MutableList<GalleryPresenter.GalleryItem> = mutableListOf()
     var diffResult: DiffUtil.DiffResult? = null
 
-    val selectedResources: MutableList<ResourceId> = mutableListOf()
+    private val _selectedResources: MutableList<ResourceId> = mutableListOf()
+    val selectedResources: List<ResourceId> = _selectedResources
+
     val scoreWidgetController = ScoreWidgetController(
         scope = viewModelScope,
         getCurrentId = { currentItem.id() },
@@ -353,9 +355,9 @@ class GalleryUpliftViewModel(
         viewModelScope.launch {
             selectingEnabled = !selectingEnabled
             _toggleSelect.emit(selectingEnabled)
-            selectedResources.clear()
+            _selectedResources.clear()
             if (selectingEnabled) {
-                selectedResources.add(currentItem.resource.id)
+                _selectedResources.add(currentItem.resource.id)
             }
         }
     }
@@ -390,18 +392,18 @@ class GalleryUpliftViewModel(
 
     fun onSelectBtnClick() {
         val id = currentItem.id()
-        val wasSelected = id in selectedResources
+        val wasSelected = id in _selectedResources
 
         if (wasSelected) {
-            selectedResources.remove(id)
+            _selectedResources.remove(id)
         } else {
-            selectedResources.add(id)
+            _selectedResources.add(id)
         }
 
         _displaySelected.value = DisplaySelected(
             selected = !wasSelected,
             showAnim = true,
-            selectedCount = selectedResources.size,
+            selectedCount = _selectedResources.size,
             itemCount = galleryItems.size
         )
     }
@@ -493,9 +495,9 @@ class GalleryUpliftViewModel(
         scoreWidgetController.displayScore()
 
         _displaySelected.value = DisplaySelected(
-            selected = id in selectedResources,
+            selected = id in _selectedResources,
             showAnim = false,
-            selectedCount = selectedResources.size,
+            selectedCount = _selectedResources.size,
             itemCount = galleryItems.size,
         )
     }
