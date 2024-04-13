@@ -260,10 +260,10 @@ class GalleryUpliftViewModel constructor(
                 tagsStorage = tagsStorageRepo.provide(index)
                 scoreStorage = scoreStorageRepo.provide(index)
             } catch (e: StorageException) {
-//                _displayStorageException.value = StorageExceptionGallery(
-//                    label = e.label,
-//                    messenger = e.msg
-//                )
+                _displayStorageException.value = StorageExceptionGallery(
+                    label = e.label,
+                    messenger = e.msg
+                )
                 // TODO Trigger displayStorageException
 //                viewState.displayStorageException(
 //                    e.label,

@@ -367,6 +367,13 @@ class GalleryUpliftFragment : Fragment() {
                         }
                     }
                 }
+                launch {
+                    viewModel.displayStorageException.collect {
+                        it?.let {
+                            displayStorageException(it.label, it.messenger)
+                        }
+                    }
+                }
             }
         }
     }
