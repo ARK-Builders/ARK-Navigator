@@ -309,8 +309,8 @@ class GalleryUpliftFragment : Fragment() {
                     viewModel.displaySelected.collect {
                         it?.let {
                             displaySelected(
-                                it.selected,
-                                it.showAnim,
+                                selected = it.selected,
+                                showAnim = it.showAnim,
                                 selectedCount = it.selectedCount,
                                 itemCount = viewModel.galleryItems.size
                             )
