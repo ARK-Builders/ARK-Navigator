@@ -140,7 +140,7 @@ class GalleryUpliftFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_gallery, container, false);
+        return inflater.inflate(R.layout.fragment_gallery, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -245,7 +245,9 @@ class GalleryUpliftFragment : Fragment() {
                 }
                 launch {
                     viewModel.shareLink.collect {
-                        shareLink(it)
+                        if (it.isNotEmpty()) {
+                            shareLink(it)
+                        }
                     }
                 }
                 launch {
@@ -262,12 +264,9 @@ class GalleryUpliftFragment : Fragment() {
                 }
                 launch {
                     viewModel.openLink.collect {
-
-                    }
-                }
-                launch {
-                    viewModel.openLink.collect {
-                        openLink(it)
+                        if (it.isNotEmpty()) {
+                            openLink(it)
+                        }
                     }
                 }
                 launch {
@@ -287,13 +286,6 @@ class GalleryUpliftFragment : Fragment() {
                 launch {
                     viewModel.notifyResourceChange.collect {
                         notifyResourcesChanged()
-                    }
-                }
-                launch {
-                    viewModel.notifyResourceChange.collect {
-                        viewModel.showProgress.collect {
-                            setProgressVisibility(it, "Changes detected, indexing")
-                        }
                     }
                 }
                 launch {
@@ -349,7 +341,9 @@ class GalleryUpliftFragment : Fragment() {
                 }
                 launch {
                     viewModel.onNavigateBack.collect {
-                        onBackClick()
+                        if (it) {
+                            onBackClick()
+                        }
                     }
                 }
                 launch {

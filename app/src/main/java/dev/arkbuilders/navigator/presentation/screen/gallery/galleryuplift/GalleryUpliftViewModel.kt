@@ -243,27 +243,27 @@ class GalleryUpliftViewModel constructor(
             }.launchIn(viewModelScope)
 
             //TODO Trigger setProgressVisibility
-            _showProgress.value = true
+//            _showProgress.value = true
 //            viewState.setProgressVisibility(true, "Providing metadata storage")
             metadataStorage = metadataStorageRepo.provide(index)
 
             //TODO Trigger setProgressVisibility
-            _showProgress.value = true
+//            _showProgress.value = true
 //            viewState.setProgressVisibility(true, "Providing previews storage")
             previewStorage = previewStorageRepo.provide(index)
 
             //TODO Trigger setProgressVisibility
-            _showProgress.value = true
+//            _showProgress.value = true
 //            viewState.setProgressVisibility(true, "Proviging data storages")
 
             try {
                 tagsStorage = tagsStorageRepo.provide(index)
                 scoreStorage = scoreStorageRepo.provide(index)
             } catch (e: StorageException) {
-                _displayStorageException.value = StorageExceptionGallery(
-                    label = e.label,
-                    messenger = e.msg
-                )
+//                _displayStorageException.value = StorageExceptionGallery(
+//                    label = e.label,
+//                    messenger = e.msg
+//                )
                 // TODO Trigger displayStorageException
 //                viewState.displayStorageException(
 //                    e.label,
