@@ -71,15 +71,11 @@ class GalleryUpliftViewModel(
     val analytics: GalleryAnalytics,
 ) : ViewModel() {
     private val messageFlow: MutableSharedFlow<Message> = MutableSharedFlow()
-    lateinit var index: ResourceIndex
-        private set
-    lateinit var tagsStorage: TagStorage
-        private set
+    private lateinit var index: ResourceIndex
+    private lateinit var tagsStorage: TagStorage
     private lateinit var previewStorage: PreviewProcessor
-    lateinit var metadataStorage: MetadataProcessor
-        private set
-    lateinit var statsStorage: StatsStorage
-        private set
+    private lateinit var metadataStorage: MetadataProcessor
+    private lateinit var statsStorage: StatsStorage
     private lateinit var scoreStorage: ScoreStorage
 
     var galleryItems: MutableList<GalleryPresenter.GalleryItem> = mutableListOf()
@@ -196,6 +192,7 @@ class GalleryUpliftViewModel(
     ) {
         this.rootAndFav = rootAndFav
         this.resourcesIds = resourcesIds
+        onFirstViewAttach()
     }
 
     fun onPreviewsItemClick() {
@@ -258,7 +255,8 @@ class GalleryUpliftViewModel(
         index.updateAll()
         _notifyResourceChange.value = true
     }
-    fun onFirstViewAttach() {
+
+    private fun onFirstViewAttach() {
         analytics.trackScreen()
         Timber.d(LogTags.GALLERY_SCREEN, "first view attached in GalleryPresenter")
         viewModelScope.launch {
