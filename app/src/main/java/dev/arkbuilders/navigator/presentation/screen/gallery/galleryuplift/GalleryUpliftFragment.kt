@@ -29,12 +29,14 @@ import com.google.android.material.chip.Chip
 import dev.arkbuilders.arkfilepicker.folders.RootAndFav
 import dev.arkbuilders.arklib.ResourceId
 import dev.arkbuilders.arklib.data.index.Resource
+import dev.arkbuilders.arklib.data.index.ResourceIndex
 import dev.arkbuilders.arklib.data.index.ResourceIndexRepo
 import dev.arkbuilders.arklib.data.meta.Metadata
 import dev.arkbuilders.arklib.data.meta.MetadataProcessorRepo
 import dev.arkbuilders.arklib.data.preview.PreviewProcessorRepo
 import dev.arkbuilders.arklib.user.score.ScoreStorageRepo
 import dev.arkbuilders.arklib.user.tags.Tag
+import dev.arkbuilders.arklib.user.tags.TagStorage
 import dev.arkbuilders.arklib.user.tags.Tags
 import dev.arkbuilders.arklib.user.tags.TagsStorageRepo
 import dev.arkbuilders.arklib.utils.extension
@@ -44,6 +46,7 @@ import dev.arkbuilders.navigator.BuildConfig
 import dev.arkbuilders.navigator.R
 import dev.arkbuilders.navigator.analytics.gallery.GalleryAnalytics
 import dev.arkbuilders.navigator.data.preferences.Preferences
+import dev.arkbuilders.navigator.data.stats.StatsStorage
 import dev.arkbuilders.navigator.data.stats.StatsStorageRepo
 import dev.arkbuilders.navigator.data.utils.LogTags
 import dev.arkbuilders.navigator.databinding.FragmentGalleryBinding
@@ -64,6 +67,7 @@ import dev.arkbuilders.navigator.presentation.utils.makeVisible
 import dev.arkbuilders.navigator.presentation.view.DefaultPopup
 import dev.arkbuilders.navigator.presentation.view.DepthPageTransformer
 import dev.arkbuilders.navigator.presentation.view.StackedToasts
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.nio.file.Path
@@ -109,16 +113,7 @@ class GalleryUpliftFragment : Fragment() {
     lateinit var factory: GalleryUpliftViewModelFactory.Factory
     private val viewModel: GalleryUpliftViewModel by viewModels {
         factory.create(
-            selectorNotEdit = false,
-//            preferences = preferences,
-//            router = router,
-//            indexRepo = indexRepo,
-//            previewStorageRepo = previewStorageRepo,
-//            metadataStorageRepo = metadataStorageRepo,
-//            tagsStorageRepo = tagsStorageRepo,
-//            statsStorageRepo = statsStorageRepo,
-//            scoreStorageRepo = scoreStorageRepo,
-//            analytics = analytics
+            selectorNotEdit = false
         )
     }
 
@@ -146,11 +141,11 @@ class GalleryUpliftFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         Timber.d(LogTags.GALLERY_SCREEN, "view created in GalleryFragment")
         App.instance.appComponent.inject(this)
-        viewModel.apply {
-            rootAndFav = requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav
+        viewModel.initialize(
+            rootAndFav = requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
             resourcesIds = requireArguments().getParcelableArray(RESOURCES_KEY)!!
                 .toList() as List<ResourceId>
-        }
+        )
         super.onViewCreated(view, savedInstanceState)
         viewModel.onFirstViewAttach()
 
@@ -297,12 +292,16 @@ class GalleryUpliftFragment : Fragment() {
                 }
                 launch {
                     viewModel.notifyCurrentItemChange.collect {
-                        notifyCurrentItemChanged()
+                        if (it) {
+                            notifyCurrentItemChanged()
+                        }
                     }
                 }
                 launch {
                     viewModel.updatePagerAdapterWithDiff.collect {
-                        updatePagerAdapterWithDiff()
+                        if (it) {
+                            updatePagerAdapterWithDiff()
+                        }
                     }
                 }
                 launch {
@@ -326,7 +325,9 @@ class GalleryUpliftFragment : Fragment() {
                 }
                 launch {
                     viewModel.notifyResourceScoresChanged.collect {
-                        notifyResourceScoresChanged()
+                        if (it) {
+                            notifyResourceScoresChanged()
+                        }
                     }
                 }
                 launch {
@@ -363,7 +364,14 @@ class GalleryUpliftFragment : Fragment() {
                 launch {
                     viewModel.showEditTagsDialog.collect {
                         it?.let {
-                            showEditTagsDialog(it)
+                            showEditTagsDialog(
+                                resource = it.resource,
+                                resources = it.resources,
+                                statsStorage = it.statsStorage,
+                                rootAndFav = it.rootAndFav,
+                                index = it.index,
+                                storage = it.storage,
+                            )
                         }
                     }
                 }
@@ -371,6 +379,23 @@ class GalleryUpliftFragment : Fragment() {
                     viewModel.displayStorageException.collect {
                         it?.let {
                             displayStorageException(it.label, it.messenger)
+                        }
+                    }
+                }
+                launch {
+                    viewModel.notifyTagsChanged.collect {
+                        if (it) {
+                            notifyTagsChanged()
+                        }
+                    }
+                }
+                launch {
+                    viewModel.showProgressWithText.collect {
+                        it?.let {
+                            setProgressVisibility(
+                                isVisible = it.isVisible,
+                                withText = it.text
+                            )
                         }
                     }
                 }
@@ -544,19 +569,24 @@ class GalleryUpliftFragment : Fragment() {
         }
     }
 
-    fun showEditTagsDialog(
-        resource: ResourceId
+    private fun showEditTagsDialog(
+        resource: ResourceId,
+        rootAndFav: RootAndFav,
+        resources: List<ResourceId>,
+        index: ResourceIndex,
+        storage: TagStorage,
+        statsStorage: StatsStorage
     ) {
         Timber.d(
             LogTags.GALLERY_SCREEN,
             "showing [edit-tags] dialog for resource $resource"
         )
         val dialog = EditTagsDialogFragment.newInstance(
-            requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
-            listOf(resource),
-            viewModel.index,
-            viewModel.tagsStorage,
-            viewModel.statsStorage
+            rootAndFav = rootAndFav,
+            resources = resources,
+            index = index,
+            storage = storage,
+            statsStorage = statsStorage
         )
         dialog.show(childFragmentManager, EditTagsDialogFragment.FRAGMENT_TAG)
     }
