@@ -107,7 +107,6 @@ class GalleryUpliftFragment : Fragment() {
 
     @Inject
     lateinit var factory: GalleryUpliftViewModelFactory.Factory
-
     private val viewModel: GalleryUpliftViewModel by viewModels {
         factory.create(
             selectorNotEdit = false,
@@ -128,6 +127,7 @@ class GalleryUpliftFragment : Fragment() {
     private val scoreWidget by lazy {
         ScoreWidget(viewModel.scoreWidgetController, viewLifecycleOwner)
     }
+
     private fun onBackClick() {
         Timber.d(LogTags.GALLERY_SCREEN, "quitting from GalleryPresenter")
         notifySelectedChanged(viewModel.selectedResources)
@@ -146,13 +146,14 @@ class GalleryUpliftFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         Timber.d(LogTags.GALLERY_SCREEN, "view created in GalleryFragment")
         App.instance.appComponent.inject(this)
-        super.onViewCreated(view, savedInstanceState)
-        viewModel.onFirstViewAttach()
         viewModel.apply {
             rootAndFav = requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav
             resourcesIds = requireArguments().getParcelableArray(RESOURCES_KEY)!!
                 .toList() as List<ResourceId>
         }
+        super.onViewCreated(view, savedInstanceState)
+        viewModel.onFirstViewAttach()
+
         Timber.d(
             LogTags.GALLERY_SCREEN,
             "currentItem = ${binding.viewPager.currentItem}"
