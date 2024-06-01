@@ -40,9 +40,12 @@ import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domai
 import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.ShowEditTagsData
 import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.ShowInfoData
 import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.StorageExceptionGallery
+import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.state.GallerySideEffect
+import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.state.GalleryState
 import dev.arkbuilders.navigator.presentation.screen.resources.adapter.ResourceDiffUtilCallback
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -51,6 +54,12 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.orbitmvi.orbit.Container
+import org.orbitmvi.orbit.ContainerHost
+import org.orbitmvi.orbit.syntax.simple.intent
+import org.orbitmvi.orbit.syntax.simple.postSideEffect
+import org.orbitmvi.orbit.syntax.simple.reduce
+import org.orbitmvi.orbit.viewmodel.container
 import timber.log.Timber
 import java.io.FileReader
 import java.nio.file.Files
@@ -69,7 +78,7 @@ class GalleryUpliftViewModel(
     val statsStorageRepo: StatsStorageRepo,
     val scoreStorageRepo: ScoreStorageRepo,
     val analytics: GalleryAnalytics,
-) : ViewModel() {
+) : ContainerHost<GalleryState, GallerySideEffect>, ViewModel() {
     private lateinit var index: ResourceIndex
     private lateinit var tagsStorage: TagStorage
     private lateinit var previewStorage: PreviewProcessor
@@ -78,6 +87,9 @@ class GalleryUpliftViewModel(
     private lateinit var scoreStorage: ScoreStorage
     private lateinit var rootAndFav: RootAndFav
     private lateinit var resourcesIds: List<ResourceId>
+
+    override val container: Container<GalleryState, GallerySideEffect> =
+        container(GalleryState())
 
     var galleryItems: MutableList<GalleryPresenter.GalleryItem> = mutableListOf()
     var diffResult: DiffUtil.DiffResult? = null
@@ -89,7 +101,10 @@ class GalleryUpliftViewModel(
         scope = viewModelScope,
         getCurrentId = { currentItem.id() },
         onScoreChanged = {
-            _notifyResourceScoresChanged.value = true
+//            _notifyResourceScoresChanged.value = true
+            intent {
+                postSideEffect(GallerySideEffect.NotifyResourceScoresChanged)
+            }
         }
     )
 
@@ -101,90 +116,90 @@ class GalleryUpliftViewModel(
     private val currentItem: GalleryPresenter.GalleryItem
         get() = galleryItems[currentPos]
 
-    private val _notifyResourceScoresChanged: MutableStateFlow<Boolean> =
-        MutableStateFlow(false)
-    val notifyResourceScoresChanged: StateFlow<Boolean> =
-        _notifyResourceScoresChanged
+//    private val _notifyResourceScoresChanged: MutableStateFlow<Boolean> =
+//        MutableStateFlow(false)
+//    val notifyResourceScoresChanged: StateFlow<Boolean> =
+//        _notifyResourceScoresChanged
 
-    private val _setControlsVisibility: MutableStateFlow<Boolean> =
-        MutableStateFlow(false)
-    val setControlsVisibility: StateFlow<Boolean> =
-        _setControlsVisibility
+//    private val _setControlsVisibility: MutableStateFlow<Boolean> =
+//        MutableStateFlow(false)
+//    val setControlsVisibility: StateFlow<Boolean> =
+//        _setControlsVisibility
 
-    private val _onNavigateBack: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val onNavigateBack: StateFlow<Boolean> = _onNavigateBack
+//    private val _onNavigateBack: MutableStateFlow<Boolean> = MutableStateFlow(false)
+//    val onNavigateBack: StateFlow<Boolean> = _onNavigateBack
 
-    private val _deleteResource: MutableStateFlow<Int?> = MutableStateFlow(null)
-    val deleteResource: StateFlow<Int?> = _deleteResource
+//    private val _deleteResource: MutableStateFlow<Int?> = MutableStateFlow(null)
+//    val deleteResource: StateFlow<Int?> = _deleteResource
 
-    private val _toastIndexFailedPath: MutableStateFlow<Path?> =
-        MutableStateFlow(null)
-    val toastIndexFailedPath: StateFlow<Path?> = _toastIndexFailedPath
+//    private val _toastIndexFailedPath: MutableStateFlow<Path?> =
+//        MutableStateFlow(null)
+//    val toastIndexFailedPath: StateFlow<Path?> = _toastIndexFailedPath
 
-    private val _showInfoAlert: MutableStateFlow<ShowInfoData?> =
-        MutableStateFlow(null)
-    val showInfoAlert: StateFlow<ShowInfoData?> = _showInfoAlert
+//    private val _showInfoAlert: MutableStateFlow<ShowInfoData?> =
+//        MutableStateFlow(null)
+//    val showInfoAlert: StateFlow<ShowInfoData?> = _showInfoAlert
 
-    private val _displayStorageException: MutableStateFlow<StorageExceptionGallery?> =
-        MutableStateFlow(null)
-    val displayStorageException: StateFlow<StorageExceptionGallery?> =
-        _displayStorageException
+//    private val _displayStorageException: MutableStateFlow<StorageExceptionGallery?> =
+//        MutableStateFlow(null)
+//    val displayStorageException: StateFlow<StorageExceptionGallery?> =
+//        _displayStorageException
 
-    private val _updatePagerAdapter: MutableStateFlow<Boolean> =
-        MutableStateFlow(false)
-    val updatePagerAdapter: StateFlow<Boolean> = _updatePagerAdapter
+//    private val _updatePagerAdapter: MutableStateFlow<Boolean> =
+//        MutableStateFlow(false)
+//    val updatePagerAdapter: StateFlow<Boolean> = _updatePagerAdapter
 
-    private val _shareLink: MutableStateFlow<String> = MutableStateFlow("")
-    val shareLink: StateFlow<String> = _shareLink
+//    private val _shareLink: MutableStateFlow<String> = MutableStateFlow("")
+//    val shareLink: StateFlow<String> = _shareLink
 
-    private val _shareResource: MutableStateFlow<Path?> = MutableStateFlow(null)
-    val shareResource: StateFlow<Path?> = _shareResource
+//    private val _shareResource: MutableStateFlow<Path?> = MutableStateFlow(null)
+//    val shareResource: StateFlow<Path?> = _shareResource
 
-    private val _editResource: MutableStateFlow<Path?> = MutableStateFlow(null)
-    val editResource: StateFlow<Path?> = _editResource
+//    private val _editResource: MutableStateFlow<Path?> = MutableStateFlow(null)
+//    val editResource: StateFlow<Path?> = _editResource
 
-    private val _openLink: MutableStateFlow<String> = MutableStateFlow("")
-    val openLink: StateFlow<String> = _openLink
+//    private val _openLink: MutableStateFlow<String> = MutableStateFlow("")
+//    val openLink: StateFlow<String> = _openLink
 
-    private val _viewInExternalApp: MutableStateFlow<Path?> =
-        MutableStateFlow(null)
-    val viewInExternalApp: StateFlow<Path?> = _viewInExternalApp
+//    private val _viewInExternalApp: MutableStateFlow<Path?> =
+//        MutableStateFlow(null)
+//    val viewInExternalApp: StateFlow<Path?> = _viewInExternalApp
 
-    private val _displayPreviewTags: MutableStateFlow<ResourceIdTagsPreview?> =
-        MutableStateFlow(null)
-    val displayPreviewTags: StateFlow<ResourceIdTagsPreview?> = _displayPreviewTags
+//    private val _displayPreviewTags: MutableStateFlow<ResourceIdTagsPreview?> =
+//        MutableStateFlow(null)
+//    val displayPreviewTags: StateFlow<ResourceIdTagsPreview?> = _displayPreviewTags
 
-    private val _notifyTagsChanged: MutableStateFlow<Boolean> =
-        MutableStateFlow(false)
-    val notifyTagsChanged: StateFlow<Boolean> = _notifyTagsChanged
+//    private val _notifyTagsChanged: MutableStateFlow<Boolean> =
+//        MutableStateFlow(false)
+//    val notifyTagsChanged: StateFlow<Boolean> = _notifyTagsChanged
 
-    private val _showEditTagsDialog: MutableStateFlow<ShowEditTagsData?> =
-        MutableStateFlow(null)
-    val showEditTagsDialog: StateFlow<ShowEditTagsData?> = _showEditTagsDialog
+//    private val _showEditTagsDialog: MutableStateFlow<ShowEditTagsData?> =
+//        MutableStateFlow(null)
+//    val showEditTagsDialog: StateFlow<ShowEditTagsData?> = _showEditTagsDialog
 
-    private val _setUpPreview: MutableStateFlow<SetupPreview?> =
-        MutableStateFlow(null)
-    val setUpPreview: StateFlow<SetupPreview?> = _setUpPreview
+//    private val _setUpPreview: MutableStateFlow<SetupPreview?> =
+//        MutableStateFlow(null)
+//    val setUpPreview: StateFlow<SetupPreview?> = _setUpPreview
 
-    private val _displaySelected: MutableStateFlow<DisplaySelected?> =
-        MutableStateFlow(null)
-    val displaySelected: StateFlow<DisplaySelected?> = _displaySelected
+//    private val _displaySelected: MutableStateFlow<DisplaySelected?> =
+//        MutableStateFlow(null)
+//    val displaySelected: StateFlow<DisplaySelected?> = _displaySelected
 
-    private val _notifyResourceChange: MutableStateFlow<Boolean> =
-        MutableStateFlow(false)
-    val notifyResourceChange: StateFlow<Boolean> = _notifyResourceChange
+//    private val _notifyResourceChange: MutableStateFlow<Boolean> =
+//        MutableStateFlow(false)
+//    val notifyResourceChange: StateFlow<Boolean> = _notifyResourceChange
 
-    private val _showProgressWithText: MutableStateFlow<ProgressWithText?> =
-        MutableStateFlow(null)
-    val showProgressWithText: StateFlow<ProgressWithText?> = _showProgressWithText
+//    private val _showProgressWithText: MutableStateFlow<ProgressWithText?> =
+//        MutableStateFlow(null)
+//    val showProgressWithText: StateFlow<ProgressWithText?> = _showProgressWithText
 
-    private val _notifyCurrentItemChange: MutableStateFlow<Boolean> =
-        MutableStateFlow(false)
-    val notifyCurrentItemChange: StateFlow<Boolean> = _notifyCurrentItemChange
+//    private val _notifyCurrentItemChange: MutableStateFlow<Boolean> =
+//        MutableStateFlow(false)
+//    val notifyCurrentItemChange: StateFlow<Boolean> = _notifyCurrentItemChange
 
-    private val _updatePagerAdapterWithDiff: MutableStateFlow<Boolean> =
-        MutableStateFlow(false)
-    val updatePagerAdapterWithDiff: StateFlow<Boolean> = _updatePagerAdapterWithDiff
+//    private val _updatePagerAdapterWithDiff: MutableStateFlow<Boolean> =
+//        MutableStateFlow(false)
+//    val updatePagerAdapterWithDiff: StateFlow<Boolean> = _updatePagerAdapterWithDiff
 
     fun initialize(
         rootAndFav: RootAndFav,
@@ -196,7 +211,10 @@ class GalleryUpliftViewModel(
     }
 
     fun onPreviewsItemClick() {
-        _setControlsVisibility.value = !_setControlsVisibility.value
+        intent {
+            postSideEffect(GallerySideEffect.ControlVisible(isVisible = true))
+        }
+//        _setControlsVisibility.value = !_setControlsVisibility.value
     }
 
     fun bindPlainTextView(view: PreviewPlainTextViewHolderUplift) {
@@ -234,13 +252,18 @@ class GalleryUpliftViewModel(
         galleryItems.removeAt(currentPos)
 
         if (galleryItems.isEmpty()) {
-            _onNavigateBack.emit(true)
+            intent {
+                postSideEffect(GallerySideEffect.NavigateBack)
+            }
+//            _onNavigateBack.emit(true)
             return@launch
         }
 
         onTagsChanged()
-        _deleteResource.value = currentPos
-
+//        _deleteResource.value = currentPos
+        intent {
+            postSideEffect(GallerySideEffect.DeleteResource)
+        }
     }
 
     private suspend fun deleteResource(resource: ResourceId) {
@@ -253,47 +276,98 @@ class GalleryUpliftViewModel(
         }
 
         index.updateAll()
-        _notifyResourceChange.value = true
+        intent {
+            postSideEffect(GallerySideEffect.NotifyResourceChange)
+        }
+//        _notifyResourceChange.value = true
     }
 
     private fun onFirstViewAttach() {
         analytics.trackScreen()
         Timber.d(LogTags.GALLERY_SCREEN, "first view attached in GalleryPresenter")
         viewModelScope.launch {
-            _showProgressWithText.value = ProgressWithText(
-                isVisible = true,
-                text = "Providing root index",
-            )
+            intent {
+                postSideEffect(GallerySideEffect.ShowProgressWithText(
+                    ProgressWithText(
+                        isVisible = true,
+                        text = "Providing root index",
+                    )
+                ))
+            }
+//            _showProgressWithText.value = ProgressWithText(
+//                isVisible = true,
+//                text = "Providing root index",
+//            )
             index = indexRepo.provide(rootAndFav)
             messageFlow.onEach { message ->
                 when (message) {
                     is Message.KindDetectFailed ->
-                        _toastIndexFailedPath.value = message.path
+                        intent {
+                            postSideEffect(
+                                GallerySideEffect.ToastIndexFailedPath(
+                                    message.path
+                                )
+                            )
+                        }
+//                        _toastIndexFailedPath.value = message.path
                 }
             }.launchIn(viewModelScope)
-
-            _showProgressWithText.value = ProgressWithText(
-                isVisible = true,
-                text = "Providing metadata storage",
-            )
+            intent {
+                postSideEffect(GallerySideEffect.ShowProgressWithText(
+                    ProgressWithText(
+                        isVisible = true,
+                        text = "Providing metadata storage",
+                    )
+                ))
+            }
+//            _showProgressWithText.value = ProgressWithText(
+//                isVisible = true,
+//                text = "Providing metadata storage",
+//            )
             metadataStorage = metadataStorageRepo.provide(index)
-            _showProgressWithText.value = ProgressWithText(
-                isVisible = true,
-                text = "Providing previews storage",
-            )
+            intent {
+                postSideEffect(GallerySideEffect.ShowProgressWithText(
+                    ProgressWithText(
+                        isVisible = true,
+                        text = "Providing previews storage",
+                    )
+                ))
+            }
+//            _showProgressWithText.value = ProgressWithText(
+//                isVisible = true,
+//                text = "Providing previews storage",
+//            )
             previewStorage = previewStorageRepo.provide(index)
-            _showProgressWithText.value = ProgressWithText(
-                isVisible = true,
-                text = "Providing data storage",
-            )
+            intent {
+                postSideEffect(GallerySideEffect.ShowProgressWithText(
+                    ProgressWithText(
+                        isVisible = true,
+                        text = "Providing data storage",
+                    )
+                ))
+            }
+//            _showProgressWithText.value = ProgressWithText(
+//                isVisible = true,
+//                text = "Providing data storage",
+//            )
             try {
                 tagsStorage = tagsStorageRepo.provide(index)
                 scoreStorage = scoreStorageRepo.provide(index)
             } catch (e: StorageException) {
-                _displayStorageException.value = StorageExceptionGallery(
-                    label = e.label,
-                    messenger = e.msg
-                )
+                intent {
+                    postSideEffect(
+                        GallerySideEffect.DisplayStorageException(
+                            StorageExceptionGallery(
+                                label = e.label,
+                                messenger = e.msg
+                            )
+                        )
+                    )
+                }
+//                _displayStorageException.value = StorageExceptionGallery(
+//                    label = e.label,
+//                    messenger = e.msg
+//                )
             }
 
             statsStorage = statsStorageRepo.provide(index)
@@ -301,19 +375,39 @@ class GalleryUpliftViewModel(
 
             galleryItems = provideGalleryItems().toMutableList()
 
-            sortByScores = preferences.get(PreferenceKey.SortByScores)
-            _updatePagerAdapter.value = true
+            intent {
+                reduce {
+                    viewModelScope.launch {
+                        state.copy(sortByScores = preferences.get(PreferenceKey.SortByScores))
+                    }
+                    state
+                }
+                postSideEffect(
+                    GallerySideEffect.UpdatePagerAdapter
+                )
+            }
+//            sortByScores = preferences.get(PreferenceKey.SortByScores)
+//            _updatePagerAdapter.value = true
 
-            _showProgressWithText.value = ProgressWithText(
-                isVisible = false,
-                text = ""
-            )
+
+            intent {
+                postSideEffect(GallerySideEffect.ShowProgressWithText(
+                    ProgressWithText(
+                        isVisible = true,
+                        text = "",
+                    )
+                ))
+            }
+//            _showProgressWithText.value = ProgressWithText(
+//                isVisible = false,
+//                text = ""
+//            )
             scoreWidgetController.setVisible(sortByScores)
         }
     }
 
-    fun onPlayButtonClick() = viewModelScope.launch {
-        _viewInExternalApp.value = index.getPath(currentItem.id())!!
+    fun onPlayButtonClick() = intent {
+        postSideEffect(GallerySideEffect.ViewInExternalApp(index.getPath(currentItem.id())!!))
     }
 
     fun onInfoFabClick() = viewModelScope.launch {
@@ -329,7 +423,10 @@ class GalleryUpliftViewModel(
             resource = currentItem.resource,
             metadata = currentItem.metadata
         )
-        _showInfoAlert.emit(data)
+        intent {
+            postSideEffect(GallerySideEffect.ShowInfoAlert(data))
+        }
+//        _showInfoAlert.emit(data)
     }
 
 
@@ -343,17 +440,28 @@ class GalleryUpliftViewModel(
 
         if (currentItem.metadata is Metadata.Link) {
             val url = readText(path).getOrThrow()
-            _shareLink.emit(url)
+            intent {
+                postSideEffect(GallerySideEffect.ShareLink(url))
+            }
+//            _shareLink.emit(url)
             return@launch
         }
-        _shareResource.emit(path)
+        intent {
+            postSideEffect(GallerySideEffect.ShareResource(path))
+        }
+//        _shareResource.emit(path)
     }
 
     private val _toggleSelect: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val toggleSelect: StateFlow<Boolean> = _toggleSelect
     fun onSelectingChanged() {
         viewModelScope.launch {
-            selectingEnabled = !selectingEnabled
+            intent {
+                reduce {
+                    state.copy(selectingEnabled = !state.selectingEnabled)
+                }
+            }
+//            selectingEnabled = !selectingEnabled
             _toggleSelect.emit(selectingEnabled)
             _selectedResources.clear()
             if (selectingEnabled) {
@@ -374,10 +482,22 @@ class GalleryUpliftViewModel(
 
         if (currentItem.metadata is Metadata.Link) {
             val url = readText(path).getOrThrow()
-            _openLink.emit(url)
+            intent {
+                postSideEffect(GallerySideEffect.OpenLink(url))
+            }
+//            _openLink.emit(url)
             return@launch
         }
-        _viewInExternalApp.emit(path)
+        intent {
+            postSideEffect(
+                GallerySideEffect.ViewInExternalApp(
+                    index.getPath(
+                        currentItem.id()
+                    )!!
+                )
+            )
+        }
+//        _viewInExternalApp.emit(path)
     }
 
     fun onEditFabClick() = viewModelScope.launch {
@@ -387,7 +507,10 @@ class GalleryUpliftViewModel(
             "[edit_resource] clicked at position $currentPos"
         )
         val path = index.getPath(currentItem.id())!!
-        _editResource.emit(path)
+//        _editResource.emit(path)
+        intent {
+            postSideEffect(GallerySideEffect.EditResource(path))
+        }
     }
 
     fun onSelectBtnClick() {
@@ -400,12 +523,24 @@ class GalleryUpliftViewModel(
             _selectedResources.add(id)
         }
 
-        _displaySelected.value = DisplaySelected(
-            selected = !wasSelected,
-            showAnim = true,
-            selectedCount = _selectedResources.size,
-            itemCount = galleryItems.size
-        )
+        intent {
+            postSideEffect(
+                GallerySideEffect.DisplaySelectedFile(
+                    DisplaySelected(
+                        selected = !wasSelected,
+                        showAnim = true,
+                        selectedCount = _selectedResources.size,
+                        itemCount = galleryItems.size
+                    )
+                )
+            )
+        }
+//        _displaySelected.value = DisplaySelected(
+//            selected = !wasSelected,
+//            showAnim = true,
+//            selectedCount = _selectedResources.size,
+//            itemCount = galleryItems.size
+//        )
     }
 
     fun onResume() {
@@ -413,11 +548,21 @@ class GalleryUpliftViewModel(
     }
 
     fun onTagsChanged() {
-        val tags = tagsStorage.getTags(currentItem.id())
-        _displayPreviewTags.value = ResourceIdTagsPreview(
-            resourceId = currentItem.id(),
-            tags = tags,
-        )
+        intent {
+            val tags = tagsStorage.getTags(currentItem.id())
+            postSideEffect(
+                GallerySideEffect.DisplayPreviewTags(
+                    ResourceIdTagsPreview(
+                        resourceId = currentItem.id(),
+                        tags = tags,
+                    )
+                )
+            )
+        }
+//        _displayPreviewTags.value = ResourceIdTagsPreview(
+//            resourceId = currentItem.id(),
+//            tags = tags,
+//        )
     }
 
     fun onPageChanged(newPos: Int) = viewModelScope.launch {
@@ -426,8 +571,13 @@ class GalleryUpliftViewModel(
 
         checkResourceChanges(newPos)
 
-        currentPos = newPos
 
+//        currentPos = newPos
+        intent {
+            reduce {
+                state.copy(currentPos = newPos)
+            }
+        }
         val id = currentItem.id()
         val tags = tagsStorage.getTags(id)
         displayPreview(id, currentItem.metadata, tags)
@@ -449,10 +599,20 @@ class GalleryUpliftViewModel(
         val tags = tagsStorage.getTags(id)
         val newTags = tags - tag
 
-        _displayPreviewTags.value = ResourceIdTagsPreview(
-            resourceId = id,
-            tags = newTags,
-        )
+//        _displayPreviewTags.value = ResourceIdTagsPreview(
+//            resourceId = id,
+//            tags = newTags,
+//        )
+        intent {
+            postSideEffect(
+                GallerySideEffect.DisplayPreviewTags(
+                    ResourceIdTagsPreview(
+                        resourceId = id,
+                        tags = newTags,
+                    )
+                )
+            )
+        }
         statsStorage.handleEvent(
             StatsEvent.TagsChanged(
                 id, tags, newTags
@@ -463,19 +623,36 @@ class GalleryUpliftViewModel(
 
         tagsStorage.setTags(id, newTags)
         tagsStorage.persist()
-        _notifyTagsChanged.value = true
+        intent {
+            postSideEffect(GallerySideEffect.NotifyTagsChanged)
+        }
+//        _notifyTagsChanged.value = true
     }
 
     fun onEditTagsDialogBtnClick() {
         analytics.trackTagsEdit()
-        _showEditTagsDialog.value = ShowEditTagsData(
-            resource = currentItem.id(),
-            resources = listOf(currentItem.id()),
-            statsStorage = statsStorage,
-            rootAndFav = rootAndFav,
-            index = index,
-            storage = tagsStorage,
-        )
+        intent {
+            postSideEffect(
+                GallerySideEffect.ShowEditTagsDialog(
+                    ShowEditTagsData(
+                        resource = currentItem.id(),
+                        resources = listOf(currentItem.id()),
+                        statsStorage = statsStorage,
+                        rootAndFav = rootAndFav,
+                        index = index,
+                        storage = tagsStorage,
+                    )
+                )
+            )
+        }
+//        _showEditTagsDialog.value = ShowEditTagsData(
+//            resource = currentItem.id(),
+//            resources = listOf(currentItem.id()),
+//            statsStorage = statsStorage,
+//            rootAndFav = rootAndFav,
+//            index = index,
+//            storage = tagsStorage,
+//        )
     }
 
     private fun displayPreview(
@@ -483,23 +660,55 @@ class GalleryUpliftViewModel(
         meta: Metadata,
         tags: Tags
     ) {
-        _setUpPreview.value = SetupPreview(
-            position = currentPos,
-            meta = meta,
-        )
+        intent {
+            postSideEffect(
+                GallerySideEffect.SetUpPreview(
+                    SetupPreview(
+                        position = currentPos,
+                        meta = meta,
+                    )
+                )
+            )
+        }
+//        _setUpPreview.value = SetupPreview(
+//            position = currentPos,
+//            meta = meta,
+//        )
 
-        _displayPreviewTags.value = ResourceIdTagsPreview(
-            resourceId = id,
-            tags = tags,
-        )
+        intent {
+            postSideEffect(
+                GallerySideEffect.DisplayPreviewTags(
+                    ResourceIdTagsPreview(
+                        resourceId = id,
+                        tags = tags,
+                    )
+                )
+            )
+        }
+//        _displayPreviewTags.value = ResourceIdTagsPreview(
+//            resourceId = id,
+//            tags = tags,
+//        )
         scoreWidgetController.displayScore()
 
-        _displaySelected.value = DisplaySelected(
-            selected = id in _selectedResources,
-            showAnim = false,
-            selectedCount = _selectedResources.size,
-            itemCount = galleryItems.size,
-        )
+        intent {
+            postSideEffect(
+                GallerySideEffect.DisplaySelectedFile(
+                    DisplaySelected(
+                        selected = id in _selectedResources,
+                        showAnim = false,
+                        selectedCount = _selectedResources.size,
+                        itemCount = galleryItems.size,
+                    )
+                )
+            )
+        }
+//        _displaySelected.value = DisplaySelected(
+//            selected = id in _selectedResources,
+//            showAnim = false,
+//            selectedCount = _selectedResources.size,
+//            itemCount = galleryItems.size,
+//        )
     }
 
     private fun checkResourceChanges(pos: Int) =
@@ -552,18 +761,29 @@ class GalleryUpliftViewModel(
     private fun invokeHandleGalleryExternalChangesUseCase(
     ) {
         viewModelScope.launch {
-            withContext(Dispatchers.Main) {
-                _showProgressWithText.value = ProgressWithText(
-                    isVisible = true,
-                    text = "Changes detected, indexing"
-                )
+//            withContext(Dispatchers.Main) {
+//                _showProgressWithText.value = ProgressWithText(
+//                    isVisible = true,
+//                    text = "Changes detected, indexing"
+//                )
+//            }
+            intent {
+                postSideEffect(GallerySideEffect.ShowProgressWithText(
+                    ProgressWithText(
+                        isVisible = true,
+                        text = "Changes detected, indexing"
+                    )
+                ))
             }
 
             index.updateAll()
 
-            withContext(Dispatchers.Main) {
-                _notifyResourceChange.value = true
+            intent {
+                postSideEffect(GallerySideEffect.NotifyResourceChange)
             }
+//            withContext(Dispatchers.Main) {
+//                _notifyResourceChange.value = true
+//            }
 
             viewModelScope.launch {
                 metadataStorage.busy.collect { busy ->
@@ -573,7 +793,10 @@ class GalleryUpliftViewModel(
 
             val newItems = provideGalleryItems()
             if (newItems.isEmpty()) {
-                _onNavigateBack.value = true
+                intent {
+                    postSideEffect(GallerySideEffect.NavigateBack)
+                }
+//                _onNavigateBack.value = true
                 return@launch
             }
 
@@ -588,11 +811,22 @@ class GalleryUpliftViewModel(
 
             viewModelScope.launch {
                 _updatePagerAdapterWithDiff.value = true
-                _notifyCurrentItemChange.value = true
-                _showProgressWithText.value = ProgressWithText(
-                    isVisible = true,
-                    text = "Changes detected, indexing"
-                )
+
+//                _notifyCurrentItemChange.value = true
+                intent {
+                    postSideEffect(GallerySideEffect.UpdatePagerAdapterWithDiff)
+                    postSideEffect(GallerySideEffect.NotifyCurrentItemChange)
+                    postSideEffect(GallerySideEffect.ShowProgressWithText(
+                        ProgressWithText(
+                            isVisible = true,
+                            text = "Changes detected, indexing"
+                        )
+                    ))
+                }
+//                _showProgressWithText.value = ProgressWithText(
+//                    isVisible = true,
+//                    text = "Changes detected, indexing"
+//                )
             }
         }
     }
