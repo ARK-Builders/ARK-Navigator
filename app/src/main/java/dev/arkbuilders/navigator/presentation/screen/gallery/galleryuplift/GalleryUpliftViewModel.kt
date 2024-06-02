@@ -85,8 +85,7 @@ class GalleryUpliftViewModel(
     private lateinit var rootAndFav: RootAndFav
     private lateinit var resourcesIds: List<ResourceId>
 
-    override val container: Container<GalleryState, GallerySideEffect> =
-        container(GalleryState())
+    override val container: Container<GalleryState, GallerySideEffect> = container(GalleryState())
 
     var galleryItems: MutableList<GalleryPresenter.GalleryItem> = mutableListOf()
     var diffResult: DiffUtil.DiffResult? = null
@@ -127,10 +126,8 @@ class GalleryUpliftViewModel(
         viewModelScope.launch {
             view.reset()
             val item = galleryItems[view.pos]
-
             val path = index.getPath(item.id())!!
             val content = readText(path)
-
             content.onSuccess {
                 view.setContent(it)
             }
@@ -156,14 +153,12 @@ class GalleryUpliftViewModel(
         )
         deleteResource(currentItem.id())
         galleryItems.removeAt(container.stateFlow.value.currentPos)
-
         if (galleryItems.isEmpty()) {
             intent {
                 postSideEffect(GallerySideEffect.NavigateBack)
             }
             return@launch
         }
-
         onTagsChanged()
         intent {
             postSideEffect(GallerySideEffect.DeleteResource(container.stateFlow.value.currentPos))
@@ -172,13 +167,10 @@ class GalleryUpliftViewModel(
 
     private suspend fun deleteResource(resource: ResourceId) {
         Timber.d(LogTags.GALLERY_SCREEN, "deleting resource $resource")
-
-        val path = index.getPath(resource)
-
         withContext(Dispatchers.IO) {
+            val path = index.getPath(resource)
             Files.delete(path)
         }
-
         index.updateAll()
         intent {
             postSideEffect(GallerySideEffect.NotifyResourceChange)
@@ -190,12 +182,14 @@ class GalleryUpliftViewModel(
         Timber.d(LogTags.GALLERY_SCREEN, "first view attached in GalleryPresenter")
         viewModelScope.launch {
             intent {
-                postSideEffect(GallerySideEffect.ShowProgressWithText(
-                    ProgressWithText(
-                        isVisible = true,
-                        text = "Providing root index",
+                postSideEffect(
+                    GallerySideEffect.ShowProgressWithText(
+                        ProgressWithText(
+                            isVisible = true,
+                            text = "Providing root index",
+                        )
                     )
-                ))
+                )
             }
             index = indexRepo.provide(rootAndFav)
             messageFlow.onEach { message ->
@@ -211,30 +205,36 @@ class GalleryUpliftViewModel(
                 }
             }.launchIn(viewModelScope)
             intent {
-                postSideEffect(GallerySideEffect.ShowProgressWithText(
-                    ProgressWithText(
-                        isVisible = true,
-                        text = "Providing metadata storage",
+                postSideEffect(
+                    GallerySideEffect.ShowProgressWithText(
+                        ProgressWithText(
+                            isVisible = true,
+                            text = "Providing metadata storage",
+                        )
                     )
-                ))
+                )
             }
             metadataStorage = metadataStorageRepo.provide(index)
             intent {
-                postSideEffect(GallerySideEffect.ShowProgressWithText(
-                    ProgressWithText(
-                        isVisible = true,
-                        text = "Providing previews storage",
+                postSideEffect(
+                    GallerySideEffect.ShowProgressWithText(
+                        ProgressWithText(
+                            isVisible = true,
+                            text = "Providing previews storage",
+                        )
                     )
-                ))
+                )
             }
             previewStorage = previewStorageRepo.provide(index)
             intent {
-                postSideEffect(GallerySideEffect.ShowProgressWithText(
-                    ProgressWithText(
-                        isVisible = true,
-                        text = "Providing data storage",
+                postSideEffect(
+                    GallerySideEffect.ShowProgressWithText(
+                        ProgressWithText(
+                            isVisible = true,
+                            text = "Providing data storage",
+                        )
                     )
-                ))
+                )
             }
             try {
                 tagsStorage = tagsStorageRepo.provide(index)
@@ -251,12 +251,9 @@ class GalleryUpliftViewModel(
                     )
                 }
             }
-
             statsStorage = statsStorageRepo.provide(index)
             scoreWidgetController.init(scoreStorage)
-
             galleryItems = provideGalleryItems().toMutableList()
-
             intent {
                 reduce {
                     viewModelScope.launch {
@@ -267,15 +264,14 @@ class GalleryUpliftViewModel(
                 postSideEffect(
                     GallerySideEffect.UpdatePagerAdapter
                 )
-            }
-
-            intent {
-                postSideEffect(GallerySideEffect.ShowProgressWithText(
-                    ProgressWithText(
-                        isVisible = false,
-                        text = "",
+                postSideEffect(
+                    GallerySideEffect.ShowProgressWithText(
+                        ProgressWithText(
+                            isVisible = false,
+                            text = "",
+                        )
                     )
-                ))
+                )
             }
             scoreWidgetController.setVisible(container.stateFlow.value.sortByScores)
         }
@@ -291,7 +287,6 @@ class GalleryUpliftViewModel(
             LogTags.GALLERY_SCREEN,
             "[info_resource] clicked at position ${container.stateFlow.value.currentPos}"
         )
-
         val path = index.getPath(currentItem.id())!!
         val data = ShowInfoData(
             path = path,
@@ -311,7 +306,6 @@ class GalleryUpliftViewModel(
             "[share_resource] clicked at position ${container.stateFlow.value.currentPos}"
         )
         val path = index.getPath(currentItem.id())!!
-
         if (currentItem.metadata is Metadata.Link) {
             val url = readText(path).getOrThrow()
             intent {
@@ -323,6 +317,7 @@ class GalleryUpliftViewModel(
             postSideEffect(GallerySideEffect.ShareResource(path))
         }
     }
+
     fun onSelectingChanged() {
         intent {
             reduce {
@@ -342,10 +337,8 @@ class GalleryUpliftViewModel(
             LogTags.GALLERY_SCREEN,
             "[open_resource] clicked at position ${container.stateFlow.value.currentPos}"
         )
-
         val id = currentItem.id()
         val path = index.getPath(id)!!
-
         if (currentItem.metadata is Metadata.Link) {
             val url = readText(path).getOrThrow()
             intent {
@@ -379,7 +372,6 @@ class GalleryUpliftViewModel(
     fun onSelectBtnClick() {
         val id = currentItem.id()
         val wasSelected = id in _selectedResources
-
         if (wasSelected) {
             _selectedResources.remove(id)
         } else {
@@ -421,7 +413,6 @@ class GalleryUpliftViewModel(
     fun onPageChanged(newPos: Int) = viewModelScope.launch {
         if (galleryItems.isEmpty())
             return@launch
-
         checkResourceChanges(newPos)
         intent {
             reduce {
@@ -445,7 +436,6 @@ class GalleryUpliftViewModel(
     fun onTagRemove(tag: Tag) = viewModelScope.launch(NonCancellable) {
         analytics.trackTagRemove()
         val id = currentItem.id()
-
         val tags = tagsStorage.getTags(id)
         val newTags = tags - tag
 
@@ -466,7 +456,6 @@ class GalleryUpliftViewModel(
         )
 
         Timber.d(LogTags.GALLERY_SCREEN, "setting new tags $newTags to $currentItem")
-
         tagsStorage.setTags(id, newTags)
         tagsStorage.persist()
         intent {
@@ -539,22 +528,18 @@ class GalleryUpliftViewModel(
             if (galleryItems.isEmpty()) {
                 return@launch
             }
-
             val item = galleryItems[pos]
-
             val path = index.getPath(item.id())
                 ?: let {
                     Timber.d("Resource ${item.id()} can't be found in the index")
                     invokeHandleGalleryExternalChangesUseCase()
                     return@launch
                 }
-
             if (path.notExists()) {
                 Timber.d("Resource ${item.id()} isn't stored by path $path")
                 invokeHandleGalleryExternalChangesUseCase()
                 return@launch
             }
-
             if (path.getLastModifiedTime() != item.resource.modified) {
                 Timber.d("Index is not up-to-date regarding path $path")
                 invokeHandleGalleryExternalChangesUseCase()
@@ -584,12 +569,14 @@ class GalleryUpliftViewModel(
     private fun invokeHandleGalleryExternalChangesUseCase() {
         viewModelScope.launch {
             intent {
-                postSideEffect(GallerySideEffect.ShowProgressWithText(
-                    ProgressWithText(
-                        isVisible = true,
-                        text = "Changes detected, indexing"
+                postSideEffect(
+                    GallerySideEffect.ShowProgressWithText(
+                        ProgressWithText(
+                            isVisible = true,
+                            text = "Changes detected, indexing"
+                        )
                     )
-                ))
+                )
             }
 
             index.updateAll()
@@ -625,12 +612,14 @@ class GalleryUpliftViewModel(
                 intent {
                     postSideEffect(GallerySideEffect.UpdatePagerAdapterWithDiff)
                     postSideEffect(GallerySideEffect.NotifyCurrentItemChange)
-                    postSideEffect(GallerySideEffect.ShowProgressWithText(
-                        ProgressWithText(
-                            isVisible = true,
-                            text = "Changes detected, indexing"
+                    postSideEffect(
+                        GallerySideEffect.ShowProgressWithText(
+                            ProgressWithText(
+                                isVisible = true,
+                                text = "Changes detected, indexing"
+                            )
                         )
-                    ))
+                    )
                 }
             }
         }
@@ -646,5 +635,3 @@ class GalleryUpliftViewModel(
             }
         }
 }
-
-

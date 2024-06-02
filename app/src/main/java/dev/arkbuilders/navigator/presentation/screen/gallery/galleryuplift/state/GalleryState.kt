@@ -38,9 +38,9 @@ sealed class GallerySideEffect {
     data class ShowEditTagsDialog(val data: ShowEditTagsData) : GallerySideEffect()
     data class SetUpPreview(val data: SetupPreview) : GallerySideEffect()
     data class DisplaySelectedFile(val data: DisplaySelected) : GallerySideEffect()
-    data object NotifyResourceChange: GallerySideEffect()
-    data class ShowProgressWithText(val text: ProgressWithText): GallerySideEffect()
-    data object NotifyCurrentItemChange: GallerySideEffect()
-    data object UpdatePagerAdapterWithDiff: GallerySideEffect()
+    data object NotifyResourceChange : GallerySideEffect()
+    data class ShowProgressWithText(val text: ProgressWithText) : GallerySideEffect()
+    data object NotifyCurrentItemChange : GallerySideEffect()
+    data object UpdatePagerAdapterWithDiff : GallerySideEffect()
     data class ToggleSelect(val isEnabled: Boolean) : GallerySideEffect()
 }
