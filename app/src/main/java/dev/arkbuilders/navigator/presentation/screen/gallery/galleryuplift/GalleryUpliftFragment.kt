@@ -71,7 +71,7 @@ class GalleryUpliftFragment : Fragment() {
     lateinit var factory: GalleryUpliftViewModelFactory.Factory
     private val viewModel: GalleryUpliftViewModel by viewModels {
         factory.create(
-            selectorNotEdit = false
+            requireArguments().getBoolean(SELECTING_ENABLED_KEY)
         )
     }
 
