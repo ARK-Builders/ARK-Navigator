@@ -183,11 +183,28 @@ class GalleryUpliftFragment : Fragment() {
     private fun handleSideEffect(sideEffect: GallerySideEffect) {
         with(sideEffect) {
             when (this) {
-                is GallerySideEffect.ControlVisible -> setControlsVisibility(isVisible)
+                is GallerySideEffect.ControlVisible ->
+                    setControlsVisibility(visible = isVisible)
+
                 is GallerySideEffect.DeleteResource -> deleteResource(pos)
-                is GallerySideEffect.DisplayPreviewTags -> displayPreviewTags(data.resourceId, data.tags)
-                is GallerySideEffect.DisplaySelectedFile -> displaySelected(data.selected, data.showAnim, data.selectedCount, data.itemCount)
-                is GallerySideEffect.DisplayStorageException -> displayStorageException(storageException.label, storageException.messenger)
+                is GallerySideEffect.DisplayPreviewTags -> displayPreviewTags(
+                    resource = data.resourceId,
+                    tags = data.tags
+                )
+
+                is GallerySideEffect.DisplaySelectedFile -> displaySelected(
+                    selected = data.selected,
+                    showAnim = data.showAnim,
+                    selectedCount = data.selectedCount,
+                    itemCount = data.itemCount
+                )
+
+                is GallerySideEffect.DisplayStorageException ->
+                    displayStorageException(
+                        label = storageException.label,
+                        msg = storageException.messenger
+                    )
+
                 is GallerySideEffect.EditResource -> editResource(path)
                 GallerySideEffect.NavigateBack -> onBackClick()
                 GallerySideEffect.NotifyCurrentItemChange -> notifyCurrentItemChanged()
@@ -195,7 +212,11 @@ class GalleryUpliftFragment : Fragment() {
                 GallerySideEffect.NotifyResourceScoresChanged -> notifyResourceScoresChanged()
                 GallerySideEffect.NotifyTagsChanged -> notifyTagsChanged()
                 is GallerySideEffect.OpenLink -> openLink(url)
-                is GallerySideEffect.SetUpPreview -> setupPreview(data.position, data.meta)
+                is GallerySideEffect.SetUpPreview -> setupPreview(
+                    pos = data.position,
+                    meta = data.meta
+                )
+
                 is GallerySideEffect.ShareLink -> shareLink(url)
                 is GallerySideEffect.ShareResource -> shareResource(path)
                 is GallerySideEffect.ShowEditTagsDialog -> showEditTagsDialog(
@@ -206,11 +227,26 @@ class GalleryUpliftFragment : Fragment() {
                     index = data.index,
                     storage = data.storage,
                 )
-                is GallerySideEffect.ShowInfoAlert -> showInfoAlert(infoData.path, infoData.resource, infoData.metadata)
-                is GallerySideEffect.ShowProgressWithText -> setProgressVisibility(text.isVisible, text.text)
-                is GallerySideEffect.ToastIndexFailedPath -> toastIndexFailedPath(path)
+
+                is GallerySideEffect.ShowInfoAlert -> showInfoAlert(
+                    path = infoData.path,
+                    resource = infoData.resource,
+                    metadata = infoData.metadata
+                )
+
+                is GallerySideEffect.ShowProgressWithText -> setProgressVisibility(
+                    isVisible = text.isVisible,
+                    withText = text.text
+                )
+
+                is GallerySideEffect.ToastIndexFailedPath -> toastIndexFailedPath(
+                    path
+                )
+
                 GallerySideEffect.UpdatePagerAdapter -> updatePagerAdapter()
-                GallerySideEffect.UpdatePagerAdapterWithDiff -> updatePagerAdapterWithDiff()
+                GallerySideEffect.UpdatePagerAdapterWithDiff ->
+                    updatePagerAdapterWithDiff()
+
                 is GallerySideEffect.ViewInExternalApp -> viewInExternalApp(path)
                 is GallerySideEffect.ToggleSelect -> toggleSelecting(isEnabled)
             }

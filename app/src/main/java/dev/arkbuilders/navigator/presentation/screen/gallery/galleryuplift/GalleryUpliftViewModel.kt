@@ -85,7 +85,8 @@ class GalleryUpliftViewModel(
     private lateinit var rootAndFav: RootAndFav
     private lateinit var resourcesIds: List<ResourceId>
 
-    override val container: Container<GalleryState, GallerySideEffect> = container(GalleryState())
+    override val container: Container<GalleryState, GallerySideEffect> =
+        container(GalleryState())
 
     var galleryItems: MutableList<GalleryPresenter.GalleryItem> = mutableListOf()
     var diffResult: DiffUtil.DiffResult? = null
@@ -149,7 +150,10 @@ class GalleryUpliftViewModel(
         analytics.trackResRemove()
         Timber.d(
             LogTags.GALLERY_SCREEN,
-            "[remove_resource] clicked at position ${container.stateFlow.value.currentPos}"
+            buildString {
+                append("[remove_resource] clicked at position ")
+                append("${container.stateFlow.value.currentPos}")
+            }
         )
         deleteResource(currentItem.id())
         galleryItems.removeAt(container.stateFlow.value.currentPos)
@@ -161,7 +165,9 @@ class GalleryUpliftViewModel(
         }
         onTagsChanged()
         intent {
-            postSideEffect(GallerySideEffect.DeleteResource(container.stateFlow.value.currentPos))
+            postSideEffect(
+                GallerySideEffect.DeleteResource(container.stateFlow.value.currentPos)
+            )
         }
     }
 
@@ -257,7 +263,9 @@ class GalleryUpliftViewModel(
             intent {
                 reduce {
                     viewModelScope.launch {
-                        state.copy(sortByScores = preferences.get(PreferenceKey.SortByScores))
+                        state.copy(
+                            sortByScores = preferences.get(PreferenceKey.SortByScores)
+                        )
                     }
                     state
                 }
@@ -278,7 +286,11 @@ class GalleryUpliftViewModel(
     }
 
     fun onPlayButtonClick() = intent {
-        postSideEffect(GallerySideEffect.ViewInExternalApp(index.getPath(currentItem.id())!!))
+        postSideEffect(
+            GallerySideEffect.ViewInExternalApp(
+                index.getPath(currentItem.id())!!
+            )
+        )
     }
 
     fun onInfoFabClick() = viewModelScope.launch {
@@ -303,7 +315,8 @@ class GalleryUpliftViewModel(
         analytics.trackResShare()
         Timber.d(
             LogTags.GALLERY_SCREEN,
-            "[share_resource] clicked at position ${container.stateFlow.value.currentPos}"
+            "[share_resource] clicked at position " +
+                "${container.stateFlow.value.currentPos}"
         )
         val path = index.getPath(currentItem.id())!!
         if (currentItem.metadata is Metadata.Link) {
@@ -323,7 +336,11 @@ class GalleryUpliftViewModel(
             reduce {
                 state.copy(selectingEnabled = !state.selectingEnabled)
             }
-            postSideEffect(GallerySideEffect.ToggleSelect(container.stateFlow.value.selectingEnabled))
+            postSideEffect(
+                GallerySideEffect.ToggleSelect(
+                    container.stateFlow.value.selectingEnabled
+                )
+            )
         }
         _selectedResources.clear()
         if (container.stateFlow.value.selectingEnabled) {
