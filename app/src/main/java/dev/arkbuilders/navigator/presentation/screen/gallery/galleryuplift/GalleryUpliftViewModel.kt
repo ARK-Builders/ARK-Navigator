@@ -104,10 +104,6 @@ class GalleryUpliftViewModel(
         }
     )
 
-//    private var currentPos = 0
-    private var sortByScores = false
-    private var selectingEnabled: Boolean = false
-
     private val messageFlow: MutableSharedFlow<Message> = MutableSharedFlow()
     private val currentItem: GalleryPresenter.GalleryItem
         get() = galleryItems[container.stateFlow.value.currentPos]
@@ -281,7 +277,7 @@ class GalleryUpliftViewModel(
                     )
                 ))
             }
-            scoreWidgetController.setVisible(sortByScores)
+            scoreWidgetController.setVisible(container.stateFlow.value.sortByScores)
         }
     }
 
@@ -332,10 +328,10 @@ class GalleryUpliftViewModel(
             reduce {
                 state.copy(selectingEnabled = !state.selectingEnabled)
             }
-            postSideEffect(GallerySideEffect.ToggleSelect(selectingEnabled))
+            postSideEffect(GallerySideEffect.ToggleSelect(container.stateFlow.value.selectingEnabled))
         }
         _selectedResources.clear()
-        if (selectingEnabled) {
+        if (container.stateFlow.value.selectingEnabled) {
             _selectedResources.add(currentItem.resource.id)
         }
     }
