@@ -262,7 +262,7 @@ class GalleryUpliftViewModel(
         onTagsChanged()
 //        _deleteResource.value = currentPos
         intent {
-            postSideEffect(GallerySideEffect.DeleteResource)
+            postSideEffect(GallerySideEffect.DeleteResource(currentPos))
         }
     }
 
@@ -393,7 +393,7 @@ class GalleryUpliftViewModel(
             intent {
                 postSideEffect(GallerySideEffect.ShowProgressWithText(
                     ProgressWithText(
-                        isVisible = true,
+                        isVisible = false,
                         text = "",
                     )
                 ))
@@ -810,7 +810,7 @@ class GalleryUpliftViewModel(
             galleryItems = newItems.toMutableList()
 
             viewModelScope.launch {
-                _updatePagerAdapterWithDiff.value = true
+//                _updatePagerAdapterWithDiff.value = true
 
 //                _notifyCurrentItemChange.value = true
                 intent {
