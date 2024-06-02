@@ -315,7 +315,6 @@ class GalleryUpliftViewModel(
         }
     }
 
-
     fun onShareFabClick() = viewModelScope.launch {
         analytics.trackResShare()
         Timber.d(

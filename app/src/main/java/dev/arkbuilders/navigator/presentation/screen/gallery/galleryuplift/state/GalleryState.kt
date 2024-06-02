@@ -22,8 +22,9 @@ sealed class GallerySideEffect {
     data class DeleteResource(val pos: Int) : GallerySideEffect()
     data class ToastIndexFailedPath(val path: Path) : GallerySideEffect()
     data class ShowInfoAlert(val infoData: ShowInfoData) : GallerySideEffect()
-    data class DisplayStorageException(val storageException: StorageExceptionGallery) :
-        GallerySideEffect()
+    data class DisplayStorageException(
+        val storageException: StorageExceptionGallery
+    ) : GallerySideEffect()
 
     data object UpdatePagerAdapter : GallerySideEffect()
     data class ShareLink(val url: String) : GallerySideEffect()
