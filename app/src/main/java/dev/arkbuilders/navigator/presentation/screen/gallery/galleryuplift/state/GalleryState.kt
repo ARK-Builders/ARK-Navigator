@@ -42,4 +42,5 @@ sealed class GallerySideEffect {
     data class ShowProgressWithText(val text: ProgressWithText): GallerySideEffect()
     data object NotifyCurrentItemChange: GallerySideEffect()
     data object UpdatePagerAdapterWithDiff: GallerySideEffect()
+    data class ToggleSelect(val isEnabled: Boolean) : GallerySideEffect()
 }

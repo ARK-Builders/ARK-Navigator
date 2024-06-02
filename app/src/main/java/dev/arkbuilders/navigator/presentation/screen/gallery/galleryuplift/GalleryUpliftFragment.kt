@@ -18,9 +18,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import androidx.viewpager2.widget.ViewPager2
@@ -224,6 +222,7 @@ class GalleryUpliftFragment : Fragment() {
                 GallerySideEffect.UpdatePagerAdapter -> updatePagerAdapter()
                 GallerySideEffect.UpdatePagerAdapterWithDiff -> updatePagerAdapterWithDiff()
                 is GallerySideEffect.ViewInExternalApp -> viewInExternalApp(path)
+                is GallerySideEffect.ToggleSelect -> toggleSelecting(isEnabled)
             }
         }
     }
