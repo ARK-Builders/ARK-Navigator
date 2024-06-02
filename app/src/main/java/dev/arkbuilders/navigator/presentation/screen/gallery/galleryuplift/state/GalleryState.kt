@@ -16,11 +16,10 @@ data class GalleryState(
 )
 
 sealed class GallerySideEffect {
-    data class Progress(val text: String) : GallerySideEffect()
     data object NotifyResourceScoresChanged : GallerySideEffect()
     data class ControlVisible(val isVisible: Boolean) : GallerySideEffect()
     data object NavigateBack : GallerySideEffect()
-    data object DeleteResource : GallerySideEffect()
+    data class DeleteResource(val pos: Int) : GallerySideEffect()
     data class ToastIndexFailedPath(val path: Path) : GallerySideEffect()
     data class ShowInfoAlert(val infoData: ShowInfoData) : GallerySideEffect()
     data class DisplayStorageException(val storageException: StorageExceptionGallery) :
