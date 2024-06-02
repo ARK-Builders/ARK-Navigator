@@ -565,7 +565,6 @@ class GalleryUpliftViewModel(
             emptyList()
         }
 
-
     private fun invokeHandleGalleryExternalChangesUseCase() {
         viewModelScope.launch {
             intent {

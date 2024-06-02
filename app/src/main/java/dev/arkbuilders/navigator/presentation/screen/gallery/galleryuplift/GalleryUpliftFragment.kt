@@ -64,7 +64,6 @@ import java.nio.file.Path
 import javax.inject.Inject
 import kotlin.system.measureTimeMillis
 
-
 class GalleryUpliftFragment : Fragment() {
     private val binding by viewBinding(FragmentGalleryBinding::bind)
 
@@ -83,7 +82,6 @@ class GalleryUpliftFragment : Fragment() {
     private lateinit var stackedToasts: StackedToasts
     private lateinit var pagerAdapter: PreviewsPagerUplift
 
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -91,7 +89,6 @@ class GalleryUpliftFragment : Fragment() {
     ): View? {
         return inflater.inflate(R.layout.fragment_gallery, container, false)
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()
@@ -126,19 +123,15 @@ class GalleryUpliftFragment : Fragment() {
         requireActivity().onBackPressedDispatcher.addCallback(this) {
             onBackClick()
         }
-
-
         pagerAdapter = PreviewsPagerUplift(requireContext(), viewModel)
 
         initViewPager()
         scoreWidget.init(ScoreWidgetBinding.bind(binding.scoreWidget))
-
         binding.apply {
             val selectingEnabled =
                 requireArguments().getBoolean(GalleryFragment.SELECTING_ENABLED_KEY)
             layoutSelected.isVisible = selectingEnabled
             fabStartSelect.isVisible = !selectingEnabled
-
             removeResourceFab.setOnClickListener {
                 Toast.makeText(
                     requireContext(),
@@ -146,7 +139,6 @@ class GalleryUpliftFragment : Fragment() {
                     Toast.LENGTH_SHORT
                 ).show()
             }
-
             removeResourceFab.setOnLongClickListener {
                 val time = measureTimeMillis {
                     viewModel.onRemoveFabClick()
@@ -154,7 +146,6 @@ class GalleryUpliftFragment : Fragment() {
                 Timber.tag(LogTags.GALLERY_SCREEN).d("${time / 1000L}s")
                 true
             }
-
             infoResourceFab.setOnClickListener {
                 viewModel.onInfoFabClick()
             }
@@ -226,7 +217,6 @@ class GalleryUpliftFragment : Fragment() {
         }
     }
 
-
     private fun render(state: GalleryState) {
         setControlsVisibility(state.selectingEnabled)
     }
@@ -295,7 +285,6 @@ class GalleryUpliftFragment : Fragment() {
             ).show()
         }
     }
-
 
     private fun shareResource(resourcePath: Path) =
         openIntentChooser(
@@ -421,7 +410,6 @@ class GalleryUpliftFragment : Fragment() {
         dialog.show(childFragmentManager, EditTagsDialogFragment.FRAGMENT_TAG)
     }
 
-
     @SuppressLint("ClickableViewAccessibility")
     fun setProgressVisibility(isVisible: Boolean, withText: String) {
         binding.layoutProgress.apply {
@@ -454,7 +442,6 @@ class GalleryUpliftFragment : Fragment() {
             pagerAdapter.notifyItemChanged(binding.viewPager.currentItem)
         }
     }
-
 
     private fun displaySelected(
         selected: Boolean,
@@ -536,7 +523,6 @@ class GalleryUpliftFragment : Fragment() {
         }
     }
 
-
     private fun initViewPager() = with(binding.viewPager) {
         adapter = pagerAdapter
         offscreenPageLimit = 2
@@ -593,7 +579,6 @@ class GalleryUpliftFragment : Fragment() {
         }
         startActivity(Intent.createChooser(intent, title))
     }
-
 
     private fun getExternalAppIntent(
         resourcePath: Path,
