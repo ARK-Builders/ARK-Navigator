@@ -207,9 +207,13 @@ class GalleryUpliftFragment : Fragment() {
 
                 is GallerySideEffect.EditResource -> editResource(path)
                 GallerySideEffect.NavigateBack -> onBackClick()
-                GallerySideEffect.NotifyCurrentItemChange -> notifyCurrentItemChanged()
+                GallerySideEffect.NotifyCurrentItemChange ->
+                    notifyCurrentItemChanged()
+
                 GallerySideEffect.NotifyResourceChange -> notifyResourcesChanged()
-                GallerySideEffect.NotifyResourceScoresChanged -> notifyResourceScoresChanged()
+                GallerySideEffect.NotifyResourceScoresChanged ->
+                    notifyResourceScoresChanged()
+
                 GallerySideEffect.NotifyTagsChanged -> notifyTagsChanged()
                 is GallerySideEffect.OpenLink -> openLink(url)
                 is GallerySideEffect.SetUpPreview -> setupPreview(

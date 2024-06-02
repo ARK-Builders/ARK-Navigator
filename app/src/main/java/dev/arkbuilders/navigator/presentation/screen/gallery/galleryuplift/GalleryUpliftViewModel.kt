@@ -166,7 +166,9 @@ class GalleryUpliftViewModel(
         onTagsChanged()
         intent {
             postSideEffect(
-                GallerySideEffect.DeleteResource(container.stateFlow.value.currentPos)
+                GallerySideEffect.DeleteResource(
+                    container.stateFlow.value.currentPos
+                )
             )
         }
     }
@@ -264,7 +266,9 @@ class GalleryUpliftViewModel(
                 reduce {
                     viewModelScope.launch {
                         state.copy(
-                            sortByScores = preferences.get(PreferenceKey.SortByScores)
+                            sortByScores = preferences.get(
+                                PreferenceKey.SortByScores
+                            )
                         )
                     }
                     state
@@ -297,7 +301,8 @@ class GalleryUpliftViewModel(
         analytics.trackResInfo()
         Timber.d(
             LogTags.GALLERY_SCREEN,
-            "[info_resource] clicked at position ${container.stateFlow.value.currentPos}"
+            "[info_resource] clicked at position" +
+                " ${container.stateFlow.value.currentPos}"
         )
         val path = index.getPath(currentItem.id())!!
         val data = ShowInfoData(
@@ -352,7 +357,8 @@ class GalleryUpliftViewModel(
         analytics.trackResOpen()
         Timber.d(
             LogTags.GALLERY_SCREEN,
-            "[open_resource] clicked at position ${container.stateFlow.value.currentPos}"
+            "[open_resource] clicked at position " +
+                "${container.stateFlow.value.currentPos}"
         )
         val id = currentItem.id()
         val path = index.getPath(id)!!
@@ -378,7 +384,8 @@ class GalleryUpliftViewModel(
         analytics.trackResEdit()
         Timber.d(
             LogTags.GALLERY_SCREEN,
-            "[edit_resource] clicked at position ${container.stateFlow.value.currentPos}"
+            "[edit_resource] clicked at position " +
+                "${container.stateFlow.value.currentPos}"
         )
         val path = index.getPath(currentItem.id())!!
         intent {
