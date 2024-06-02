@@ -49,6 +49,8 @@ import dev.arkbuilders.navigator.presentation.dialog.StorageExceptionDialogFragm
 import dev.arkbuilders.navigator.presentation.dialog.edittags.EditTagsDialogFragment
 import dev.arkbuilders.navigator.presentation.navigation.Screens
 import dev.arkbuilders.navigator.presentation.screen.gallery.GalleryFragment
+import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.state.GallerySideEffect
+import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.state.GalleryState
 import dev.arkbuilders.navigator.presentation.screen.main.MainActivity
 import dev.arkbuilders.navigator.presentation.utils.FullscreenHelper
 import dev.arkbuilders.navigator.presentation.utils.extra.ExtraLoader
@@ -58,6 +60,7 @@ import dev.arkbuilders.navigator.presentation.view.DefaultPopup
 import dev.arkbuilders.navigator.presentation.view.DepthPageTransformer
 import dev.arkbuilders.navigator.presentation.view.StackedToasts
 import kotlinx.coroutines.launch
+import org.orbitmvi.orbit.viewmodel.observe
 import timber.log.Timber
 import java.nio.file.Path
 import javax.inject.Inject
@@ -182,6 +185,52 @@ class GalleryUpliftFragment : Fragment() {
                 return@setOnLongClickListener true
             }
         }
+        viewModel.observe(
+            lifecycleOwner = this,
+            state = ::render,
+            sideEffect = ::handleSideEffect
+        )
+    }
+
+    private fun handleSideEffect(sideEffect: GallerySideEffect) {
+        with(sideEffect) {
+            when (this) {
+                is GallerySideEffect.ControlVisible -> setControlsVisibility(isVisible)
+                is GallerySideEffect.DeleteResource -> deleteResource(pos)
+                is GallerySideEffect.DisplayPreviewTags -> displayPreviewTags(data.resourceId, data.tags)
+                is GallerySideEffect.DisplaySelectedFile -> displaySelected(data.selected, data.showAnim, data.selectedCount, data.itemCount)
+                is GallerySideEffect.DisplayStorageException -> displayStorageException(storageException.label, storageException.messenger)
+                is GallerySideEffect.EditResource -> editResource(path)
+                GallerySideEffect.NavigateBack -> onBackClick()
+                GallerySideEffect.NotifyCurrentItemChange -> notifyCurrentItemChanged()
+                GallerySideEffect.NotifyResourceChange -> notifyResourcesChanged()
+                GallerySideEffect.NotifyResourceScoresChanged -> notifyResourceScoresChanged()
+                GallerySideEffect.NotifyTagsChanged -> notifyTagsChanged()
+                is GallerySideEffect.OpenLink -> openLink(url)
+                is GallerySideEffect.SetUpPreview -> setupPreview(data.position, data.meta)
+                is GallerySideEffect.ShareLink -> shareLink(url)
+                is GallerySideEffect.ShareResource -> shareResource(path)
+                is GallerySideEffect.ShowEditTagsDialog -> showEditTagsDialog(
+                    resource = data.resource,
+                    resources = data.resources,
+                    statsStorage = data.statsStorage,
+                    rootAndFav = data.rootAndFav,
+                    index = data.index,
+                    storage = data.storage,
+                )
+                is GallerySideEffect.ShowInfoAlert -> showInfoAlert(infoData.path, infoData.resource, infoData.metadata)
+                is GallerySideEffect.ShowProgressWithText -> setProgressVisibility(text.isVisible, text.text)
+                is GallerySideEffect.ToastIndexFailedPath -> toastIndexFailedPath(path)
+                GallerySideEffect.UpdatePagerAdapter -> updatePagerAdapter()
+                GallerySideEffect.UpdatePagerAdapterWithDiff -> updatePagerAdapterWithDiff()
+                is GallerySideEffect.ViewInExternalApp -> viewInExternalApp(path)
+            }
+        }
+    }
+
+
+    private fun render(state: GalleryState) {
+        setControlsVisibility(state.selectingEnabled)
     }
 
     private fun onBackClick() {
@@ -192,178 +241,178 @@ class GalleryUpliftFragment : Fragment() {
     }
 
     private fun collectState() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
-                    viewModel.showInfoAlert.collect { data ->
-                        data?.let {
-                            showInfoAlert(it.path, it.resource, it.metadata)
-                        }
-                    }
-                }
-                launch {
-                    viewModel.shareLink.collect {
-                        if (it.isNotEmpty()) {
-                            shareLink(it)
-                        }
-                    }
-                }
-                launch {
-                    viewModel.shareResource.collect { path ->
-                        path?.let {
-                            shareResource(path)
-                        }
-                    }
-                }
-                launch {
-                    viewModel.toggleSelect.collect {
-                        toggleSelecting(it)
-                    }
-                }
-                launch {
-                    viewModel.openLink.collect {
-                        if (it.isNotEmpty()) {
-                            openLink(it)
-                        }
-                    }
-                }
-                launch {
-                    viewModel.viewInExternalApp.collect { path ->
-                        path?.let {
-                            viewInExternalApp(it)
-                        }
-                    }
-                }
-                launch {
-                    viewModel.editResource.collect { path ->
-                        path?.let {
-                            editResource(it)
-                        }
-                    }
-                }
-                launch {
-                    viewModel.notifyResourceChange.collect {
-                        notifyResourcesChanged()
-                    }
-                }
-                launch {
-                    viewModel.displayPreviewTags.collect {
-                        if (it != null) {
-                            displayPreviewTags(it.resourceId, it.tags)
-                        }
-                    }
-                }
-                launch {
-                    viewModel.notifyCurrentItemChange.collect {
-                        if (it) {
-                            notifyCurrentItemChanged()
-                        }
-                    }
-                }
-                launch {
-                    viewModel.updatePagerAdapterWithDiff.collect {
-                        if (it) {
-                            updatePagerAdapterWithDiff()
-                        }
-                    }
-                }
-                launch {
-                    viewModel.displaySelected.collect {
-                        it?.let {
-                            displaySelected(
-                                selected = it.selected,
-                                showAnim = it.showAnim,
-                                selectedCount = it.selectedCount,
-                                itemCount = viewModel.galleryItems.size
-                            )
-                        }
-                    }
-                }
-                launch {
-                    viewModel.toastIndexFailedPath.collect {
-                        it?.let {
-                            toastIndexFailedPath(it)
-                        }
-                    }
-                }
-                launch {
-                    viewModel.notifyResourceScoresChanged.collect {
-                        if (it) {
-                            notifyResourceScoresChanged()
-                        }
-                    }
-                }
-                launch {
-                    viewModel.updatePagerAdapter.collect {
-                        updatePagerAdapter()
-                    }
-                }
-                launch {
-                    viewModel.setControlsVisibility.collect {
-                        setControlsVisibility(it)
-                    }
-                }
-                launch {
-                    viewModel.onNavigateBack.collect {
-                        if (it) {
-                            onBackClick()
-                        }
-                    }
-                }
-                launch {
-                    viewModel.deleteResource.collect {
-                        it?.let {
-                            deleteResource(it)
-                        }
-                    }
-                }
-                launch {
-                    viewModel.setUpPreview.collect {
-                        it?.let {
-                            setupPreview(it.position, it.meta)
-                        }
-                    }
-                }
-                launch {
-                    viewModel.showEditTagsDialog.collect {
-                        it?.let {
-                            showEditTagsDialog(
-                                resource = it.resource,
-                                resources = it.resources,
-                                statsStorage = it.statsStorage,
-                                rootAndFav = it.rootAndFav,
-                                index = it.index,
-                                storage = it.storage,
-                            )
-                        }
-                    }
-                }
-                launch {
-                    viewModel.displayStorageException.collect {
-                        it?.let {
-                            displayStorageException(it.label, it.messenger)
-                        }
-                    }
-                }
-                launch {
-                    viewModel.notifyTagsChanged.collect {
-                        if (it) {
-                            notifyTagsChanged()
-                        }
-                    }
-                }
-                launch {
-                    viewModel.showProgressWithText.collect {
-                        it?.let {
-                            setProgressVisibility(
-                                isVisible = it.isVisible,
-                                withText = it.text
-                            )
-                        }
-                    }
-                }
-            }
-        }
+//        viewLifecycleOwner.lifecycleScope.launch {
+//            repeatOnLifecycle(Lifecycle.State.STARTED) {
+//                launch {
+//                    viewModel.showInfoAlert.collect { data ->
+//                        data?.let {
+//                            showInfoAlert(it.path, it.resource, it.metadata)
+//                        }
+//                    }
+//                }
+//                launch {
+//                    viewModel.shareLink.collect {
+//                        if (it.isNotEmpty()) {
+//                            shareLink(it)
+//                        }
+//                    }
+//                }
+//                launch {
+//                    viewModel.shareResource.collect { path ->
+//                        path?.let {
+//                            shareResource(path)
+//                        }
+//                    }
+//                }
+//                launch {
+//                    viewModel.toggleSelect.collect {
+//                        toggleSelecting(it)
+//                    }
+//                }
+//                launch {
+//                    viewModel.openLink.collect {
+//                        if (it.isNotEmpty()) {
+//                            openLink(it)
+//                        }
+//                    }
+//                }
+//                launch {
+//                    viewModel.viewInExternalApp.collect { path ->
+//                        path?.let {
+//                            viewInExternalApp(it)
+//                        }
+//                    }
+//                }
+//                launch {
+//                    viewModel.editResource.collect { path ->
+//                        path?.let {
+//                            editResource(it)
+//                        }
+//                    }
+//                }
+//                launch {
+//                    viewModel.notifyResourceChange.collect {
+//                        notifyResourcesChanged()
+//                    }
+//                }
+//                launch {
+//                    viewModel.displayPreviewTags.collect {
+//                        if (it != null) {
+//                            displayPreviewTags(it.resourceId, it.tags)
+//                        }
+//                    }
+//                }
+//                launch {
+//                    viewModel.notifyCurrentItemChange.collect {
+//                        if (it) {
+//                            notifyCurrentItemChanged()
+//                        }
+//                    }
+//                }
+//                launch {
+//                    viewModel.updatePagerAdapterWithDiff.collect {
+//                        if (it) {
+//                            updatePagerAdapterWithDiff()
+//                        }
+//                    }
+//                }
+//                launch {
+//                    viewModel.displaySelected.collect {
+//                        it?.let {
+//                            displaySelected(
+//                                selected = it.selected,
+//                                showAnim = it.showAnim,
+//                                selectedCount = it.selectedCount,
+//                                itemCount = viewModel.galleryItems.size
+//                            )
+//                        }
+//                    }
+//                }
+//                launch {
+//                    viewModel.toastIndexFailedPath.collect {
+//                        it?.let {
+//                            toastIndexFailedPath(it)
+//                        }
+//                    }
+//                }
+//                launch {
+//                    viewModel.notifyResourceScoresChanged.collect {
+//                        if (it) {
+//                            notifyResourceScoresChanged()
+//                        }
+//                    }
+//                }
+//                launch {
+//                    viewModel.updatePagerAdapter.collect {
+//                        updatePagerAdapter()
+//                    }
+//                }
+//                launch {
+//                    viewModel.setControlsVisibility.collect {
+//                        setControlsVisibility(it)
+//                    }
+//                }
+//                launch {
+//                    viewModel.onNavigateBack.collect {
+//                        if (it) {
+//                            onBackClick()
+//                        }
+//                    }
+//                }
+//                launch {
+//                    viewModel.deleteResource.collect {
+//                        it?.let {
+//                            deleteResource(it)
+//                        }
+//                    }
+//                }
+//                launch {
+//                    viewModel.setUpPreview.collect {
+//                        it?.let {
+//                            setupPreview(it.position, it.meta)
+//                        }
+//                    }
+//                }
+//                launch {
+//                    viewModel.showEditTagsDialog.collect {
+//                        it?.let {
+//                            showEditTagsDialog(
+//                                resource = it.resource,
+//                                resources = it.resources,
+//                                statsStorage = it.statsStorage,
+//                                rootAndFav = it.rootAndFav,
+//                                index = it.index,
+//                                storage = it.storage,
+//                            )
+//                        }
+//                    }
+//                }
+//                launch {
+//                    viewModel.displayStorageException.collect {
+//                        it?.let {
+//                            displayStorageException(it.label, it.messenger)
+//                        }
+//                    }
+//                }
+//                launch {
+//                    viewModel.notifyTagsChanged.collect {
+//                        if (it) {
+//                            notifyTagsChanged()
+//                        }
+//                    }
+//                }
+//                launch {
+//                    viewModel.showProgressWithText.collect {
+//                        it?.let {
+//                            setProgressVisibility(
+//                                isVisible = it.isVisible,
+//                                withText = it.text
+//                            )
+//                        }
+//                    }
+//                }
+//            }
+//        }
     }
 
     private fun updatePagerAdapter() {
