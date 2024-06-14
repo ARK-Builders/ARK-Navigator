@@ -176,7 +176,7 @@ class GalleryUpliftViewModel(
         }
     }
 
-    fun onFirstViewAttach() {
+    fun initStorages() {
         analytics.trackScreen()
         Timber.d(LogTags.GALLERY_SCREEN, "first view attached in GalleryPresenter")
         viewModelScope.launch {

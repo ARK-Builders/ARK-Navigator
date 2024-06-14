@@ -108,7 +108,7 @@ class GalleryUpliftFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         Timber.d(LogTags.GALLERY_SCREEN, "view created in GalleryFragment")
         App.instance.appComponent.inject(this)
-        viewModel.onFirstViewAttach()
+        viewModel.initStorages()
         super.onViewCreated(view, savedInstanceState)
         Timber.d(
             LogTags.GALLERY_SCREEN,
