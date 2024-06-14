@@ -71,7 +71,7 @@ class GalleryUpliftFragment : Fragment() {
     lateinit var factory: GalleryUpliftViewModelFactory.Factory
     private val viewModel: GalleryUpliftViewModel by viewModels {
         factory.create(
-            selectingEnabled =requireArguments().getBoolean(SELECTING_ENABLED_KEY),
+            selectingEnabled = requireArguments().getBoolean(SELECTING_ENABLED_KEY),
             rootAndFav = requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
             resourcesIds = requireArguments().getParcelableArray(RESOURCES_KEY)!!
                 .toList() as List<ResourceId>
