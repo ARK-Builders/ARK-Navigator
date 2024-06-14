@@ -71,8 +71,13 @@ class GalleryUpliftFragment : Fragment() {
     lateinit var factory: GalleryUpliftViewModelFactory.Factory
     private val viewModel: GalleryUpliftViewModel by viewModels {
         factory.create(
-            requireArguments().getBoolean(SELECTING_ENABLED_KEY)
-        )
+            selectingEnabled =requireArguments().getBoolean(SELECTING_ENABLED_KEY),
+            rootAndFav = requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
+            resourcesIds = requireArguments().getParcelableArray(RESOURCES_KEY)!!
+                .toList() as List<ResourceId>
+        ).apply {
+            App.instance.appComponent.inject(this@GalleryUpliftFragment)
+        }
     }
 
     private val scoreWidget by lazy {
@@ -103,11 +108,7 @@ class GalleryUpliftFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         Timber.d(LogTags.GALLERY_SCREEN, "view created in GalleryFragment")
         App.instance.appComponent.inject(this)
-        viewModel.initialize(
-            rootAndFav = requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
-            resourcesIds = requireArguments().getParcelableArray(RESOURCES_KEY)!!
-                .toList() as List<ResourceId>
-        )
+        viewModel.onFirstViewAttach()
         super.onViewCreated(view, savedInstanceState)
         Timber.d(
             LogTags.GALLERY_SCREEN,

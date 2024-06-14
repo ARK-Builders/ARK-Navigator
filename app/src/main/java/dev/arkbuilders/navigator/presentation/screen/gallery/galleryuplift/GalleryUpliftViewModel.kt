@@ -65,7 +65,9 @@ import kotlin.io.path.getLastModifiedTime
 import kotlin.io.path.notExists
 
 class GalleryUpliftViewModel(
-    selectorNotEdit: Boolean,
+    selectingEnabled: Boolean,
+    private val rootAndFav: RootAndFav,
+    private val resourcesIds: List<ResourceId>,
     val preferences: Preferences,
     val router: AppRouter,
     val indexRepo: ResourceIndexRepo,
@@ -82,11 +84,9 @@ class GalleryUpliftViewModel(
     private lateinit var metadataStorage: MetadataProcessor
     private lateinit var statsStorage: StatsStorage
     private lateinit var scoreStorage: ScoreStorage
-    private lateinit var rootAndFav: RootAndFav
-    private lateinit var resourcesIds: List<ResourceId>
 
     override val container: Container<GalleryState, GallerySideEffect> =
-        container(GalleryState())
+        container(GalleryState(selectingEnabled = selectingEnabled))
 
     var galleryItems: MutableList<GalleryPresenter.GalleryItem> = mutableListOf()
     var diffResult: DiffUtil.DiffResult? = null
@@ -107,15 +107,6 @@ class GalleryUpliftViewModel(
     private val messageFlow: MutableSharedFlow<Message> = MutableSharedFlow()
     private val currentItem: GalleryPresenter.GalleryItem
         get() = galleryItems[container.stateFlow.value.currentPos]
-
-    fun initialize(
-        rootAndFav: RootAndFav,
-        resourcesIds: List<ResourceId>,
-    ) {
-        this.rootAndFav = rootAndFav
-        this.resourcesIds = resourcesIds
-        onFirstViewAttach()
-    }
 
     fun onPreviewsItemClick() {
         intent {
@@ -185,7 +176,7 @@ class GalleryUpliftViewModel(
         }
     }
 
-    private fun onFirstViewAttach() {
+    fun onFirstViewAttach() {
         analytics.trackScreen()
         Timber.d(LogTags.GALLERY_SCREEN, "first view attached in GalleryPresenter")
         viewModelScope.launch {
