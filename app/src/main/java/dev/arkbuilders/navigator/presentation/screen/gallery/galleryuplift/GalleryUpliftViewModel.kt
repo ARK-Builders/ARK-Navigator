@@ -272,7 +272,6 @@ class GalleryUpliftViewModel(
                 scoreWidgetController.setVisible(container.stateFlow.value.sortByScores)
             }
         }
-
     }
 
     fun onPlayButtonClick() = intent {
@@ -443,12 +442,11 @@ class GalleryUpliftViewModel(
     }
 
     fun onTagRemove(tag: Tag) = viewModelScope.launch(NonCancellable) {
-        analytics.trackTagRemove()
-        val id = currentItem.id()
-        val tags = tagsStorage.getTags(id)
-        val newTags = tags - tag
-
         intent {
+            analytics.trackTagRemove()
+            val id = currentItem.id()
+            val tags = tagsStorage.getTags(id)
+            val newTags = tags - tag
             postSideEffect(
                 GallerySideEffect.DisplayPreviewTags(
                     ResourceIdTagsPreview(
@@ -457,24 +455,24 @@ class GalleryUpliftViewModel(
                     )
                 )
             )
-        }
-        statsStorage.handleEvent(
-            StatsEvent.TagsChanged(
-                id, tags, newTags
+            statsStorage.handleEvent(
+                StatsEvent.TagsChanged(
+                    id, tags, newTags
+                )
             )
-        )
-
-        Timber.d(LogTags.GALLERY_SCREEN, "setting new tags $newTags to $currentItem")
-        tagsStorage.setTags(id, newTags)
-        tagsStorage.persist()
-        intent {
+            Timber.d(
+                LogTags.GALLERY_SCREEN,
+                "setting new tags $newTags to $currentItem"
+            )
+            tagsStorage.setTags(id, newTags)
+            tagsStorage.persist()
             postSideEffect(GallerySideEffect.NotifyTagsChanged)
         }
     }
 
     fun onEditTagsDialogBtnClick() {
-        analytics.trackTagsEdit()
         intent {
+            analytics.trackTagsEdit()
             postSideEffect(
                 GallerySideEffect.ShowEditTagsDialog(
                     ShowEditTagsData(
