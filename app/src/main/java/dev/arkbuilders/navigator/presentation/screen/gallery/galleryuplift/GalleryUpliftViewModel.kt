@@ -138,24 +138,24 @@ class GalleryUpliftViewModel(
         galleryItems[pos].metadata.kind.ordinal
 
     fun onRemoveFabClick() = viewModelScope.launch(NonCancellable) {
-        analytics.trackResRemove()
-        Timber.d(
-            LogTags.GALLERY_SCREEN,
-            buildString {
-                append("[remove_resource] clicked at position ")
-                append("${container.stateFlow.value.currentPos}")
-            }
-        )
-        deleteResource(currentItem.id())
-        galleryItems.removeAt(container.stateFlow.value.currentPos)
-        if (galleryItems.isEmpty()) {
-            intent {
-                postSideEffect(GallerySideEffect.NavigateBack)
-            }
-            return@launch
-        }
-        onTagsChanged()
         intent {
+            analytics.trackResRemove()
+            Timber.d(
+                LogTags.GALLERY_SCREEN,
+                buildString {
+                    append("[remove_resource] clicked at position ")
+                    append("${container.stateFlow.value.currentPos}")
+                }
+            )
+            deleteResource(currentItem.id())
+            galleryItems.removeAt(container.stateFlow.value.currentPos)
+            if (galleryItems.isEmpty()) {
+                intent {
+                    postSideEffect(GallerySideEffect.NavigateBack)
+                }
+                return@intent
+            }
+            onTagsChanged()
             postSideEffect(
                 GallerySideEffect.DeleteResource(
                     container.stateFlow.value.currentPos
@@ -165,22 +165,26 @@ class GalleryUpliftViewModel(
     }
 
     private suspend fun deleteResource(resource: ResourceId) {
-        Timber.d(LogTags.GALLERY_SCREEN, "deleting resource $resource")
-        withContext(Dispatchers.IO) {
-            val path = index.getPath(resource)
-            Files.delete(path)
-        }
-        index.updateAll()
         intent {
+            Timber.d(LogTags.GALLERY_SCREEN, "deleting resource $resource")
+            withContext(Dispatchers.IO) {
+                val path = index.getPath(resource)
+                Files.delete(path)
+            }
+            index.updateAll()
+
             postSideEffect(GallerySideEffect.NotifyResourceChange)
         }
     }
 
     fun initStorages() {
-        analytics.trackScreen()
-        Timber.d(LogTags.GALLERY_SCREEN, "first view attached in GalleryPresenter")
-        viewModelScope.launch {
-            intent {
+        intent {
+            analytics.trackScreen()
+            Timber.d(
+                LogTags.GALLERY_SCREEN,
+                "first view attached in GalleryPresenter"
+            )
+            viewModelScope.launch {
                 postSideEffect(
                     GallerySideEffect.ShowProgressWithText(
                         ProgressWithText(
@@ -189,21 +193,19 @@ class GalleryUpliftViewModel(
                         )
                     )
                 )
-            }
-            index = indexRepo.provide(rootAndFav)
-            messageFlow.onEach { message ->
-                when (message) {
-                    is Message.KindDetectFailed ->
-                        intent {
-                            postSideEffect(
-                                GallerySideEffect.ToastIndexFailedPath(
-                                    message.path
+                index = indexRepo.provide(rootAndFav)
+                messageFlow.onEach { message ->
+                    when (message) {
+                        is Message.KindDetectFailed ->
+                            intent {
+                                postSideEffect(
+                                    GallerySideEffect.ToastIndexFailedPath(
+                                        message.path
+                                    )
                                 )
-                            )
-                        }
-                }
-            }.launchIn(viewModelScope)
-            intent {
+                            }
+                    }
+                }.launchIn(viewModelScope)
                 postSideEffect(
                     GallerySideEffect.ShowProgressWithText(
                         ProgressWithText(
@@ -212,9 +214,7 @@ class GalleryUpliftViewModel(
                         )
                     )
                 )
-            }
-            metadataStorage = metadataStorageRepo.provide(index)
-            intent {
+                metadataStorage = metadataStorageRepo.provide(index)
                 postSideEffect(
                     GallerySideEffect.ShowProgressWithText(
                         ProgressWithText(
@@ -223,9 +223,7 @@ class GalleryUpliftViewModel(
                         )
                     )
                 )
-            }
-            previewStorage = previewStorageRepo.provide(index)
-            intent {
+                previewStorage = previewStorageRepo.provide(index)
                 postSideEffect(
                     GallerySideEffect.ShowProgressWithText(
                         ProgressWithText(
@@ -234,12 +232,11 @@ class GalleryUpliftViewModel(
                         )
                     )
                 )
-            }
-            try {
-                tagsStorage = tagsStorageRepo.provide(index)
-                scoreStorage = scoreStorageRepo.provide(index)
-            } catch (e: StorageException) {
-                intent {
+
+                try {
+                    tagsStorage = tagsStorageRepo.provide(index)
+                    scoreStorage = scoreStorageRepo.provide(index)
+                } catch (e: StorageException) {
                     postSideEffect(
                         GallerySideEffect.DisplayStorageException(
                             StorageExceptionGallery(
@@ -248,12 +245,11 @@ class GalleryUpliftViewModel(
                             )
                         )
                     )
+
                 }
-            }
-            statsStorage = statsStorageRepo.provide(index)
-            scoreWidgetController.init(scoreStorage)
-            galleryItems = provideGalleryItems().toMutableList()
-            intent {
+                statsStorage = statsStorageRepo.provide(index)
+                scoreWidgetController.init(scoreStorage)
+                galleryItems = provideGalleryItems().toMutableList()
                 reduce {
                     viewModelScope.launch {
                         state.copy(
@@ -264,9 +260,7 @@ class GalleryUpliftViewModel(
                     }
                     state
                 }
-                postSideEffect(
-                    GallerySideEffect.UpdatePagerAdapter
-                )
+                postSideEffect(GallerySideEffect.UpdatePagerAdapter)
                 postSideEffect(
                     GallerySideEffect.ShowProgressWithText(
                         ProgressWithText(
@@ -275,9 +269,10 @@ class GalleryUpliftViewModel(
                         )
                     )
                 )
+                scoreWidgetController.setVisible(container.stateFlow.value.sortByScores)
             }
-            scoreWidgetController.setVisible(container.stateFlow.value.sortByScores)
         }
+
     }
 
     fun onPlayButtonClick() = intent {
@@ -427,15 +422,15 @@ class GalleryUpliftViewModel(
     fun onPageChanged(newPos: Int) = viewModelScope.launch {
         if (galleryItems.isEmpty())
             return@launch
-        checkResourceChanges(newPos)
         intent {
             reduce {
                 state.copy(currentPos = newPos)
             }
+            checkResourceChanges(newPos)
+            val id = currentItem.id()
+            val tags = tagsStorage.getTags(id)
+            displayPreview(id, currentItem.metadata, tags)
         }
-        val id = currentItem.id()
-        val tags = tagsStorage.getTags(id)
-        displayPreview(id, currentItem.metadata, tags)
     }
 
     fun onTagSelected(tag: Tag) {
@@ -509,9 +504,6 @@ class GalleryUpliftViewModel(
                     )
                 )
             )
-        }
-
-        intent {
             postSideEffect(
                 GallerySideEffect.DisplayPreviewTags(
                     ResourceIdTagsPreview(
@@ -520,10 +512,15 @@ class GalleryUpliftViewModel(
                     )
                 )
             )
-        }
-        scoreWidgetController.displayScore()
-
-        intent {
+            scoreWidgetController.displayScore()
+            postSideEffect(
+                GallerySideEffect.DisplayPreviewTags(
+                    ResourceIdTagsPreview(
+                        resourceId = id,
+                        tags = tags,
+                    )
+                )
+            )
             postSideEffect(
                 GallerySideEffect.DisplaySelectedFile(
                     DisplaySelected(
@@ -590,50 +587,45 @@ class GalleryUpliftViewModel(
                         )
                     )
                 )
-            }
-
-            index.updateAll()
-
-            intent {
+                index.updateAll()
                 postSideEffect(GallerySideEffect.NotifyResourceChange)
-            }
 
-            viewModelScope.launch {
-                metadataStorage.busy.collect { busy ->
-                    if (!busy) cancel()
-                }
-            }.join()
+                viewModelScope.launch {
+                    metadataStorage.busy.collect { busy ->
+                        if (!busy) cancel()
+                    }
+                }.join()
 
-            val newItems = provideGalleryItems()
-            if (newItems.isEmpty()) {
-                intent {
+                val newItems = provideGalleryItems()
+                if (newItems.isEmpty()) {
                     postSideEffect(GallerySideEffect.NavigateBack)
+                    return@intent
                 }
-                return@launch
-            }
+                if (newItems.isEmpty()) {
+                    intent {
+                        postSideEffect(GallerySideEffect.NavigateBack)
+                    }
+                    return@intent
+                }
 
-            diffResult = DiffUtil.calculateDiff(
-                ResourceDiffUtilCallback(
-                    galleryItems.map { it.resource.id },
-                    newItems.map { it.resource.id }
+                diffResult = DiffUtil.calculateDiff(
+                    ResourceDiffUtilCallback(
+                        galleryItems.map { it.resource.id },
+                        newItems.map { it.resource.id }
+                    )
                 )
-            )
 
-            galleryItems = newItems.toMutableList()
-
-            viewModelScope.launch {
-                intent {
-                    postSideEffect(GallerySideEffect.UpdatePagerAdapterWithDiff)
-                    postSideEffect(GallerySideEffect.NotifyCurrentItemChange)
-                    postSideEffect(
-                        GallerySideEffect.ShowProgressWithText(
-                            ProgressWithText(
-                                isVisible = true,
-                                text = "Changes detected, indexing"
-                            )
+                galleryItems = newItems.toMutableList()
+                postSideEffect(GallerySideEffect.UpdatePagerAdapterWithDiff)
+                postSideEffect(GallerySideEffect.NotifyCurrentItemChange)
+                postSideEffect(
+                    GallerySideEffect.ShowProgressWithText(
+                        ProgressWithText(
+                            isVisible = true,
+                            text = "Changes detected, indexing"
                         )
                     )
-                }
+                )
             }
         }
     }
