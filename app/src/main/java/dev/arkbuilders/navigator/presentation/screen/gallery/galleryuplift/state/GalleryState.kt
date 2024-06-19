@@ -11,7 +11,6 @@ import java.nio.file.Path
 
 data class GalleryState(
     val currentPos: Int = 0,
-    val sortByScores: Boolean = false,
     val selectingEnabled: Boolean = false,
 )
 

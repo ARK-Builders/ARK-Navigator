@@ -35,6 +35,7 @@ import dev.arkbuilders.arklib.user.tags.Tags
 import dev.arkbuilders.arklib.utils.extension
 import dev.arkbuilders.components.databinding.ScoreWidgetBinding
 import dev.arkbuilders.components.scorewidget.ScoreWidget
+import dev.arkbuilders.components.scorewidget.ScoreWidgetController
 import dev.arkbuilders.navigator.BuildConfig
 import dev.arkbuilders.navigator.R
 import dev.arkbuilders.navigator.data.stats.StatsStorage
@@ -58,6 +59,7 @@ import dev.arkbuilders.navigator.presentation.view.DefaultPopup
 import dev.arkbuilders.navigator.presentation.view.DepthPageTransformer
 import dev.arkbuilders.navigator.presentation.view.StackedToasts
 import kotlinx.coroutines.launch
+import moxy.presenterScope
 import org.orbitmvi.orbit.viewmodel.observe
 import timber.log.Timber
 import java.nio.file.Path

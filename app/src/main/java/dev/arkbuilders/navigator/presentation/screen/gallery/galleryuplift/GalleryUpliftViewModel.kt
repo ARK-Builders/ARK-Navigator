@@ -250,15 +250,11 @@ class GalleryUpliftViewModel(
                 statsStorage = statsStorageRepo.provide(index)
                 scoreWidgetController.init(scoreStorage)
                 galleryItems = provideGalleryItems().toMutableList()
-                reduce {
-                    viewModelScope.launch {
-                        state.copy(
-                            sortByScores = preferences.get(
-                                PreferenceKey.SortByScores
-                            )
-                        )
-                    }
-                    state
+                viewModelScope.launch {
+                    val result = preferences.get(
+                        PreferenceKey.SortByScores
+                    )
+                    scoreWidgetController.setVisible(result)
                 }
                 postSideEffect(GallerySideEffect.UpdatePagerAdapter)
                 postSideEffect(
@@ -269,7 +265,6 @@ class GalleryUpliftViewModel(
                         )
                     )
                 )
-                scoreWidgetController.setVisible(container.stateFlow.value.sortByScores)
             }
         }
     }
