@@ -11,25 +11,25 @@ object TestData {
             R1,
             "Resource1",
             ".jpg",
-            fileTime(),
+            fileTime()
         ),
         R2 to Resource(
             R2,
             "Resource2",
             ".jpg",
-            fileTime(),
+            fileTime()
         ),
         R3 to Resource(
             R3,
             "Resource3",
             ".jpg",
-            fileTime(),
+            fileTime()
         ),
         R4 to Resource(
             R4,
             "Resource4",
             ".odt",
-            fileTime(),
+            fileTime()
         )
     )
 

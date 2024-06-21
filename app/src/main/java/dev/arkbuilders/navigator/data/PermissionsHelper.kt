@@ -40,9 +40,9 @@ class PermissionsHelper @Inject constructor(private val appContext: Context) {
     }
 
     fun isWritePermissionGranted(): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             Environment.isExternalStorageManager()
-        else {
+        } else {
             ContextCompat.checkSelfPermission(
                 appContext,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -63,11 +63,12 @@ class PermissionsHelper @Inject constructor(private val appContext: Context) {
                     Manifest.permission.WRITE_EXTERNAL_STORAGE
                 ) ?: true
 
-            if (rationale)
+            if (rationale) {
                 writePermLauncher!!
                     .launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            else
+            } else {
                 writePermUsingSettingsLauncher!!.launch(packageUri)
+            }
         }
     }
 

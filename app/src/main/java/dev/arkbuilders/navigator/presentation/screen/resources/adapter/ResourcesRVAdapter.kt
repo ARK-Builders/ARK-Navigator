@@ -30,8 +30,9 @@ class ResourcesRVAdapter(
         holder.binding.root.setOnClickListener {
             if (presenter.selectingEnabled) {
                 presenter.onItemSelectChanged(holder)
-            } else
+            } else {
                 presenter.onItemClick(position)
+            }
         }
         holder.binding.root.setOnLongClickListener {
             if (presenter.selectingEnabled) {

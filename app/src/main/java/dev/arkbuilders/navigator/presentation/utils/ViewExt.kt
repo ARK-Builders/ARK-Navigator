@@ -32,8 +32,9 @@ fun View.makeVisibleAndSetOnClickListener(action: () -> Unit) {
 }
 
 fun TextView?.textOrGone(string: String?) {
-    if (string.isNullOrEmpty()) this?.makeGone()
-    else {
+    if (string.isNullOrEmpty()) {
+        this?.makeGone()
+    } else {
         this?.text = string
         this?.makeVisible()
     }

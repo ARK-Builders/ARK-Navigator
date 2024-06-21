@@ -63,7 +63,7 @@ class FoldersViewModel @Inject constructor(
     private val permsHelper: PermissionsHelper,
     private val devicePathsExtractor: DevicePathsExtractor,
     private val defaultDispatcher: CoroutineDispatcher = Dispatchers.IO,
-    private val foldersAnalytics: FoldersAnalytics,
+    private val foldersAnalytics: FoldersAnalytics
 ) : ViewModel(), ContainerHost<FoldersState, FoldersSideEffect> {
 
     override val container: Container<FoldersState, FoldersSideEffect> = container(
@@ -313,7 +313,7 @@ class FoldersViewModelFactory @AssistedInject constructor(
             preferences = preferences,
             permsHelper = permsHelper,
             devicePathsExtractor = devicePathsExtractor,
-            foldersAnalytics = foldersAnalytics,
+            foldersAnalytics = foldersAnalytics
         ) as T
     }
 

@@ -59,7 +59,7 @@ class GalleryPresenter(
     startAt: Int,
     private var selectingEnabled: Boolean,
     private val selectedResources: MutableList<ResourceId>,
-    private val defaultDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val defaultDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : MvpPresenter<GalleryView>() {
 
     val scoreWidgetController = ScoreWidgetController(
@@ -181,8 +181,9 @@ class GalleryPresenter(
     }
 
     fun onPageChanged(newPos: Int) = presenterScope.launch {
-        if (galleryItems.isEmpty())
+        if (galleryItems.isEmpty()) {
             return@launch
+        }
 
         checkResourceChanges(newPos)
 
@@ -291,7 +292,8 @@ class GalleryPresenter(
         analytics.trackTagSelect()
         router.navigateTo(
             Screens.ResourcesScreenWithSelectedTag(
-                rootAndFav, tag
+                rootAndFav,
+                tag
             )
         )
     }
@@ -306,7 +308,9 @@ class GalleryPresenter(
         viewState.displayPreviewTags(id, newTags)
         statsStorage.handleEvent(
             StatsEvent.TagsChanged(
-                id, tags, newTags
+                id,
+                tags,
+                newTags
             )
         )
 

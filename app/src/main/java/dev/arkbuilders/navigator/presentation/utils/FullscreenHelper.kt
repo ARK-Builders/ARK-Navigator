@@ -19,13 +19,17 @@ object FullscreenHelper {
             windowInsetsController.systemBarsBehavior =
                 WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             windowInsetsController.hide(WindowInsetsCompat.Type.statusBars())
-        } else window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
+        } else {
+            window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
+        }
     }
 
     private fun showStatusBar(window: Window) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val windowInsetsController = window.insetsController ?: return
             windowInsetsController.show(WindowInsetsCompat.Type.statusBars())
-        } else window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
+        } else {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
+        }
     }
 }
