@@ -62,8 +62,9 @@ class EditTagsDialogFragment(
     }
 
     override fun init(): Unit = with(binding) {
-        if (presenter.resources.size != 1)
+        if (presenter.resources.size != 1) {
             tvTags.text = getString(R.string.common_tags)
+        }
         setupFullHeight()
         btnTagsSorting.setOnClickListener {
             TagsSortDialogFragment.newInstance(selectorNotEdit = false)
@@ -79,8 +80,9 @@ class EditTagsDialogFragment(
             true
         }
         etNewTags.setOnKeyListener { _, keyCode, event ->
-            if (keyCode == KeyEvent.KEYCODE_DEL)
+            if (keyCode == KeyEvent.KEYCODE_DEL) {
                 presenter.onBackspacePressed()
+            }
 
             return@setOnKeyListener false
         }
@@ -96,8 +98,9 @@ class EditTagsDialogFragment(
         etNewTags.placeCursorToEnd()
         etNewTags.showKeyboard()
         etNewTags.onBackPressedListener = {
-            if (!presenter.onBackClick())
+            if (!presenter.onBackClick()) {
                 dismissDialog()
+            }
 
             true
         }
@@ -147,8 +150,9 @@ class EditTagsDialogFragment(
 
     override fun setInput(input: String) {
         binding.btnAdd.isVisible = input.isNotEmpty()
-        if (binding.etNewTags.text.toString() != input)
+        if (binding.etNewTags.text.toString() != input) {
             binding.etNewTags.setText(input)
+        }
     }
 
     override fun hideSortingBtn() {
@@ -176,8 +180,9 @@ class EditTagsDialogFragment(
         if (root.currentState == R.id.end) {
             etNewTags.placeCursorToEnd()
             etNewTags.onBackPressedListener = {
-                if (!presenter.onBackClick())
+                if (!presenter.onBackClick()) {
                     dismissDialog()
+                }
                 true
             }
         }

@@ -23,16 +23,22 @@ interface ResourcesView : CommonMvpView {
 
     @StateStrategyType(SkipStrategy::class)
     fun toastResourcesSelected(selected: Int)
+
     @StateStrategyType(SkipStrategy::class)
     fun toastResourcesSelectedFocusMode(selected: Int, hidden: Int)
+
     @StateStrategyType(SkipStrategy::class)
     fun toastPathsFailed(failedPaths: List<Path>)
+
     @StateStrategyType(SkipStrategy::class)
     fun onSelectingChanged(enabled: Boolean)
+
     @StateStrategyType(SkipStrategy::class)
     fun clearStackedToasts()
+
     @StateStrategyType(SkipStrategy::class)
     fun shareResources(resources: List<Path>)
+
     @StateStrategyType(SkipStrategy::class)
     fun displayStorageException(label: String, msg: String)
 }

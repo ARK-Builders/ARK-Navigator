@@ -40,8 +40,9 @@ class StorageBackup @Inject constructor(
     private val filesToIgnore = listOf<String>()
 
     fun backup() = CoroutineScope(Dispatchers.IO).launch {
-        if (!preferences.get(PreferenceKey.BackupEnabled))
+        if (!preferences.get(PreferenceKey.BackupEnabled)) {
             return@launch
+        }
 
         val allRoots = foldersRepo.provideFolders().keys
 
@@ -93,8 +94,9 @@ class StorageBackup @Inject constructor(
             backupFolder.resolve("$BACKUP_NAME_PREFIX$date.zip")
         }
         backupFolder.listDirectoryEntries().forEach { backup ->
-            if (!keepBackups.contains(backup))
+            if (!keepBackups.contains(backup)) {
                 backup.deleteIfExists()
+            }
         }
     }
 

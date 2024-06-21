@@ -27,8 +27,9 @@ class HandleGalleryExternalChangesUseCase @Inject constructor() {
 
             presenterScope.launch {
                 metadataStorage.busy.collect { busy ->
-                    if (!busy)
+                    if (!busy) {
                         cancel()
+                    }
                 }
             }.join()
 

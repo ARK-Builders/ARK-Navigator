@@ -282,8 +282,9 @@ class ResourcesPresenter(
                 val path = index.getPath(id)!!
                 val newPath = directoryToMove.findNotExistCopyName(path)
                 path.copyTo(newPath)
-                if (path != newPath)
+                if (path != newPath) {
                     path.deleteIfExists()
+                }
             }
         }
         jobs.forEach { it.join() }
@@ -411,8 +412,9 @@ class ResourcesPresenter(
     }
 
     fun onBackClick() = presenterScope.launch {
-        if (!tagsSelectorController.onBackClick())
+        if (!tagsSelectorController.onBackClick()) {
             router.exit()
+        }
     }
 
     suspend fun onRemovedResourceDetected() {

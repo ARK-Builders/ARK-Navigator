@@ -79,10 +79,11 @@ class EditTagsDialogPresenter(
         viewState.init()
         presenterScope.launch {
             val showTagSorting = preferences.get(PreferenceKey.CollectTagUsageStats)
-            if (showTagSorting)
+            if (showTagSorting) {
                 initSortingPref()
-            else
+            } else {
                 viewState.hideSortingBtn()
+            }
 
             if (_index != null && _storage != null && _statsStorage != null) {
                 index = _index
@@ -162,8 +163,9 @@ class EditTagsDialogPresenter(
     }
 
     fun onBackspacePressed() {
-        if (input.isNotEmpty() || wasTextRemovedRecently || wasTagRemovedRecently)
+        if (input.isNotEmpty() || wasTextRemovedRecently || wasTagRemovedRecently) {
             return
+        }
 
         val lastTag = commonTags.lastOrNull() ?: return
         removeTag(lastTag)
@@ -195,8 +197,9 @@ class EditTagsDialogPresenter(
     }
 
     fun onInputDone() = presenterScope.launch {
-        if (input.isNotEmpty())
+        if (input.isNotEmpty()) {
             addTag(input)
+        }
 
         val oldTags = tagsByResources.map { (id, _) ->
             id to storage.getTags(id)
@@ -216,8 +219,9 @@ class EditTagsDialogPresenter(
 
         commonTags += validatedTag
         val affectedIds = tagsByResources.mapNotNull { entry ->
-            if (entry.value.contains(validatedTag))
+            if (entry.value.contains(validatedTag)) {
                 return@mapNotNull null
+            }
 
             entry.value += validatedTag
             entry.key
@@ -278,8 +282,9 @@ class EditTagsDialogPresenter(
             .distinct()
             .sortedBy { sortCriteria[it] }
 
-        if (!sortingAscending)
+        if (!sortingAscending) {
             quick = quick.reversed()
+        }
 
         return quick
     }

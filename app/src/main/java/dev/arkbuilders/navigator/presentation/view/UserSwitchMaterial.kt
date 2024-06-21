@@ -21,9 +21,11 @@ class UserSwitchMaterial(
             SETTINGS_SCREEN,
             "setOnUserCheckedChangeListener: ${this.id}, " + "$isChecked"
         )
-        if (checkedChangeListener == null)
+        if (checkedChangeListener == null) {
             checkedChangeListener = CustomCheckedChangeListener(callback)
-        else checkedChangeListener?.callback = callback
+        } else {
+            checkedChangeListener?.callback = callback
+        }
 
         this.setOnCheckedChangeListener(checkedChangeListener)
     }
@@ -39,8 +41,9 @@ class UserSwitchMaterial(
         var callback: (isChecked: Boolean) -> Unit
     ) : OnCheckedChangeListener {
         override fun onCheckedChanged(button: CompoundButton, isChecked: Boolean) {
-            if (button.isPressed)
+            if (button.isPressed) {
                 callback(isChecked)
+            }
         }
     }
 }

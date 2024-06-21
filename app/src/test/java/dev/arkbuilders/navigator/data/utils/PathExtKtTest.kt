@@ -74,7 +74,7 @@ class PathExtKtTest {
             findLongestCommonPrefix(
                 listOf(
                     Paths.get("/PATH/"),
-                    Paths.get("/PATH"),
+                    Paths.get("/PATH")
                 )
             )
         }

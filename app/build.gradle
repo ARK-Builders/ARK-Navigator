@@ -11,6 +11,10 @@ apply plugin: 'kotlin-parcelize'
 apply plugin: "de.mannodermaus.android-junit5"
 apply plugin: "org.sonarqube"
 
+configurations {
+    ktlint
+}
+
 sonarqube {
     properties {
         property "sonar.projectName", "ARK-Navigator"
@@ -196,6 +200,28 @@ dependencies {
 
     implementation "org.apache.tika:tika-core:$tika_core"
     implementation "com.airbnb.android:lottie:$lottie_version"
+
+    ktlint("com.pinterest:ktlint:0.47.1")
+}
+
+tasks.register('ktlintFormat', JavaExec) {
+    mainClass = "com.pinterest.ktlint.Main"
+    classpath = configurations.ktlint
+    args("$rootDir/**/*.kt", "!$rootDir/**/build/**")
+    jvmArgs "--add-opens=java.base/java.lang=ALL-UNNAMED"
+
+    if (project.hasProperty("autoCorrect") && project.property("autoCorrect") == "0") {
+        logger.quiet("(KTLINT): auto correction is disabled")
+    } else {
+        logger.quiet("(KTLINT): auto correction is enabled")
+        args "-F"
+    }
+}
+
+tasks.register('ktlintCheck', JavaExec) {
+    classpath = configurations.ktlint
+    mainClass = "com.pinterest.ktlint.Main"
+    args "src/**/*.kt", "**.kts", "!**/build/**"
 }
 
 tasks.register('installGitHook', Copy) {
@@ -208,5 +234,9 @@ tasks.register('installGitHook', Copy) {
     rename("pre-commit-$suffix", 'pre-commit')
     fileMode 0775
 }
+
+tasks.preBuild.dependsOn ktlintCheck
+
+tasks.ktlintCheck.dependsOn ktlintFormat
 
 build.dependsOn installGitHook

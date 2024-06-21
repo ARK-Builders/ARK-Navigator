@@ -47,7 +47,7 @@ class RepoModule {
         @Named(APP_SCOPE_NAME)
         appScope: CoroutineScope,
         @Named(STATS_FLOW_NAME)
-        statsFlow: MutableSharedFlow<StatsEvent>,
+        statsFlow: MutableSharedFlow<StatsEvent>
     ): TagsStorageRepo {
         return TagsStorageRepo(appScope, statsFlow)
     }
@@ -71,7 +71,7 @@ class RepoModule {
     @Provides
     fun scoreStorageRepo(
         @Named(APP_SCOPE_NAME)
-        appScope: CoroutineScope,
+        appScope: CoroutineScope
     ) = ScoreStorageRepo(appScope)
 
     @Singleton

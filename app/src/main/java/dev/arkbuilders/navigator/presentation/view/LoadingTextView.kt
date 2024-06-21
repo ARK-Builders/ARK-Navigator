@@ -17,14 +17,18 @@ class LoadingTextView(context: Context, attrs: AttributeSet?) :
         set(value) {
             field = value
             text = loadingText
-            if (text.isNotEmpty() && !isMakingDots)
+            if (text.isNotEmpty() && !isMakingDots) {
                 makeLoadingDots()
+            }
         }
 
     private var dotCount = 0
         set(value) {
-            field = if (value >= 4) 0
-            else value
+            field = if (value >= 4) {
+                0
+            } else {
+                value
+            }
         }
 
     fun setVisibilityAndLoadingStatus(visibility: Int) {
@@ -42,7 +46,9 @@ class LoadingTextView(context: Context, attrs: AttributeSet?) :
                 val textToDisplay = "$loadingText${".".repeat(dotCount)}"
                 this.text = textToDisplay
                 makeLoadingDots()
-            } else isMakingDots = false
+            } else {
+                isMakingDots = false
+            }
         }, 500)
     }
 }

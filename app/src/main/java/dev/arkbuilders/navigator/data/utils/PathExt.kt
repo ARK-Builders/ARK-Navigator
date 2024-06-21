@@ -13,8 +13,9 @@ val ANDROID_DIRECTORY: Path = Paths.get("Android")
 
 fun Path.findNotExistCopyName(name: Path): Path {
     val originalNamePath = this.resolve(name.fileName)
-    if (originalNamePath.notExists())
+    if (originalNamePath.notExists()) {
         return originalNamePath
+    }
 
     var filesCounter = 1
 

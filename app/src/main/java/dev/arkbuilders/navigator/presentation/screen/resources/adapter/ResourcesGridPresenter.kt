@@ -141,8 +141,9 @@ class ResourcesGridPresenter(
             val clickedResource = selection[pos]
             resourcesPresenter.onRemovedResourceDetected()
             // selection has been updated
-            if (!selection.contains(clickedResource))
+            if (!selection.contains(clickedResource)) {
                 return@launch
+            }
         }
 
         router.navigateToFragmentUsingAdd(
@@ -156,8 +157,9 @@ class ResourcesGridPresenter(
 
     fun onSelectingChanged(enabled: Boolean) {
         selectingEnabled = enabled
-        if (!selectingEnabled)
+        if (!selectingEnabled) {
             resources.forEach { it.isSelected = false }
+        }
         viewState.onSelectingChanged(enabled)
         viewState.setSelectingEnabled(enabled)
         viewState.setSelectingCount(
@@ -199,13 +201,15 @@ class ResourcesGridPresenter(
         preferences.flow(PreferenceKey.Sorting).onEach { intSorting ->
             val newSorting = Sorting.values()[intSorting]
             analytics.trackResSortCriteria(newSorting)
-            if (sorting != newSorting)
+            if (sorting != newSorting) {
                 updateSorting(newSorting)
+            }
         }.launchIn(scope + Dispatchers.IO)
 
         preferences.flow(PreferenceKey.IsSortingAscending).onEach {
-            if (ascending != it)
+            if (ascending != it) {
                 updateAscending(it)
+            }
         }.launchIn(scope + Dispatchers.IO)
 
         preferences.flow(PreferenceKey.ShortFileNames).onEach {
@@ -349,10 +353,11 @@ class ResourcesGridPresenter(
     private fun mapNewResources(
         newResources: Set<Resource>
     ): List<ResourceItem> {
-        if (!selectingEnabled)
+        if (!selectingEnabled) {
             return newResources.map { resource ->
                 ResourceItem(resource)
             }
+        }
 
         return newResources.map { resource ->
             val selected = resources
@@ -374,7 +379,9 @@ class ResourcesGridPresenter(
 
             val comparator = if (bySorting != null && byScores != null) {
                 byScores.then(bySorting)
-            } else byScores ?: bySorting!!
+            } else {
+                byScores ?: bySorting!!
+            }
 
             resources = resources.sortedWith(comparator)
 

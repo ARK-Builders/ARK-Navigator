@@ -39,8 +39,11 @@ class FileItemViewHolder(
         progressIv.isVisible = false
         cbSelected.isVisible = isSelectingEnabled
         cbSelected.isChecked = isItemSelected
-        val elevation = if (isSelectingEnabled && isItemSelected)
-            SELECTED_ELEVATION else DEFAULT_ELEVATION
+        val elevation = if (isSelectingEnabled && isItemSelected) {
+            SELECTED_ELEVATION
+        } else {
+            DEFAULT_ELEVATION
+        }
         root.elevation = this.root.context.dpToPx(elevation)
     }
 
@@ -71,7 +74,8 @@ class FileItemViewHolder(
         joinThumbnailJob?.cancel()
 
         ExtraLoader.load(
-            meta, listOf(primaryExtra, secondaryExtra),
+            meta,
+            listOf(primaryExtra, secondaryExtra),
             verbose = false
         )
 
@@ -97,7 +101,7 @@ class FileItemViewHolder(
     private fun onThumbnailReady(
         path: Path,
         id: ResourceId,
-        locator: PreviewLocator,
+        locator: PreviewLocator
     ) = with(binding) {
         val thumbnail = if (locator.check() != PreviewStatus.ABSENT) {
             locator.thumbnail()

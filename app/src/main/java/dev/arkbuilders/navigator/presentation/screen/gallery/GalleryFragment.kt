@@ -71,9 +71,11 @@ class GalleryFragment :
                 requireArguments().getParcelableArray(SELECTED_RESOURCES_KEY)!!
                     .toList() as List<ResourceId>
                 )
-                .toMutableList(),
+                .toMutableList()
         ).apply {
+
             Timber.d(GALLERY_SCREEN, "creating GalleryPresenter")
+
             App.instance.appComponent.inject(this)
         }
     }
@@ -220,7 +222,8 @@ class GalleryFragment :
             requireContext().startActivity(intent)
         } catch (e: ActivityNotFoundException) {
             Toast.makeText(
-                requireContext(), getString(R.string.no_app_found_to_open_this_file),
+                requireContext(),
+                getString(R.string.no_app_found_to_open_this_file),
                 Toast.LENGTH_SHORT
             ).show()
         }
@@ -383,8 +386,9 @@ class GalleryFragment :
     ) = with(binding) {
         Timber.d("display ${System.currentTimeMillis()}")
         cbSelected.isChecked = selected
-        if (!showAnim)
+        if (!showAnim) {
             cbSelected.jumpDrawablesToCurrentState()
+        }
         tvSelectedOf.text = "$selectedCount/$itemCount"
 
         return@with
@@ -600,7 +604,7 @@ class GalleryFragment :
             resources: List<ResourceId>,
             startAt: Int,
             selectingEnabled: Boolean = false,
-            selectedResources: List<ResourceId> = emptyList(),
+            selectedResources: List<ResourceId> = emptyList()
         ) = GalleryFragment().apply {
             arguments = Bundle().apply {
                 putParcelable(ROOT_AND_FAV_KEY, rootAndFav)

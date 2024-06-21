@@ -242,17 +242,19 @@ class ResourcesFragment :
     }
 
     override fun toastResourcesSelected(selected: Int) {
-        if (isFragmentVisible())
+        if (isFragmentVisible()) {
             toast(R.string.toast_resources_selected, selected)
+        }
     }
 
     override fun toastResourcesSelectedFocusMode(selected: Int, hidden: Int) {
-        if (isFragmentVisible())
+        if (isFragmentVisible()) {
             toast(
                 R.string.toast_resources_selected_focus_mode,
                 selected,
                 hidden
             )
+        }
     }
 
     override fun toastPathsFailed(failedPaths: List<Path>) =

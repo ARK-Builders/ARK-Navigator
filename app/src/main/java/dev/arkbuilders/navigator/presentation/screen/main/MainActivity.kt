@@ -44,8 +44,9 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         App.instance.appComponent.inject(this)
         super.onCreate(savedInstanceState)
         permsHelper.registerActivity(this)
-        if (savedInstanceState == null)
+        if (savedInstanceState == null) {
             router.replaceScreen(Screens.FoldersScreen())
+        }
         init()
     }
 

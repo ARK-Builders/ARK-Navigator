@@ -58,8 +58,9 @@ class RootsScanDialogPresenter : MvpPresenter<RootsScanView>() {
         if (folder.arkFolder().exists()) {
             roots.add(folder)
             withContext(Dispatchers.Main) { viewState.setProgress(roots.size) }
-        } else
+        } else {
             queue.addAll(folder.listDirectoryEntries().filter(Path::isDirectory))
+        }
     } catch (e: Exception) {
         Timber.w(LogTags.FILES, "Can't scan $folder due to $e")
         withContext(Dispatchers.Main) {

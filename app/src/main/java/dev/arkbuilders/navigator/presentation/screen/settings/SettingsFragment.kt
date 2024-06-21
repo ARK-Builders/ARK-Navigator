@@ -105,7 +105,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
             R.string.explanation_of_this_feature,
             R.string.collect_tag_usage_stats_enabled,
             R.string.collect_tag_usage_stats_disabled
-        ),
+        )
     )
 
     //endregion
@@ -181,7 +181,7 @@ private class BooleanPreferenceModel(
     @StringRes val title: Int,
     @StringRes val desc: Int,
     @StringRes val toastEnabled: Int,
-    @StringRes val toastDisabled: Int,
+    @StringRes val toastDisabled: Int
 )
 
 private class BooleanPreferenceItem(
@@ -224,8 +224,11 @@ private class BooleanPreferenceItem(
         switchBtn.setOnClickListener {
             preferenceEnabled = !preferenceEnabled
             ctx.toast(
-                if (preferenceEnabled) model.toastEnabled
-                else model.toastDisabled
+                if (preferenceEnabled) {
+                    model.toastEnabled
+                } else {
+                    model.toastDisabled
+                }
             )
             settingsAnalytics.trackBooleanPref(
                 ctx.getString(model.name),

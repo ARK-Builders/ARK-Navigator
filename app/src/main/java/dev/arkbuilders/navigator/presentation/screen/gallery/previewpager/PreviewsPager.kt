@@ -64,8 +64,9 @@ class PreviewsPager(
 
     override fun onViewRecycled(holder: RecyclerView.ViewHolder) {
         super.onViewRecycled(holder)
-        if (holder is PreviewImageViewHolder)
+        if (holder is PreviewImageViewHolder) {
             holder.onRecycled()
+        }
     }
 
     private fun getGestureDetector(): GestureDetectorCompat {

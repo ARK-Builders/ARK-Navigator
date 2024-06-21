@@ -15,8 +15,10 @@ interface RootsScanView : MvpView {
 
     @StateStrategyType(OneExecutionStateStrategy::class)
     fun notifyRootsFound(roots: List<Path>)
+
     @StateStrategyType(OneExecutionStateStrategy::class)
     fun toastFolderSkip(folder: Path)
+
     @StateStrategyType(OneExecutionStateStrategy::class)
     fun closeDialog()
 }

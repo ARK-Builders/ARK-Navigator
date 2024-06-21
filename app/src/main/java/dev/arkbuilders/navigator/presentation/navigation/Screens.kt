@@ -27,7 +27,8 @@ class Screens {
         val tag: Tag
     ) : SupportAppScreen() {
         override fun getFragment() = ResourcesFragment.newInstanceWithSelectedTag(
-            rootAndFav, tag
+            rootAndFav,
+            tag
         )
     }
 

@@ -164,7 +164,9 @@ class FoldersFragment : Fragment(R.layout.fragment_folders) {
             if (withText.isNotEmpty()) {
                 progressText.setVisibilityAndLoadingStatus(View.VISIBLE)
                 progressText.loadingText = withText
-            } else progressText.setVisibilityAndLoadingStatus(View.GONE)
+            } else {
+                progressText.setVisibilityAndLoadingStatus(View.GONE)
+            }
         }
     }
 
