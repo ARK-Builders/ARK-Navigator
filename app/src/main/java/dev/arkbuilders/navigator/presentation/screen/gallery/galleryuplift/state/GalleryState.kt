@@ -1,7 +1,6 @@
 package dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.state
 
 import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.DisplaySelected
-import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.ProgressWithText
 import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.ResourceIdTagsPreview
 import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.SetupPreview
 import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.ShowEditTagsData
@@ -13,6 +12,15 @@ data class GalleryState(
     val currentPos: Int = 0,
     val selectingEnabled: Boolean = false,
 )
+
+sealed interface ProgressState {
+    data object ProvidingRootIndex: ProgressState
+    data object ProvidingMetaDataStorage: ProgressState
+    data object ProvidingPreviewStorage: ProgressState
+    data object ProvidingDataStorage: ProgressState
+    data object Indexing: ProgressState
+    data object HideProgress: ProgressState
+}
 
 sealed class GallerySideEffect {
     data object NotifyResourceScoresChanged : GallerySideEffect()
@@ -39,7 +47,7 @@ sealed class GallerySideEffect {
     data class SetUpPreview(val data: SetupPreview) : GallerySideEffect()
     data class DisplaySelectedFile(val data: DisplaySelected) : GallerySideEffect()
     data object NotifyResourceChange : GallerySideEffect()
-    data class ShowProgressWithText(val text: ProgressWithText) : GallerySideEffect()
+    data class ShowProgressWithText(val state: ProgressState) : GallerySideEffect()
     data object NotifyCurrentItemChange : GallerySideEffect()
     data object UpdatePagerAdapterWithDiff : GallerySideEffect()
     data class ToggleSelect(val isEnabled: Boolean) : GallerySideEffect()
