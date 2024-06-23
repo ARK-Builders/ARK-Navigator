@@ -185,7 +185,11 @@ class GalleryUpliftViewModel(
                 "first view attached in GalleryPresenter"
             )
             viewModelScope.launch {
-                postSideEffect(GallerySideEffect.ShowProgressWithText(ProgressState.ProvidingRootIndex))
+                postSideEffect(
+                    GallerySideEffect.ShowProgressWithText(
+                        ProgressState.ProvidingRootIndex
+                    )
+                )
                 index = indexRepo.provide(rootAndFav)
                 messageFlow.onEach { message ->
                     when (message) {
@@ -199,12 +203,23 @@ class GalleryUpliftViewModel(
                             }
                     }
                 }.launchIn(viewModelScope)
-                postSideEffect(GallerySideEffect.ShowProgressWithText(ProgressState.ProvidingMetaDataStorage))
+                postSideEffect(
+                    GallerySideEffect.ShowProgressWithText(
+                        ProgressState.ProvidingMetaDataStorage
+                    )
+                )
                 metadataStorage = metadataStorageRepo.provide(index)
-                postSideEffect(GallerySideEffect.ShowProgressWithText(ProgressState.ProvidingPreviewStorage))
+                postSideEffect(
+                    GallerySideEffect.ShowProgressWithText(
+                        ProgressState.ProvidingPreviewStorage
+                    )
+                )
                 previewStorage = previewStorageRepo.provide(index)
-                postSideEffect(GallerySideEffect.ShowProgressWithText(ProgressState.ProvidingDataStorage))
-
+                postSideEffect(
+                    GallerySideEffect.ShowProgressWithText(
+                        ProgressState.ProvidingDataStorage
+                    )
+                )
                 try {
                     tagsStorage = tagsStorageRepo.provide(index)
                     scoreStorage = scoreStorageRepo.provide(index)
@@ -230,7 +245,9 @@ class GalleryUpliftViewModel(
                 }
                 postSideEffect(GallerySideEffect.UpdatePagerAdapter)
                 postSideEffect(
-                    GallerySideEffect.ShowProgressWithText(ProgressState.HideProgress)
+                    GallerySideEffect.ShowProgressWithText(
+                        ProgressState.HideProgress
+                    )
                 )
             }
         }

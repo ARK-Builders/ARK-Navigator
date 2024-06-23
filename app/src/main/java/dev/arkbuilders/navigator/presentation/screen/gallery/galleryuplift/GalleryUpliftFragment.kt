@@ -35,7 +35,6 @@ import dev.arkbuilders.arklib.user.tags.Tags
 import dev.arkbuilders.arklib.utils.extension
 import dev.arkbuilders.components.databinding.ScoreWidgetBinding
 import dev.arkbuilders.components.scorewidget.ScoreWidget
-import dev.arkbuilders.components.scorewidget.ScoreWidgetController
 import dev.arkbuilders.navigator.BuildConfig
 import dev.arkbuilders.navigator.R
 import dev.arkbuilders.navigator.data.stats.StatsStorage
@@ -455,33 +454,33 @@ class GalleryUpliftFragment : Fragment() {
     private fun handleProgressState(state: ProgressState) {
         when (state) {
             ProgressState.HideProgress -> setProgressVisibility(
-                isVisible = false,
-                withText = ""
+                false,
+                ""
             )
 
             ProgressState.Indexing -> setProgressVisibility(
-                isVisible = true,
-                withText = getString(R.string.progress_text_changes_detected_indexing)
+                true,
+                getString(R.string.progress_text_changes_detected_indexing)
             )
 
             ProgressState.ProvidingDataStorage -> setProgressVisibility(
-                isVisible = true,
-                withText = getString(R.string.progress_text_providing_data_storage)
+                true,
+                getString(R.string.progress_text_providing_data_storage)
             )
 
             ProgressState.ProvidingMetaDataStorage -> setProgressVisibility(
-                isVisible = true,
-                withText = getString(R.string.progress_text_providing_metadata_storage)
+                true,
+                getString(R.string.progress_text_providing_metadata_storage)
             )
 
             ProgressState.ProvidingPreviewStorage -> setProgressVisibility(
-                isVisible = true,
-                withText = getString(R.string.progress_text_providing_previews_storage)
+                true,
+                getString(R.string.progress_text_providing_previews_storage)
             )
 
             ProgressState.ProvidingRootIndex -> setProgressVisibility(
-                isVisible = true,
-                withText = getString(R.string.progress_text_providing_root_index)
+                true,
+                getString(R.string.progress_text_providing_root_index)
             )
         }
     }
