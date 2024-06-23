@@ -145,8 +145,16 @@ class ResourcesGridPresenter(
                 return@launch
         }
 
+//        router.navigateToFragmentUsingAdd(
+//            Screens.GalleryScreen(
+//                rootAndFav,
+//                selection.map { it.id() },
+//                pos
+//            )
+//        )
+
         router.navigateToFragmentUsingAdd(
-            Screens.GalleryScreen(
+            Screens.GalleryUpliftScreen(
                 rootAndFav,
                 selection.map { it.id() },
                 pos
@@ -303,7 +311,7 @@ class ResourcesGridPresenter(
 
     fun onSelectedItemLongClick(item: FileItemViewHolder) {
         router.navigateToFragmentUsingAdd(
-            Screens.GalleryScreenWithSelected(
+            Screens.GalleryScreenWithSelectedUplift(
                 rootAndFav,
                 selection.map { it.id() },
                 item.position(),

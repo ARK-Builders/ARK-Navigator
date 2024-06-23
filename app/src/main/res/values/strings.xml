@@ -131,4 +131,9 @@
     <string name="close">Close</string>
     <string name="corrupted_storage">Corrupted Storage</string>
     <string name="storage_corrupt_info">%1$s storage is corrupted. \nCause: %2$s. \nOpening the folder isn\'t safe</string>
+    <string name="progress_text_changes_detected_indexing">Changes detected, indexing</string>
+    <string name="progress_text_providing_data_storage">Providing data storage</string>
+    <string name="progress_text_providing_metadata_storage">Providing metadata storage</string>
+    <string name="progress_text_providing_previews_storage">Providing previews storage</string>
+    <string name="progress_text_providing_root_index">Providing root index</string>
 </resources>

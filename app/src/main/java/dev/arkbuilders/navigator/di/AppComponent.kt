@@ -28,6 +28,7 @@ import dev.arkbuilders.navigator.presentation.screen.settings.SettingsFragment
 import dev.arkbuilders.arkfilepicker.folders.FoldersRepo
 import dev.arkbuilders.navigator.analytics.AnalyticsModule
 import dev.arkbuilders.navigator.di.modules.DispatcherModule
+import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.GalleryUpliftFragment
 import javax.inject.Singleton
 
 @Singleton
@@ -51,6 +52,8 @@ interface AppComponent {
     fun inject(resourcesFragment: ResourcesFragment)
     fun inject(galleryPresenter: GalleryPresenter)
     fun inject(galleryFragment: GalleryFragment)
+    fun inject(galleryFragment: GalleryUpliftFragment)
+
     fun inject(settingsFragment: SettingsFragment)
     fun inject(resourcesGridPresenter: ResourcesGridPresenter)
     fun inject(editTagsDialogPresenter: EditTagsDialogPresenter)
