@@ -232,7 +232,6 @@ class GalleryUpliftViewModel(
                             )
                         )
                     )
-
                 }
                 statsStorage = statsStorageRepo.provide(index)
                 scoreWidgetController.init(scoreStorage)
