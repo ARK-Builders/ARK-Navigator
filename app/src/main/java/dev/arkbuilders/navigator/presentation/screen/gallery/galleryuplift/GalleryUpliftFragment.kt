@@ -50,6 +50,7 @@ import dev.arkbuilders.navigator.presentation.navigation.Screens
 import dev.arkbuilders.navigator.presentation.screen.gallery.GalleryFragment
 import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.state.GallerySideEffect
 import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.state.GalleryState
+import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.state.ProgressState
 import dev.arkbuilders.navigator.presentation.screen.main.MainActivity
 import dev.arkbuilders.navigator.presentation.utils.FullscreenHelper
 import dev.arkbuilders.navigator.presentation.utils.extra.ExtraLoader
@@ -59,7 +60,6 @@ import dev.arkbuilders.navigator.presentation.view.DefaultPopup
 import dev.arkbuilders.navigator.presentation.view.DepthPageTransformer
 import dev.arkbuilders.navigator.presentation.view.StackedToasts
 import kotlinx.coroutines.launch
-import moxy.presenterScope
 import org.orbitmvi.orbit.viewmodel.observe
 import timber.log.Timber
 import java.nio.file.Path
@@ -241,9 +241,8 @@ class GalleryUpliftFragment : Fragment() {
                     metadata = infoData.metadata
                 )
 
-                is GallerySideEffect.ShowProgressWithText -> setProgressVisibility(
-                    isVisible = text.isVisible,
-                    withText = text.text
+                is GallerySideEffect.ShowProgressWithText -> handleProgressState(
+                    state
                 )
 
                 is GallerySideEffect.ToastIndexFailedPath -> toastIndexFailedPath(
@@ -453,8 +452,42 @@ class GalleryUpliftFragment : Fragment() {
         dialog.show(childFragmentManager, EditTagsDialogFragment.FRAGMENT_TAG)
     }
 
+    private fun handleProgressState(state: ProgressState) {
+        when (state) {
+            ProgressState.HideProgress -> setProgressVisibility(
+                isVisible = false,
+                withText = ""
+            )
+
+            ProgressState.Indexing -> setProgressVisibility(
+                isVisible = true,
+                withText = getString(R.string.progress_text_changes_detected_indexing)
+            )
+
+            ProgressState.ProvidingDataStorage -> setProgressVisibility(
+                isVisible = true,
+                withText = getString(R.string.progress_text_providing_data_storage)
+            )
+
+            ProgressState.ProvidingMetaDataStorage -> setProgressVisibility(
+                isVisible = true,
+                withText = getString(R.string.progress_text_providing_metadata_storage)
+            )
+
+            ProgressState.ProvidingPreviewStorage -> setProgressVisibility(
+                isVisible = true,
+                withText = getString(R.string.progress_text_providing_previews_storage)
+            )
+
+            ProgressState.ProvidingRootIndex -> setProgressVisibility(
+                isVisible = true,
+                withText = getString(R.string.progress_text_providing_root_index)
+            )
+        }
+    }
+
     @SuppressLint("ClickableViewAccessibility")
-    fun setProgressVisibility(isVisible: Boolean, withText: String) {
+    private fun setProgressVisibility(isVisible: Boolean, withText: String) {
         binding.layoutProgress.apply {
             root.isVisible = isVisible
 
