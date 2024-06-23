@@ -34,7 +34,6 @@ import dev.arkbuilders.navigator.presentation.navigation.AppRouter
 import dev.arkbuilders.navigator.presentation.navigation.Screens
 import dev.arkbuilders.navigator.presentation.screen.gallery.GalleryPresenter
 import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.DisplaySelected
-import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.ProgressWithText
 import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.ResourceIdTagsPreview
 import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.SetupPreview
 import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.ShowEditTagsData
@@ -42,6 +41,7 @@ import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domai
 import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.StorageExceptionGallery
 import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.state.GallerySideEffect
 import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.state.GalleryState
+import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.state.ProgressState
 import dev.arkbuilders.navigator.presentation.screen.resources.adapter.ResourceDiffUtilCallback
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -185,14 +185,7 @@ class GalleryUpliftViewModel(
                 "first view attached in GalleryPresenter"
             )
             viewModelScope.launch {
-                postSideEffect(
-                    GallerySideEffect.ShowProgressWithText(
-                        ProgressWithText(
-                            isVisible = true,
-                            text = "Providing root index",
-                        )
-                    )
-                )
+                postSideEffect(GallerySideEffect.ShowProgressWithText(ProgressState.ProvidingRootIndex))
                 index = indexRepo.provide(rootAndFav)
                 messageFlow.onEach { message ->
                     when (message) {
@@ -206,32 +199,11 @@ class GalleryUpliftViewModel(
                             }
                     }
                 }.launchIn(viewModelScope)
-                postSideEffect(
-                    GallerySideEffect.ShowProgressWithText(
-                        ProgressWithText(
-                            isVisible = true,
-                            text = "Providing metadata storage",
-                        )
-                    )
-                )
+                postSideEffect(GallerySideEffect.ShowProgressWithText(ProgressState.ProvidingMetaDataStorage))
                 metadataStorage = metadataStorageRepo.provide(index)
-                postSideEffect(
-                    GallerySideEffect.ShowProgressWithText(
-                        ProgressWithText(
-                            isVisible = true,
-                            text = "Providing previews storage",
-                        )
-                    )
-                )
+                postSideEffect(GallerySideEffect.ShowProgressWithText(ProgressState.ProvidingPreviewStorage))
                 previewStorage = previewStorageRepo.provide(index)
-                postSideEffect(
-                    GallerySideEffect.ShowProgressWithText(
-                        ProgressWithText(
-                            isVisible = true,
-                            text = "Providing data storage",
-                        )
-                    )
-                )
+                postSideEffect(GallerySideEffect.ShowProgressWithText(ProgressState.ProvidingDataStorage))
 
                 try {
                     tagsStorage = tagsStorageRepo.provide(index)
@@ -257,14 +229,7 @@ class GalleryUpliftViewModel(
                     scoreWidgetController.setVisible(result)
                 }
                 postSideEffect(GallerySideEffect.UpdatePagerAdapter)
-                postSideEffect(
-                    GallerySideEffect.ShowProgressWithText(
-                        ProgressWithText(
-                            isVisible = false,
-                            text = "",
-                        )
-                    )
-                )
+                postSideEffect(GallerySideEffect.ShowProgressWithText(ProgressState.HideProgress))
             }
         }
     }
@@ -574,10 +539,11 @@ class GalleryUpliftViewModel(
             intent {
                 postSideEffect(
                     GallerySideEffect.ShowProgressWithText(
-                        ProgressWithText(
-                            isVisible = true,
-                            text = "Changes detected, indexing"
-                        )
+                        ProgressState.Indexing
+//                        ProgressWithText(
+//                            isVisible = true,
+//                            text = "Changes detected, indexing"
+//                        )
                     )
                 )
                 index.updateAll()
@@ -613,10 +579,11 @@ class GalleryUpliftViewModel(
                 postSideEffect(GallerySideEffect.NotifyCurrentItemChange)
                 postSideEffect(
                     GallerySideEffect.ShowProgressWithText(
-                        ProgressWithText(
-                            isVisible = true,
-                            text = "Changes detected, indexing"
-                        )
+                        ProgressState.Indexing
+//                        ProgressWithText(
+//                            isVisible = true,
+//                            text = "Changes detected, indexing"
+//                        )
                     )
                 )
             }
