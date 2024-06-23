@@ -229,7 +229,9 @@ class GalleryUpliftViewModel(
                     scoreWidgetController.setVisible(result)
                 }
                 postSideEffect(GallerySideEffect.UpdatePagerAdapter)
-                postSideEffect(GallerySideEffect.ShowProgressWithText(ProgressState.HideProgress))
+                postSideEffect(
+                    GallerySideEffect.ShowProgressWithText(ProgressState.HideProgress)
+                )
             }
         }
     }

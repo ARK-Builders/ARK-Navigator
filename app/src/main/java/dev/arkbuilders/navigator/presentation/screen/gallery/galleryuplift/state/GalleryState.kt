@@ -14,12 +14,12 @@ data class GalleryState(
 )
 
 sealed interface ProgressState {
-    data object ProvidingRootIndex: ProgressState
-    data object ProvidingMetaDataStorage: ProgressState
-    data object ProvidingPreviewStorage: ProgressState
-    data object ProvidingDataStorage: ProgressState
-    data object Indexing: ProgressState
-    data object HideProgress: ProgressState
+    data object ProvidingRootIndex : ProgressState
+    data object ProvidingMetaDataStorage : ProgressState
+    data object ProvidingPreviewStorage : ProgressState
+    data object ProvidingDataStorage : ProgressState
+    data object Indexing : ProgressState
+    data object HideProgress : ProgressState
 }
 
 sealed class GallerySideEffect {
