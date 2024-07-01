@@ -21,14 +21,14 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Set up JDK 17
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'adopt'
         cache: gradle
 
     - name: Validate Gradle wrapper
-      uses: gradle/wrapper-validation-action@v1.0.5
+      uses: gradle/actions/wrapper-validation@v3
 
     - name: Build debug APK
       run: ./gradlew assembleDebug
@@ -38,17 +38,17 @@ jobs:
     environment: Development
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up JDK 17
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'adopt'
         cache: gradle
 
     - name: Validate Gradle wrapper
-      uses: gradle/wrapper-validation-action@v1.0.5
+      uses: gradle/actions/wrapper-validation@v3
 
     - name: Decrypt the keystore for signing
       run: |
@@ -59,19 +59,19 @@ jobs:
       run: ./gradlew assembleRelease
 
     - name: Upload release arm64-v8a APK
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
           name: ark-navigator-arm64-v8a-apk
           path: ./app/build/outputs/apk/release/ark-navigator-arm64-v8a-release.apk
 
     - name: Upload release armeabi-v7a APK
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
           name: ark-navigator-armeabi-v7a-apk
           path: ./app/build/outputs/apk/release/ark-navigator-armeabi-v7a-release.apk
 
     - name: Upload release universal APK
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
           name: ark-navigator-universal-apk
           path: ./app/build/outputs/apk/release/ark-navigator-universal-release.apk
@@ -80,19 +80,19 @@ jobs:
       run: ./gradlew assembleDebug
 
     - name: Upload debug arm64-v8a APK
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
           name: ark-navigator-arm64-v8a-debug-apk
           path: ./app/build/outputs/apk/debug/ark-navigator-arm64-v8a-debug.apk
 
     - name: Upload debug armeabi-v7a APK
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
           name: ark-navigator-armeabi-v7a-debug-apk
           path: ./app/build/outputs/apk/debug/ark-navigator-armeabi-v7a-debug.apk
 
     - name: Upload debug universal APK
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
           name: ark-navigator-universal-debug-apk
           path: ./app/build/outputs/apk/debug/ark-navigator-universal-debug.apk
@@ -102,10 +102,10 @@ jobs:
     environment: Development
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up JDK 17
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'adopt'
@@ -117,10 +117,10 @@ jobs:
     environment: Development
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up JDK 17
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'adopt'
@@ -128,7 +128,7 @@ jobs:
     - name: Run linter
       run: ./gradlew lint
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: lint-results
         path: ./app/build/reports/lint-results-debug.html
@@ -137,10 +137,10 @@ jobs:
     environment: Development
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up JDK 17
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'adopt'
