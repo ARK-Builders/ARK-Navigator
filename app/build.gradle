@@ -225,7 +225,7 @@ tasks.register('ktlintCheck', JavaExec) {
 }
 
 tasks.register('installGitHook', Copy) {
-    def suffix = "linux"
+    def suffix = "unix"
     if (Os.isFamily(Os.FAMILY_WINDOWS)) {
         suffix = "windows"
     }
@@ -239,4 +239,4 @@ tasks.preBuild.dependsOn ktlintCheck
 
 tasks.ktlintCheck.dependsOn ktlintFormat
 
-build.dependsOn installGitHook
+tasks.preBuild.dependsOn installGitHook
