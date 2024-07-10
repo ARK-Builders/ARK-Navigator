@@ -40,11 +40,17 @@ class TagsSortViewModel(
     override val container: Container<TagsSortState, TagsSortSideEffect> =
         container(TagsSortState.Loading)
 
-    private val sortingPrefKey = if (selectorNotEdit)
-        PreferenceKey.TagsSortingSelector else PreferenceKey.TagsSortingEdit
+    private val sortingPrefKey = if (selectorNotEdit) {
+        PreferenceKey.TagsSortingSelector
+    } else {
+        PreferenceKey.TagsSortingEdit
+    }
 
-    private val ascPrefKey = if (selectorNotEdit)
-        PreferenceKey.TagsSortingSelectorAsc else PreferenceKey.TagsSortingEditAsc
+    private val ascPrefKey = if (selectorNotEdit) {
+        PreferenceKey.TagsSortingSelectorAsc
+    } else {
+        PreferenceKey.TagsSortingEditAsc
+    }
 
     init {
         intent {

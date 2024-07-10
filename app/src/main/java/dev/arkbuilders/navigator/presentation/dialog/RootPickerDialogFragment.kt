@@ -85,7 +85,7 @@ private const val ROOT_NOT_FAV_BUNDLE_KEY = "rootNotFav"
 
 fun FragmentManager.onRootOrFavPicked(
     lifecycleOwner: LifecycleOwner,
-    listener: (path: Path, rootNotFavorite: Boolean) -> Unit,
+    listener: (path: Path, rootNotFavorite: Boolean) -> Unit
 ) {
     setFragmentResultListener(
         ROOT_PICKED_REQUEST_KEY,

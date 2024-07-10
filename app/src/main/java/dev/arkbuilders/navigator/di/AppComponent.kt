@@ -37,10 +37,9 @@ import javax.inject.Singleton
         CiceroneModule::class,
         RepoModule::class,
         DispatcherModule::class,
-        AnalyticsModule::class,
+        AnalyticsModule::class
     ]
 )
-
 interface AppComponent {
     fun arkBackup(): StorageBackup
     fun preferences(): Preferences
@@ -67,7 +66,7 @@ interface AppComponent {
         fun create(
             @BindsInstance app: App,
             @BindsInstance context: Context,
-            @BindsInstance foldersRepo: FoldersRepo,
+            @BindsInstance foldersRepo: FoldersRepo
         ): AppComponent
     }
 }

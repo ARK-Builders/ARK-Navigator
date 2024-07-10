@@ -152,6 +152,7 @@ class PreviewImageViewHolder(
                 override fun onTileLoadError(e: Exception?) {}
 
                 override fun onPreviewReleased() {}
-            })
+            }
+        )
     }
 }

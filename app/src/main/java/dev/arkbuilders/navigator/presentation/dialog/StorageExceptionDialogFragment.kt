@@ -58,7 +58,7 @@ class StorageExceptionDialogFragment : DialogFragment() {
 
         fun newInstance(
             storageType: String,
-            messageText: String,
+            messageText: String
         ) = StorageExceptionDialogFragment().also {
             it.arguments = bundleOf().apply {
                 putString(STORAGE_TYPE_KEY, storageType)
