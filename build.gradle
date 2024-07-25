@@ -42,7 +42,7 @@ buildscript {
         kotlinx_coroutines_test_version = "1.6.1"
         core_testing_version = "2.1.0"
         ffmeg_media_retriever_version = "1.0.14"
-        tika_core = "2.4.0"
+        tika_core = "2.9.2"
         matomo_analytics_version = "4.1.4"
     }
 
