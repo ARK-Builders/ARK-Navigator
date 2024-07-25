@@ -121,9 +121,9 @@ dependencies {
     //For local developments of arklib-android:
     releaseImplementation "dev.arkbuilders:arklib:$ark_lib_version"
     debugImplementation "dev.arkbuilders:arklib-debug:$ark_lib_version"
-    implementation("dev.arkbuilders:components:$ark_components_version") {
-        exclude group: "dev.arkbuilders", module: "arklib"
-    }
+//    implementation("dev.arkbuilders:components:$ark_components_version") {
+//        exclude group: "dev.arkbuilders", module: "arklib"
+//    }
 
     //// For local development, you can inject local AAR dependency:
     // implementation files('/tmp/arklib-android/lib/build/outputs/aar/lib-debug.aar')
@@ -151,7 +151,19 @@ dependencies {
     implementation "com.davemorrissey.labs:subsampling-scale-image-view-androidx:$scale_image_view_androidx_version"
     implementation "com.github.MikeOrtiz:TouchImageView:$touch_image_view_version"
 
-    implementation "dev.arkbuilders:arkfilepicker:$dev_ark_picker_file_version"
+//    implementation "dev.arkbuilders:arkfilepicker:$dev_ark_picker_file_version"
+    implementation ("dev.arkbuilders.components:filepicker:0.1.1-SNAPSHOT-04") {
+        exclude group: "dev.arkbuilders", module: "arklib"
+    }
+    implementation ("dev.arkbuilders.components:tagselector:0.0.9-SNAPSHOT-02") {
+        exclude group: "dev.arkbuilders", module: "arklib"
+    }
+    implementation ("dev.arkbuilders.components:folderstree:0.0.9-SNAPSHOT-02") {
+        exclude group: "dev.arkbuilders", module: "arklib"
+    }
+    implementation ("dev.arkbuilders.components:scorewidget:0.0.9-SNAPSHOT-02") {
+        exclude group: "dev.arkbuilders", module: "arklib"
+    }
 
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$serialization_json_version"
 

@@ -1,6 +1,6 @@
 package dev.arkbuilders.navigator.data
 
-import dev.arkbuilders.arkfilepicker.folders.FoldersRepo
+import dev.arkbuilders.arklib.data.folders.FoldersRepo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

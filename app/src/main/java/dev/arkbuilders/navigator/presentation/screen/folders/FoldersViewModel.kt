@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import dev.arkbuilders.arkfilepicker.folders.FoldersRepo
+import dev.arkbuilders.arklib.data.folders.FoldersRepo
 import dev.arkbuilders.arklib.data.index.ResourceIndexRepo
 import dev.arkbuilders.navigator.analytics.folders.FoldersAnalytics
 import dev.arkbuilders.navigator.data.PermissionsHelper
