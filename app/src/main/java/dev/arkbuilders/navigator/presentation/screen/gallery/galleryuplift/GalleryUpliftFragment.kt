@@ -266,6 +266,7 @@ class GalleryUpliftFragment : Fragment() {
     }
 
     private fun render(state: GalleryState) {
+        pagerAdapter.dispatchUpdates(state.galleryItems)
         setControlsVisibility(state.controlsVisible)
     }
 

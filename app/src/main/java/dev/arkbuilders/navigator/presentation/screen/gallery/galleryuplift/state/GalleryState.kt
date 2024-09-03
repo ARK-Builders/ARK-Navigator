@@ -1,6 +1,7 @@
 package dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.state
 
 import dev.arkbuilders.arkfilepicker.folders.RootAndFav
+import dev.arkbuilders.navigator.presentation.screen.gallery.GalleryPresenter
 import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.DisplaySelected
 import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.ResourceIdTagsPreview
 import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.SetupPreview
@@ -12,6 +13,7 @@ import java.nio.file.Path
 data class GalleryState(
     val rootAndFav: RootAndFav,
     val currentPos: Int = 0,
+    val galleryItems: List<GalleryPresenter.GalleryItem> = emptyList(),
     val selectingEnabled: Boolean = false,
     val controlsVisible: Boolean = true,
 )

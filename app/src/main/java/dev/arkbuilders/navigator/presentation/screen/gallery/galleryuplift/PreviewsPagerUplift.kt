@@ -7,18 +7,37 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.ViewGroup
 import androidx.core.view.GestureDetectorCompat
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import dev.arkbuilders.arklib.data.meta.Kind
 import dev.arkbuilders.navigator.databinding.ItemImageBinding
 import dev.arkbuilders.navigator.databinding.ItemPreviewPlainTextBinding
+import dev.arkbuilders.navigator.presentation.screen.gallery.GalleryPresenter
 import dev.arkbuilders.navigator.presentation.screen.gallery.previewpager.PreviewPlainTextViewHolder
+import dev.arkbuilders.navigator.presentation.screen.resources.adapter.ResourceDiffUtilCallback
 
 class PreviewsPagerUplift(
     val context: Context,
     val viewModel: GalleryUpliftViewModel,
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    private var galleryItems = emptyList<GalleryPresenter.GalleryItem>()
 
-    override fun getItemCount() = viewModel.galleryItems.size
+    fun dispatchUpdates(newItems: List<GalleryPresenter.GalleryItem>) {
+        if (newItems == galleryItems)
+            return
+        val diff = DiffUtil.calculateDiff(
+            ResourceDiffUtilCallback(
+                galleryItems.map { it.resource.id },
+                newItems.map { it.resource.id }
+            )
+        )
+        galleryItems = newItems
+        diff.dispatchUpdatesTo(this)
+    }
+
+    override fun getItemCount(): Int {
+        return galleryItems.size
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         if (viewType == Kind.PLAINTEXT.ordinal) {

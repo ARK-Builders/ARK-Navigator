@@ -53,6 +53,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
+import org.orbitmvi.orbit.syntax.simple.blockingIntent
 import org.orbitmvi.orbit.syntax.simple.intent
 import org.orbitmvi.orbit.syntax.simple.postSideEffect
 import org.orbitmvi.orbit.syntax.simple.reduce
@@ -557,7 +558,7 @@ class GalleryUpliftViewModel(
             }
         }
 
-    private fun initStorages() = intent {
+    private fun initStorages() = blockingIntent {
         analytics.trackScreen()
         Timber.d(
             LogTags.GALLERY_SCREEN,
@@ -620,7 +621,9 @@ class GalleryUpliftViewModel(
             )
             scoreWidgetController.setVisible(result)
         }
-        postSideEffect(GallerySideEffect.UpdatePagerAdapter)
+        reduce {
+            state.copy(galleryItems = galleryItems)
+        }
         postSideEffect(
             GallerySideEffect.ShowProgressWithText(
                 ProgressState.HideProgress
