@@ -17,7 +17,8 @@ data class GalleryState(
     val selectingEnabled: Boolean = false,
     val controlsVisible: Boolean = true,
 ) {
-    fun currentItem() = galleryItems[currentPos]
+    val currentItem: GalleryItem
+        get() = galleryItems[currentPos]
 }
 
 sealed interface ProgressState {

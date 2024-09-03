@@ -137,7 +137,7 @@ class GalleryUpliftViewModel(
                     append("${state.currentPos}")
                 }
             )
-            deleteResource(state.currentItem().id())
+            deleteResource(state.currentItem.id())
             val newGalleryItems = state.galleryItems.toMutableList()
             newGalleryItems.removeAt(state.currentPos)
             if (newGalleryItems.isEmpty()) {
@@ -429,7 +429,7 @@ class GalleryUpliftViewModel(
             if (state.galleryItems.isEmpty()) {
                 return@intent
             }
-            val item = state.currentItem()
+            val item = state.galleryItems[pos]
             val path = index.getPath(item.id())
                 ?: let {
                     Timber.d("Resource ${item.id()} can't be found in the index")
