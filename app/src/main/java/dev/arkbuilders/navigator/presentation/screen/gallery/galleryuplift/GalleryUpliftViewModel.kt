@@ -86,7 +86,12 @@ class GalleryUpliftViewModel(
     private lateinit var scoreStorage: ScoreStorage
 
     override val container: Container<GalleryState, GallerySideEffect> =
-        container(GalleryState(selectingEnabled = selectingEnabled))
+        container(
+            GalleryState(
+                rootAndFav = rootAndFav,
+                selectingEnabled = selectingEnabled
+            )
+        )
 
     var galleryItems: MutableList<GalleryPresenter.GalleryItem> = mutableListOf()
     var diffResult: DiffUtil.DiffResult? = null
