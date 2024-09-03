@@ -21,8 +21,4 @@ class PreviewPlainTextViewHolderUplift(
     fun setContent(text: String) = with(binding) {
         tvContent.text = text
     }
-
-    fun reset() = with(binding) {
-        tvContent.text = ""
-    }
 }

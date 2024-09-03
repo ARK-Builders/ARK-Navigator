@@ -125,7 +125,8 @@ class GalleryUpliftFragment : Fragment() {
         requireActivity().onBackPressedDispatcher.addCallback(this) {
             onBackClick()
         }
-        pagerAdapter = PreviewsPagerUplift(requireContext(), viewModel)
+        pagerAdapter =
+            PreviewsPagerUplift(lifecycleScope, requireContext(), viewModel)
 
         initViewPager()
         scoreWidget.init(ScoreWidgetBinding.bind(binding.scoreWidget))
@@ -195,6 +196,7 @@ class GalleryUpliftFragment : Fragment() {
                         }
                     }
                 }
+
                 is GallerySideEffect.DeleteResource -> deleteResource(pos)
                 is GallerySideEffect.DisplayPreviewTags -> displayPreviewTags(
                     resource = data.resourceId,

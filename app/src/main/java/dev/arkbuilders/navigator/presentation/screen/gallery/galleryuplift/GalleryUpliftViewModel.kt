@@ -129,29 +129,6 @@ class GalleryUpliftViewModel(
         }
     }
 
-    fun bindPlainTextView(view: PreviewPlainTextViewHolderUplift) {
-        viewModelScope.launch {
-            view.reset()
-            val item = galleryItems[view.pos]
-            val path = index.getPath(item.id())!!
-            val content = readText(path)
-            content.onSuccess {
-                view.setContent(it)
-            }
-        }
-    }
-
-    fun bindView(view: PreviewImageViewHolderUplift) = viewModelScope.launch {
-        view.reset()
-        val item = galleryItems[view.pos]
-        val path = index.getPath(item.id())!!
-        val placeholder = ImageUtils.iconForExtension(extension(path))
-        view.setSource(placeholder, item.id(), item.metadata, item.preview)
-    }
-
-    fun getKind(pos: Int): Int =
-        galleryItems[pos].metadata.kind.ordinal
-
     fun onRemoveFabClick() = viewModelScope.launch(NonCancellable) {
         intent {
             analytics.trackResRemove()
