@@ -102,7 +102,7 @@ class GalleryUpliftViewModel(
 
     val scoreWidgetController = ScoreWidgetController(
         scope = viewModelScope,
-        getCurrentId = { currentItem.id() },
+        getCurrentId = { container.stateFlow.value.currentItem.id() },
         onScoreChanged = {
             intent {
                 postSideEffect(GallerySideEffect.NotifyResourceScoresChanged)
@@ -111,8 +111,6 @@ class GalleryUpliftViewModel(
     )
 
     private val messageFlow: MutableSharedFlow<Message> = MutableSharedFlow()
-    private val currentItem: GalleryItem
-        get() = galleryItems[container.stateFlow.value.currentPos]
 
     init {
         initStorages()
@@ -169,108 +167,97 @@ class GalleryUpliftViewModel(
     fun onPlayButtonClick() = intent {
         postSideEffect(
             GallerySideEffect.ViewInExternalApp(
-                index.getPath(currentItem.id())!!
+                index.getPath(state.currentItem.id())!!
             )
         )
     }
 
-    fun onInfoFabClick() = viewModelScope.launch {
+    fun onInfoFabClick() = intent {
         analytics.trackResInfo()
         Timber.d(
             LogTags.GALLERY_SCREEN,
             "[info_resource] clicked at position" +
                 " ${container.stateFlow.value.currentPos}"
         )
-        val path = index.getPath(currentItem.id())!!
+        val path = index.getPath(state.currentItem.id())!!
         val data = ShowInfoData(
             path = path,
-            resource = currentItem.resource,
-            metadata = currentItem.metadata
+            resource = state.currentItem.resource,
+            metadata = state.currentItem.metadata
         )
         intent {
             postSideEffect(GallerySideEffect.ShowInfoAlert(data))
         }
     }
 
-    fun onShareFabClick() = viewModelScope.launch {
+    fun onShareFabClick() = intent {
         analytics.trackResShare()
         Timber.d(
             LogTags.GALLERY_SCREEN,
             "[share_resource] clicked at position " +
                 "${container.stateFlow.value.currentPos}"
         )
-        val path = index.getPath(currentItem.id())!!
-        if (currentItem.metadata is Metadata.Link) {
+        val path = index.getPath(state.currentItem.id())!!
+        if (state.currentItem.metadata is Metadata.Link) {
             val url = readText(path).getOrThrow()
-            intent {
-                postSideEffect(GallerySideEffect.ShareLink(url))
-            }
-            return@launch
+            postSideEffect(GallerySideEffect.ShareLink(url))
+            return@intent
         }
-        intent {
-            postSideEffect(GallerySideEffect.ShareResource(path))
-        }
+        postSideEffect(GallerySideEffect.ShareResource(path))
     }
 
-    fun onSelectingChanged() {
-        intent {
-            reduce {
-                state.copy(selectingEnabled = !state.selectingEnabled)
-            }
-            postSideEffect(
-                GallerySideEffect.ToggleSelect(
-                    container.stateFlow.value.selectingEnabled
-                )
-            )
+    fun onSelectingChanged() = intent {
+        reduce {
+            state.copy(selectingEnabled = !state.selectingEnabled)
         }
+        postSideEffect(
+            GallerySideEffect.ToggleSelect(
+                container.stateFlow.value.selectingEnabled
+            )
+        )
+
         _selectedResources.clear()
         if (container.stateFlow.value.selectingEnabled) {
-            _selectedResources.add(currentItem.resource.id)
+            _selectedResources.add(state.currentItem.id())
         }
     }
 
-    fun onOpenFabClick() = viewModelScope.launch {
+    fun onOpenFabClick() = intent {
         analytics.trackResOpen()
         Timber.d(
             LogTags.GALLERY_SCREEN,
             "[open_resource] clicked at position " +
                 "${container.stateFlow.value.currentPos}"
         )
-        val id = currentItem.id()
+        val id = state.currentItem.id()
         val path = index.getPath(id)!!
-        if (currentItem.metadata is Metadata.Link) {
+        if (state.currentItem.metadata is Metadata.Link) {
             val url = readText(path).getOrThrow()
-            intent {
-                postSideEffect(GallerySideEffect.OpenLink(url))
-            }
-            return@launch
+            postSideEffect(GallerySideEffect.OpenLink(url))
+            return@intent
         }
-        intent {
-            postSideEffect(
-                GallerySideEffect.ViewInExternalApp(
-                    index.getPath(
-                        currentItem.id()
-                    )!!
-                )
+        postSideEffect(
+            GallerySideEffect.ViewInExternalApp(
+                index.getPath(
+                    state.currentItem.id()
+                )!!
             )
-        }
+        )
     }
 
-    fun onEditFabClick() = viewModelScope.launch {
+    fun onEditFabClick() = intent {
         analytics.trackResEdit()
         Timber.d(
             LogTags.GALLERY_SCREEN,
             "[edit_resource] clicked at position " +
                 "${container.stateFlow.value.currentPos}"
         )
-        val path = index.getPath(currentItem.id())!!
-        intent {
-            postSideEffect(GallerySideEffect.EditResource(path))
-        }
+        val path = index.getPath(state.currentItem.id())!!
+        postSideEffect(GallerySideEffect.EditResource(path))
     }
 
-    fun onSelectBtnClick() {
-        val id = currentItem.id()
+    fun onSelectBtnClick() = intent {
+        val id = state.currentItem.id()
         val wasSelected = id in _selectedResources
         if (wasSelected) {
             _selectedResources.remove(id)
@@ -292,35 +279,34 @@ class GalleryUpliftViewModel(
         }
     }
 
-    fun onResume() {
-        checkResourceChanges(container.stateFlow.value.currentPos)
+    fun onResume() = intent {
+        checkResourceChanges(state.currentPos)
     }
 
-    fun onTagsChanged() {
-        intent {
-            val tags = tagsStorage.getTags(currentItem.id())
-            postSideEffect(
-                GallerySideEffect.DisplayPreviewTags(
-                    ResourceIdTagsPreview(
-                        resourceId = currentItem.id(),
-                        tags = tags,
-                    )
+    fun onTagsChanged() = intent {
+        val tags = tagsStorage.getTags(state.currentItem.id())
+        postSideEffect(
+            GallerySideEffect.DisplayPreviewTags(
+                ResourceIdTagsPreview(
+                    resourceId = state.currentItem.id(),
+                    tags = tags,
                 )
             )
-        }
+        )
     }
 
-    fun onPageChanged(newPos: Int) = viewModelScope.launch {
+
+    fun onPageChanged(newPos: Int) = intent {
         if (galleryItems.isEmpty())
-            return@launch
+            return@intent
         intent {
             reduce {
                 state.copy(currentPos = newPos)
             }
             checkResourceChanges(newPos)
-            val id = currentItem.id()
+            val id = state.currentItem.id()
             val tags = tagsStorage.getTags(id)
-            displayPreview(id, currentItem.metadata, tags)
+            displayPreview(id, state.currentItem.metadata, tags)
         }
     }
 
@@ -333,10 +319,10 @@ class GalleryUpliftViewModel(
         )
     }
 
-    fun onTagRemove(tag: Tag) = viewModelScope.launch(NonCancellable) {
+    fun onTagRemove(tag: Tag) = intent {
         intent {
             analytics.trackTagRemove()
-            val id = currentItem.id()
+            val id = state.currentItem.id()
             val tags = tagsStorage.getTags(id)
             val newTags = tags - tag
             postSideEffect(
@@ -354,7 +340,7 @@ class GalleryUpliftViewModel(
             )
             Timber.d(
                 LogTags.GALLERY_SCREEN,
-                "setting new tags $newTags to $currentItem"
+                "setting new tags $newTags to $state.currentItem"
             )
             tagsStorage.setTags(id, newTags)
             tagsStorage.persist()
@@ -362,67 +348,65 @@ class GalleryUpliftViewModel(
         }
     }
 
-    fun onEditTagsDialogBtnClick() {
-        intent {
-            analytics.trackTagsEdit()
-            postSideEffect(
-                GallerySideEffect.ShowEditTagsDialog(
-                    ShowEditTagsData(
-                        resource = currentItem.id(),
-                        resources = listOf(currentItem.id()),
-                        statsStorage = statsStorage,
-                        rootAndFav = rootAndFav,
-                        index = index,
-                        storage = tagsStorage,
-                    )
+    fun onEditTagsDialogBtnClick() = intent {
+        analytics.trackTagsEdit()
+        postSideEffect(
+            GallerySideEffect.ShowEditTagsDialog(
+                ShowEditTagsData(
+                    resource = state.currentItem.id(),
+                    resources = listOf(state.currentItem.id()),
+                    statsStorage = statsStorage,
+                    rootAndFav = rootAndFav,
+                    index = index,
+                    storage = tagsStorage,
                 )
             )
-        }
+        )
     }
+
 
     private fun displayPreview(
         id: ResourceId,
         meta: Metadata,
         tags: Tags
-    ) {
-        intent {
-            postSideEffect(
-                GallerySideEffect.SetUpPreview(
-                    SetupPreview(
-                        position = container.stateFlow.value.currentPos,
-                        meta = meta,
-                    )
+    ) = intent {
+        postSideEffect(
+            GallerySideEffect.SetUpPreview(
+                SetupPreview(
+                    position = state.currentPos,
+                    meta = meta,
                 )
             )
-            postSideEffect(
-                GallerySideEffect.DisplayPreviewTags(
-                    ResourceIdTagsPreview(
-                        resourceId = id,
-                        tags = tags,
-                    )
+        )
+        postSideEffect(
+            GallerySideEffect.DisplayPreviewTags(
+                ResourceIdTagsPreview(
+                    resourceId = id,
+                    tags = tags,
                 )
             )
-            scoreWidgetController.displayScore()
-            postSideEffect(
-                GallerySideEffect.DisplayPreviewTags(
-                    ResourceIdTagsPreview(
-                        resourceId = id,
-                        tags = tags,
-                    )
+        )
+        scoreWidgetController.displayScore()
+        postSideEffect(
+            GallerySideEffect.DisplayPreviewTags(
+                ResourceIdTagsPreview(
+                    resourceId = id,
+                    tags = tags,
                 )
             )
-            postSideEffect(
-                GallerySideEffect.DisplaySelectedFile(
-                    DisplaySelected(
-                        selected = id in _selectedResources,
-                        showAnim = false,
-                        selectedCount = _selectedResources.size,
-                        itemCount = galleryItems.size,
-                    )
+        )
+        postSideEffect(
+            GallerySideEffect.DisplaySelectedFile(
+                DisplaySelected(
+                    selected = id in _selectedResources,
+                    showAnim = false,
+                    selectedCount = _selectedResources.size,
+                    itemCount = galleryItems.size,
                 )
             )
-        }
+        )
     }
+
 
     private fun checkResourceChanges(pos: Int) =
         intent {
