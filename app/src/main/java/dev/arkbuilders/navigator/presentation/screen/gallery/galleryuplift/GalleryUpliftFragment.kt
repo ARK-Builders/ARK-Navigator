@@ -185,9 +185,6 @@ class GalleryUpliftFragment : Fragment() {
     private fun handleSideEffect(sideEffect: GallerySideEffect) {
         with(sideEffect) {
             when (this) {
-                is GallerySideEffect.ControlVisible ->
-                    setControlsVisibility(visible = isVisible)
-
                 is GallerySideEffect.DeleteResource -> deleteResource(pos)
                 is GallerySideEffect.DisplayPreviewTags -> displayPreviewTags(
                     resource = data.resourceId,
@@ -259,7 +256,7 @@ class GalleryUpliftFragment : Fragment() {
     }
 
     private fun render(state: GalleryState) {
-        setControlsVisibility(state.selectingEnabled)
+        setControlsVisibility(state.controlsVisible)
     }
 
     private fun onBackClick() {

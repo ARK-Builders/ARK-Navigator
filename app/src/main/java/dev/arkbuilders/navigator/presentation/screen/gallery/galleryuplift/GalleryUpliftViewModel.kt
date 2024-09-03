@@ -110,7 +110,7 @@ class GalleryUpliftViewModel(
 
     fun onPreviewsItemClick() {
         intent {
-            postSideEffect(GallerySideEffect.ControlVisible(isVisible = true))
+            reduce { state.copy(controlsVisible = !state.controlsVisible) }
         }
     }
 

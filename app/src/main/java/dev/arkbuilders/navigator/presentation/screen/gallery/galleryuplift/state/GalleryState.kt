@@ -11,6 +11,7 @@ import java.nio.file.Path
 data class GalleryState(
     val currentPos: Int = 0,
     val selectingEnabled: Boolean = false,
+    val controlsVisible: Boolean = true,
 )
 
 sealed interface ProgressState {
@@ -24,7 +25,6 @@ sealed interface ProgressState {
 
 sealed class GallerySideEffect {
     data object NotifyResourceScoresChanged : GallerySideEffect()
-    data class ControlVisible(val isVisible: Boolean) : GallerySideEffect()
     data object NavigateBack : GallerySideEffect()
     data class DeleteResource(val pos: Int) : GallerySideEffect()
     data class ToastIndexFailedPath(val path: Path) : GallerySideEffect()
