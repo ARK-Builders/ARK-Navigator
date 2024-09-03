@@ -32,8 +32,8 @@ import dev.arkbuilders.navigator.data.stats.StatsStorageRepo
 import dev.arkbuilders.navigator.data.utils.LogTags
 import dev.arkbuilders.navigator.presentation.navigation.AppRouter
 import dev.arkbuilders.navigator.presentation.navigation.Screens
-import dev.arkbuilders.navigator.presentation.screen.gallery.GalleryPresenter
 import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.DisplaySelected
+import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.GalleryItem
 import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.ResourceIdTagsPreview
 import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.SetupPreview
 import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.ShowEditTagsData
@@ -96,7 +96,7 @@ class GalleryUpliftViewModel(
             )
         )
 
-    var galleryItems: MutableList<GalleryPresenter.GalleryItem> = mutableListOf()
+    var galleryItems: MutableList<GalleryItem> = mutableListOf()
     var diffResult: DiffUtil.DiffResult? = null
 
     private val _selectedResources: MutableList<ResourceId> = mutableListOf()
@@ -113,7 +113,7 @@ class GalleryUpliftViewModel(
     )
 
     private val messageFlow: MutableSharedFlow<Message> = MutableSharedFlow()
-    private val currentItem: GalleryPresenter.GalleryItem
+    private val currentItem: GalleryItem
         get() = galleryItems[container.stateFlow.value.currentPos]
 
     init {
@@ -474,18 +474,19 @@ class GalleryUpliftViewModel(
             }
         }
 
-    private fun provideGalleryItems(): List<GalleryPresenter.GalleryItem> =
+    private fun provideGalleryItems(): List<GalleryItem> =
         try {
             val allResources = index.allResources()
             resourcesIds
                 .filter { allResources.keys.contains(it) }
                 .map { id ->
+                    val path = index.getPath(id)!!
                     val preview = previewStorage.retrieve(id).getOrThrow()
                     val metadata = metadataStorage.retrieve(id).getOrThrow()
                     val resource = allResources.getOrElse(id) {
                         throw NullPointerException("Resource not exist")
                     }
-                    GalleryPresenter.GalleryItem(resource, preview, metadata)
+                    GalleryItem(resource, preview, metadata, path)
                 }.toMutableList()
         } catch (e: Exception) {
             Timber.d("Can't provide gallery items")

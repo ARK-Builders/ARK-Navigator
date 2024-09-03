@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import dev.arkbuilders.arklib.data.meta.Kind
 import dev.arkbuilders.navigator.databinding.ItemImageBinding
 import dev.arkbuilders.navigator.databinding.ItemPreviewPlainTextBinding
-import dev.arkbuilders.navigator.presentation.screen.gallery.GalleryPresenter
+import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.GalleryItem
 import dev.arkbuilders.navigator.presentation.screen.gallery.previewpager.PreviewPlainTextViewHolder
 import dev.arkbuilders.navigator.presentation.screen.resources.adapter.ResourceDiffUtilCallback
 
@@ -20,9 +20,9 @@ class PreviewsPagerUplift(
     val context: Context,
     val viewModel: GalleryUpliftViewModel,
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    private var galleryItems = emptyList<GalleryPresenter.GalleryItem>()
+    private var galleryItems = emptyList<GalleryItem>()
 
-    fun dispatchUpdates(newItems: List<GalleryPresenter.GalleryItem>) {
+    fun dispatchUpdates(newItems: List<GalleryItem>) {
         if (newItems == galleryItems)
             return
         val diff = DiffUtil.calculateDiff(
