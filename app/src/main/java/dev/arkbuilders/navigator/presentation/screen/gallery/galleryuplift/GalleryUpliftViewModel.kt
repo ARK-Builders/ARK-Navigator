@@ -21,8 +21,6 @@ import dev.arkbuilders.arklib.user.tags.Tag
 import dev.arkbuilders.arklib.user.tags.TagStorage
 import dev.arkbuilders.arklib.user.tags.Tags
 import dev.arkbuilders.arklib.user.tags.TagsStorageRepo
-import dev.arkbuilders.arklib.utils.ImageUtils
-import dev.arkbuilders.arklib.utils.extension
 import dev.arkbuilders.components.scorewidget.ScoreWidgetController
 import dev.arkbuilders.navigator.analytics.gallery.GalleryAnalytics
 import dev.arkbuilders.navigator.data.preferences.PreferenceKey
@@ -136,23 +134,22 @@ class GalleryUpliftViewModel(
                 LogTags.GALLERY_SCREEN,
                 buildString {
                     append("[remove_resource] clicked at position ")
-                    append("${container.stateFlow.value.currentPos}")
+                    append("${state.currentPos}")
                 }
             )
-            deleteResource(currentItem.id())
-            galleryItems.removeAt(container.stateFlow.value.currentPos)
-            if (galleryItems.isEmpty()) {
+            deleteResource(state.currentItem().id())
+            val newGalleryItems = state.galleryItems.toMutableList()
+            newGalleryItems.removeAt(state.currentPos)
+            if (newGalleryItems.isEmpty()) {
                 intent {
                     postSideEffect(GallerySideEffect.NavigateBack)
                 }
                 return@intent
             }
             onTagsChanged()
-            postSideEffect(
-                GallerySideEffect.DeleteResource(
-                    container.stateFlow.value.currentPos
-                )
-            )
+            reduce {
+                state.copy(galleryItems = newGalleryItems)
+            }
         }
     }
 
@@ -428,26 +425,26 @@ class GalleryUpliftViewModel(
     }
 
     private fun checkResourceChanges(pos: Int) =
-        viewModelScope.launch {
-            if (galleryItems.isEmpty()) {
-                return@launch
+        intent {
+            if (state.galleryItems.isEmpty()) {
+                return@intent
             }
-            val item = galleryItems[pos]
+            val item = state.currentItem()
             val path = index.getPath(item.id())
                 ?: let {
                     Timber.d("Resource ${item.id()} can't be found in the index")
                     invokeHandleGalleryExternalChangesUseCase()
-                    return@launch
+                    return@intent
                 }
             if (path.notExists()) {
                 Timber.d("Resource ${item.id()} isn't stored by path $path")
                 invokeHandleGalleryExternalChangesUseCase()
-                return@launch
+                return@intent
             }
             if (path.getLastModifiedTime() != item.resource.modified) {
                 Timber.d("Index is not up-to-date regarding path $path")
                 invokeHandleGalleryExternalChangesUseCase()
-                return@launch
+                return@intent
             }
         }
 
@@ -515,7 +512,7 @@ class GalleryUpliftViewModel(
                 postSideEffect(GallerySideEffect.NotifyCurrentItemChange)
                 postSideEffect(
                     GallerySideEffect.ShowProgressWithText(
-                        ProgressState.Indexing
+                        ProgressState.HideProgress
 //                        ProgressWithText(
 //                            isVisible = true,
 //                            text = "Changes detected, indexing"

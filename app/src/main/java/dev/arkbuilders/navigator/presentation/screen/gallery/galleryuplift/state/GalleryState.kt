@@ -16,7 +16,9 @@ data class GalleryState(
     val galleryItems: List<GalleryItem> = emptyList(),
     val selectingEnabled: Boolean = false,
     val controlsVisible: Boolean = true,
-)
+) {
+    fun currentItem() = galleryItems[currentPos]
+}
 
 sealed interface ProgressState {
     data object ProvidingRootIndex : ProgressState
