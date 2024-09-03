@@ -72,6 +72,7 @@ class GalleryUpliftFragment : Fragment() {
     lateinit var factory: GalleryUpliftViewModelFactory.Factory
     private val viewModel: GalleryUpliftViewModel by viewModels {
         factory.create(
+            startPos = requireArguments().getInt(START_AT_KEY),
             selectingEnabled = requireArguments().getBoolean(SELECTING_ENABLED_KEY),
             rootAndFav = requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
             resourcesIds = requireArguments().getParcelableArray(RESOURCES_KEY)!!
@@ -184,6 +185,16 @@ class GalleryUpliftFragment : Fragment() {
     private fun handleSideEffect(sideEffect: GallerySideEffect) {
         with(sideEffect) {
             when (this) {
+                is GallerySideEffect.ScrollToPage -> {
+                    binding.viewPager.adapter?.itemCount?.let { count ->
+                        if (this.pos < count) {
+                            binding.viewPager.setCurrentItem(
+                                this.pos,
+                                false
+                            )
+                        }
+                    }
+                }
                 is GallerySideEffect.DeleteResource -> deleteResource(pos)
                 is GallerySideEffect.DisplayPreviewTags -> displayPreviewTags(
                     resource = data.resourceId,
@@ -267,15 +278,6 @@ class GalleryUpliftFragment : Fragment() {
 
     private fun updatePagerAdapter() {
         pagerAdapter.notifyDataSetChanged()
-        binding.viewPager.adapter?.itemCount?.let { count ->
-            val startAt = requireArguments().getInt(START_AT_KEY)
-            if (startAt < count) {
-                binding.viewPager.setCurrentItem(
-                    startAt,
-                    false
-                )
-            }
-        }
     }
 
     private fun updatePagerAdapterWithDiff() {

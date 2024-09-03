@@ -18,6 +18,7 @@ import dev.arkbuilders.navigator.data.stats.StatsStorageRepo
 import dev.arkbuilders.navigator.presentation.navigation.AppRouter
 
 class GalleryUpliftViewModelFactory @AssistedInject constructor(
+    @Assisted val startPos: Int,
     @Assisted val selectingEnabled: Boolean,
     @Assisted private val rootAndFav: RootAndFav,
     @Assisted private val resourcesIds: List<ResourceId>,
@@ -33,6 +34,7 @@ class GalleryUpliftViewModelFactory @AssistedInject constructor(
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return GalleryUpliftViewModel(
+            startPos = startPos,
             selectingEnabled = selectingEnabled,
             rootAndFav = rootAndFav,
             resourcesIds = resourcesIds,
@@ -51,6 +53,7 @@ class GalleryUpliftViewModelFactory @AssistedInject constructor(
     @AssistedFactory
     interface Factory {
         fun create(
+            @Assisted startPos: Int,
             @Assisted selectingEnabled: Boolean,
             @Assisted rootAndFav: RootAndFav,
             @Assisted resourcesIds: List<ResourceId>,

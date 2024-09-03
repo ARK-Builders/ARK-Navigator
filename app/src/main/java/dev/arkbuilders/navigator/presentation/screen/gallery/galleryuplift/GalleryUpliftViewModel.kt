@@ -65,6 +65,7 @@ import kotlin.io.path.getLastModifiedTime
 import kotlin.io.path.notExists
 
 class GalleryUpliftViewModel(
+    startPos: Int,
     selectingEnabled: Boolean,
     private val rootAndFav: RootAndFav,
     private val resourcesIds: List<ResourceId>,
@@ -89,6 +90,7 @@ class GalleryUpliftViewModel(
         container(
             GalleryState(
                 rootAndFav = rootAndFav,
+                currentPos = startPos,
                 selectingEnabled = selectingEnabled
             )
         )
@@ -115,6 +117,9 @@ class GalleryUpliftViewModel(
 
     init {
         initStorages()
+        intent {
+            postSideEffect(GallerySideEffect.ScrollToPage(state.currentPos))
+        }
     }
 
     fun onPreviewsItemClick() {
@@ -558,70 +563,68 @@ class GalleryUpliftViewModel(
             LogTags.GALLERY_SCREEN,
             "first view attached in GalleryPresenter"
         )
-        viewModelScope.launch {
-            postSideEffect(
-                GallerySideEffect.ShowProgressWithText(
-                    ProgressState.ProvidingRootIndex
-                )
+        postSideEffect(
+            GallerySideEffect.ShowProgressWithText(
+                ProgressState.ProvidingRootIndex
             )
-            index = indexRepo.provide(rootAndFav)
-            messageFlow.onEach { message ->
-                when (message) {
-                    is Message.KindDetectFailed ->
-                        intent {
-                            postSideEffect(
-                                GallerySideEffect.ToastIndexFailedPath(
-                                    message.path
-                                )
+        )
+        index = indexRepo.provide(rootAndFav)
+        messageFlow.onEach { message ->
+            when (message) {
+                is Message.KindDetectFailed ->
+                    intent {
+                        postSideEffect(
+                            GallerySideEffect.ToastIndexFailedPath(
+                                message.path
                             )
-                        }
-                }
-            }.launchIn(viewModelScope)
-            postSideEffect(
-                GallerySideEffect.ShowProgressWithText(
-                    ProgressState.ProvidingMetaDataStorage
-                )
-            )
-            metadataStorage = metadataStorageRepo.provide(index)
-            postSideEffect(
-                GallerySideEffect.ShowProgressWithText(
-                    ProgressState.ProvidingPreviewStorage
-                )
-            )
-            previewStorage = previewStorageRepo.provide(index)
-            postSideEffect(
-                GallerySideEffect.ShowProgressWithText(
-                    ProgressState.ProvidingDataStorage
-                )
-            )
-            try {
-                tagsStorage = tagsStorageRepo.provide(index)
-                scoreStorage = scoreStorageRepo.provide(index)
-            } catch (e: StorageException) {
-                postSideEffect(
-                    GallerySideEffect.DisplayStorageException(
-                        StorageExceptionGallery(
-                            label = e.label,
-                            messenger = e.msg
                         )
-                    )
-                )
+                    }
             }
-            statsStorage = statsStorageRepo.provide(index)
-            scoreWidgetController.init(scoreStorage)
-            galleryItems = provideGalleryItems().toMutableList()
-            viewModelScope.launch {
-                val result = preferences.get(
-                    PreferenceKey.SortByScores
-                )
-                scoreWidgetController.setVisible(result)
-            }
-            postSideEffect(GallerySideEffect.UpdatePagerAdapter)
+        }.launchIn(viewModelScope)
+        postSideEffect(
+            GallerySideEffect.ShowProgressWithText(
+                ProgressState.ProvidingMetaDataStorage
+            )
+        )
+        metadataStorage = metadataStorageRepo.provide(index)
+        postSideEffect(
+            GallerySideEffect.ShowProgressWithText(
+                ProgressState.ProvidingPreviewStorage
+            )
+        )
+        previewStorage = previewStorageRepo.provide(index)
+        postSideEffect(
+            GallerySideEffect.ShowProgressWithText(
+                ProgressState.ProvidingDataStorage
+            )
+        )
+        try {
+            tagsStorage = tagsStorageRepo.provide(index)
+            scoreStorage = scoreStorageRepo.provide(index)
+        } catch (e: StorageException) {
             postSideEffect(
-                GallerySideEffect.ShowProgressWithText(
-                    ProgressState.HideProgress
+                GallerySideEffect.DisplayStorageException(
+                    StorageExceptionGallery(
+                        label = e.label,
+                        messenger = e.msg
+                    )
                 )
             )
         }
+        statsStorage = statsStorageRepo.provide(index)
+        scoreWidgetController.init(scoreStorage)
+        galleryItems = provideGalleryItems().toMutableList()
+        viewModelScope.launch {
+            val result = preferences.get(
+                PreferenceKey.SortByScores
+            )
+            scoreWidgetController.setVisible(result)
+        }
+        postSideEffect(GallerySideEffect.UpdatePagerAdapter)
+        postSideEffect(
+            GallerySideEffect.ShowProgressWithText(
+                ProgressState.HideProgress
+            )
+        )
     }
 }
