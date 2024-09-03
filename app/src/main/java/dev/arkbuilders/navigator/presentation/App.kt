@@ -1,7 +1,6 @@
 package dev.arkbuilders.navigator.presentation
 
 import android.app.Application
-import android.os.StrictMode
 import dev.arkbuilders.arkfilepicker.folders.FoldersRepo
 import dev.arkbuilders.arklib.initArkLib
 import dev.arkbuilders.arklib.initRustLogger
@@ -30,9 +29,9 @@ class App : Application() {
         private set
 
     init {
-        if (BuildConfig.DEBUG) {
-            StrictMode.enableDefaults()
-        }
+//        if (BuildConfig.DEBUG) {
+//            StrictMode.enableDefaults()
+//        }
     }
 
     override fun onCreate() {
