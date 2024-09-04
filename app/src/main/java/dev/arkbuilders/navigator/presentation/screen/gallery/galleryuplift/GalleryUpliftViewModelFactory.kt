@@ -21,7 +21,8 @@ class GalleryUpliftViewModelFactory @AssistedInject constructor(
     @Assisted val startPos: Int,
     @Assisted val selectingEnabled: Boolean,
     @Assisted private val rootAndFav: RootAndFav,
-    @Assisted private val resourcesIds: List<ResourceId>,
+    @Assisted("all") private val resourcesIds: List<ResourceId>,
+    @Assisted("selected") private val selectedResources: List<ResourceId>,
     val preferences: Preferences,
     val router: AppRouter,
     val indexRepo: ResourceIndexRepo,
@@ -36,6 +37,7 @@ class GalleryUpliftViewModelFactory @AssistedInject constructor(
         return GalleryUpliftViewModel(
             startPos = startPos,
             selectingEnabled = selectingEnabled,
+            selectedResources = selectedResources,
             rootAndFav = rootAndFav,
             resourcesIds = resourcesIds,
             preferences = preferences,
@@ -56,7 +58,8 @@ class GalleryUpliftViewModelFactory @AssistedInject constructor(
             @Assisted startPos: Int,
             @Assisted selectingEnabled: Boolean,
             @Assisted rootAndFav: RootAndFav,
-            @Assisted resourcesIds: List<ResourceId>,
+            @Assisted("all") resourcesIds: List<ResourceId>,
+            @Assisted("selected") selectedResources: List<ResourceId>,
         ): GalleryUpliftViewModelFactory
     }
 }

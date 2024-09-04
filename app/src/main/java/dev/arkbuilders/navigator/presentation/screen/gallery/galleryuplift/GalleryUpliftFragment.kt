@@ -74,9 +74,12 @@ class GalleryUpliftFragment : Fragment() {
         factory.create(
             startPos = requireArguments().getInt(START_AT_KEY),
             selectingEnabled = requireArguments().getBoolean(SELECTING_ENABLED_KEY),
+            selectedResources = requireArguments()
+                .getParcelableArray(SELECTED_RESOURCES_KEY)!!
+                .toList() as List<ResourceId>,
             rootAndFav = requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
             resourcesIds = requireArguments().getParcelableArray(RESOURCES_KEY)!!
-                .toList() as List<ResourceId>
+                .toList() as List<ResourceId>,
         ).apply {
             App.instance.appComponent.inject(this@GalleryUpliftFragment)
         }
@@ -156,7 +159,7 @@ class GalleryUpliftFragment : Fragment() {
                 viewModel.onShareFabClick()
             }
             fabStartSelect.setOnClickListener {
-                viewModel.onSelectingChanged()
+                viewModel.onSelectingChanged(true)
             }
 
             openResourceFab.setOnClickListener {
@@ -172,7 +175,7 @@ class GalleryUpliftFragment : Fragment() {
             }
 
             layoutSelected.setOnLongClickListener {
-                viewModel.onSelectingChanged()
+                viewModel.onSelectingChanged(false)
                 return@setOnLongClickListener true
             }
         }
@@ -201,13 +204,6 @@ class GalleryUpliftFragment : Fragment() {
                 is GallerySideEffect.DisplayPreviewTags -> displayPreviewTags(
                     resource = resourceId,
                     tags = tags
-                )
-
-                is GallerySideEffect.DisplaySelectedFile -> displaySelected(
-                    selected = selected,
-                    showAnim = showAnim,
-                    selectedCount = selectedCount,
-                    itemCount = itemCount
                 )
 
                 is GallerySideEffect.DisplayStorageException ->
@@ -258,7 +254,8 @@ class GalleryUpliftFragment : Fragment() {
                 )
 
                 is GallerySideEffect.ViewInExternalApp -> viewInExternalApp(path)
-                is GallerySideEffect.ToggleSelect -> toggleSelecting(isEnabled)
+                is GallerySideEffect.AbortSelectAnimation ->
+                    binding.cbSelected.jumpDrawablesToCurrentState()
             }
         }
     }
@@ -266,11 +263,17 @@ class GalleryUpliftFragment : Fragment() {
     private fun render(state: GalleryState) {
         pagerAdapter.dispatchUpdates(state.galleryItems)
         setControlsVisibility(state.controlsVisible)
+        toggleSelecting(state.selectingEnabled)
+        displaySelected(
+            state.currentItemSelected,
+            state.selectedResources.size,
+            state.galleryItems.size
+        )
     }
 
     private fun onBackClick() {
         Timber.d(LogTags.GALLERY_SCREEN, "quitting from GalleryPresenter")
-        notifySelectedChanged(viewModel.selectedResources)
+        notifySelectedChanged(viewModel.container.stateFlow.value.selectedResources)
         exitFullscreen()
         viewModel.router.exit()
     }
@@ -509,14 +512,11 @@ class GalleryUpliftFragment : Fragment() {
 
     private fun displaySelected(
         selected: Boolean,
-        showAnim: Boolean,
         selectedCount: Int,
         itemCount: Int
     ) = with(binding) {
         Timber.d("display ${System.currentTimeMillis()}")
         cbSelected.isChecked = selected
-        if (!showAnim)
-            cbSelected.jumpDrawablesToCurrentState()
         tvSelectedOf.text = "$selectedCount/$itemCount"
 
         return@with
@@ -527,11 +527,6 @@ class GalleryUpliftFragment : Fragment() {
         binding.fabStartSelect.isVisible = !enabled
         requireArguments().apply {
             putBoolean(GalleryFragment.SELECTING_ENABLED_KEY, enabled)
-        }
-        if (enabled) {
-            viewModel.onSelectBtnClick()
-        } else {
-            binding.cbSelected.isChecked = false
         }
     }
 

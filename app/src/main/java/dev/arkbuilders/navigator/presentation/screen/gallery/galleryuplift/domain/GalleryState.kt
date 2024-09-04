@@ -14,10 +14,14 @@ data class GalleryState(
     val currentPos: Int = 0,
     val galleryItems: List<GalleryItem> = emptyList(),
     val selectingEnabled: Boolean = false,
+    val selectedResources: List<ResourceId> = emptyList(),
     val controlsVisible: Boolean = true,
 ) {
     val currentItem: GalleryItem
         get() = galleryItems[currentPos]
+
+    val currentItemSelected: Boolean
+        get() = currentItem.id() in selectedResources
 }
 
 sealed interface ProgressState {
@@ -71,15 +75,10 @@ sealed class GallerySideEffect {
         val meta: Metadata
     ) : GallerySideEffect()
 
-    data class DisplaySelectedFile(
-        val selected: Boolean,
-        val showAnim: Boolean,
-        val selectedCount: Int,
-        val itemCount: Int,
-    ) : GallerySideEffect()
+    // workaround to not show checkbox select animation when we change page
+    data object AbortSelectAnimation: GallerySideEffect()
 
     data object NotifyResourceChange : GallerySideEffect()
     data class ShowProgressWithText(val state: ProgressState) : GallerySideEffect()
     data object NotifyCurrentItemChange : GallerySideEffect()
-    data class ToggleSelect(val isEnabled: Boolean) : GallerySideEffect()
 }

@@ -58,6 +58,7 @@ import kotlin.io.path.notExists
 class GalleryUpliftViewModel(
     startPos: Int,
     selectingEnabled: Boolean,
+    selectedResources: List<ResourceId>,
     private val rootAndFav: RootAndFav,
     private val resourcesIds: List<ResourceId>,
     val preferences: Preferences,
@@ -82,12 +83,10 @@ class GalleryUpliftViewModel(
             GalleryState(
                 rootAndFav = rootAndFav,
                 currentPos = startPos,
-                selectingEnabled = selectingEnabled
+                selectingEnabled = selectingEnabled,
+                selectedResources = selectedResources
             )
         )
-
-    private val _selectedResources: MutableList<ResourceId> = mutableListOf()
-    val selectedResources: List<ResourceId> = _selectedResources
 
     val scoreWidgetController = ScoreWidgetController(
         scope = viewModelScope,
@@ -196,19 +195,20 @@ class GalleryUpliftViewModel(
         postSideEffect(GallerySideEffect.ShareResource(path))
     }
 
-    fun onSelectingChanged() = intent {
+    fun onSelectingChanged(enabled: Boolean) = intent {
         reduce {
-            state.copy(selectingEnabled = !state.selectingEnabled)
+            state.copy(selectingEnabled = enabled)
         }
-        postSideEffect(
-            GallerySideEffect.ToggleSelect(
-                container.stateFlow.value.selectingEnabled
-            )
-        )
 
-        _selectedResources.clear()
-        if (container.stateFlow.value.selectingEnabled) {
-            _selectedResources.add(state.currentItem.id())
+        reduce {
+            if (enabled) {
+                state.copy(
+                    selectedResources = state.selectedResources
+                        + state.currentItem.id()
+                )
+            } else {
+                state.copy(selectedResources = emptyList())
+            }
         }
     }
 
@@ -248,21 +248,17 @@ class GalleryUpliftViewModel(
 
     fun onSelectBtnClick() = intent {
         val id = state.currentItem.id()
-        val wasSelected = id in _selectedResources
+        val newSelectedList = state.selectedResources.toMutableList()
+        val wasSelected = id in state.selectedResources
         if (wasSelected) {
-            _selectedResources.remove(id)
+            newSelectedList.remove(id)
         } else {
-            _selectedResources.add(id)
+            newSelectedList.add(id)
         }
 
-        postSideEffect(
-            GallerySideEffect.DisplaySelectedFile(
-                selected = !wasSelected,
-                showAnim = true,
-                selectedCount = _selectedResources.size,
-                itemCount = state.galleryItems.size
-            )
-        )
+        reduce {
+            state.copy(selectedResources = newSelectedList)
+        }
     }
 
     fun onResume() = intent {
@@ -283,15 +279,16 @@ class GalleryUpliftViewModel(
     fun onPageChanged(newPos: Int) = intent {
         if (state.galleryItems.isEmpty())
             return@intent
-        intent {
-            reduce {
-                state.copy(currentPos = newPos)
-            }
-            checkResourceChanges(newPos)
-            val id = state.currentItem.id()
-            val tags = tagsStorage.getTags(id)
-            displayPreview(id, state.currentItem.metadata, tags)
+
+        reduce {
+            state.copy(currentPos = newPos)
         }
+        postSideEffect(GallerySideEffect.AbortSelectAnimation)
+
+        checkResourceChanges(newPos)
+        val id = state.currentItem.id()
+        val tags = tagsStorage.getTags(id)
+        displayPreview(id, state.currentItem.metadata, tags)
     }
 
     fun onTagSelected(tag: Tag) {
@@ -363,14 +360,6 @@ class GalleryUpliftViewModel(
             )
         )
         scoreWidgetController.displayScore()
-        postSideEffect(
-            GallerySideEffect.DisplaySelectedFile(
-                selected = id in _selectedResources,
-                showAnim = false,
-                selectedCount = _selectedResources.size,
-                itemCount = state.galleryItems.size,
-            )
-        )
     }
 
 
