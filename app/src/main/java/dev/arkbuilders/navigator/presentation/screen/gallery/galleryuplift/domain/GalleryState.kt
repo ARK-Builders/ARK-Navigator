@@ -16,6 +16,7 @@ data class GalleryState(
     val selectingEnabled: Boolean = false,
     val selectedResources: List<ResourceId> = emptyList(),
     val controlsVisible: Boolean = true,
+    val progressState: ProgressState = ProgressState.HideProgress
 ) {
     val currentItem: GalleryItem
         get() = galleryItems[currentPos]
@@ -79,6 +80,5 @@ sealed class GallerySideEffect {
     data object AbortSelectAnimation: GallerySideEffect()
 
     data object NotifyResourceChange : GallerySideEffect()
-    data class ShowProgressWithText(val state: ProgressState) : GallerySideEffect()
     data object NotifyCurrentItemChange : GallerySideEffect()
 }

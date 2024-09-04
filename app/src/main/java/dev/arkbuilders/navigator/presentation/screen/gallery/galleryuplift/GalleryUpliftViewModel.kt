@@ -407,15 +407,9 @@ class GalleryUpliftViewModel(
         }
 
     private fun invokeHandleGalleryExternalChangesUseCase() = intent {
-        postSideEffect(
-            GallerySideEffect.ShowProgressWithText(
-                ProgressState.Indexing
-//                        ProgressWithText(
-//                            isVisible = true,
-//                            text = "Changes detected, indexing"
-//                        )
-            )
-        )
+        reduce {
+            state.copy(progressState = ProgressState.Indexing)
+        }
         index.updateAll()
         postSideEffect(GallerySideEffect.NotifyResourceChange)
 
@@ -434,15 +428,9 @@ class GalleryUpliftViewModel(
         reduce {
             state.copy(galleryItems = newItems)
         }
-        postSideEffect(
-            GallerySideEffect.ShowProgressWithText(
-                ProgressState.HideProgress
-//                        ProgressWithText(
-//                            isVisible = true,
-//                            text = "Changes detected, indexing"
-//                        )
-            )
-        )
+        reduce {
+            state.copy(progressState = ProgressState.HideProgress)
+        }
     }
 
     private suspend fun readText(source: Path): Result<String> =
@@ -461,11 +449,9 @@ class GalleryUpliftViewModel(
             LogTags.GALLERY_SCREEN,
             "first view attached in GalleryPresenter"
         )
-        postSideEffect(
-            GallerySideEffect.ShowProgressWithText(
-                ProgressState.ProvidingRootIndex
-            )
-        )
+        reduce {
+            state.copy(progressState = ProgressState.ProvidingRootIndex)
+        }
         index = indexRepo.provide(rootAndFav)
         messageFlow.onEach { message ->
             when (message) {
@@ -479,23 +465,17 @@ class GalleryUpliftViewModel(
                     }
             }
         }.launchIn(viewModelScope)
-        postSideEffect(
-            GallerySideEffect.ShowProgressWithText(
-                ProgressState.ProvidingMetaDataStorage
-            )
-        )
+        reduce {
+            state.copy(progressState = ProgressState.ProvidingMetaDataStorage)
+        }
         metadataStorage = metadataStorageRepo.provide(index)
-        postSideEffect(
-            GallerySideEffect.ShowProgressWithText(
-                ProgressState.ProvidingPreviewStorage
-            )
-        )
+        reduce {
+            state.copy(progressState = ProgressState.ProvidingPreviewStorage)
+        }
         previewStorage = previewStorageRepo.provide(index)
-        postSideEffect(
-            GallerySideEffect.ShowProgressWithText(
-                ProgressState.ProvidingDataStorage
-            )
-        )
+        reduce {
+            state.copy(progressState = ProgressState.ProvidingDataStorage)
+        }
         try {
             tagsStorage = tagsStorageRepo.provide(index)
             scoreStorage = scoreStorageRepo.provide(index)
@@ -517,12 +497,10 @@ class GalleryUpliftViewModel(
             scoreWidgetController.setVisible(result)
         }
         reduce {
-            state.copy(galleryItems = galleryItems)
-        }
-        postSideEffect(
-            GallerySideEffect.ShowProgressWithText(
-                ProgressState.HideProgress
+            state.copy(
+                galleryItems = galleryItems,
+                progressState = ProgressState.HideProgress
             )
-        )
+        }
     }
 }

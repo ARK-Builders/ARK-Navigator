@@ -245,10 +245,6 @@ class GalleryUpliftFragment : Fragment() {
                     metadata = metadata
                 )
 
-                is GallerySideEffect.ShowProgressWithText -> handleProgressState(
-                    state
-                )
-
                 is GallerySideEffect.ToastIndexFailedPath -> toastIndexFailedPath(
                     path
                 )
@@ -269,6 +265,7 @@ class GalleryUpliftFragment : Fragment() {
             state.selectedResources.size,
             state.galleryItems.size
         )
+        handleProgressState(state.progressState)
     }
 
     private fun onBackClick() {
