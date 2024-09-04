@@ -2,7 +2,6 @@ package dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.recyclerview.widget.DiffUtil
 import dev.arkbuilders.arkfilepicker.folders.RootAndFav
 import dev.arkbuilders.arklib.ResourceId
 import dev.arkbuilders.arklib.data.Message
@@ -40,7 +39,6 @@ import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domai
 import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.state.GallerySideEffect
 import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.state.GalleryState
 import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.state.ProgressState
-import dev.arkbuilders.navigator.presentation.screen.resources.adapter.ResourceDiffUtilCallback
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.cancel
@@ -95,7 +93,6 @@ class GalleryUpliftViewModel(
         )
 
     var galleryItems: MutableList<GalleryItem> = mutableListOf()
-    var diffResult: DiffUtil.DiffResult? = null
 
     private val _selectedResources: MutableList<ResourceId> = mutableListOf()
     val selectedResources: List<ResourceId> = _selectedResources
@@ -451,60 +448,43 @@ class GalleryUpliftViewModel(
             emptyList()
         }
 
-    private fun invokeHandleGalleryExternalChangesUseCase() {
+    private fun invokeHandleGalleryExternalChangesUseCase() = intent {
+        postSideEffect(
+            GallerySideEffect.ShowProgressWithText(
+                ProgressState.Indexing
+//                        ProgressWithText(
+//                            isVisible = true,
+//                            text = "Changes detected, indexing"
+//                        )
+            )
+        )
+        index.updateAll()
+        postSideEffect(GallerySideEffect.NotifyResourceChange)
+
         viewModelScope.launch {
-            intent {
-                postSideEffect(
-                    GallerySideEffect.ShowProgressWithText(
-                        ProgressState.Indexing
-//                        ProgressWithText(
-//                            isVisible = true,
-//                            text = "Changes detected, indexing"
-//                        )
-                    )
-                )
-                index.updateAll()
-                postSideEffect(GallerySideEffect.NotifyResourceChange)
-
-                viewModelScope.launch {
-                    metadataStorage.busy.collect { busy ->
-                        if (!busy) cancel()
-                    }
-                }.join()
-
-                val newItems = provideGalleryItems()
-                if (newItems.isEmpty()) {
-                    postSideEffect(GallerySideEffect.NavigateBack)
-                    return@intent
-                }
-                if (newItems.isEmpty()) {
-                    intent {
-                        postSideEffect(GallerySideEffect.NavigateBack)
-                    }
-                    return@intent
-                }
-
-                diffResult = DiffUtil.calculateDiff(
-                    ResourceDiffUtilCallback(
-                        galleryItems.map { it.resource.id },
-                        newItems.map { it.resource.id }
-                    )
-                )
-
-                galleryItems = newItems.toMutableList()
-                postSideEffect(GallerySideEffect.UpdatePagerAdapterWithDiff)
-                postSideEffect(GallerySideEffect.NotifyCurrentItemChange)
-                postSideEffect(
-                    GallerySideEffect.ShowProgressWithText(
-                        ProgressState.HideProgress
-//                        ProgressWithText(
-//                            isVisible = true,
-//                            text = "Changes detected, indexing"
-//                        )
-                    )
-                )
+            metadataStorage.busy.collect { busy ->
+                if (!busy) cancel()
             }
+        }.join()
+
+        val newItems = provideGalleryItems()
+        if (newItems.isEmpty()) {
+            postSideEffect(GallerySideEffect.NavigateBack)
+            return@intent
         }
+
+        reduce {
+            state.copy(galleryItems = newItems)
+        }
+        postSideEffect(
+            GallerySideEffect.ShowProgressWithText(
+                ProgressState.HideProgress
+//                        ProgressWithText(
+//                            isVisible = true,
+//                            text = "Changes detected, indexing"
+//                        )
+            )
+        )
     }
 
     private suspend fun readText(source: Path): Result<String> =

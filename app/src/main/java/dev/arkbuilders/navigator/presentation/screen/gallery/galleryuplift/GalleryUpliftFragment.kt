@@ -257,10 +257,6 @@ class GalleryUpliftFragment : Fragment() {
                     path
                 )
 
-                GallerySideEffect.UpdatePagerAdapter -> updatePagerAdapter()
-                GallerySideEffect.UpdatePagerAdapterWithDiff ->
-                    updatePagerAdapterWithDiff()
-
                 is GallerySideEffect.ViewInExternalApp -> viewInExternalApp(path)
                 is GallerySideEffect.ToggleSelect -> toggleSelecting(isEnabled)
             }
@@ -277,14 +273,6 @@ class GalleryUpliftFragment : Fragment() {
         notifySelectedChanged(viewModel.selectedResources)
         exitFullscreen()
         viewModel.router.exit()
-    }
-
-    private fun updatePagerAdapter() {
-        pagerAdapter.notifyDataSetChanged()
-    }
-
-    private fun updatePagerAdapterWithDiff() {
-        viewModel.diffResult?.dispatchUpdatesTo(pagerAdapter)
     }
 
     private fun setupPreview(

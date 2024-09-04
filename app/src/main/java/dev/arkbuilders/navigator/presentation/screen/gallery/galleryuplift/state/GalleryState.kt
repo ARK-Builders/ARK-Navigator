@@ -41,7 +41,6 @@ sealed class GallerySideEffect {
         val storageException: StorageExceptionGallery
     ) : GallerySideEffect()
 
-    data object UpdatePagerAdapter : GallerySideEffect()
     data class ShareLink(val url: String) : GallerySideEffect()
     data class ShareResource(val path: Path) : GallerySideEffect()
     data class EditResource(val path: Path) : GallerySideEffect()
@@ -57,6 +56,5 @@ sealed class GallerySideEffect {
     data object NotifyResourceChange : GallerySideEffect()
     data class ShowProgressWithText(val state: ProgressState) : GallerySideEffect()
     data object NotifyCurrentItemChange : GallerySideEffect()
-    data object UpdatePagerAdapterWithDiff : GallerySideEffect()
     data class ToggleSelect(val isEnabled: Boolean) : GallerySideEffect()
 }
