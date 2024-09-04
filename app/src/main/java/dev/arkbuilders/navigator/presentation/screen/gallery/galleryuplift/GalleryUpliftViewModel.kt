@@ -18,7 +18,6 @@ import dev.arkbuilders.arklib.user.score.ScoreStorage
 import dev.arkbuilders.arklib.user.score.ScoreStorageRepo
 import dev.arkbuilders.arklib.user.tags.Tag
 import dev.arkbuilders.arklib.user.tags.TagStorage
-import dev.arkbuilders.arklib.user.tags.Tags
 import dev.arkbuilders.arklib.user.tags.TagsStorageRepo
 import dev.arkbuilders.components.scorewidget.ScoreWidgetController
 import dev.arkbuilders.navigator.analytics.gallery.GalleryAnalytics
@@ -280,6 +279,7 @@ class GalleryUpliftViewModel(
         reduce {
             state.copy(currentPos = newPos)
         }
+        postSideEffect(GallerySideEffect.AbortSelectAnimation)
 
         checkResourceChanges(newPos)
         val id = state.currentItem.id()
@@ -287,8 +287,7 @@ class GalleryUpliftViewModel(
         reduce {
             state.copy(tags = tags)
         }
-        postSideEffect(GallerySideEffect.AbortSelectAnimation)
-        displayPreview(id, state.currentItem.metadata, tags)
+        scoreWidgetController.displayScore()
     }
 
     fun onTagSelected(tag: Tag) {
@@ -336,21 +335,6 @@ class GalleryUpliftViewModel(
                 storage = tagsStorage,
             )
         )
-    }
-
-
-    private fun displayPreview(
-        id: ResourceId,
-        meta: Metadata,
-        tags: Tags
-    ) = intent {
-        postSideEffect(
-            GallerySideEffect.SetUpPreview(
-                position = state.currentPos,
-                meta = meta,
-            )
-        )
-        scoreWidgetController.displayScore()
     }
 
 

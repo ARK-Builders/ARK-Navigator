@@ -58,7 +58,6 @@ import dev.arkbuilders.navigator.presentation.utils.makeVisible
 import dev.arkbuilders.navigator.presentation.view.DefaultPopup
 import dev.arkbuilders.navigator.presentation.view.DepthPageTransformer
 import dev.arkbuilders.navigator.presentation.view.StackedToasts
-import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.viewmodel.observe
 import timber.log.Timber
 import java.nio.file.Path
@@ -222,10 +221,6 @@ class GalleryUpliftFragment : Fragment() {
 
                 GallerySideEffect.NotifyTagsChanged -> notifyTagsChanged()
                 is GallerySideEffect.OpenLink -> openLink(url)
-                is GallerySideEffect.SetUpPreview -> setupPreview(
-                    pos = position,
-                    meta = meta
-                )
 
                 is GallerySideEffect.ShareLink -> shareLink(url)
                 is GallerySideEffect.ShareResource -> shareResource(path)
@@ -269,6 +264,7 @@ class GalleryUpliftFragment : Fragment() {
             displayPreviewTags(state.currentItem.id(), state.tags)
             cacheTags = state.tags
         }
+        setupPreview(state.currentPos, state.currentItem.metadata)
     }
 
     private fun onBackClick() {
@@ -282,16 +278,14 @@ class GalleryUpliftFragment : Fragment() {
         pos: Int,
         meta: Metadata
     ) {
-        lifecycleScope.launch {
-            with(binding) {
-                setupOpenEditFABs(meta)
-                ExtraLoader.load(
-                    meta,
-                    listOf(primaryExtra, secondaryExtra),
-                    verbose = true
-                )
-                requireArguments().putInt(START_AT_KEY, pos)
-            }
+        with(binding) {
+            setupOpenEditFABs(meta)
+            ExtraLoader.load(
+                meta,
+                listOf(primaryExtra, secondaryExtra),
+                verbose = true
+            )
+            requireArguments().putInt(START_AT_KEY, pos)
         }
     }
 

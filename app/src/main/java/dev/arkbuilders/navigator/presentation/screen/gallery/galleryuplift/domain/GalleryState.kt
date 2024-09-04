@@ -69,11 +69,6 @@ sealed class GallerySideEffect {
         val statsStorage: StatsStorage
     ) : GallerySideEffect()
 
-    data class SetUpPreview(
-        val position: Int,
-        val meta: Metadata
-    ) : GallerySideEffect()
-
     // workaround to not show checkbox select animation when we change page
     data object AbortSelectAnimation: GallerySideEffect()
 
