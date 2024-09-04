@@ -92,8 +92,6 @@ class GalleryUpliftViewModel(
             )
         )
 
-    var galleryItems: MutableList<GalleryItem> = mutableListOf()
-
     private val _selectedResources: MutableList<ResourceId> = mutableListOf()
     val selectedResources: List<ResourceId> = _selectedResources
 
@@ -262,18 +260,16 @@ class GalleryUpliftViewModel(
             _selectedResources.add(id)
         }
 
-        intent {
-            postSideEffect(
-                GallerySideEffect.DisplaySelectedFile(
-                    DisplaySelected(
-                        selected = !wasSelected,
-                        showAnim = true,
-                        selectedCount = _selectedResources.size,
-                        itemCount = galleryItems.size
-                    )
+        postSideEffect(
+            GallerySideEffect.DisplaySelectedFile(
+                DisplaySelected(
+                    selected = !wasSelected,
+                    showAnim = true,
+                    selectedCount = _selectedResources.size,
+                    itemCount = state.galleryItems.size
                 )
             )
-        }
+        )
     }
 
     fun onResume() = intent {
@@ -294,7 +290,7 @@ class GalleryUpliftViewModel(
 
 
     fun onPageChanged(newPos: Int) = intent {
-        if (galleryItems.isEmpty())
+        if (state.galleryItems.isEmpty())
             return@intent
         intent {
             reduce {
@@ -398,7 +394,7 @@ class GalleryUpliftViewModel(
                     selected = id in _selectedResources,
                     showAnim = false,
                     selectedCount = _selectedResources.size,
-                    itemCount = galleryItems.size,
+                    itemCount = state.galleryItems.size,
                 )
             )
         )
@@ -553,7 +549,7 @@ class GalleryUpliftViewModel(
         }
         statsStorage = statsStorageRepo.provide(index)
         scoreWidgetController.init(scoreStorage)
-        galleryItems = provideGalleryItems().toMutableList()
+        val galleryItems = provideGalleryItems()
         viewModelScope.launch {
             val result = preferences.get(
                 PreferenceKey.SortByScores
