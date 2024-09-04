@@ -29,16 +29,10 @@ import dev.arkbuilders.navigator.data.stats.StatsStorageRepo
 import dev.arkbuilders.navigator.data.utils.LogTags
 import dev.arkbuilders.navigator.presentation.navigation.AppRouter
 import dev.arkbuilders.navigator.presentation.navigation.Screens
-import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.DisplaySelected
 import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.GalleryItem
-import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.ResourceIdTagsPreview
-import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.SetupPreview
-import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.ShowEditTagsData
-import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.ShowInfoData
-import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.StorageExceptionGallery
-import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.state.GallerySideEffect
-import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.state.GalleryState
-import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.state.ProgressState
+import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.GallerySideEffect
+import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.GalleryState
+import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.ProgressState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.cancel
@@ -175,13 +169,14 @@ class GalleryUpliftViewModel(
                 " ${container.stateFlow.value.currentPos}"
         )
         val path = index.getPath(state.currentItem.id())!!
-        val data = ShowInfoData(
-            path = path,
-            resource = state.currentItem.resource,
-            metadata = state.currentItem.metadata
-        )
         intent {
-            postSideEffect(GallerySideEffect.ShowInfoAlert(data))
+            postSideEffect(
+                GallerySideEffect.ShowInfoAlert(
+                    path = path,
+                    resource = state.currentItem.resource,
+                    metadata = state.currentItem.metadata
+                )
+            )
         }
     }
 
@@ -262,12 +257,10 @@ class GalleryUpliftViewModel(
 
         postSideEffect(
             GallerySideEffect.DisplaySelectedFile(
-                DisplaySelected(
-                    selected = !wasSelected,
-                    showAnim = true,
-                    selectedCount = _selectedResources.size,
-                    itemCount = state.galleryItems.size
-                )
+                selected = !wasSelected,
+                showAnim = true,
+                selectedCount = _selectedResources.size,
+                itemCount = state.galleryItems.size
             )
         )
     }
@@ -280,10 +273,8 @@ class GalleryUpliftViewModel(
         val tags = tagsStorage.getTags(state.currentItem.id())
         postSideEffect(
             GallerySideEffect.DisplayPreviewTags(
-                ResourceIdTagsPreview(
-                    resourceId = state.currentItem.id(),
-                    tags = tags,
-                )
+                resourceId = state.currentItem.id(),
+                tags = tags,
             )
         )
     }
@@ -320,10 +311,8 @@ class GalleryUpliftViewModel(
             val newTags = tags - tag
             postSideEffect(
                 GallerySideEffect.DisplayPreviewTags(
-                    ResourceIdTagsPreview(
-                        resourceId = id,
-                        tags = newTags,
-                    )
+                    resourceId = id,
+                    tags = newTags,
                 )
             )
             statsStorage.handleEvent(
@@ -345,14 +334,12 @@ class GalleryUpliftViewModel(
         analytics.trackTagsEdit()
         postSideEffect(
             GallerySideEffect.ShowEditTagsDialog(
-                ShowEditTagsData(
-                    resource = state.currentItem.id(),
-                    resources = listOf(state.currentItem.id()),
-                    statsStorage = statsStorage,
-                    rootAndFav = rootAndFav,
-                    index = index,
-                    storage = tagsStorage,
-                )
+                resource = state.currentItem.id(),
+                resources = listOf(state.currentItem.id()),
+                statsStorage = statsStorage,
+                rootAndFav = rootAndFav,
+                index = index,
+                storage = tagsStorage,
             )
         )
     }
@@ -365,37 +352,23 @@ class GalleryUpliftViewModel(
     ) = intent {
         postSideEffect(
             GallerySideEffect.SetUpPreview(
-                SetupPreview(
-                    position = state.currentPos,
-                    meta = meta,
-                )
+                position = state.currentPos,
+                meta = meta,
             )
         )
         postSideEffect(
             GallerySideEffect.DisplayPreviewTags(
-                ResourceIdTagsPreview(
-                    resourceId = id,
-                    tags = tags,
-                )
+                resourceId = id,
+                tags = tags,
             )
         )
         scoreWidgetController.displayScore()
         postSideEffect(
-            GallerySideEffect.DisplayPreviewTags(
-                ResourceIdTagsPreview(
-                    resourceId = id,
-                    tags = tags,
-                )
-            )
-        )
-        postSideEffect(
             GallerySideEffect.DisplaySelectedFile(
-                DisplaySelected(
-                    selected = id in _selectedResources,
-                    showAnim = false,
-                    selectedCount = _selectedResources.size,
-                    itemCount = state.galleryItems.size,
-                )
+                selected = id in _selectedResources,
+                showAnim = false,
+                selectedCount = _selectedResources.size,
+                itemCount = state.galleryItems.size,
             )
         )
     }
@@ -540,10 +513,8 @@ class GalleryUpliftViewModel(
         } catch (e: StorageException) {
             postSideEffect(
                 GallerySideEffect.DisplayStorageException(
-                    StorageExceptionGallery(
-                        label = e.label,
-                        messenger = e.msg
-                    )
+                    label = e.label,
+                    messenger = e.msg
                 )
             )
         }

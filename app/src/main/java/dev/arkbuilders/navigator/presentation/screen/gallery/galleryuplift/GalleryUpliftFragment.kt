@@ -47,9 +47,9 @@ import dev.arkbuilders.navigator.presentation.dialog.StorageExceptionDialogFragm
 import dev.arkbuilders.navigator.presentation.dialog.edittags.EditTagsDialogFragment
 import dev.arkbuilders.navigator.presentation.navigation.Screens
 import dev.arkbuilders.navigator.presentation.screen.gallery.GalleryFragment
-import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.state.GallerySideEffect
-import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.state.GalleryState
-import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.state.ProgressState
+import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.GallerySideEffect
+import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.GalleryState
+import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.ProgressState
 import dev.arkbuilders.navigator.presentation.screen.main.MainActivity
 import dev.arkbuilders.navigator.presentation.utils.FullscreenHelper
 import dev.arkbuilders.navigator.presentation.utils.extra.ExtraLoader
@@ -199,21 +199,21 @@ class GalleryUpliftFragment : Fragment() {
 
                 is GallerySideEffect.DeleteResource -> deleteResource(pos)
                 is GallerySideEffect.DisplayPreviewTags -> displayPreviewTags(
-                    resource = data.resourceId,
-                    tags = data.tags
+                    resource = resourceId,
+                    tags = tags
                 )
 
                 is GallerySideEffect.DisplaySelectedFile -> displaySelected(
-                    selected = data.selected,
-                    showAnim = data.showAnim,
-                    selectedCount = data.selectedCount,
-                    itemCount = data.itemCount
+                    selected = selected,
+                    showAnim = showAnim,
+                    selectedCount = selectedCount,
+                    itemCount = itemCount
                 )
 
                 is GallerySideEffect.DisplayStorageException ->
                     displayStorageException(
-                        label = storageException.label,
-                        msg = storageException.messenger
+                        label = label,
+                        msg = messenger
                     )
 
                 is GallerySideEffect.EditResource -> editResource(path)
@@ -228,25 +228,25 @@ class GalleryUpliftFragment : Fragment() {
                 GallerySideEffect.NotifyTagsChanged -> notifyTagsChanged()
                 is GallerySideEffect.OpenLink -> openLink(url)
                 is GallerySideEffect.SetUpPreview -> setupPreview(
-                    pos = data.position,
-                    meta = data.meta
+                    pos = position,
+                    meta = meta
                 )
 
                 is GallerySideEffect.ShareLink -> shareLink(url)
                 is GallerySideEffect.ShareResource -> shareResource(path)
                 is GallerySideEffect.ShowEditTagsDialog -> showEditTagsDialog(
-                    resource = data.resource,
-                    resources = data.resources,
-                    statsStorage = data.statsStorage,
-                    rootAndFav = data.rootAndFav,
-                    index = data.index,
-                    storage = data.storage,
+                    resource = resource,
+                    resources = resources,
+                    statsStorage = statsStorage,
+                    rootAndFav = rootAndFav,
+                    index = index,
+                    storage = storage,
                 )
 
                 is GallerySideEffect.ShowInfoAlert -> showInfoAlert(
-                    path = infoData.path,
-                    resource = infoData.resource,
-                    metadata = infoData.metadata
+                    path = path,
+                    resource = resource,
+                    metadata = metadata
                 )
 
                 is GallerySideEffect.ShowProgressWithText -> handleProgressState(
