@@ -6,6 +6,7 @@ import dev.arkbuilders.arklib.data.index.Resource
 import dev.arkbuilders.arklib.data.index.ResourceIndex
 import dev.arkbuilders.arklib.data.meta.Metadata
 import dev.arkbuilders.arklib.user.tags.TagStorage
+import dev.arkbuilders.arklib.user.tags.Tags
 import dev.arkbuilders.navigator.data.stats.StatsStorage
 import java.nio.file.Path
 
@@ -16,7 +17,8 @@ data class GalleryState(
     val selectingEnabled: Boolean = false,
     val selectedResources: List<ResourceId> = emptyList(),
     val controlsVisible: Boolean = true,
-    val progressState: ProgressState = ProgressState.HideProgress
+    val progressState: ProgressState = ProgressState.HideProgress,
+    val tags: Tags = emptySet()
 ) {
     val currentItem: GalleryItem
         get() = galleryItems[currentPos]
@@ -56,10 +58,6 @@ sealed class GallerySideEffect {
     data class EditResource(val path: Path) : GallerySideEffect()
     data class OpenLink(val url: String) : GallerySideEffect()
     data class ViewInExternalApp(val path: Path) : GallerySideEffect()
-    data class DisplayPreviewTags(
-        val resourceId: ResourceId,
-        val tags: Set<String>
-    ) : GallerySideEffect()
 
     data object NotifyTagsChanged : GallerySideEffect()
     data class ShowEditTagsDialog(

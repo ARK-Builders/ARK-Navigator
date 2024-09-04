@@ -267,12 +267,9 @@ class GalleryUpliftViewModel(
 
     fun onTagsChanged() = intent {
         val tags = tagsStorage.getTags(state.currentItem.id())
-        postSideEffect(
-            GallerySideEffect.DisplayPreviewTags(
-                resourceId = state.currentItem.id(),
-                tags = tags,
-            )
-        )
+        reduce {
+            state.copy(tags = tags)
+        }
     }
 
 
@@ -283,11 +280,14 @@ class GalleryUpliftViewModel(
         reduce {
             state.copy(currentPos = newPos)
         }
-        postSideEffect(GallerySideEffect.AbortSelectAnimation)
 
         checkResourceChanges(newPos)
         val id = state.currentItem.id()
         val tags = tagsStorage.getTags(id)
+        reduce {
+            state.copy(tags = tags)
+        }
+        postSideEffect(GallerySideEffect.AbortSelectAnimation)
         displayPreview(id, state.currentItem.metadata, tags)
     }
 
@@ -306,12 +306,9 @@ class GalleryUpliftViewModel(
             val id = state.currentItem.id()
             val tags = tagsStorage.getTags(id)
             val newTags = tags - tag
-            postSideEffect(
-                GallerySideEffect.DisplayPreviewTags(
-                    resourceId = id,
-                    tags = newTags,
-                )
-            )
+            reduce {
+                state.copy(tags = newTags)
+            }
             statsStorage.handleEvent(
                 StatsEvent.TagsChanged(
                     id, tags, newTags
@@ -351,12 +348,6 @@ class GalleryUpliftViewModel(
             GallerySideEffect.SetUpPreview(
                 position = state.currentPos,
                 meta = meta,
-            )
-        )
-        postSideEffect(
-            GallerySideEffect.DisplayPreviewTags(
-                resourceId = id,
-                tags = tags,
             )
         )
         scoreWidgetController.displayScore()

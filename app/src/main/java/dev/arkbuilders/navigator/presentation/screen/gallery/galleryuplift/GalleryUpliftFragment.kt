@@ -92,6 +92,9 @@ class GalleryUpliftFragment : Fragment() {
     private lateinit var stackedToasts: StackedToasts
     private lateinit var pagerAdapter: PreviewsPagerUplift
 
+    // avoid pointless update on render if there are no changes
+    private var cacheTags: Tags? = null
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -201,10 +204,6 @@ class GalleryUpliftFragment : Fragment() {
                 }
 
                 is GallerySideEffect.DeleteResource -> deleteResource(pos)
-                is GallerySideEffect.DisplayPreviewTags -> displayPreviewTags(
-                    resource = resourceId,
-                    tags = tags
-                )
 
                 is GallerySideEffect.DisplayStorageException ->
                     displayStorageException(
@@ -266,6 +265,10 @@ class GalleryUpliftFragment : Fragment() {
             state.galleryItems.size
         )
         handleProgressState(state.progressState)
+        if (state.tags != cacheTags) {
+            displayPreviewTags(state.currentItem.id(), state.tags)
+            cacheTags = state.tags
+        }
     }
 
     private fun onBackClick() {
@@ -397,25 +400,23 @@ class GalleryUpliftFragment : Fragment() {
     }
 
     private fun displayPreviewTags(resource: ResourceId, tags: Tags) {
-        lifecycleScope.launch {
-            Timber.d(
-                LogTags.GALLERY_SCREEN,
-                "displaying tags of resource $resource for preview"
-            )
-            binding.tagsCg.removeAllViews()
+        Timber.d(
+            LogTags.GALLERY_SCREEN,
+            "displaying tags of resource $resource for preview"
+        )
+        binding.tagsCg.removeAllViews()
 
-            tags.forEach { tag ->
-                val chip = Chip(context)
-                chip.text = tag
+        tags.forEach { tag ->
+            val chip = Chip(context)
+            chip.text = tag
 
-                chip.setOnClickListener {
-                    showTagMenuPopup(tag, chip)
-                }
-                binding.tagsCg.addView(chip)
+            chip.setOnClickListener {
+                showTagMenuPopup(tag, chip)
             }
-
-            binding.tagsCg.addView(createEditChip())
+            binding.tagsCg.addView(chip)
         }
+
+        binding.tagsCg.addView(createEditChip())
     }
 
     private fun showEditTagsDialog(
