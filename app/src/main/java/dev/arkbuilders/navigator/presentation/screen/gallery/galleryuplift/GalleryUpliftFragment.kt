@@ -92,7 +92,7 @@ class GalleryUpliftFragment : Fragment() {
     private lateinit var pagerAdapter: PreviewsPagerUplift
 
     // avoid pointless update on render if there are no changes
-    private var cacheTags: Tags? = null
+    private var cacheState: GalleryState? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -252,7 +252,7 @@ class GalleryUpliftFragment : Fragment() {
 
     private fun render(state: GalleryState) {
         pagerAdapter.dispatchUpdates(state.galleryItems)
-        setControlsVisibility(state.controlsVisible)
+        binding.previewControls.isVisible = state.controlsVisible
         toggleSelecting(state.selectingEnabled)
         displaySelected(
             state.currentItemSelected,
@@ -260,11 +260,15 @@ class GalleryUpliftFragment : Fragment() {
             state.galleryItems.size
         )
         handleProgressState(state.progressState)
-        if (state.tags != cacheTags) {
+        if (state.tags != cacheState?.tags) {
             displayPreviewTags(state.currentItem.id(), state.tags)
-            cacheTags = state.tags
         }
-        setupPreview(state.currentPos, state.currentItem.metadata)
+        if (state.currentPos != cacheState?.currentPos ||
+            state.currentItem.metadata != cacheState?.currentItem?.metadata
+        ) {
+            setupPreview(state.currentPos, state.currentItem.metadata)
+        }
+        cacheState = state
     }
 
     private fun onBackClick() {
@@ -287,10 +291,6 @@ class GalleryUpliftFragment : Fragment() {
             )
             requireArguments().putInt(START_AT_KEY, pos)
         }
-    }
-
-    private fun setControlsVisibility(visible: Boolean) {
-        binding.previewControls.isVisible = visible
     }
 
     private fun editResource(resourcePath: Path) {
