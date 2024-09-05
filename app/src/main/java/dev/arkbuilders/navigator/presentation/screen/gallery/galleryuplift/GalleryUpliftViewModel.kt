@@ -59,7 +59,7 @@ class GalleryUpliftViewModel(
     selectingEnabled: Boolean,
     selectedResources: List<ResourceId>,
     rootAndFav: RootAndFav,
-    private val resourcesIds: List<ResourceId>,
+    resourcesIds: List<ResourceId>,
     val preferences: Preferences,
     val router: AppRouter,
     val indexRepo: ResourceIndexRepo,
@@ -81,6 +81,7 @@ class GalleryUpliftViewModel(
         container(
             GalleryState(
                 rootAndFav = rootAndFav,
+                resourcesIds = resourcesIds,
                 currentPos = startPos,
                 selectingEnabled = selectingEnabled,
                 selectedResources = selectedResources
@@ -290,11 +291,11 @@ class GalleryUpliftViewModel(
         scoreWidgetController.displayScore()
     }
 
-    fun onTagSelected(tag: Tag) = intent {
+    fun onTagSelected(tag: Tag) {
         analytics.trackTagSelect()
         router.navigateTo(
             Screens.ResourcesScreenWithSelectedTag(
-                state.rootAndFav, tag
+                container.stateFlow.value.rootAndFav, tag
             )
         )
     }
@@ -362,7 +363,9 @@ class GalleryUpliftViewModel(
             }
         }
 
-    private fun provideGalleryItems(): List<GalleryItem> =
+    private fun provideGalleryItems(
+        resourcesIds: List<ResourceId>
+    ): List<GalleryItem> =
         try {
             val allResources = index.allResources()
             resourcesIds
@@ -394,7 +397,7 @@ class GalleryUpliftViewModel(
             }
         }.join()
 
-        val newItems = provideGalleryItems()
+        val newItems = provideGalleryItems(state.resourcesIds)
         if (newItems.isEmpty()) {
             postSideEffect(GallerySideEffect.NavigateBack)
             return@intent
@@ -464,7 +467,7 @@ class GalleryUpliftViewModel(
         }
         statsStorage = statsStorageRepo.provide(index)
         scoreWidgetController.init(scoreStorage)
-        val galleryItems = provideGalleryItems()
+        val galleryItems = provideGalleryItems(state.resourcesIds)
         viewModelScope.launch {
             val result = preferences.get(
                 PreferenceKey.SortByScores

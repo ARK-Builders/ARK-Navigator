@@ -13,6 +13,7 @@ import java.nio.file.Path
 data class GalleryState(
     val rootAndFav: RootAndFav,
     val currentPos: Int = 0,
+    val resourcesIds: List<ResourceId> = emptyList(),
     val galleryItems: List<GalleryItem> = emptyList(),
     val selectingEnabled: Boolean = false,
     val selectedResources: List<ResourceId> = emptyList(),
