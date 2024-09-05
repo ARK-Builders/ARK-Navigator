@@ -58,7 +58,7 @@ class GalleryUpliftViewModel(
     startPos: Int,
     selectingEnabled: Boolean,
     selectedResources: List<ResourceId>,
-    private val rootAndFav: RootAndFav,
+    rootAndFav: RootAndFav,
     private val resourcesIds: List<ResourceId>,
     val preferences: Preferences,
     val router: AppRouter,
@@ -290,11 +290,11 @@ class GalleryUpliftViewModel(
         scoreWidgetController.displayScore()
     }
 
-    fun onTagSelected(tag: Tag) {
+    fun onTagSelected(tag: Tag) = intent {
         analytics.trackTagSelect()
         router.navigateTo(
             Screens.ResourcesScreenWithSelectedTag(
-                rootAndFav, tag
+                state.rootAndFav, tag
             )
         )
     }
@@ -330,7 +330,7 @@ class GalleryUpliftViewModel(
                 resource = state.currentItem.id(),
                 resources = listOf(state.currentItem.id()),
                 statsStorage = statsStorage,
-                rootAndFav = rootAndFav,
+                rootAndFav = state.rootAndFav,
                 index = index,
                 storage = tagsStorage,
             )
@@ -427,7 +427,7 @@ class GalleryUpliftViewModel(
         reduce {
             state.copy(progressState = ProgressState.ProvidingRootIndex)
         }
-        index = indexRepo.provide(rootAndFav)
+        index = indexRepo.provide(state.rootAndFav)
         messageFlow.onEach { message ->
             when (message) {
                 is Message.KindDetectFailed ->
