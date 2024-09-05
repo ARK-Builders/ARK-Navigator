@@ -13,7 +13,6 @@ import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.core.content.FileProvider
 import androidx.core.os.bundleOf
-import androidx.core.view.doOnNextLayout
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
@@ -78,7 +77,7 @@ class GalleryUpliftFragment : Fragment() {
                 .toList() as List<ResourceId>,
             rootAndFav = requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
             resourcesIds = requireArguments().getParcelableArray(RESOURCES_KEY)!!
-                .toList() as List<ResourceId>,
+                .toList() as List<ResourceId>
         ).apply {
             App.instance.appComponent.inject(this@GalleryUpliftFragment)
         }
@@ -228,7 +227,7 @@ class GalleryUpliftFragment : Fragment() {
                     statsStorage = statsStorage,
                     rootAndFav = rootAndFav,
                     index = index,
-                    storage = storage,
+                    storage = storage
                 )
 
                 is GallerySideEffect.ShowInfoAlert -> showInfoAlert(
@@ -305,7 +304,8 @@ class GalleryUpliftFragment : Fragment() {
             requireContext().startActivity(intent)
         } catch (e: ActivityNotFoundException) {
             Toast.makeText(
-                requireContext(), getString(R.string.no_app_found_to_open_this_file),
+                requireContext(),
+                getString(R.string.no_app_found_to_open_this_file),
                 Toast.LENGTH_SHORT
             ).show()
         }
@@ -702,7 +702,7 @@ class GalleryUpliftFragment : Fragment() {
             resources: List<ResourceId>,
             startAt: Int,
             selectingEnabled: Boolean = false,
-            selectedResources: List<ResourceId> = emptyList(),
+            selectedResources: List<ResourceId> = emptyList()
         ) = GalleryUpliftFragment().apply {
             arguments = Bundle().apply {
                 putParcelable(ROOT_AND_FAV_KEY, rootAndFav)

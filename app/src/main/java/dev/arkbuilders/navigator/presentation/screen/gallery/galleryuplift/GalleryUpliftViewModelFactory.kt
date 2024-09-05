@@ -31,7 +31,7 @@ class GalleryUpliftViewModelFactory @AssistedInject constructor(
     val tagsStorageRepo: TagsStorageRepo,
     val statsStorageRepo: StatsStorageRepo,
     val scoreStorageRepo: ScoreStorageRepo,
-    val analytics: GalleryAnalytics,
+    val analytics: GalleryAnalytics
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return GalleryUpliftViewModel(
@@ -48,7 +48,7 @@ class GalleryUpliftViewModelFactory @AssistedInject constructor(
             tagsStorageRepo = tagsStorageRepo,
             statsStorageRepo = statsStorageRepo,
             scoreStorageRepo = scoreStorageRepo,
-            analytics = analytics,
+            analytics = analytics
         ) as T
     }
 
@@ -59,7 +59,7 @@ class GalleryUpliftViewModelFactory @AssistedInject constructor(
             @Assisted selectingEnabled: Boolean,
             @Assisted rootAndFav: RootAndFav,
             @Assisted("all") resourcesIds: List<ResourceId>,
-            @Assisted("selected") selectedResources: List<ResourceId>,
+            @Assisted("selected") selectedResources: List<ResourceId>
         ): GalleryUpliftViewModelFactory
     }
 }

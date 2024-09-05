@@ -68,7 +68,7 @@ class GalleryUpliftViewModel(
     val tagsStorageRepo: TagsStorageRepo,
     val statsStorageRepo: StatsStorageRepo,
     val scoreStorageRepo: ScoreStorageRepo,
-    val analytics: GalleryAnalytics,
+    val analytics: GalleryAnalytics
 ) : ContainerHost<GalleryState, GallerySideEffect>, ViewModel() {
     private lateinit var index: ResourceIndex
     private lateinit var tagsStorage: TagStorage
@@ -203,8 +203,8 @@ class GalleryUpliftViewModel(
         reduce {
             if (enabled) {
                 state.copy(
-                    selectedResources = state.selectedResources
-                        + state.currentItem.id()
+                    selectedResources = state.selectedResources +
+                        state.currentItem.id()
                 )
             } else {
                 state.copy(selectedResources = emptyList())
@@ -272,10 +272,10 @@ class GalleryUpliftViewModel(
         }
     }
 
-
     fun onPageChanged(newPos: Int) = intent {
-        if (state.galleryItems.isEmpty())
+        if (state.galleryItems.isEmpty()) {
             return@intent
+        }
 
         reduce {
             state.copy(currentPos = newPos)
@@ -295,7 +295,8 @@ class GalleryUpliftViewModel(
         analytics.trackTagSelect()
         router.navigateTo(
             Screens.ResourcesScreenWithSelectedTag(
-                container.stateFlow.value.rootAndFav, tag
+                container.stateFlow.value.rootAndFav,
+                tag
             )
         )
     }
@@ -311,7 +312,9 @@ class GalleryUpliftViewModel(
             }
             statsStorage.handleEvent(
                 StatsEvent.TagsChanged(
-                    id, tags, newTags
+                    id,
+                    tags,
+                    newTags
                 )
             )
             Timber.d(
@@ -333,11 +336,10 @@ class GalleryUpliftViewModel(
                 statsStorage = statsStorage,
                 rootAndFav = state.rootAndFav,
                 index = index,
-                storage = tagsStorage,
+                storage = tagsStorage
             )
         )
     }
-
 
     private fun checkResourceChanges(pos: Int) =
         intent {

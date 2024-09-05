@@ -70,7 +70,7 @@ sealed class GallerySideEffect {
     ) : GallerySideEffect()
 
     // workaround to not show checkbox select animation when we change page
-    data object AbortSelectAnimation: GallerySideEffect()
+    data object AbortSelectAnimation : GallerySideEffect()
 
     data object NotifyResourceChange : GallerySideEffect()
     data object NotifyCurrentItemChange : GallerySideEffect()

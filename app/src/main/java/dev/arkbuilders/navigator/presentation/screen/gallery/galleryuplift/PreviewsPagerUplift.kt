@@ -26,13 +26,14 @@ import java.nio.file.Path
 class PreviewsPagerUplift(
     val lifecycleScope: CoroutineScope,
     val context: Context,
-    val viewModel: GalleryUpliftViewModel,
+    val viewModel: GalleryUpliftViewModel
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private var galleryItems = emptyList<GalleryItem>()
 
     fun dispatchUpdates(newItems: List<GalleryItem>) {
-        if (newItems == galleryItems)
+        if (newItems == galleryItems) {
             return
+        }
         val diff = DiffUtil.calculateDiff(
             ResourceDiffUtilCallback(
                 galleryItems.map { it.resource.id },
@@ -107,8 +108,9 @@ class PreviewsPagerUplift(
 
     override fun onViewRecycled(holder: RecyclerView.ViewHolder) {
         super.onViewRecycled(holder)
-        if (holder is PreviewImageViewHolderUplift)
+        if (holder is PreviewImageViewHolderUplift) {
             holder.onRecycled()
+        }
     }
 
     private fun getGestureDetector(): GestureDetectorCompat {
