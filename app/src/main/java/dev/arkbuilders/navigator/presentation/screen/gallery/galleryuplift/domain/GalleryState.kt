@@ -41,7 +41,6 @@ sealed class GallerySideEffect {
     data class ScrollToPage(val pos: Int) : GallerySideEffect()
     data object NotifyResourceScoresChanged : GallerySideEffect()
     data object NavigateBack : GallerySideEffect()
-    data class DeleteResource(val pos: Int) : GallerySideEffect()
     data class ToastIndexFailedPath(val path: Path) : GallerySideEffect()
     data class ShowInfoAlert(
         val path: Path,

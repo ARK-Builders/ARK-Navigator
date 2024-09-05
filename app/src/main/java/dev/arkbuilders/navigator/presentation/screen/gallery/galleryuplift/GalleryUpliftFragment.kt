@@ -202,8 +202,6 @@ class GalleryUpliftFragment : Fragment() {
                     }
                 }
 
-                is GallerySideEffect.DeleteResource -> deleteResource(pos)
-
                 is GallerySideEffect.DisplayStorageException ->
                     displayStorageException(
                         label = label,
@@ -340,16 +338,6 @@ class GalleryUpliftFragment : Fragment() {
 
     private fun viewInExternalApp(resourcePath: Path) {
         openIntentChooser(resourcePath, Intent.ACTION_VIEW, true)
-    }
-
-    private fun deleteResource(pos: Int) {
-        binding.viewPager.apply {
-            setPageTransformer(null)
-            pagerAdapter.notifyItemRemoved(pos)
-            doOnNextLayout {
-                setPageTransformer(DepthPageTransformer())
-            }
-        }
     }
 
     private fun displayStorageException(label: String, msg: String) {
