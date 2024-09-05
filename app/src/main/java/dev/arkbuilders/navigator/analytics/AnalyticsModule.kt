@@ -34,7 +34,7 @@ class AnalyticsModule {
     @Singleton
     @Provides
     fun provideGalleryAnalytics(
-        matomoTracker: Tracker,
+        matomoTracker: Tracker
     ): GalleryAnalytics = GalleryAnalyticsImpl(matomoTracker)
 
     @Singleton

@@ -61,13 +61,16 @@ class StackedToasts(
     private fun collectToasts() = toastsFlow.onEach { path ->
         adapterUpdateManageMutex.withLock {
             val item = ToastItem(rv.context, path)
-            if (toasts.size == MAX_ITEMS)
+            if (toasts.size == MAX_ITEMS) {
                 itemOverflowMutex.withLock {}
-            if (adapterUpdateJob.isCancelled)
+            }
+            if (adapterUpdateJob.isCancelled) {
                 adapterUpdateJob = collectAdapterUpdate()
+            }
             toasts.add(item)
-            if (toasts.size == MAX_ITEMS)
+            if (toasts.size == MAX_ITEMS) {
                 itemOverflowMutex.lock()
+            }
             launchItemTimer(item)
         }
     }.launchIn(lifecycleScope)
@@ -81,8 +84,9 @@ class StackedToasts(
     private fun collectAdapterUpdate() = tickerFlow(TICK).onEach {
         if (toasts.isEmpty()) {
             adapterUpdateManageMutex.withLock {
-                if (toasts.isEmpty())
+                if (toasts.isEmpty()) {
                     currentCoroutineContext().cancel()
+                }
             }
         }
         FastAdapterDiffUtil[adapter] = toasts
