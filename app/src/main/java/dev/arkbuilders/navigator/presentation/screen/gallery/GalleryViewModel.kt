@@ -1,4 +1,4 @@
-package dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift
+package dev.arkbuilders.navigator.presentation.screen.gallery
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -28,10 +28,10 @@ import dev.arkbuilders.navigator.data.stats.StatsStorageRepo
 import dev.arkbuilders.navigator.data.utils.LogTags
 import dev.arkbuilders.navigator.presentation.navigation.AppRouter
 import dev.arkbuilders.navigator.presentation.navigation.Screens
-import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.GalleryItem
-import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.GallerySideEffect
-import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.GalleryState
-import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.ProgressState
+import dev.arkbuilders.navigator.presentation.screen.gallery.domain.GalleryItem
+import dev.arkbuilders.navigator.presentation.screen.gallery.domain.GallerySideEffect
+import dev.arkbuilders.navigator.presentation.screen.gallery.domain.GalleryState
+import dev.arkbuilders.navigator.presentation.screen.gallery.domain.ProgressState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.cancel
@@ -54,7 +54,7 @@ import java.nio.file.Path
 import kotlin.io.path.getLastModifiedTime
 import kotlin.io.path.notExists
 
-class GalleryUpliftViewModel(
+class GalleryViewModel(
     startPos: Int,
     selectingEnabled: Boolean,
     selectedResources: List<ResourceId>,

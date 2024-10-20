@@ -1,4 +1,4 @@
-package dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift
+package dev.arkbuilders.navigator.presentation.screen.gallery.pager
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -14,7 +14,8 @@ import dev.arkbuilders.arklib.utils.ImageUtils
 import dev.arkbuilders.arklib.utils.extension
 import dev.arkbuilders.navigator.databinding.ItemImageBinding
 import dev.arkbuilders.navigator.databinding.ItemPreviewPlainTextBinding
-import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain.GalleryItem
+import dev.arkbuilders.navigator.presentation.screen.gallery.GalleryViewModel
+import dev.arkbuilders.navigator.presentation.screen.gallery.domain.GalleryItem
 import dev.arkbuilders.navigator.presentation.screen.resources.adapter.ResourceDiffUtilCallback
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -23,10 +24,10 @@ import kotlinx.coroutines.withContext
 import java.io.FileReader
 import java.nio.file.Path
 
-class PreviewsPagerUplift(
+class PreviewsPager(
     val lifecycleScope: CoroutineScope,
     val context: Context,
-    val viewModel: GalleryUpliftViewModel
+    val viewModel: GalleryViewModel
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private var galleryItems = emptyList<GalleryItem>()
 
@@ -50,7 +51,7 @@ class PreviewsPagerUplift(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         if (viewType == Kind.PLAINTEXT.ordinal) {
-            PreviewPlainTextViewHolderUplift(
+            PreviewPlainTextViewHolder(
                 ItemPreviewPlainTextBinding.inflate(
                     LayoutInflater.from(parent.context),
                     parent,
@@ -59,7 +60,7 @@ class PreviewsPagerUplift(
                 getGestureDetector()
             )
         } else {
-            PreviewImageViewHolderUplift(
+            PreviewImageViewHolder(
                 ItemImageBinding.inflate(
                     LayoutInflater.from(parent.context),
                     parent,
@@ -80,7 +81,7 @@ class PreviewsPagerUplift(
     ) {
         lifecycleScope.launch {
             when (holder) {
-                is PreviewPlainTextViewHolderUplift -> {
+                is PreviewPlainTextViewHolder -> {
                     holder.pos = position
                     val item = galleryItems[position]
                     val text = readText(item.path)
@@ -89,7 +90,7 @@ class PreviewsPagerUplift(
                     }
                 }
 
-                is PreviewImageViewHolderUplift -> {
+                is PreviewImageViewHolder -> {
                     holder.reset()
                     holder.pos = position
                     val item = galleryItems[position]
@@ -108,7 +109,7 @@ class PreviewsPagerUplift(
 
     override fun onViewRecycled(holder: RecyclerView.ViewHolder) {
         super.onViewRecycled(holder)
-        if (holder is PreviewImageViewHolderUplift) {
+        if (holder is PreviewImageViewHolder) {
             holder.onRecycled()
         }
     }

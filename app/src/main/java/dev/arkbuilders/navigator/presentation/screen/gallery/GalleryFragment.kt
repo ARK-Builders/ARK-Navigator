@@ -6,25 +6,38 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.TypedValue
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.core.content.FileProvider
 import androidx.core.os.bundleOf
-import androidx.core.view.doOnNextLayout
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import androidx.viewpager2.widget.ViewPager2
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.chip.Chip
+import dev.arkbuilders.arkfilepicker.folders.RootAndFav
+import dev.arkbuilders.arklib.ResourceId
+import dev.arkbuilders.arklib.data.index.Resource
+import dev.arkbuilders.arklib.data.index.ResourceIndex
+import dev.arkbuilders.arklib.data.meta.Metadata
+import dev.arkbuilders.arklib.user.tags.Tag
+import dev.arkbuilders.arklib.user.tags.TagStorage
+import dev.arkbuilders.arklib.user.tags.Tags
+import dev.arkbuilders.arklib.utils.extension
 import dev.arkbuilders.components.databinding.ScoreWidgetBinding
 import dev.arkbuilders.components.scorewidget.ScoreWidget
 import dev.arkbuilders.navigator.BuildConfig
 import dev.arkbuilders.navigator.R
-import dev.arkbuilders.navigator.data.utils.LogTags.GALLERY_SCREEN
+import dev.arkbuilders.navigator.data.stats.StatsStorage
+import dev.arkbuilders.navigator.data.utils.LogTags
 import dev.arkbuilders.navigator.databinding.FragmentGalleryBinding
 import dev.arkbuilders.navigator.databinding.PopupGalleryTagMenuBinding
 import dev.arkbuilders.navigator.presentation.App
@@ -32,7 +45,10 @@ import dev.arkbuilders.navigator.presentation.dialog.DetailsAlertDialog
 import dev.arkbuilders.navigator.presentation.dialog.StorageExceptionDialogFragment
 import dev.arkbuilders.navigator.presentation.dialog.edittags.EditTagsDialogFragment
 import dev.arkbuilders.navigator.presentation.navigation.Screens
-import dev.arkbuilders.navigator.presentation.screen.gallery.previewpager.PreviewsPager
+import dev.arkbuilders.navigator.presentation.screen.gallery.domain.GallerySideEffect
+import dev.arkbuilders.navigator.presentation.screen.gallery.domain.GalleryState
+import dev.arkbuilders.navigator.presentation.screen.gallery.domain.ProgressState
+import dev.arkbuilders.navigator.presentation.screen.gallery.pager.PreviewsPager
 import dev.arkbuilders.navigator.presentation.screen.main.MainActivity
 import dev.arkbuilders.navigator.presentation.utils.FullscreenHelper
 import dev.arkbuilders.navigator.presentation.utils.extra.ExtraLoader
@@ -41,54 +57,48 @@ import dev.arkbuilders.navigator.presentation.utils.makeVisible
 import dev.arkbuilders.navigator.presentation.view.DefaultPopup
 import dev.arkbuilders.navigator.presentation.view.DepthPageTransformer
 import dev.arkbuilders.navigator.presentation.view.StackedToasts
-import kotlinx.coroutines.launch
-import moxy.MvpAppCompatFragment
-import moxy.ktx.moxyPresenter
-import dev.arkbuilders.arkfilepicker.folders.RootAndFav
-import dev.arkbuilders.arklib.ResourceId
-import dev.arkbuilders.arklib.data.index.Resource
-import dev.arkbuilders.arklib.data.meta.Metadata
-import dev.arkbuilders.arklib.user.tags.Tag
-import dev.arkbuilders.arklib.user.tags.Tags
-import dev.arkbuilders.arklib.utils.extension
+import org.orbitmvi.orbit.viewmodel.observe
 import timber.log.Timber
 import java.nio.file.Path
+import javax.inject.Inject
 import kotlin.system.measureTimeMillis
 
-class GalleryFragment :
-    MvpAppCompatFragment(R.layout.fragment_gallery), GalleryView {
-
+class GalleryFragment : Fragment() {
     private val binding by viewBinding(FragmentGalleryBinding::bind)
 
-    private val presenter by moxyPresenter {
-        GalleryPresenter(
+    @Inject
+    lateinit var factory: GalleryViewModelFactory.Factory
+    private val viewModel: GalleryViewModel by viewModels {
+        factory.create(
+            startPos = requireArguments().getInt(START_AT_KEY),
+            selectingEnabled = requireArguments().getBoolean(SELECTING_ENABLED_KEY),
+            selectedResources = requireArguments()
+                .getParcelableArray(SELECTED_RESOURCES_KEY)!!
+                .toList() as List<ResourceId>,
             rootAndFav = requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
             resourcesIds = requireArguments().getParcelableArray(RESOURCES_KEY)!!
-                .toList() as List<ResourceId>,
-            startAt = requireArguments().getInt(START_AT_KEY),
-            selectingEnabled = requireArguments().getBoolean(SELECTING_ENABLED_KEY),
-            selectedResources = (
-                requireArguments().getParcelableArray(SELECTED_RESOURCES_KEY)!!
-                    .toList() as List<ResourceId>
-                )
-                .toMutableList()
+                .toList() as List<ResourceId>
         ).apply {
-
-            Timber.d(GALLERY_SCREEN, "creating GalleryPresenter")
-
-            App.instance.appComponent.inject(this)
+            App.instance.appComponent.inject(this@GalleryFragment)
         }
     }
-    private lateinit var stackedToasts: StackedToasts
-    private lateinit var pagerAdapter: PreviewsPager
+
     private val scoreWidget by lazy {
-        ScoreWidget(presenter.scoreWidgetController, viewLifecycleOwner)
+        ScoreWidget(viewModel.scoreWidgetController, viewLifecycleOwner)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        Timber.d(GALLERY_SCREEN, "view created in GalleryFragment")
-        super.onViewCreated(view, savedInstanceState)
-        App.instance.appComponent.inject(this)
+    private lateinit var stackedToasts: StackedToasts
+    private lateinit var pagerAdapter: PreviewsPager
+
+    // avoid pointless update on render if there are no changes
+    private var cacheState: GalleryState? = null
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_gallery, container, false)
     }
 
     override fun onDestroyView() {
@@ -96,9 +106,19 @@ class GalleryFragment :
         scoreWidget.onDestroyView()
     }
 
-    override fun init() {
-        Timber.d(GALLERY_SCREEN, "currentItem = ${binding.viewPager.currentItem}")
+    override fun onResume() {
+        super.onResume()
+        viewModel.onResume()
+    }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        Timber.d(LogTags.GALLERY_SCREEN, "view created in GalleryFragment")
+        App.instance.appComponent.inject(this)
+        super.onViewCreated(view, savedInstanceState)
+        Timber.d(
+            LogTags.GALLERY_SCREEN,
+            "currentItem = ${binding.viewPager.currentItem}"
+        )
         animatePagerAppearance()
         initResultListener()
         stackedToasts = StackedToasts(binding.rvToasts, lifecycleScope)
@@ -107,20 +127,18 @@ class GalleryFragment :
         (requireActivity() as MainActivity).setBottomNavigationVisibility(false)
 
         requireActivity().onBackPressedDispatcher.addCallback(this) {
-            presenter.onBackClick()
+            onBackClick()
         }
-
-        pagerAdapter = PreviewsPager(requireContext(), presenter)
+        pagerAdapter =
+            PreviewsPager(lifecycleScope, requireContext(), viewModel)
 
         initViewPager()
         scoreWidget.init(ScoreWidgetBinding.bind(binding.scoreWidget))
-
         binding.apply {
             val selectingEnabled =
                 requireArguments().getBoolean(SELECTING_ENABLED_KEY)
             layoutSelected.isVisible = selectingEnabled
             fabStartSelect.isVisible = !selectingEnabled
-
             removeResourceFab.setOnClickListener {
                 Toast.makeText(
                     requireContext(),
@@ -128,87 +146,151 @@ class GalleryFragment :
                     Toast.LENGTH_SHORT
                 ).show()
             }
-
             removeResourceFab.setOnLongClickListener {
                 val time = measureTimeMillis {
-                    presenter.onRemoveFabClick()
+                    viewModel.onRemoveFabClick()
                 }
-                Timber.tag(GALLERY_SCREEN).d("${time / 1000L}s")
+                Timber.tag(LogTags.GALLERY_SCREEN).d("${time / 1000L}s")
                 true
             }
-
             infoResourceFab.setOnClickListener {
-                presenter.onInfoFabClick()
+                viewModel.onInfoFabClick()
             }
             shareResourceFab.setOnClickListener {
-                presenter.onShareFabClick()
+                viewModel.onShareFabClick()
             }
             fabStartSelect.setOnClickListener {
-                presenter.onSelectingChanged()
+                viewModel.onSelectingChanged(true)
             }
 
             openResourceFab.setOnClickListener {
-                presenter.onOpenFabClick()
+                viewModel.onOpenFabClick()
             }
 
             editResourceFab.setOnClickListener {
-                presenter.onEditFabClick()
+                viewModel.onEditFabClick()
             }
 
             layoutSelected.setOnClickListener {
-                presenter.onSelectBtnClick()
+                viewModel.onSelectBtnClick()
             }
 
             layoutSelected.setOnLongClickListener {
-                presenter.onSelectingChanged()
+                viewModel.onSelectingChanged(false)
                 return@setOnLongClickListener true
             }
         }
+        viewModel.observe(
+            lifecycleOwner = this,
+            state = ::render,
+            sideEffect = ::handleSideEffect
+        )
     }
 
-    override fun updatePagerAdapter() {
-        pagerAdapter.notifyDataSetChanged()
-        binding.viewPager.adapter?.itemCount?.let { count ->
-            val startAt = requireArguments().getInt(START_AT_KEY)
-            if (startAt < count) {
-                binding.viewPager.setCurrentItem(
-                    startAt,
-                    false
+    private fun handleSideEffect(sideEffect: GallerySideEffect) {
+        with(sideEffect) {
+            when (this) {
+                is GallerySideEffect.ScrollToPage -> {
+                    binding.viewPager.adapter?.itemCount?.let { count ->
+                        if (this.pos < count) {
+                            binding.viewPager.setCurrentItem(
+                                this.pos,
+                                false
+                            )
+                        }
+                    }
+                }
+
+                is GallerySideEffect.DisplayStorageException ->
+                    displayStorageException(
+                        label = label,
+                        msg = messenger
+                    )
+
+                is GallerySideEffect.EditResource -> editResource(path)
+                GallerySideEffect.NavigateBack -> onBackClick()
+                GallerySideEffect.NotifyCurrentItemChange ->
+                    notifyCurrentItemChanged()
+
+                GallerySideEffect.NotifyResourceChange -> notifyResourcesChanged()
+                GallerySideEffect.NotifyResourceScoresChanged ->
+                    notifyResourceScoresChanged()
+
+                GallerySideEffect.NotifyTagsChanged -> notifyTagsChanged()
+                is GallerySideEffect.OpenLink -> openLink(url)
+
+                is GallerySideEffect.ShareLink -> shareLink(url)
+                is GallerySideEffect.ShareResource -> shareResource(path)
+                is GallerySideEffect.ShowEditTagsDialog -> showEditTagsDialog(
+                    resource = resource,
+                    resources = resources,
+                    statsStorage = statsStorage,
+                    rootAndFav = rootAndFav,
+                    index = index,
+                    storage = storage
                 )
+
+                is GallerySideEffect.ShowInfoAlert -> showInfoAlert(
+                    path = path,
+                    resource = resource,
+                    metadata = metadata
+                )
+
+                is GallerySideEffect.ToastIndexFailedPath -> toastIndexFailedPath(
+                    path
+                )
+
+                is GallerySideEffect.ViewInExternalApp -> viewInExternalApp(path)
+                is GallerySideEffect.AbortSelectAnimation ->
+                    binding.cbSelected.jumpDrawablesToCurrentState()
             }
         }
     }
 
-    override fun updatePagerAdapterWithDiff() {
-        presenter.diffResult?.dispatchUpdatesTo(pagerAdapter)
+    private fun render(state: GalleryState) {
+        pagerAdapter.dispatchUpdates(state.galleryItems)
+        binding.previewControls.isVisible = state.controlsVisible
+        toggleSelecting(state.selectingEnabled)
+        displaySelected(
+            state.currentItemSelected,
+            state.selectedResources.size,
+            state.galleryItems.size
+        )
+        handleProgressState(state.progressState)
+        if (state.tags != cacheState?.tags) {
+            displayPreviewTags(state.currentItem.id(), state.tags)
+        }
+        if (state.currentPos != cacheState?.currentPos ||
+            state.currentItem.metadata != cacheState?.currentItem?.metadata
+        ) {
+            setupPreview(state.currentPos, state.currentItem.metadata)
+        }
+        cacheState = state
     }
 
-    override fun setupPreview(
+    private fun onBackClick() {
+        Timber.d(LogTags.GALLERY_SCREEN, "quitting from GalleryPresenter")
+        notifySelectedChanged(viewModel.container.stateFlow.value.selectedResources)
+        exitFullscreen()
+        viewModel.router.exit()
+    }
+
+    private fun setupPreview(
         pos: Int,
         meta: Metadata
     ) {
-        lifecycleScope.launch {
-            with(binding) {
-                setupOpenEditFABs(meta)
-                ExtraLoader.load(
-                    meta,
-                    listOf(primaryExtra, secondaryExtra),
-                    verbose = true
-                )
-                requireArguments().putInt(START_AT_KEY, pos)
-            }
+        with(binding) {
+            setupOpenEditFABs(meta)
+            ExtraLoader.load(
+                meta,
+                listOf(primaryExtra, secondaryExtra),
+                verbose = true
+            )
+            requireArguments().putInt(START_AT_KEY, pos)
         }
     }
 
-    override fun setPreviewsScrollingEnabled(enabled: Boolean) {
-        binding.viewPager.isUserInputEnabled = enabled
-    }
-
-    override fun setControlsVisibility(visible: Boolean) {
-        binding.previewControls.isVisible = visible
-    }
-
-    override fun editResource(resourcePath: Path) {
+    private fun editResource(resourcePath: Path) {
         val intent = getExternalAppIntent(
             resourcePath,
             Intent.ACTION_EDIT,
@@ -229,65 +311,55 @@ class GalleryFragment :
         }
     }
 
-    override fun shareResource(resourcePath: Path) =
+    private fun shareResource(resourcePath: Path) =
         openIntentChooser(
             resourcePath,
             Intent.ACTION_SEND,
             detachProcess = false
         )
 
-    override fun openLink(link: String) {
+    private fun openLink(link: String) {
         val intent = Intent(Intent.ACTION_VIEW)
         val uri = Uri.parse(link)
         intent.data = uri
         startActivity(Intent.createChooser(intent, "View the link with:"))
     }
 
-    override fun shareLink(link: String) {
+    private fun shareLink(link: String) {
         val intent = Intent(Intent.ACTION_SEND)
         intent.putExtra(Intent.EXTRA_TEXT, link)
         intent.type = "text/plain"
         startActivity(Intent.createChooser(intent, "Share the link with:"))
     }
 
-    override fun showInfoAlert(path: Path, resource: Resource, metadata: Metadata) {
+    private fun showInfoAlert(path: Path, resource: Resource, metadata: Metadata) {
         DetailsAlertDialog(path, resource, metadata, requireContext()).show()
     }
 
-    override fun viewInExternalApp(resourcePath: Path) {
+    private fun viewInExternalApp(resourcePath: Path) {
         openIntentChooser(resourcePath, Intent.ACTION_VIEW, true)
     }
 
-    override fun deleteResource(pos: Int) {
-        binding.viewPager.apply {
-            setPageTransformer(null)
-            pagerAdapter.notifyItemRemoved(pos)
-            doOnNextLayout {
-                setPageTransformer(DepthPageTransformer())
-            }
-        }
-    }
-
-    override fun displayStorageException(label: String, msg: String) {
+    private fun displayStorageException(label: String, msg: String) {
         StorageExceptionDialogFragment.newInstance(label, msg).show(
             childFragmentManager,
             StorageExceptionDialogFragment.TAG
         )
     }
 
-    override fun notifyResourcesChanged() {
+    private fun notifyResourcesChanged() {
         setFragmentResult(REQUEST_RESOURCES_CHANGED_KEY, bundleOf())
     }
 
-    override fun notifyTagsChanged() {
+    private fun notifyTagsChanged() {
         setFragmentResult(REQUEST_TAGS_CHANGED_KEY, bundleOf())
     }
 
-    override fun notifyResourceScoresChanged() {
+    private fun notifyResourceScoresChanged() {
         setFragmentResult(SCORES_CHANGED_KEY, bundleOf())
     }
 
-    override fun notifySelectedChanged(
+    private fun notifySelectedChanged(
         selected: List<ResourceId>
     ) {
         setFragmentResult(
@@ -297,56 +369,96 @@ class GalleryFragment :
                     SELECTING_ENABLED_KEY,
                     requireArguments().getBoolean(SELECTING_ENABLED_KEY)
                 )
-                putParcelableArray(SELECTED_RESOURCES_KEY, selected.toTypedArray())
+                putParcelableArray(
+                    SELECTED_RESOURCES_KEY,
+                    selected.toTypedArray()
+                )
             }
         )
     }
 
-    override fun toastIndexFailedPath(path: Path) {
+    private fun toastIndexFailedPath(path: Path) {
         stackedToasts.toast(path)
     }
 
-    override fun displayPreviewTags(resource: ResourceId, tags: Tags) {
-        lifecycleScope.launch {
-            Timber.d(
-                GALLERY_SCREEN,
-                "displaying tags of resource $resource for preview"
-            )
-            binding.tagsCg.removeAllViews()
+    private fun displayPreviewTags(resource: ResourceId, tags: Tags) {
+        Timber.d(
+            LogTags.GALLERY_SCREEN,
+            "displaying tags of resource $resource for preview"
+        )
+        binding.tagsCg.removeAllViews()
 
-            tags.forEach { tag ->
-                val chip = Chip(context)
-                chip.text = tag
+        tags.forEach { tag ->
+            val chip = Chip(context)
+            chip.text = tag
 
-                chip.setOnClickListener {
-                    showTagMenuPopup(tag, chip)
-                }
-                binding.tagsCg.addView(chip)
+            chip.setOnClickListener {
+                showTagMenuPopup(tag, chip)
             }
-
-            binding.tagsCg.addView(createEditChip())
+            binding.tagsCg.addView(chip)
         }
+
+        binding.tagsCg.addView(createEditChip())
     }
 
-    override fun showEditTagsDialog(
-        resource: ResourceId
+    private fun showEditTagsDialog(
+        resource: ResourceId,
+        rootAndFav: RootAndFav,
+        resources: List<ResourceId>,
+        index: ResourceIndex,
+        storage: TagStorage,
+        statsStorage: StatsStorage
     ) {
         Timber.d(
-            GALLERY_SCREEN,
+            LogTags.GALLERY_SCREEN,
             "showing [edit-tags] dialog for resource $resource"
         )
         val dialog = EditTagsDialogFragment.newInstance(
-            requireArguments()[ROOT_AND_FAV_KEY] as RootAndFav,
-            listOf(resource),
-            presenter.index,
-            presenter.tagsStorage,
-            presenter.statsStorage
+            rootAndFav = rootAndFav,
+            resources = resources,
+            index = index,
+            storage = storage,
+            statsStorage = statsStorage
         )
         dialog.show(childFragmentManager, EditTagsDialogFragment.FRAGMENT_TAG)
     }
 
+    private fun handleProgressState(state: ProgressState) {
+        when (state) {
+            ProgressState.HideProgress -> setProgressVisibility(
+                false,
+                ""
+            )
+
+            ProgressState.Indexing -> setProgressVisibility(
+                true,
+                getString(R.string.progress_text_changes_detected_indexing)
+            )
+
+            ProgressState.ProvidingDataStorage -> setProgressVisibility(
+                true,
+                getString(R.string.progress_text_providing_data_storage)
+            )
+
+            ProgressState.ProvidingMetaDataStorage -> setProgressVisibility(
+                true,
+                getString(R.string.progress_text_providing_metadata_storage)
+            )
+
+            ProgressState.ProvidingPreviewStorage -> setProgressVisibility(
+                true,
+                getString(R.string.progress_text_providing_previews_storage)
+            )
+
+            ProgressState.ProvidingRootIndex -> setProgressVisibility(
+                true,
+                getString(R.string.progress_text_providing_root_index)
+            )
+        }
+    }
+
     @SuppressLint("ClickableViewAccessibility")
-    override fun setProgressVisibility(isVisible: Boolean, withText: String) {
+    private fun setProgressVisibility(isVisible: Boolean, withText: String) {
         binding.layoutProgress.apply {
             root.isVisible = isVisible
 
@@ -367,111 +479,34 @@ class GalleryFragment :
         }
     }
 
-    override fun exitFullscreen() {
+    private fun exitFullscreen() {
         FullscreenHelper.setStatusBarVisibility(true, requireActivity().window)
         (requireActivity() as MainActivity).setBottomNavigationVisibility(true)
     }
 
-    override fun notifyCurrentItemChanged() {
+    private fun notifyCurrentItemChanged() {
         binding.viewPager.post {
             pagerAdapter.notifyItemChanged(binding.viewPager.currentItem)
         }
     }
 
-    override fun displaySelected(
+    private fun displaySelected(
         selected: Boolean,
-        showAnim: Boolean,
         selectedCount: Int,
         itemCount: Int
     ) = with(binding) {
         Timber.d("display ${System.currentTimeMillis()}")
         cbSelected.isChecked = selected
-        if (!showAnim) {
-            cbSelected.jumpDrawablesToCurrentState()
-        }
         tvSelectedOf.text = "$selectedCount/$itemCount"
 
         return@with
     }
 
-    override fun onResume() {
-        super.onResume()
-        presenter.onResume()
-    }
-
-    override fun toggleSelecting(enabled: Boolean) {
+    private fun toggleSelecting(enabled: Boolean) {
         binding.layoutSelected.isVisible = enabled
         binding.fabStartSelect.isVisible = !enabled
         requireArguments().apply {
             putBoolean(SELECTING_ENABLED_KEY, enabled)
-        }
-        if (enabled) {
-            presenter.onSelectBtnClick()
-        } else {
-            binding.cbSelected.isChecked = false
-        }
-    }
-
-    private fun initViewPager() = with(binding.viewPager) {
-        adapter = pagerAdapter
-        offscreenPageLimit = 2
-        val rv = (getChildAt(0) as RecyclerView)
-        (rv.itemAnimator as SimpleItemAnimator).removeDuration = 0
-        setPageTransformer(DepthPageTransformer())
-
-        registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-            override fun onPageSelected(position: Int) {
-                presenter.onPageChanged(position)
-            }
-        })
-    }
-
-    private fun showTagMenuPopup(tag: Tag, tagView: View) {
-        val menuBinding = PopupGalleryTagMenuBinding
-            .inflate(requireActivity().layoutInflater)
-        val popup = DefaultPopup(
-            menuBinding,
-            R.style.BottomFadeScaleAnimation,
-            R.drawable.bg_rounded_16dp
-        )
-        menuBinding.apply {
-            btnNewSelection.setOnClickListener {
-                presenter.onTagSelected(tag)
-                popup.popupWindow.dismiss()
-            }
-            btnRemoveTag.setOnClickListener {
-                presenter.onTagRemove(tag)
-                popup.popupWindow.dismiss()
-            }
-        }
-        popup.showAbove(tagView)
-    }
-
-    /**
-     * setFragmentResult notifies ResourcesFragment
-     * It is duplicated since the result can only be consumed once
-     */
-    private fun initResultListener() {
-        childFragmentManager.setFragmentResultListener(
-            EditTagsDialogFragment.REQUEST_TAGS_CHANGED_KEY,
-            this
-        ) { _, _ ->
-            setFragmentResult(REQUEST_TAGS_CHANGED_KEY, bundleOf())
-            presenter.onTagsChanged()
-        }
-
-        childFragmentManager.setFragmentResultListener(
-            StorageExceptionDialogFragment.STORAGE_CORRUPTION_DETECTED,
-            this
-        ) { _, _ ->
-            presenter.router.newRootScreen(Screens.FoldersScreen())
-        }
-    }
-
-    private fun animatePagerAppearance() {
-        binding.viewPager.animate().apply {
-            duration = 500L
-            alpha(1f)
         }
     }
 
@@ -499,13 +534,76 @@ class GalleryFragment :
         }
     }
 
+    /**
+     * setFragmentResult notifies ResourcesFragment
+     * It is duplicated since the result can only be consumed once
+     */
+    private fun initResultListener() {
+        childFragmentManager.setFragmentResultListener(
+            EditTagsDialogFragment.REQUEST_TAGS_CHANGED_KEY,
+            this
+        ) { _, _ ->
+            setFragmentResult(REQUEST_TAGS_CHANGED_KEY, bundleOf())
+            viewModel.onTagsChanged()
+        }
+
+        childFragmentManager.setFragmentResultListener(
+            StorageExceptionDialogFragment.STORAGE_CORRUPTION_DETECTED,
+            this
+        ) { _, _ ->
+            viewModel.router.newRootScreen(Screens.FoldersScreen())
+        }
+    }
+
+    private fun animatePagerAppearance() {
+        binding.viewPager.animate().apply {
+            duration = 500L
+            alpha(1f)
+        }
+    }
+
+    private fun initViewPager() = with(binding.viewPager) {
+        adapter = pagerAdapter
+        offscreenPageLimit = 2
+        val rv = (getChildAt(0) as RecyclerView)
+        (rv.itemAnimator as SimpleItemAnimator).removeDuration = 0
+        setPageTransformer(DepthPageTransformer())
+
+        registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                viewModel.onPageChanged(position)
+            }
+        })
+    }
+
+    private fun showTagMenuPopup(tag: Tag, tagView: View) {
+        val menuBinding = PopupGalleryTagMenuBinding
+            .inflate(requireActivity().layoutInflater)
+        val popup = DefaultPopup(
+            menuBinding,
+            R.style.BottomFadeScaleAnimation,
+            R.drawable.bg_rounded_16dp
+        )
+        menuBinding.apply {
+            btnNewSelection.setOnClickListener {
+                viewModel.onTagSelected(tag)
+                popup.popupWindow.dismiss()
+            }
+            btnRemoveTag.setOnClickListener {
+                viewModel.onTagRemove(tag)
+                popup.popupWindow.dismiss()
+            }
+        }
+        popup.showAbove(tagView)
+    }
+
     private fun openIntentChooser(
         resourcePath: Path,
         actionType: String,
         detachProcess: Boolean
     ) {
         Timber.i(
-            GALLERY_SCREEN,
+            LogTags.GALLERY_SCREEN,
             "Opening resource in an external application " +
                 "path: $resourcePath" +
                 "action: $actionType"
@@ -551,7 +649,7 @@ class GalleryFragment :
             }
         }
         Timber.d(
-            GALLERY_SCREEN,
+            LogTags.GALLERY_SCREEN,
             "URI: ${intent.data}" + "MIME: ${intent.type}"
         )
         return intent
@@ -579,10 +677,10 @@ class GalleryFragment :
                 setOnClickListener {
                     val position = binding.viewPager.currentItem
                     Timber.d(
-                        GALLERY_SCREEN,
+                        LogTags.GALLERY_SCREEN,
                         "[edit_tags] clicked at position $position"
                     )
-                    presenter.onEditTagsDialogBtnClick()
+                    viewModel.onEditTagsDialogBtnClick()
                 }
             }
         }

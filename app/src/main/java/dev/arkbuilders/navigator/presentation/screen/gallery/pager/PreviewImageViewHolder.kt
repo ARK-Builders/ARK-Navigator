@@ -1,8 +1,9 @@
-package dev.arkbuilders.navigator.presentation.screen.gallery.previewpager
+package dev.arkbuilders.navigator.presentation.screen.gallery.pager
 
 import android.annotation.SuppressLint
 import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.isVisible
+import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.RecyclerView
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.ortiz.touchview.OnTouchImageViewListener
@@ -12,20 +13,19 @@ import dev.arkbuilders.arklib.data.preview.PreviewLocator
 import dev.arkbuilders.arklib.data.preview.PreviewStatus
 import dev.arkbuilders.arklib.utils.ImageUtils
 import dev.arkbuilders.navigator.databinding.ItemImageBinding
-import dev.arkbuilders.navigator.presentation.screen.gallery.GalleryPresenter
+import dev.arkbuilders.navigator.presentation.screen.gallery.GalleryViewModel
 import dev.arkbuilders.navigator.presentation.utils.makeVisibleAndSetOnClickListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import moxy.presenterScope
 import timber.log.Timber
 
 @SuppressLint("ClickableViewAccessibility")
 class PreviewImageViewHolder(
     private val binding: ItemImageBinding,
-    private val presenter: GalleryPresenter,
+    private val viewModel: GalleryViewModel,
     private val gestureDetector: GestureDetectorCompat
 ) : RecyclerView.ViewHolder(binding.root) {
 
@@ -55,7 +55,7 @@ class PreviewImageViewHolder(
 
         if (meta is Metadata.Video) {
             icPlay.makeVisibleAndSetOnClickListener {
-                presenter.onPlayButtonClick()
+                viewModel.onPlayButtonClick()
             }
         } else {
             icPlay.isVisible = false
@@ -64,7 +64,7 @@ class PreviewImageViewHolder(
         if (!locator.isGenerated()) {
             progress.isVisible = true
             Timber.d("join preview generation for $id")
-            joinPreviewJob = presenter.presenterScope.launch {
+            joinPreviewJob = viewModel.viewModelScope.launch {
                 locator.join()
 
                 if (!isActive) return@launch

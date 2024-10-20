@@ -28,7 +28,6 @@ import dev.arkbuilders.navigator.presentation.dialog.ConfirmationDialogFragment
 import dev.arkbuilders.navigator.presentation.dialog.StorageExceptionDialogFragment
 import dev.arkbuilders.navigator.presentation.dialog.sort.SortDialogFragment
 import dev.arkbuilders.navigator.presentation.dialog.tagssort.TagsSortDialogFragment
-import dev.arkbuilders.navigator.presentation.screen.gallery.GalleryFragment
 import dev.arkbuilders.navigator.presentation.screen.main.MainActivity
 import dev.arkbuilders.navigator.presentation.screen.resources.adapter.ResourcesRVAdapter
 import dev.arkbuilders.navigator.presentation.utils.FullscreenHelper
@@ -44,6 +43,7 @@ import dev.arkbuilders.arkfilepicker.folders.RootAndFav
 import dev.arkbuilders.arkfilepicker.presentation.onArkPathPicked
 import dev.arkbuilders.arklib.ResourceId
 import dev.arkbuilders.arklib.user.tags.Tag
+import dev.arkbuilders.navigator.presentation.screen.gallery.GalleryFragment
 import timber.log.Timber
 import java.nio.file.Path
 import javax.inject.Inject

@@ -1,4 +1,4 @@
-package dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.domain
+package dev.arkbuilders.navigator.presentation.screen.gallery.domain
 
 import dev.arkbuilders.arkfilepicker.folders.RootAndFav
 import dev.arkbuilders.arklib.ResourceId

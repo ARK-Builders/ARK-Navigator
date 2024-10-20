@@ -1,4 +1,4 @@
-package dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift
+package dev.arkbuilders.navigator.presentation.screen.gallery
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -17,7 +17,7 @@ import dev.arkbuilders.navigator.data.preferences.Preferences
 import dev.arkbuilders.navigator.data.stats.StatsStorageRepo
 import dev.arkbuilders.navigator.presentation.navigation.AppRouter
 
-class GalleryUpliftViewModelFactory @AssistedInject constructor(
+class GalleryViewModelFactory @AssistedInject constructor(
     @Assisted val startPos: Int,
     @Assisted val selectingEnabled: Boolean,
     @Assisted private val rootAndFav: RootAndFav,
@@ -34,7 +34,7 @@ class GalleryUpliftViewModelFactory @AssistedInject constructor(
     val analytics: GalleryAnalytics
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return GalleryUpliftViewModel(
+        return GalleryViewModel(
             startPos = startPos,
             selectingEnabled = selectingEnabled,
             selectedResources = selectedResources,
@@ -60,6 +60,6 @@ class GalleryUpliftViewModelFactory @AssistedInject constructor(
             @Assisted rootAndFav: RootAndFav,
             @Assisted("all") resourcesIds: List<ResourceId>,
             @Assisted("selected") selectedResources: List<ResourceId>
-        ): GalleryUpliftViewModelFactory
+        ): GalleryViewModelFactory
     }
 }

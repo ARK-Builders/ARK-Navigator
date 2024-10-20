@@ -1,4 +1,4 @@
-package dev.arkbuilders.navigator.presentation.screen.gallery.previewpager
+package dev.arkbuilders.navigator.presentation.screen.gallery.pager
 
 import android.annotation.SuppressLint
 import androidx.core.view.GestureDetectorCompat
@@ -20,9 +20,5 @@ class PreviewPlainTextViewHolder(
 
     fun setContent(text: String) = with(binding) {
         tvContent.text = text
-    }
-
-    fun reset() = with(binding) {
-        tvContent.text = ""
     }
 }

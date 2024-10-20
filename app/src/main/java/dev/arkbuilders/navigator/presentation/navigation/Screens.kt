@@ -1,14 +1,13 @@
 package dev.arkbuilders.navigator.presentation.navigation
 
-import ru.terrakok.cicerone.android.support.SupportAppScreen
 import dev.arkbuilders.arkfilepicker.folders.RootAndFav
 import dev.arkbuilders.arklib.ResourceId
+import dev.arkbuilders.arklib.user.tags.Tag
 import dev.arkbuilders.navigator.presentation.screen.folders.FoldersFragment
 import dev.arkbuilders.navigator.presentation.screen.gallery.GalleryFragment
 import dev.arkbuilders.navigator.presentation.screen.resources.ResourcesFragment
 import dev.arkbuilders.navigator.presentation.screen.settings.SettingsFragment
-import dev.arkbuilders.arklib.user.tags.Tag
-import dev.arkbuilders.navigator.presentation.screen.gallery.galleryuplift.GalleryUpliftFragment
+import ru.terrakok.cicerone.android.support.SupportAppScreen
 
 class Screens {
     class FoldersScreen : SupportAppScreen() {
@@ -42,15 +41,6 @@ class Screens {
             GalleryFragment.newInstance(rootAndFav, resources, startAt)
     }
 
-    class GalleryUpliftScreen(
-        private val rootAndFav: RootAndFav,
-        val resources: List<ResourceId>,
-        private val startAt: Int
-    ) : SupportAppScreen() {
-        override fun getFragment() =
-            GalleryUpliftFragment.newInstance(rootAndFav, resources, startAt)
-    }
-
     class GalleryScreenWithSelected(
         private val rootAndFav: RootAndFav,
         val resources: List<ResourceId>,
@@ -59,22 +49,6 @@ class Screens {
     ) : SupportAppScreen() {
         override fun getFragment() =
             GalleryFragment.newInstance(
-                rootAndFav,
-                resources,
-                startAt,
-                true,
-                selectedResources
-            )
-    }
-
-    class GalleryScreenWithSelectedUplift(
-        private val rootAndFav: RootAndFav,
-        val resources: List<ResourceId>,
-        private val startAt: Int,
-        private val selectedResources: List<ResourceId>
-    ) : SupportAppScreen() {
-        override fun getFragment() =
-            GalleryUpliftFragment.newInstance(
                 rootAndFav,
                 resources,
                 startAt,
