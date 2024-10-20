@@ -1,13 +1,13 @@
 package dev.arkbuilders.navigator.presentation.navigation
 
-import ru.terrakok.cicerone.android.support.SupportAppScreen
 import dev.arkbuilders.arkfilepicker.folders.RootAndFav
 import dev.arkbuilders.arklib.ResourceId
+import dev.arkbuilders.arklib.user.tags.Tag
 import dev.arkbuilders.navigator.presentation.screen.folders.FoldersFragment
 import dev.arkbuilders.navigator.presentation.screen.gallery.GalleryFragment
 import dev.arkbuilders.navigator.presentation.screen.resources.ResourcesFragment
 import dev.arkbuilders.navigator.presentation.screen.settings.SettingsFragment
-import dev.arkbuilders.arklib.user.tags.Tag
+import ru.terrakok.cicerone.android.support.SupportAppScreen
 
 class Screens {
     class FoldersScreen : SupportAppScreen() {
